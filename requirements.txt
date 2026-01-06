@@ -1,0 +1,23 @@
+# Whiteout Survival Optimizer - Dependencies
+
+# Web Framework
+streamlit>=1.29.0
+
+# Database
+sqlalchemy>=2.0.0
+
+# OCR for screenshot reading (optional - large download)
+# easyocr>=1.7.0
+
+# Image processing
+Pillow>=10.0.0
+
+# HTTP requests for downloading assets
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# Data handling
+pandas>=2.0.0
+
+# AI Recommendations
+openai>=1.0.0
