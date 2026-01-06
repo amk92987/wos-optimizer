@@ -11,6 +11,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
+from database.models import UserHero, UserInventory
 
 st.set_page_config(page_title="Settings - WoS Optimizer", page_icon="⚙️", layout="wide")
 
@@ -314,10 +315,14 @@ if st.button("💾 Save All Settings", type="primary", use_container_width=True)
 st.markdown("---")
 st.markdown("## 🗃️ Data Management")
 
+st.info("💡 **Tip:** Use the **Profiles** page to save/load your data across computers!")
+
+st.markdown("### 🔧 Reset Options")
+
 col6, col7 = st.columns(2)
 
 with col6:
-    if st.button("🔄 Reset Priorities to Default"):
+    if st.button("🔄 Reset Priorities to Default", use_container_width=True):
         profile.priority_svs = 5
         profile.priority_rally = 4
         profile.priority_castle_battle = 4
@@ -328,11 +333,10 @@ with col6:
         st.rerun()
 
 with col7:
-    if st.button("⚠️ Reset All Data", type="secondary"):
+    if st.button("⚠️ Reset All Data", type="secondary", use_container_width=True):
         st.warning("This will clear all your saved heroes and inventory!")
         if st.button("Confirm Reset", type="secondary"):
             # Clear user heroes and inventory
-            from database.models import UserHero, UserInventory
             db.query(UserHero).filter(UserHero.profile_id == profile.id).delete()
             db.query(UserInventory).filter(UserInventory.profile_id == profile.id).delete()
             db.commit()

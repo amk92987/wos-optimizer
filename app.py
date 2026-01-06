@@ -15,8 +15,8 @@ from database.db import init_db, get_db, get_or_create_profile
 
 # Page config must be first Streamlit command
 st.set_page_config(
-    page_title="WoS Optimizer",
-    page_icon="❄️",
+    page_title="Home - WoS Optimizer",
+    page_icon="🏠",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -110,8 +110,8 @@ def render_sidebar():
 
 def render_home():
     """Render the home page."""
-    st.markdown("# ❄️ Whiteout Survival Optimizer")
-    st.markdown("### Your personal guide to building the strongest heroes")
+    st.markdown("# 🏠 Home")
+    st.markdown("### Welcome to Whiteout Survival Optimizer")
 
     st.markdown("---")
 

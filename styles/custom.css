@@ -194,6 +194,20 @@ h1, h2, h3 {
 .stSelectbox > div > div {
     background: var(--background-card);
     border-color: var(--primary-ice);
+    cursor: pointer;
+}
+
+.stSelectbox [data-baseweb="select"] {
+    cursor: pointer;
+}
+
+.stSelectbox svg {
+    cursor: pointer;
+}
+
+/* Number input styling */
+.stNumberInput button {
+    cursor: pointer;
 }
 
 /* Slider styling */

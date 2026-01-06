@@ -1,0 +1,18 @@
+{
+  "export_version": "1.0",
+  "export_date": "2026-01-06T17:55:17.657204",
+  "profile": {
+    "name": "Chief",
+    "server_age_days": 0,
+    "furnace_level": 1,
+    "priority_svs": 5,
+    "priority_rally": 4,
+    "priority_castle_battle": 4,
+    "priority_exploration": 3,
+    "priority_gathering": 2,
+    "svs_wins": 0,
+    "svs_losses": 0,
+    "last_svs_date": null
+  },
+  "heroes": []
+}
