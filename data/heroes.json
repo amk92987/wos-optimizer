@@ -82,13 +82,15 @@
       "tier_exploration": "A",
       "image_filename": "sergey.png",
       "how_to_obtain": "Hero Recruitment",
-      "notes": "Good early game tank for exploration.",
-      "best_use": "Early exploration tank. Useful until you get Natalia or Alonso leveled.",
+      "notes": "Best garrison joiner in the game. His expedition skill reduces damage taken by all troops.",
+      "best_use": "BEST GARRISON JOINER. Put in leftmost slot when reinforcing garrisons. Don't use for attack rallies.",
       "exploration_skill_1": "Iron Defense",
       "exploration_skill_2": "Taunt",
       "expedition_skill_1": "Shield Bash",
-      "expedition_skill_2": "Hold the Line",
-      "mythic_gear": null
+      "expedition_skill_2": "Defenders' Edge",
+      "mythic_gear": null,
+      "rally_joiner_role": "garrison",
+      "rally_joiner_skill": "-20% DMG taken (all troops)"
     },
     {
       "name": "Gina",
@@ -199,14 +201,14 @@
       "mythic_gear": null
     },
     {
-      "name": "Walis Bokan",
+      "name": "Lumak Bokan",
       "generation": 1,
       "hero_class": "Infantry",
       "rarity": "Epic",
       "tier_overall": "C",
       "tier_expedition": "C",
       "tier_exploration": "B",
-      "image_filename": "walis_bokan.png",
+      "image_filename": "lumak_bokan.png",
       "how_to_obtain": "Hero Recruitment",
       "notes": "Early infantry option.",
       "best_use": "Filler infantry. Sergey is usually better. Replace with Legendaries.",
@@ -232,7 +234,9 @@
       "exploration_skill_2": "Unyielding",
       "expedition_skill_1": "Troop Damage Boost",
       "expedition_skill_2": "Attack Amplifier",
-      "mythic_gear": "Dawnbreak"
+      "mythic_gear": "Dawnbreak",
+      "rally_joiner_role": "attack",
+      "rally_joiner_skill": "Infantry ATK multiplier - boosts all rally damage"
     },
     {
       "name": "Natalia",
@@ -503,6 +507,26 @@
       "expedition_skill_1": "Lightning Strike",
       "expedition_skill_2": "Tempest Rush",
       "mythic_gear": "Stormbreaker Shield"
+    },
+    {
+      "name": "Jessie",
+      "generation": 5,
+      "hero_class": "Marksman",
+      "rarity": "Legendary",
+      "tier_overall": "A",
+      "tier_expedition": "S+",
+      "tier_exploration": "B",
+      "image_filename": "jessie.png",
+      "how_to_obtain": "Lucky Wheel, Hero Recruitment",
+      "notes": "BEST attack rally joiner in the game. Her Stand of Arms skill (+25% DMG dealt) affects ALL damage types.",
+      "best_use": "BEST ATTACK JOINER. Put in leftmost slot when joining attack rallies or Bear Trap. Her +25% damage buff applies to all troops.",
+      "exploration_skill_1": "Sharpshooter",
+      "exploration_skill_2": "Keen Eye",
+      "expedition_skill_1": "Volley Fire",
+      "expedition_skill_2": "Stand of Arms",
+      "mythic_gear": null,
+      "rally_joiner_role": "attack",
+      "rally_joiner_skill": "+25% DMG dealt (all troops) - affects normal attacks, hero skills, pet abilities"
     },
     {
       "name": "Wu Ming",

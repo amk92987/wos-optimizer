@@ -1,6 +1,5 @@
 """
 Lineups Page - Best hero lineups and troop compositions for different events.
-Based on verified game mechanics and top-player strategies.
 """
 
 import streamlit as st
@@ -11,7 +10,7 @@ import json
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-st.set_page_config(page_title="Lineups - WoS Optimizer", page_icon="⚔️", layout="wide")
+from database.db import init_db, get_db, get_or_create_profile
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -19,12 +18,62 @@ if css_file.exists():
     with open(css_file, encoding='utf-8') as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+# Initialize database and get user profile
+init_db()
+db = get_db()
+profile = get_or_create_profile(db)
+
 # Load hero data for reference
 heroes_file = PROJECT_ROOT / "data" / "heroes.json"
 with open(heroes_file, encoding='utf-8') as f:
     HERO_DATA = json.load(f)
 
 HEROES_BY_NAME = {h["name"]: h for h in HERO_DATA.get("heroes", [])}
+
+
+def get_current_generation(server_age_days: int) -> int:
+    """Calculate current hero generation based on server age."""
+    if server_age_days < 40:
+        return 1
+    elif server_age_days < 120:
+        return 2
+    elif server_age_days < 200:
+        return 3
+    elif server_age_days < 280:
+        return 4
+    elif server_age_days < 360:
+        return 5
+    elif server_age_days < 440:
+        return 6
+    elif server_age_days < 520:
+        return 7
+    else:
+        return 8 + ((server_age_days - 520) // 80)
+
+
+def hero_available(hero_name: str, max_gen: int) -> bool:
+    """Check if a hero is available based on current generation."""
+    hero = HEROES_BY_NAME.get(hero_name)
+    if not hero:
+        return False
+    return hero.get("generation", 1) <= max_gen
+
+
+def get_available_hero(preferred: str, fallback: str, hero_class: str, max_gen: int) -> str:
+    """Get the best available hero, falling back if preferred isn't unlocked."""
+    if hero_available(preferred, max_gen):
+        return preferred
+    if hero_available(fallback, max_gen):
+        return fallback
+    # Find any available hero of this class
+    for hero in HERO_DATA.get("heroes", []):
+        if hero.get("hero_class") == hero_class and hero.get("generation", 1) <= max_gen:
+            return hero["name"]
+    return preferred  # Return preferred anyway as placeholder
+
+
+# Get user's current generation
+USER_GEN = get_current_generation(profile.server_age_days)
 
 
 def get_class_symbol(hero_class: str) -> str:
@@ -140,28 +189,13 @@ st.markdown("Optimal hero and troop setups for every game mode")
 st.markdown("---")
 
 # Critical game mechanics
-st.error("""
-**🎮 CRITICAL: World March = 3 Heroes**
-
-World marches (attacks, rallies, garrisons) use **3 heroes**:
-- **1 Infantry** (tank/frontline)
-- **1 Lancer** (damage/support)
-- **1 Marksman** (ranged DPS)
-
-Only **Arena** and some special modes use 5 heroes!
-""")
-
 st.info("""
-**📌 Rally Skill Mechanics (VERIFIED)**
+**📌 Rally Skill Mechanics**
 
-**Rally Leader:** Your 3 heroes provide **9 expedition skills** (right-side skills) that affect the entire rally.
-
-**Rally Joiner:** Only your **first hero's TOP-RIGHT expedition skill** is used!
+**Rally Joiner:** Only your **leftmost hero's expedition skill** contributes to the rally!
 - Up to **4 member skills** contribute total and can stack
 - This is why specific "joiner heroes" matter (Jessie, Sergey)
 - Your other 2 heroes and their skills DON'T contribute when joining
-
-*Source: Century Games Help Center + WoS Wiki*
 """)
 
 st.markdown("---")
@@ -387,25 +421,32 @@ elif event_type == "Bear Trap Rally":
     st.markdown("## 🐻 Bear Trap Rally")
     st.markdown("Alliance rally against Bear Trap boss")
 
-    st.error("""
-    **Full Rally Setup: Rally Squad + Your 6 Joining Marches**
+    st.caption(f"*Showing heroes for your server: Generation {USER_GEN}*")
 
-    - **Rally Squad** (3 heroes) - YOUR expedition skills apply at full effect
-    - **6 Joining Marches** (3 heroes each = 18 heroes) - Contribute troops
+    st.info("""
+    **📌 Rally Joiner Mechanics**
 
-    Total: **21 heroes** for maximum participation
+    Only the **top 4 highest level** expedition skills from joiners apply to the rally.
+
+    This is based on **skill level**, not player power. A level 5 Sergey skill would bump out a level 3 Jessie
+    skill - even though Jessie's +25% damage is far more valuable for attacks.
     """)
 
-    tab_rally, tab_joins = st.tabs(["Rally Squad (Leader)", "Your 6 Joining Marches"])
+    tab_rally, tab_joins = st.tabs(["Rally Squad (Leader)", "Joining Strategy"])
 
     with tab_rally:
-        st.markdown("### Rally Squad")
-        st.markdown("*This is THE most important lineup - your expedition skills affect the entire rally*")
+        st.markdown("### Rally Leader Setup")
+        st.markdown("*When YOU are leading the rally - all 3 of your heroes' expedition skills apply*")
+
+        # Use generation-appropriate heroes
+        infantry_hero = get_available_hero("Jeronimo", "Natalia", "Infantry", USER_GEN)
+        lancer_hero = get_available_hero("Molly", "Zinman", "Lancer", USER_GEN)
+        marksman_hero = get_available_hero("Alonso", "Philly", "Marksman", USER_GEN)
 
         render_3hero_lineup(
-            infantry={"name": "Jeronimo", "role": "CRITICAL - ATK boost to ALL rally troops", "lead": True},
-            lancer={"name": "Molly", "role": "Healing support"},
-            marksman={"name": "Alonso", "role": "Main damage dealer"}
+            infantry={"name": infantry_hero, "role": "ATK boost to rally", "lead": True},
+            lancer={"name": lancer_hero, "role": "Healing support"},
+            marksman={"name": marksman_hero, "role": "Main damage dealer"}
         )
         render_troop_ratio(20, 20, 60, "Heavy Marksman for maximum damage")
 
@@ -414,7 +455,6 @@ elif event_type == "Bear Trap Rally":
             **Why Jeronimo lead is crucial:**
             - His expedition skill provides massive Infantry ATK boost
             - This buff applies to the ENTIRE rally, not just your troops
-            - Difference between good and great rally damage
 
             **When to use Natalia lead instead:**
             - If infantry melts before fight ends
@@ -428,64 +468,51 @@ elif event_type == "Bear Trap Rally":
             """)
 
     with tab_joins:
-        st.markdown("### Your 6 Joining Marches")
-        st.markdown("*As joiner, hero skills have reduced effect - focus on survivability and troop contribution*")
+        st.markdown("### Joining Strategy")
 
-        marches = [
-            {
-                "title": "March 1 - Secondary Main",
-                "infantry": {"name": "Natalia", "role": "Tank"},
-                "lancer": {"name": "Zinman", "role": "Support"},
-                "marksman": {"name": "Philly", "role": "Damage"}
-            },
-            {
-                "title": "March 2 - Attack Joiner",
-                "infantry": {"name": "Flint", "role": "Secondary tank"},
-                "lancer": {"name": "Bahiti", "role": "Sustain"},
-                "marksman": {"name": "Jessie", "role": "ATK buff joiner"}
-            },
-            {
-                "title": "March 3",
-                "infantry": {"name": "Ahmose", "role": "Infantry"},
-                "lancer": {"name": "Patrick", "role": "Lancer"},
-                "marksman": {"name": "Logan", "role": "Marksman"}
-            },
-            {
-                "title": "March 4",
-                "infantry": {"name": "Greg", "role": "Tank"},
-                "lancer": {"name": "Hector", "role": "Support"},
-                "marksman": {"name": "Mia", "role": "Fill"}
-            },
-            {
-                "title": "March 5",
-                "infantry": {"name": "Sergey", "role": "Budget infantry"},
-                "lancer": {"name": "Cloris", "role": "Fill"},
-                "marksman": {"name": "Charlie", "role": "Fill"}
-            },
-            {
-                "title": "March 6 - Remaining Roster",
-                "infantry": {"name": "Any Infantry", "role": "Fill slot"},
-                "lancer": {"name": "Any Lancer", "role": "Fill slot"},
-                "marksman": {"name": "Any Marksman", "role": "Fill slot"}
-            },
+        st.warning("""
+        **⚠️ IMPORTANT: Should you use heroes when joining?**
+
+        Only the **top 4 highest level** expedition skills apply. If your hero has a high-level skill that's
+        not useful for attacks (like Sergey's defensive skill), it could bump out someone's lower-level
+        Jessie - which has a much better damage multiplier.
+        """)
+
+        # Show valuable joiner heroes that are available
+        st.markdown("### Heroes Worth Using as Joiner")
+        st.markdown("*Only use these heroes in your leftmost slot - they have valuable rally expedition skills:*")
+
+        valuable_joiners = [
+            ("Jeronimo", "Infantry", "Infantry ATK multiplier", 1),
+            ("Jessie", "Marksman", "+25% DMG dealt (all troops)", 1),
+            ("Jasser", "Marksman", "Rally damage buff", 1),
+            ("Seo-yoon", "Marksman", "Rally damage buff", 1),
         ]
 
-        cols = st.columns(2)
-        for i, march in enumerate(marches):
-            with cols[i % 2]:
-                st.markdown(f"**{march['title']}**")
-                render_3hero_lineup(march["infantry"], march["lancer"], march["marksman"])
-                st.markdown("---")
+        available_joiners = []
+        for name, hero_class, skill, gen in valuable_joiners:
+            if gen <= USER_GEN:
+                available_joiners.append((name, hero_class, skill))
+                render_hero_slot(name, hero_class, skill, False)
 
-        render_troop_ratio(30, 20, 50, "Joining marches - balance survival with damage")
+        if not available_joiners:
+            st.markdown("*No valuable joiner heroes available at Gen 1 - join with troops only*")
 
-        st.info("""
-        **Joiner Tips:**
-        - Fill ALL 3 hero slots on every march
-        - Empty slots = wasted troop capacity
-        - Even weak heroes contribute troop power
-        - **Jessie** is excellent in joiner marches (ATK expedition skills)
+        st.markdown("---")
+
+        st.markdown("### If You DON'T Have These Heroes")
+        st.success("""
+        **Join with TROOPS ONLY (no heroes)**
+
+        - Send your troops to contribute damage
+        - Don't put any heroes in the march
+        - This prevents your leveled-up but wrong skill (like Sergey) from bumping out a valuable damage multiplier
+        - Your troops still contribute to the rally damage!
         """)
+
+        st.markdown("---")
+        st.markdown("### Troop Recommendations")
+        render_troop_ratio(20, 20, 60, "Match the rally leader's marksman-heavy strategy")
 
 # =============================================================================
 # CRAZY JOE RALLY
@@ -507,15 +534,14 @@ elif event_type == "Crazy Joe Rally":
             lancer={"name": "Molly", "role": "CRITICAL - Team healing"},
             marksman={"name": "Alonso", "role": "Sustained DPS"}
         )
-        render_troop_ratio(90, 10, 0, "VERIFIED: Infantry-heavy - infantry kills before others engage")
+        render_troop_ratio(90, 10, 0, "Infantry-heavy - infantry kills before others engage")
 
         st.markdown("""
-        **Joe-specific mechanics (VERIFIED):**
+        **Joe-specific mechanics:**
         - Infantry engages FIRST in combat order
         - If infantry stats are high enough, they defeat all bandits before Lancers/Marksmen attack
         - This is why 90/10/0 works - back row never gets to fight
         - Molly's healing still valuable for survival
-        - Source: One Chilled Gamer + A Jack Of Everything
         """)
 
     with tab_joins:
@@ -537,15 +563,13 @@ elif event_type == "Rally Joiner Setup":
     st.markdown("## 🤝 Rally Joiner Best Practices")
     st.markdown("Optimizing your contribution when joining someone else's rally")
 
-    st.error("""
-    **⚠️ CRITICAL JOINER MECHANIC (VERIFIED)**
+    st.info("""
+    **⚠️ CRITICAL JOINER MECHANIC**
 
-    When joining a rally, only your **FIRST hero's TOP-RIGHT expedition skill** is used!
+    When joining a rally, only your **leftmost hero's expedition skill** is used!
     - Your other 2 heroes contribute NOTHING to rally buffs
     - Up to **4 member skills** total contribute to a rally
     - Member skills CAN stack if they're the same effect
-
-    *Source: Century Games Help Center + BlueStacks Rally Guide*
     """)
 
     col1, col2 = st.columns(2)
@@ -555,14 +579,14 @@ elif event_type == "Rally Joiner Setup":
 
         st.markdown("**🔥 Attack/Rally Joiners:**")
         st.markdown("""
-        Heroes whose **TOP-RIGHT skill** buffs damage:
+        Heroes whose **expedition skill** buffs damage:
         """)
         render_hero_slot("Jessie", "Marksman", "Stand of Arms: +25% DMG dealt (all troops)", False)
         st.caption("Best attack joiner - affects ALL damage types including skills, pets, teammates")
 
         st.markdown("**🛡️ Garrison Joiners:**")
         st.markdown("""
-        Heroes whose **TOP-RIGHT skill** reduces damage:
+        Heroes whose **expedition skill** reduces damage:
         """)
         render_hero_slot("Sergey", "Infantry", "Defenders' Edge: -20% DMG taken (all troops)", False)
         st.caption("Best garrison joiner - universal damage reduction")
@@ -573,10 +597,10 @@ elif event_type == "Rally Joiner Setup":
         st.info("""
         **Key Understanding:**
 
-        Only ONE skill per joiner matters (top-right of first hero).
+        Only ONE skill per joiner matters (leftmost hero's expedition skill).
 
         What matters most:
-        1. **First hero selection** - choose for their top-right skill
+        1. **Leftmost hero selection** - choose for their expedition skill
         2. **Troop survival** - dead troops = zero contribution
         3. **Troop tier** - T9/T10 significantly outperform lower tiers
         """)
@@ -838,10 +862,8 @@ elif event_type == "Reservoir Raid":
 # =============================================================================
 st.markdown("---")
 
-with st.expander("📊 Troop Ratio Quick Reference (VERIFIED)"):
+with st.expander("📊 Troop Ratio Quick Reference"):
     st.markdown("""
-    *Source: A Jack Of Everything + One Chilled Gamer*
-
     | Situation | Infantry | Lancer | Marksman | Notes |
     |-----------|----------|--------|----------|-------|
     | **Default Formation** | 50% | 20% | 30% | Balanced default |
@@ -855,22 +877,20 @@ with st.expander("📊 Troop Ratio Quick Reference (VERIFIED)"):
     **Class Counters:** Infantry > Lancer > Marksman > Infantry
     """)
 
-with st.expander("🦸 Joiner Role Quick Reference (VERIFIED)"):
+with st.expander("🦸 Joiner Role Quick Reference"):
     st.markdown("""
-    *Source: BlueStacks Rally Guide + Century Games Help Center*
-
-    ### CRITICAL: Only TOP-RIGHT skill of FIRST hero matters!
+    ### CRITICAL: Only leftmost hero's expedition skill matters!
 
     ### Best Attack/Rally Joiners
-    | Hero | Top-Right Skill | Effect |
-    |------|-----------------|--------|
+    | Hero | Expedition Skill | Effect |
+    |------|------------------|--------|
     | **Jessie** | Stand of Arms | +25% DMG dealt (all troops) |
 
     Jessie's buff affects ALL damage types: normal attacks, hero skills, pet abilities, teammate buffs.
 
     ### Best Garrison Joiners
-    | Hero | Top-Right Skill | Effect |
-    |------|-----------------|--------|
+    | Hero | Expedition Skill | Effect |
+    |------|------------------|--------|
     | **Sergey** | Defenders' Edge | -20% DMG taken (all troops) |
 
     ### Investment Rule
@@ -880,8 +900,7 @@ with st.expander("🦸 Joiner Role Quick Reference (VERIFIED)"):
     - ❌ NOT premium resources (Stones/Mithril)
     - ❌ NOT priority over core heroes
 
-    **Misconception:** "All joiner skills apply with reduced effect"
-    **Truth:** Only 1 skill per joiner contributes. Other heroes/skills don't matter.
+    Only 1 skill per joiner contributes. Other heroes/skills don't matter.
     """)
 
 with st.expander("💰 Spender-Specific Advice"):
@@ -934,3 +953,6 @@ with st.expander("⏰ S3 Transition Notes"):
     - First SvS → Multiple SvS cycles → S3 signals
     - Don't panic-freeze, but don't over-invest
     """)
+
+# Close database connection
+db.close()

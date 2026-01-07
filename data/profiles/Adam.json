@@ -1,10 +1,10 @@
 {
   "export_version": "1.0",
-  "export_date": "2026-01-06T17:55:17.657204",
+  "export_date": "2026-01-07T00:03:03.659786",
   "profile": {
-    "name": "Chief",
-    "server_age_days": 0,
-    "furnace_level": 1,
+    "name": "Adam",
+    "server_age_days": 80,
+    "furnace_level": 31,
     "priority_svs": 5,
     "priority_rally": 4,
     "priority_castle_battle": 4,

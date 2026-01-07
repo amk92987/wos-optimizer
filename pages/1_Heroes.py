@@ -13,8 +13,6 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import Hero, UserHero
 
-st.set_page_config(page_title="Heroes - WoS Optimizer", page_icon="🦸", layout="wide")
-
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
 if css_file.exists():
@@ -263,11 +261,10 @@ def render_hero_card_with_editor(hero: dict, owned_data=None, show_editor: bool 
             m_color = get_quality_color(owned_data.mythic_gear_quality)
             gear_html += f'<div style="margin-top:4px;background:rgba(233,30,99,0.2);border:1px solid #E91E63;border-radius:4px;padding:2px;text-align:center;"><div style="font-size:9px;color:#E91E63;">{mythic_gear}</div></div>'
 
-    # Best use blurb
-    blurb_html = ""
-    if best_use:
-        blurb_color = "#FF6B35" if tier in ["S+", "S"] else "#B8D4E8"
-        blurb_html = f'<div style="margin-top:8px;padding:6px;background:rgba(0,0,0,0.3);border-radius:4px;font-size:10px;color:{blurb_color};line-height:1.3;">{best_use}</div>'
+    # Best use blurb - fixed height, centered text
+    blurb_color = "#FF6B35" if tier in ["S+", "S"] else "#B8D4E8"
+    blurb_text = best_use if best_use else "&nbsp;"
+    blurb_html = f'<div style="margin-top:8px;padding:6px;background:rgba(0,0,0,0.3);border-radius:4px;font-size:10px;color:{blurb_color};line-height:1.3;min-height:50px;max-height:50px;overflow:hidden;display:flex;align-items:center;justify-content:center;text-align:center;">{blurb_text}</div>'
 
     # Build HTML - tier badge has tooltip on hover
     html_parts = [

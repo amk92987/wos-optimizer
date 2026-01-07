@@ -15,8 +15,6 @@ from database.db import init_db, get_db, get_or_create_profile
 from database.models import UserHero, UserInventory
 from engine.ai_recommender import AIRecommender, format_data_preview
 
-st.set_page_config(page_title="AI Advisor - WoS Optimizer", page_icon="🤖", layout="wide")
-
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
 if css_file.exists():

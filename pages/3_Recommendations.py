@@ -14,8 +14,6 @@ from database.db import init_db, get_db, get_or_create_profile
 from database.models import UserHero
 from engine.recommender import RecommendationEngine, UpgradeType
 
-st.set_page_config(page_title="Recommendations - WoS Optimizer", page_icon="📈", layout="wide")
-
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
 if css_file.exists():

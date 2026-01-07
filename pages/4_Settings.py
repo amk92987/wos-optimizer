@@ -5,7 +5,6 @@ Settings Page - Configure your profile and priorities.
 import streamlit as st
 from pathlib import Path
 import sys
-from datetime import datetime
 
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -13,7 +12,6 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import UserHero, UserInventory
 
-st.set_page_config(page_title="Settings - WoS Optimizer", page_icon="⚙️", layout="wide")
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -65,8 +63,8 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("## 🏰 Game Profile")
 
-    # Chief name
-    profile.name = st.text_input("Chief Name", value=profile.name or "Chief")
+    # Chief name - use key to prevent overwriting on rerender
+    chief_name = st.text_input("Chief Name", value=profile.name or "Chief", key="chief_name_input")
 
     # Server age estimation
     st.markdown("### Server Age")
@@ -272,44 +270,13 @@ with col2:
 
 st.markdown("---")
 
-# SvS Tracking
-st.markdown("## ⚔️ SvS History")
-
-col3, col4, col5 = st.columns(3)
-
-with col3:
-    profile.svs_wins = st.number_input(
-        "SvS Wins",
-        min_value=0,
-        value=profile.svs_wins
-    )
-
-with col4:
-    profile.svs_losses = st.number_input(
-        "SvS Losses",
-        min_value=0,
-        value=profile.svs_losses
-    )
-
-with col5:
-    total = profile.svs_wins + profile.svs_losses
-    if total > 0:
-        win_rate = (profile.svs_wins / total) * 100
-        st.metric("Win Rate", f"{win_rate:.1f}%")
-    else:
-        st.metric("Win Rate", "N/A")
-
-# Last SvS date
-if st.checkbox("Record last SvS date"):
-    last_svs = st.date_input("Last SvS Date")
-    profile.last_svs_date = datetime.combine(last_svs, datetime.min.time())
-
-st.markdown("---")
-
 # Save button
 if st.button("💾 Save All Settings", type="primary", use_container_width=True):
-    save_profile()
-    st.rerun()
+    # Save chief name from the input
+    profile.name = chief_name
+    db.commit()
+    st.success("Settings saved!")
+    st.balloons()
 
 # Data management
 st.markdown("---")

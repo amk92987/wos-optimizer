@@ -21,3 +21,4 @@ pandas>=2.0.0
 
 # AI Recommendations
 openai>=1.0.0
+st-star-rating

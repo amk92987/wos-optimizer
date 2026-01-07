@@ -154,6 +154,29 @@ Users set priorities (1-5 scale) for:
 
 The recommendation engine weights upgrades based on these priorities.
 
+### Rally Joiner Mechanics
+
+**Critical mechanic**: When joining a rally, only the **leftmost hero's expedition skill** is used.
+
+**Skill level determines priority**: Only the top 4 highest LEVEL expedition skills from all joiners apply to the rally. This is based on skill level, not player power.
+
+**Risk of wrong skills**: A high-level wrong skill (like Sergey's defensive skill at level 5) can bump out a lower-level valuable skill (like Jessie's +25% damage at level 3).
+
+**Best Attack Joiner Heroes** (for Bear Trap, Castle Attacks):
+| Hero | Gen | Skill Effect |
+|------|-----|--------------|
+| Jeronimo | 1 | Infantry ATK multiplier |
+| Jessie | 5 | +25% DMG dealt (all troops) |
+
+**Best Garrison Joiner Heroes** (for defense):
+| Hero | Gen | Skill Effect |
+|------|-----|--------------|
+| Sergey | 1 | -20% DMG taken (all troops) |
+
+**If you don't have the right joiner heroes**: Join with troops only (no heroes) to avoid bumping out someone else's valuable skill.
+
+Heroes with `rally_joiner_role` field in heroes.json: "attack" or "garrison"
+
 ## Important Notes
 
 ### UTF-8 Encoding

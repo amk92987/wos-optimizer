@@ -14,8 +14,6 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import Item, UserInventory
 
-st.set_page_config(page_title="Backpack - WoS Optimizer", page_icon="🎒", layout="wide")
-
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
 if css_file.exists():

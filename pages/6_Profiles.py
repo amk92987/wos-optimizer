@@ -14,7 +14,6 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import UserHero, Hero, UserInventory
 
-st.set_page_config(page_title="Profiles - WoS Optimizer", page_icon="👤", layout="wide")
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -123,6 +122,10 @@ def load_profile_from_file(filepath: Path):
         with open(filepath, encoding='utf-8') as f:
             data = json.load(f)
 
+        # Track loaded profile file
+        st.session_state["loaded_profile_path"] = str(filepath)
+        st.session_state["loaded_profile_filename"] = filepath.name
+
         # Import profile settings
         if "profile" in data:
             p = data["profile"]
@@ -220,6 +223,47 @@ def delete_profile_file(filepath: Path):
         return False
 
 
+def update_loaded_profile():
+    """Update the currently loaded profile file with current data."""
+    if "loaded_profile_path" not in st.session_state:
+        return False, "No profile loaded to update"
+
+    filepath = Path(st.session_state["loaded_profile_path"])
+    if not filepath.exists():
+        return False, "Profile file no longer exists"
+
+    data = export_current_profile()
+
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=2)
+
+    return True, f"Updated profile: {filepath.name}"
+
+
+def rename_profile_file(new_name: str):
+    """Rename the currently loaded profile file."""
+    if "loaded_profile_path" not in st.session_state:
+        return False, "No profile loaded to rename"
+
+    old_path = Path(st.session_state["loaded_profile_path"])
+    if not old_path.exists():
+        return False, "Profile file no longer exists"
+
+    # Create safe filename
+    safe_name = "".join(c if c.isalnum() or c in "._- " else "_" for c in new_name)
+    new_filename = f"{safe_name}.json"
+    new_path = PROFILES_DIR / new_filename
+
+    # Rename file
+    old_path.rename(new_path)
+
+    # Update session state
+    st.session_state["loaded_profile_path"] = str(new_path)
+    st.session_state["loaded_profile_filename"] = new_filename
+
+    return True, f"Renamed to: {new_filename}"
+
+
 # Page content
 st.markdown("# 👤 Profiles")
 st.markdown("Save and load profiles to sync your data across computers via git.")
@@ -228,6 +272,13 @@ st.markdown("---")
 
 # Current profile summary
 st.markdown("## 📊 Current Profile")
+
+# Show loaded profile status
+loaded_file = st.session_state.get("loaded_profile_filename")
+if loaded_file:
+    st.success(f"📂 **Loaded from:** `{loaded_file}`")
+else:
+    st.info("💡 No profile file loaded. Load a saved profile or save a new one below.")
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
@@ -240,25 +291,73 @@ with col3:
 with col4:
     st.metric("Furnace Level", profile.furnace_level)
 
+# Edit profile name and update loaded profile
+if loaded_file:
+    st.markdown("### ✏️ Edit Loaded Profile")
+
+    edit_col1, edit_col2, edit_col3 = st.columns([3, 1, 1])
+
+    with edit_col1:
+        new_name = st.text_input(
+            "Chief Name",
+            value=profile.name or "Chief",
+            key="edit_profile_name",
+            help="Update your chief name"
+        )
+
+    with edit_col2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("✏️ Rename File", use_container_width=True):
+            if new_name and new_name != profile.name:
+                profile.name = new_name
+                db.commit()
+            success, message = rename_profile_file(new_name)
+            if success:
+                st.success(message)
+                st.rerun()
+            else:
+                st.error(message)
+
+    with edit_col3:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("💾 Update Profile", type="primary", use_container_width=True):
+            # Save name change first
+            if new_name and new_name != profile.name:
+                profile.name = new_name
+                db.commit()
+            success, message = update_loaded_profile()
+            if success:
+                st.success(message)
+            else:
+                st.error(message)
+
 st.markdown("---")
 
-# Save current profile
-st.markdown("## 💾 Save Current Profile")
+# Save as new profile
+st.markdown("## 💾 Save As New Profile")
 
 save_col1, save_col2 = st.columns([3, 1])
 
 with save_col1:
     save_name = st.text_input(
-        "Profile Name",
+        "New Profile Name",
         value=profile.name or "My Profile",
-        help="Name for this saved profile"
+        key="save_new_profile_name",
+        help="Name for the new saved profile"
     )
 
 with save_col2:
     st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("💾 Save Profile", type="primary", use_container_width=True):
+    if st.button("💾 Save As New", type="primary", use_container_width=True):
         if save_name:
+            # Update profile name if different
+            if save_name != profile.name:
+                profile.name = save_name
+                db.commit()
             filepath = save_profile_to_file(save_name)
+            # Track the newly saved file as loaded
+            st.session_state["loaded_profile_path"] = str(filepath)
+            st.session_state["loaded_profile_filename"] = filepath.name
             st.success(f"Profile saved to: `data/profiles/{filepath.name}`")
             st.info("Commit and push to git to sync across computers!")
             st.rerun()
