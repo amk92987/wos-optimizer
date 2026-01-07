@@ -1,0 +1,160 @@
+{
+  "system": "hero_gear_mastery",
+  "description": "Mastery Forging upgrade edges for Gold Hero Gear",
+  "unit": "mastery_level",
+  "currencies": ["essence_stone", "mythic_gear"],
+  "unlock_requirements": {
+    "furnace_level": 20,
+    "gear_enhancement_level": 20
+  },
+  "source_ids": ["SRC_WHITEOUTDATA_MASTERY"],
+  "generated_at": "2026-01-07T00:00:00Z",
+
+  "edges": [
+    {
+      "upgrade_id": "hero_gear_mastery:0->1",
+      "from": {"mastery_level": 0},
+      "to": {"mastery_level": 1},
+      "cost": {"essence_stone": 10, "mythic_gear": 0},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:1->2",
+      "from": {"mastery_level": 1},
+      "to": {"mastery_level": 2},
+      "cost": {"essence_stone": 20, "mythic_gear": 0},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:2->3",
+      "from": {"mastery_level": 2},
+      "to": {"mastery_level": 3},
+      "cost": {"essence_stone": 30, "mythic_gear": 0},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:3->4",
+      "from": {"mastery_level": 3},
+      "to": {"mastery_level": 4},
+      "cost": {"essence_stone": 40, "mythic_gear": 0},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:4->5",
+      "from": {"mastery_level": 4},
+      "to": {"mastery_level": 5},
+      "cost": {"essence_stone": 50, "mythic_gear": 0},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:5->6",
+      "from": {"mastery_level": 5},
+      "to": {"mastery_level": 6},
+      "cost": {"essence_stone": 60, "mythic_gear": 0},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:6->7",
+      "from": {"mastery_level": 6},
+      "to": {"mastery_level": 7},
+      "cost": {"essence_stone": 70, "mythic_gear": 0},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:7->8",
+      "from": {"mastery_level": 7},
+      "to": {"mastery_level": 8},
+      "cost": {"essence_stone": 80, "mythic_gear": 0},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:8->9",
+      "from": {"mastery_level": 8},
+      "to": {"mastery_level": 9},
+      "cost": {"essence_stone": 90, "mythic_gear": 0},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:9->10",
+      "from": {"mastery_level": 9},
+      "to": {"mastery_level": 10},
+      "cost": {"essence_stone": 100, "mythic_gear": 0},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:10->11",
+      "from": {"mastery_level": 10},
+      "to": {"mastery_level": 11},
+      "cost": {"essence_stone": 110, "mythic_gear": 1},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:11->12",
+      "from": {"mastery_level": 11},
+      "to": {"mastery_level": 12},
+      "cost": {"essence_stone": 120, "mythic_gear": 2},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:12->13",
+      "from": {"mastery_level": 12},
+      "to": {"mastery_level": 13},
+      "cost": {"essence_stone": 130, "mythic_gear": 3},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:13->14",
+      "from": {"mastery_level": 13},
+      "to": {"mastery_level": 14},
+      "cost": {"essence_stone": 140, "mythic_gear": 4},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:14->15",
+      "from": {"mastery_level": 14},
+      "to": {"mastery_level": 15},
+      "cost": {"essence_stone": 150, "mythic_gear": 5},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:15->16",
+      "from": {"mastery_level": 15},
+      "to": {"mastery_level": 16},
+      "cost": {"essence_stone": 160, "mythic_gear": 6},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:16->17",
+      "from": {"mastery_level": 16},
+      "to": {"mastery_level": 17},
+      "cost": {"essence_stone": 170, "mythic_gear": 7},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:17->18",
+      "from": {"mastery_level": 17},
+      "to": {"mastery_level": 18},
+      "cost": {"essence_stone": 180, "mythic_gear": 8},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:18->19",
+      "from": {"mastery_level": 18},
+      "to": {"mastery_level": 19},
+      "cost": {"essence_stone": 190, "mythic_gear": 9},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "hero_gear_mastery:19->20",
+      "from": {"mastery_level": 19},
+      "to": {"mastery_level": 20},
+      "cost": {"essence_stone": 200, "mythic_gear": 10},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    }
+  ],
+
+  "totals": {
+    "mastery_0_to_10": {"essence_stone": 550, "mythic_gear": 0},
+    "mastery_0_to_20": {"essence_stone": 2100, "mythic_gear": 55}
+  }
+}

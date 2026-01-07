@@ -1,0 +1,27 @@
+{
+  "system": "buildings_fc",
+  "generated_at": "2026-01-07T20:29:05.313071Z",
+  "ok": true,
+  "total_edges": 313,
+  "buildings_covered": [
+    "furnace",
+    "embassy",
+    "command_center",
+    "infirmary",
+    "infantry_camp",
+    "lancer_camp",
+    "marksman_camp"
+  ],
+  "edges_per_building": {
+    "furnace": 19,
+    "embassy": 49,
+    "command_center": 49,
+    "infirmary": 49,
+    "infantry_camp": 49,
+    "lancer_camp": 49,
+    "marksman_camp": 49
+  },
+  "level_range": "30-1 to FC10-0",
+  "issues": [],
+  "notes": []
+}

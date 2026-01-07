@@ -54,6 +54,12 @@ recommender = AIRecommender()
 st.markdown("# 🤖 AI Advisor")
 st.markdown("Get intelligent, personalized recommendations powered by AI.")
 
+st.info("""
+**How it works:** The AI receives your profile data (heroes, levels, skills, priorities) along with
+**verified game mechanics** (rally rules, skill scaling, troop ratios). This prevents hallucination
+and ensures recommendations are based on accurate WoS knowledge.
+""")
+
 st.markdown("---")
 
 # API Key status

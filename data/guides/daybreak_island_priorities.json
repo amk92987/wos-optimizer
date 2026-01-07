@@ -1,0 +1,168 @@
+{
+  "system": "daybreak_island",
+  "description": "Daybreak Island upgrade priorities and strategy guide",
+  "version": "1.0",
+  "generated_at": "2026-01-07T00:00:00Z",
+
+  "overview": {
+    "unlock": "Furnace Level 19 + Dock building",
+    "currency": "Life Essence (720 wood = 1 Life Essence via Dock)",
+    "purpose": "Combat buffs via Tree of Life + Prosperity decorations",
+    "total_investment": {
+      "tree_of_life_max": 293500,
+      "starry_lighthouse": 50000,
+      "decorations_for_gates": "varies by strategy",
+      "wood_equivalent": "200M+ wood total"
+    }
+  },
+
+  "tree_of_life_priority": {
+    "description": "Tree of Life is the PRIMARY goal - decorations are just means to unlock it",
+    "buff_progression": [
+      {"level": 1, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": "Free starting buff"},
+      {"level": 2, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": ""},
+      {"level": 3, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": ""},
+      {"level": 4, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": ""},
+      {"level": 5, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": ""},
+      {"level": 6, "buff": "Troops Health +5%", "combat_value": "HIGH", "notes": "First real combat buff - priority milestone"},
+      {"level": 7, "buff": "Troops Health +5%", "combat_value": "HIGH", "notes": "Stacks with L6"},
+      {"level": 8, "buff": "Troops Defense +5%", "combat_value": "HIGH", "notes": "Reduces damage taken"},
+      {"level": 9, "buff": "Troops Defense +5%", "combat_value": "HIGH", "notes": "Stacks with L8"},
+      {"level": 10, "buff": "Troops Lethality +5%", "combat_value": "CRITICAL", "notes": "Max level - unlocks Starry Lighthouse"}
+    ],
+    "milestone_priorities": {
+      "first_priority": "Tree of Life L6 - Troops Health +5% is first real combat value",
+      "second_priority": "Tree of Life L10 - Troops Lethality +5% + Starry Lighthouse unlock",
+      "skip_until_needed": "L2-L5 are just Healing Speed - rush past these"
+    }
+  },
+
+  "decoration_strategy": {
+    "purpose": "Decorations provide Prosperity to unlock Tree of Life levels",
+    "prosperity_gates": [
+      {"tree_level": 2, "prosperity_needed": 200},
+      {"tree_level": 3, "prosperity_needed": 600},
+      {"tree_level": 4, "prosperity_needed": 1200},
+      {"tree_level": 5, "prosperity_needed": 2400},
+      {"tree_level": 6, "prosperity_needed": 4800},
+      {"tree_level": 7, "prosperity_needed": 8000},
+      {"tree_level": 8, "prosperity_needed": 12000},
+      {"tree_level": 9, "prosperity_needed": 16000},
+      {"tree_level": 10, "prosperity_needed": 20000}
+    ],
+    "decoration_efficiency": {
+      "common": {"cost": 1000, "prosperity": 50, "efficiency": 0.05},
+      "uncommon": {"cost": 2000, "prosperity": 100, "efficiency": 0.05},
+      "rare": {"cost": 3000, "prosperity": 200, "efficiency": 0.067},
+      "epic": {"cost": 5000, "prosperity": 400, "efficiency": 0.08},
+      "mythic": {"cost": 10000, "prosperity": 1000, "efficiency": 0.10}
+    },
+    "recommendation": {
+      "most_efficient": "Mythic decorations (0.10 Prosperity per Life Essence)",
+      "space_efficient": "Mythic decorations also give most Prosperity per slot",
+      "budget_option": "Epic decorations are 80% as efficient but half the cost",
+      "avoid": "Common/Uncommon decorations are least efficient"
+    }
+  },
+
+  "priorities_by_spending_profile": {
+    "f2p": {
+      "overall_priority": "Medium - good long-term value but wood-intensive",
+      "strategy": [
+        "Rush Tree of Life L6 for first combat buff",
+        "Use Epic decorations for balance of cost and efficiency",
+        "Don't over-invest beyond L6 until Furnace L30 is reached",
+        "Tree of Life L10 is a late-game goal, not mid-game"
+      ],
+      "recommended_milestones": [
+        {"milestone": "Tree of Life L6", "reason": "First real combat buff (Troops Health +5%)"},
+        {"milestone": "Starry Lighthouse", "reason": "March Speed +10% is valuable but requires L10"}
+      ],
+      "avoid": [
+        "Buying excessive Common/Uncommon decorations",
+        "Prioritizing Daybreak over Furnace progression",
+        "Spending Life Essence on decorations beyond Prosperity gates"
+      ],
+      "wood_budget": "Allocate ~50M wood before L30, then reassess"
+    },
+    "minnow": {
+      "overall_priority": "Medium-High - combat buffs compound with other investments",
+      "strategy": [
+        "Rush Tree of Life L6, then steady progress to L10",
+        "Mix of Epic and Mythic decorations",
+        "Complete alongside FC progression"
+      ],
+      "recommended_milestones": [
+        {"milestone": "Tree of Life L8", "reason": "Troops Health +10% and Defense +5%"},
+        {"milestone": "Starry Lighthouse", "reason": "March Speed helps in all content"}
+      ]
+    },
+    "dolphin": {
+      "overall_priority": "High - buffs multiply with your hero/troop investments",
+      "strategy": [
+        "Rush Tree of Life L10 relatively quickly",
+        "Mythic decorations for efficiency",
+        "Complete Starry Lighthouse"
+      ],
+      "recommended_milestones": [
+        {"milestone": "Tree of Life L10 + Starry Lighthouse", "reason": "Full combat buff suite"}
+      ]
+    },
+    "whale": {
+      "overall_priority": "High - complete it",
+      "strategy": [
+        "Max everything quickly",
+        "All Mythic decorations",
+        "Tree of Life L10 + Starry Lighthouse as soon as unlocked"
+      ]
+    }
+  },
+
+  "priorities_by_alliance_role": {
+    "rally_lead": {
+      "priority_boost": "+1 (higher priority)",
+      "reason": "Combat buffs directly improve rally performance",
+      "focus": "Tree of Life L10 for Troops Lethality +5%"
+    },
+    "filler": {
+      "priority_boost": "0 (standard priority)",
+      "reason": "Buffs help but not as critical as for leads",
+      "focus": "Tree of Life L6-8 is sufficient"
+    },
+    "farmer": {
+      "priority_boost": "-1 (lower priority)",
+      "reason": "Combat buffs less relevant for economy focus",
+      "focus": "Tree of Life L6 minimum, then deprioritize"
+    }
+  },
+
+  "common_mistakes": [
+    {
+      "mistake": "Building decorations without a Prosperity goal",
+      "why_bad": "Decorations beyond Prosperity gates waste Life Essence",
+      "fix": "Only build decorations to meet the next Tree of Life gate"
+    },
+    {
+      "mistake": "Rushing Daybreak before Furnace L30",
+      "why_bad": "FC unlock is more valuable than Daybreak buffs",
+      "fix": "Get Tree of Life L6, then focus Furnace to L30"
+    },
+    {
+      "mistake": "Using Common/Uncommon decorations",
+      "why_bad": "Lowest efficiency - wastes Life Essence",
+      "fix": "Save for Epic/Mythic decorations"
+    },
+    {
+      "mistake": "Ignoring Daybreak entirely",
+      "why_bad": "Free combat stats with no downside",
+      "fix": "At minimum, get Tree of Life L6 for Troops Health +5%"
+    }
+  ],
+
+  "integration_with_other_systems": {
+    "furnace": "Daybreak unlocks at F19 but don't let it slow F30 rush",
+    "troops": "Daybreak buffs apply to ALL troops - more troops = more value from buffs",
+    "svs": "Combat buffs are always active - no activation needed during SvS",
+    "wood_economy": "Daybreak competes with building upgrades for wood - balance carefully"
+  }
+}

@@ -1,0 +1,207 @@
+{
+  "spender_paths": {
+    "core_principle": "Spender level determines how much inefficiency you can afford. F2P must be near-perfect, whales can be strategically wasteful.",
+    "f2p": {
+      "label": "Free-to-Play",
+      "resource_reality": "Very limited Chief Gear XP, Mythic materials, Hero shards. Cannot recover from mistakes quickly.",
+      "chief_gear": {
+        "priority": "absolute",
+        "strategy": "Focus on 2-3 pieces ahead of rest. Do NOT rush Mythic on everything.",
+        "order": ["Ring", "Amulet", "Gloves", "Boots", "Helmet", "Armor"]
+      },
+      "hero_gear": {
+        "allowed": false,
+        "exceptions": ["primary_field_dps"],
+        "limit": 1,
+        "rules": ["Only heroes relevant 2+ generations", "Only field PvP or solo use", "NEVER gear rally joiners"],
+        "targets": ["Molly OR Alonso (not both)"]
+      },
+      "mistake_tolerance": "none"
+    },
+    "low_spender": {
+      "label": "Low Spender (Battle Pass / small packs)",
+      "resource_reality": "Steady but slow income. Can correct small mistakes. Still punished by major misallocations.",
+      "chief_gear": {
+        "priority": "dominant",
+        "strategy": "Ring + Amulet pushed ahead. Can begin equalizing Gloves/Boots sooner."
+      },
+      "hero_gear": {
+        "allowed": true,
+        "limit": 2,
+        "roles": ["field_dps", "rally_leader"],
+        "rules": ["Must be used daily", "Must be used across multiple modes", "NOT purely rally joiner"],
+        "targets": ["Alonso (DPS multi-mode)", "Jeronimo (if rally leader)", "Molly (field PvP)"],
+        "avoid": "Gearing defensive heroes early (low ROI)"
+      },
+      "mistake_tolerance": "low"
+    },
+    "medium_spender": {
+      "label": "Medium Spender",
+      "resource_reality": "Can sustain upgrades. Can recover from mistakes. Still benefits from efficiency.",
+      "chief_gear": {
+        "priority": "foundational",
+        "strategy": "Ring & Amulet to Mythic early. Remaining pieces can follow closer behind."
+      },
+      "hero_gear": {
+        "allowed": true,
+        "limit": 4,
+        "priority_order": ["rally_leader", "primary_dps", "secondary_dps", "situational"],
+        "targets": ["Jeronimo (rally leader)", "Alonso (DPS)", "Molly (PvP)", "1 situational (garrison or CJ)"]
+      },
+      "mistake_tolerance": "medium"
+    },
+    "whale": {
+      "label": "Whale",
+      "resource_reality": "Resource constraints effectively removed. Speed > efficiency. Short-term dominance is goal.",
+      "chief_gear": {
+        "priority": "max_everything",
+        "strategy": "Max everything fast. No opportunity cost concern."
+      },
+      "hero_gear": {
+        "allowed": true,
+        "limit": "none",
+        "roi_constraints": "ignored",
+        "targets": ["All core heroes", "Rally leaders", "Field PvP heroes", "Defensive specialists", "Even transitional heroes"],
+        "can_do": ["Gear heroes before optimal", "Gear heroes knowing they'll be replaced", "Brute-force power"]
+      },
+      "mistake_tolerance": "high"
+    },
+    "summary_table": {
+      "headers": ["Spender", "Chief Gear", "Hero Gear", "Mistake Tolerance"],
+      "rows": [
+        ["F2P", "Mandatory", "Minimal", "None"],
+        ["Low", "Dominant", "Limited", "Low"],
+        ["Medium", "Balanced", "Strategic", "Medium"],
+        ["Whale", "Maxed", "Everything", "High"]
+      ]
+    }
+  },
+  "roi_comparison": {
+    "chief_gear": {
+      "scope": "Global - all troops, all heroes",
+      "scaling": "Multiplicative",
+      "mode_coverage": "100% - rallies, field PvP, garrison, Bear Trap, Crazy Joe, SvS",
+      "replacement_risk": "None",
+      "long_term_relevance": "Permanent",
+      "roi_level": "always_high"
+    },
+    "hero_gear": {
+      "scope": "Single hero only",
+      "scaling": "Additive + conditional",
+      "mode_coverage": "Limited",
+      "replacement_risk": "High - generation bound",
+      "long_term_relevance": "Hero-dependent",
+      "roi_by_context": {
+        "rally_joiner": "very_low",
+        "rally_leader": "medium",
+        "field_pvp": "high",
+        "arena": "high",
+        "pve": "medium"
+      }
+    },
+    "investment_hierarchy": [
+      "1. Chief Gear: Ring",
+      "2. Chief Gear: Amulet",
+      "3. Remaining Chief Gear",
+      "4. Hero Gear on long-term core heroes",
+      "5. Hero Gear on situational heroes"
+    ],
+    "hero_gear_conditions": [
+      "Hero is used as rally leader (not just joiner)",
+      "Hero remains relevant next generation",
+      "Chief Ring and Amulet at target tier first"
+    ]
+  },
+  "chief_gear": {
+    "description": "Global combat buffs that apply to ALL heroes and troops. Always active once equipped.",
+    "pieces": [
+      {
+        "slot": "Ring",
+        "primary_stat": "Troop Attack (All)",
+        "benefits": "Universal - all classes",
+        "priority": 1,
+        "tier": "Highest Impact"
+      },
+      {
+        "slot": "Amulet",
+        "primary_stat": "Troop Lethality / Damage",
+        "benefits": "Universal - PvP focused",
+        "priority": 2,
+        "tier": "Highest Impact"
+      },
+      {
+        "slot": "Gloves",
+        "primary_stat": "Marksman Attack",
+        "benefits": "Marksman heroes (Alonso, Molly)",
+        "priority": 3,
+        "tier": "Offensive Class"
+      },
+      {
+        "slot": "Boots",
+        "primary_stat": "Lancer Attack",
+        "benefits": "Lancer heroes",
+        "priority": 4,
+        "tier": "Offensive Class"
+      },
+      {
+        "slot": "Helmet",
+        "primary_stat": "Infantry Defense",
+        "benefits": "Infantry heroes (Natalia, Sergey, Flint)",
+        "priority": 5,
+        "tier": "Defensive"
+      },
+      {
+        "slot": "Armor",
+        "primary_stat": "Infantry Health",
+        "benefits": "Infantry heroes",
+        "priority": 6,
+        "tier": "Defensive"
+      }
+    ],
+    "quality_tiers": [
+      {"tier": 1, "name": "Common"},
+      {"tier": 2, "name": "Uncommon"},
+      {"tier": 3, "name": "Rare"},
+      {"tier": 4, "name": "Epic"},
+      {"tier": 5, "name": "Legendary"},
+      {"tier": 6, "name": "Mythic"}
+    ],
+    "upgrade_priority": {
+      "order": ["Ring", "Amulet", "Gloves", "Boots", "Helmet", "Armor"],
+      "best_stats": ["Troop Attack", "Lethality"],
+      "long_term_goal": "Mythic on Ring & Amulet first",
+      "applies_to": "All heroes, all marches, all events"
+    },
+    "common_mistakes": [
+      {
+        "mistake": "Upgrading Infantry gear first because infantry tanks",
+        "correction": "Infantry stats matter LESS than damage multipliers in PvP/SvS"
+      },
+      {
+        "mistake": "Over-investing in early quality tiers",
+        "correction": "Epic/Legendary gear is temporary; Mythic is the real target"
+      },
+      {
+        "mistake": "Ignoring Amulet lethality",
+        "correction": "Lethality directly impacts kill count & battle outcome in SvS"
+      },
+      {
+        "mistake": "Over-gearing rally joiners",
+        "correction": "Joiner hero gear barely matters - only 1 expedition skill contributes. Chief Gear still fully applies."
+      },
+      {
+        "mistake": "Dumping hero gear into Gen 1 heroes too early",
+        "correction": "Generation risk - heroes get outclassed. Gear on retired hero = dead capital."
+      },
+      {
+        "mistake": "Neglecting Ring/Amulet because heroes feel stronger",
+        "correction": "Chief Gear multiplies ALL damage; hero gear is narrow. Ring/Amulet first always."
+      },
+      {
+        "mistake": "Treating hero gear and chief gear as equal systems",
+        "correction": "Chief Gear = universal multiplier (always high ROI). Hero Gear = conditional amplifier (context-dependent ROI)."
+      }
+    ],
+    "sources": ["Whiteout Survival Wiki - Chief Gear", "Whiteout Survival Wiki - Chief Gear Upgrading & Forging", "Community optimization guides"]
+  }
+}

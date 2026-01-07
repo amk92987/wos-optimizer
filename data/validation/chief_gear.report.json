@@ -1,0 +1,36 @@
+{
+  "system": "chief_gear",
+  "generated_at": "2026-01-07T19:16:47.360203Z",
+  "ok": true,
+  "tiers_found": [
+    "red-0",
+    "red-1",
+    "red-2",
+    "red-3",
+    "red T1",
+    "red T1-1",
+    "red T1-2",
+    "red T1-3",
+    "red T2",
+    "red T2-1",
+    "red T2-2",
+    "red T2-3",
+    "red T3",
+    "red T3-1",
+    "red T3-2",
+    "red T3-3",
+    "red T4-0",
+    "red T4-1",
+    "red T4-2",
+    "red T4-3"
+  ],
+  "rows": 84,
+  "edges": 83,
+  "duplicates": [],
+  "missing_nodes": [],
+  "orphan_edges": [],
+  "integrity": {
+    "ok": true
+  },
+  "notes": []
+}

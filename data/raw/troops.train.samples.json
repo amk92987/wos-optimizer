@@ -1,0 +1,53 @@
+{
+  "source_id": "SRC_TROOP_CALCULATOR",
+  "retrieved_at": "2026-01-07T00:00:00Z",
+  "notes": [
+    "Per-troop training costs from One Chilled Gamer calculator",
+    "Costs are linear - multiply by quantity for batch costs",
+    "HOC = Hall of Chiefs, SvS = State of Power, KoI = King of Icefield",
+    "T11 shows HOC=0 in source (may not be eligible for Hall of Chiefs event)"
+  ],
+  "per_troop_costs": {
+    "infantry": [
+      {"tier": 1, "meat": 36, "wood": 27, "coal": 7, "iron": 2, "time_seconds": 12, "power": 3, "hoc_points": 90, "svs_points": 3, "koi_points": 1},
+      {"tier": 2, "meat": 58, "wood": 44, "coal": 10, "iron": 3, "time_seconds": 17, "power": 4, "hoc_points": 120, "svs_points": 4, "koi_points": 2},
+      {"tier": 3, "meat": 92, "wood": 69, "coal": 17, "iron": 4, "time_seconds": 24, "power": 6, "hoc_points": 180, "svs_points": 5, "koi_points": 3},
+      {"tier": 4, "meat": 120, "wood": 90, "coal": 21, "iron": 5, "time_seconds": 32, "power": 9, "hoc_points": 265, "svs_points": 8, "koi_points": 5},
+      {"tier": 5, "meat": 156, "wood": 117, "coal": 27, "iron": 6, "time_seconds": 44, "power": 13, "hoc_points": 385, "svs_points": 12, "koi_points": 7},
+      {"tier": 6, "meat": 186, "wood": 140, "coal": 33, "iron": 7, "time_seconds": 60, "power": 20, "hoc_points": 595, "svs_points": 18, "koi_points": 11},
+      {"tier": 7, "meat": 279, "wood": 210, "coal": 49, "iron": 11, "time_seconds": 83, "power": 28, "hoc_points": 830, "svs_points": 25, "koi_points": 16},
+      {"tier": 8, "meat": 558, "wood": 419, "coal": 98, "iron": 21, "time_seconds": 113, "power": 38, "hoc_points": 1130, "svs_points": 35, "koi_points": 23},
+      {"tier": 9, "meat": 1394, "wood": 1046, "coal": 244, "iron": 51, "time_seconds": 131, "power": 50, "hoc_points": 1485, "svs_points": 45, "koi_points": 30},
+      {"tier": 10, "meat": 2788, "wood": 2091, "coal": 488, "iron": 102, "time_seconds": 152, "power": 66, "hoc_points": 1960, "svs_points": 60, "koi_points": 39},
+      {"tier": 11, "meat": 6970, "wood": 5228, "coal": 1220, "iron": 253, "time_seconds": 180, "power": 80, "hoc_points": 0, "svs_points": 75, "koi_points": 49}
+    ],
+    "lancer": [
+      {"tier": 1, "meat": 32, "wood": 30, "coal": 7, "iron": 2, "time_seconds": 12, "power": 3, "hoc_points": 90, "svs_points": 3, "koi_points": 1},
+      {"tier": 2, "meat": 51, "wood": 48, "coal": 10, "iron": 3, "time_seconds": 17, "power": 4, "hoc_points": 120, "svs_points": 4, "koi_points": 2},
+      {"tier": 3, "meat": 81, "wood": 76, "coal": 16, "iron": 4, "time_seconds": 24, "power": 5, "hoc_points": 180, "svs_points": 5, "koi_points": 3},
+      {"tier": 4, "meat": 105, "wood": 99, "coal": 21, "iron": 5, "time_seconds": 32, "power": 9, "hoc_points": 265, "svs_points": 8, "koi_points": 5},
+      {"tier": 5, "meat": 136, "wood": 129, "coal": 27, "iron": 7, "time_seconds": 44, "power": 13, "hoc_points": 385, "svs_points": 12, "koi_points": 7},
+      {"tier": 6, "meat": 163, "wood": 154, "coal": 32, "iron": 8, "time_seconds": 60, "power": 20, "hoc_points": 595, "svs_points": 18, "koi_points": 11},
+      {"tier": 7, "meat": 244, "wood": 231, "coal": 48, "iron": 11, "time_seconds": 83, "power": 28, "hoc_points": 830, "svs_points": 25, "koi_points": 16},
+      {"tier": 8, "meat": 488, "wood": 461, "coal": 95, "iron": 22, "time_seconds": 113, "power": 38, "hoc_points": 1130, "svs_points": 35, "koi_points": 23},
+      {"tier": 9, "meat": 1220, "wood": 1151, "coal": 237, "iron": 55, "time_seconds": 131, "power": 50, "hoc_points": 1485, "svs_points": 45, "koi_points": 30},
+      {"tier": 10, "meat": 2440, "wood": 2301, "coal": 474, "iron": 109, "time_seconds": 152, "power": 66, "hoc_points": 1960, "svs_points": 60, "koi_points": 39},
+      {"tier": 11, "meat": 6099, "wood": 5751, "coal": 1185, "iron": 271, "time_seconds": 180, "power": 80, "hoc_points": 0, "svs_points": 75, "koi_points": 49}
+    ],
+    "marksman": [
+      {"tier": 1, "meat": 23, "wood": 34, "coal": 6, "iron": 2, "time_seconds": 12, "power": 3, "hoc_points": 90, "svs_points": 3, "koi_points": 1},
+      {"tier": 2, "meat": 36, "wood": 54, "coal": 9, "iron": 4, "time_seconds": 17, "power": 4, "hoc_points": 120, "svs_points": 4, "koi_points": 2},
+      {"tier": 3, "meat": 58, "wood": 86, "coal": 15, "iron": 5, "time_seconds": 24, "power": 5, "hoc_points": 180, "svs_points": 5, "koi_points": 3},
+      {"tier": 4, "meat": 75, "wood": 111, "coal": 19, "iron": 6, "time_seconds": 32, "power": 9, "hoc_points": 265, "svs_points": 8, "koi_points": 5},
+      {"tier": 5, "meat": 97, "wood": 144, "coal": 24, "iron": 8, "time_seconds": 44, "power": 13, "hoc_points": 385, "svs_points": 12, "koi_points": 7},
+      {"tier": 6, "meat": 117, "wood": 173, "coal": 29, "iron": 10, "time_seconds": 60, "power": 20, "hoc_points": 595, "svs_points": 18, "koi_points": 11},
+      {"tier": 7, "meat": 175, "wood": 258, "coal": 44, "iron": 14, "time_seconds": 83, "power": 28, "hoc_points": 830, "svs_points": 25, "koi_points": 16},
+      {"tier": 8, "meat": 349, "wood": 516, "coal": 87, "iron": 28, "time_seconds": 113, "power": 38, "hoc_points": 1130, "svs_points": 35, "koi_points": 23},
+      {"tier": 9, "meat": 872, "wood": 1290, "coal": 217, "iron": 70, "time_seconds": 131, "power": 50, "hoc_points": 1485, "svs_points": 45, "koi_points": 30},
+      {"tier": 10, "meat": 1740, "wood": 2579, "coal": 433, "iron": 140, "time_seconds": 152, "power": 66, "hoc_points": 1960, "svs_points": 60, "koi_points": 39},
+      {"tier": 11, "meat": 4357, "wood": 6448, "coal": 1081, "iron": 349, "time_seconds": 180, "power": 80, "hoc_points": 0, "svs_points": 75, "koi_points": 49}
+    ]
+  },
+  "sample_quantities": [100, 500, 1000, 5000, 10000],
+  "tiers_for_edges": [6, 7, 8, 9, 10, 11]
+}

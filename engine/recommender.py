@@ -4,9 +4,10 @@ Prioritizes upgrades based on user's goals and current hero states.
 
 VERIFIED MECHANICS (from WOS_REFERENCE.md):
 - Rally Leader: 3 heroes provide 9 expedition skills (all right-side skills)
-- Rally Joiner: Only FIRST hero's TOP-RIGHT expedition skill contributes
-- Best Attack Joiner: Jessie (Stand of Arms: +25% DMG dealt all troops)
-- Best Garrison Joiner: Sergey (Defenders' Edge: -20% DMG taken all troops)
+- Rally Joiner: Only LEFTMOST hero's top-right expedition skill contributes
+- Best Attack Joiner: Jessie (Stand of Arms: +5/10/15/20/25% DMG dealt per level)
+- Best Garrison Joiner: Sergey (Defenders' Edge: +4/8/12/16/20% DMG reduction per level)
+- Top 4 highest SKILL LEVEL expedition skills from all joiners apply
 - Combat Order: Infantry → Lancers → Marksmen
 """
 
@@ -49,19 +50,21 @@ class Recommendation:
         }
 
 
-# Verified joiner hero data
+# Verified joiner hero data (skill scaling per level 1-5)
 JOINER_HEROES = {
     'attack': {
         'Jessie': {
             'skill_name': 'Stand of Arms',
-            'effect': '+25% DMG dealt (all troops)',
+            'scaling': [5, 10, 15, 20, 25],  # % DMG dealt per level
+            'effect': '+5/10/15/20/25% DMG dealt (all troops)',
             'reason': 'Best attack joiner - affects ALL damage types including skills, pets, teammates'
         }
     },
     'garrison': {
         'Sergey': {
             'skill_name': 'Defenders\' Edge',
-            'effect': '-20% DMG taken (all troops)',
+            'scaling': [4, 8, 12, 16, 20],  # % DMG reduction per level
+            'effect': '+4/8/12/16/20% DMG reduction (all troops)',
             'reason': 'Best garrison joiner - universal damage reduction'
         }
     }
@@ -382,7 +385,7 @@ class RecommendationEngine:
                     current_value=0,
                     target_value=1,
                     priority_score=0.9 * attack_priority,
-                    reason="UNLOCK JESSIE: Best attack joiner. Her top-right skill (+25% DMG dealt) applies when joining rallies. Only this skill matters as joiner!",
+                    reason="UNLOCK JESSIE: Best attack joiner. Her top-right skill (+5-25% DMG dealt, scales with level) applies when you join rallies in leftmost slot.",
                     category="high"
                 ))
             else:
@@ -398,7 +401,7 @@ class RecommendationEngine:
                                 current_value=exp_skill,
                                 target_value=5,
                                 priority_score=0.85 * attack_priority,
-                                reason=f"MAX JESSIE'S EXPEDITION SKILL: Her Stand of Arms (+{exp_skill * 5}% → +25% DMG) is the ONLY skill that matters when joining rallies!",
+                                reason=f"LEVEL JESSIE'S TOP-RIGHT SKILL: Stand of Arms is currently +{exp_skill * 5}% DMG → max +25% at level 5. Put her in leftmost slot when joining rallies!",
                                 category="high"
                             ))
                         break
@@ -412,7 +415,7 @@ class RecommendationEngine:
                     current_value=0,
                     target_value=1,
                     priority_score=0.8 * defense_priority,
-                    reason="UNLOCK SERGEY: Best garrison joiner. His top-right skill (-20% DMG taken) applies when reinforcing garrisons.",
+                    reason="UNLOCK SERGEY: Best garrison joiner. His top-right skill (-4-20% DMG taken, scales with level) applies when you reinforce in leftmost slot.",
                     category="high"
                 ))
             else:
@@ -427,7 +430,7 @@ class RecommendationEngine:
                                 current_value=exp_skill,
                                 target_value=5,
                                 priority_score=0.75 * defense_priority,
-                                reason=f"LEVEL SERGEY'S EXPEDITION SKILL: His Defenders' Edge (-{exp_skill * 4}% → -20% DMG taken) is key for garrison defense!",
+                                reason=f"LEVEL SERGEY'S TOP-RIGHT SKILL: Defenders' Edge is currently -{exp_skill * 4}% DMG taken → max -20% at level 5. Put him in leftmost slot when reinforcing!",
                                 category="medium"
                             ))
                         break

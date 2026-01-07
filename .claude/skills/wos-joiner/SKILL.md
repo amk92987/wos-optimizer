@@ -11,25 +11,27 @@ Helps users understand rally joiner mechanics and identify their best joiner her
 
 ## Critical Mechanic
 
-**When joining a rally, only your LEFTMOST hero's expedition skill is used!**
+**When joining a rally, only your LEFTMOST hero's TOP-RIGHT expedition skill is used!**
 
+- **Leftmost hero**: The first hero in your march lineup (slot 1)
+- **Top-right skill**: The expedition skill in the top-right position on the hero skill screen
 - Your other 2 heroes contribute NOTHING to rally buffs
 - Only the **top 4 highest SKILL LEVEL** expedition skills from all joiners apply
 - This is based on **skill level**, not player power
 - Member skills CAN stack if they're the same effect
 
-**IMPORTANT**: A high-level wrong skill can bump out a lower-level right skill. Example: A level 5 Sergey (defensive) would bump out a level 3 Jessie (+25% damage) - even though Jessie's skill is far more valuable for attacks.
+**IMPORTANT**: A high-level wrong skill can bump out a lower-level right skill. Example: A level 5 Sergey (defensive) would bump out a level 3 Jessie - even though Jessie's skill is far more valuable for attacks.
 
 ## Best Attack/Rally Joiner Heroes
 
-Heroes with expedition skills that buff rally damage:
+Heroes with top-right expedition skills that buff rally damage:
 
-| Hero | Gen | Skill Effect |
-|------|-----|--------------|
-| **Jeronimo** | 1 | Infantry ATK multiplier |
-| **Jessie** | 5 | +25% DMG dealt (all troops) |
-| **Jasser** | 7 | Rally damage buff |
-| **Seo-yoon** | 8 | Rally damage buff |
+| Hero | Gen | Skill (Top-Right) | Effect per Level |
+|------|-----|-------------------|------------------|
+| **Jessie** | 5 | Stand of Arms | +5/10/15/20/25% DMG dealt |
+| **Jeronimo** | 1 | Infantry ATK buff | Scales with level |
+| **Jasser** | 7 | Rally damage buff | Scales with level |
+| **Seo-yoon** | 8 | Rally damage buff | Scales with level |
 
 **Why Jessie is top tier**: Her "damage dealt" buff affects ALL damage types:
 - Normal attacks
@@ -39,11 +41,11 @@ Heroes with expedition skills that buff rally damage:
 
 ## Best Garrison/Defense Joiner Heroes
 
-Heroes with expedition skills that reduce damage taken:
+Heroes with top-right expedition skills that reduce damage taken:
 
-| Hero | Gen | Skill Effect |
-|------|-----|--------------|
-| **Sergey** | 1 | -20% DMG taken (all troops) |
+| Hero | Gen | Skill (Top-Right) | Effect per Level |
+|------|-----|-------------------|------------------|
+| **Sergey** | 1 | Defenders' Edge | -4/8/12/16/20% DMG taken |
 
 ## When to Join with TROOPS ONLY (No Heroes)
 
@@ -75,9 +77,11 @@ When analyzing joiner heroes:
 ## Investment Priority for Joiners
 
 Joiner heroes should have:
+- ✅ HIGH top-right expedition skill level (this determines if your skill gets used AND how strong it is!)
+  - Jessie: +5% per level (max +25% at level 5)
+  - Sergey: -4% per level (max -20% at level 5)
 - ✅ Functional gear (legendary okay)
-- ✅ Appropriate levels
-- ✅ HIGH expedition skill levels (this determines if your skill gets used!)
+- ✅ Appropriate hero levels
 - ❌ NOT mythic gear
 - ❌ NOT premium resources (Essence Stones, Mithril)
 - ❌ NOT priority over main heroes

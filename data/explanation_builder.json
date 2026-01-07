@@ -1,0 +1,293 @@
+{
+  "_meta": {
+    "description": "Explanation Builder Spec - inputs/outputs for recommendation explanations",
+    "tone": "slightly_spicy",
+    "show_numbers": true,
+    "version": "1.0"
+  },
+
+  "input_schema": {
+    "request": {
+      "context": "rally_joiner | rally_leader | field_pvp | garrison | global | economy | presets",
+      "event_id": "event_svs | event_bear | event_cj | event_castle | null",
+      "spender_profile_id": "spender_f2p | spender_low | spender_medium | spender_whale",
+      "goal": "maximize_damage | maximize_survival | balanced",
+      "player_state": {
+        "server_generation": "integer (1-9+)",
+        "heroes_owned": ["hero_id array"],
+        "hero_skill_levels": {
+          "hero_id": { "skill_id": "level (1-5)" }
+        },
+        "chief_gear": {
+          "ring_quality": "common | uncommon | rare | epic | legendary | mythic",
+          "amulet_quality": "quality tier"
+        }
+      }
+    },
+    "engine_output": {
+      "recommendations": [
+        {
+          "recommendation_id": "string",
+          "type": "hero_choice | gear_priority | troop_ratio | warning",
+          "hero_id": "optional hero_id",
+          "hero_skill_id": "optional skill_id",
+          "score": "0.0-1.0",
+          "score_components": {
+            "component_name": "0.0-1.0"
+          },
+          "applied_rules": ["rule_id array"]
+        }
+      ]
+    },
+    "knowledge_base": {
+      "claims": "array of claim objects with claim_id, type, text, evidence_source_ids",
+      "sources": "array of source objects with id, title, type, retrieved_at"
+    }
+  },
+
+  "output_schema": {
+    "recommendation_id": "string",
+    "title": "string - action-oriented title",
+    "context": "string - which context this applies to",
+    "event_id": "optional event_id",
+    "confidence": {
+      "grade": "A | B | C | D",
+      "score": "0.0-1.0",
+      "basis": ["mechanic", "verified_data", "context", "economy", "meta_labeled", "process"]
+    },
+    "summary_one_liner": "string - slightly spicy, includes numbers when available",
+    "why_this": "string - fuller explanation paragraph",
+    "reasons": [
+      {
+        "rank": "integer (1 = most important)",
+        "type": "mechanic | data | context | economy | meta",
+        "claim": "string - the factual claim",
+        "evidence_source_ids": ["source_id array"],
+        "impact": "high | medium | low"
+      }
+    ],
+    "tradeoffs": ["string array - honest downsides/caveats"],
+    "assumptions": ["string array - what must be true for this to apply"],
+    "next_actions": ["string array - specific action steps"],
+    "scoring_breakdown": {
+      "raw_score": "float",
+      "components": [
+        {
+          "name": "string",
+          "weight": "float",
+          "value": "float",
+          "contribution": "float (weight * value)"
+        }
+      ]
+    }
+  },
+
+  "builder_algorithm": {
+    "step_a": {
+      "name": "Collect facts the engine used",
+      "actions": [
+        "applied_rules[] -> convert into mechanic claims",
+        "hero_skill_id, gear_slot, etc. -> convert into data claims",
+        "context/event/spender -> add context/economy claims"
+      ]
+    },
+    "step_b": {
+      "name": "Rank reasons by impact",
+      "priority_order": [
+        "1. mechanic (hard rules)",
+        "2. data (specific skills/stats)",
+        "3. context (mode/event logic)",
+        "4. economy (spender constraints)",
+        "5. meta (community consensus; always labeled)"
+      ]
+    },
+    "step_c": {
+      "name": "Build text from templates",
+      "templates": [
+        "Joiner hero choice template",
+        "Leader hero choice template",
+        "Gear priority template",
+        "Don't do this warning template"
+      ]
+    },
+    "step_d": {
+      "name": "Confidence scoring",
+      "formula": "confidence_score = 0.55*(mechanic_coverage) + 0.35*(data_coverage) + 0.10*(meta_coverage)",
+      "coverage_definition": "0..1 based on whether each claim has evidence_source_ids",
+      "grade_mapping": {
+        "A": ">= 0.90",
+        "B": "0.80 - 0.89",
+        "C": "0.65 - 0.79",
+        "D": "< 0.65"
+      },
+      "honesty_rule": "meta-only recs can't get an A"
+    }
+  },
+
+  "examples": {
+    "1_attack_joiner_jessie": {
+      "recommendation_id": "rec_joiner_attack_jessie",
+      "title": "Use Jessie as your attack rally joiner",
+      "context": "rally_joiner",
+      "confidence": { "grade": "A", "score": 0.92, "basis": ["mechanic", "verified_data"] },
+      "summary_one_liner": "Joiners only apply one top-right skill, and Jessie's top-right boosts all-troops damage—ideal for offense.",
+      "reasons": [
+        { "rank": 1, "type": "mechanic", "claim": "Joiners contribute only the first hero's top-right expedition skill.", "evidence_source_ids": ["SRC_HELP_RALLY_MEMBER_SKILLS", "SRC_WIKI_RALLY_BUFF_GUIDE"], "impact": "high" },
+        { "rank": 2, "type": "data", "claim": "Jessie's top-right expedition skill increases damage dealt for all troops (+5/10/15/20/25% per level).", "evidence_source_ids": ["SRC_WIKI_JESSIE"], "impact": "high" }
+      ],
+      "tradeoffs": ["Jessie hero gear has low rally ROI; skill level matters more than gear for joiner value."],
+      "next_actions": ["Put Jessie in slot #1 when joining attack rallies.", "Prioritize leveling Jessie's top-right expedition skill."]
+    },
+
+    "2_defense_joiner_sergey": {
+      "recommendation_id": "rec_joiner_defense_sergey",
+      "title": "Use Sergey as your defense/garrison rally joiner",
+      "context": "rally_joiner",
+      "confidence": { "grade": "A", "score": 0.90, "basis": ["mechanic", "verified_data"] },
+      "summary_one_liner": "For defense, carry the best damage-taken reduction top-right skill—Sergey is a top option (-4/8/12/16/20% per level).",
+      "reasons": [
+        { "rank": 1, "type": "mechanic", "claim": "Joiners contribute only the first hero's top-right expedition skill.", "evidence_source_ids": ["SRC_HELP_RALLY_MEMBER_SKILLS", "SRC_WIKI_RALLY_BUFF_GUIDE"], "impact": "high" },
+        { "rank": 2, "type": "data", "claim": "Sergey's top-right expedition skill reduces damage taken for all troops.", "evidence_source_ids": ["SRC_WIKI_SERGEY"], "impact": "high" }
+      ],
+      "tradeoffs": ["If your state uses different defense joiner priorities, this can change—use your app's event presets to override."],
+      "next_actions": ["Put Sergey in slot #1 when joining defensive rallies.", "Level Sergey's top-right expedition skill."]
+    },
+
+    "3_rally_leader_jeronimo": {
+      "recommendation_id": "rec_leader_jeronimo",
+      "title": "Use Jeronimo as rally leader for offensive rallies",
+      "context": "rally_leader",
+      "confidence": { "grade": "A", "score": 0.91, "basis": ["mechanic", "verified_data"] },
+      "summary_one_liner": "Leaders provide 9 expedition skills; Jeronimo has multiple all-troops offensive effects that scale the whole rally.",
+      "reasons": [
+        { "rank": 1, "type": "mechanic", "claim": "Rally leaders apply a full set of expedition skills from their selected heroes (9 total: 3 heroes x 3 skills).", "evidence_source_ids": ["SRC_WIKI_RALLY_BUFF_GUIDE"], "impact": "high" },
+        { "rank": 2, "type": "data", "claim": "Jeronimo's expedition kit includes all-troops offensive boosts (damage dealt / attack increases).", "evidence_source_ids": ["SRC_WIKI_JERONIMO"], "impact": "high" }
+      ],
+      "tradeoffs": ["If you rarely lead rallies, Jeronimo's ROI shifts toward field PvP/solo rather than rally optimization."],
+      "next_actions": ["Use Jeronimo in your rally-leading march when available.", "Prioritize chief gear and leader-hero gear over joiner gearing."]
+    },
+
+    "4_warning_joiner_gear_low_roi": {
+      "recommendation_id": "rec_warn_joiner_gear_low_roi",
+      "title": "Avoid heavy hero-gear investment on rally joiners",
+      "context": "rally_joiner",
+      "confidence": { "grade": "A", "score": 0.93, "basis": ["mechanic"] },
+      "summary_one_liner": "Joiners mainly contribute a single skill—not their hero damage—so hero gear has low rally ROI.",
+      "reasons": [
+        { "rank": 1, "type": "mechanic", "claim": "Joiner contribution is limited to one top-right expedition skill (with a cap of 4 selected member skills total).", "evidence_source_ids": ["SRC_HELP_RALLY_MEMBER_SKILLS", "SRC_WIKI_RALLY_BUFF_GUIDE"], "impact": "high" }
+      ],
+      "tradeoffs": ["If the hero is also your main field PvP carry, gear can still be worth it—but for field performance, not rally join value."],
+      "next_actions": ["Prioritize chief Ring/Amulet upgrades first.", "Only gear a joiner hero if they are also a top field PvP hero in your roster."]
+    },
+
+    "5_chief_gear_ring_first": {
+      "recommendation_id": "rec_chiefgear_ring_first",
+      "title": "Upgrade Chief Gear Ring first",
+      "context": "global",
+      "confidence": { "grade": "B", "score": 0.86, "basis": ["verified_data", "economy"] },
+      "summary_one_liner": "Troop Attack applies everywhere, to all troops—Ring upgrades are the most universal power gain.",
+      "reasons": [
+        { "rank": 1, "type": "data", "claim": "Chief Gear Ring provides global Troop Attack bonus to all classes.", "evidence_source_ids": ["SRC_WIKI_CHIEF_GEAR"], "impact": "high" },
+        { "rank": 2, "type": "economy", "claim": "Universal multipliers produce higher ROI for limited-resource players.", "evidence_source_ids": ["SRC_INTERNAL_ROI_RULES"], "impact": "medium" }
+      ],
+      "tradeoffs": ["If your immediate goal is defense-only events, infantry defensive pieces can be temporarily prioritized—but you lose general ROI."],
+      "next_actions": ["Upgrade Ring → Amulet before spreading resources across all pieces."]
+    },
+
+    "6_chief_gear_amulet_second": {
+      "recommendation_id": "rec_chiefgear_amulet_second",
+      "title": "Upgrade Chief Gear Amulet second",
+      "context": "global",
+      "confidence": { "grade": "B", "score": 0.84, "basis": ["verified_data", "meta_labeled"] },
+      "summary_one_liner": "Amulet stats (Lethality/Damage scaling) are highly impactful in PvP/SvS outcomes.",
+      "reasons": [
+        { "rank": 1, "type": "data", "claim": "Chief Gear Amulet provides Lethality/Damage bonuses.", "evidence_source_ids": ["SRC_WIKI_CHIEF_GEAR"], "impact": "high" },
+        { "rank": 2, "type": "meta", "claim": "Competitive play commonly prioritizes lethality/damage scaling early for PvP/SvS.", "evidence_source_ids": ["SRC_COMMUNITY_GUIDE_1", "SRC_COMMUNITY_GUIDE_2"], "impact": "medium" }
+      ],
+      "tradeoffs": ["If you are focused on pure PvE (non-SvS), the relative value may be lower than Troop Attack."],
+      "next_actions": ["After Ring, push Amulet before evenly upgrading defensive pieces."]
+    },
+
+    "7_field_pvp_molly_dps": {
+      "recommendation_id": "rec_field_molly_dps",
+      "title": "Use Molly as a field PvP DPS carry (not as a rally joiner)",
+      "context": "field_pvp",
+      "confidence": { "grade": "B", "score": 0.82, "basis": ["context", "data_required"] },
+      "summary_one_liner": "Hero gear matters most in field fights; Molly's value is personal damage, not rally scaling.",
+      "reasons": [
+        { "rank": 1, "type": "context", "claim": "Field PvP favors personal DPS kits and hero gear more than rally join mechanics.", "evidence_source_ids": ["SRC_INTERNAL_CONTEXT_WEIGHTS"], "impact": "high" },
+        { "rank": 2, "type": "data", "claim": "Molly's kit is damage-focused (Lancer DPS role) rather than rally-buff focused.", "evidence_source_ids": ["SRC_WIKI_MOLLY"], "impact": "medium" }
+      ],
+      "tradeoffs": ["If your primary play is rally joining, a joiner-skill carrier provides more rally value than a DPS hero."],
+      "next_actions": ["Gear Molly for field PvP only if she is one of your top-used field marches.", "Use Jessie/Sergey as joiners instead."]
+    },
+
+    "8_f2p_hero_gear_limit": {
+      "recommendation_id": "rec_f2p_limit_hero_gear",
+      "title": "F2P: limit hero gear to your single best field carry",
+      "context": "economy",
+      "confidence": { "grade": "B", "score": 0.80, "basis": ["economy"] },
+      "summary_one_liner": "With limited materials, spreading hero gear across multiple heroes slows power growth more than it helps.",
+      "reasons": [
+        { "rank": 1, "type": "economy", "claim": "Low resource velocity increases the penalty of inefficient upgrades.", "evidence_source_ids": ["SRC_INTERNAL_SPENDER_RULES"], "impact": "high" }
+      ],
+      "tradeoffs": ["If you lead rallies frequently (rare for strict F2P), a leader hero may compete with field carry for gearing."],
+      "next_actions": ["Pick one primary field DPS hero for hero gear.", "Prioritize chief Ring/Amulet before second hero gearing."]
+    },
+
+    "9_troop_ratio_default_meta": {
+      "recommendation_id": "rec_ratio_default_attack_meta",
+      "title": "Default attack ratio preset: 50/20/30",
+      "context": "presets",
+      "confidence": { "grade": "C", "score": 0.72, "basis": ["meta_labeled"] },
+      "summary_one_liner": "50/20/30 (Infantry/Lancer/Marksman) is a common community baseline, but optimal ratios vary by heroes, opponent, and event.",
+      "reasons": [
+        { "rank": 1, "type": "meta", "claim": "Community guides commonly use 50/20/30 as a general-purpose default.", "evidence_source_ids": ["SRC_COMMUNITY_RATIO_GUIDE_1", "SRC_COMMUNITY_RATIO_GUIDE_2"], "impact": "medium" }
+      ],
+      "tradeoffs": ["If you have strong class-specific buffs or are targeting a specific counter, shift ratios accordingly."],
+      "next_actions": ["Use this as a baseline only.", "Let the optimizer adjust based on your hero skill mix and event type."]
+    },
+
+    "10_patch_resilience_notice": {
+      "recommendation_id": "rec_patch_resilience_notice",
+      "title": "This recommendation may change after balance updates",
+      "context": "system_notice",
+      "confidence": { "grade": "A", "score": 0.90, "basis": ["process"] },
+      "summary_one_liner": "Your app uses sources + rules; if skill values or rally rules change, this recommendation will update automatically.",
+      "reasons": [
+        { "rank": 1, "type": "mechanic", "claim": "Recommendations are derived from stored rules and verified skill data sources.", "evidence_source_ids": ["SRC_DATA_PIPELINE_DOC"], "impact": "high" }
+      ],
+      "next_actions": ["Refresh sources for hero skills after each patch note update.", "Recompute recommendations when any source entry changes."]
+    }
+  },
+
+  "ux_pattern": {
+    "description": "Recommended card layout for each recommendation",
+    "layers": [
+      { "level": 1, "name": "One-liner", "visibility": "always_visible" },
+      { "level": 2, "name": "Why", "visibility": "expand" },
+      { "level": 3, "name": "Tradeoffs", "visibility": "expand" },
+      { "level": 4, "name": "Show evidence", "visibility": "expand", "content": "sourceRef.title list" },
+      { "level": 5, "name": "How scored", "visibility": "optional_nerd_view" }
+    ],
+    "rationale": "Keeps casual players engaged and hardcore players trusting"
+  },
+
+  "source_id_mapping": {
+    "SRC_HELP_RALLY_MEMBER_SKILLS": "Century Games Help Center: Rally member skills (stacking / selection limits)",
+    "SRC_WIKI_RALLY_BUFF_GUIDE": "WoS Wiki: Advanced Rally Guide",
+    "SRC_WIKI_JESSIE": "WoS Wiki: Jessie Hero Page",
+    "SRC_WIKI_SERGEY": "WoS Wiki: Sergey Hero Page",
+    "SRC_WIKI_JERONIMO": "WoS Wiki: Jeronimo Hero Page",
+    "SRC_WIKI_MOLLY": "WoS Wiki: Molly Hero Page",
+    "SRC_WIKI_CHIEF_GEAR": "WoS Wiki: Chief Gear Guide",
+    "SRC_INTERNAL_ROI_RULES": "Internal: ROI calculation rules",
+    "SRC_INTERNAL_SPENDER_RULES": "Internal: Spender profile constraints",
+    "SRC_INTERNAL_CONTEXT_WEIGHTS": "Internal: Combat context weight definitions",
+    "SRC_COMMUNITY_GUIDE_1": "BlueStacks WoS Guide",
+    "SRC_COMMUNITY_GUIDE_2": "LootBar WoS Guide",
+    "SRC_COMMUNITY_RATIO_GUIDE_1": "A Jack Of Everything: Troop Ratios",
+    "SRC_COMMUNITY_RATIO_GUIDE_2": "One Chilled Gamer: Troop Formation",
+    "SRC_DATA_PIPELINE_DOC": "Internal: Data pipeline documentation"
+  }
+}

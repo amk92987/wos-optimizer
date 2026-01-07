@@ -1,0 +1,175 @@
+{
+  "_meta": {
+    "description": "Confidence Scoring System - strict, explainable, anti-hallucination",
+    "definition": "How strongly the recommendation is supported by verifiable mechanics + cited data, given patch risk and source quality",
+    "version": "1.0"
+  },
+
+  "grade_mapping": {
+    "A": { "min": 0.90, "max": 1.00, "label": "High confidence", "description": "Mechanics + verified values" },
+    "B": { "min": 0.80, "max": 0.89, "label": "Good confidence", "description": "Strong evidence, minor gaps" },
+    "C": { "min": 0.65, "max": 0.79, "label": "Moderate confidence", "description": "Community meta / assumptions / patch-sensitive" },
+    "D": { "min": 0.50, "max": 0.64, "label": "Low confidence", "description": "Limited evidence" },
+    "E": { "min": 0.00, "max": 0.49, "label": "Very low confidence", "description": "Speculative" }
+  },
+
+  "claim_types": {
+    "mechanic": { "description": "Rules of the game (leader vs joiner, stacking cap)", "weight": 0.55 },
+    "data": { "description": "Numeric values (skill %, piece stats)", "weight": 0.30 },
+    "context": { "description": "Event logic (Bear vs SvS vs CJ)", "weight": 0.10 },
+    "economy": { "description": "Spender constraints (resource velocity)", "weight": 0.03 },
+    "meta": { "description": "Community consensus (ratios, tier lists)", "weight": 0.02 }
+  },
+
+  "scoring_formula": {
+    "final_score": "CONF = clamp01(BASE_SUPPORT * SOURCE_QUALITY_FACTOR * RECENCY_FACTOR * CONSENSUS_FACTOR * COMPLETENESS_FACTOR)",
+
+    "components": {
+      "base_support": {
+        "formula": "BASE_SUPPORT = 0.55*M + 0.30*D + 0.10*C + 0.03*E + 0.02*T",
+        "variables": {
+          "M": "mechanic_coverage (0-1)",
+          "D": "data_coverage (0-1)",
+          "C": "context_coverage (0-1)",
+          "E": "economy_coverage (0-1)",
+          "T": "meta_coverage (0-1)"
+        },
+        "behavior": "If meta-only (no mechanics, no data), cannot score high"
+      },
+
+      "source_quality_factor": {
+        "formula": "SOURCE_QUALITY_FACTOR = 0.85 + 0.15*Q",
+        "Q_definition": "Average quality across all claims used",
+        "quality_scores": {
+          "official_help_center": 1.00,
+          "official_patch_notes": 1.00,
+          "wos_wiki": 0.90,
+          "reputable_creator_guide": 0.75,
+          "community_posts": 0.60,
+          "unknown_uncited": 0.00
+        },
+        "bounds": "0.85 to 1.00 - doesn't nuke good recs but rewards official sources"
+      },
+
+      "recency_factor": {
+        "formula": "claim_recency = 1 - 0.35*age_ratio, where age_ratio = min(1, age_days / max_age_days)",
+        "max_age_by_type": {
+          "mechanics": 365,
+          "data_values": 180,
+          "meta": 60
+        },
+        "behavior": "Old meta penalized hard; mechanics barely affected"
+      },
+
+      "consensus_factor": {
+        "scores": {
+          "3+_sources_agree": 1.00,
+          "2_sources_agree": 0.92,
+          "1_source_only": 0.80,
+          "sources_conflict": 0.60
+        }
+      },
+
+      "completeness_factor": {
+        "all_required_claims_have_evidence": 1.00,
+        "missing_any_required_claim": 0.70
+      }
+    }
+  },
+
+  "required_claims_by_recommendation_type": {
+    "hero_choice_rally_joiner": {
+      "required": [
+        { "claim_type": "mechanic", "claim_id": "joiner_skill_rule", "description": "Joiner only applies top-right skill" },
+        { "claim_type": "mechanic", "claim_id": "max_joiner_skills_selected", "description": "Top 4 joiner skills selected" },
+        { "claim_type": "data", "claim_id": "hero_top_right_skill", "description": "Chosen hero's top-right skill definition + value" }
+      ]
+    },
+    "hero_choice_rally_leader": {
+      "required": [
+        { "claim_type": "mechanic", "claim_id": "leader_skill_count", "description": "Leader provides 9 expedition skills" },
+        { "claim_type": "data", "claim_id": "leader_hero_expedition_kit", "description": "At least one data claim per selected leader hero" }
+      ]
+    },
+    "gear_priority_chief": {
+      "required": [
+        { "claim_type": "mechanic", "claim_id": "chief_gear_global", "description": "Chief gear applies globally" },
+        { "claim_type": "data", "claim_id": "gear_stat_affected", "description": "The stat the gear piece affects" }
+      ],
+      "optional_meta": "community_prioritizes_ring_amulet"
+    },
+    "troop_ratio_preset": {
+      "required": [
+        { "claim_type": "meta", "claim_id": "ratio_source", "description": "Must be meta-labeled" }
+      ],
+      "max_grade": "C",
+      "notes": "Always shows it's a baseline that varies"
+    }
+  },
+
+  "anti_hallucination_guardrails": {
+    "rule_1_no_evidence_no_claim": {
+      "description": "If evidence_source_ids is empty, the claim cannot be emitted"
+    },
+    "rule_2_meta_labeling_mandatory": {
+      "description": "Any claim from non-authoritative sources gets type=meta",
+      "caps": {
+        "meta_contributes_meaningfully": "B",
+        "meta_only": "C"
+      }
+    },
+    "rule_3_staleness_auto_downgrades": {
+      "description": "If meta sources are older than 60 days, auto cap at C"
+    }
+  },
+
+  "output_format": {
+    "high_confidence_example": {
+      "confidence": {
+        "grade": "A",
+        "score": 0.93,
+        "basis": ["mechanic", "verified_data"],
+        "penalties": [],
+        "notes": "Supported by rally mechanics + verified expedition skill data."
+      }
+    },
+    "low_confidence_example": {
+      "confidence": {
+        "grade": "C",
+        "score": 0.71,
+        "basis": ["meta_labeled"],
+        "penalties": ["meta_only", "stale_sources"],
+        "notes": "This is a common community baseline and may vary by state/event/opponent."
+      }
+    }
+  },
+
+  "scoring_examples": {
+    "jessie_attack_joiner": {
+      "evidence": {
+        "mechanic_joiner_top_right": { "sources": ["official", "wiki"], "status": "verified" },
+        "data_jessie_skill": { "sources": ["wiki"], "status": "verified" },
+        "recency": "good",
+        "consensus": "2+ sources"
+      },
+      "coverage": { "M": 1.0, "D": 1.0, "C": 0.8, "T": 0.2 },
+      "expected_grade": "A (0.90+)"
+    },
+    "default_ratio_50_20_30": {
+      "evidence": {
+        "mostly_meta": true,
+        "low_mechanic_data_grounding": true,
+        "patch_context_dependent": true
+      },
+      "coverage": { "M": 0.2, "D": 0.1, "T": 0.9 },
+      "expected_grade": "C or D"
+    }
+  },
+
+  "implementation_checklist": [
+    "Add required_claims_by_recommendation_type to engine",
+    "Implement claim_evidence_validator",
+    "Implement confidence_score(recommendation) function",
+    "Show confidence badge + 'why confidence' dropdown in UI"
+  ]
+}

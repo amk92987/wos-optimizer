@@ -510,7 +510,7 @@
     },
     {
       "name": "Jessie",
-      "generation": 5,
+      "generation": 1,
       "hero_class": "Marksman",
       "rarity": "Legendary",
       "tier_overall": "A",
@@ -755,7 +755,7 @@
       "image_filename": "blanchette.png",
       "how_to_obtain": "Lucky Wheel",
       "notes": "Best damage dealer in the game. High base stats, accurate attacks. F2P friendly.",
-      "best_use": "BEST MARKSMAN IN GAME. Highest DPS, excellent in all modes. F2P friendly unlock. Priority investment once available.",
+      "best_use": "BEST MARKSMAN IN GAME. Highest damage output, excellent in all modes. F2P friendly unlock. Priority investment once available.",
       "exploration_skill_1": "Perfect Accuracy",
       "exploration_skill_2": "Elite Training",
       "expedition_skill_1": "Devastating Volley",

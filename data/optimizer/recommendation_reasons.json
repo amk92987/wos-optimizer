@@ -1,0 +1,228 @@
+{
+  "description": "Explanations and reasoning for upgrade recommendations",
+  "version": "1.0",
+  "generated_at": "2026-01-07T00:00:00Z",
+
+  "system_reasons": {
+    "furnace": {
+      "short": "Unlocks all other systems",
+      "detailed": "Furnace level gates everything else in the game. Higher Furnace unlocks new buildings, higher troop tiers, and eventually Fire Crystal content at L30.",
+      "priority_by_phase": {
+        "early_game": "Critical - rush to L19 for Daybreak Island",
+        "mid_game": "Critical - rush to L30 for FC unlock",
+        "late_game": "High - FC progression unlocks higher tiers",
+        "endgame": "Medium - diminishing returns after FC5"
+      }
+    },
+    "war_academy": {
+      "short": "Massive troop training efficiency",
+      "detailed": "War Academy reduces troop training time and cost. At high levels, you train the same troops in half the time with fewer resources. Essential for rebuilding after SvS losses.",
+      "priority_by_phase": {
+        "late_game": "Critical - first FC investment after Furnace",
+        "endgame": "High - max efficiency at FC10"
+      },
+      "spending_notes": {
+        "f2p": "Focus here - training efficiency compounds over time",
+        "whale": "Still important but speedups reduce urgency"
+      }
+    },
+    "troops_train": {
+      "short": "Direct power increase",
+      "detailed": "Higher tier troops have better stats. T10+ troops significantly outperform lower tiers in combat. Training more troops = more power = better SvS performance.",
+      "priority_by_phase": {
+        "early_game": "Medium - limited by Furnace level",
+        "mid_game": "High - T8-T9 are solid",
+        "late_game": "Critical - T10 is the power tier",
+        "endgame": "Critical - T11 dominates"
+      }
+    },
+    "troops_promote": {
+      "short": "Convert existing troops to higher tier",
+      "detailed": "Promotion converts lower tier troops to higher tier without full training cost. More efficient than training from scratch when you have excess lower-tier troops.",
+      "priority_by_phase": {
+        "late_game": "High - convert T9 to T10",
+        "endgame": "High - convert T10 to T11"
+      }
+    },
+    "hero_gear_mastery": {
+      "short": "Combat stat multiplier",
+      "detailed": "Mastery Forging adds percentage bonuses to hero combat stats. Each level increases ATK, DEF, and HP. Benefits multiply with hero level and skills.",
+      "priority_by_phase": {
+        "late_game": "High - start after Mythic gear obtained",
+        "endgame": "High - push to L20 for max stats"
+      },
+      "spending_notes": {
+        "f2p": "Focus one hero at a time - partial mastery is inefficient",
+        "whale": "Can parallel multiple heroes"
+      }
+    },
+    "chief_gear": {
+      "short": "Passive stat bonuses",
+      "detailed": "Chief Gear provides always-on stat bonuses. Higher tiers give more stats but cost significantly more. Red-1 is a good stopping point for non-whales.",
+      "priority_by_phase": {
+        "mid_game": "Medium - gradual progression",
+        "late_game": "Medium - diminishing returns at high tiers"
+      },
+      "spending_notes": {
+        "f2p": "Stop at Red-0 or Red-1 - higher tiers are whale territory",
+        "whale": "Push to max for marginal gains"
+      }
+    },
+    "chief_charms": {
+      "short": "Additional stat layer",
+      "detailed": "Charms provide independent stat bonuses across 6 slots. L1-11 are accessible to everyone. L12-16 require Gen 7 state and Jewel Secrets.",
+      "priority_by_phase": {
+        "mid_game": "High - push all slots to L11",
+        "late_game": "Medium - wait for Gen 7 for L12+",
+        "endgame": "High - L12-16 for endgame stats"
+      },
+      "spending_notes": {
+        "f2p": "Max at L11 until Gen 7 state, then slow progress",
+        "whale": "L16 all slots is achievable"
+      }
+    },
+    "pets": {
+      "short": "Combat skills + passive bonuses",
+      "detailed": "Pets provide active combat skills (2-hour buffs) and passive stat bonuses. SSR pets have the best skills and highest level cap (100). Focus SSR pets first.",
+      "priority_by_phase": {
+        "mid_game": "Medium - start collection early",
+        "late_game": "Medium - SSR pets to L60+"
+      },
+      "spending_notes": {
+        "f2p": "L60 is efficient stopping point - L70+ costs spike",
+        "whale": "L100 SSR pets for max stats"
+      }
+    },
+    "daybreak_island": {
+      "short": "Combat buffs via Life Essence",
+      "detailed": "Tree of Life provides significant combat buffs (Health, Defense, Lethality). Requires wood investment via Dock. Buffs are always active once unlocked.",
+      "priority_by_phase": {
+        "mid_game": "High - rush Tree of Life L6 for Troops Health buff",
+        "late_game": "Medium - complete to L10 for Lethality buff"
+      }
+    },
+    "research": {
+      "short": "Permanent bonuses and unlocks",
+      "detailed": "Research provides permanent stat bonuses and unlocks features. Tool Enhancement reduces research time (critical). Economy research improves resource flow. Battle research gives power.",
+      "priority_by_phase": {
+        "early_game": "Critical - Tool Enhancement is top priority",
+        "mid_game": "Critical - Tool Enhancement VII is a milestone",
+        "late_game": "Medium - Battle research for power"
+      }
+    }
+  },
+
+  "recommendation_templates": {
+    "unlock_gate": {
+      "template": "Unlocking {system} at {requirement} opens {benefit}",
+      "examples": [
+        "Unlocking Daybreak Island at Furnace L19 opens combat buffs via Tree of Life",
+        "Unlocking FC content at Furnace L30 opens War Academy and advanced progression"
+      ]
+    },
+    "efficiency_milestone": {
+      "template": "{system} {level} provides {efficiency_gain} - {reason}",
+      "examples": [
+        "Tool Enhancement VII provides max research speed - critical milestone for all players",
+        "War Academy FC5 provides 40% training efficiency - huge long-term savings"
+      ]
+    },
+    "power_gain": {
+      "template": "{upgrade} gives {power} power for {cost} - {efficiency_rating} efficiency",
+      "examples": [
+        "T10 Infantry training gives 1,200 power per troop - high efficiency",
+        "Chief Charm L15 gives 124,000 power for 600 guides - medium efficiency"
+      ]
+    },
+    "combat_value": {
+      "template": "{upgrade} improves {stat} by {amount} - {combat_impact}",
+      "examples": [
+        "Hero Gear Mastery L10 improves all combat stats by 15% - significant for rally leads",
+        "Tree of Life L10 improves Troop Lethality by 5% - affects all troops in combat"
+      ]
+    },
+    "spending_gate": {
+      "template": "{upgrade} is {accessibility} for {profile} players - {reason}",
+      "examples": [
+        "Chief Gear Red-2+ is whale territory for F2P players - resource cost spikes exponentially",
+        "Charm L12-16 is accessible for dolphins+ - requires Jewel Secrets from events"
+      ]
+    }
+  },
+
+  "hero_lineup_reasons": {
+    "rally_attack": {
+      "context": "Attacking enemy castles, Bear Trap, Crazy Joe",
+      "key_principle": "Only the top 4 highest-LEVEL expedition skills from all joiners apply",
+      "best_heroes": [
+        {
+          "hero": "Jessie",
+          "skill": "Stand of Arms",
+          "effect": "+5/10/15/20/25% DMG dealt per level",
+          "reason": "Direct damage boost is the highest-value rally joiner skill"
+        },
+        {
+          "hero": "Jeronimo",
+          "skill": "Infantry ATK buff",
+          "effect": "Infantry attack boost scales with level",
+          "reason": "Boosts the most common troop type in rallies"
+        }
+      ],
+      "avoid": [
+        {
+          "hero": "Sergey",
+          "skill": "Defenders' Edge",
+          "effect": "-4/8/12/16/20% DMG taken",
+          "reason": "Defensive skill - wrong for attack rallies, can bump out damage skills"
+        }
+      ],
+      "no_hero_rule": "If you don't have a good attack joiner hero, send troops only to avoid bumping out someone else's valuable skill"
+    },
+    "rally_defense": {
+      "context": "Defending your castle, garrison reinforcement",
+      "key_principle": "Defensive skills reduce incoming damage",
+      "best_heroes": [
+        {
+          "hero": "Sergey",
+          "skill": "Defenders' Edge",
+          "effect": "-4/8/12/16/20% DMG taken per level",
+          "reason": "Direct damage reduction is the highest-value defensive skill"
+        }
+      ]
+    },
+    "exploration": {
+      "context": "Frozen Stages, PvE content",
+      "key_principle": "Exploration skills (left side) are used, not expedition skills",
+      "best_heroes": [
+        {
+          "hero": "Natalia",
+          "skill": "Healing/support",
+          "reason": "Sustain keeps team alive through long fights"
+        },
+        {
+          "hero": "Molly",
+          "skill": "AOE damage",
+          "reason": "Clears waves efficiently"
+        }
+      ]
+    },
+    "svs_march": {
+      "context": "State vs State combat marches",
+      "key_principle": "Your own expedition skills apply, plus formation bonuses",
+      "composition": {
+        "rally_lead": "Use your strongest heroes with maxed expedition skills",
+        "filler": "Use heroes that complement the rally lead's composition",
+        "solo": "Match hero class to your strongest troop type"
+      }
+    }
+  },
+
+  "why_not_reasons": {
+    "efficiency_too_low": "This upgrade's power gain per resource is below your efficiency threshold ({threshold}%). Consider higher-value options first.",
+    "not_unlocked": "This system unlocks at {requirement}. Focus on reaching that milestone first.",
+    "wrong_phase": "This upgrade is optimized for {target_phase} players. At your current phase ({current_phase}), prioritize {alternative} instead.",
+    "whale_only": "This upgrade is primarily accessible to heavy spenders. F2P/low spenders should focus on {alternative} for better value.",
+    "wrong_focus": "Your priority focus is {focus}. This upgrade benefits {other_focus} more. Consider switching focus or choosing {alternative}.",
+    "bottleneck_resource": "You're likely bottlenecked on {resource}. This upgrade requires significant {resource} investment. Consider {alternative} which uses {other_resource} instead."
+  }
+}

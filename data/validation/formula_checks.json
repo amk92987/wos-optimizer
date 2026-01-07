@@ -1,0 +1,21 @@
+{
+  "_meta": {
+    "description": "Test cases for validating formulas against table data",
+    "usage": "Formula engine must reproduce expected_cost within tolerance_pct"
+  },
+  "checks": [
+    {
+      "test_id": "chief_gear_red0_step1",
+      "system": "chief_gear",
+      "input": { "tier": "red-0", "step": 1 },
+      "expected_cost": {
+        "hardened_alloy": 12500,
+        "polishing_solution": 132,
+        "design_plan": 21,
+        "lunar_amber": 2
+      },
+      "tolerance_pct": 0.0,
+      "source_ids": ["SRC_WIKI_CHIEF_GEAR"]
+    }
+  ]
+}

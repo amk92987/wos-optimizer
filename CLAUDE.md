@@ -143,6 +143,23 @@ Quality levels with max gear levels:
 - **Marksman**: Ranged damage (Symbol: Bow) - Chief Gear: Belt, Shortstaff
 - **Lancer**: Balanced fighters (Symbol: Swords) - Chief Gear: Hat, Watch
 
+### Hero Skill System
+
+Each hero has two types of skills, visible on separate sides of the skill screen:
+
+**Exploration Skills (Left Side)**
+- Upgraded with **Exploration Manuals**
+- Used for PvE content (exploration, events)
+- Levels 1-5, equal % increase per level
+
+**Expedition Skills (Right Side)**
+- Upgraded with **Expedition Manuals**
+- Used for PvP content (rallies, garrison, SvS)
+- Levels 1-5, equal % increase per level
+- **Top-right skill** is specifically used when joining rallies
+
+**Manual Costs**: Increasing amount of manuals required per level upgrade.
+
 ### Priority System
 
 Users set priorities (1-5 scale) for:
@@ -156,22 +173,24 @@ The recommendation engine weights upgrades based on these priorities.
 
 ### Rally Joiner Mechanics
 
-**Critical mechanic**: When joining a rally, only the **leftmost hero's expedition skill** is used.
+**Critical mechanic**: When joining a rally, only the **leftmost hero's top-right expedition skill** is used.
+- **Leftmost hero**: First hero in your march lineup (slot 1)
+- **Top-right skill**: The expedition skill in top-right position on hero skill screen
 
 **Skill level determines priority**: Only the top 4 highest LEVEL expedition skills from all joiners apply to the rally. This is based on skill level, not player power.
 
-**Risk of wrong skills**: A high-level wrong skill (like Sergey's defensive skill at level 5) can bump out a lower-level valuable skill (like Jessie's +25% damage at level 3).
+**Risk of wrong skills**: A high-level wrong skill (like Sergey's defensive skill at level 5) can bump out a lower-level valuable skill (like Jessie's damage skill at level 3).
 
 **Best Attack Joiner Heroes** (for Bear Trap, Castle Attacks):
-| Hero | Gen | Skill Effect |
-|------|-----|--------------|
-| Jeronimo | 1 | Infantry ATK multiplier |
-| Jessie | 5 | +25% DMG dealt (all troops) |
+| Hero | Gen | Top-Right Skill | Effect per Level (1-5) |
+|------|-----|-----------------|------------------------|
+| Jessie | 5 | Stand of Arms | +5/10/15/20/25% DMG dealt |
+| Jeronimo | 1 | Infantry ATK buff | Scales with level |
 
 **Best Garrison Joiner Heroes** (for defense):
-| Hero | Gen | Skill Effect |
-|------|-----|--------------|
-| Sergey | 1 | -20% DMG taken (all troops) |
+| Hero | Gen | Top-Right Skill | Effect per Level (1-5) |
+|------|-----|-----------------|------------------------|
+| Sergey | 1 | Defenders' Edge | -4/8/12/16/20% DMG taken |
 
 **If you don't have the right joiner heroes**: Join with troops only (no heroes) to avoid bumping out someone else's valuable skill.
 
@@ -198,19 +217,153 @@ rm wos.db   # Unix
 streamlit run app.py
 ```
 
+## Optimizer Decision System
+
+The optimizer recommends upgrades based on player state, spending profile, and goals.
+
+### Player Settings (`data/optimizer/player_settings_schema.json`)
+
+**Required Inputs:**
+- `furnace_level` (1-30) - Determines game phase and unlocked systems
+- `furnace_fc_level` (optional) - FC progression like "FC3-0"
+- `state_age_days` - Unlocks time-gated content (pets at 55 days)
+- `spending_profile` - Affects efficiency thresholds and recommendations
+- `priority_focus` - svs_combat, balanced_growth, or economy_focus
+- `alliance_role` - rally_lead, filler, farmer, or casual
+
+**Spending Profiles:**
+| Profile | Monthly USD | Efficiency Threshold | Skip Whale Content |
+|---------|-------------|---------------------|-------------------|
+| f2p | $0 | 0.8 | Yes |
+| minnow | $5-30 | 0.7 | Yes |
+| dolphin | $30-100 | 0.5 | No |
+| orca | $100-500 | 0.3 | No |
+| whale | $500+ | 0.0 | No |
+
+### Game Phases (`data/optimizer/progression_phases.json`)
+
+| Phase | Furnace | Focus |
+|-------|---------|-------|
+| early_game | 1-18 | Rush to F19 for Daybreak, unlock Research |
+| mid_game | 19-29 | Rush to F30 for FC, Tool Enhancement VII, Charms L11 |
+| late_game | 30/FC1-FC4 | FC progression, War Academy, Hero Gear Mastery |
+| endgame | FC5+ | FC10 completion, Mastery L20, Charms L12-16 |
+
+### System Unlocks (`data/optimizer/system_unlocks.json`)
+
+| Furnace | Systems Unlocked |
+|---------|-----------------|
+| 1 | buildings, troops, chief_gear |
+| 9 | research |
+| 18 | pets (also needs 55 days state age) |
+| 19 | daybreak_island |
+| 25 | chief_charms |
+| 30 | buildings_fc, war_academy, hero_gear_mastery |
+
+### Decision Rules (`data/optimizer/decision_rules.json`)
+
+Priority weights by focus:
+- **svs_combat**: Troops (1.0), War Academy (0.95), Hero Gear (0.85)
+- **balanced_growth**: Buildings (0.9), Research (0.85), Troops (0.7)
+- **economy_focus**: Buildings (1.0), Research (0.95), Pets (0.6)
+
+### Optimizer Documentation
+
+Full decision flow and logic: `data/optimizer/OPTIMIZER_LOGIC.md`
+
+### Strategy Guides (`data/guides/`)
+
+Detailed reasoning and explanations for recommendations:
+
+| Guide | File | Purpose |
+|-------|------|---------|
+| Hero Lineups | `hero_lineup_reasoning.json` | Rally joiner selection, slot 1 hero choice, expedition vs exploration |
+| Daybreak Island | `daybreak_island_priorities.json` | Tree of Life priorities, decoration strategy by spender type |
+| Research | `research_priorities.json` | Research tree order, Tool Enhancement VII priority, by profile |
+| Recommendation Reasons | `../optimizer/recommendation_reasons.json` | "Why" explanations for all suggestion types |
+
+**Key Guide Features:**
+- Priorities by spending profile (F2P → whale)
+- Priorities by alliance role (rally lead, filler, farmer)
+- Common mistakes with explanations
+- Quick reference summaries
+
+### Recommendation Reasons
+
+Every recommendation should include a `reason` field explaining "why":
+- **Unlock gates**: "Unlocking X at Y opens Z"
+- **Efficiency milestones**: "X provides Y% efficiency - critical milestone"
+- **Power gains**: "X gives Y power for Z cost - high efficiency"
+- **Spending gates**: "X is whale territory for F2P - consider Y instead"
+
+## Upgrade Data System
+
+The optimizer uses a tables-first data model with 920+ upgrade edges for cost-aware recommendations.
+
+### Data Files (`data/upgrades/`)
+
+| System | File | Edges | Currencies |
+|--------|------|-------|------------|
+| Chief Gear | `chief_gear.steps.json` | 83 | hardened_alloy, polishing_solution, design_plan, lunar_amber |
+| War Academy | `war_academy.steps.json` | 45 | fire_crystal_shards, refined_fire_crystals, meat, wood, coal, iron |
+| Troops (train) | `troops.train.edges.json` | 90 | meat, wood, coal, iron |
+| Troops (promote) | `troops.promote.edges.json` | 75 | meat, wood, coal, iron |
+| Buildings (L1-30) | `buildings.edges.json` | 261 | wood, meat, coal, iron, fire_crystal |
+| Buildings (FC) | `buildings.fc.edges.json` | 313 | wood, meat, coal, iron, fire_crystal, refined_fire_crystal |
+| Hero Gear Mastery | `hero_gear.mastery.edges.json` | 20 | essence_stone, mythic_gear |
+| Chief Charms | `chief_charms.edges.json` | 16 | charm_guide, charm_design, jewel_secrets |
+| Pets | `pets.advancement.edges.json` | 10 | pet_food, taming_manual, energizing_potion, strengthening_serum |
+| Daybreak Island | `daybreak_island.tree_of_life.edges.json` | 9 | life_essence |
+
+### Build Scripts (`scripts/`)
+
+```bash
+# Regenerate edges from raw data
+py scripts/build_war_academy_edges.py
+py scripts/build_buildings_edges.py
+py scripts/build_buildings_fc_edges.py
+
+# Check gem shadow prices status
+py scripts/compute_gem_costs.py --check-prices
+```
+
+### Resource Valuation (`data/conversions/`)
+
+- `gem_shadow_prices.json` - Gem-equivalent costs for all resources (needs screenshots to populate)
+- `scarcity_profiles.json` - Player-specific multipliers (F2P, low spender, whale)
+
+### Research Sources (`data/research_sources.json`)
+
+Tiered source registry for data collection:
+- **Tier 1** (trust 1.0): WoS Wiki, Official Help
+- **Tier 2** (trust 0.85-0.9): whiteoutsurvival.app, whiteoutdata.com, quackulator.com, onechilledgamer.com
+- **Tier 3** (trust 0.6): allclash.com (meta only, must label)
+
+### Skills (`.claude/skills/`)
+
+- `/wos-research` - Tiered source lookup with confidence grades
+- `/wos-recommend` - Upgrade recommendations
+- `/wos-upgrades` - Cost data access
+- `/wos-joiner` - Rally joiner hero selection
+- `/wos-lineup` - Event lineup builder
+
 ## Game Data References
 
 Hero tier rankings and game mechanics sourced from:
 - [Whiteout Survival Wiki](https://www.whiteoutsurvival.wiki/)
 - [AllClash Tier List](https://www.allclash.com/best-heroes-in-whiteout-survival-tier-list/)
 - [WhiteoutData](https://whiteoutdata.com/)
+- [WhiteoutSurvival.app](https://whiteoutsurvival.app/) - FC building data
+- [Quackulator](https://www.quackulator.com/) - Cost calculators
+- [OneChilledGamer](https://onechilledgamer.com/) - Troop calculators
 
 ## Future Enhancements
 
 Planned features not yet implemented:
-- Pet tracking and recommendations
-- Chief gear and charm tracking
 - Event calendar with SvS reminders
-- Power calculators
+- Power calculators (per-upgrade power gain)
 - Alliance coordination features
 - Actual hero portrait images (currently using class symbols)
+- Gem shadow prices (needs in-game screenshots for resource/speedup pricing)
+- Research tree granular costs (currently partial - structure only)
+- Goal pathfinding ("How do I reach X milestone?")

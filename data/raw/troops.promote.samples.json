@@ -1,0 +1,35 @@
+{
+  "source_id": "SRC_TROOP_CALCULATOR",
+  "retrieved_at": "2026-01-07T00:00:00Z",
+  "notes": [
+    "Per-troop promotion costs calculated as difference between tier costs",
+    "promotion_cost(T_n -> T_n+1) = training_cost(T_n+1) - training_cost(T_n)",
+    "This is the standard game mechanic for promotion",
+    "Promotion time is typically same as training time for target tier"
+  ],
+  "per_troop_promotion_costs": {
+    "infantry": [
+      {"tier_from": 6, "tier_to": 7, "meat": 93, "wood": 70, "coal": 16, "iron": 4, "time_seconds": 83, "power_gained": 8, "hoc_points": 235, "svs_points": 7, "koi_points": 5},
+      {"tier_from": 7, "tier_to": 8, "meat": 279, "wood": 209, "coal": 49, "iron": 10, "time_seconds": 113, "power_gained": 10, "hoc_points": 300, "svs_points": 10, "koi_points": 7},
+      {"tier_from": 8, "tier_to": 9, "meat": 836, "wood": 627, "coal": 146, "iron": 30, "time_seconds": 131, "power_gained": 12, "hoc_points": 355, "svs_points": 10, "koi_points": 7},
+      {"tier_from": 9, "tier_to": 10, "meat": 1394, "wood": 1045, "coal": 244, "iron": 51, "time_seconds": 152, "power_gained": 16, "hoc_points": 475, "svs_points": 15, "koi_points": 9},
+      {"tier_from": 10, "tier_to": 11, "meat": 4182, "wood": 3137, "coal": 732, "iron": 151, "time_seconds": 180, "power_gained": 14, "hoc_points": 0, "svs_points": 15, "koi_points": 10}
+    ],
+    "lancer": [
+      {"tier_from": 6, "tier_to": 7, "meat": 81, "wood": 77, "coal": 16, "iron": 3, "time_seconds": 83, "power_gained": 8, "hoc_points": 235, "svs_points": 7, "koi_points": 5},
+      {"tier_from": 7, "tier_to": 8, "meat": 244, "wood": 230, "coal": 47, "iron": 11, "time_seconds": 113, "power_gained": 10, "hoc_points": 300, "svs_points": 10, "koi_points": 7},
+      {"tier_from": 8, "tier_to": 9, "meat": 732, "wood": 690, "coal": 142, "iron": 33, "time_seconds": 131, "power_gained": 12, "hoc_points": 355, "svs_points": 10, "koi_points": 7},
+      {"tier_from": 9, "tier_to": 10, "meat": 1220, "wood": 1150, "coal": 237, "iron": 54, "time_seconds": 152, "power_gained": 16, "hoc_points": 475, "svs_points": 15, "koi_points": 9},
+      {"tier_from": 10, "tier_to": 11, "meat": 3659, "wood": 3450, "coal": 711, "iron": 162, "time_seconds": 180, "power_gained": 14, "hoc_points": 0, "svs_points": 15, "koi_points": 10}
+    ],
+    "marksman": [
+      {"tier_from": 6, "tier_to": 7, "meat": 58, "wood": 85, "coal": 15, "iron": 4, "time_seconds": 83, "power_gained": 8, "hoc_points": 235, "svs_points": 7, "koi_points": 5},
+      {"tier_from": 7, "tier_to": 8, "meat": 174, "wood": 258, "coal": 43, "iron": 14, "time_seconds": 113, "power_gained": 10, "hoc_points": 300, "svs_points": 10, "koi_points": 7},
+      {"tier_from": 8, "tier_to": 9, "meat": 523, "wood": 774, "coal": 130, "iron": 42, "time_seconds": 131, "power_gained": 12, "hoc_points": 355, "svs_points": 10, "koi_points": 7},
+      {"tier_from": 9, "tier_to": 10, "meat": 868, "wood": 1289, "coal": 216, "iron": 70, "time_seconds": 152, "power_gained": 16, "hoc_points": 475, "svs_points": 15, "koi_points": 9},
+      {"tier_from": 10, "tier_to": 11, "meat": 2617, "wood": 3869, "coal": 648, "iron": 209, "time_seconds": 180, "power_gained": 14, "hoc_points": 0, "svs_points": 15, "koi_points": 10}
+    ]
+  },
+  "sample_quantities": [100, 500, 1000, 5000, 10000],
+  "promotion_tiers": ["T6->T7", "T7->T8", "T8->T9", "T9->T10", "T10->T11"]
+}

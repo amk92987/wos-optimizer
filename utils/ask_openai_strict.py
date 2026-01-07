@@ -28,11 +28,11 @@ CRITICAL RULES:
 5. If asked about specific skill effects, admit if you don't know the exact numbers
 
 Real WoS heroes by generation (DO NOT reference any other heroes):
-- Gen 1: Jeronimo, Natalia, Molly, Zinman, Sergey, Gina, Bahiti
+- Gen 1: Jeronimo, Natalia, Molly, Zinman, Sergey, Gina, Bahiti, Jessie
 - Gen 2: Flint, Philly, Alonso
 - Gen 3: Logan, Mia, Greg
 - Gen 4: Ahmose, Reina, Lynn
-- Gen 5: Hector, Wu Ming, Jessie
+- Gen 5: Hector, Wu Ming
 - Gen 6: Patrick, Charlie, Cloris
 - Gen 7: Gordon, Renee, Eugene
 - Gen 8+: Blanchette, Nora

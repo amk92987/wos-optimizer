@@ -1,0 +1,3320 @@
+{
+  "system": "troops_promote",
+  "unit": "batch",
+  "currencies": [
+    "meat",
+    "wood",
+    "coal",
+    "iron",
+    "fire_crystal",
+    "speedups_seconds"
+  ],
+  "generated_at": "2026-01-07T19:38:02.578184Z",
+  "notes": [
+    "Promotion costs = training_cost(tier_to) - training_cost(tier_from)",
+    "Time is base time before speed buffs",
+    "Promotion is more resource-efficient than training from scratch"
+  ],
+  "edges": [
+    {
+      "upgrade_id": "troops_promote:infantry:T6->T7:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 9300,
+        "wood": 7000,
+        "coal": 1600,
+        "iron": 400,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 8300,
+      "benefit": {
+        "power_gained": 800
+      },
+      "event_points": {
+        "hall_of_chiefs": 23500,
+        "king_of_icefield": 500,
+        "state_of_power": 700
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T6_to_T7_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T6->T7:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 46500,
+        "wood": 35000,
+        "coal": 8000,
+        "iron": 2000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 41500,
+      "benefit": {
+        "power_gained": 4000
+      },
+      "event_points": {
+        "hall_of_chiefs": 117500,
+        "king_of_icefield": 2500,
+        "state_of_power": 3500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T6_to_T7_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T6->T7:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 93000,
+        "wood": 70000,
+        "coal": 16000,
+        "iron": 4000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 83000,
+      "benefit": {
+        "power_gained": 8000
+      },
+      "event_points": {
+        "hall_of_chiefs": 235000,
+        "king_of_icefield": 5000,
+        "state_of_power": 7000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T6_to_T7_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T6->T7:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 465000,
+        "wood": 350000,
+        "coal": 80000,
+        "iron": 20000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 415000,
+      "benefit": {
+        "power_gained": 40000
+      },
+      "event_points": {
+        "hall_of_chiefs": 1175000,
+        "king_of_icefield": 25000,
+        "state_of_power": 35000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T6_to_T7_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T6->T7:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 930000,
+        "wood": 700000,
+        "coal": 160000,
+        "iron": 40000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 830000,
+      "benefit": {
+        "power_gained": 80000
+      },
+      "event_points": {
+        "hall_of_chiefs": 2350000,
+        "king_of_icefield": 50000,
+        "state_of_power": 70000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T6_to_T7_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T7->T8:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 27900,
+        "wood": 20900,
+        "coal": 4900,
+        "iron": 1000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 11300,
+      "benefit": {
+        "power_gained": 1000
+      },
+      "event_points": {
+        "hall_of_chiefs": 30000,
+        "king_of_icefield": 700,
+        "state_of_power": 1000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T7_to_T8_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T7->T8:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 139500,
+        "wood": 104500,
+        "coal": 24500,
+        "iron": 5000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 56500,
+      "benefit": {
+        "power_gained": 5000
+      },
+      "event_points": {
+        "hall_of_chiefs": 150000,
+        "king_of_icefield": 3500,
+        "state_of_power": 5000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T7_to_T8_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T7->T8:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 279000,
+        "wood": 209000,
+        "coal": 49000,
+        "iron": 10000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 113000,
+      "benefit": {
+        "power_gained": 10000
+      },
+      "event_points": {
+        "hall_of_chiefs": 300000,
+        "king_of_icefield": 7000,
+        "state_of_power": 10000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T7_to_T8_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T7->T8:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 1395000,
+        "wood": 1045000,
+        "coal": 245000,
+        "iron": 50000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 565000,
+      "benefit": {
+        "power_gained": 50000
+      },
+      "event_points": {
+        "hall_of_chiefs": 1500000,
+        "king_of_icefield": 35000,
+        "state_of_power": 50000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T7_to_T8_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T7->T8:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 2790000,
+        "wood": 2090000,
+        "coal": 490000,
+        "iron": 100000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1130000,
+      "benefit": {
+        "power_gained": 100000
+      },
+      "event_points": {
+        "hall_of_chiefs": 3000000,
+        "king_of_icefield": 70000,
+        "state_of_power": 100000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T7_to_T8_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T8->T9:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 83600,
+        "wood": 62700,
+        "coal": 14600,
+        "iron": 3000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 13100,
+      "benefit": {
+        "power_gained": 1200
+      },
+      "event_points": {
+        "hall_of_chiefs": 35500,
+        "king_of_icefield": 700,
+        "state_of_power": 1000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T8_to_T9_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T8->T9:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 418000,
+        "wood": 313500,
+        "coal": 73000,
+        "iron": 15000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 65500,
+      "benefit": {
+        "power_gained": 6000
+      },
+      "event_points": {
+        "hall_of_chiefs": 177500,
+        "king_of_icefield": 3500,
+        "state_of_power": 5000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T8_to_T9_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T8->T9:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 836000,
+        "wood": 627000,
+        "coal": 146000,
+        "iron": 30000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 131000,
+      "benefit": {
+        "power_gained": 12000
+      },
+      "event_points": {
+        "hall_of_chiefs": 355000,
+        "king_of_icefield": 7000,
+        "state_of_power": 10000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T8_to_T9_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T8->T9:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 4180000,
+        "wood": 3135000,
+        "coal": 730000,
+        "iron": 150000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 655000,
+      "benefit": {
+        "power_gained": 60000
+      },
+      "event_points": {
+        "hall_of_chiefs": 1775000,
+        "king_of_icefield": 35000,
+        "state_of_power": 50000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T8_to_T9_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T8->T9:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 8360000,
+        "wood": 6270000,
+        "coal": 1460000,
+        "iron": 300000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1310000,
+      "benefit": {
+        "power_gained": 120000
+      },
+      "event_points": {
+        "hall_of_chiefs": 3550000,
+        "king_of_icefield": 70000,
+        "state_of_power": 100000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T8_to_T9_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T9->T10:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 139400,
+        "wood": 104500,
+        "coal": 24400,
+        "iron": 5100,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 15200,
+      "benefit": {
+        "power_gained": 1600
+      },
+      "event_points": {
+        "hall_of_chiefs": 47500,
+        "king_of_icefield": 900,
+        "state_of_power": 1500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T9_to_T10_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T9->T10:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 697000,
+        "wood": 522500,
+        "coal": 122000,
+        "iron": 25500,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 76000,
+      "benefit": {
+        "power_gained": 8000
+      },
+      "event_points": {
+        "hall_of_chiefs": 237500,
+        "king_of_icefield": 4500,
+        "state_of_power": 7500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T9_to_T10_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T9->T10:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 1394000,
+        "wood": 1045000,
+        "coal": 244000,
+        "iron": 51000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 152000,
+      "benefit": {
+        "power_gained": 16000
+      },
+      "event_points": {
+        "hall_of_chiefs": 475000,
+        "king_of_icefield": 9000,
+        "state_of_power": 15000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T9_to_T10_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T9->T10:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 6970000,
+        "wood": 5225000,
+        "coal": 1220000,
+        "iron": 255000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 760000,
+      "benefit": {
+        "power_gained": 80000
+      },
+      "event_points": {
+        "hall_of_chiefs": 2375000,
+        "king_of_icefield": 45000,
+        "state_of_power": 75000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T9_to_T10_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T9->T10:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 13940000,
+        "wood": 10450000,
+        "coal": 2440000,
+        "iron": 510000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1520000,
+      "benefit": {
+        "power_gained": 160000
+      },
+      "event_points": {
+        "hall_of_chiefs": 4750000,
+        "king_of_icefield": 90000,
+        "state_of_power": 150000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T9_to_T10_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T10->T11:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 418200,
+        "wood": 313700,
+        "coal": 73200,
+        "iron": 15100,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 18000,
+      "benefit": {
+        "power_gained": 1400
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 1000,
+        "state_of_power": 1500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T10_to_T11_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T10->T11:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 2091000,
+        "wood": 1568500,
+        "coal": 366000,
+        "iron": 75500,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 90000,
+      "benefit": {
+        "power_gained": 7000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 5000,
+        "state_of_power": 7500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T10_to_T11_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T10->T11:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 4182000,
+        "wood": 3137000,
+        "coal": 732000,
+        "iron": 151000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 180000,
+      "benefit": {
+        "power_gained": 14000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 10000,
+        "state_of_power": 15000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T10_to_T11_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T10->T11:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 20910000,
+        "wood": 15685000,
+        "coal": 3660000,
+        "iron": 755000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 900000,
+      "benefit": {
+        "power_gained": 70000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 50000,
+        "state_of_power": 75000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T10_to_T11_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:infantry:T10->T11:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "infantry",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "infantry",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 41820000,
+        "wood": 31370000,
+        "coal": 7320000,
+        "iron": 1510000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1800000,
+      "benefit": {
+        "power_gained": 140000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 100000,
+        "state_of_power": 150000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "infantry_T10_to_T11_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T6->T7:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 8100,
+        "wood": 7700,
+        "coal": 1600,
+        "iron": 300,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 8300,
+      "benefit": {
+        "power_gained": 800
+      },
+      "event_points": {
+        "hall_of_chiefs": 23500,
+        "king_of_icefield": 500,
+        "state_of_power": 700
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T6_to_T7_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T6->T7:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 40500,
+        "wood": 38500,
+        "coal": 8000,
+        "iron": 1500,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 41500,
+      "benefit": {
+        "power_gained": 4000
+      },
+      "event_points": {
+        "hall_of_chiefs": 117500,
+        "king_of_icefield": 2500,
+        "state_of_power": 3500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T6_to_T7_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T6->T7:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 81000,
+        "wood": 77000,
+        "coal": 16000,
+        "iron": 3000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 83000,
+      "benefit": {
+        "power_gained": 8000
+      },
+      "event_points": {
+        "hall_of_chiefs": 235000,
+        "king_of_icefield": 5000,
+        "state_of_power": 7000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T6_to_T7_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T6->T7:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 405000,
+        "wood": 385000,
+        "coal": 80000,
+        "iron": 15000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 415000,
+      "benefit": {
+        "power_gained": 40000
+      },
+      "event_points": {
+        "hall_of_chiefs": 1175000,
+        "king_of_icefield": 25000,
+        "state_of_power": 35000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T6_to_T7_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T6->T7:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 810000,
+        "wood": 770000,
+        "coal": 160000,
+        "iron": 30000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 830000,
+      "benefit": {
+        "power_gained": 80000
+      },
+      "event_points": {
+        "hall_of_chiefs": 2350000,
+        "king_of_icefield": 50000,
+        "state_of_power": 70000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T6_to_T7_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T7->T8:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 24400,
+        "wood": 23000,
+        "coal": 4700,
+        "iron": 1100,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 11300,
+      "benefit": {
+        "power_gained": 1000
+      },
+      "event_points": {
+        "hall_of_chiefs": 30000,
+        "king_of_icefield": 700,
+        "state_of_power": 1000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T7_to_T8_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T7->T8:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 122000,
+        "wood": 115000,
+        "coal": 23500,
+        "iron": 5500,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 56500,
+      "benefit": {
+        "power_gained": 5000
+      },
+      "event_points": {
+        "hall_of_chiefs": 150000,
+        "king_of_icefield": 3500,
+        "state_of_power": 5000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T7_to_T8_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T7->T8:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 244000,
+        "wood": 230000,
+        "coal": 47000,
+        "iron": 11000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 113000,
+      "benefit": {
+        "power_gained": 10000
+      },
+      "event_points": {
+        "hall_of_chiefs": 300000,
+        "king_of_icefield": 7000,
+        "state_of_power": 10000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T7_to_T8_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T7->T8:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 1220000,
+        "wood": 1150000,
+        "coal": 235000,
+        "iron": 55000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 565000,
+      "benefit": {
+        "power_gained": 50000
+      },
+      "event_points": {
+        "hall_of_chiefs": 1500000,
+        "king_of_icefield": 35000,
+        "state_of_power": 50000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T7_to_T8_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T7->T8:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 2440000,
+        "wood": 2300000,
+        "coal": 470000,
+        "iron": 110000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1130000,
+      "benefit": {
+        "power_gained": 100000
+      },
+      "event_points": {
+        "hall_of_chiefs": 3000000,
+        "king_of_icefield": 70000,
+        "state_of_power": 100000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T7_to_T8_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T8->T9:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 73200,
+        "wood": 69000,
+        "coal": 14200,
+        "iron": 3300,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 13100,
+      "benefit": {
+        "power_gained": 1200
+      },
+      "event_points": {
+        "hall_of_chiefs": 35500,
+        "king_of_icefield": 700,
+        "state_of_power": 1000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T8_to_T9_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T8->T9:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 366000,
+        "wood": 345000,
+        "coal": 71000,
+        "iron": 16500,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 65500,
+      "benefit": {
+        "power_gained": 6000
+      },
+      "event_points": {
+        "hall_of_chiefs": 177500,
+        "king_of_icefield": 3500,
+        "state_of_power": 5000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T8_to_T9_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T8->T9:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 732000,
+        "wood": 690000,
+        "coal": 142000,
+        "iron": 33000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 131000,
+      "benefit": {
+        "power_gained": 12000
+      },
+      "event_points": {
+        "hall_of_chiefs": 355000,
+        "king_of_icefield": 7000,
+        "state_of_power": 10000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T8_to_T9_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T8->T9:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 3660000,
+        "wood": 3450000,
+        "coal": 710000,
+        "iron": 165000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 655000,
+      "benefit": {
+        "power_gained": 60000
+      },
+      "event_points": {
+        "hall_of_chiefs": 1775000,
+        "king_of_icefield": 35000,
+        "state_of_power": 50000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T8_to_T9_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T8->T9:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 7320000,
+        "wood": 6900000,
+        "coal": 1420000,
+        "iron": 330000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1310000,
+      "benefit": {
+        "power_gained": 120000
+      },
+      "event_points": {
+        "hall_of_chiefs": 3550000,
+        "king_of_icefield": 70000,
+        "state_of_power": 100000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T8_to_T9_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T9->T10:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 122000,
+        "wood": 115000,
+        "coal": 23700,
+        "iron": 5400,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 15200,
+      "benefit": {
+        "power_gained": 1600
+      },
+      "event_points": {
+        "hall_of_chiefs": 47500,
+        "king_of_icefield": 900,
+        "state_of_power": 1500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T9_to_T10_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T9->T10:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 610000,
+        "wood": 575000,
+        "coal": 118500,
+        "iron": 27000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 76000,
+      "benefit": {
+        "power_gained": 8000
+      },
+      "event_points": {
+        "hall_of_chiefs": 237500,
+        "king_of_icefield": 4500,
+        "state_of_power": 7500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T9_to_T10_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T9->T10:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 1220000,
+        "wood": 1150000,
+        "coal": 237000,
+        "iron": 54000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 152000,
+      "benefit": {
+        "power_gained": 16000
+      },
+      "event_points": {
+        "hall_of_chiefs": 475000,
+        "king_of_icefield": 9000,
+        "state_of_power": 15000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T9_to_T10_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T9->T10:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 6100000,
+        "wood": 5750000,
+        "coal": 1185000,
+        "iron": 270000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 760000,
+      "benefit": {
+        "power_gained": 80000
+      },
+      "event_points": {
+        "hall_of_chiefs": 2375000,
+        "king_of_icefield": 45000,
+        "state_of_power": 75000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T9_to_T10_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T9->T10:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 12200000,
+        "wood": 11500000,
+        "coal": 2370000,
+        "iron": 540000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1520000,
+      "benefit": {
+        "power_gained": 160000
+      },
+      "event_points": {
+        "hall_of_chiefs": 4750000,
+        "king_of_icefield": 90000,
+        "state_of_power": 150000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T9_to_T10_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T10->T11:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 365900,
+        "wood": 345000,
+        "coal": 71100,
+        "iron": 16200,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 18000,
+      "benefit": {
+        "power_gained": 1400
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 1000,
+        "state_of_power": 1500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T10_to_T11_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T10->T11:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 1829500,
+        "wood": 1725000,
+        "coal": 355500,
+        "iron": 81000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 90000,
+      "benefit": {
+        "power_gained": 7000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 5000,
+        "state_of_power": 7500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T10_to_T11_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T10->T11:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 3659000,
+        "wood": 3450000,
+        "coal": 711000,
+        "iron": 162000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 180000,
+      "benefit": {
+        "power_gained": 14000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 10000,
+        "state_of_power": 15000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T10_to_T11_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T10->T11:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 18295000,
+        "wood": 17250000,
+        "coal": 3555000,
+        "iron": 810000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 900000,
+      "benefit": {
+        "power_gained": 70000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 50000,
+        "state_of_power": 75000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T10_to_T11_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:lancer:T10->T11:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "lancer",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "lancer",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 36590000,
+        "wood": 34500000,
+        "coal": 7110000,
+        "iron": 1620000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1800000,
+      "benefit": {
+        "power_gained": 140000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 100000,
+        "state_of_power": 150000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "lancer_T10_to_T11_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T6->T7:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 5800,
+        "wood": 8500,
+        "coal": 1500,
+        "iron": 400,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 8300,
+      "benefit": {
+        "power_gained": 800
+      },
+      "event_points": {
+        "hall_of_chiefs": 23500,
+        "king_of_icefield": 500,
+        "state_of_power": 700
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T6_to_T7_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T6->T7:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 29000,
+        "wood": 42500,
+        "coal": 7500,
+        "iron": 2000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 41500,
+      "benefit": {
+        "power_gained": 4000
+      },
+      "event_points": {
+        "hall_of_chiefs": 117500,
+        "king_of_icefield": 2500,
+        "state_of_power": 3500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T6_to_T7_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T6->T7:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 58000,
+        "wood": 85000,
+        "coal": 15000,
+        "iron": 4000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 83000,
+      "benefit": {
+        "power_gained": 8000
+      },
+      "event_points": {
+        "hall_of_chiefs": 235000,
+        "king_of_icefield": 5000,
+        "state_of_power": 7000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T6_to_T7_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T6->T7:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 290000,
+        "wood": 425000,
+        "coal": 75000,
+        "iron": 20000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 415000,
+      "benefit": {
+        "power_gained": 40000
+      },
+      "event_points": {
+        "hall_of_chiefs": 1175000,
+        "king_of_icefield": 25000,
+        "state_of_power": 35000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T6_to_T7_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T6->T7:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 6,
+        "tier_to": 7,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 580000,
+        "wood": 850000,
+        "coal": 150000,
+        "iron": 40000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 830000,
+      "benefit": {
+        "power_gained": 80000
+      },
+      "event_points": {
+        "hall_of_chiefs": 2350000,
+        "king_of_icefield": 50000,
+        "state_of_power": 70000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T6_to_T7_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T7->T8:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 17400,
+        "wood": 25800,
+        "coal": 4300,
+        "iron": 1400,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 11300,
+      "benefit": {
+        "power_gained": 1000
+      },
+      "event_points": {
+        "hall_of_chiefs": 30000,
+        "king_of_icefield": 700,
+        "state_of_power": 1000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T7_to_T8_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T7->T8:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 87000,
+        "wood": 129000,
+        "coal": 21500,
+        "iron": 7000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 56500,
+      "benefit": {
+        "power_gained": 5000
+      },
+      "event_points": {
+        "hall_of_chiefs": 150000,
+        "king_of_icefield": 3500,
+        "state_of_power": 5000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T7_to_T8_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T7->T8:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 174000,
+        "wood": 258000,
+        "coal": 43000,
+        "iron": 14000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 113000,
+      "benefit": {
+        "power_gained": 10000
+      },
+      "event_points": {
+        "hall_of_chiefs": 300000,
+        "king_of_icefield": 7000,
+        "state_of_power": 10000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T7_to_T8_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T7->T8:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 870000,
+        "wood": 1290000,
+        "coal": 215000,
+        "iron": 70000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 565000,
+      "benefit": {
+        "power_gained": 50000
+      },
+      "event_points": {
+        "hall_of_chiefs": 1500000,
+        "king_of_icefield": 35000,
+        "state_of_power": 50000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T7_to_T8_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T7->T8:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 7,
+        "tier_to": 8,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 1740000,
+        "wood": 2580000,
+        "coal": 430000,
+        "iron": 140000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1130000,
+      "benefit": {
+        "power_gained": 100000
+      },
+      "event_points": {
+        "hall_of_chiefs": 3000000,
+        "king_of_icefield": 70000,
+        "state_of_power": 100000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T7_to_T8_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T8->T9:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 52300,
+        "wood": 77400,
+        "coal": 13000,
+        "iron": 4200,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 13100,
+      "benefit": {
+        "power_gained": 1200
+      },
+      "event_points": {
+        "hall_of_chiefs": 35500,
+        "king_of_icefield": 700,
+        "state_of_power": 1000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T8_to_T9_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T8->T9:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 261500,
+        "wood": 387000,
+        "coal": 65000,
+        "iron": 21000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 65500,
+      "benefit": {
+        "power_gained": 6000
+      },
+      "event_points": {
+        "hall_of_chiefs": 177500,
+        "king_of_icefield": 3500,
+        "state_of_power": 5000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T8_to_T9_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T8->T9:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 523000,
+        "wood": 774000,
+        "coal": 130000,
+        "iron": 42000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 131000,
+      "benefit": {
+        "power_gained": 12000
+      },
+      "event_points": {
+        "hall_of_chiefs": 355000,
+        "king_of_icefield": 7000,
+        "state_of_power": 10000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T8_to_T9_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T8->T9:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 2615000,
+        "wood": 3870000,
+        "coal": 650000,
+        "iron": 210000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 655000,
+      "benefit": {
+        "power_gained": 60000
+      },
+      "event_points": {
+        "hall_of_chiefs": 1775000,
+        "king_of_icefield": 35000,
+        "state_of_power": 50000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T8_to_T9_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T8->T9:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 8,
+        "tier_to": 9,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 5230000,
+        "wood": 7740000,
+        "coal": 1300000,
+        "iron": 420000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1310000,
+      "benefit": {
+        "power_gained": 120000
+      },
+      "event_points": {
+        "hall_of_chiefs": 3550000,
+        "king_of_icefield": 70000,
+        "state_of_power": 100000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T8_to_T9_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T9->T10:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 86800,
+        "wood": 128900,
+        "coal": 21600,
+        "iron": 7000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 15200,
+      "benefit": {
+        "power_gained": 1600
+      },
+      "event_points": {
+        "hall_of_chiefs": 47500,
+        "king_of_icefield": 900,
+        "state_of_power": 1500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T9_to_T10_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T9->T10:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 434000,
+        "wood": 644500,
+        "coal": 108000,
+        "iron": 35000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 76000,
+      "benefit": {
+        "power_gained": 8000
+      },
+      "event_points": {
+        "hall_of_chiefs": 237500,
+        "king_of_icefield": 4500,
+        "state_of_power": 7500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T9_to_T10_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T9->T10:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 868000,
+        "wood": 1289000,
+        "coal": 216000,
+        "iron": 70000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 152000,
+      "benefit": {
+        "power_gained": 16000
+      },
+      "event_points": {
+        "hall_of_chiefs": 475000,
+        "king_of_icefield": 9000,
+        "state_of_power": 15000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T9_to_T10_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T9->T10:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 4340000,
+        "wood": 6445000,
+        "coal": 1080000,
+        "iron": 350000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 760000,
+      "benefit": {
+        "power_gained": 80000
+      },
+      "event_points": {
+        "hall_of_chiefs": 2375000,
+        "king_of_icefield": 45000,
+        "state_of_power": 75000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T9_to_T10_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T9->T10:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 9,
+        "tier_to": 10,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 8680000,
+        "wood": 12890000,
+        "coal": 2160000,
+        "iron": 700000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1520000,
+      "benefit": {
+        "power_gained": 160000
+      },
+      "event_points": {
+        "hall_of_chiefs": 4750000,
+        "king_of_icefield": 90000,
+        "state_of_power": 150000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T9_to_T10_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T10->T11:qty100",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 100
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 100
+      },
+      "cost": {
+        "meat": 261700,
+        "wood": 386900,
+        "coal": 64800,
+        "iron": 20900,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 18000,
+      "benefit": {
+        "power_gained": 1400
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 1000,
+        "state_of_power": 1500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T10_to_T11_qty100_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T10->T11:qty500",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 500
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 500
+      },
+      "cost": {
+        "meat": 1308500,
+        "wood": 1934500,
+        "coal": 324000,
+        "iron": 104500,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 90000,
+      "benefit": {
+        "power_gained": 7000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 5000,
+        "state_of_power": 7500
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T10_to_T11_qty500_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T10->T11:qty1000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 1000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 1000
+      },
+      "cost": {
+        "meat": 2617000,
+        "wood": 3869000,
+        "coal": 648000,
+        "iron": 209000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 180000,
+      "benefit": {
+        "power_gained": 14000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 10000,
+        "state_of_power": 15000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T10_to_T11_qty1000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T10->T11:qty5000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 5000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 5000
+      },
+      "cost": {
+        "meat": 13085000,
+        "wood": 19345000,
+        "coal": 3240000,
+        "iron": 1045000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 900000,
+      "benefit": {
+        "power_gained": 70000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 50000,
+        "state_of_power": 75000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T10_to_T11_qty5000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    },
+    {
+      "upgrade_id": "troops_promote:marksman:T10->T11:qty10000",
+      "from": {
+        "action": "promote",
+        "troop_type": "marksman",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 10000
+      },
+      "to": {
+        "result": "promoted",
+        "troop_type": "marksman",
+        "tier_from": 10,
+        "tier_to": 11,
+        "qty": 10000
+      },
+      "cost": {
+        "meat": 26170000,
+        "wood": 38690000,
+        "coal": 6480000,
+        "iron": 2090000,
+        "fire_crystal": 0,
+        "speedups_seconds": 0
+      },
+      "time_seconds": 1800000,
+      "benefit": {
+        "power_gained": 140000
+      },
+      "event_points": {
+        "hall_of_chiefs": 0,
+        "king_of_icefield": 100000,
+        "state_of_power": 150000
+      },
+      "source_ids": [
+        "SRC_TROOP_CALCULATOR"
+      ],
+      "evidence": {
+        "sample_key": "marksman_T10_to_T11_qty10000_promote"
+      },
+      "confidence": {
+        "grade": "B",
+        "reason": "calculator output capture"
+      }
+    }
+  ]
+}

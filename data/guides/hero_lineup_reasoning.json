@@ -1,0 +1,331 @@
+{
+  "system": "hero_lineups",
+  "description": "Hero lineup selection reasoning for all game modes",
+  "version": "1.0",
+  "generated_at": "2026-01-07T00:00:00Z",
+
+  "critical_concepts": {
+    "skill_types": {
+      "exploration_skills": {
+        "location": "Left side of hero skill screen",
+        "upgraded_with": "Exploration Manuals",
+        "used_in": ["Frozen Stages", "Exploration content", "PvE"],
+        "note": "These skills do NOT apply in rallies or SvS"
+      },
+      "expedition_skills": {
+        "location": "Right side of hero skill screen",
+        "upgraded_with": "Expedition Manuals",
+        "used_in": ["Rallies", "SvS", "Castle battles", "PvP"],
+        "critical_note": "Top-right skill is used when JOINING rallies"
+      }
+    },
+    "rally_joiner_mechanic": {
+      "description": "When you JOIN someone else's rally, only your leftmost hero's top-right expedition skill matters",
+      "key_rule": "Only the TOP 4 HIGHEST LEVEL skills from all joiners apply to the rally",
+      "implication": "A high-level wrong skill can bump out a lower-level valuable skill",
+      "example": {
+        "bad": "Your Sergey L5 defense skill bumps out alliance mate's Jessie L3 damage skill",
+        "good": "Your Jessie L5 damage skill contributes to rally damage"
+      }
+    }
+  },
+
+  "lineup_scenarios": {
+    "rally_attack_joiner": {
+      "scenario": "Joining someone else's attack rally (Bear Trap, Castle Attack, Crazy Joe)",
+      "what_matters": "Your leftmost hero's top-right expedition skill",
+      "goal": "Contribute a high-level ATTACK skill to the rally",
+
+      "best_heroes": [
+        {
+          "hero": "Jessie",
+          "generation": 5,
+          "class": "Marksman",
+          "top_right_skill": "Stand of Arms",
+          "effect_per_level": ["+5%", "+10%", "+15%", "+20%", "+25%"],
+          "effect_type": "DMG dealt increase",
+          "priority": "S+ (Best attack joiner)",
+          "reason": "Direct damage boost is the single most valuable rally joiner skill. High level Jessie should ALWAYS be in slot 1 for attack rallies."
+        },
+        {
+          "hero": "Jeronimo",
+          "generation": 1,
+          "class": "Infantry",
+          "top_right_skill": "Infantry ATK buff",
+          "effect_type": "Infantry attack increase",
+          "priority": "S (Excellent attack joiner)",
+          "reason": "Infantry are the most common troop type in rallies. Boosts a large portion of rally damage."
+        },
+        {
+          "hero": "Wu Ming",
+          "generation": 5,
+          "class": "Lancer",
+          "top_right_skill": "Attack buff",
+          "priority": "A (Good attack joiner)",
+          "reason": "General attack boost helps all troops"
+        }
+      ],
+
+      "heroes_to_avoid": [
+        {
+          "hero": "Sergey",
+          "generation": 1,
+          "class": "Infantry",
+          "top_right_skill": "Defenders' Edge",
+          "effect_per_level": ["-4%", "-8%", "-12%", "-16%", "-20%"],
+          "effect_type": "DMG taken reduction",
+          "priority": "AVOID for attack rallies",
+          "reason": "Defensive skill does nothing for attack rallies and can bump out valuable attack skills from other joiners"
+        },
+        {
+          "hero": "Any hero with defensive/healing top-right skill",
+          "reason": "Wrong skill type for attack content"
+        }
+      ],
+
+      "no_good_hero_rule": {
+        "situation": "You don't have a good attack joiner hero (or yours is low level)",
+        "action": "JOIN WITH TROOPS ONLY - NO HEROES",
+        "reason": "Sending no heroes means you don't contribute any skill. This is BETTER than contributing a bad skill that bumps out someone else's good skill.",
+        "how": "Remove all heroes from march before joining rally"
+      },
+
+      "skill_level_importance": {
+        "description": "Only top 4 highest LEVEL skills apply",
+        "key_insight": "Skill LEVEL matters more than hero level or power",
+        "example": "A L5 skill from a F2P player beats a L3 skill from a whale",
+        "recommendation": "Focus expedition manual investment on your best joiner hero"
+      }
+    },
+
+    "rally_defense_joiner": {
+      "scenario": "Reinforcing an ally's castle or garrison defense",
+      "what_matters": "Your leftmost hero's top-right expedition skill",
+      "goal": "Contribute a high-level DEFENSE skill",
+
+      "best_heroes": [
+        {
+          "hero": "Sergey",
+          "generation": 1,
+          "class": "Infantry",
+          "top_right_skill": "Defenders' Edge",
+          "effect_per_level": ["-4%", "-8%", "-12%", "-16%", "-20%"],
+          "effect_type": "DMG taken reduction",
+          "priority": "S+ (Best defense joiner)",
+          "reason": "Direct damage reduction protects all defending troops"
+        }
+      ],
+
+      "heroes_to_avoid": [
+        {
+          "hero": "Jessie",
+          "reason": "Attack skill doesn't help defense"
+        },
+        {
+          "hero": "Any hero with attack-focused top-right skill",
+          "reason": "Wrong skill type for defense content"
+        }
+      ]
+    },
+
+    "rally_lead": {
+      "scenario": "You are LEADING a rally (you started it)",
+      "what_matters": "ALL your heroes' expedition skills apply",
+      "goal": "Maximize your personal combat contribution",
+
+      "hero_selection": {
+        "principle": "Use your strongest heroes with highest expedition skill levels",
+        "formation": "Match hero classes to your troop composition",
+        "example": "If rally is mostly Infantry, use Infantry heroes in front slots"
+      },
+
+      "recommended_approach": [
+        "Put your highest-skill heroes in the lineup",
+        "Match hero class to your dominant troop type",
+        "Consider hero synergies (some heroes buff specific troop types)"
+      ]
+    },
+
+    "svs_march": {
+      "scenario": "Your own march in State vs State combat",
+      "what_matters": "All your heroes' expedition skills",
+      "goal": "Maximize your march's combat effectiveness",
+
+      "hero_selection_by_role": {
+        "rally_lead": {
+          "approach": "Use your absolute best heroes",
+          "reason": "Your stats affect the entire rally"
+        },
+        "filler": {
+          "approach": "Match hero class to troop type you're sending",
+          "reason": "Class bonuses improve troop performance"
+        },
+        "solo_attacker": {
+          "approach": "Hero class should match your strongest troop type",
+          "reason": "Synergy between hero and troops"
+        }
+      }
+    },
+
+    "exploration_pve": {
+      "scenario": "Frozen Stages, exploration content, PvE",
+      "what_matters": "Exploration skills (LEFT side)",
+      "goal": "Clear content with minimal losses",
+
+      "best_heroes": [
+        {
+          "hero": "Natalia",
+          "role": "Healer/Support",
+          "reason": "Sustain keeps team alive through long fights"
+        },
+        {
+          "hero": "Molly",
+          "role": "AOE Damage",
+          "reason": "Clears waves efficiently"
+        },
+        {
+          "hero": "Zinman",
+          "role": "Tank",
+          "reason": "Absorbs damage for the team"
+        }
+      ],
+
+      "formation_tips": [
+        "Put tanks in front row",
+        "Put healers/support in back row",
+        "Put damage dealers in middle"
+      ]
+    },
+
+    "bear_trap_crazy_joe": {
+      "scenario": "Alliance boss content (Bear Trap, Crazy Joe)",
+      "what_matters": "Expedition skills when joining, varies when leading",
+      "goal": "Maximize damage to boss",
+
+      "if_joining": {
+        "use": "Attack joiner heroes (Jessie, Jeronimo)",
+        "reason": "Same rules as rally attack joiner"
+      },
+
+      "if_leading": {
+        "use": "Your strongest heroes with attack skills",
+        "reason": "All your expedition skills apply"
+      }
+    }
+  },
+
+  "hero_investment_priority": {
+    "description": "Which heroes to invest expedition manuals in",
+
+    "by_spending_profile": {
+      "f2p": {
+        "priority_order": [
+          {
+            "rank": 1,
+            "hero": "Jessie (if owned)",
+            "reason": "Best attack joiner - used in every attack rally you join"
+          },
+          {
+            "rank": 2,
+            "hero": "Sergey",
+            "reason": "Best defense joiner - every F2P has him from Gen 1"
+          },
+          {
+            "rank": 3,
+            "hero": "Jeronimo",
+            "reason": "Good attack joiner, Gen 1 hero everyone has"
+          }
+        ],
+        "strategy": "Focus on ONE joiner hero per role (attack/defense). Don't spread manuals thin."
+      },
+      "dolphin_plus": {
+        "priority_order": [
+          {
+            "rank": 1,
+            "hero": "Jessie",
+            "reason": "Must-have attack joiner at L5"
+          },
+          {
+            "rank": 2,
+            "hero": "Your rally lead heroes",
+            "reason": "Your stats matter when leading"
+          },
+          {
+            "rank": 3,
+            "hero": "Sergey",
+            "reason": "Defense joiner for garrison"
+          }
+        ]
+      }
+    },
+
+    "by_alliance_role": {
+      "rally_lead": {
+        "focus": "Your personal hero roster - all expedition skills matter",
+        "manual_priority": "Spread across your main 5-6 heroes"
+      },
+      "filler": {
+        "focus": "Joiner heroes only - Jessie L5, Sergey L5",
+        "manual_priority": "Concentrate on 1-2 joiner heroes to max level"
+      }
+    }
+  },
+
+  "common_mistakes": [
+    {
+      "mistake": "Using Sergey in attack rallies",
+      "why_bad": "His defensive skill bumps out attack skills from other joiners",
+      "impact": "Reduces entire rally's damage output",
+      "fix": "Use Jessie/Jeronimo for attacks, save Sergey for defense"
+    },
+    {
+      "mistake": "Putting wrong hero in slot 1 when joining",
+      "why_bad": "Only leftmost hero's top-right skill matters when joining",
+      "impact": "Contributing wrong skill type",
+      "fix": "Always put your joiner hero in slot 1 (leftmost position)"
+    },
+    {
+      "mistake": "Spreading expedition manuals across all heroes",
+      "why_bad": "Only top 4 highest LEVEL skills matter in rallies",
+      "impact": "Having many L3 skills is worse than having one L5 skill",
+      "fix": "Focus manuals on your primary joiner hero until L5"
+    },
+    {
+      "mistake": "Joining rallies with random heroes",
+      "why_bad": "Random skills may hurt the rally more than help",
+      "impact": "Your bad skill could bump out someone's good skill",
+      "fix": "Either use correct joiner hero OR join with troops only"
+    },
+    {
+      "mistake": "Confusing exploration vs expedition skills",
+      "why_bad": "Using exploration heroes in PvP or vice versa",
+      "impact": "Wrong skills active for the content",
+      "fix": "Check which side of skill screen matters for your content"
+    },
+    {
+      "mistake": "Not having a defense joiner ready",
+      "why_bad": "When castle is attacked, you need defense skills",
+      "impact": "Poor defense performance when reinforcing",
+      "fix": "Level Sergey's expedition skills even if you focus on attack"
+    }
+  ],
+
+  "quick_reference": {
+    "joining_attack_rally": {
+      "slot_1_hero": "Jessie or Jeronimo (attack skill)",
+      "if_no_good_hero": "Remove all heroes, join with troops only"
+    },
+    "joining_defense": {
+      "slot_1_hero": "Sergey (defense skill)",
+      "if_no_good_hero": "Any hero with defensive top-right skill"
+    },
+    "leading_rally": {
+      "heroes": "Your best expedition-skilled heroes",
+      "formation": "Match classes to your troop composition"
+    },
+    "exploration": {
+      "heroes": "Tank + Healer + DPS",
+      "skills_used": "Exploration skills (left side)"
+    }
+  }
+}

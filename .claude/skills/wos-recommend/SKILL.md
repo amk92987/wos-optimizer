@@ -15,6 +15,10 @@ Analyzes user's saved heroes and profile to provide prioritized upgrade recommen
 2. **User Heroes**: `wos.db` (owned heroes with levels, stars, skills)
 3. **Hero Data**: `data/heroes.json` (tier ratings, classes, generations)
 4. **Verified Mechanics**: `data/WOS_REFERENCE.md`
+5. **Upgrade Costs**: `data/upgrades/*.json` (cost-aware recommendations)
+6. **Explanation System**: `data/explanation_builder.json` (how to explain recs)
+7. **Confidence Scoring**: `data/confidence_scoring.json` (grade recommendations)
+8. **Combat Synergy**: `data/synergy_model.json` (context-aware weights)
 
 ## Instructions
 
@@ -38,7 +42,7 @@ When generating recommendations:
 ### Joiner Role Bonus
 - If user prioritizes Rally/SvS AND doesn't have Jessie leveled → HIGH priority
 - If user prioritizes Garrison AND doesn't have Sergey leveled → HIGH priority
-- Reason: Only their top-right skill matters when joining
+- Reason: Only their expedition skill matters when joining (leftmost hero)
 
 ### Leader Role Bonus
 - Jeronimo gets bonus if user prioritizes Rally (his 9 skills buff entire rally)
@@ -56,9 +60,16 @@ Gen diff = CurrentGen - HeroGen
 Exception: S+ tier heroes add +0.2 relevance
 ```
 
+### Hero Skill System
+Each hero has two skill types:
+- **Exploration skills** (left side of screen) - Upgraded with Exploration Manuals - for PvE
+- **Expedition skills** (right side of screen) - Upgraded with Expedition Manuals - for PvP
+- Both scale 1-5 with equal % increments per level
+- Manual costs increase per level
+
 ### Skill Priority (for PvP-focused users)
 - Expedition skills > Exploration skills
-- First hero's top-right expedition skill (joiner role) is CRITICAL
+- Leftmost hero's TOP-RIGHT expedition skill (joiner role) is CRITICAL
 
 ## Recommendation Categories
 
@@ -88,7 +99,7 @@ Exception: S+ tier heroes add +0.2 relevance
 **Resources**: Hero EXP items
 
 ### 2. [HIGH] Unlock Jessie
-**Reason**: Best attack joiner. Her top-right skill (+25% DMG) applies when joining rallies.
+**Reason**: Best attack joiner. Her expedition skill (+25% DMG) applies when joining rallies (leftmost slot).
 **Resources**: Hero shards from events
 
 ### 3. [MEDIUM] Upgrade Natalia's Expedition Skill 1 to Lv 4

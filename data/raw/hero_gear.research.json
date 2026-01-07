@@ -1,0 +1,155 @@
+{
+  "system": "hero_gear",
+  "retrieved_at": "2026-01-07T00:00:00Z",
+  "sources": [
+    {
+      "source_id": "SRC_WHITEOUTDATA_HERO_GEAR_XP",
+      "url": "https://whiteoutdata.com/data/hero-gear-xp-chart/",
+      "confidence": "A"
+    },
+    {
+      "source_id": "SRC_WHITEOUTDATA_MASTERY",
+      "url": "https://whiteoutdata.com/others/mastery-forging/",
+      "confidence": "A"
+    },
+    {
+      "source_id": "SRC_WIKI_HERO_GEAR",
+      "url": "https://www.whiteoutsurvival.wiki/hero-gears/hero-gear/",
+      "confidence": "A"
+    },
+    {
+      "source_id": "SRC_WHITEOUTAPP_HERO_GEAR",
+      "url": "https://whiteoutsurvival.app/gears/hero-gears/",
+      "confidence": "A"
+    }
+  ],
+
+  "overview": {
+    "unlock_requirement": "Furnace Level 15",
+    "gear_types": ["weapon", "helmet", "armor", "boots", "ring", "amulet"],
+    "rarity_tiers": ["grey", "green", "blue", "purple", "gold", "mythic", "legendary"],
+    "max_enhancement_level": 100,
+    "max_mastery_level": 20
+  },
+
+  "gear_sacrifice_xp": {
+    "description": "Enhancement XP gained when sacrificing gear",
+    "values": {
+      "grey": 10,
+      "green": 30,
+      "blue": 60,
+      "purple": 150
+    },
+    "source": "SRC_WIKI_HERO_GEAR"
+  },
+
+  "enhancement_xp_per_level": {
+    "description": "XP required to reach each enhancement level (1-100)",
+    "note": "Pattern: roughly linear increase, ~24x growth from L1 to L100",
+    "source": "SRC_WHITEOUTDATA_HERO_GEAR_XP",
+    "sample_values": {
+      "1": 10, "2": 15, "3": 20, "10": 55, "20": 105, "30": 160,
+      "33": 190, "34": 200, "35": 210, "36": 220,
+      "43": 330, "53": 530, "63": 770,
+      "66": 860, "67": 890, "68": 920, "69": 950,
+      "76": 1230, "86": 1700, "96": 2200, "100": 2400
+    },
+    "full_table_needed": true
+  },
+
+  "mastery_forging": {
+    "description": "Gold gear enhancement system using Essence Stones",
+    "unlock_requirements": {
+      "furnace_level": 20,
+      "gear_enhancement_level": 20
+    },
+    "levels": [
+      {"level": 1, "essence_stones": 10, "mythic_gear": 0},
+      {"level": 2, "essence_stones": 20, "mythic_gear": 0},
+      {"level": 3, "essence_stones": 30, "mythic_gear": 0},
+      {"level": 4, "essence_stones": 40, "mythic_gear": 0},
+      {"level": 5, "essence_stones": 50, "mythic_gear": 0},
+      {"level": 6, "essence_stones": 60, "mythic_gear": 0},
+      {"level": 7, "essence_stones": 70, "mythic_gear": 0},
+      {"level": 8, "essence_stones": 80, "mythic_gear": 0},
+      {"level": 9, "essence_stones": 90, "mythic_gear": 0},
+      {"level": 10, "essence_stones": 100, "mythic_gear": 0},
+      {"level": 11, "essence_stones": 110, "mythic_gear": 1},
+      {"level": 12, "essence_stones": 120, "mythic_gear": 2},
+      {"level": 13, "essence_stones": 130, "mythic_gear": 3},
+      {"level": 14, "essence_stones": 140, "mythic_gear": 4},
+      {"level": 15, "essence_stones": 150, "mythic_gear": 5},
+      {"level": 16, "essence_stones": 160, "mythic_gear": 6},
+      {"level": 17, "essence_stones": 170, "mythic_gear": 7},
+      {"level": 18, "essence_stones": 180, "mythic_gear": 8},
+      {"level": 19, "essence_stones": 190, "mythic_gear": 9},
+      {"level": 20, "essence_stones": 200, "mythic_gear": 10}
+    ],
+    "totals": {
+      "total_essence_stones": 2100,
+      "total_mythic_gear": 55
+    },
+    "source": "SRC_WHITEOUTDATA_MASTERY"
+  },
+
+  "mythic_gear_upgrade": {
+    "description": "Mythic gear requires XP, Legendary Gear, and Mithril",
+    "source": "SRC_WHITEOUTAPP_HERO_GEAR",
+    "milestone_costs": {
+      "legendary_gear": {
+        "1": 2, "20": 3, "40": 5, "60": 5, "80": 10, "100": 10
+      },
+      "mithril": {
+        "1": 0, "20": 10, "40": 20, "60": 30, "80": 40, "100": 50
+      }
+    },
+    "xp_range": {
+      "level_2": 2500,
+      "level_99": 9300,
+      "pattern": "~50 XP increase per level between milestones"
+    }
+  },
+
+  "legendary_ascension": {
+    "description": "Ascend Mythic gear to Legendary tier",
+    "requirements": {
+      "mythic_enhancement_level": 100,
+      "mythic_mastery_level": 10,
+      "mythic_gear_sacrifice": 2
+    },
+    "source": "SRC_WIKI_HERO_GEAR"
+  },
+
+  "essence_stone_sources": {
+    "description": "Where to obtain Essence Stones",
+    "sources": [
+      "Bear Hunt",
+      "Intel Missions",
+      "Growth Missions",
+      "Mystery Shop",
+      "Foundry Shop",
+      "Arena Shop",
+      "VIP Shop",
+      "Frostdragon Tyrant Shop",
+      "Canyon Shop",
+      "Tundra Trading Station",
+      "Alliance Mobilization",
+      "Mia Fortune",
+      "Chests",
+      "Packs"
+    ],
+    "source": "SRC_WIKI_ESSENCE_STONES"
+  },
+
+  "reforge_mechanics": {
+    "enhancement_reforge": {
+      "description": "Reset enhancement level",
+      "refund": "100% of XP and items"
+    },
+    "mastery_reforge": {
+      "description": "Reset mastery level (Legendary gear)",
+      "refund": "50% of Essence Stones",
+      "note": "Also resets to Enhancement Level 0"
+    }
+  }
+}

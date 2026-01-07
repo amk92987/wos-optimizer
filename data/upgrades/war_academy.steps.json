@@ -1,0 +1,1460 @@
+{
+  "system": "war_academy",
+  "unit": "level",
+  "currencies": [
+    "fire_crystal_shards",
+    "refined_fire_crystals",
+    "meat",
+    "wood",
+    "coal",
+    "iron"
+  ],
+  "generated_at": "2026-01-07T19:28:25.547947Z",
+  "notes": [
+    "Each research applies to all 3 troop types (Infantry, Marksman, Lancer)",
+    "Prerequisites refer to Furnace Core building level",
+    "Refined Fire Crystals appear starting at FC5-1"
+  ],
+  "edges": [
+    {
+      "upgrade_id": "war_academy:FC1-0->FC1-1",
+      "from": {
+        "level": "FC1-0"
+      },
+      "to": {
+        "level": "FC1-1"
+      },
+      "cost": {
+        "fire_crystal_shards": 0,
+        "refined_fire_crystals": 0,
+        "meat": 0,
+        "wood": 0,
+        "coal": 0,
+        "iron": 0
+      },
+      "prereq": {
+        "furnace_fc_level": "FC1"
+      },
+      "time_seconds": 2,
+      "power_gain": 6888,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC1-0"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC1-1->FC1-2",
+      "from": {
+        "level": "FC1-1"
+      },
+      "to": {
+        "level": "FC1-2"
+      },
+      "cost": {
+        "fire_crystal_shards": 71,
+        "refined_fire_crystals": 0,
+        "meat": 36000000,
+        "wood": 36000000,
+        "coal": 7200000,
+        "iron": 1800000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC2"
+      },
+      "time_seconds": 155520,
+      "power_gain": 6888,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC1-1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC1-2->FC1-3",
+      "from": {
+        "level": "FC1-2"
+      },
+      "to": {
+        "level": "FC1-3"
+      },
+      "cost": {
+        "fire_crystal_shards": 71,
+        "refined_fire_crystals": 0,
+        "meat": 36000000,
+        "wood": 36000000,
+        "coal": 7200000,
+        "iron": 1800000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC2"
+      },
+      "time_seconds": 155520,
+      "power_gain": 6888,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC1-2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC1-3->FC1-4",
+      "from": {
+        "level": "FC1-3"
+      },
+      "to": {
+        "level": "FC1-4"
+      },
+      "cost": {
+        "fire_crystal_shards": 71,
+        "refined_fire_crystals": 0,
+        "meat": 36000000,
+        "wood": 36000000,
+        "coal": 7200000,
+        "iron": 1800000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC2"
+      },
+      "time_seconds": 155520,
+      "power_gain": 6888,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC1-3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC1-4->FC2-0",
+      "from": {
+        "level": "FC1-4"
+      },
+      "to": {
+        "level": "FC2-0"
+      },
+      "cost": {
+        "fire_crystal_shards": 71,
+        "refined_fire_crystals": 0,
+        "meat": 36000000,
+        "wood": 36000000,
+        "coal": 7200000,
+        "iron": 1800000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC2"
+      },
+      "time_seconds": 155520,
+      "power_gain": 6888,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC1-4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC2-0->FC2-1",
+      "from": {
+        "level": "FC2-0"
+      },
+      "to": {
+        "level": "FC2-1"
+      },
+      "cost": {
+        "fire_crystal_shards": 71,
+        "refined_fire_crystals": 0,
+        "meat": 36000000,
+        "wood": 36000000,
+        "coal": 7200000,
+        "iron": 1800000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC2"
+      },
+      "time_seconds": 155520,
+      "power_gain": 6888,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC2-0"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC2-1->FC2-2",
+      "from": {
+        "level": "FC2-1"
+      },
+      "to": {
+        "level": "FC2-2"
+      },
+      "cost": {
+        "fire_crystal_shards": 107,
+        "refined_fire_crystals": 0,
+        "meat": 39000000,
+        "wood": 39000000,
+        "coal": 7900000,
+        "iron": 1900000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC3"
+      },
+      "time_seconds": 190080,
+      "power_gain": 6888,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC2-1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC2-2->FC2-3",
+      "from": {
+        "level": "FC2-2"
+      },
+      "to": {
+        "level": "FC2-3"
+      },
+      "cost": {
+        "fire_crystal_shards": 107,
+        "refined_fire_crystals": 0,
+        "meat": 39000000,
+        "wood": 39000000,
+        "coal": 7900000,
+        "iron": 1900000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC3"
+      },
+      "time_seconds": 190080,
+      "power_gain": 6888,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC2-2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC2-3->FC2-4",
+      "from": {
+        "level": "FC2-3"
+      },
+      "to": {
+        "level": "FC2-4"
+      },
+      "cost": {
+        "fire_crystal_shards": 107,
+        "refined_fire_crystals": 0,
+        "meat": 39000000,
+        "wood": 39000000,
+        "coal": 7900000,
+        "iron": 1900000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC3"
+      },
+      "time_seconds": 190080,
+      "power_gain": 6888,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC2-3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC2-4->FC3-0",
+      "from": {
+        "level": "FC2-4"
+      },
+      "to": {
+        "level": "FC3-0"
+      },
+      "cost": {
+        "fire_crystal_shards": 107,
+        "refined_fire_crystals": 0,
+        "meat": 39000000,
+        "wood": 39000000,
+        "coal": 7900000,
+        "iron": 1900000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC3"
+      },
+      "time_seconds": 190080,
+      "power_gain": 6888,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC2-4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC3-0->FC3-1",
+      "from": {
+        "level": "FC3-0"
+      },
+      "to": {
+        "level": "FC3-1"
+      },
+      "cost": {
+        "fire_crystal_shards": 107,
+        "refined_fire_crystals": 0,
+        "meat": 39000000,
+        "wood": 39000000,
+        "coal": 7900000,
+        "iron": 1900000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC3"
+      },
+      "time_seconds": 190080,
+      "power_gain": 7584,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC3-0"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC3-1->FC3-2",
+      "from": {
+        "level": "FC3-1"
+      },
+      "to": {
+        "level": "FC3-2"
+      },
+      "cost": {
+        "fire_crystal_shards": 126,
+        "refined_fire_crystals": 0,
+        "meat": 41000000,
+        "wood": 41000000,
+        "coal": 8200000,
+        "iron": 2000000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC4"
+      },
+      "time_seconds": 206160,
+      "power_gain": 7584,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC3-1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC3-2->FC3-3",
+      "from": {
+        "level": "FC3-2"
+      },
+      "to": {
+        "level": "FC3-3"
+      },
+      "cost": {
+        "fire_crystal_shards": 126,
+        "refined_fire_crystals": 0,
+        "meat": 41000000,
+        "wood": 41000000,
+        "coal": 8200000,
+        "iron": 2000000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC4"
+      },
+      "time_seconds": 206160,
+      "power_gain": 7584,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC3-2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC3-3->FC3-4",
+      "from": {
+        "level": "FC3-3"
+      },
+      "to": {
+        "level": "FC3-4"
+      },
+      "cost": {
+        "fire_crystal_shards": 126,
+        "refined_fire_crystals": 0,
+        "meat": 41000000,
+        "wood": 41000000,
+        "coal": 8200000,
+        "iron": 2000000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC4"
+      },
+      "time_seconds": 206160,
+      "power_gain": 7584,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC3-3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC3-4->FC4-0",
+      "from": {
+        "level": "FC3-4"
+      },
+      "to": {
+        "level": "FC4-0"
+      },
+      "cost": {
+        "fire_crystal_shards": 126,
+        "refined_fire_crystals": 0,
+        "meat": 41000000,
+        "wood": 41000000,
+        "coal": 8200000,
+        "iron": 2000000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC4"
+      },
+      "time_seconds": 206160,
+      "power_gain": 7584,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC3-4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC4-0->FC4-1",
+      "from": {
+        "level": "FC4-0"
+      },
+      "to": {
+        "level": "FC4-1"
+      },
+      "cost": {
+        "fire_crystal_shards": 126,
+        "refined_fire_crystals": 0,
+        "meat": 41000000,
+        "wood": 41000000,
+        "coal": 8200000,
+        "iron": 2000000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC4"
+      },
+      "time_seconds": 206160,
+      "power_gain": 7584,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC4-0"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC4-1->FC4-2",
+      "from": {
+        "level": "FC4-1"
+      },
+      "to": {
+        "level": "FC4-2"
+      },
+      "cost": {
+        "fire_crystal_shards": 150,
+        "refined_fire_crystals": 0,
+        "meat": 42000000,
+        "wood": 42000000,
+        "coal": 8200000,
+        "iron": 2100000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC5"
+      },
+      "time_seconds": 241920,
+      "power_gain": 7584,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC4-1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC4-2->FC4-3",
+      "from": {
+        "level": "FC4-2"
+      },
+      "to": {
+        "level": "FC4-3"
+      },
+      "cost": {
+        "fire_crystal_shards": 150,
+        "refined_fire_crystals": 0,
+        "meat": 42000000,
+        "wood": 42000000,
+        "coal": 8200000,
+        "iron": 2100000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC5"
+      },
+      "time_seconds": 241920,
+      "power_gain": 7584,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC4-2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC4-3->FC4-4",
+      "from": {
+        "level": "FC4-3"
+      },
+      "to": {
+        "level": "FC4-4"
+      },
+      "cost": {
+        "fire_crystal_shards": 150,
+        "refined_fire_crystals": 0,
+        "meat": 42000000,
+        "wood": 42000000,
+        "coal": 8200000,
+        "iron": 2100000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC5"
+      },
+      "time_seconds": 241920,
+      "power_gain": 7584,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC4-3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC4-4->FC5-0",
+      "from": {
+        "level": "FC4-4"
+      },
+      "to": {
+        "level": "FC5-0"
+      },
+      "cost": {
+        "fire_crystal_shards": 150,
+        "refined_fire_crystals": 0,
+        "meat": 42000000,
+        "wood": 42000000,
+        "coal": 8200000,
+        "iron": 2100000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC5"
+      },
+      "time_seconds": 241920,
+      "power_gain": 7584,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC4-4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC5-0->FC5-1",
+      "from": {
+        "level": "FC5-0"
+      },
+      "to": {
+        "level": "FC5-1"
+      },
+      "cost": {
+        "fire_crystal_shards": 150,
+        "refined_fire_crystals": 0,
+        "meat": 42000000,
+        "wood": 42000000,
+        "coal": 8200000,
+        "iron": 2100000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC5"
+      },
+      "time_seconds": 241920,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC5-0"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC5-1->FC5-2",
+      "from": {
+        "level": "FC5-1"
+      },
+      "to": {
+        "level": "FC5-2"
+      },
+      "cost": {
+        "fire_crystal_shards": 90,
+        "refined_fire_crystals": 4,
+        "meat": 48000000,
+        "wood": 48000000,
+        "coal": 9600000,
+        "iron": 2400000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC6"
+      },
+      "time_seconds": 259200,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC5-1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC5-2->FC5-3",
+      "from": {
+        "level": "FC5-2"
+      },
+      "to": {
+        "level": "FC5-3"
+      },
+      "cost": {
+        "fire_crystal_shards": 90,
+        "refined_fire_crystals": 4,
+        "meat": 48000000,
+        "wood": 48000000,
+        "coal": 9600000,
+        "iron": 2400000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC6"
+      },
+      "time_seconds": 259200,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC5-2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC5-3->FC5-4",
+      "from": {
+        "level": "FC5-3"
+      },
+      "to": {
+        "level": "FC5-4"
+      },
+      "cost": {
+        "fire_crystal_shards": 90,
+        "refined_fire_crystals": 4,
+        "meat": 48000000,
+        "wood": 48000000,
+        "coal": 9600000,
+        "iron": 2400000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC6"
+      },
+      "time_seconds": 259200,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC5-3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC5-4->FC6-0",
+      "from": {
+        "level": "FC5-4"
+      },
+      "to": {
+        "level": "FC6-0"
+      },
+      "cost": {
+        "fire_crystal_shards": 90,
+        "refined_fire_crystals": 4,
+        "meat": 48000000,
+        "wood": 48000000,
+        "coal": 9600000,
+        "iron": 2400000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC6"
+      },
+      "time_seconds": 259200,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC5-4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC6-0->FC6-1",
+      "from": {
+        "level": "FC6-0"
+      },
+      "to": {
+        "level": "FC6-1"
+      },
+      "cost": {
+        "fire_crystal_shards": 45,
+        "refined_fire_crystals": 9,
+        "meat": 48000000,
+        "wood": 48000000,
+        "coal": 9600000,
+        "iron": 2400000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC6"
+      },
+      "time_seconds": 259200,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC6-0"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC6-1->FC6-2",
+      "from": {
+        "level": "FC6-1"
+      },
+      "to": {
+        "level": "FC6-2"
+      },
+      "cost": {
+        "fire_crystal_shards": 108,
+        "refined_fire_crystals": 6,
+        "meat": 54000000,
+        "wood": 54000000,
+        "coal": 10000000,
+        "iron": 2700000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC7"
+      },
+      "time_seconds": 310560,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC6-1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC6-2->FC6-3",
+      "from": {
+        "level": "FC6-2"
+      },
+      "to": {
+        "level": "FC6-3"
+      },
+      "cost": {
+        "fire_crystal_shards": 108,
+        "refined_fire_crystals": 6,
+        "meat": 54000000,
+        "wood": 54000000,
+        "coal": 10000000,
+        "iron": 2700000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC7"
+      },
+      "time_seconds": 310560,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC6-2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC6-3->FC6-4",
+      "from": {
+        "level": "FC6-3"
+      },
+      "to": {
+        "level": "FC6-4"
+      },
+      "cost": {
+        "fire_crystal_shards": 108,
+        "refined_fire_crystals": 6,
+        "meat": 54000000,
+        "wood": 54000000,
+        "coal": 10000000,
+        "iron": 2700000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC7"
+      },
+      "time_seconds": 310560,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC6-3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC6-4->FC7-0",
+      "from": {
+        "level": "FC6-4"
+      },
+      "to": {
+        "level": "FC7-0"
+      },
+      "cost": {
+        "fire_crystal_shards": 108,
+        "refined_fire_crystals": 6,
+        "meat": 54000000,
+        "wood": 54000000,
+        "coal": 10000000,
+        "iron": 2700000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC7"
+      },
+      "time_seconds": 310560,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC6-4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC7-0->FC7-1",
+      "from": {
+        "level": "FC7-0"
+      },
+      "to": {
+        "level": "FC7-1"
+      },
+      "cost": {
+        "fire_crystal_shards": 54,
+        "refined_fire_crystals": 13,
+        "meat": 54000000,
+        "wood": 54000000,
+        "coal": 10000000,
+        "iron": 2700000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC7"
+      },
+      "time_seconds": 310560,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC7-0"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC7-1->FC7-2",
+      "from": {
+        "level": "FC7-1"
+      },
+      "to": {
+        "level": "FC7-2"
+      },
+      "cost": {
+        "fire_crystal_shards": 108,
+        "refined_fire_crystals": 9,
+        "meat": 66000000,
+        "wood": 66000000,
+        "coal": 13000000,
+        "iron": 3300000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC8"
+      },
+      "time_seconds": 345600,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC7-1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC7-2->FC7-3",
+      "from": {
+        "level": "FC7-2"
+      },
+      "to": {
+        "level": "FC7-3"
+      },
+      "cost": {
+        "fire_crystal_shards": 108,
+        "refined_fire_crystals": 9,
+        "meat": 66000000,
+        "wood": 66000000,
+        "coal": 13000000,
+        "iron": 3300000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC8"
+      },
+      "time_seconds": 345600,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC7-2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC7-3->FC7-4",
+      "from": {
+        "level": "FC7-3"
+      },
+      "to": {
+        "level": "FC7-4"
+      },
+      "cost": {
+        "fire_crystal_shards": 108,
+        "refined_fire_crystals": 9,
+        "meat": 66000000,
+        "wood": 66000000,
+        "coal": 13000000,
+        "iron": 3300000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC8"
+      },
+      "time_seconds": 345600,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC7-3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC7-4->FC8-0",
+      "from": {
+        "level": "FC7-4"
+      },
+      "to": {
+        "level": "FC8-0"
+      },
+      "cost": {
+        "fire_crystal_shards": 108,
+        "refined_fire_crystals": 9,
+        "meat": 66000000,
+        "wood": 66000000,
+        "coal": 13000000,
+        "iron": 3300000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC8"
+      },
+      "time_seconds": 345600,
+      "power_gain": 8112,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC7-4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC8-0->FC8-1",
+      "from": {
+        "level": "FC8-0"
+      },
+      "to": {
+        "level": "FC8-1"
+      },
+      "cost": {
+        "fire_crystal_shards": 54,
+        "refined_fire_crystals": 19,
+        "meat": 66000000,
+        "wood": 66000000,
+        "coal": 13000000,
+        "iron": 3300000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC8"
+      },
+      "time_seconds": 345600,
+      "power_gain": 8664,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC8-0"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC8-1->FC8-2",
+      "from": {
+        "level": "FC8-1"
+      },
+      "to": {
+        "level": "FC8-2"
+      },
+      "cost": {
+        "fire_crystal_shards": 126,
+        "refined_fire_crystals": 13,
+        "meat": 72000000,
+        "wood": 72000000,
+        "coal": 14000000,
+        "iron": 3600000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC9"
+      },
+      "time_seconds": 223200,
+      "power_gain": 8664,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC8-1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC8-2->FC8-3",
+      "from": {
+        "level": "FC8-2"
+      },
+      "to": {
+        "level": "FC8-3"
+      },
+      "cost": {
+        "fire_crystal_shards": 126,
+        "refined_fire_crystals": 13,
+        "meat": 72000000,
+        "wood": 72000000,
+        "coal": 14000000,
+        "iron": 3600000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC9"
+      },
+      "time_seconds": 223200,
+      "power_gain": 8664,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC8-2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC8-3->FC8-4",
+      "from": {
+        "level": "FC8-3"
+      },
+      "to": {
+        "level": "FC8-4"
+      },
+      "cost": {
+        "fire_crystal_shards": 126,
+        "refined_fire_crystals": 13,
+        "meat": 72000000,
+        "wood": 72000000,
+        "coal": 14000000,
+        "iron": 3600000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC9"
+      },
+      "time_seconds": 223200,
+      "power_gain": 8664,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC8-3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC8-4->FC9-0",
+      "from": {
+        "level": "FC8-4"
+      },
+      "to": {
+        "level": "FC9-0"
+      },
+      "cost": {
+        "fire_crystal_shards": 126,
+        "refined_fire_crystals": 13,
+        "meat": 72000000,
+        "wood": 72000000,
+        "coal": 14000000,
+        "iron": 3600000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC9"
+      },
+      "time_seconds": 223200,
+      "power_gain": 8784,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC8-4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC9-0->FC9-1",
+      "from": {
+        "level": "FC9-0"
+      },
+      "to": {
+        "level": "FC9-1"
+      },
+      "cost": {
+        "fire_crystal_shards": 63,
+        "refined_fire_crystals": 27,
+        "meat": 72000000,
+        "wood": 72000000,
+        "coal": 14000000,
+        "iron": 3600000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC9"
+      },
+      "time_seconds": 223200,
+      "power_gain": 8664,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC9-0"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC9-1->FC9-2",
+      "from": {
+        "level": "FC9-1"
+      },
+      "to": {
+        "level": "FC9-2"
+      },
+      "cost": {
+        "fire_crystal_shards": 157,
+        "refined_fire_crystals": 31,
+        "meat": 84000000,
+        "wood": 84000000,
+        "coal": 16000000,
+        "iron": 7200000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC10"
+      },
+      "time_seconds": 345600,
+      "power_gain": 8664,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC9-1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC9-2->FC9-3",
+      "from": {
+        "level": "FC9-2"
+      },
+      "to": {
+        "level": "FC9-3"
+      },
+      "cost": {
+        "fire_crystal_shards": 157,
+        "refined_fire_crystals": 31,
+        "meat": 84000000,
+        "wood": 84000000,
+        "coal": 16000000,
+        "iron": 7200000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC10"
+      },
+      "time_seconds": 345600,
+      "power_gain": 8664,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC9-2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC9-3->FC9-4",
+      "from": {
+        "level": "FC9-3"
+      },
+      "to": {
+        "level": "FC9-4"
+      },
+      "cost": {
+        "fire_crystal_shards": 157,
+        "refined_fire_crystals": 31,
+        "meat": 84000000,
+        "wood": 84000000,
+        "coal": 16000000,
+        "iron": 7200000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC10"
+      },
+      "time_seconds": 345600,
+      "power_gain": 8664,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC9-3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "war_academy:FC9-4->FC10-0",
+      "from": {
+        "level": "FC9-4"
+      },
+      "to": {
+        "level": "FC10-0"
+      },
+      "cost": {
+        "fire_crystal_shards": 157,
+        "refined_fire_crystals": 31,
+        "meat": 84000000,
+        "wood": 84000000,
+        "coal": 16000000,
+        "iron": 7200000
+      },
+      "prereq": {
+        "furnace_fc_level": "FC10"
+      },
+      "time_seconds": 345600,
+      "power_gain": 8784,
+      "source_ids": [
+        "SRC_WIKI_WAR_ACADEMY"
+      ],
+      "evidence": {
+        "source_row_key": "FC9-4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    }
+  ]
+}

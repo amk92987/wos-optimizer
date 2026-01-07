@@ -1,0 +1,153 @@
+{
+  "system": "chief_charms",
+  "description": "Chief Charm upgrade edges (per slot, 6 slots total)",
+  "unit": "charm_level",
+  "currencies": ["charm_guide", "charm_design", "jewel_secrets"],
+  "unlock_requirement": "Furnace Level 25",
+  "source_ids": ["SRC_WHITEOUTDATA_CHARMS"],
+  "generated_at": "2026-01-07T00:00:00Z",
+  "notes": "Costs are per charm slot. Multiply by 6 for all slots.",
+
+  "edges": [
+    {
+      "upgrade_id": "chief_charm:0->1",
+      "from": {"level": 0},
+      "to": {"level": 1},
+      "cost": {"charm_guide": 5, "charm_design": 5, "jewel_secrets": 0},
+      "power_gain": 205700,
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:1->2",
+      "from": {"level": 1},
+      "to": {"level": 2},
+      "cost": {"charm_guide": 40, "charm_design": 15, "jewel_secrets": 0},
+      "power_gain": 82300,
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:2->3",
+      "from": {"level": 2},
+      "to": {"level": 3},
+      "cost": {"charm_guide": 60, "charm_design": 40, "jewel_secrets": 0},
+      "power_gain": 82000,
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:3->4",
+      "from": {"level": 3},
+      "to": {"level": 4},
+      "cost": {"charm_guide": 80, "charm_design": 100, "jewel_secrets": 0},
+      "power_gain": 82000,
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:4->5",
+      "from": {"level": 4},
+      "to": {"level": 5},
+      "cost": {"charm_guide": 100, "charm_design": 200, "jewel_secrets": 0},
+      "power_gain": 124000,
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:5->6",
+      "from": {"level": 5},
+      "to": {"level": 6},
+      "cost": {"charm_guide": 120, "charm_design": 300, "jewel_secrets": 0},
+      "power_gain": 124000,
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:6->7",
+      "from": {"level": 6},
+      "to": {"level": 7},
+      "cost": {"charm_guide": 140, "charm_design": 400, "jewel_secrets": 0},
+      "power_gain": 124000,
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:7->8",
+      "from": {"level": 7},
+      "to": {"level": 8},
+      "cost": {"charm_guide": 200, "charm_design": 400, "jewel_secrets": 0},
+      "power_gain": 124000,
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:8->9",
+      "from": {"level": 8},
+      "to": {"level": 9},
+      "cost": {"charm_guide": 300, "charm_design": 400, "jewel_secrets": 0},
+      "power_gain": 124000,
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:9->10",
+      "from": {"level": 9},
+      "to": {"level": 10},
+      "cost": {"charm_guide": 420, "charm_design": 420, "jewel_secrets": 0},
+      "power_gain": 124000,
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:10->11",
+      "from": {"level": 10},
+      "to": {"level": 11},
+      "cost": {"charm_guide": 560, "charm_design": 420, "jewel_secrets": 0},
+      "power_gain": 124000,
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:11->12",
+      "from": {"level": 11},
+      "to": {"level": 12},
+      "cost": {"charm_guide": 580, "charm_design": 450, "jewel_secrets": 15},
+      "power_gain": null,
+      "prereq": {"state_generation": 7},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:12->13",
+      "from": {"level": 12},
+      "to": {"level": 13},
+      "cost": {"charm_guide": 580, "charm_design": 450, "jewel_secrets": 30},
+      "power_gain": null,
+      "prereq": {"state_generation": 7},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:13->14",
+      "from": {"level": 13},
+      "to": {"level": 14},
+      "cost": {"charm_guide": 600, "charm_design": 500, "jewel_secrets": 45},
+      "power_gain": null,
+      "prereq": {"state_generation": 7},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:14->15",
+      "from": {"level": 14},
+      "to": {"level": 15},
+      "cost": {"charm_guide": 600, "charm_design": 500, "jewel_secrets": 70},
+      "power_gain": null,
+      "prereq": {"state_generation": 7},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "chief_charm:15->16",
+      "from": {"level": 15},
+      "to": {"level": 16},
+      "cost": {"charm_guide": 650, "charm_design": 550, "jewel_secrets": 100},
+      "power_gain": null,
+      "prereq": {"state_generation": 7},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    }
+  ],
+
+  "totals": {
+    "per_slot_to_L11": {"charm_guide": 2025, "charm_design": 2700, "jewel_secrets": 0},
+    "per_slot_to_L16": {"charm_guide": 5035, "charm_design": 5150, "jewel_secrets": 260},
+    "all_6_slots_to_L11": {"charm_guide": 12150, "charm_design": 16200, "jewel_secrets": 0},
+    "all_6_slots_to_L16": {"charm_guide": 30210, "charm_design": 30900, "jewel_secrets": 1560}
+  }
+}

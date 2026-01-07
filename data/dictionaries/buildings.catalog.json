@@ -1,0 +1,51 @@
+{
+  "system": "buildings",
+  "notes": [
+    "Complete list of all buildings in Whiteout Survival",
+    "FC (Fire Crystal) buildings are tracked separately in buildings.fc.edges.json",
+    "Max levels are for normal (non-FC) progression"
+  ],
+  "building_types": [
+    {"building_id": "furnace", "name": "Furnace", "category": "core", "max_level": 30},
+
+    {"building_id": "embassy", "name": "Embassy", "category": "military", "max_level": 30},
+    {"building_id": "infirmary", "name": "Infirmary", "category": "military", "max_level": 30},
+    {"building_id": "infantry_camp", "name": "Infantry Camp", "category": "military", "max_level": 30},
+    {"building_id": "lancer_camp", "name": "Lancer Camp", "category": "military", "max_level": 30},
+    {"building_id": "marksman_camp", "name": "Marksman Camp", "category": "military", "max_level": 30},
+    {"building_id": "command_center", "name": "Command Center", "category": "military", "max_level": 30},
+    {"building_id": "barricade", "name": "Barricade", "category": "military", "max_level": 30},
+    {"building_id": "enlistment_office", "name": "Enlistment Office", "category": "military", "max_level": 30},
+
+    {"building_id": "research_center", "name": "Research Center", "category": "progression", "max_level": 30},
+    {"building_id": "hero_hall", "name": "Hero Hall", "category": "progression", "max_level": 30},
+    {"building_id": "dawn_academy", "name": "Dawn Academy", "category": "progression", "max_level": 30},
+    {"building_id": "war_academy", "name": "War Academy", "category": "progression", "max_level": 5},
+
+    {"building_id": "storehouse", "name": "Storehouse", "category": "economy", "max_level": 30},
+    {"building_id": "sawmill", "name": "Sawmill", "category": "economy", "max_level": 30},
+    {"building_id": "coal_mine", "name": "Coal Mine", "category": "economy", "max_level": 30},
+    {"building_id": "iron_mine", "name": "Iron Mine", "category": "economy", "max_level": 30},
+    {"building_id": "hunters_hut", "name": "Hunter's Hut", "category": "economy", "max_level": 30},
+    {"building_id": "cookhouse", "name": "Cookhouse", "category": "economy", "max_level": 30},
+
+    {"building_id": "shelter", "name": "Shelter", "category": "housing", "max_level": 30, "notes": "Multiple shelters exist"},
+    {"building_id": "clinic", "name": "Clinic", "category": "housing", "max_level": 30},
+
+    {"building_id": "arena", "name": "Arena", "category": "other", "max_level": 30},
+    {"building_id": "chiefs_house", "name": "Chief's House", "category": "other", "max_level": 30},
+    {"building_id": "suggestion_box", "name": "Suggestion Box", "category": "other", "max_level": 1},
+    {"building_id": "explorers_cabin", "name": "Explorers Cabin", "category": "other", "max_level": 30},
+    {"building_id": "crystal_laboratory", "name": "Crystal Laboratory", "category": "other", "max_level": 30},
+    {"building_id": "beast_cage", "name": "Beast Cage", "category": "other", "max_level": 30},
+    {"building_id": "lighthouse", "name": "Lighthouse", "category": "other", "max_level": 30}
+  ],
+  "categories": {
+    "core": "Central buildings required for progression",
+    "military": "Training camps and combat-related buildings",
+    "progression": "Research and hero development",
+    "economy": "Resource production and storage",
+    "housing": "Survivor shelters and support",
+    "other": "Special function buildings"
+  }
+}

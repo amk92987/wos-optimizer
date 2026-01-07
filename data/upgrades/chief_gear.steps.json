@@ -1,0 +1,2254 @@
+{
+  "system": "chief_gear",
+  "unit": "step",
+  "currencies": [
+    "hardened_alloy",
+    "polishing_solution",
+    "design_plan",
+    "lunar_amber"
+  ],
+  "generated_at": "2026-01-07T19:16:47.360164Z",
+  "edges": [
+    {
+      "upgrade_id": "chief_gear:red-0:step1->step2",
+      "from": {
+        "tier": "red-0",
+        "step": 1
+      },
+      "to": {
+        "tier": "red-0",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 12500,
+        "polishing_solution": 132,
+        "design_plan": 21,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-0_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-0:step2->step3",
+      "from": {
+        "tier": "red-0",
+        "step": 2
+      },
+      "to": {
+        "tier": "red-0",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 12500,
+        "polishing_solution": 132,
+        "design_plan": 21,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-0_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-0:step3->step4",
+      "from": {
+        "tier": "red-0",
+        "step": 3
+      },
+      "to": {
+        "tier": "red-0",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 12500,
+        "polishing_solution": 132,
+        "design_plan": 21,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-0_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-0:step4->red-1:step1",
+      "from": {
+        "tier": "red-0",
+        "step": 4
+      },
+      "to": {
+        "tier": "red-1",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 12500,
+        "polishing_solution": 134,
+        "design_plan": 22,
+        "lunar_amber": 4
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-0_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-1:step1->step2",
+      "from": {
+        "tier": "red-1",
+        "step": 1
+      },
+      "to": {
+        "tier": "red-1",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 13000,
+        "polishing_solution": 140,
+        "design_plan": 22,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-1_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-1:step2->step3",
+      "from": {
+        "tier": "red-1",
+        "step": 2
+      },
+      "to": {
+        "tier": "red-1",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 13000,
+        "polishing_solution": 140,
+        "design_plan": 22,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-1_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-1:step3->step4",
+      "from": {
+        "tier": "red-1",
+        "step": 3
+      },
+      "to": {
+        "tier": "red-1",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 13000,
+        "polishing_solution": 140,
+        "design_plan": 22,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-1_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-1:step4->red-2:step1",
+      "from": {
+        "tier": "red-1",
+        "step": 4
+      },
+      "to": {
+        "tier": "red-2",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 13000,
+        "polishing_solution": 140,
+        "design_plan": 24,
+        "lunar_amber": 4
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-1_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-2:step1->step2",
+      "from": {
+        "tier": "red-2",
+        "step": 1
+      },
+      "to": {
+        "tier": "red-2",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 13500,
+        "polishing_solution": 147,
+        "design_plan": 23,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-2_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-2:step2->step3",
+      "from": {
+        "tier": "red-2",
+        "step": 2
+      },
+      "to": {
+        "tier": "red-2",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 13500,
+        "polishing_solution": 147,
+        "design_plan": 23,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-2_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-2:step3->step4",
+      "from": {
+        "tier": "red-2",
+        "step": 3
+      },
+      "to": {
+        "tier": "red-2",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 13500,
+        "polishing_solution": 147,
+        "design_plan": 23,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-2_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-2:step4->red-3:step1",
+      "from": {
+        "tier": "red-2",
+        "step": 4
+      },
+      "to": {
+        "tier": "red-3",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 13500,
+        "polishing_solution": 149,
+        "design_plan": 26,
+        "lunar_amber": 4
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-2_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-3:step1->step2",
+      "from": {
+        "tier": "red-3",
+        "step": 1
+      },
+      "to": {
+        "tier": "red-3",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 14000,
+        "polishing_solution": 155,
+        "design_plan": 25,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-3_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-3:step2->step3",
+      "from": {
+        "tier": "red-3",
+        "step": 2
+      },
+      "to": {
+        "tier": "red-3",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 14000,
+        "polishing_solution": 155,
+        "design_plan": 25,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-3_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-3:step3->step4",
+      "from": {
+        "tier": "red-3",
+        "step": 3
+      },
+      "to": {
+        "tier": "red-3",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 14000,
+        "polishing_solution": 155,
+        "design_plan": 25,
+        "lunar_amber": 2
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-3_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red-3:step4->red T1:step1",
+      "from": {
+        "tier": "red-3",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T1",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 14000,
+        "polishing_solution": 155,
+        "design_plan": 25,
+        "lunar_amber": 4
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red-3_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1:step1->step2",
+      "from": {
+        "tier": "red T1",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T1",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 14750,
+        "polishing_solution": 167,
+        "design_plan": 27,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1:step2->step3",
+      "from": {
+        "tier": "red T1",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T1",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 14750,
+        "polishing_solution": 167,
+        "design_plan": 27,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1:step3->step4",
+      "from": {
+        "tier": "red T1",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T1",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 14750,
+        "polishing_solution": 167,
+        "design_plan": 27,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1:step4->red T1-1:step1",
+      "from": {
+        "tier": "red T1",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T1-1",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 14750,
+        "polishing_solution": 169,
+        "design_plan": 29,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-1:step1->step2",
+      "from": {
+        "tier": "red T1-1",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T1-1",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 15250,
+        "polishing_solution": 175,
+        "design_plan": 28,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-1_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-1:step2->step3",
+      "from": {
+        "tier": "red T1-1",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T1-1",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 15250,
+        "polishing_solution": 175,
+        "design_plan": 28,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-1_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-1:step3->step4",
+      "from": {
+        "tier": "red T1-1",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T1-1",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 15250,
+        "polishing_solution": 175,
+        "design_plan": 28,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-1_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-1:step4->red T1-2:step1",
+      "from": {
+        "tier": "red T1-1",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T1-2",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 15250,
+        "polishing_solution": 175,
+        "design_plan": 31,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-1_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-2:step1->step2",
+      "from": {
+        "tier": "red T1-2",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T1-2",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 15750,
+        "polishing_solution": 182,
+        "design_plan": 30,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-2_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-2:step2->step3",
+      "from": {
+        "tier": "red T1-2",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T1-2",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 15750,
+        "polishing_solution": 182,
+        "design_plan": 30,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-2_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-2:step3->step4",
+      "from": {
+        "tier": "red T1-2",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T1-2",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 15750,
+        "polishing_solution": 182,
+        "design_plan": 30,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-2_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-2:step4->red T1-3:step1",
+      "from": {
+        "tier": "red T1-2",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T1-3",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 15750,
+        "polishing_solution": 184,
+        "design_plan": 30,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-2_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-3:step1->step2",
+      "from": {
+        "tier": "red T1-3",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T1-3",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 16250,
+        "polishing_solution": 190,
+        "design_plan": 31,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-3_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-3:step2->step3",
+      "from": {
+        "tier": "red T1-3",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T1-3",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 16250,
+        "polishing_solution": 190,
+        "design_plan": 31,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-3_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-3:step3->step4",
+      "from": {
+        "tier": "red T1-3",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T1-3",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 16250,
+        "polishing_solution": 190,
+        "design_plan": 31,
+        "lunar_amber": 3
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-3_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T1-3:step4->red T2:step1",
+      "from": {
+        "tier": "red T1-3",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T2",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 16250,
+        "polishing_solution": 190,
+        "design_plan": 32,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T1-3_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2:step1->step2",
+      "from": {
+        "tier": "red T2",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T2",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 17000,
+        "polishing_solution": 202,
+        "design_plan": 33,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2:step2->step3",
+      "from": {
+        "tier": "red T2",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T2",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 17000,
+        "polishing_solution": 202,
+        "design_plan": 33,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2:step3->step4",
+      "from": {
+        "tier": "red T2",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T2",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 17000,
+        "polishing_solution": 202,
+        "design_plan": 33,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2:step4->red T2-1:step1",
+      "from": {
+        "tier": "red T2",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T2-1",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 17000,
+        "polishing_solution": 204,
+        "design_plan": 36,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-1:step1->step2",
+      "from": {
+        "tier": "red T2-1",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T2-1",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 17500,
+        "polishing_solution": 210,
+        "design_plan": 35,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-1_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-1:step2->step3",
+      "from": {
+        "tier": "red T2-1",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T2-1",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 17500,
+        "polishing_solution": 210,
+        "design_plan": 35,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-1_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-1:step3->step4",
+      "from": {
+        "tier": "red T2-1",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T2-1",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 17500,
+        "polishing_solution": 210,
+        "design_plan": 35,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-1_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-1:step4->red T2-2:step1",
+      "from": {
+        "tier": "red T2-1",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T2-2",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 17500,
+        "polishing_solution": 210,
+        "design_plan": 35,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-1_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-2:step1->step2",
+      "from": {
+        "tier": "red T2-2",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T2-2",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 18000,
+        "polishing_solution": 217,
+        "design_plan": 36,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-2_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-2:step2->step3",
+      "from": {
+        "tier": "red T2-2",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T2-2",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 18000,
+        "polishing_solution": 217,
+        "design_plan": 36,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-2_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-2:step3->step4",
+      "from": {
+        "tier": "red T2-2",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T2-2",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 18000,
+        "polishing_solution": 217,
+        "design_plan": 36,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-2_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-2:step4->red T2-3:step1",
+      "from": {
+        "tier": "red T2-2",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T2-3",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 18000,
+        "polishing_solution": 219,
+        "design_plan": 37,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-2_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-3:step1->step2",
+      "from": {
+        "tier": "red T2-3",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T2-3",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 18500,
+        "polishing_solution": 225,
+        "design_plan": 37,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-3_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-3:step2->step3",
+      "from": {
+        "tier": "red T2-3",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T2-3",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 18500,
+        "polishing_solution": 225,
+        "design_plan": 37,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-3_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-3:step3->step4",
+      "from": {
+        "tier": "red T2-3",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T2-3",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 18500,
+        "polishing_solution": 225,
+        "design_plan": 37,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-3_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T2-3:step4->red T3:step1",
+      "from": {
+        "tier": "red T2-3",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T3",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 18500,
+        "polishing_solution": 225,
+        "design_plan": 39,
+        "lunar_amber": 5
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T2-3_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3:step1->step2",
+      "from": {
+        "tier": "red T3",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T3",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 19250,
+        "polishing_solution": 237,
+        "design_plan": 40,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3:step2->step3",
+      "from": {
+        "tier": "red T3",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T3",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 19250,
+        "polishing_solution": 237,
+        "design_plan": 40,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3:step3->step4",
+      "from": {
+        "tier": "red T3",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T3",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 19250,
+        "polishing_solution": 237,
+        "design_plan": 40,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3:step4->red T3-1:step1",
+      "from": {
+        "tier": "red T3",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T3-1",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 19250,
+        "polishing_solution": 239,
+        "design_plan": 40,
+        "lunar_amber": 7
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-1:step1->step2",
+      "from": {
+        "tier": "red T3-1",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T3-1",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 20000,
+        "polishing_solution": 247,
+        "design_plan": 41,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-1_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-1:step2->step3",
+      "from": {
+        "tier": "red T3-1",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T3-1",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 20000,
+        "polishing_solution": 247,
+        "design_plan": 41,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-1_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-1:step3->step4",
+      "from": {
+        "tier": "red T3-1",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T3-1",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 20000,
+        "polishing_solution": 247,
+        "design_plan": 41,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-1_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-1:step4->red T3-2:step1",
+      "from": {
+        "tier": "red T3-1",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T3-2",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 20000,
+        "polishing_solution": 249,
+        "design_plan": 42,
+        "lunar_amber": 7
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-1_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-2:step1->step2",
+      "from": {
+        "tier": "red T3-2",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T3-2",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 20750,
+        "polishing_solution": 257,
+        "design_plan": 42,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-2_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-2:step2->step3",
+      "from": {
+        "tier": "red T3-2",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T3-2",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 20750,
+        "polishing_solution": 257,
+        "design_plan": 42,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-2_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-2:step3->step4",
+      "from": {
+        "tier": "red T3-2",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T3-2",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 20750,
+        "polishing_solution": 257,
+        "design_plan": 42,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-2_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-2:step4->red T3-3:step1",
+      "from": {
+        "tier": "red T3-2",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T3-3",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 20750,
+        "polishing_solution": 259,
+        "design_plan": 44,
+        "lunar_amber": 7
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-2_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-3:step1->step2",
+      "from": {
+        "tier": "red T3-3",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T3-3",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 21500,
+        "polishing_solution": 267,
+        "design_plan": 45,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-3_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-3:step2->step3",
+      "from": {
+        "tier": "red T3-3",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T3-3",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 21500,
+        "polishing_solution": 267,
+        "design_plan": 45,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-3_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-3:step3->step4",
+      "from": {
+        "tier": "red T3-3",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T3-3",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 21500,
+        "polishing_solution": 267,
+        "design_plan": 45,
+        "lunar_amber": 6
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-3_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T3-3:step4->red T4-0:step1",
+      "from": {
+        "tier": "red T3-3",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T4-0",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 21500,
+        "polishing_solution": 269,
+        "design_plan": 45,
+        "lunar_amber": 7
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T3-3_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-0:step1->step2",
+      "from": {
+        "tier": "red T4-0",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T4-0",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 24000,
+        "polishing_solution": 300,
+        "design_plan": 50,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-0_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-0:step2->step3",
+      "from": {
+        "tier": "red T4-0",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T4-0",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 24000,
+        "polishing_solution": 300,
+        "design_plan": 50,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-0_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-0:step3->step4",
+      "from": {
+        "tier": "red T4-0",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T4-0",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 24000,
+        "polishing_solution": 300,
+        "design_plan": 50,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-0_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-0:step4->step5",
+      "from": {
+        "tier": "red T4-0",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T4-0",
+        "step": 5
+      },
+      "cost": {
+        "hardened_alloy": 24000,
+        "polishing_solution": 300,
+        "design_plan": 50,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-0_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-0:step5->red T4-1:step1",
+      "from": {
+        "tier": "red T4-0",
+        "step": 5
+      },
+      "to": {
+        "tier": "red T4-1",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 24000,
+        "polishing_solution": 300,
+        "design_plan": 50,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-0_step5"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-1:step1->step2",
+      "from": {
+        "tier": "red T4-1",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T4-1",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 28000,
+        "polishing_solution": 330,
+        "design_plan": 55,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-1_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-1:step2->step3",
+      "from": {
+        "tier": "red T4-1",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T4-1",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 28000,
+        "polishing_solution": 330,
+        "design_plan": 55,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-1_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-1:step3->step4",
+      "from": {
+        "tier": "red T4-1",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T4-1",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 28000,
+        "polishing_solution": 330,
+        "design_plan": 55,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-1_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-1:step4->step5",
+      "from": {
+        "tier": "red T4-1",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T4-1",
+        "step": 5
+      },
+      "cost": {
+        "hardened_alloy": 28000,
+        "polishing_solution": 330,
+        "design_plan": 55,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-1_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-1:step5->red T4-2:step1",
+      "from": {
+        "tier": "red T4-1",
+        "step": 5
+      },
+      "to": {
+        "tier": "red T4-2",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 28000,
+        "polishing_solution": 330,
+        "design_plan": 55,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-1_step5"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-2:step1->step2",
+      "from": {
+        "tier": "red T4-2",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T4-2",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 32000,
+        "polishing_solution": 360,
+        "design_plan": 60,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-2_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-2:step2->step3",
+      "from": {
+        "tier": "red T4-2",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T4-2",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 32000,
+        "polishing_solution": 360,
+        "design_plan": 60,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-2_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-2:step3->step4",
+      "from": {
+        "tier": "red T4-2",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T4-2",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 32000,
+        "polishing_solution": 360,
+        "design_plan": 60,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-2_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-2:step4->step5",
+      "from": {
+        "tier": "red T4-2",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T4-2",
+        "step": 5
+      },
+      "cost": {
+        "hardened_alloy": 32000,
+        "polishing_solution": 360,
+        "design_plan": 60,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-2_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-2:step5->red T4-3:step1",
+      "from": {
+        "tier": "red T4-2",
+        "step": 5
+      },
+      "to": {
+        "tier": "red T4-3",
+        "step": 1
+      },
+      "cost": {
+        "hardened_alloy": 32000,
+        "polishing_solution": 360,
+        "design_plan": 60,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-2_step5"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-3:step1->step2",
+      "from": {
+        "tier": "red T4-3",
+        "step": 1
+      },
+      "to": {
+        "tier": "red T4-3",
+        "step": 2
+      },
+      "cost": {
+        "hardened_alloy": 36000,
+        "polishing_solution": 390,
+        "design_plan": 65,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-3_step1"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-3:step2->step3",
+      "from": {
+        "tier": "red T4-3",
+        "step": 2
+      },
+      "to": {
+        "tier": "red T4-3",
+        "step": 3
+      },
+      "cost": {
+        "hardened_alloy": 36000,
+        "polishing_solution": 390,
+        "design_plan": 65,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-3_step2"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-3:step3->step4",
+      "from": {
+        "tier": "red T4-3",
+        "step": 3
+      },
+      "to": {
+        "tier": "red T4-3",
+        "step": 4
+      },
+      "cost": {
+        "hardened_alloy": 36000,
+        "polishing_solution": 390,
+        "design_plan": 65,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-3_step3"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    },
+    {
+      "upgrade_id": "chief_gear:red T4-3:step4->step5",
+      "from": {
+        "tier": "red T4-3",
+        "step": 4
+      },
+      "to": {
+        "tier": "red T4-3",
+        "step": 5
+      },
+      "cost": {
+        "hardened_alloy": 36000,
+        "polishing_solution": 390,
+        "design_plan": 65,
+        "lunar_amber": 8
+      },
+      "source_ids": [
+        "SRC_WIKI_CHIEF_GEAR"
+      ],
+      "evidence": {
+        "source_row_key": "red T4-3_step4"
+      },
+      "confidence": {
+        "grade": "A",
+        "reason": "direct table row"
+      }
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "description": "Player progression phases based on Furnace level and state age",
+  "version": "1.0",
+  "generated_at": "2026-01-07T00:00:00Z",
+
+  "phases": [
+    {
+      "id": "early_game",
+      "name": "Early Game",
+      "furnace_range": [1, 18],
+      "state_age_days": [0, 54],
+      "characteristics": [
+        "Limited systems unlocked",
+        "Focus on Furnace progression",
+        "Basic resource management",
+        "Heroes Gen 1-2 available"
+      ],
+      "primary_goals": [
+        "Rush Furnace to L19 for Daybreak Island",
+        "Unlock Research Center (Furnace L9)",
+        "Build troop capacity",
+        "Complete early expedition milestones"
+      ],
+      "resource_focus": ["meat", "wood", "coal", "iron"],
+      "bottlenecks": ["speedups", "rss_production"]
+    },
+    {
+      "id": "mid_game",
+      "name": "Mid Game",
+      "furnace_range": [19, 29],
+      "state_age_days": [55, 199],
+      "characteristics": [
+        "Most core systems unlocked",
+        "Pets become available (L18 + 55 days)",
+        "Daybreak Island active (L19)",
+        "Chief Charms unlock (L25)",
+        "Preparing for FC transition"
+      ],
+      "primary_goals": [
+        "Push Furnace to L30 for FC unlock",
+        "Max key research (Tool Enhancement VII)",
+        "Build hero roster (Gen 3-5)",
+        "Develop pet collection",
+        "Establish charm progression"
+      ],
+      "resource_focus": ["meat", "wood", "coal", "iron", "speedups"],
+      "bottlenecks": ["speedups", "hero_shards", "charm_materials"]
+    },
+    {
+      "id": "late_game",
+      "name": "Late Game (FC Era)",
+      "furnace_range": [30, 30],
+      "furnace_fc_range": ["30-1", "FC5-0"],
+      "state_age_days": [200, 400],
+      "characteristics": [
+        "Fire Crystal economy begins",
+        "FC building upgrades dominate",
+        "War Academy progression",
+        "Advanced troop tiers (T9-T10)",
+        "Hero Gear Mastery available"
+      ],
+      "primary_goals": [
+        "FC Furnace progression",
+        "War Academy for troop efficiency",
+        "Hero Gear Mastery leveling",
+        "T10+ troop development",
+        "SvS competitiveness"
+      ],
+      "resource_focus": ["fire_crystal", "refined_fire_crystal", "essence_stone", "speedups"],
+      "bottlenecks": ["fire_crystals", "fc_speedups", "essence_stones"]
+    },
+    {
+      "id": "endgame",
+      "name": "Endgame",
+      "furnace_fc_range": ["FC5-0", "FC10-0"],
+      "state_age_days": [400, null],
+      "characteristics": [
+        "Max tier troops (T11)",
+        "High FC building levels",
+        "Mature hero roster",
+        "Optimizing marginal gains",
+        "Gen 7+ state features"
+      ],
+      "primary_goals": [
+        "Complete FC10 progression",
+        "Max Hero Gear Mastery",
+        "Charm L12-16 (Gen 7+)",
+        "Pet optimization",
+        "Power efficiency for SvS"
+      ],
+      "resource_focus": ["fire_crystal", "refined_fire_crystal", "jewel_secrets", "mythic_gear"],
+      "bottlenecks": ["time", "whale_currencies"]
+    }
+  ],
+
+  "phase_detection_rules": {
+    "description": "How to determine player's current phase",
+    "primary_indicator": "furnace_level",
+    "secondary_indicator": "state_age_days",
+    "rules": [
+      {"condition": "furnace_level < 19", "phase": "early_game"},
+      {"condition": "furnace_level >= 19 AND furnace_level < 30", "phase": "mid_game"},
+      {"condition": "furnace_level == 30 AND furnace_fc_level < 'FC5-0'", "phase": "late_game"},
+      {"condition": "furnace_fc_level >= 'FC5-0'", "phase": "endgame"}
+    ]
+  }
+}

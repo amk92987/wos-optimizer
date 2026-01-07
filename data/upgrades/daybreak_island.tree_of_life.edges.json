@@ -1,0 +1,109 @@
+{
+  "system": "daybreak_island_tree_of_life",
+  "description": "Tree of Life upgrade edges for Daybreak Island",
+  "unit": "tree_level",
+  "currencies": ["life_essence"],
+  "unlock_requirement": "Furnace Level 19, Dock built",
+  "source_ids": ["SRC_ONECHILLEDGAMER_DAYBREAK"],
+  "generated_at": "2026-01-07T00:00:00Z",
+  "notes": "Prosperity requirements must be met via decorations before upgrading",
+
+  "edges": [
+    {
+      "upgrade_id": "tree_of_life:1->2",
+      "from": {"level": 1},
+      "to": {"level": 2},
+      "cost": {"life_essence": 1000},
+      "prereq": {"prosperity": 200},
+      "benefit": {"healing_speed_pct": 30},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "tree_of_life:2->3",
+      "from": {"level": 2},
+      "to": {"level": 3},
+      "cost": {"life_essence": 2500},
+      "prereq": {"prosperity": 600},
+      "benefit": {"healing_speed_pct": 30},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "tree_of_life:3->4",
+      "from": {"level": 3},
+      "to": {"level": 4},
+      "cost": {"life_essence": 5000},
+      "prereq": {"prosperity": 1200},
+      "benefit": {"healing_speed_pct": 30},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "tree_of_life:4->5",
+      "from": {"level": 4},
+      "to": {"level": 5},
+      "cost": {"life_essence": 10000},
+      "prereq": {"prosperity": 2400},
+      "benefit": {"healing_speed_pct": 30},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "tree_of_life:5->6",
+      "from": {"level": 5},
+      "to": {"level": 6},
+      "cost": {"life_essence": 20000},
+      "prereq": {"prosperity": 4800},
+      "benefit": {"troops_health_pct": 5},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "tree_of_life:6->7",
+      "from": {"level": 6},
+      "to": {"level": 7},
+      "cost": {"life_essence": 35000},
+      "prereq": {"prosperity": 8000},
+      "benefit": {"troops_health_pct": 5},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "tree_of_life:7->8",
+      "from": {"level": 7},
+      "to": {"level": 8},
+      "cost": {"life_essence": 50000},
+      "prereq": {"prosperity": 12000},
+      "benefit": {"troops_defense_pct": 5},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "tree_of_life:8->9",
+      "from": {"level": 8},
+      "to": {"level": 9},
+      "cost": {"life_essence": 70000},
+      "prereq": {"prosperity": 16000},
+      "benefit": {"troops_defense_pct": 5},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    },
+    {
+      "upgrade_id": "tree_of_life:9->10",
+      "from": {"level": 9},
+      "to": {"level": 10},
+      "cost": {"life_essence": 100000},
+      "prereq": {"prosperity": 20000},
+      "benefit": {"troops_lethality_pct": 5},
+      "confidence": {"grade": "A", "reason": "direct table row"}
+    }
+  ],
+
+  "totals": {
+    "tree_of_life_1_to_10": {
+      "life_essence": 293500,
+      "wood_equivalent": 211320000
+    }
+  },
+
+  "special_upgrades": {
+    "starry_lighthouse": {
+      "unlock_requirement": "Tree of Life Level 10",
+      "cost": {"life_essence": 50000},
+      "benefit": {"march_speed_pct": 10}
+    }
+  }
+}

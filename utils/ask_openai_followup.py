@@ -21,11 +21,11 @@ client = OpenAI(api_key=api_key)
 SYSTEM_PROMPT = """You are an expert Whiteout Survival (WoS) player.
 
 IMPORTANT: Only use REAL hero names from the game. Here are the actual heroes by generation:
-- Gen 1: Jeronimo (Infantry), Natalia (Infantry), Molly (Lancer), Zinman (Lancer), Sergey (Infantry), Gina (Marksman), Bahiti (Lancer)
+- Gen 1: Jeronimo (Infantry), Natalia (Infantry), Molly (Lancer), Zinman (Lancer), Sergey (Infantry), Gina (Marksman), Bahiti (Lancer), Jessie (Marksman)
 - Gen 2: Flint (Infantry), Philly (Marksman), Alonso (Marksman)
 - Gen 3: Logan (Marksman), Mia (Marksman), Greg (Infantry)
 - Gen 4: Ahmose (Infantry), Reina (Lancer), Lynn (Marksman)
-- Gen 5: Hector (Lancer), Wu Ming (Infantry), Jessie (Marksman)
+- Gen 5: Hector (Lancer), Wu Ming (Infantry)
 - Gen 6: Patrick (Lancer), Charlie (Marksman), Cloris (Lancer)
 - Gen 7: Gordon (Infantry), Renee (Marksman), Eugene (Lancer)
 - Gen 8+: Blanchette (Lancer), Nora, and newer heroes

@@ -36,9 +36,9 @@ logo_path = PROJECT_ROOT / "assets" / "logo.svg"
 
 if not logo_path.exists():
     svg_content = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 50">
-  <text x="5" y="35" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#E8F4F8">❄️ WoS Optimizer</text>
+  <text x="5" y="35" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="#E8F4F8">WoS Optimizer</text>
 </svg>'''
-    logo_path.write_text(svg_content)
+    logo_path.write_text(svg_content, encoding='utf-8')
 
 st.logo(image=str(logo_path), size="large", icon_image=str(logo_path))
 

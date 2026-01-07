@@ -1,0 +1,142 @@
+{
+  "system": "research",
+  "retrieved_at": "2026-01-07T00:00:00Z",
+  "sources": [
+    {
+      "source_id": "SRC_WIKI_RESEARCH",
+      "url": "https://www.whiteoutsurvival.wiki/research/",
+      "confidence": "B"
+    },
+    {
+      "source_id": "SRC_THERIA_RESEARCH",
+      "url": "https://theriagames.com/guide/whiteout-survival-research-center-guide/",
+      "confidence": "B"
+    },
+    {
+      "source_id": "SRC_WHITEOUTDATA_RESEARCH",
+      "url": "https://whiteoutdata.com/buildings/research-center/",
+      "confidence": "B"
+    }
+  ],
+  "data_completeness": "partial",
+  "notes": "Granular per-tech costs are in external calculators/spreadsheets. This file contains structure and totals.",
+
+  "overview": {
+    "building": "Research Center",
+    "unlock_requirement": "Furnace Level 9",
+    "fc_unlock": "Furnace Level 30 (Fire Crystal research)",
+    "currencies": ["meat", "wood", "coal", "iron", "fire_crystal"]
+  },
+
+  "trees": {
+    "growth": {
+      "description": "Development and infrastructure upgrades",
+      "tiers": 7,
+      "priority": "Early game priority, Tool Enhancement VII is critical",
+      "technologies": [
+        {"name": "Tooling Up", "effect": "Reduces building construction time"},
+        {"name": "Tool Enhancement", "effect": "Speeds up research (TOP PRIORITY)", "max_tier": 7},
+        {"name": "Camp Expansion", "effect": "Increases simultaneous troop training capacity"},
+        {"name": "Command Tactics", "effect": "Enables deploying more armies during expeditions"},
+        {"name": "Trainer Tools", "effect": "Reduces troop training time"},
+        {"name": "Bandaging", "effect": "Speeds up infirmary healing"},
+        {"name": "Ward Expansion", "effect": "Increases injured troop capacity (Infirmary)"}
+      ],
+      "total_cost": {
+        "meat": 212530000,
+        "wood": 212530000,
+        "coal": 42050000,
+        "iron": 10650000
+      },
+      "total_time": "883d 4h 16m 13s"
+    },
+    "economy": {
+      "description": "Resource production and gathering efficiency",
+      "tiers": 6,
+      "priority": "Early-mid game for resource flow",
+      "technologies": [
+        {"name": "Food Gathering", "effect": "Increases meat production"},
+        {"name": "Wood Gathering", "effect": "Increases wood production"},
+        {"name": "Coal Mining", "effect": "Increases coal production"},
+        {"name": "Iron Mining", "effect": "Increases iron production"},
+        {"name": "Food Output", "effect": "Increases meat building output"},
+        {"name": "Wood Output", "effect": "Increases wood building output"},
+        {"name": "Coal Output", "effect": "Increases coal building output"},
+        {"name": "Iron Output", "effect": "Increases iron building output"}
+      ],
+      "total_cost": {
+        "meat": 162920000,
+        "wood": 162920000,
+        "coal": 32400000,
+        "iron": 8090000
+      },
+      "total_time": "166d 6h 23m 50s"
+    },
+    "battle": {
+      "description": "Combat and unit improvements",
+      "tiers": 6,
+      "priority": "Power gains, PvP/SvS focus",
+      "technologies": [
+        {"name": "Weapons Prep", "effect": "General attack boost"},
+        {"name": "Reprisal Tactics", "effect": "Counter-attack improvements"},
+        {"name": "Close Combat", "effect": "Melee combat bonuses"},
+        {"name": "Precision Targeting", "effect": "Accuracy improvements"},
+        {"name": "Skirmishing", "effect": "Skirmish battle bonuses"},
+        {"name": "Defensive Formation", "effect": "Defense bonuses"},
+        {"name": "Infantry Attack/Defense", "effect": "Infantry stat boosts"},
+        {"name": "Marksman Attack/Defense", "effect": "Marksman stat boosts"},
+        {"name": "Lancer Attack/Defense", "effect": "Lancer stat boosts"},
+        {"name": "Regimental Expansion", "effect": "Increases troop deployment capacity"}
+      ],
+      "total_cost": "not_documented",
+      "total_time": "not_documented",
+      "notes": "Battle research gives significant Power gains"
+    },
+    "advanced_units": {
+      "description": "Tier 7+ specialized unit research (post-FC unlock)",
+      "categories": [
+        {"name": "Infantry", "units": ["Flame Squad", "Helios Infantry"]},
+        {"name": "Marksman", "units": ["Crystal Vision", "Helios Marksman"]},
+        {"name": "Lancer", "units": ["Blazing Lancer", "Helios Lancer"]}
+      ],
+      "unlock_requirement": "Fire Crystal research (Furnace L30+)"
+    }
+  },
+
+  "strategy_guidance": {
+    "claim_type": "meta",
+    "confidence": "C",
+    "early_game": [
+      "Prioritize Growth tree, especially Tool Enhancement",
+      "Economy tree for steady resource flow",
+      "Unlock Battle tier 1 for foundation"
+    ],
+    "mid_game": [
+      "Tool Enhancement VII is critical milestone",
+      "Balance Economy and Battle based on playstyle"
+    ],
+    "late_game": [
+      "Fire Crystal research for advanced units",
+      "Battle research for Power gains and SvS"
+    ],
+    "general_tip": "When in doubt, Battle > Growth > Economy for power gains"
+  },
+
+  "calculators": [
+    {
+      "name": "Theria Games Research Calculator",
+      "url": "https://theriagames.com/guide/whiteout-survival-research-calculator/",
+      "features": "Per-tech costs, prerequisites"
+    },
+    {
+      "name": "WoSTools Research Calculator",
+      "url": "https://wostools.net/",
+      "features": "Full research system support"
+    },
+    {
+      "name": "WOS Calculator",
+      "url": "https://woscalculator.com/",
+      "features": "Research speed modeling"
+    }
+  ]
+}

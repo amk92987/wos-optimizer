@@ -17,8 +17,8 @@ Provides event-specific lineup recommendations based on verified game mechanics.
 
 ### Rally Structure
 - **Leader**: 3 heroes provide 9 expedition skills (all right-side skills)
-- **Joiners**: Only FIRST hero's TOP-RIGHT expedition skill contributes
-- **Max member skills**: 4 total (can stack if same effect)
+- **Joiners**: Only LEFTMOST hero's TOP-RIGHT expedition skill contributes
+- **Max member skills**: Top 4 highest SKILL LEVEL from all joiners (can stack if same effect)
 
 ### Combat Order
 Infantry fights first → Lancers → Marksmen
@@ -81,10 +81,10 @@ When building a lineup:
 
 ## Best Joiner Heroes
 
-| Role | Hero | Top-Right Skill | Effect |
-|------|------|-----------------|--------|
-| Attack Joiner | Jessie | Stand of Arms | +25% DMG dealt (all troops) |
-| Garrison Joiner | Sergey | Defenders' Edge | -20% DMG taken (all troops) |
+| Role | Hero | Top-Right Skill | Effect per Level (1-5) |
+|------|------|-----------------|------------------------|
+| Attack Joiner | Jessie | Stand of Arms | +5/10/15/20/25% DMG dealt |
+| Garrison Joiner | Sergey | Defenders' Edge | -4/8/12/16/20% DMG taken |
 
 ## Output Format
 

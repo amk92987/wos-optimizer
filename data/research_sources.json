@@ -1,0 +1,202 @@
+{
+  "description": "Whiteout Survival source registry for Research skill",
+  "last_updated": "2026-01-07",
+  "design_principle": "Use official/structured sources for mechanics & costs, community tools for tables/calculators, content creators only for meta (explicitly labeled).",
+
+  "rules": {
+    "rule_1_mechanics_over_meta": "If Wiki/Help Center contradicts YouTube → Wiki wins",
+    "rule_2_tables_over_advice": "If a calculator table exists → use it instead of prose",
+    "rule_3_meta_must_be_labeled": "If source is community/meta → claim_type: meta, confidence_cap: C",
+    "rule_4_cost_data_requires_table": "No guessing costs from text descriptions"
+  },
+
+  "allowed_sources": [
+    {
+      "id": "wos_wiki",
+      "name": "Whiteout Survival Wiki",
+      "tier": 1,
+      "trust": 1.0,
+      "url": "https://www.whiteoutsurvival.wiki/",
+      "alt_url": "https://whiteoutsurvival.fandom.com/",
+      "use_for": ["mechanics", "skill_descriptions", "system_definitions", "unlock_conditions", "static_tables"],
+      "do_not_use_for": ["best_advice_without_meta_label", "exact_late_game_costs_if_calculator_exists"],
+      "confidence_weight": 5,
+      "notes": "Prefer Wiki when answering what something does or how a system works."
+    },
+    {
+      "id": "wos_help",
+      "name": "Official Help / Patch Notes",
+      "tier": 1,
+      "trust": 1.0,
+      "url": null,
+      "use_for": ["rules", "limits", "rally_mechanics", "skill_stacking", "balance_changes"],
+      "do_not_use_for": ["cost_tables"],
+      "confidence_weight": 5,
+      "notes": "Overrides all other sources if a conflict exists. In-game help or official announcements."
+    },
+    {
+      "id": "whiteoutsurvival_app",
+      "name": "whiteoutsurvival.app",
+      "tier": 2,
+      "trust": 0.9,
+      "url": "https://whiteoutsurvival.app/",
+      "endpoints": {
+        "buildings_index": "https://whiteoutsurvival.app/buildings/",
+        "war_academy": "https://whiteoutsurvival.app/buildings/war-academy/",
+        "furnace": "https://whiteoutsurvival.app/buildings/furnace/",
+        "embassy": "https://whiteoutsurvival.app/buildings/embassy/",
+        "infantry_camp": "https://whiteoutsurvival.app/buildings/infantry-camp/",
+        "lancer_camp": "https://whiteoutsurvival.app/buildings/lancer-camp/",
+        "marksman_camp": "https://whiteoutsurvival.app/buildings/marksman-camp/",
+        "command_center": "https://whiteoutsurvival.app/buildings/command-center/",
+        "infirmary": "https://whiteoutsurvival.app/buildings/infirmary/"
+      },
+      "use_for": ["building_costs", "fc_levels", "prerequisites", "war_academy_costs"],
+      "do_not_use_for": ["pvp_advice", "hero_tier_lists"],
+      "confidence_weight": 4,
+      "notes": "Best source for tables-first ingestion of building data. Drop-down enumerations = authoritative max levels."
+    },
+    {
+      "id": "whiteoutdata",
+      "name": "Whiteout Data",
+      "tier": 2,
+      "trust": 0.9,
+      "url": "https://whiteoutdata.com/",
+      "endpoints": {
+        "buildings_index": "https://whiteoutdata.com/category/buildings/",
+        "furnace": "https://whiteoutdata.com/furnace/",
+        "embassy": "https://whiteoutdata.com/embassy/",
+        "infantry_camp": "https://whiteoutdata.com/infantry-camp/",
+        "lancer_camp": "https://whiteoutdata.com/lancer-camp/",
+        "marksman_camp": "https://whiteoutdata.com/marksman-camp/",
+        "research_center": "https://whiteoutdata.com/research-center/",
+        "command_center": "https://whiteoutdata.com/command-center/",
+        "infirmary": "https://whiteoutdata.com/infirmary/",
+        "storehouse": "https://whiteoutdata.com/storehouse/"
+      },
+      "use_for": ["building_costs_l1_l30", "prerequisites"],
+      "do_not_use_for": ["fc_levels", "strategy"],
+      "confidence_weight": 4,
+      "notes": "Good for L1-L30 building data with prereqs."
+    },
+    {
+      "id": "quackulator",
+      "name": "Quackulator",
+      "tier": 2,
+      "trust": 0.85,
+      "url": "https://www.quackulator.com/",
+      "endpoints": {
+        "main": "https://www.quackulator.com/",
+        "chief_gear": "https://www.quackulator.com/chiefgear.php"
+      },
+      "use_for": ["chief_gear_costs", "cost_validation", "building_cost_verification"],
+      "do_not_use_for": ["skill_mechanics"],
+      "confidence_weight": 4,
+      "notes": "Use as validation, not as the primary truth. Good for range-to-range totals."
+    },
+    {
+      "id": "onechilledgamer",
+      "name": "OneChilledGamer",
+      "tier": 2,
+      "trust": 0.85,
+      "url": "https://onechilledgamer.com/",
+      "endpoints": {
+        "troop_calculator": "https://onechilledgamer.com/whiteout-survival-troop-cost-calculator/"
+      },
+      "use_for": ["troop_costs", "training_costs", "promotion_costs", "time_power_points", "event_points"],
+      "do_not_use_for": ["strategic_recommendations_without_meta"],
+      "confidence_weight": 4,
+      "notes": "Ideal for generating troop cost tables. Linear scaling verification."
+    },
+    {
+      "id": "allclash",
+      "name": "All Clash",
+      "tier": 3,
+      "trust": 0.6,
+      "url": "https://www.allclash.com/",
+      "endpoints": {
+        "heroes": "https://www.allclash.com/whiteout-survival-best-heroes-tier-list/",
+        "beginners": "https://www.allclash.com/whiteout-survival-guide/"
+      },
+      "use_for": ["meta_only", "hero_tier_lists", "strategy_guides"],
+      "do_not_use_for": ["mechanics", "costs", "exact_percentages"],
+      "confidence_weight": 3,
+      "notes": "Always tag output as claim_type: meta and cap confidence at C."
+    },
+    {
+      "id": "community_meta",
+      "name": "Community Guides (YouTube/Reddit/Discord)",
+      "tier": 3,
+      "trust": 0.6,
+      "url": null,
+      "use_for": ["meta_only", "meta_trends", "common_strategies", "player_consensus"],
+      "do_not_use_for": ["mechanics", "costs", "exact_percentages"],
+      "confidence_weight": 3,
+      "notes": "Always tag output as claim_type: meta and cap confidence at C."
+    },
+    {
+      "id": "social_early_detection",
+      "name": "Reddit/Discord/Facebook (Early Detection)",
+      "tier": 4,
+      "trust": 0.4,
+      "url": null,
+      "use_for": ["early_patch_detection", "edge_cases", "undocumented_behavior"],
+      "do_not_use_for": ["authoritative_facts", "cost_data"],
+      "confidence_weight": 2,
+      "notes": "Never emit these claims without at least one stronger source."
+    }
+  ],
+
+  "disallowed_sources": [
+    "AI-generated blogs without citations",
+    "SEO spam sites",
+    "Tier lists with no data backing",
+    "Unsourced Google Docs / screenshots"
+  ],
+
+  "fetch_allowed_domains": [
+    "www.whiteoutsurvival.wiki",
+    "whiteoutsurvival.fandom.com",
+    "whiteoutsurvival.app",
+    "whiteoutdata.com",
+    "www.quackulator.com",
+    "onechilledgamer.com",
+    "www.allclash.com",
+    "www.bluestacks.com",
+    "lootbar.gg",
+    "www.ajackof.com"
+  ],
+
+  "topics_to_research": [
+    {
+      "topic": "hero_gear",
+      "subtopics": ["xp_costs", "essence_stones", "mastery_forging"],
+      "best_source_guess": "wos_wiki",
+      "status": "pending"
+    },
+    {
+      "topic": "chief_gear_charms",
+      "subtopics": ["charm_stats", "upgrade_costs"],
+      "best_source_guess": "wos_wiki",
+      "status": "pending"
+    },
+    {
+      "topic": "pets",
+      "subtopics": ["pet_stats", "upgrade_costs", "food_requirements"],
+      "best_source_guess": "wos_wiki",
+      "status": "pending"
+    },
+    {
+      "topic": "research_tree",
+      "subtopics": ["growth", "economy", "battle"],
+      "best_source_guess": "whiteoutsurvival_app",
+      "status": "pending"
+    },
+    {
+      "topic": "daybreak_island",
+      "subtopics": ["buildings", "upgrades", "mechanics"],
+      "best_source_guess": "wos_wiki",
+      "status": "pending"
+    }
+  ]
+}

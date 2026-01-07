@@ -1,0 +1,156 @@
+{
+  "_meta": {
+    "description": "Upgrade Costs Schema - cost-aware recommendation data model",
+    "approach": "tables-first, then formulas for validation",
+    "version": "1.0"
+  },
+
+  "data_model": {
+    "upgrade_edge": {
+      "description": "Every upgrade is an edge from one state to another with costs and benefits",
+      "schema": {
+        "upgrade_id": "string - unique identifier (system:entity:from->to)",
+        "system": "string - which game system (chief_gear, war_academy, building, troop, hero, etc.)",
+        "entity": "string - specific item (helmet, ring, furnace, infantry_t10, etc.)",
+        "from": {
+          "tier": "string - quality tier if applicable",
+          "step": "integer - step within tier if applicable",
+          "level": "string/integer - level if applicable"
+        },
+        "to": {
+          "tier": "string",
+          "step": "integer",
+          "level": "string/integer"
+        },
+        "cost": {
+          "resource_id": "integer quantity"
+        },
+        "time_seconds": "integer or null",
+        "benefit": {
+          "stat_id": "value gained"
+        },
+        "prereq": [
+          { "system": "string", "level": "string/integer" }
+        ],
+        "source_ids": ["array of source references"],
+        "confidence": {
+          "grade": "A/B/C/D",
+          "reason": "string"
+        }
+      }
+    }
+  },
+
+  "verified_sources": {
+    "chief_gear_table": {
+      "id": "woswiki_chief_gear_table",
+      "url": "https://www.whiteoutsurvival.wiki/chief-gear/chief-gear/",
+      "title": "Chief Gear - Whiteout Survival Wiki",
+      "data_type": "static_table",
+      "columns": ["tier", "step", "hardened_alloy", "polishing_solution", "design_plan", "lunar_amber"],
+      "confidence": "A"
+    },
+    "war_academy_chart": {
+      "id": "whiteoutsurvival_app_war_academy",
+      "url": "https://whiteoutsurvival.app/buildings/war-academy/",
+      "title": "War Academy Upgrade Cost Chart & Calculator",
+      "data_type": "static_table",
+      "columns": ["level", "furnace_prereq", "fire_crystal", "refined_fire_crystal"],
+      "confidence": "A"
+    },
+    "troop_calculator": {
+      "id": "onechilledgamer_troop_calc",
+      "url": "https://onechilledgamer.com/whiteout-survival-troop-cost-calculator/",
+      "title": "Whiteout Survival Troop Cost Calculator",
+      "data_type": "calculator_output",
+      "outputs": ["resources_required", "time_required", "power_gained", "event_points"],
+      "confidence": "A"
+    },
+    "building_calculator": {
+      "id": "quackulator_building",
+      "url": "https://quackulator.com/",
+      "title": "WOS Quackulator: Building Upgrade Calculator",
+      "data_type": "calculator_output",
+      "confidence": "A"
+    },
+    "chief_gear_calculator": {
+      "id": "quackulator_chiefgear",
+      "url": "https://quackulator.com/chiefgear.php",
+      "title": "Chief Gear Upgrade Calculator - WOS Quackulator",
+      "data_type": "calculator_output",
+      "use": "cross_validation",
+      "confidence": "A"
+    }
+  },
+
+  "example_edges": {
+    "chief_gear_step": {
+      "upgrade_id": "chiefgear:helmet:red-0:step1->step2",
+      "system": "chief_gear",
+      "entity": "helmet",
+      "from": { "tier": "red-0", "step": 1 },
+      "to": { "tier": "red-0", "step": 2 },
+      "cost": {
+        "hardened_alloy": 12500,
+        "polishing_solution": 132,
+        "design_plan": 21,
+        "lunar_amber": 2
+      },
+      "time_seconds": null,
+      "benefit": null,
+      "source_ids": ["woswiki_chief_gear_table"],
+      "confidence": { "grade": "A", "reason": "direct table row from wiki" }
+    },
+    "war_academy_fc5": {
+      "upgrade_id": "war_academy:FC5-1->FC5-2",
+      "system": "building_war_academy",
+      "entity": "war_academy",
+      "from": { "level": "FC5-1" },
+      "to": { "level": "FC5-2" },
+      "cost": {
+        "fire_crystal": 90,
+        "refined_fire_crystal": 4
+      },
+      "prereq": [{ "system": "furnace", "level": "FC6" }],
+      "source_ids": ["whiteoutsurvival_app_war_academy"],
+      "confidence": { "grade": "A", "reason": "direct chart row" }
+    }
+  },
+
+  "benefit_types": {
+    "direct_stat": {
+      "description": "Stat gain that can be tabled directly",
+      "example": { "troop_attack_pct": 5.0 }
+    },
+    "unlock_milestone": {
+      "description": "Unlocks a feature or system",
+      "example": { "level": 22, "unlocks": ["chief_gear"] }
+    },
+    "formula_based": {
+      "description": "Benefits that scale and need formulas (phase 2)",
+      "example": "research node benefits"
+    }
+  },
+
+  "validation_approach": {
+    "description": "How to validate formulas against tables",
+    "steps": [
+      "Build compute_cost(system, params) formula function",
+      "Run across same level range as table rows",
+      "Compare: delta = abs(formula_cost - table_cost) / table_cost",
+      "If delta <= 0.5% -> formula matches table",
+      "Use confidence scoring to flag mismatches"
+    ],
+    "result": "tables = ground truth, formulas = scalable generator, automated tests ensure match"
+  },
+
+  "implementation_order": [
+    "1. Chief Gear ingestion (wiki table -> DB)",
+    "2. War Academy ingestion (chart -> DB)",
+    "3. Troop calculator harvesting (generate own table)",
+    "4. Building calculator harvesting (generate own table)",
+    "5. Formulas + table validation"
+  ],
+
+  "storage_format_question": "JSON files (easy to ship + version) vs SQLite (best for querying) vs CSV (easy to inspect)?"
+}

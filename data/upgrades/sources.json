@@ -1,0 +1,58 @@
+[
+  {
+    "source_id": "SRC_WIKI_CHIEF_GEAR",
+    "type": "wiki",
+    "title": "Whiteout Survival Wiki - Chief Gear (upgrade cost table)",
+    "url": "https://www.whiteoutsurvival.wiki/chief-gear/chief-gear/",
+    "retrieved_at": "2026-01-07T00:00:00Z",
+    "notes": "Used to populate chief gear step costs."
+  },
+  {
+    "source_id": "SRC_WHITEOUTAPP_WAR_ACADEMY",
+    "type": "community_tool",
+    "title": "whiteoutsurvival.app - War Academy Upgrade Cost Chart",
+    "url": "https://whiteoutsurvival.app/buildings/war-academy/",
+    "retrieved_at": "2026-01-07T00:00:00Z",
+    "notes": "Used to populate War Academy FC step costs and prerequisites."
+  },
+  {
+    "source_id": "SRC_QUACKULATOR_CHIEF_GEAR",
+    "type": "community_tool",
+    "title": "Quackulator - Chief Gear Upgrade Calculator",
+    "url": "https://quackulator.com/chiefgear.php",
+    "retrieved_at": "2026-01-07T00:00:00Z",
+    "notes": "Use for cross-checking totals (range-based validation)."
+  },
+  {
+    "source_id": "SRC_QUACKULATOR_BUILDING",
+    "type": "community_tool",
+    "title": "Quackulator - Building Upgrade Calculator",
+    "url": "https://quackulator.com/",
+    "retrieved_at": "2026-01-07T00:00:00Z",
+    "notes": "Use for building upgrade costs."
+  },
+  {
+    "source_id": "SRC_TROOP_CALCULATOR",
+    "type": "community_tool",
+    "title": "Troop Cost Calculator (training/promotion)",
+    "url": "https://onechilledgamer.com/whiteout-survival-troop-cost-calculator/",
+    "retrieved_at": "2026-01-07T00:00:00Z",
+    "notes": "Used to generate troop cost edges by sweeping troop_type, tier, and qty. Per-troop costs are linear (multiply by quantity for batch costs)."
+  },
+  {
+    "source_id": "SRC_BUILDING_CALCULATOR",
+    "type": "community_tool",
+    "title": "Building Upgrade Cost Calculator",
+    "url": "https://whiteoutdata.com/category/buildings/",
+    "retrieved_at": "2026-01-07T00:00:00Z",
+    "notes": "Used to generate building upgrade edges by sweeping building_id and level (L1-L30)."
+  },
+  {
+    "source_id": "SRC_WHITEOUTAPP_FC_BUILDINGS",
+    "type": "community_tool",
+    "title": "whiteoutsurvival.app - FC Building Upgrade Charts",
+    "url": "https://whiteoutsurvival.app/buildings/",
+    "retrieved_at": "2026-01-07T00:00:00Z",
+    "notes": "Used to populate FC level costs (30-1 through FC10-0) for 7 buildings: furnace, embassy, infantry_camp, lancer_camp, marksman_camp, command_center, infirmary."
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "system": "troops",
+  "generated_at": "2026-01-07T19:38:02.578184Z",
+  "ok": true,
+  "train_edges": 90,
+  "promote_edges": 75,
+  "troop_types": [
+    "infantry",
+    "lancer",
+    "marksman"
+  ],
+  "train_tiers": [
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "promote_tiers": [
+    "T6->T7",
+    "T7->T8",
+    "T8->T9",
+    "T9->T10",
+    "T10->T11"
+  ],
+  "quantities": [
+    100,
+    500,
+    1000,
+    5000,
+    10000
+  ],
+  "train_missing": [],
+  "promote_missing": [],
+  "linearity_ok": true,
+  "train_linearity_issues": [],
+  "promote_linearity_issues": [],
+  "integrity_issues": [],
+  "notes": []
+}

@@ -1,0 +1,135 @@
+{
+  "synergy_model": {
+    "description": "Mechanics-first Gear + Hero + Rally Synergy Model - How power propagates through battles",
+    "core_question": "Where does my power actually come from in this fight?",
+
+    "first_principles": {
+      "chief_gear": {
+        "applies": "globally",
+        "coverage": "100% in all contexts",
+        "contexts": ["rally_leader", "rally_joiner", "field_pvp", "garrison", "pve"],
+        "effect": "Multiplies ALL troop damage & survivability",
+        "rule": "Chief Gear is always ON"
+      },
+      "hero_gear": {
+        "affects": ["hero personal damage", "hero skill scaling"],
+        "impact_by_context": {
+          "rally_leader": "medium",
+          "rally_joiner": "very_low",
+          "field_pvp": "high",
+          "solo_pve": "high",
+          "garrison": "medium"
+        }
+      },
+      "rally_skill_propagation": {
+        "leader": {
+          "skills_used": 9,
+          "explanation": "3 heroes × right-side skills"
+        },
+        "joiner": {
+          "skills_contributed": 1,
+          "which_skill": "top-right skill of first (leftmost) hero",
+          "max_joiner_skills": 4,
+          "can_stack": true
+        },
+        "key_insight": "Leader choice dominates, joiners are utility slots"
+      }
+    },
+
+    "combat_contexts": ["rally_leader", "rally_joiner", "field_pvp", "garrison"],
+
+    "synergy_weights": {
+      "rally_leader": {
+        "chief_gear": 5,
+        "leader_hero_selection": 5,
+        "leader_hero_gear": 3,
+        "joiner_hero_gear": 0,
+        "key_insight": "Rally leaders should be chosen for EXPEDITION SKILL QUALITY, not DPS"
+      },
+      "rally_joiner": {
+        "chief_gear": 5,
+        "first_hero_skill": 4,
+        "hero_gear": 1,
+        "key_insight": "Joiners are SKILL CARRIERS, not damage dealers. Jessie = elite attack joiner, Sergey = elite garrison joiner, Molly = poor joiner despite DPS"
+      },
+      "field_pvp": {
+        "hero_gear": 5,
+        "hero_dps_kit": 5,
+        "chief_gear": 3,
+        "expedition_buffs": 2,
+        "key_insight": "Field PvP is the ONLY mode where hero gear can rival chief gear in ROI"
+      },
+      "garrison": {
+        "damage_reduction_skills": 5,
+        "chief_gear_defensive": 4,
+        "hero_gear": 2,
+        "dps": 1
+      }
+    },
+
+    "event_overrides": {
+      "svs": {
+        "event": "SvS / Castle Battles",
+        "priority": ["rally_leader", "chief_gear", "buff_skills"]
+      },
+      "bear_trap": {
+        "event": "Bear Trap",
+        "priority": ["attack_buffs", "rally_size", "chief_gear"],
+        "ignore": ["hero_personal_dps"]
+      },
+      "crazy_joe": {
+        "event": "Crazy Joe",
+        "priority": ["infantry_survivability", "damage_taken_reduction"],
+        "deprioritize": ["marksman_attack"]
+      }
+    },
+
+    "hero_role_tags": {
+      "Jeronimo": ["rally_leader", "attack_buffer"],
+      "Jessie": ["attack_joiner"],
+      "Sergey": ["defense_joiner", "garrison"],
+      "Molly": ["field_dps", "solo"],
+      "Alonso": ["field_dps", "hybrid"],
+      "Natalia": ["tank", "garrison", "rally_leader"]
+    },
+
+    "never_recommend": [
+      "DPS heroes as joiners",
+      "Defensive heroes as rally leaders",
+      "Gearing joiner-only heroes"
+    ],
+
+    "decision_logic": {
+      "rally_joiner": {
+        "recommend_hero": "best_top_right_skill",
+        "recommend_gear": "chief_gear_only"
+      },
+      "rally_leader": {
+        "recommend_heroes": "best_expedition_skill_set",
+        "recommend_gear": "chief_gear + leader_hero_gear"
+      },
+      "field_pvp": {
+        "recommend_heroes": "highest_dps_heroes",
+        "recommend_gear": "hero_gear + chief_gear"
+      },
+      "f2p_override": "block hero_gear unless context == field_pvp"
+    },
+
+    "power_illusion_warning": {
+      "problem": "Hero gear increases visible damage numbers, Chief gear increases battle outcomes",
+      "warn_when": [
+        "Over-invest in hero gear",
+        "Gear joiners",
+        "Ignore Ring/Amulet progression"
+      ]
+    },
+
+    "core_truths": [
+      "Rallies are won by buffs, not DPS",
+      "Joiners carry skills, not damage",
+      "Chief Gear is universal power",
+      "Hero Gear is situational power",
+      "Spender level determines allowed inefficiency"
+    ]
+  }
+}

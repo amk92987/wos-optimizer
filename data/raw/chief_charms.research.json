@@ -1,0 +1,100 @@
+{
+  "system": "chief_charms",
+  "retrieved_at": "2026-01-07T00:00:00Z",
+  "sources": [
+    {
+      "source_id": "SRC_WHITEOUTDATA_CHARMS",
+      "url": "https://whiteoutdata.com/items/chief-charms/",
+      "confidence": "A"
+    },
+    {
+      "source_id": "SRC_THERIA_CHARM_GUIDE",
+      "url": "https://theriagames.com/guide/whiteout-survival-charm-guide/",
+      "confidence": "B"
+    }
+  ],
+
+  "overview": {
+    "unlock_requirement": "Furnace Level 25",
+    "total_levels": 16,
+    "normal_max_level": 11,
+    "gen7_max_level": 16,
+    "charm_slots": 6,
+    "material_exchange_unlock": "At least one Level 11 charm"
+  },
+
+  "charm_slots": {
+    "description": "6 charm slots matching Chief Gear pieces",
+    "slots": [
+      {"slot": "cap", "name": "Lancer Cap", "troop_type": "lancer", "stat_type": "attack_defense"},
+      {"slot": "watch", "name": "Watch", "troop_type": "lancer", "stat_type": "attack_defense"},
+      {"slot": "coat", "name": "Infantry Coat", "troop_type": "infantry", "stat_type": "attack_defense"},
+      {"slot": "pants", "name": "Pants", "troop_type": "infantry", "stat_type": "attack_defense"},
+      {"slot": "belt", "name": "Marksman Belt", "troop_type": "marksman", "stat_type": "attack_defense"},
+      {"slot": "weapon", "name": "Weapon", "troop_type": "marksman", "stat_type": "attack_defense"}
+    ]
+  },
+
+  "upgrade_materials": {
+    "charm_guide": {
+      "description": "Common material for all levels",
+      "sources": ["Castle Battle", "Foundry Shop", "SVS Shop", "Canyon Shop", "Frostfire Mine", "Tundra Trading Station"]
+    },
+    "charm_design": {
+      "description": "Intermediate material for all levels",
+      "sources": ["Giant Elk", "Foundry Battle", "Foundry Shop", "Power Region Shop", "Canyon Shop"]
+    },
+    "jewel_secrets": {
+      "description": "Rare material for levels 12-16 only",
+      "sources": ["Late game events", "Shops"]
+    }
+  },
+
+  "upgrade_costs_per_level": [
+    {"level": 1, "charm_guide": 5, "charm_design": 5, "jewel_secrets": 0, "power": 205700},
+    {"level": 2, "charm_guide": 40, "charm_design": 15, "jewel_secrets": 0, "power": 288000},
+    {"level": 3, "charm_guide": 60, "charm_design": 40, "jewel_secrets": 0, "power": 370000},
+    {"level": 4, "charm_guide": 80, "charm_design": 100, "jewel_secrets": 0, "power": 452000},
+    {"level": 5, "charm_guide": 100, "charm_design": 200, "jewel_secrets": 0, "power": 576000},
+    {"level": 6, "charm_guide": 120, "charm_design": 300, "jewel_secrets": 0, "power": 700000},
+    {"level": 7, "charm_guide": 140, "charm_design": 400, "jewel_secrets": 0, "power": 824000},
+    {"level": 8, "charm_guide": 200, "charm_design": 400, "jewel_secrets": 0, "power": 948000},
+    {"level": 9, "charm_guide": 300, "charm_design": 400, "jewel_secrets": 0, "power": 1072000},
+    {"level": 10, "charm_guide": 420, "charm_design": 420, "jewel_secrets": 0, "power": 1196000},
+    {"level": 11, "charm_guide": 560, "charm_design": 420, "jewel_secrets": 0, "power": 1320000},
+    {"level": 12, "charm_guide": 580, "charm_design": 450, "jewel_secrets": 15, "power": null},
+    {"level": 13, "charm_guide": 580, "charm_design": 450, "jewel_secrets": 30, "power": null},
+    {"level": 14, "charm_guide": 600, "charm_design": 500, "jewel_secrets": 45, "power": null},
+    {"level": 15, "charm_guide": 600, "charm_design": 500, "jewel_secrets": 70, "power": null},
+    {"level": 16, "charm_guide": 650, "charm_design": 550, "jewel_secrets": 100, "power": null}
+  ],
+
+  "totals": {
+    "level_1_to_11": {
+      "charm_guide": 2025,
+      "charm_design": 2700,
+      "jewel_secrets": 0
+    },
+    "level_1_to_16": {
+      "charm_guide": 5035,
+      "charm_design": 5150,
+      "jewel_secrets": 260
+    },
+    "per_slot_to_max": {
+      "charm_guide": 5035,
+      "charm_design": 5150,
+      "jewel_secrets": 260
+    },
+    "all_6_slots_to_max": {
+      "charm_guide": 30210,
+      "charm_design": 30900,
+      "jewel_secrets": 1560
+    }
+  },
+
+  "upgrade_strategy": {
+    "priority": "Infantry charms first (frontline tanks)",
+    "uniformity_bonus": "Evenly upgrading all charms grants army-wide attack/defense boost",
+    "timing": "Upgrade during major events for optimal progression"
+  }
+}

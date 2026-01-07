@@ -1,0 +1,349 @@
+{
+  "_meta": {
+    "description": "Recommendation Explanation System - credibility + UX layer",
+    "purpose": "User trust, no-hallucination discipline, expandable explanations",
+    "version": "1.0"
+  },
+
+  "reason_types": {
+    "mechanic": {
+      "description": "Game rules (leader vs joiner, stacking limits, etc.)",
+      "strength": "strongest",
+      "ui_color": "#4A90D9"
+    },
+    "data": {
+      "description": "Verified database entries (skills/stats)",
+      "strength": "strongest",
+      "ui_color": "#4A90D9"
+    },
+    "context": {
+      "description": "Event/mode logic (SvS vs Bear vs CJ)",
+      "strength": "strong",
+      "ui_color": "#5BA55B"
+    },
+    "economy": {
+      "description": "Spender constraints (F2P vs whale)",
+      "strength": "strong",
+      "ui_color": "#5BA55B"
+    },
+    "meta": {
+      "description": "Community consensus (version-sensitive)",
+      "strength": "weaker",
+      "ui_color": "#FFB347"
+    },
+    "personalized": {
+      "description": "User-specific inputs (their heroes/gear/etc.)",
+      "strength": "strong",
+      "ui_color": "#9B59B6"
+    }
+  },
+
+  "confidence_grades": {
+    "A": {"min_score": 0.85, "label": "High confidence", "description": "Mechanics-backed + verified data"},
+    "B": {"min_score": 0.70, "label": "Good confidence", "description": "Strong evidence, minor assumptions"},
+    "C": {"min_score": 0.50, "label": "Moderate confidence", "description": "Some assumptions or meta-based"},
+    "D": {"min_score": 0.0, "label": "Low confidence", "description": "Speculative or user-dependent"}
+  },
+
+  "claims": {
+    "claim_joiner_top_right_only": {
+      "text": "Rally joiners only contribute the first hero's top-right expedition skill.",
+      "type": "mechanic",
+      "evidence_source_ids": ["helpcenter_rally_members_4skills", "woswiki_rally_buff_guide"]
+    },
+    "claim_leader_9_skills": {
+      "text": "Rally leaders provide 9 expedition skills (3 heroes x 3 skills each).",
+      "type": "mechanic",
+      "evidence_source_ids": ["helpcenter_rally_mechanics"]
+    },
+    "claim_top_4_joiner_skills": {
+      "text": "Top 4 highest level expedition skills from all joiners are applied.",
+      "type": "mechanic",
+      "evidence_source_ids": ["helpcenter_rally_members_4skills"]
+    },
+    "claim_jessie_dmg_boost": {
+      "text": "Jessie's top-right expedition skill (Stand of Arms) increases all-troops damage dealt by +5/10/15/20/25% per level.",
+      "type": "data",
+      "evidence_source_ids": ["woswiki_jessie_expedition_skills"]
+    },
+    "claim_sergey_dmg_reduction": {
+      "text": "Sergey's top-right expedition skill (Defenders' Edge) reduces damage taken by -4/8/12/16/20% per level.",
+      "type": "data",
+      "evidence_source_ids": ["woswiki_sergey_expedition_skills"]
+    },
+    "claim_chief_gear_global": {
+      "text": "Chief Gear provides global buffs that apply in ALL combat modes.",
+      "type": "mechanic",
+      "evidence_source_ids": ["ingame_chief_gear_desc"]
+    },
+    "claim_hero_gear_personal": {
+      "text": "Hero Gear only affects the individual hero it's equipped on.",
+      "type": "mechanic",
+      "evidence_source_ids": ["ingame_hero_gear_desc"]
+    },
+    "claim_joiner_gear_low_roi": {
+      "text": "Hero gear investment on rally joiners has minimal impact because joiners contribute skills, not personal damage.",
+      "type": "economy",
+      "evidence_source_ids": ["community_gear_guide", "synergy_model"]
+    },
+    "claim_dps_personal_not_rally": {
+      "text": "DPS (damage per second) is personal hero damage; rally outcomes scale with buffs, not individual DPS.",
+      "type": "mechanic",
+      "evidence_source_ids": ["synergy_model"]
+    }
+  },
+
+  "templates": {
+    "joiner_hero_choice": {
+      "id": "template_joiner_hero",
+      "why_pattern": "Joiner applies only one skill -> choose strongest top-right effect.",
+      "tradeoff_pattern": "Hero gear ROI is low here.",
+      "next_action_pattern": "Put this hero first in march; level that skill.",
+      "applicable_contexts": ["rally_joiner"]
+    },
+    "rally_leader_choice": {
+      "id": "template_rally_leader",
+      "why_pattern": "Leader determines 9 skills -> choose heroes with all-troops buffs/strong expedition kit.",
+      "tradeoff_pattern": "Hero gear matters more than for joiners, but chief gear still dominates.",
+      "next_action_pattern": "Use this as your rally lead lineup; upgrade chief ring/amulet first.",
+      "applicable_contexts": ["rally_leader"]
+    },
+    "chief_gear_upgrade": {
+      "id": "template_chief_gear",
+      "why_pattern": "Global multiplier, applies everywhere.",
+      "tradeoff_pattern": "Spreads resources; focus on ring/amulet first.",
+      "next_action_pattern": "Upgrade Ring -> Amulet -> Gloves/Boots.",
+      "applicable_contexts": ["all"]
+    },
+    "dont_do_warning": {
+      "id": "template_warning",
+      "why_pattern": "This investment doesn't propagate in your chosen mode.",
+      "example_pattern": "Gearing a joiner hero yields minimal rally impact.",
+      "applicable_contexts": ["all"]
+    }
+  },
+
+  "example_explanations": {
+    "jessie_attack_joiner": {
+      "recommendation_id": "rec_jessie_joiner",
+      "title": "Use Jessie as your rally joiner for offense",
+      "context": "rally_joiner",
+      "confidence": {
+        "grade": "A",
+        "score": 0.92,
+        "reason": "Mechanics-backed rule + verified skill effect"
+      },
+      "why_this": "As a rally joiner, only your first hero's top-right expedition skill is applied. Jessie's top-right gives an all-troops damage dealt boost, which is one of the best offensive joiner effects.",
+      "reasons": [
+        {
+          "rank": 1,
+          "type": "mechanic",
+          "claim": "Joiners contribute only the first hero's top-right expedition skill.",
+          "claim_id": "claim_joiner_top_right_only",
+          "impact": "high"
+        },
+        {
+          "rank": 2,
+          "type": "data",
+          "claim": "Jessie's top-right expedition skill increases all-troops damage dealt by +5-25%.",
+          "claim_id": "claim_jessie_dmg_boost",
+          "impact": "high"
+        }
+      ],
+      "tradeoffs": [
+        "Jessie's hero gear investment has low ROI as a joiner; prioritize Chief Gear instead if resources are limited."
+      ],
+      "assumptions": [
+        "You are joining (not leading) the rally",
+        "Your Jessie top-right skill is leveled reasonably"
+      ],
+      "next_actions": [
+        "Put Jessie in slot #1 of the joining march",
+        "Level Jessie's top-right skill before investing in Jessie hero gear"
+      ]
+    },
+    "sergey_defense_joiner": {
+      "recommendation_id": "rec_sergey_joiner",
+      "title": "Use Sergey as your garrison/defense rally joiner",
+      "context": "rally_joiner",
+      "confidence": {
+        "grade": "A",
+        "score": 0.90,
+        "reason": "Mechanics-backed rule + verified skill effect"
+      },
+      "why_this": "Joiner uses only top-right skill; Sergey provides universal damage taken reduction that helps the entire rally survive longer.",
+      "reasons": [
+        {
+          "rank": 1,
+          "type": "mechanic",
+          "claim": "Joiners contribute only the first hero's top-right expedition skill.",
+          "claim_id": "claim_joiner_top_right_only",
+          "impact": "high"
+        },
+        {
+          "rank": 2,
+          "type": "data",
+          "claim": "Sergey's top-right expedition skill reduces damage taken by -4-20%.",
+          "claim_id": "claim_sergey_dmg_reduction",
+          "impact": "high"
+        }
+      ],
+      "tradeoffs": [
+        "Sergey is best for defense; for offense rallies, Jessie provides more value."
+      ],
+      "assumptions": [
+        "You are joining a defense or garrison rally",
+        "Your Sergey top-right skill is leveled"
+      ],
+      "next_actions": [
+        "Put Sergey in slot #1 when joining defense rallies",
+        "Level Sergey's top-right skill (Defenders' Edge)"
+      ]
+    },
+    "jeronimo_rally_leader": {
+      "recommendation_id": "rec_jeronimo_leader",
+      "title": "Use Jeronimo as your rally leader",
+      "context": "rally_leader",
+      "confidence": {
+        "grade": "A",
+        "score": 0.88,
+        "reason": "S+ tier + multiple all-troops expedition buffs"
+      },
+      "why_this": "Leader uses 9 skills; Jeronimo has multiple all-troops offensive expedition effects that apply rally-wide impact.",
+      "reasons": [
+        {
+          "rank": 1,
+          "type": "mechanic",
+          "claim": "Rally leaders provide 9 expedition skills (3 heroes x 3 skills).",
+          "claim_id": "claim_leader_9_skills",
+          "impact": "high"
+        },
+        {
+          "rank": 2,
+          "type": "data",
+          "claim": "Jeronimo is S+ tier with strong offensive expedition skills.",
+          "impact": "high"
+        }
+      ],
+      "tradeoffs": [
+        "As leader, chief gear still dominates but hero gear ROI is higher than for joiners."
+      ],
+      "assumptions": [
+        "You are leading the rally (not joining)",
+        "You have Jeronimo reasonably leveled"
+      ],
+      "next_actions": [
+        "Use Jeronimo as primary rally lead",
+        "Prioritize Chief Gear ring/amulet, then consider Jeronimo hero gear"
+      ]
+    },
+    "molly_field_not_rally": {
+      "recommendation_id": "rec_molly_field",
+      "title": "Gear Molly for field PvP, not rallies",
+      "context": "field_pvp",
+      "confidence": {
+        "grade": "B",
+        "score": 0.78,
+        "reason": "Economic optimization based on role"
+      },
+      "why_this": "Molly excels at personal DPS, but DPS is personal damage. Rally outcomes scale with buffs, and joiners don't bring DPS value - they bring skills.",
+      "reasons": [
+        {
+          "rank": 1,
+          "type": "mechanic",
+          "claim": "DPS is personal hero damage; rally outcomes scale with buffs.",
+          "claim_id": "claim_dps_personal_not_rally",
+          "impact": "high"
+        },
+        {
+          "rank": 2,
+          "type": "economy",
+          "claim": "Hero gear investment on rally joiners has minimal impact.",
+          "claim_id": "claim_joiner_gear_low_roi",
+          "impact": "medium"
+        }
+      ],
+      "tradeoffs": [
+        "Molly with gear dominates field PvP but that investment doesn't translate to rally performance."
+      ],
+      "assumptions": [
+        "You use Molly in both field and rally contexts",
+        "Resources are limited (not a whale)"
+      ],
+      "next_actions": [
+        "Gear Molly if field/solo PvP is your focus",
+        "Don't expect Molly gear to improve rally results significantly"
+      ]
+    },
+    "chief_gear_priority": {
+      "recommendation_id": "rec_chief_gear_first",
+      "title": "Prioritize Chief Gear Ring and Amulet",
+      "context": "all",
+      "confidence": {
+        "grade": "A",
+        "score": 0.95,
+        "reason": "Universal multiplier with highest ROI"
+      },
+      "why_this": "Chief Gear provides global buffs that apply in ALL combat modes. Ring (Troop Attack) and Amulet (Lethality) affect every troop in every battle.",
+      "reasons": [
+        {
+          "rank": 1,
+          "type": "mechanic",
+          "claim": "Chief Gear provides global buffs that apply in ALL combat modes.",
+          "claim_id": "claim_chief_gear_global",
+          "impact": "high"
+        },
+        {
+          "rank": 2,
+          "type": "economy",
+          "claim": "Ring and Amulet have highest ROI due to universal application.",
+          "impact": "high"
+        }
+      ],
+      "tradeoffs": [
+        "Chief Gear upgrades are slow and expensive but provide permanent, universal value."
+      ],
+      "assumptions": [
+        "You participate in multiple game modes",
+        "Resources are not unlimited"
+      ],
+      "next_actions": [
+        "Upgrade Ring to Mythic first",
+        "Then Amulet to Mythic",
+        "Then Gloves/Boots based on your troop composition"
+      ]
+    }
+  },
+
+  "scoring_breakdown_schema": {
+    "description": "Show your work - transparency for power users",
+    "example": {
+      "components": [
+        {"name": "joiner_skill_value", "weight": 0.9, "hero_score": 0.95, "contribution": 0.855},
+        {"name": "chief_gear", "weight": 1.0, "player_score": 0.70, "contribution": 0.70},
+        {"name": "hero_gear", "weight": 0.1, "player_score": 0.40, "contribution": 0.04}
+      ],
+      "total": 1.595,
+      "normalized": 0.92
+    }
+  },
+
+  "ux_levels": {
+    "level_1": {
+      "name": "Short summary",
+      "description": "One sentence explanation for casual users",
+      "example": "Jessie is best because rally joiners only apply one top-right skill, and hers boosts all-troops damage."
+    },
+    "level_2": {
+      "name": "Expandable details",
+      "description": "Full breakdown for power users",
+      "sections": ["Mechanic explanation", "Skill evidence", "Tradeoffs", "What to do next", "Scoring breakdown"]
+    }
+  },
+
+  "implementation_notes": {
+    "build_from_claims": "Represent each explanation line as a claim object, then recommendations become a list of claim_ids + parameterized inserts",
+    "never_raw_urls": "Use sourceRef.title + 'tap to view source' in-app. Rotate sources without changing logic.",
+    "always_label_meta": "If including community meta, show 'Meta (version-sensitive)' with lower confidence weight"
+  }
+}

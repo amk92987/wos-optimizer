@@ -1,0 +1,553 @@
+{
+  "meta": {
+    "schema_version": "0.2.0",
+    "last_updated": "2026-01-07",
+    "related_schemas": {
+      "explanation_system": "explanation_system.json",
+      "explanation_builder": "explanation_builder.json",
+      "confidence_scoring": "confidence_scoring.json",
+      "chief_gear": "chief_gear.json",
+      "synergy_model": "synergy_model.json"
+    },
+    "source_notes": [
+      {
+        "id": "SOURCE_WOS_WIKI",
+        "title": "Whiteout Survival Wiki",
+        "type": "wiki",
+        "url": "https://www.whiteoutsurvival.wiki/",
+        "retrieved_at": "2026-01-07T00:00:00Z",
+        "notes": "Primary source for hero skills, stats, mechanics"
+      },
+      {
+        "id": "SOURCE_CENTURY_HELP",
+        "title": "Century Games Help Center",
+        "type": "official",
+        "url": "https://help.centurygames.com/",
+        "retrieved_at": "2026-01-07T00:00:00Z",
+        "notes": "Official game mechanics explanations"
+      },
+      {
+        "id": "SOURCE_COMMUNITY",
+        "title": "Community Guides (BlueStacks, LootBar, etc.)",
+        "type": "community",
+        "url": "",
+        "retrieved_at": "2026-01-07T00:00:00Z",
+        "notes": "Cross-validated community consensus"
+      }
+    ]
+  },
+
+  "entities": {
+    "heroes": [
+      {
+        "id": "hero_jeronimo",
+        "name": "Jeronimo",
+        "class": "infantry",
+        "generation": 1,
+        "rarity": "legendary",
+        "roles": ["rally_leader", "attack_buffer"],
+        "expedition_skills": [
+          {
+            "id": "exp_jeronimo_skill1",
+            "name": "Battle Manifesto",
+            "slot": "top_right",
+            "effects": [
+              {
+                "stat": "damage_dealt_pct",
+                "target": "all_troops",
+                "scaling": {
+                  "levels": [
+                    { "level": 1, "value": 5 },
+                    { "level": 2, "value": 10 },
+                    { "level": 3, "value": 15 },
+                    { "level": 4, "value": 20 },
+                    { "level": 5, "value": 25 }
+                  ]
+                }
+              }
+            ],
+            "sources": ["SOURCE_WOS_WIKI"]
+          }
+        ],
+        "notes": "S+ tier rally leader. Multiple all-troop offensive expedition skills."
+      },
+      {
+        "id": "hero_jessie",
+        "name": "Jessie",
+        "class": "marksman",
+        "generation": 1,
+        "rarity": "epic",
+        "roles": ["attack_joiner"],
+        "expedition_skills": [
+          {
+            "id": "exp_jessie_stand_of_arms",
+            "name": "Stand of Arms",
+            "slot": "top_right",
+            "effects": [
+              {
+                "stat": "damage_dealt_pct",
+                "target": "all_troops",
+                "scaling": {
+                  "levels": [
+                    { "level": 1, "value": 5 },
+                    { "level": 2, "value": 10 },
+                    { "level": 3, "value": 15 },
+                    { "level": 4, "value": 20 },
+                    { "level": 5, "value": 25 }
+                  ]
+                }
+              }
+            ],
+            "sources": ["SOURCE_WOS_WIKI"]
+          }
+        ],
+        "notes": "BEST attack joiner. Top-right skill (+25% DMG at max) applies to all damage types."
+      },
+      {
+        "id": "hero_sergey",
+        "name": "Sergey",
+        "class": "infantry",
+        "generation": 1,
+        "rarity": "epic",
+        "roles": ["defense_joiner", "garrison"],
+        "expedition_skills": [
+          {
+            "id": "exp_sergey_defenders_edge",
+            "name": "Defenders' Edge",
+            "slot": "top_right",
+            "effects": [
+              {
+                "stat": "damage_taken_reduction_pct",
+                "target": "all_troops",
+                "scaling": {
+                  "levels": [
+                    { "level": 1, "value": 4 },
+                    { "level": 2, "value": 8 },
+                    { "level": 3, "value": 12 },
+                    { "level": 4, "value": 16 },
+                    { "level": 5, "value": 20 }
+                  ]
+                }
+              }
+            ],
+            "sources": ["SOURCE_WOS_WIKI"]
+          }
+        ],
+        "notes": "BEST garrison/defense joiner. Universal damage reduction."
+      },
+      {
+        "id": "hero_natalia",
+        "name": "Natalia",
+        "class": "infantry",
+        "generation": 1,
+        "rarity": "legendary",
+        "roles": ["tank", "garrison", "rally_leader"],
+        "expedition_skills": [],
+        "notes": "Top-tier tank. Strong defensive expedition skills."
+      },
+      {
+        "id": "hero_molly",
+        "name": "Molly",
+        "class": "lancer",
+        "generation": 1,
+        "rarity": "legendary",
+        "roles": ["field_dps", "healer", "pve"],
+        "expedition_skills": [],
+        "notes": "Field DPS + healing. Poor joiner despite damage output."
+      },
+      {
+        "id": "hero_zinman",
+        "name": "Zinman",
+        "class": "lancer",
+        "generation": 1,
+        "rarity": "legendary",
+        "roles": ["field_dps"],
+        "expedition_skills": [],
+        "notes": "Gen 1 lancer."
+      },
+      {
+        "id": "hero_gina",
+        "name": "Gina",
+        "class": "marksman",
+        "generation": 1,
+        "rarity": "epic",
+        "roles": ["gathering"],
+        "expedition_skills": [],
+        "notes": "Gathering specialist."
+      },
+      {
+        "id": "hero_bahiti",
+        "name": "Bahiti",
+        "class": "lancer",
+        "generation": 1,
+        "rarity": "epic",
+        "roles": ["pve"],
+        "expedition_skills": [],
+        "notes": "PvE focused."
+      },
+      {
+        "id": "hero_flint",
+        "name": "Flint",
+        "class": "infantry",
+        "generation": 2,
+        "rarity": "legendary",
+        "roles": ["tank", "arena"],
+        "expedition_skills": [],
+        "notes": "Strong tank for Arena."
+      },
+      {
+        "id": "hero_philly",
+        "name": "Philly",
+        "class": "marksman",
+        "generation": 2,
+        "rarity": "legendary",
+        "roles": ["field_dps", "burst"],
+        "expedition_skills": [],
+        "notes": "Burst damage marksman."
+      },
+      {
+        "id": "hero_alonso",
+        "name": "Alonso",
+        "class": "marksman",
+        "generation": 2,
+        "rarity": "legendary",
+        "roles": ["field_dps", "rally_leader", "hybrid"],
+        "expedition_skills": [],
+        "notes": "Top DPS. Multi-mode viable. Good hero gear investment target."
+      }
+    ],
+
+    "chief_gear": [
+      {
+        "id": "chiefgear_ring",
+        "slot": "ring",
+        "name": "Ring",
+        "primary_stat": "troop_attack_pct",
+        "benefits": "Universal - all classes",
+        "recommended_priority_rank": 1,
+        "tier": "highest_impact",
+        "stat_profiles": [
+          { "quality": "common", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] },
+          { "quality": "uncommon", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] },
+          { "quality": "rare", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] },
+          { "quality": "epic", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] },
+          { "quality": "legendary", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] },
+          { "quality": "mythic", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] }
+        ],
+        "sources": ["SOURCE_WOS_WIKI"],
+        "notes": "Upgrade FIRST. Affects all troops, stacks with hero buffs."
+      },
+      {
+        "id": "chiefgear_amulet",
+        "slot": "amulet",
+        "name": "Amulet",
+        "primary_stat": "troop_lethality_pct",
+        "benefits": "Universal - PvP focused",
+        "recommended_priority_rank": 2,
+        "tier": "highest_impact",
+        "stat_profiles": [
+          { "quality": "common", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] },
+          { "quality": "uncommon", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] },
+          { "quality": "rare", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] },
+          { "quality": "epic", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] },
+          { "quality": "legendary", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] },
+          { "quality": "mythic", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] }
+        ],
+        "sources": ["SOURCE_WOS_WIKI"],
+        "notes": "Upgrade SECOND. Lethality decisive in PvP & SvS."
+      },
+      {
+        "id": "chiefgear_gloves",
+        "slot": "gloves",
+        "name": "Gloves",
+        "primary_stat": "marksman_attack_pct",
+        "benefits": "Marksman heroes (Alonso, Philly)",
+        "recommended_priority_rank": 3,
+        "tier": "offensive_class",
+        "stat_profiles": [
+          { "quality": "common", "stats": [{ "stat": "marksman_attack_pct", "value": 0 }] },
+          { "quality": "mythic", "stats": [{ "stat": "marksman_attack_pct", "value": 0 }] }
+        ],
+        "sources": ["SOURCE_WOS_WIKI"],
+        "notes": "Important for Alonso/Molly-centric marches."
+      },
+      {
+        "id": "chiefgear_boots",
+        "slot": "boots",
+        "name": "Boots",
+        "primary_stat": "lancer_attack_pct",
+        "benefits": "Lancer heroes (Molly)",
+        "recommended_priority_rank": 4,
+        "tier": "offensive_class",
+        "stat_profiles": [
+          { "quality": "common", "stats": [{ "stat": "lancer_attack_pct", "value": 0 }] },
+          { "quality": "mythic", "stats": [{ "stat": "lancer_attack_pct", "value": 0 }] }
+        ],
+        "sources": ["SOURCE_WOS_WIKI"],
+        "notes": "Lancer attack scaling."
+      },
+      {
+        "id": "chiefgear_helmet",
+        "slot": "helmet",
+        "name": "Helmet",
+        "primary_stat": "infantry_defense_pct",
+        "benefits": "Infantry heroes (Natalia, Sergey, Flint)",
+        "recommended_priority_rank": 5,
+        "tier": "defensive",
+        "stat_profiles": [
+          { "quality": "common", "stats": [{ "stat": "infantry_defense_pct", "value": 0 }] },
+          { "quality": "mythic", "stats": [{ "stat": "infantry_defense_pct", "value": 0 }] }
+        ],
+        "sources": ["SOURCE_WOS_WIKI"],
+        "notes": "Defensive. Useful for garrison, Crazy Joe."
+      },
+      {
+        "id": "chiefgear_armor",
+        "slot": "armor",
+        "name": "Armor",
+        "primary_stat": "infantry_health_pct",
+        "benefits": "Infantry heroes",
+        "recommended_priority_rank": 6,
+        "tier": "defensive",
+        "stat_profiles": [
+          { "quality": "common", "stats": [{ "stat": "infantry_health_pct", "value": 0 }] },
+          { "quality": "mythic", "stats": [{ "stat": "infantry_health_pct", "value": 0 }] }
+        ],
+        "sources": ["SOURCE_WOS_WIKI"],
+        "notes": "Lowest priority. Infantry health."
+      }
+    ],
+
+    "hero_gear": [
+      {
+        "id": "herogear_helmet",
+        "slot": "helmet",
+        "name": "Hero Helmet",
+        "applies_to": "hero_only",
+        "primary_stats": ["hero_defense", "hero_health"],
+        "sources": ["SOURCE_WOS_WIKI"],
+        "notes": "Defensive hero gear slot."
+      },
+      {
+        "id": "herogear_armor",
+        "slot": "armor",
+        "name": "Hero Armor",
+        "applies_to": "hero_only",
+        "primary_stats": ["hero_health", "hero_defense"],
+        "sources": ["SOURCE_WOS_WIKI"],
+        "notes": "Defensive hero gear slot."
+      },
+      {
+        "id": "herogear_weapon",
+        "slot": "weapon",
+        "name": "Hero Weapon",
+        "applies_to": "hero_only",
+        "primary_stats": ["hero_attack", "hero_damage"],
+        "sources": ["SOURCE_WOS_WIKI"],
+        "notes": "Offensive hero gear slot. Primary damage source."
+      },
+      {
+        "id": "herogear_accessory",
+        "slot": "accessory",
+        "name": "Hero Accessory",
+        "applies_to": "hero_only",
+        "primary_stats": ["hero_attack", "hero_crit"],
+        "sources": ["SOURCE_WOS_WIKI"],
+        "notes": "Offensive hero gear slot."
+      }
+    ],
+
+    "pets": [
+      {
+        "id": "pet_placeholder",
+        "name": "Placeholder Pet",
+        "bonuses": [
+          {
+            "stat": "troop_attack_pct",
+            "target": "all_troops",
+            "scaling": { "levels": [{ "level": 1, "value": 0 }] }
+          }
+        ],
+        "sources": ["SOURCE_WOS_WIKI"],
+        "notes": "Pet data to be filled from Q4 research."
+      }
+    ],
+
+    "events": [
+      { "id": "event_svs", "name": "SvS", "tags": ["pvp", "rally", "attack", "defense"], "notes": "State vs State - main competitive event" },
+      { "id": "event_bear", "name": "Bear Trap", "tags": ["pve", "rally", "scoring_damage"], "notes": "Troop ratio: 0/10/90. Max DPS focus." },
+      { "id": "event_crazyjoe", "name": "Crazy Joe", "tags": ["pve", "defense", "scoring_kills"], "notes": "Troop ratio: 90/10/0. Infantry-heavy." },
+      { "id": "event_arena", "name": "Arena", "tags": ["pvp", "solo", "5v5"], "notes": "5 hero battles. Hero gear matters more." },
+      { "id": "event_garrison", "name": "Garrison Defense", "tags": ["pvp", "defense"], "notes": "Damage reduction skills priority." }
+    ]
+  },
+
+  "rules": {
+    "contexts": [
+      { "id": "ctx_rally_leader", "name": "rally_leader", "notes": "You lead rally. 9 expedition skills apply." },
+      { "id": "ctx_rally_joiner", "name": "rally_joiner", "notes": "You join rally. Only leftmost hero top-right skill." },
+      { "id": "ctx_field_pvp", "name": "field_pvp", "notes": "Open world PvP. Hero gear has highest impact." },
+      { "id": "ctx_garrison", "name": "garrison", "notes": "Castle defense. Damage reduction priority." }
+    ],
+
+    "rally_mechanics": {
+      "leader_skill_count": 9,
+      "leader_skill_explanation": "3 heroes x 3 right-side expedition skills",
+      "joiner_skill_rule": "Only the leftmost hero's top-right expedition skill contributes when joining a rally.",
+      "max_joiner_skills_selected": 4,
+      "joiner_skill_selection": "Top 4 highest SKILL LEVEL from all joiners",
+      "joiner_skills_stack": true,
+      "sources": ["SOURCE_WOS_WIKI", "SOURCE_CENTURY_HELP"]
+    },
+
+    "spender_profiles": [
+      {
+        "id": "spender_f2p",
+        "name": "F2P",
+        "hero_gear_limit": 1,
+        "allows_inefficiency": false,
+        "chief_gear_priority": "absolute",
+        "hero_gear_targets": ["Molly OR Alonso (not both)"],
+        "notes": "Chief Gear Ring+Amulet first. Hero gear only on primary field DPS. NEVER gear rally joiners."
+      },
+      {
+        "id": "spender_low",
+        "name": "Low Spender",
+        "hero_gear_limit": 2,
+        "allows_inefficiency": false,
+        "chief_gear_priority": "dominant",
+        "hero_gear_targets": ["Alonso", "Jeronimo (if rally leader)", "Molly"],
+        "notes": "Chief Gear still #1. Hero gear on daily-use multi-mode heroes only."
+      },
+      {
+        "id": "spender_medium",
+        "name": "Medium Spender",
+        "hero_gear_limit": 4,
+        "allows_inefficiency": true,
+        "chief_gear_priority": "foundational",
+        "hero_gear_targets": ["Jeronimo (rally leader)", "Alonso (DPS)", "Molly (PvP)", "1 situational"],
+        "notes": "Ring & Amulet to Mythic early. Strategic hero gear investment."
+      },
+      {
+        "id": "spender_whale",
+        "name": "Whale",
+        "hero_gear_limit": "none",
+        "allows_inefficiency": true,
+        "chief_gear_priority": "max_everything",
+        "hero_gear_targets": ["All core heroes"],
+        "notes": "Speed > efficiency. ROI constraints ignored."
+      }
+    ],
+
+    "scoring_weights": [
+      {
+        "id": "weights_rally_joiner",
+        "context": "rally_joiner",
+        "weights": { "chief_gear": 1.0, "hero_selection": 0.6, "hero_gear": 0.1, "joiner_skill_value": 0.9 },
+        "notes": "Joiner: pick by top-right skill; hero gear contributes least."
+      },
+      {
+        "id": "weights_rally_leader",
+        "context": "rally_leader",
+        "weights": { "chief_gear": 1.0, "hero_selection": 1.0, "hero_gear": 0.4, "joiner_skill_value": 0.3 },
+        "notes": "Leader: expedition skill set dominates; chief gear always strong."
+      },
+      {
+        "id": "weights_field_pvp",
+        "context": "field_pvp",
+        "weights": { "chief_gear": 0.6, "hero_selection": 1.0, "hero_gear": 1.0, "joiner_skill_value": 0.0 },
+        "notes": "Field: hero gear and DPS kit have full impact."
+      },
+      {
+        "id": "weights_garrison",
+        "context": "garrison",
+        "weights": { "chief_gear": 0.8, "hero_selection": 1.0, "hero_gear": 0.3, "joiner_skill_value": 0.4 },
+        "notes": "Defense: mitigation skills + defensive chief gear matter."
+      }
+    ]
+  },
+
+  "presets": {
+    "troop_ratios": [
+      {
+        "id": "ratio_default",
+        "name": "Default / Castle Battle",
+        "infantry_pct": 50,
+        "lancer_pct": 20,
+        "marksman_pct": 30,
+        "notes": "Balanced default ratio.",
+        "sources": ["SOURCE_COMMUNITY"]
+      },
+      {
+        "id": "ratio_bear_trap",
+        "name": "Bear Trap / Bear Hunt",
+        "infantry_pct": 0,
+        "lancer_pct": 10,
+        "marksman_pct": 90,
+        "notes": "Maximum DPS. Bear is slow, doesn't kill troops quickly.",
+        "sources": ["SOURCE_COMMUNITY"]
+      },
+      {
+        "id": "ratio_crazy_joe",
+        "name": "Crazy Joe",
+        "infantry_pct": 90,
+        "lancer_pct": 10,
+        "marksman_pct": 0,
+        "notes": "Infantry-heavy. Infantry kills before backline attacks.",
+        "sources": ["SOURCE_COMMUNITY"]
+      },
+      {
+        "id": "ratio_labyrinth",
+        "name": "Labyrinth",
+        "infantry_pct": 60,
+        "lancer_pct": 15,
+        "marksman_pct": 25,
+        "notes": "Tanky for PvE.",
+        "sources": ["SOURCE_COMMUNITY"]
+      },
+      {
+        "id": "ratio_championship",
+        "name": "Alliance Championship",
+        "infantry_pct": 45,
+        "lancer_pct": 25,
+        "marksman_pct": 35,
+        "notes": "Balanced competitive.",
+        "sources": ["SOURCE_COMMUNITY"]
+      }
+    ],
+    "march_templates": [
+      {
+        "id": "template_joiner_attack",
+        "name": "Attack Rally Joiner",
+        "context": "rally_joiner",
+        "hero_ids": ["hero_jessie"],
+        "recommended_ratio_id": "ratio_default",
+        "notes": "Put Jessie in leftmost slot. Her Stand of Arms (+5-25% DMG) applies."
+      },
+      {
+        "id": "template_joiner_defense",
+        "name": "Garrison/Defense Joiner",
+        "context": "rally_joiner",
+        "hero_ids": ["hero_sergey"],
+        "recommended_ratio_id": "ratio_default",
+        "notes": "Put Sergey in leftmost slot. His Defenders' Edge (-4-20% DMG taken) applies."
+      },
+      {
+        "id": "template_rally_leader_attack",
+        "name": "Rally Leader (Attack)",
+        "context": "rally_leader",
+        "hero_ids": ["hero_jeronimo", "hero_molly", "hero_alonso"],
+        "recommended_ratio_id": "ratio_default",
+        "notes": "Jeronimo lead for ATK buffs. 9 expedition skills apply to rally."
+      },
+      {
+        "id": "template_rally_leader_defense",
+        "name": "Rally Leader (Defense)",
+        "context": "rally_leader",
+        "hero_ids": ["hero_natalia", "hero_molly", "hero_alonso"],
+        "recommended_ratio_id": "ratio_default",
+        "notes": "Natalia lead for defensive buffs."
+      }
+    ]
+  }
+}

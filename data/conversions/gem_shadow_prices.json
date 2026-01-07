@@ -1,0 +1,319 @@
+{
+  "system": "shadow_prices",
+  "description": "Universal gem-equivalent costs for all resources. Used to compute true upgrade costs.",
+  "base_currency": "gems",
+  "retrieved_at": "2026-01-07T00:00:00Z",
+  "last_verified": null,
+  "confidence_note": "Grade E = not yet sourced. Populate via in-game screenshots or verified calculator data.",
+
+  "usd_baseline": {
+    "gems_per_usd": 500.05,
+    "source": "user_provided",
+    "pack": "50,000 gems = $99.99",
+    "notes": "Base shop rate. Better rates available via discounted packs."
+  },
+
+  "conversion_mechanisms": {
+    "description": "Allowed sources for conversion rates (in priority order)",
+    "allowed": [
+      "in_game_shop_screenshot",
+      "calculator_with_explicit_gem_costs",
+      "wiki_gem_price_table",
+      "community_consensus_meta"
+    ],
+    "disallowed": [
+      "guessing",
+      "interpolation_without_source",
+      "ai_generated_estimates"
+    ]
+  },
+
+  "prices": {
+    "basic_resources": [
+      {
+        "resource_id": "meat",
+        "display_name": "Meat",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Check resource packs in Gem Shop. Web guides say 'don't buy' but don't list prices."
+      },
+      {
+        "resource_id": "wood",
+        "display_name": "Wood",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Need screenshot of Gem Shop resource pack"
+      },
+      {
+        "resource_id": "coal",
+        "display_name": "Coal",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Need screenshot of Gem Shop resource pack"
+      },
+      {
+        "resource_id": "iron",
+        "display_name": "Iron",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Usually most scarce. Need screenshot of Gem Shop resource pack"
+      }
+    ],
+
+    "fire_crystals": [
+      {
+        "resource_id": "fire_crystal",
+        "display_name": "Fire Crystal",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Check FC packs in shop"
+      },
+      {
+        "resource_id": "fire_crystal_shards",
+        "display_name": "Fire Crystal Shards",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "War Academy currency"
+      },
+      {
+        "resource_id": "refined_fire_crystal",
+        "display_name": "Refined Fire Crystal",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "High-value FC buildings currency"
+      }
+    ],
+
+    "speedups": [
+      {
+        "resource_id": "speedup_general_1m",
+        "display_name": "General Speedup (1 min)",
+        "gems_per_unit": null,
+        "seconds": 60,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Need instant finish or speedup pack screenshot"
+      },
+      {
+        "resource_id": "speedup_general_5m",
+        "display_name": "General Speedup (5 min)",
+        "gems_per_unit": null,
+        "seconds": 300,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": null
+      },
+      {
+        "resource_id": "speedup_general_15m",
+        "display_name": "General Speedup (15 min)",
+        "gems_per_unit": null,
+        "seconds": 900,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": null
+      },
+      {
+        "resource_id": "speedup_general_1h",
+        "display_name": "General Speedup (1 hour)",
+        "gems_per_unit": null,
+        "seconds": 3600,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": null
+      },
+      {
+        "resource_id": "speedup_general_3h",
+        "display_name": "General Speedup (3 hour)",
+        "gems_per_unit": null,
+        "seconds": 10800,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": null
+      },
+      {
+        "resource_id": "speedup_general_8h",
+        "display_name": "General Speedup (8 hour)",
+        "gems_per_unit": null,
+        "seconds": 28800,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": null
+      },
+      {
+        "resource_id": "speedup_general_24h",
+        "display_name": "General Speedup (24 hour)",
+        "gems_per_unit": null,
+        "seconds": 86400,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": null
+      }
+    ],
+
+    "chief_gear_materials": [
+      {
+        "resource_id": "hardened_alloy",
+        "display_name": "Hardened Alloy",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Chief gear upgrade material"
+      },
+      {
+        "resource_id": "polishing_solution",
+        "display_name": "Polishing Solution",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Chief gear upgrade material"
+      },
+      {
+        "resource_id": "design_plan",
+        "display_name": "Design Plan",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Chief gear upgrade material"
+      },
+      {
+        "resource_id": "lunar_amber",
+        "display_name": "Lunar Amber",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Chief gear upgrade material - rare"
+      }
+    ],
+
+    "hero_materials": [
+      {
+        "resource_id": "hero_xp",
+        "display_name": "Hero XP",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "From XP items or stages"
+      },
+      {
+        "resource_id": "hero_shards",
+        "display_name": "Hero Shards (generic)",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Varies by hero rarity"
+      },
+      {
+        "resource_id": "essence_stone",
+        "display_name": "Essence Stone",
+        "gems_per_unit": null,
+        "unit_size": 1,
+        "source_ids": [],
+        "confidence": { "grade": "E", "reason": "not yet sourced" },
+        "notes": "Hero gear material"
+      }
+    ],
+
+    "misc_items": [
+      {
+        "resource_id": "second_builder_48h",
+        "display_name": "2nd Builder (48 hours)",
+        "gems_per_unit": 1000,
+        "unit_size": 1,
+        "source_ids": ["web_guides"],
+        "confidence": { "grade": "B", "reason": "multiple web sources agree" },
+        "notes": "1,000 gems for 48 hours of 2nd builder"
+      },
+      {
+        "resource_id": "chief_stamina_10",
+        "display_name": "Chief Stamina (10)",
+        "gems_per_unit": 100,
+        "unit_size": 10,
+        "source_ids": ["web_guides"],
+        "confidence": { "grade": "B", "reason": "multiple web sources agree" },
+        "notes": "VIP Shop price: 100 gems for 10 stamina"
+      },
+      {
+        "resource_id": "advanced_teleport",
+        "display_name": "Advanced Teleport",
+        "gems_per_unit": 2000,
+        "unit_size": 1,
+        "source_ids": ["web_guides"],
+        "confidence": { "grade": "B", "reason": "multiple web sources agree" },
+        "notes": "VIP Shop discounted price (normally 4,000)"
+      },
+      {
+        "resource_id": "vip_points_1000",
+        "display_name": "VIP Points (1,000)",
+        "gems_per_unit": 2000,
+        "unit_size": 1000,
+        "source_ids": ["web_guides"],
+        "confidence": { "grade": "B", "reason": "multiple web sources agree" },
+        "notes": "2,000 gems for 1,000 VIP points"
+      },
+      {
+        "resource_id": "lucky_wheel_spin",
+        "display_name": "Lucky Wheel Spin",
+        "gems_per_unit": 1500,
+        "unit_size": 1,
+        "source_ids": ["web_guides"],
+        "confidence": { "grade": "B", "reason": "multiple web sources agree" },
+        "notes": "Single spin. 10x = 13,500 gems"
+      },
+      {
+        "resource_id": "arena_extra_attempt_1",
+        "display_name": "Arena Extra Attempt (1st)",
+        "gems_per_unit": 100,
+        "unit_size": 1,
+        "source_ids": ["web_guides"],
+        "confidence": { "grade": "B", "reason": "multiple web sources agree" },
+        "notes": "Scales up to 800 gems for 5th attempt"
+      }
+    ]
+  },
+
+  "derived_rates": {
+    "description": "Computed rates based on primary prices",
+    "gems_per_second_speedup": null,
+    "gems_per_hour_speedup": null,
+    "notes": "Calculate as: gems_per_unit / seconds for each speedup, take average or best rate"
+  },
+
+  "screenshots_needed": [
+    "Gem Shop - Resource pack (shows gems for meat/wood/coal/iron)",
+    "Gem Shop - Speedup pack (shows gems for speedup hours)",
+    "Gem Shop - Fire Crystal pack",
+    "Instant Finish button on a building (shows gem cost for remaining time)",
+    "Any merchant bundle showing gem->resource conversion"
+  ],
+
+  "usage": {
+    "gem_cost_formula": "gem_cost(upgrade) = Σ(amount[i] * gems_per_unit[i]) + time_seconds * gems_per_second_speedup",
+    "roi_formula": "ROI = benefit_score / gem_cost",
+    "example": {
+      "upgrade": "furnace:L29->L30",
+      "resources": { "wood": 5000000, "meat": 4000000, "coal": 3000000, "iron": 2000000 },
+      "time_seconds": 259200,
+      "gem_cost": "pending (need resource prices)"
+    }
+  }
+}

@@ -1,0 +1,99 @@
+{
+  "system": "pets_advancement",
+  "description": "Pet advancement milestone edges (every 10 levels). Based on SSR pet (Snow Ape) data.",
+  "unit": "advancement_milestone",
+  "currencies": ["pet_food", "taming_manual", "energizing_potion", "strengthening_serum"],
+  "unlock_requirement": "Furnace Level 18, State Age 55+ days",
+  "source_ids": ["SRC_WHITEOUTAPP_PETS"],
+  "generated_at": "2026-01-07T00:00:00Z",
+  "notes": "Costs shown are cumulative to reach each milestone. Pet food costs between milestones vary.",
+
+  "edges": [
+    {
+      "upgrade_id": "pet_ssr:0->10",
+      "from": {"level": 0},
+      "to": {"level": 10},
+      "cost": {"pet_food": 925, "taming_manual": 35, "energizing_potion": 0, "strengthening_serum": 0},
+      "confidence": {"grade": "A", "reason": "whiteoutsurvival.app data"}
+    },
+    {
+      "upgrade_id": "pet_ssr:10->20",
+      "from": {"level": 10},
+      "to": {"level": 20},
+      "cost": {"pet_food": 775, "taming_manual": 35, "energizing_potion": 0, "strengthening_serum": 0},
+      "confidence": {"grade": "A", "reason": "derived from cumulative totals"}
+    },
+    {
+      "upgrade_id": "pet_ssr:20->30",
+      "from": {"level": 20},
+      "to": {"level": 30},
+      "cost": {"pet_food": 1050, "taming_manual": 40, "energizing_potion": 15, "strengthening_serum": 0},
+      "confidence": {"grade": "A", "reason": "derived from cumulative totals"}
+    },
+    {
+      "upgrade_id": "pet_ssr:30->40",
+      "from": {"level": 30},
+      "to": {"level": 40},
+      "cost": {"pet_food": 1550, "taming_manual": 35, "energizing_potion": 20, "strengthening_serum": 0},
+      "confidence": {"grade": "A", "reason": "derived from cumulative totals"}
+    },
+    {
+      "upgrade_id": "pet_ssr:40->50",
+      "from": {"level": 40},
+      "to": {"level": 50},
+      "cost": {"pet_food": 2050, "taming_manual": 75, "energizing_potion": 15, "strengthening_serum": 10},
+      "confidence": {"grade": "A", "reason": "derived from cumulative totals"}
+    },
+    {
+      "upgrade_id": "pet_ssr:50->60",
+      "from": {"level": 50},
+      "to": {"level": 60},
+      "cost": {"pet_food": 2550, "taming_manual": 70, "energizing_potion": 15, "strengthening_serum": 10},
+      "confidence": {"grade": "A", "reason": "derived from cumulative totals"}
+    },
+    {
+      "upgrade_id": "pet_ssr:60->70",
+      "from": {"level": 60},
+      "to": {"level": 70},
+      "cost": {"pet_food": 3550, "taming_manual": 110, "energizing_potion": 18, "strengthening_serum": 20},
+      "confidence": {"grade": "B", "reason": "estimated from pattern"}
+    },
+    {
+      "upgrade_id": "pet_ssr:70->80",
+      "from": {"level": 70},
+      "to": {"level": 80},
+      "cost": {"pet_food": 3550, "taming_manual": 110, "energizing_potion": 18, "strengthening_serum": 20},
+      "confidence": {"grade": "B", "reason": "estimated from pattern"}
+    },
+    {
+      "upgrade_id": "pet_ssr:80->90",
+      "from": {"level": 80},
+      "to": {"level": 90},
+      "cost": {"pet_food": 3550, "taming_manual": 110, "energizing_potion": 17, "strengthening_serum": 20},
+      "confidence": {"grade": "B", "reason": "estimated from pattern"}
+    },
+    {
+      "upgrade_id": "pet_ssr:90->100",
+      "from": {"level": 90},
+      "to": {"level": 100},
+      "cost": {"pet_food": 3550, "taming_manual": 110, "energizing_potion": 17, "strengthening_serum": 20},
+      "confidence": {"grade": "B", "reason": "estimated to match L100 total"}
+    }
+  ],
+
+  "totals": {
+    "ssr_pet_0_to_100": {
+      "pet_food": 23100,
+      "taming_manual": 730,
+      "energizing_potion": 135,
+      "strengthening_serum": 100
+    }
+  },
+
+  "max_levels_by_rarity": {
+    "N": 50,
+    "R": 60,
+    "SR": 80,
+    "SSR": 100
+  }
+}

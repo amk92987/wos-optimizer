@@ -1,0 +1,265 @@
+{
+  "system": "research",
+  "description": "Research tree priorities and strategy guide by player profile",
+  "version": "1.0",
+  "generated_at": "2026-01-07T00:00:00Z",
+
+  "overview": {
+    "unlock": "Furnace Level 9 + Research Center building",
+    "trees": ["Growth", "Economy", "Battle"],
+    "fc_research": "Furnace Level 30 (Fire Crystal research for advanced units)",
+    "currencies": ["meat", "wood", "coal", "iron", "fire_crystal (FC era)"],
+    "critical_milestone": "Tool Enhancement VII - reduces all research time significantly"
+  },
+
+  "tree_overview": {
+    "growth": {
+      "description": "Development and infrastructure upgrades",
+      "key_technologies": [
+        {"name": "Tool Enhancement", "priority": "CRITICAL", "reason": "Speeds up ALL research - must max first"},
+        {"name": "Tooling Up", "priority": "High", "reason": "Reduces building construction time"},
+        {"name": "Camp Expansion", "priority": "Medium", "reason": "Train more troops simultaneously"},
+        {"name": "Trainer Tools", "priority": "Medium", "reason": "Reduces troop training time"},
+        {"name": "Command Tactics", "priority": "Low-Medium", "reason": "More expedition armies"},
+        {"name": "Bandaging", "priority": "Low", "reason": "Faster healing"},
+        {"name": "Ward Expansion", "priority": "Low", "reason": "More injured troop capacity"}
+      ],
+      "total_cost": {
+        "meat": 212530000,
+        "wood": 212530000,
+        "coal": 42050000,
+        "iron": 10650000
+      },
+      "total_time": "883 days (before speed bonuses)"
+    },
+    "economy": {
+      "description": "Resource production and gathering efficiency",
+      "key_technologies": [
+        {"name": "Food/Wood/Coal/Iron Gathering", "priority": "Medium", "reason": "Increases gathering speed"},
+        {"name": "Food/Wood/Coal/Iron Output", "priority": "Medium", "reason": "Increases building production"}
+      ],
+      "total_cost": {
+        "meat": 162920000,
+        "wood": 162920000,
+        "coal": 32400000,
+        "iron": 8090000
+      },
+      "total_time": "166 days (before speed bonuses)",
+      "notes": "Lower priority than Growth for most players"
+    },
+    "battle": {
+      "description": "Combat and unit improvements",
+      "key_technologies": [
+        {"name": "Infantry/Marksman/Lancer Attack", "priority": "High", "reason": "Direct damage increase"},
+        {"name": "Infantry/Marksman/Lancer Defense", "priority": "Medium-High", "reason": "Reduces losses"},
+        {"name": "Regimental Expansion", "priority": "High", "reason": "More troops per march"},
+        {"name": "Weapons Prep", "priority": "Medium", "reason": "General attack boost"},
+        {"name": "Defensive Formation", "priority": "Medium", "reason": "General defense boost"}
+      ],
+      "notes": "Best for Power gains and SvS performance"
+    }
+  },
+
+  "tool_enhancement_priority": {
+    "description": "Tool Enhancement is THE most important research in the game",
+    "levels": [
+      {"level": 1, "effect": "Research speed +5%", "priority": "Do immediately"},
+      {"level": 2, "effect": "Research speed +10%", "priority": "Do immediately"},
+      {"level": 3, "effect": "Research speed +15%", "priority": "Do immediately"},
+      {"level": 4, "effect": "Research speed +20%", "priority": "High"},
+      {"level": 5, "effect": "Research speed +25%", "priority": "High"},
+      {"level": 6, "effect": "Research speed +30%", "priority": "High"},
+      {"level": 7, "effect": "Research speed +35% (MAX)", "priority": "CRITICAL MILESTONE"}
+    ],
+    "why_critical": [
+      "Every research after Tool Enhancement VII is 35% faster",
+      "Time saved compounds - earlier VII = more total time saved",
+      "Affects ALL future research including Battle tree",
+      "Most efficient use of early-game speedups"
+    ],
+    "common_mistake": "Spreading research across trees before maxing Tool Enhancement VII"
+  },
+
+  "priorities_by_phase": {
+    "early_game": {
+      "phase": "Furnace 9-18",
+      "priority_order": [
+        {"rank": 1, "tech": "Tool Enhancement I-III", "reason": "Research speed is foundational"},
+        {"rank": 2, "tech": "Tooling Up I-II", "reason": "Building speed helps Furnace rush"},
+        {"rank": 3, "tech": "Camp Expansion I", "reason": "Basic troop capacity"},
+        {"rank": 4, "tech": "Battle Tier 1 basics", "reason": "Foundation for later"}
+      ],
+      "avoid": ["Deep Economy tree", "High-tier Battle research"],
+      "total_focus": "Growth tree 80%, Battle tree 20%"
+    },
+    "mid_game": {
+      "phase": "Furnace 19-29",
+      "priority_order": [
+        {"rank": 1, "tech": "Tool Enhancement IV-VII", "reason": "MUST reach VII before anything else"},
+        {"rank": 2, "tech": "Tooling Up III-V", "reason": "Building speed for F30 rush"},
+        {"rank": 3, "tech": "Trainer Tools II-III", "reason": "Troop training efficiency"},
+        {"rank": 4, "tech": "Battle tree Tier 2-3", "reason": "Power gains and SvS prep"}
+      ],
+      "milestone": "Tool Enhancement VII is THE mid-game milestone",
+      "total_focus": "Growth tree 60%, Battle tree 30%, Economy tree 10%"
+    },
+    "late_game": {
+      "phase": "Furnace 30 / FC era",
+      "priority_order": [
+        {"rank": 1, "tech": "Battle tree (attack stats)", "reason": "Direct combat improvement"},
+        {"rank": 2, "tech": "Regimental Expansion", "reason": "More troops per march"},
+        {"rank": 3, "tech": "Advanced unit research", "reason": "T10+ troop unlocks"},
+        {"rank": 4, "tech": "Remaining Growth tree", "reason": "Quality of life"}
+      ],
+      "total_focus": "Battle tree 60%, Growth tree 30%, Economy tree 10%"
+    },
+    "endgame": {
+      "phase": "FC5+",
+      "priority_order": [
+        {"rank": 1, "tech": "Max Battle tree", "reason": "Power optimization"},
+        {"rank": 2, "tech": "Complete all trees", "reason": "Marginal gains matter at endgame"}
+      ],
+      "total_focus": "Complete everything"
+    }
+  },
+
+  "priorities_by_spending_profile": {
+    "f2p": {
+      "overall_strategy": "Maximize Tool Enhancement VII ASAP, then balanced approach",
+      "research_order": [
+        "1. Tool Enhancement VII (use ALL speedups here)",
+        "2. Tooling Up V (building speed)",
+        "3. Trainer Tools III (troop training)",
+        "4. Battle tree attack stats",
+        "5. Economy tree last (lowest priority)"
+      ],
+      "speedup_usage": "Hoard speedups for Tool Enhancement research only until VII",
+      "avoid": [
+        "Spreading speedups across multiple research",
+        "Economy tree early (low combat value)",
+        "Deep Battle tree before Tool Enhancement VII"
+      ],
+      "reasoning": "F2P players are time-constrained. Tool Enhancement VII reduces all future time by 35%."
+    },
+    "minnow": {
+      "overall_strategy": "Tool Enhancement VII priority, then Battle focus",
+      "research_order": [
+        "1. Tool Enhancement VII",
+        "2. Battle tree Tier 3-4",
+        "3. Tooling Up V",
+        "4. Regimental Expansion",
+        "5. Economy tree as filler"
+      ],
+      "speedup_usage": "Spend on Tool Enhancement and key Battle research",
+      "reasoning": "With some speedups from packs, can afford more Battle focus after VII"
+    },
+    "dolphin": {
+      "overall_strategy": "Faster Tool Enhancement VII, aggressive Battle tree",
+      "research_order": [
+        "1. Rush Tool Enhancement VII",
+        "2. Battle tree attack stats aggressively",
+        "3. Regimental Expansion max",
+        "4. Growth tree completion",
+        "5. Economy tree"
+      ],
+      "reasoning": "Speedups allow faster progression - Battle gives power for SvS"
+    },
+    "whale": {
+      "overall_strategy": "Max everything quickly",
+      "research_order": [
+        "1. Tool Enhancement VII immediately",
+        "2. Parallel Battle + Growth",
+        "3. Complete all trees"
+      ],
+      "reasoning": "Speedups aren't a constraint - complete everything"
+    }
+  },
+
+  "priorities_by_priority_focus": {
+    "svs_combat": {
+      "emphasis": "Battle tree > Growth tree > Economy tree",
+      "key_techs": [
+        "Infantry/Marksman/Lancer Attack (prioritize your main troop type)",
+        "Regimental Expansion (more troops = more power)",
+        "Defense stats (reduce SvS losses)"
+      ],
+      "reasoning": "Battle research directly improves combat performance"
+    },
+    "balanced_growth": {
+      "emphasis": "Growth tree > Battle tree > Economy tree",
+      "key_techs": [
+        "Tool Enhancement VII (always first)",
+        "Tooling Up (building speed)",
+        "Balanced Battle tree"
+      ],
+      "reasoning": "Faster progression unlocks more systems"
+    },
+    "economy_focus": {
+      "emphasis": "Growth tree > Economy tree > Battle tree",
+      "key_techs": [
+        "Tool Enhancement VII (still first)",
+        "Gathering speed techs",
+        "Output techs for production buildings"
+      ],
+      "reasoning": "More resources enable more upgrades over time",
+      "caveat": "Still do Tool Enhancement VII first - it affects Economy research too"
+    }
+  },
+
+  "priorities_by_alliance_role": {
+    "rally_lead": {
+      "emphasis": "Battle tree priority, especially attack stats",
+      "key_techs": ["Max attack for your primary troop type", "Regimental Expansion"],
+      "reasoning": "Rally lead stats affect the entire rally"
+    },
+    "filler": {
+      "emphasis": "Balanced approach",
+      "key_techs": ["Tool Enhancement VII", "Basic Battle tree"],
+      "reasoning": "Your individual stats matter less - focus on troop count"
+    },
+    "farmer": {
+      "emphasis": "Economy tree higher priority than usual",
+      "key_techs": ["Gathering speed", "Output techs"],
+      "reasoning": "You're optimizing for resource generation"
+    }
+  },
+
+  "common_mistakes": [
+    {
+      "mistake": "Researching Economy tree early",
+      "why_bad": "Economy research has lowest combat value and doesn't speed up progression",
+      "fix": "Do Economy tree last, after Growth and Battle"
+    },
+    {
+      "mistake": "Spreading research across all trees before Tool Enhancement VII",
+      "why_bad": "Every research takes 35% longer than it would after VII",
+      "fix": "Focus Growth tree until Tool Enhancement VII, then branch out"
+    },
+    {
+      "mistake": "Using speedups on random research",
+      "why_bad": "Speedups are precious - using them inefficiently wastes value",
+      "fix": "Hoard speedups for Tool Enhancement (and later, key Battle research)"
+    },
+    {
+      "mistake": "Ignoring Battle tree after Tool Enhancement VII",
+      "why_bad": "Battle research gives significant Power and combat stats",
+      "fix": "Switch focus to Battle tree after VII for SvS preparation"
+    },
+    {
+      "mistake": "Researching defense before attack",
+      "why_bad": "Attack wins fights - defense just reduces losses",
+      "fix": "Prioritize attack stats, then defense"
+    }
+  ],
+
+  "research_speed_calculation": {
+    "base_time": "Listed time in research center",
+    "modifiers": [
+      {"source": "Tool Enhancement VII", "bonus": "-35%"},
+      {"source": "VIP level", "bonus": "varies"},
+      {"source": "Alliance tech", "bonus": "varies"},
+      {"source": "Temporary buffs", "bonus": "varies"}
+    ],
+    "example": "A 100-day research with Tool Enhancement VII takes 65 days"
+  }
+}

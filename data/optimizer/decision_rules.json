@@ -1,0 +1,172 @@
+{
+  "description": "Optimizer decision rules for upgrade prioritization",
+  "version": "1.0",
+  "generated_at": "2026-01-07T00:00:00Z",
+
+  "priority_profiles": {
+    "svs_combat": {
+      "description": "Maximize SvS and combat effectiveness",
+      "system_weights": {
+        "troops_train": 1.0,
+        "troops_promote": 0.9,
+        "war_academy": 0.95,
+        "hero_gear_mastery": 0.85,
+        "chief_gear": 0.7,
+        "chief_charms": 0.75,
+        "daybreak_island": 0.6,
+        "pets": 0.5,
+        "buildings": 0.4,
+        "buildings_fc": 0.5,
+        "research": 0.6
+      },
+      "notes": "Troop power is king for SvS"
+    },
+    "balanced_growth": {
+      "description": "Steady progression across all systems",
+      "system_weights": {
+        "buildings": 0.9,
+        "buildings_fc": 0.9,
+        "research": 0.85,
+        "troops_train": 0.7,
+        "troops_promote": 0.6,
+        "war_academy": 0.7,
+        "chief_gear": 0.6,
+        "hero_gear_mastery": 0.6,
+        "chief_charms": 0.6,
+        "pets": 0.5,
+        "daybreak_island": 0.5
+      },
+      "notes": "Furnace progression unlocks everything"
+    },
+    "economy_focus": {
+      "description": "Maximize resource generation and efficiency",
+      "system_weights": {
+        "buildings": 1.0,
+        "buildings_fc": 0.9,
+        "research": 0.95,
+        "daybreak_island": 0.3,
+        "troops_train": 0.4,
+        "troops_promote": 0.3,
+        "war_academy": 0.5,
+        "chief_gear": 0.4,
+        "hero_gear_mastery": 0.3,
+        "chief_charms": 0.3,
+        "pets": 0.6
+      },
+      "notes": "Research economy tree, building upgrades for production"
+    }
+  },
+
+  "phase_rules": {
+    "early_game": {
+      "top_priorities": [
+        "Furnace upgrades (unlock systems)",
+        "Research Center unlock and Tool Enhancement",
+        "Basic troop training capacity"
+      ],
+      "avoid": [
+        "Over-investing in low-tier chief gear",
+        "Spreading resources too thin"
+      ],
+      "milestone_targets": [
+        {"system": "buildings", "target": "furnace L19", "reason": "Daybreak Island unlock"},
+        {"system": "research", "target": "Tool Enhancement III+", "reason": "Speed up progression"}
+      ]
+    },
+    "mid_game": {
+      "top_priorities": [
+        "Rush Furnace to L30 for FC unlock",
+        "Tool Enhancement VII (critical)",
+        "Pet collection and leveling",
+        "Chief Charms to L10-11"
+      ],
+      "avoid": [
+        "Ignoring pets (they compound over time)",
+        "Neglecting Daybreak Island combat buffs"
+      ],
+      "milestone_targets": [
+        {"system": "buildings", "target": "furnace L30", "reason": "FC unlock"},
+        {"system": "research", "target": "Tool Enhancement VII", "reason": "Research speed cap"},
+        {"system": "chief_charms", "target": "L11", "reason": "Max before Gen 7 gate"},
+        {"system": "daybreak_island", "target": "Tree of Life L6+", "reason": "Combat buffs"}
+      ]
+    },
+    "late_game": {
+      "top_priorities": [
+        "FC Furnace progression",
+        "War Academy for troop efficiency",
+        "Hero Gear Mastery",
+        "T10+ troops"
+      ],
+      "avoid": [
+        "Ignoring War Academy (huge troop value)",
+        "Stockpiling fire crystals without using them"
+      ],
+      "milestone_targets": [
+        {"system": "buildings_fc", "target": "furnace FC5+", "reason": "Unlock higher FC tiers"},
+        {"system": "war_academy", "target": "FC5+", "reason": "Troop training efficiency"},
+        {"system": "hero_gear_mastery", "target": "L10+", "reason": "Combat stats"},
+        {"system": "troops_train", "target": "T10 unlocked", "reason": "Power tier"}
+      ]
+    },
+    "endgame": {
+      "top_priorities": [
+        "Complete FC10 buildings",
+        "Max Hero Gear Mastery (L20)",
+        "Chief Charms L12-16 (Gen 7+)",
+        "T11 troop dominance"
+      ],
+      "avoid": [
+        "Inefficient marginal upgrades",
+        "Ignoring event optimization"
+      ],
+      "milestone_targets": [
+        {"system": "buildings_fc", "target": "furnace FC10-0", "reason": "Max buildings"},
+        {"system": "hero_gear_mastery", "target": "L20", "reason": "Max mastery"},
+        {"system": "chief_charms", "target": "L16", "reason": "Max charms"},
+        {"system": "war_academy", "target": "FC10-0", "reason": "Max efficiency"}
+      ]
+    }
+  },
+
+  "resource_allocation_rules": {
+    "speedups": {
+      "priority_uses": ["Furnace upgrades", "Research", "War Academy"],
+      "rule": "Save for Furnace pushes unless capped on storage"
+    },
+    "fire_crystal": {
+      "priority_uses": ["FC Furnace", "War Academy", "FC Buildings"],
+      "rule": "Furnace first, then War Academy, then other buildings"
+    },
+    "essence_stone": {
+      "priority_uses": ["Hero Gear Mastery"],
+      "rule": "Focus on one hero at a time to maximize mastery level"
+    },
+    "charm_materials": {
+      "priority_uses": ["Chief Charms"],
+      "rule": "All 6 slots evenly to maximize total stats"
+    },
+    "pet_materials": {
+      "priority_uses": ["SSR pets first", "SR pets second"],
+      "rule": "Focus SSR pets (Snow Ape, Cave Lion) for combat value"
+    },
+    "life_essence": {
+      "priority_uses": ["Tree of Life", "Decorations for Prosperity gates"],
+      "rule": "Tree of Life is the goal, decorations are means to unlock it"
+    }
+  },
+
+  "efficiency_heuristics": {
+    "diminishing_returns_thresholds": {
+      "chief_gear": "Red-1 tier is good stopping point for F2P",
+      "chief_charms": "L11 is natural gate, L16 is whale territory",
+      "pets": "L60 is efficient, L100 is whale investment",
+      "hero_gear_mastery": "L10 is solid, L20 is endgame goal"
+    },
+    "power_per_resource_rankings": {
+      "high_efficiency": ["Troop promotion (high tier)", "War Academy", "Research"],
+      "medium_efficiency": ["Hero Gear Mastery", "Chief Charms", "FC Buildings"],
+      "low_efficiency": ["Max tier chief gear", "Pet L70+", "Decorations beyond gates"]
+    }
+  }
+}

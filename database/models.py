@@ -16,6 +16,12 @@ class UserProfile(Base):
     name = Column(String(100), default="Chief")
     server_age_days = Column(Integer, default=0)
     furnace_level = Column(Integer, default=1)
+    furnace_fc_level = Column(String(10), nullable=True)  # e.g., "FC3-0", "30-1"
+
+    # Optimizer settings
+    spending_profile = Column(String(20), default="f2p")  # f2p, minnow, dolphin, orca, whale
+    priority_focus = Column(String(20), default="balanced_growth")  # svs_combat, balanced_growth, economy_focus
+    alliance_role = Column(String(20), default="filler")  # rally_lead, filler, farmer, casual
 
     # Priority settings (1-5 scale)
     priority_svs = Column(Integer, default=5)

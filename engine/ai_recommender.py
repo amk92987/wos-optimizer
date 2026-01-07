@@ -1,10 +1,12 @@
 """
 AI-Powered Recommendation Engine using OpenAI API.
 Submits compact, structured data for intelligent analysis.
+Includes verified game mechanics to prevent hallucination.
 """
 
 import os
 import json
+from pathlib import Path
 from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
 
@@ -19,28 +21,142 @@ class AIRecommendation:
     resources_needed: str  # What you need
 
 
+# Condensed verified game mechanics for AI context
+VERIFIED_MECHANICS = """
+=== VERIFIED GAME MECHANICS (USE ONLY THESE - DO NOT MAKE UP DATA) ===
+
+HERO SKILL SYSTEM:
+- Each hero has 2 skill types on their skill screen:
+  - LEFT SIDE: Exploration Skills (upgraded with Exploration Manuals) - for PvE
+  - RIGHT SIDE: Expedition Skills (upgraded with Expedition Manuals) - for PvP/rallies
+- All skills scale levels 1-5 with EQUAL % increments per level
+- Example: If max is 25%, then levels give +5%, +10%, +15%, +20%, +25%
+
+RALLY MECHANICS:
+- Rally LEADER: Your 3 heroes provide 9 expedition skills (3 right-side skills × 3 heroes)
+- Rally JOINER: Only your LEFTMOST hero's TOP-RIGHT expedition skill contributes!
+  - "Leftmost hero" = First hero in march lineup (slot 1)
+  - "Top-right skill" = Expedition skill in top-right position on skill screen
+- Top 4 highest SKILL LEVEL expedition skills from all joiners apply
+- Higher skill level = more likely to be selected AND stronger effect
+
+BEST JOINER HEROES:
+| Role | Hero | Skill | Effect per Level (1-5) |
+|------|------|-------|------------------------|
+| Attack Joiner | Jessie (Gen 1) | Stand of Arms | +5/10/15/20/25% DMG dealt |
+| Garrison Joiner | Sergey (Gen 1) | Defenders' Edge | -4/8/12/16/20% DMG taken |
+
+If player doesn't have Jessie/Sergey, recommend joining rallies with TROOPS ONLY (no heroes).
+
+TROOP RATIOS BY EVENT:
+| Event | Infantry | Lancer | Marksman | Why |
+|-------|----------|--------|----------|-----|
+| Default/Castle | 50% | 20% | 30% | Balanced |
+| Bear Trap/Hunt | 0% | 10% | 90% | Max DPS, bear is slow |
+| Crazy Joe | 90% | 10% | 0% | Infantry kills before backline attacks |
+
+COMBAT ORDER: Infantry fights first → Lancers → Marksmen
+CLASS COUNTERS: Infantry > Lancer > Marksman > Infantry
+
+HERO TIERS: S+ (best) > S > A > B > C > D
+CLASSES: Infantry (tank), Marksman (ranged DPS), Lancer (balanced)
+
+GENERATION TIMELINE:
+- Gen 1: Days 0-40 (Jeronimo, Natalia, Molly, Zinman, Sergey, Gina, Bahiti, Jessie)
+- Gen 2: Days 40-120 (Flint, Philly, Alonso)
+- Gen 3: Days 120-200 (Logan, Mia, Greg)
+- Gen 4: Days 200-280 (Ahmose, Reina, Lynn)
+- Gen 5: Days 280-360 (Hector, Wu Ming)
+- Gen 6: Days 360-440 (Patrick, Charlie, Cloris)
+- Gen 7: Days 440-520 (Gordon, Renee, Eugene)
+- Gen 8+: Days 520+
+
+PRIORITIES SCALE: 1=low focus, 5=critical focus
+- SvS = State vs State (main competitive event)
+- Rally = Group attacks (Bear Trap, Crazy Joe, castle attacks)
+- Castle = Castle defense/garrison
+- PvE = Exploration stages
+- Gather = Resource gathering
+
+CHIEF GEAR (Global buffs - always active):
+| Piece | Stat | Priority |
+|-------|------|----------|
+| Ring | Troop Attack (All) | 1 - Upgrade first |
+| Amulet | Lethality/Damage | 2 - PvP decisive |
+| Gloves | Marksman Attack | 3 |
+| Boots | Lancer Attack | 4 |
+| Helmet | Infantry Defense | 5 |
+| Armor | Infantry Health | 6 |
+
+Quality: Common → Uncommon → Rare → Epic → Legendary → Mythic
+Goal: Mythic on Ring & Amulet first
+Note: Ring & Amulet affect ALL troops and stack with hero buffs
+
+SPENDER-LEVEL GEAR PATHS:
+| Spender | Chief Gear | Hero Gear | Mistake Tolerance |
+|---------|------------|-----------|-------------------|
+| F2P | Mandatory priority | 1 hero max (field DPS only) | None |
+| Low | Dominant priority | 2 heroes max | Low |
+| Medium | Foundational | 3-4 heroes (strategic) | Medium |
+| Whale | Max everything | All core heroes | High |
+
+F2P RULES: Chief Gear Ring+Amulet first. Hero gear only on Molly OR Alonso. NEVER gear rally joiners.
+LOW SPENDER: Chief Gear still #1. Hero gear on daily-use multi-mode heroes only.
+HERO GEAR ROI: Rally joiner = very low. Rally leader = medium. Field PvP = high.
+
+COMBAT SYNERGY MODEL (what matters in each context):
+Rally Leader: Chief Gear ★★★★★, Hero Selection ★★★★★, Hero Gear ★★★, Joiner Gear ☆
+Rally Joiner: Chief Gear ★★★★★, First Hero Skill ★★★★, Hero Gear ★
+Field PvP: Hero Gear ★★★★★, Hero DPS ★★★★★, Chief Gear ★★★
+Garrison: Damage Reduction ★★★★★, Chief Gear (def) ★★★★, Hero Gear ★★
+
+HERO ROLES:
+- Jeronimo: rally_leader, attack_buffer
+- Jessie: attack_joiner (BEST for rally joining)
+- Sergey: defense_joiner, garrison (BEST for garrison joining)
+- Molly: field_dps, solo (poor joiner despite DPS)
+- Alonso: field_dps, hybrid
+
+NEVER RECOMMEND: DPS heroes as joiners, Defensive heroes as rally leaders, Gearing joiner-only heroes
+
+POWER ILLUSION: Hero gear increases visible damage. Chief gear increases battle outcomes.
+
+CORE TRUTHS:
+1. Rallies are won by BUFFS, not DPS
+2. Joiners carry SKILLS, not damage
+3. Chief Gear = universal power
+4. Hero Gear = situational power
+
+=== END VERIFIED MECHANICS ===
+"""
+
+
 class AIRecommender:
     """Generate recommendations using OpenAI API."""
 
-    SYSTEM_PROMPT = """You are a Whiteout Survival expert advisor. Analyze the player's data and give specific upgrade recommendations.
+    SYSTEM_PROMPT = f"""You are a Whiteout Survival expert advisor. Analyze the player's data and give specific upgrade recommendations.
 
-GAME KNOWLEDGE:
-- Hero tiers: S+ (best) > S > A > B > C > D (worst)
-- Classes: Infantry (front tank), Marksman (back damage), Lancer (balanced)
-- Skill types: Expedition (PvP/SvS combat), Exploration (PvE/stages)
-- Generations: New heroes unlock every ~80 days. Older gen heroes become less relevant unless S+ tier.
-- SvS: State vs State - the main competitive event. Expedition skills matter most.
-- Rally: Group attacks on bosses/cities. Need strong expedition skills.
+{VERIFIED_MECHANICS}
 
-PRIORITIES SCALE: 1=low, 5=critical
+CRITICAL RULES:
+1. ONLY use hero names from the verified list above - DO NOT invent heroes
+2. ONLY use skill mechanics exactly as described - DO NOT make up percentages
+3. Reference the player's ACTUAL hero levels and skills from their data
+4. Consider their priorities when ranking recommendations
 
 OUTPUT FORMAT - Return ONLY valid JSON array, no markdown:
 [
-  {"priority": 1, "action": "Level Jeronimo to 60", "hero": "Jeronimo", "reason": "S+ tier, your top combat hero", "resources": "Hero EXP items"},
-  {"priority": 2, "action": "...", "hero": "...", "reason": "...", "resources": "..."}
+  {{"priority": 1, "action": "Level Jeronimo to 60", "hero": "Jeronimo", "reason": "S+ tier, your top combat hero", "resources": "Hero EXP items"}},
+  {{"priority": 2, "action": "...", "hero": "...", "reason": "...", "resources": "..."}}
 ]
 
 Give 5-10 specific, actionable recommendations sorted by priority (1=do first)."""
+
+    QUESTION_PROMPT = f"""You are a Whiteout Survival expert advisor. Answer questions about the player's account using ONLY the verified mechanics below.
+
+{VERIFIED_MECHANICS}
+
+CRITICAL: Only reference heroes and mechanics from the verified data above. If you don't know something specific, say so rather than guessing."""
 
     def __init__(self, api_key: Optional[str] = None):
         """Initialize with OpenAI API key from param or environment."""
@@ -230,11 +346,11 @@ Give 5-10 specific, actionable recommendations sorted by priority (1=do first)."
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You are a Whiteout Survival expert. Answer questions about the player's account concisely and specifically."},
+                    {"role": "system", "content": self.QUESTION_PROMPT},
                     {"role": "user", "content": f"{user_data}\n\nQUESTION: {question}"}
                 ],
                 temperature=0.7,
-                max_tokens=500
+                max_tokens=800
             )
 
             return response.choices[0].message.content.strip()

@@ -1,0 +1,201 @@
+{
+  "description": "Player settings schema for optimizer personalization",
+  "version": "1.0",
+  "generated_at": "2026-01-07T00:00:00Z",
+
+  "schema": {
+    "player_state": {
+      "furnace_level": {"type": "integer", "min": 1, "max": 30, "required": true},
+      "furnace_fc_level": {"type": "string", "pattern": "^(30-[1-2]|FC[1-9]-[0-1]|FC10-0)$", "required": false},
+      "state_age_days": {"type": "integer", "min": 0, "required": true},
+      "state_generation": {"type": "integer", "min": 1, "max": 14, "required": false}
+    },
+    "spending_profile": {
+      "type": "enum",
+      "values": ["f2p", "minnow", "dolphin", "orca", "whale"],
+      "required": true,
+      "default": "f2p"
+    },
+    "priority_focus": {
+      "type": "enum",
+      "values": ["svs_combat", "balanced_growth", "economy_focus"],
+      "required": true,
+      "default": "balanced_growth"
+    },
+    "alliance_role": {
+      "type": "enum",
+      "values": ["rally_lead", "filler", "farmer", "casual"],
+      "required": false,
+      "default": "filler"
+    }
+  },
+
+  "spending_profiles": {
+    "f2p": {
+      "label": "Free to Play",
+      "monthly_spend_usd": 0,
+      "characteristics": [
+        "No gem purchases",
+        "Relies on events and daily rewards",
+        "Time-gated progression",
+        "Must be highly selective with upgrades"
+      ],
+      "resource_scarcity": {
+        "gems": "extreme",
+        "speedups": "high",
+        "fire_crystal": "high",
+        "essence_stone": "extreme",
+        "mythic_gear": "extreme",
+        "jewel_secrets": "extreme"
+      },
+      "optimizer_adjustments": {
+        "skip_whale_only_upgrades": true,
+        "prioritize_event_efficiency": true,
+        "focus_on_bottleneck_resources": true,
+        "efficiency_threshold": 0.8
+      }
+    },
+    "minnow": {
+      "label": "Low Spender",
+      "monthly_spend_usd": [5, 30],
+      "characteristics": [
+        "Monthly pass / small packs",
+        "Selective event purchases",
+        "Moderate speedup supply",
+        "Some premium heroes accessible"
+      ],
+      "resource_scarcity": {
+        "gems": "high",
+        "speedups": "moderate",
+        "fire_crystal": "moderate",
+        "essence_stone": "high",
+        "mythic_gear": "high",
+        "jewel_secrets": "high"
+      },
+      "optimizer_adjustments": {
+        "skip_whale_only_upgrades": true,
+        "prioritize_event_efficiency": true,
+        "focus_on_bottleneck_resources": true,
+        "efficiency_threshold": 0.7
+      }
+    },
+    "dolphin": {
+      "label": "Mid Spender",
+      "monthly_spend_usd": [30, 100],
+      "characteristics": [
+        "Regular pack purchases",
+        "Event participation with spending",
+        "Good speedup supply",
+        "Most heroes accessible over time"
+      ],
+      "resource_scarcity": {
+        "gems": "moderate",
+        "speedups": "low",
+        "fire_crystal": "moderate",
+        "essence_stone": "moderate",
+        "mythic_gear": "moderate",
+        "jewel_secrets": "moderate"
+      },
+      "optimizer_adjustments": {
+        "skip_whale_only_upgrades": false,
+        "prioritize_event_efficiency": true,
+        "focus_on_bottleneck_resources": false,
+        "efficiency_threshold": 0.5
+      }
+    },
+    "orca": {
+      "label": "Heavy Spender",
+      "monthly_spend_usd": [100, 500],
+      "characteristics": [
+        "Significant pack purchases",
+        "Full event participation",
+        "Speedups rarely a concern",
+        "All heroes accessible"
+      ],
+      "resource_scarcity": {
+        "gems": "low",
+        "speedups": "none",
+        "fire_crystal": "low",
+        "essence_stone": "low",
+        "mythic_gear": "moderate",
+        "jewel_secrets": "low"
+      },
+      "optimizer_adjustments": {
+        "skip_whale_only_upgrades": false,
+        "prioritize_event_efficiency": false,
+        "focus_on_bottleneck_resources": false,
+        "efficiency_threshold": 0.3
+      }
+    },
+    "whale": {
+      "label": "Whale",
+      "monthly_spend_usd": [500, null],
+      "characteristics": [
+        "Unlimited spending capacity",
+        "Buy whatever is needed",
+        "Time is the only real constraint",
+        "Focus on marginal optimization"
+      ],
+      "resource_scarcity": {
+        "gems": "none",
+        "speedups": "none",
+        "fire_crystal": "none",
+        "essence_stone": "none",
+        "mythic_gear": "low",
+        "jewel_secrets": "none"
+      },
+      "optimizer_adjustments": {
+        "skip_whale_only_upgrades": false,
+        "prioritize_event_efficiency": false,
+        "focus_on_bottleneck_resources": false,
+        "efficiency_threshold": 0.0
+      }
+    }
+  },
+
+  "alliance_roles": {
+    "rally_lead": {
+      "description": "Leads rallies in SvS and events",
+      "priority_boost": {
+        "troops_train": 0.2,
+        "troops_promote": 0.2,
+        "hero_gear_mastery": 0.15,
+        "war_academy": 0.15
+      },
+      "notes": "Troop power and hero stats are critical"
+    },
+    "filler": {
+      "description": "Joins rallies and reinforces",
+      "priority_boost": {
+        "troops_train": 0.1,
+        "troops_promote": 0.1
+      },
+      "notes": "Troop count matters, quality secondary"
+    },
+    "farmer": {
+      "description": "Resource generation focus",
+      "priority_boost": {
+        "buildings": 0.15,
+        "research": 0.1
+      },
+      "notes": "Economy research and building capacity"
+    },
+    "casual": {
+      "description": "Plays for fun, no specific role",
+      "priority_boost": {},
+      "notes": "Use balanced growth defaults"
+    }
+  },
+
+  "example_player": {
+    "player_state": {
+      "furnace_level": 30,
+      "furnace_fc_level": "FC3-0",
+      "state_age_days": 250,
+      "state_generation": 5
+    },
+    "spending_profile": "minnow",
+    "priority_focus": "svs_combat",
+    "alliance_role": "filler"
+  }
+}

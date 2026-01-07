@@ -5,12 +5,36 @@
 ---
 
 ## Table of Contents
-1. [Rally Mechanics](#rally-mechanics)
-2. [Hero Skills Database](#hero-skills-database)
-3. [Troop Ratios](#troop-ratios)
-4. [Server Timeline](#server-timeline)
-5. [Hero Tier Rankings](#hero-tier-rankings)
-6. [Event Strategies](#event-strategies)
+1. [Hero Skill System](#hero-skill-system)
+2. [Rally Mechanics](#rally-mechanics)
+3. [Chief Gear](#chief-gear)
+4. [Hero Skills Database](#hero-skills-database)
+5. [Troop Ratios](#troop-ratios)
+6. [Server Timeline](#server-timeline)
+7. [Hero Tier Rankings](#hero-tier-rankings)
+8. [Event Strategies](#event-strategies)
+9. [Recommendation Explanation System](#recommendation-explanation-system)
+
+---
+
+## Hero Skill System
+
+Each hero has two types of skills, visible on separate sides of the skill screen:
+
+### Exploration Skills (Left Side)
+- Upgraded with **Exploration Manuals**
+- Used for PvE content (exploration, events)
+- Levels 1-5 with equal % increase per level
+- Example: If max effect is 25%, each level gives +5%
+
+### Expedition Skills (Right Side)
+- Upgraded with **Expedition Manuals**
+- Used for PvP content (rallies, garrison, SvS)
+- Levels 1-5 with equal % increase per level
+- **Top-right skill** is specifically used when joining rallies
+
+### Manual Costs
+Increasing amount of manuals required per level upgrade (exact amounts vary by hero rarity).
 
 ---
 
@@ -27,11 +51,12 @@
 ### Rally Joiner (Member)
 **Source:** BlueStacks Rally Joiner Guide, Century Games Help Center
 
-**CRITICAL:** Only your **first hero's TOP-RIGHT expedition skill** contributes!
+**CRITICAL:** Only your **leftmost hero's TOP-RIGHT expedition skill** contributes!
+- **Leftmost hero**: First hero in your march lineup (slot 1, marked with blue flag)
+- **Top-right skill**: The expedition skill in top-right position on hero skill screen
 - Your other 2 heroes and their skills DON'T count when joining
-- Up to **4 member skills** contribute total to a rally
+- Top **4 highest SKILL LEVEL** expedition skills from all joiners apply
 - Member skills **CAN stack** if they are the same effect
-- The first hero is marked with a blue flag icon
 
 ### Joiner Skill Selection
 **Source:** WoS Wiki Advanced Rally Guide
@@ -39,14 +64,275 @@
 "Only the 4 highest-leveled FIRST SKILL of the Hero Captain will be selected for battle."
 
 ### Best Joiner Heroes
-| Role | Hero | Top-Right Skill | Effect |
-|------|------|-----------------|--------|
-| **Attack Joiner** | Jessie | Stand of Arms | +25% damage dealt (all troops) |
-| **Garrison Joiner** | Sergey | Defenders' Edge | -20% damage taken (all troops) |
+| Role | Hero | Top-Right Skill | Effect per Level (1-5) |
+|------|------|-----------------|------------------------|
+| **Attack Joiner** | Jessie | Stand of Arms | +5/10/15/20/25% DMG dealt |
+| **Garrison Joiner** | Sergey | Defenders' Edge | -4/8/12/16/20% DMG taken |
 
 **Why Jessie is best for attack:** Her "damage dealt" buff affects ALL damage types including normal attacks, hero skills, pet abilities, and teammate buffs. This is superior to heroes that only boost basic auto-attack damage.
 
 **Why Sergey is best for garrison:** Universal damage reduction is the most straightforward defensive joiner effect.
+
+**Note:** Skill effects scale with level. A level 5 Jessie provides +25% DMG, while level 1 only provides +5%.
+
+---
+
+## Chief Gear
+
+**Source:** WoS Wiki - Chief Gear, Chief Gear Upgrading & Forging
+
+Chief Gear provides **global combat buffs** that apply to ALL heroes and troops. Unlike hero gear, Chief Gear is **always active** once equipped.
+
+### The 6 Chief Gear Pieces
+
+| Gear Piece | Primary Stat | Benefits | Priority |
+|------------|--------------|----------|----------|
+| **Ring** | Troop Attack (All) | Universal - all classes | 1 (Highest) |
+| **Amulet** | Troop Lethality/Damage | Universal - PvP focused | 2 |
+| **Gloves** | Marksman Attack | Marksman heroes (Alonso, Molly) | 3 |
+| **Boots** | Lancer Attack | Lancer heroes | 4 |
+| **Helmet** | Infantry Defense | Infantry heroes (Natalia, Sergey, Flint) | 5 |
+| **Armor** | Infantry Health | Infantry heroes | 6 |
+
+### Quality Tiers (Lowest → Highest)
+
+1. Common → 2. Uncommon → 3. Rare → 4. Epic → 5. Legendary → 6. **Mythic**
+
+**Long-term goal:** Mythic on Ring & Amulet first.
+
+### Upgrade Priority (Community Consensus)
+
+**Tier 1 - Highest Impact (Upgrade First):**
+1. **Ring** - Troop Attack scales everywhere
+2. **Amulet** - Lethality decisive in PvP & SvS
+
+**Tier 2 - Offensive Class Scaling:**
+3. **Gloves** - Marksman Attack
+4. **Boots** - Lancer Attack
+
+**Tier 3 - Defensive/Situational:**
+5. **Helmet** - Infantry Defense
+6. **Armor** - Infantry Health (useful for garrison, Crazy Joe, defensive SvS)
+
+### Why Ring & Amulet First?
+
+- They affect **all troops** (not just one class)
+- They apply to rallies, field PvP, defense, SvS scoring
+- They **stack multiplicatively** with hero expedition buffs
+
+### Common Mistakes
+
+| Mistake | Why It's Wrong |
+|---------|----------------|
+| Upgrading Infantry gear first "because infantry tanks" | Infantry stats matter LESS than damage multipliers in PvP/SvS |
+| Over-investing in Epic/Legendary tiers | These are temporary; Mythic is the real target |
+| Ignoring Amulet lethality | Lethality directly impacts kill count & battle outcome |
+
+---
+
+## Chief Gear vs Hero Gear ROI
+
+**ROI = Return on Investment**: For each scarce resource spent, how much combat power gained and in how many modes?
+
+### Chief Gear ROI (HIGHEST)
+
+| Attribute | Value |
+|-----------|-------|
+| Scope | Global - all troops, all heroes |
+| Scaling | Multiplicative |
+| Mode Coverage | 100% (rallies, PvP, garrison, events, SvS) |
+| Replacement Risk | None |
+| Long-term Relevance | Permanent |
+
+**Chief Gear is "foundational power" - no condition where it's inactive.**
+
+### Hero Gear ROI (CONDITIONAL)
+
+| Attribute | Value |
+|-----------|-------|
+| Scope | Single hero only |
+| Scaling | Additive + conditional |
+| Mode Coverage | Limited |
+| Replacement Risk | HIGH (generation-bound) |
+| Long-term Relevance | Hero-dependent |
+
+**Hero Gear ROI requires ALL THREE conditions:**
+1. Hero is used often
+2. Hero is used in modes where gear matters
+3. Hero is NOT about to be replaced by newer generation
+
+If ANY condition fails → ROI collapses.
+
+### Rally Context Changes Everything
+
+| Context | Chief Gear ROI | Hero Gear ROI |
+|---------|----------------|---------------|
+| Rally Leader | High (multiplies entire rally) | Medium (only your 3 heroes) |
+| Rally Joiner | High (still applies to your troops) | **Very Low** (barely matters) |
+| Field PvP | High | High |
+| Arena | High | High |
+
+**Critical insight:** For rally joiners, hero gear ROI is extremely low. Chief Gear ROI is unchanged.
+
+### Correct Investment Hierarchy
+
+1. **Chief Gear: Ring** (Troop Attack - universal)
+2. **Chief Gear: Amulet** (Lethality - PvP decisive)
+3. **Remaining Chief Gear**
+4. **Hero Gear on long-term core heroes** (if conditions met)
+5. **Hero Gear on situational heroes**
+
+**Only whales can safely violate this order.**
+
+### Before Investing in Hero Gear, Verify:
+
+- [ ] Hero is used as rally LEADER (not just joiner)
+- [ ] Hero remains relevant next generation
+- [ ] Chief Ring and Amulet at target tier FIRST
+
+---
+
+## Spender-Level Gear Paths
+
+**Core Principle:** Spender level determines how much inefficiency you can afford.
+
+| Spender | Chief Gear | Hero Gear | Mistake Tolerance |
+|---------|------------|-----------|-------------------|
+| F2P | Mandatory | Minimal (1 hero max) | None |
+| Low | Dominant | Limited (2 heroes) | Low |
+| Medium | Balanced | Strategic (3-4 heroes) | Medium |
+| Whale | Maxed | Everything | High |
+
+### F2P (Free-to-Play)
+
+**Reality:** Very limited resources. Cannot recover from mistakes quickly.
+
+**Chief Gear:** ABSOLUTE priority
+- Focus on 2-3 pieces ahead of rest
+- Do NOT rush Mythic on everything
+- Order: Ring → Amulet → Gloves → Boots → Helmet → Armor
+
+**Hero Gear:** Extremely limited
+- Only 1 hero (primary field damage dealer)
+- Must remain relevant 2+ generations
+- NEVER gear rally joiners
+- Targets: Molly OR Alonso (not both)
+
+### Low Spender (Battle Pass / small packs)
+
+**Reality:** Steady but slow income. Still punished by major misallocations.
+
+**Chief Gear:** Still #1 priority
+- Ring + Amulet pushed ahead
+- Can begin equalizing Gloves/Boots sooner
+
+**Hero Gear:** Selective (2 heroes max)
+- Must be used daily across multiple modes
+- NOT purely rally joiner
+- Targets: Alonso, Jeronimo (if rally leader), Molly
+- AVOID: Gearing defensive heroes early
+
+### Medium Spender
+
+**Reality:** Can sustain upgrades. Can recover from mistakes.
+
+**Chief Gear:** Foundational
+- Ring & Amulet to Mythic early
+- Rest follows closer behind
+
+**Hero Gear:** Strategic (3-4 heroes)
+- Priority: Rally leader → Primary DPS → Secondary DPS → Situational
+- Targets: Jeronimo, Alonso, Molly, 1 situational
+
+### Whale
+
+**Reality:** Resource constraints removed. Speed > efficiency.
+
+**Chief Gear:** Max everything fast
+
+**Hero Gear:** All core heroes
+- Can gear heroes before optimal
+- Can gear heroes knowing they'll be replaced
+- ROI constraints ignored
+
+---
+
+## Combat Synergy Model
+
+**Core Question:** Where does my power actually come from in this fight?
+
+### Synergy Weights by Context (★ = importance, max 5)
+
+#### Rally Leader
+| Component | Weight | Why |
+|-----------|--------|-----|
+| Chief Gear | ★★★★★ | Full global multiplier |
+| Leader Hero Selection | ★★★★★ | 9 skills define rally |
+| Leader Hero Gear | ★★★☆☆ | Affects skill scaling |
+| Joiner Hero Gear | ☆☆☆☆☆ | Irrelevant |
+
+**Key:** Rally leaders chosen for EXPEDITION SKILL QUALITY, not DPS.
+
+#### Rally Joiner
+| Component | Weight |
+|-----------|--------|
+| Chief Gear | ★★★★★ |
+| First Hero Skill | ★★★★☆ |
+| Hero Gear | ★☆☆☆☆ |
+
+**Key:** Joiners are SKILL CARRIERS, not damage dealers.
+
+#### Field PvP
+| Component | Weight |
+|-----------|--------|
+| Hero Gear | ★★★★★ |
+| Hero DPS kit | ★★★★★ |
+| Chief Gear | ★★★☆☆ |
+
+**Key:** ONLY mode where hero gear rivals chief gear ROI.
+
+#### Garrison
+| Component | Weight |
+|-----------|--------|
+| Damage reduction skills | ★★★★★ |
+| Chief Gear (defensive) | ★★★★☆ |
+| Hero Gear | ★★☆☆☆ |
+| DPS | ★☆☆☆☆ |
+
+### Hero Role Tags
+
+| Hero | Roles |
+|------|-------|
+| Jeronimo | rally_leader, attack_buffer |
+| Jessie | attack_joiner |
+| Sergey | defense_joiner, garrison |
+| Molly | field_dps, solo |
+| Alonso | field_dps, hybrid |
+| Natalia | tank, garrison, rally_leader |
+
+### Never Recommend
+
+- DPS heroes as joiners (waste of slot)
+- Defensive heroes as rally leaders
+- Gearing joiner-only heroes
+
+### Power Illusion Warning
+
+> **Hero gear increases visible damage numbers.**
+> **Chief gear increases battle outcomes.**
+
+Warn users when they:
+- Over-invest in hero gear
+- Gear joiners
+- Ignore Ring/Amulet progression
+
+### Core Truths
+
+1. Rallies are won by **buffs**, not DPS
+2. Joiners carry **skills**, not damage
+3. Chief Gear is **universal** power
+4. Hero Gear is **situational** power
+5. Spender level determines allowed inefficiency
 
 ---
 
@@ -75,7 +361,7 @@
 
 ---
 
-### Jessie (Marksman, Gen 5)
+### Jessie (Marksman, Gen 1)
 **Source:** WoS Wiki
 
 #### Expedition Skills
@@ -299,3 +585,80 @@ Standard balanced PvP composition.
 
 6. **A Jack Of Everything** - https://www.ajackof.com/
    - Troop Formation Ratios Guide
+
+---
+
+## Recommendation Explanation System
+
+The optimizer uses an evidence-based explanation system to build user trust and prevent hallucination.
+
+### Reason Types
+
+Every recommendation claim is tagged with a type:
+
+| Type | Description | Trust Level |
+|------|-------------|-------------|
+| **mechanic** | Game rules (leader vs joiner, stacking limits) | Strongest |
+| **data** | Verified database entries (skills/stats) | Strongest |
+| **context** | Event/mode logic (SvS vs Bear vs CJ) | Strong |
+| **economy** | Spender constraints (F2P vs whale) | Strong |
+| **meta** | Community consensus (version-sensitive) | Weaker |
+| **personalized** | User-specific inputs (their heroes/gear) | Strong |
+
+### Confidence Grades
+
+| Grade | Score | Meaning |
+|-------|-------|---------|
+| A | 85%+ | Mechanics-backed + verified data |
+| B | 70-84% | Strong evidence, minor assumptions |
+| C | 50-69% | Some assumptions or meta-based |
+| D | <50% | Speculative or user-dependent |
+
+### Two-Level UX
+
+**Level 1 (Short):** One sentence for casual users
+> "Jessie is best because rally joiners only apply one top-right skill, and hers boosts all-troops damage."
+
+**Level 2 (Expandable):** Full breakdown for power users
+- Mechanic explanation
+- Skill evidence
+- Tradeoffs
+- What to do next
+- Scoring breakdown
+
+### Core Claims (Evidence-Backed)
+
+| Claim ID | Claim | Type |
+|----------|-------|------|
+| `claim_joiner_top_right_only` | Rally joiners only contribute the first hero's top-right expedition skill | mechanic |
+| `claim_leader_9_skills` | Rally leaders provide 9 expedition skills (3 heroes x 3 skills each) | mechanic |
+| `claim_top_4_joiner_skills` | Top 4 highest level expedition skills from all joiners are applied | mechanic |
+| `claim_jessie_dmg_boost` | Jessie's top-right skill gives +5/10/15/20/25% DMG dealt per level | data |
+| `claim_sergey_dmg_reduction` | Sergey's top-right skill gives -4/8/12/16/20% DMG taken per level | data |
+| `claim_chief_gear_global` | Chief Gear provides global buffs in ALL combat modes | mechanic |
+| `claim_hero_gear_personal` | Hero Gear only affects the individual hero equipped | mechanic |
+| `claim_joiner_gear_low_roi` | Hero gear on rally joiners has minimal impact (skills matter, not damage) | economy |
+| `claim_dps_personal_not_rally` | DPS is personal damage; rally outcomes scale with buffs | mechanic |
+
+### Example Explanations
+
+#### Jessie as Attack Joiner
+- **Why:** Joiner uses only top-right skill; Jessie's buffs all-troops damage
+- **Do:** Jessie in slot #1, level her top-right skill
+- **Don't:** Sink hero gear into Jessie unless she's also field PvP core
+
+#### Sergey as Defense Joiner
+- **Why:** Joiner top-right skill; Sergey provides universal damage reduction
+- **Do:** Sergey in slot #1 when joining defense/garrison rallies
+
+#### Jeronimo as Rally Leader
+- **Why:** Leader uses 9 skills; Jeronimo has multiple all-troops offensive effects
+- **Do:** Prioritize as rally lead; Chief Gear first, then consider Jeronimo hero gear
+
+#### Molly for Field, Not Rally
+- **Why:** DPS is personal damage; rallies scale with buffs, not individual damage
+- **Do:** Gear Molly for field/solo PvP only; don't expect rally improvement
+
+#### Chief Gear Priority
+- **Why:** Global multiplier applies everywhere
+- **Do:** Ring → Amulet → Gloves/Boots to Mythic

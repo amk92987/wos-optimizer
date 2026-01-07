@@ -1,0 +1,95 @@
+{
+  "description": "Unlock requirements for each upgrade system",
+  "version": "1.0",
+  "generated_at": "2026-01-07T00:00:00Z",
+
+  "systems": {
+    "buildings": {
+      "edges_file": "upgrades/buildings.edges.json",
+      "unlock": {"furnace_level": 1},
+      "phase_available": "early_game",
+      "priority_phases": ["early_game", "mid_game"],
+      "notes": "Core progression, always relevant"
+    },
+    "buildings_fc": {
+      "edges_file": "upgrades/buildings.fc.edges.json",
+      "unlock": {"furnace_level": 30},
+      "phase_available": "late_game",
+      "priority_phases": ["late_game", "endgame"],
+      "notes": "Fire Crystal era building progression"
+    },
+    "research": {
+      "raw_file": "raw/research.research.json",
+      "unlock": {"furnace_level": 9},
+      "phase_available": "early_game",
+      "priority_phases": ["early_game", "mid_game"],
+      "notes": "Tool Enhancement VII is critical mid-game milestone"
+    },
+    "troops_train": {
+      "edges_file": "upgrades/troops.train.edges.json",
+      "unlock": {"furnace_level": 1},
+      "phase_available": "early_game",
+      "priority_phases": ["mid_game", "late_game"],
+      "notes": "Higher tiers unlock with Furnace/War Academy"
+    },
+    "troops_promote": {
+      "edges_file": "upgrades/troops.promote.edges.json",
+      "unlock": {"furnace_level": 1},
+      "phase_available": "early_game",
+      "priority_phases": ["late_game", "endgame"],
+      "notes": "Promotion becomes efficient at higher tiers"
+    },
+    "war_academy": {
+      "edges_file": "upgrades/war_academy.steps.json",
+      "unlock": {"furnace_level": 30},
+      "phase_available": "late_game",
+      "priority_phases": ["late_game", "endgame"],
+      "notes": "Troop training efficiency, FC-gated progression"
+    },
+    "chief_gear": {
+      "edges_file": "upgrades/chief_gear.steps.json",
+      "unlock": {"furnace_level": 1},
+      "phase_available": "early_game",
+      "priority_phases": ["mid_game", "late_game"],
+      "notes": "Gradual progression, high-tier gear is late-game"
+    },
+    "hero_gear_mastery": {
+      "edges_file": "upgrades/hero_gear.mastery.edges.json",
+      "unlock": {"furnace_level": 30, "hero_gear_tier": "mythic"},
+      "phase_available": "late_game",
+      "priority_phases": ["late_game", "endgame"],
+      "notes": "Requires Mythic gear to begin"
+    },
+    "chief_charms": {
+      "edges_file": "upgrades/chief_charms.edges.json",
+      "unlock": {"furnace_level": 25},
+      "phase_available": "mid_game",
+      "priority_phases": ["mid_game", "late_game", "endgame"],
+      "l12_plus_unlock": {"state_generation": 7},
+      "notes": "L1-11 available mid-game, L12-16 requires Gen 7 state"
+    },
+    "pets": {
+      "edges_file": "upgrades/pets.advancement.edges.json",
+      "unlock": {"furnace_level": 18, "state_age_days": 55},
+      "phase_available": "mid_game",
+      "priority_phases": ["mid_game", "late_game"],
+      "notes": "Both Furnace AND state age required"
+    },
+    "daybreak_island": {
+      "edges_file": "upgrades/daybreak_island.tree_of_life.edges.json",
+      "unlock": {"furnace_level": 19},
+      "phase_available": "mid_game",
+      "priority_phases": ["mid_game", "late_game"],
+      "notes": "Combat buffs via Life Essence investment"
+    }
+  },
+
+  "unlock_order": [
+    {"furnace": 1, "systems": ["buildings", "troops_train", "troops_promote", "chief_gear"]},
+    {"furnace": 9, "systems": ["research"]},
+    {"furnace": 18, "systems": ["pets"], "requires_state_age": 55},
+    {"furnace": 19, "systems": ["daybreak_island"]},
+    {"furnace": 25, "systems": ["chief_charms"]},
+    {"furnace": 30, "systems": ["buildings_fc", "war_academy", "hero_gear_mastery"]}
+  ]
+}

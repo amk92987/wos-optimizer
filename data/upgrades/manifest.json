@@ -1,0 +1,23 @@
+{
+  "dataset_id": "wos-upgrades",
+  "dataset_version": "0.1.0",
+  "generated_at": "2026-01-07T00:00:00Z",
+  "notes": [
+    "Tables-first dataset for upgrade cost edges (from -> to).",
+    "All numbers must be sourced and traceable via sources.json."
+  ],
+  "files": [
+    {
+      "path": "upgrades/chief_gear.steps.json",
+      "system": "chief_gear",
+      "edge_type": "step",
+      "primary_key": "upgrade_id"
+    },
+    {
+      "path": "upgrades/war_academy.steps.json",
+      "system": "war_academy",
+      "edge_type": "step",
+      "primary_key": "upgrade_id"
+    }
+  ]
+}

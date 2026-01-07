@@ -1,0 +1,85 @@
+{
+  "system": "daybreak_island",
+  "retrieved_at": "2026-01-07T00:00:00Z",
+  "sources": [
+    {
+      "source_id": "SRC_ONECHILLEDGAMER_DAYBREAK",
+      "url": "https://onechilledgamer.com/whiteout-survival-daybreak-island-guide/",
+      "confidence": "A"
+    },
+    {
+      "source_id": "SRC_WHITEOUTDATA_DAYBREAK",
+      "url": "https://whiteoutdata.com/guides/daybreak-island/",
+      "confidence": "B"
+    }
+  ],
+
+  "overview": {
+    "unlock_requirements": {
+      "furnace_level": 19,
+      "building": "Dock"
+    },
+    "primary_currency": "life_essence",
+    "currency_conversion": {
+      "wood_per_life_essence": 720,
+      "notes": "Life Essence obtained by sending wood via Dock"
+    },
+    "description": "Peaceful island for building decorations and upgrading Tree of Life for combat buffs"
+  },
+
+  "tree_of_life": {
+    "description": "Central upgrade structure providing combat buffs",
+    "max_level": 10,
+    "upgrades": [
+      {"level": 1, "prosperity_required": 0, "life_essence_cost": 0, "buff": "Healing Speed +30%"},
+      {"level": 2, "prosperity_required": 200, "life_essence_cost": 1000, "buff": "Healing Speed +30%"},
+      {"level": 3, "prosperity_required": 600, "life_essence_cost": 2500, "buff": "Healing Speed +30%"},
+      {"level": 4, "prosperity_required": 1200, "life_essence_cost": 5000, "buff": "Healing Speed +30%"},
+      {"level": 5, "prosperity_required": 2400, "life_essence_cost": 10000, "buff": "Healing Speed +30%"},
+      {"level": 6, "prosperity_required": 4800, "life_essence_cost": 20000, "buff": "Troops Health +5%"},
+      {"level": 7, "prosperity_required": 8000, "life_essence_cost": 35000, "buff": "Troops Health +5%"},
+      {"level": 8, "prosperity_required": 12000, "life_essence_cost": 50000, "buff": "Troops Defense +5%"},
+      {"level": 9, "prosperity_required": 16000, "life_essence_cost": 70000, "buff": "Troops Defense +5%"},
+      {"level": 10, "prosperity_required": 20000, "life_essence_cost": 100000, "buff": "Troops Lethality +5%"}
+    ],
+    "total_life_essence": 293500
+  },
+
+  "decorations": {
+    "description": "Buildings that provide Prosperity points to unlock Tree of Life levels",
+    "cost_by_rarity": {
+      "common": {"life_essence": 1000, "prosperity": 50},
+      "uncommon": {"life_essence": 2000, "prosperity": 100},
+      "rare": {"life_essence": 3000, "prosperity": 200},
+      "epic": {"life_essence": 5000, "prosperity": 400},
+      "mythic": {"life_essence": 10000, "prosperity": 1000}
+    },
+    "categories": ["Production", "Recreation", "Landscape", "Building"],
+    "notes": "Decorations also produce small amounts of Life Essence over time"
+  },
+
+  "starry_lighthouse": {
+    "unlock_requirement": "Tree of Life Level 10",
+    "cost": {"life_essence": 50000},
+    "buff": "March Speed +10%",
+    "description": "Special landmark available after maxing Tree of Life"
+  },
+
+  "dock": {
+    "description": "Main city building for sending wood to Daybreak Island",
+    "conversion_rate": "720 wood = 1 Life Essence",
+    "upgrade_benefits": "Higher dock levels allow sending more wood at once"
+  },
+
+  "strategy_guidance": {
+    "claim_type": "meta",
+    "confidence": "C",
+    "tips": [
+      "Prioritize Tree of Life upgrades for combat buffs",
+      "Build decorations to meet Prosperity requirements",
+      "Balance decoration rarity vs cost efficiency",
+      "Mythic decorations give best Prosperity/slot ratio but are expensive",
+      "L10 Tree of Life + Starry Lighthouse provides significant combat value"
+    ]
+  }
+}

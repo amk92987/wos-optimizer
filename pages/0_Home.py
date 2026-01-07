@@ -11,6 +11,12 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
 
+# Load CSS
+css_file = PROJECT_ROOT / "styles" / "custom.css"
+if css_file.exists():
+    with open(css_file) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
 # Initialize
 init_db()
 db = get_db()
@@ -96,11 +102,11 @@ def render_home():
 
     gen = get_current_generation(profile.server_age_days)
     timeline_data = [
-        ("Gen 1", "0-40 days", "Jeronimo, Natalia, Molly, Zinman", gen == 1),
+        ("Gen 1", "0-40 days", "Jeronimo, Natalia, Molly, Zinman, Jessie, Sergey", gen == 1),
         ("Gen 2", "40-120 days", "Flint, Philly, Alonso", gen == 2),
         ("Gen 3", "120-200 days", "Logan, Mia, Greg", gen == 3),
         ("Gen 4", "200-280 days", "Ahmose, Reina, Lynn", gen == 4),
-        ("Gen 5", "280-360 days", "Hector, Wu Ming, Jessie", gen == 5),
+        ("Gen 5", "280-360 days", "Hector, Wu Ming", gen == 5),
         ("Gen 6", "360-440 days", "Patrick, Charlie, Cloris", gen == 6),
         ("Gen 7", "440-520 days", "Gordon, Renee, Eugene", gen == 7),
         ("Gen 8+", "520+ days", "Blanchette, and more...", gen >= 8),

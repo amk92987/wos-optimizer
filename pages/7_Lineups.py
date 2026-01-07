@@ -229,7 +229,7 @@ if event_type == "World March (Default)":
         st.markdown("### Main March (Recommended)")
         render_3hero_lineup(
             infantry={"name": "Natalia", "role": "Primary tank, sustain", "lead": True},
-            lancer={"name": "Molly", "role": "DPS + healing support"},
+            lancer={"name": "Molly", "role": "Damage + healing support"},
             marksman={"name": "Alonso", "role": "Main damage dealer"}
         )
         render_troop_ratio(50, 20, 30, "Balanced default - community consensus")
@@ -248,7 +248,7 @@ if event_type == "World March (Default)":
         st.markdown("**Burst Damage Focus:**")
         render_3hero_lineup(
             infantry={"name": "Jeronimo", "role": "ATK multiplier", "lead": True},
-            lancer={"name": "Molly", "role": "DPS"},
+            lancer={"name": "Molly", "role": "Damage"},
             marksman={"name": "Alonso", "role": "Burst damage"}
         )
         st.caption("Use when you need fast kills, not sustain")
@@ -278,7 +278,7 @@ elif event_type == "SvS Castle Attack":
         render_3hero_lineup(
             infantry={"name": "Jeronimo", "role": "ATK boost to entire rally", "lead": True},
             lancer={"name": "Molly", "role": "Healing + damage"},
-            marksman={"name": "Alonso", "role": "Main DPS"}
+            marksman={"name": "Alonso", "role": "Main damage dealer"}
         )
         render_troop_ratio(50, 20, 30, "Standard attack ratio")
 
@@ -483,10 +483,10 @@ elif event_type == "Bear Trap Rally":
         st.markdown("*Only use these heroes in your leftmost slot - they have valuable rally expedition skills:*")
 
         valuable_joiners = [
-            ("Jeronimo", "Infantry", "Infantry ATK multiplier", 1),
-            ("Jessie", "Marksman", "+25% DMG dealt (all troops)", 1),
-            ("Jasser", "Marksman", "Rally damage buff", 1),
-            ("Seo-yoon", "Marksman", "Rally damage buff", 1),
+            ("Jeronimo", "Infantry", "Infantry ATK buff (scales with level)", 1),
+            ("Jessie", "Marksman", "+5/10/15/20/25% DMG dealt (per level)", 1),
+            ("Jasser", "Marksman", "Rally damage buff (scales with level)", 7),
+            ("Seo-yoon", "Marksman", "Rally damage buff (scales with level)", 8),
         ]
 
         available_joiners = []
@@ -532,7 +532,7 @@ elif event_type == "Crazy Joe Rally":
         render_3hero_lineup(
             infantry={"name": "Jeronimo", "role": "ATK multiplier", "lead": True},
             lancer={"name": "Molly", "role": "CRITICAL - Team healing"},
-            marksman={"name": "Alonso", "role": "Sustained DPS"}
+            marksman={"name": "Alonso", "role": "Sustained damage"}
         )
         render_troop_ratio(90, 10, 0, "Infantry-heavy - infantry kills before others engage")
 
@@ -581,14 +581,14 @@ elif event_type == "Rally Joiner Setup":
         st.markdown("""
         Heroes whose **expedition skill** buffs damage:
         """)
-        render_hero_slot("Jessie", "Marksman", "Stand of Arms: +25% DMG dealt (all troops)", False)
+        render_hero_slot("Jessie", "Marksman", "Stand of Arms: +5-25% DMG dealt (scales with level)", False)
         st.caption("Best attack joiner - affects ALL damage types including skills, pets, teammates")
 
         st.markdown("**🛡️ Garrison Joiners:**")
         st.markdown("""
         Heroes whose **expedition skill** reduces damage:
         """)
-        render_hero_slot("Sergey", "Infantry", "Defenders' Edge: -20% DMG taken (all troops)", False)
+        render_hero_slot("Sergey", "Infantry", "Defenders' Edge: -4-20% DMG reduction (scales with level)", False)
         st.caption("Best garrison joiner - universal damage reduction")
 
     with col2:
@@ -634,7 +634,7 @@ elif event_type == "Arena (5 Heroes)":
         render_5hero_lineup([
             {"name": "Natalia", "class": "Infantry", "role": "Primary tank", "lead": True},
             {"name": "Flint", "class": "Infantry", "role": "Secondary tank / time buyer"},
-            {"name": "Alonso", "class": "Marksman", "role": "Main DPS"},
+            {"name": "Alonso", "class": "Marksman", "role": "Main damage dealer"},
             {"name": "Molly", "class": "Lancer", "role": "Healing + damage"},
             {"name": "Philly", "class": "Marksman", "role": "Ranged burst"},
         ])
@@ -879,24 +879,29 @@ with st.expander("📊 Troop Ratio Quick Reference"):
 
 with st.expander("🦸 Joiner Role Quick Reference"):
     st.markdown("""
-    ### CRITICAL: Only leftmost hero's expedition skill matters!
+    ### CRITICAL: Only leftmost hero's TOP-RIGHT expedition skill matters!
+
+    - **Leftmost hero**: First hero in your march lineup (slot 1)
+    - **Top-right skill**: The expedition skill in top-right position on hero skill screen
+    - Skills scale with level using expedition books
 
     ### Best Attack/Rally Joiners
-    | Hero | Expedition Skill | Effect |
-    |------|------------------|--------|
-    | **Jessie** | Stand of Arms | +25% DMG dealt (all troops) |
+    | Hero | Top-Right Skill | Effect per Level (1-5) |
+    |------|-----------------|------------------------|
+    | **Jessie** | Stand of Arms | +5/10/15/20/25% DMG dealt |
 
     Jessie's buff affects ALL damage types: normal attacks, hero skills, pet abilities, teammate buffs.
 
     ### Best Garrison Joiners
-    | Hero | Expedition Skill | Effect |
-    |------|------------------|--------|
-    | **Sergey** | Defenders' Edge | -20% DMG taken (all troops) |
+    | Hero | Top-Right Skill | Effect per Level (1-5) |
+    |------|-----------------|------------------------|
+    | **Sergey** | Defenders' Edge | -4/8/12/16/20% DMG taken |
 
     ### Investment Rule
     Joiners should have:
+    - ✅ HIGH skill level (determines both usage AND strength!)
     - ✅ Functional gear (legendary okay)
-    - ✅ Appropriate levels
+    - ✅ Appropriate hero levels
     - ❌ NOT premium resources (Stones/Mithril)
     - ❌ NOT priority over core heroes
 
@@ -934,12 +939,12 @@ with st.expander("⏰ S3 Transition Notes"):
     st.markdown("""
     ### What carries into S3?
     - **Natalia** - Remains top-tier tank
-    - **Alonso** - Holds value better than most DPS
+    - **Alonso** - Holds value better than most damage dealers
     - **Flint** - Still strong for Arena
 
     ### What gets power-crept?
     - **Jeronimo** - Most affected, becomes niche
-    - **Pure DPS heroes** - Burst heroes lose relative value
+    - **Pure damage heroes** - Burst heroes lose relative value
     - Some S2 marksmen depending on S3 meta
 
     ### Investment Strategy

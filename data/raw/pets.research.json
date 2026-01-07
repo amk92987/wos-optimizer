@@ -1,0 +1,131 @@
+{
+  "system": "pets",
+  "retrieved_at": "2026-01-07T00:00:00Z",
+  "sources": [
+    {
+      "source_id": "SRC_WHITEOUTDATA_PETS",
+      "url": "https://whiteoutdata.com/guides/pets/",
+      "confidence": "A"
+    },
+    {
+      "source_id": "SRC_WHITEOUTAPP_PETS",
+      "url": "https://whiteoutsurvival.app/pets/snow-ape/",
+      "confidence": "A"
+    },
+    {
+      "source_id": "SRC_BLUESTACKS_PETS",
+      "url": "https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-pets-guide-en.html",
+      "confidence": "B"
+    }
+  ],
+
+  "overview": {
+    "unlock_requirements": {
+      "state_age_days": 55,
+      "furnace_level": 18,
+      "building": "Beast Cage"
+    },
+    "total_pets": 14,
+    "level_cap_range": "50-100 depending on pet rarity"
+  },
+
+  "pets": [
+    {"name": "Cave Hyena", "rarity": "N", "max_level": 50, "skill": "Builder's Aid", "effect": "Speeds up construction"},
+    {"name": "Arctic Wolf", "rarity": "N", "max_level": 60, "skill": "Unknown", "effect": "Unknown"},
+    {"name": "Musk Ox", "rarity": "R", "max_level": 60, "skill": "Burden Bearer", "effect": "Instantly completes gathering"},
+    {"name": "Giant Tapir", "rarity": "R", "max_level": 70, "skill": "Natural Intuition", "effect": "Grants pet food instantly"},
+    {"name": "Titan Roc", "rarity": "R", "max_level": 70, "skill": "Armor Rift", "effect": "Reduces enemy health by 5% for 2h"},
+    {"name": "Giant Elk", "rarity": "SR", "max_level": 80, "skill": "Charm Design Provider", "effect": "Grants charm designs"},
+    {"name": "Snow Leopard", "rarity": "SR", "max_level": 80, "skill": "Lightning Raid", "effect": "+30% march speed, -5% enemy lethality for 2h"},
+    {"name": "Frostscale Chameleon", "rarity": "SR", "max_level": 80, "skill": "Unknown", "effect": "Unknown"},
+    {"name": "Cave Lion", "rarity": "SSR", "max_level": 100, "skill": "Attack Boost", "effect": "+10% troop attack for 2h"},
+    {"name": "Snow Ape", "rarity": "SSR", "max_level": 100, "skill": "Tumbling Power", "effect": "+15,000 squad capacity for 2h"},
+    {"name": "Iron Rhino", "rarity": "SSR", "max_level": 100, "skill": "Rally Capacity", "effect": "+150 rally capacity for 2h"},
+    {"name": "Saber-tooth Tiger", "rarity": "SSR", "max_level": 100, "skill": "Lethality Boost", "effect": "+10% troop lethality for 2h"},
+    {"name": "Mammoth", "rarity": "SSR", "max_level": 100, "skill": "Defense Boost", "effect": "+10% troop defense for 2h"},
+    {"name": "Frost Gorilla", "rarity": "SSR", "max_level": 100, "skill": "Health Boost", "effect": "+10% troop health for 2h"}
+  ],
+
+  "tier_list": {
+    "source": "SRC_BLUESTACKS_PETS",
+    "claim_type": "meta",
+    "confidence": "C",
+    "tiers": {
+      "S": ["Frost Gorilla", "Mammoth", "Saber-tooth Tiger", "Iron Rhino", "Snow Ape"],
+      "A": ["Cave Lion", "Snow Leopard"],
+      "B": ["Giant Elk", "Titan Roc", "Giant Tapir"],
+      "C": ["Musk Ox", "Arctic Wolf", "Cave Hyena"]
+    },
+    "notes": "S-tier pets unlock at 200-370 days server age"
+  },
+
+  "upgrade_materials": {
+    "pet_food": {
+      "description": "Primary upgrade currency",
+      "sources": ["Pet Adventure", "Events", "Packs"]
+    },
+    "taming_manual": {
+      "description": "Required for all advancement milestones",
+      "sources": ["Pet Adventure", "Events"]
+    },
+    "energizing_potion": {
+      "description": "Required from level 30+ advancement",
+      "sources": ["Pet Adventure", "Events"]
+    },
+    "strengthening_serum": {
+      "description": "Required from level 50+ advancement",
+      "sources": ["Pet Adventure", "Events"]
+    }
+  },
+
+  "advancement_milestones": {
+    "description": "Advancement required every 10 levels",
+    "materials_by_level": {
+      "10": {"taming_manual": true, "energizing_potion": false, "strengthening_serum": false},
+      "20": {"taming_manual": true, "energizing_potion": false, "strengthening_serum": false},
+      "30": {"taming_manual": true, "energizing_potion": true, "strengthening_serum": false},
+      "40": {"taming_manual": true, "energizing_potion": true, "strengthening_serum": false},
+      "50": {"taming_manual": true, "energizing_potion": true, "strengthening_serum": true},
+      "60": {"taming_manual": true, "energizing_potion": true, "strengthening_serum": true},
+      "70": {"taming_manual": true, "energizing_potion": true, "strengthening_serum": true},
+      "80": {"taming_manual": true, "energizing_potion": true, "strengthening_serum": true},
+      "90": {"taming_manual": true, "energizing_potion": true, "strengthening_serum": true},
+      "100": {"taming_manual": true, "energizing_potion": true, "strengthening_serum": true}
+    }
+  },
+
+  "snow_ape_upgrade_costs": {
+    "description": "Sample upgrade costs for SSR pet (Snow Ape, max L100)",
+    "source": "SRC_WHITEOUTAPP_PETS",
+    "cumulative_totals": {
+      "to_level_10": {"pet_food": 925, "taming_manual": 35},
+      "to_level_20": {"pet_food": 1700, "taming_manual": 70},
+      "to_level_30": {"pet_food": 2750, "taming_manual": 110, "energizing_potion": 15},
+      "to_level_40": {"pet_food": 4300, "taming_manual": 145, "energizing_potion": 35},
+      "to_level_50": {"pet_food": 6350, "taming_manual": 220, "energizing_potion": 50, "strengthening_serum": 10},
+      "to_level_60": {"pet_food": 8900, "taming_manual": 290, "energizing_potion": 65, "strengthening_serum": 20},
+      "to_level_100": {"pet_food": 23100, "taming_manual": 730, "energizing_potion": 135, "strengthening_serum": 100}
+    },
+    "stat_progression": {
+      "level_1": {"attack_defense_bonus_pct": 0.17},
+      "level_100": {"attack_defense_bonus_pct": 33.52}
+    }
+  },
+
+  "refinement_system": {
+    "description": "Secondary upgrade using Wild Marks to adjust troop buffs",
+    "materials": {
+      "common_wild_mark": "Use until reaching purple tier",
+      "advanced_wild_mark": "Use for gold tier"
+    },
+    "notes": "Refinement results are variable - buffs may improve or decrease"
+  },
+
+  "pet_adventure": {
+    "cost": {"chief_stamina": 10},
+    "duration_hours": 4,
+    "daily_limit": 4,
+    "rewards": ["Pet Food", "Taming Manual", "Energizing Potion", "Strengthening Serum"],
+    "ally_treasure_chance_pct": 10
+  }
+}

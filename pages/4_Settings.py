@@ -83,13 +83,13 @@ with col1:
         available_gen = st.selectbox(
             "What's the newest hero generation available on your server?",
             [
-                "Gen 1 only (Jeronimo, Natalia, Molly, Zinman)",
+                "Gen 1 (Jeronimo, Natalia, Molly, Zinman, Jessie, Sergey)",
                 "Gen 2 (Flint, Philly, Alonso)",
                 "Gen 3 (Logan, Mia, Greg)",
                 "Gen 4 (Ahmose, Reina, Lynn)",
-                "Gen 5 (Wu Ming, Hector, Jessie)",
+                "Gen 5 (Wu Ming, Hector)",
                 "Gen 6 (Patrick, Charlie, Cloris)",
-                "Gen 7 (Gordon, Renee, Nora)",
+                "Gen 7 (Gordon, Renee, Eugene)",
                 "Gen 8+",
             ],
             index=min(max(0, (profile.server_age_days // 80)), 7)
@@ -162,15 +162,19 @@ with col1:
     # Furnace level
     st.markdown("### Furnace Level")
 
-    # Build furnace level options: 1-30, then FC1, FC2, FC3, etc.
-    furnace_options = [str(i) for i in range(1, 31)] + ["FC1", "FC2", "FC3", "FC4", "FC5"]
+    # Build furnace level options: 1-30, then FC levels (each FC has 5 sub-steps: 0-4)
+    furnace_options = [str(i) for i in range(1, 31)] + ["30-1", "30-2", "30-3", "30-4"]
+    for fc in range(1, 11):
+        for sub in range(5):  # 0, 1, 2, 3, 4
+            furnace_options.append(f"FC{fc}-{sub}")
 
-    # Convert stored value to display format
-    current_furnace = profile.furnace_level
-    if current_furnace <= 30:
-        current_display = str(current_furnace)
+    # Determine current display value
+    if profile.furnace_level < 30:
+        current_display = str(profile.furnace_level)
+    elif profile.furnace_fc_level:
+        current_display = profile.furnace_fc_level
     else:
-        current_display = f"FC{current_furnace - 30}"
+        current_display = "30"
 
     # Find index of current value
     try:
@@ -182,14 +186,16 @@ with col1:
         "Current Furnace Level",
         furnace_options,
         index=current_index,
-        help="Your main building level (1-30, then FC1, FC2, etc.)"
+        help="Your main building level (1-30, then FC progression)"
     )
 
-    # Convert selection back to numeric for storage
-    if selected_furnace.startswith("FC"):
-        profile.furnace_level = 30 + int(selected_furnace[2:])
+    # Store selection
+    if selected_furnace.startswith("FC") or selected_furnace.startswith("30-"):
+        profile.furnace_level = 30
+        profile.furnace_fc_level = selected_furnace
     else:
         profile.furnace_level = int(selected_furnace)
+        profile.furnace_fc_level = None
 
     # Milestone indicators
     milestones = [
@@ -208,9 +214,113 @@ with col1:
         else:
             st.markdown(f"⬜ **Lv.{level}**: {desc}")
 
+    # Game phase indicator
+    st.markdown("---")
+    st.markdown("#### Current Game Phase")
+
+    def get_game_phase(furnace_level, fc_level):
+        if furnace_level < 19:
+            return ("early_game", "Early Game", "Rush to F19 for Daybreak Island, unlock Research")
+        elif furnace_level < 30:
+            return ("mid_game", "Mid Game", "Rush to F30 for FC, max Tool Enhancement VII")
+        elif fc_level and (fc_level.startswith("FC5") or fc_level.startswith("FC6") or
+                          fc_level.startswith("FC7") or fc_level.startswith("FC8") or
+                          fc_level.startswith("FC9") or fc_level.startswith("FC10")):
+            return ("endgame", "Endgame", "FC10 completion, max Mastery, Charms L12-16")
+        else:
+            return ("late_game", "Late Game (FC Era)", "FC progression, War Academy, Hero Gear Mastery")
+
+    phase_id, phase_name, phase_focus = get_game_phase(profile.furnace_level, profile.furnace_fc_level)
+
+    phase_colors = {
+        "early_game": "#4CAF50",
+        "mid_game": "#2196F3",
+        "late_game": "#FF9800",
+        "endgame": "#E91E63"
+    }
+    phase_color = phase_colors.get(phase_id, "#808080")
+
+    st.markdown(f"""
+    <div style="background: {phase_color}22; border-left: 4px solid {phase_color};
+                padding: 10px; border-radius: 4px; margin: 10px 0;">
+        <strong style="color: {phase_color};">{phase_name}</strong><br>
+        <small>{phase_focus}</small>
+    </div>
+    """, unsafe_allow_html=True)
+
 with col2:
-    st.markdown("## 🎯 Priorities")
-    st.markdown("Set your gameplay focus. Higher = more important for recommendations.")
+    st.markdown("## 🤖 Optimizer Settings")
+    st.markdown("Configure how the optimizer makes recommendations for you.")
+
+    # Spending Profile
+    spending_options = {
+        "f2p": "Free to Play - No spending",
+        "minnow": "Minnow - $5-30/month (monthly pass)",
+        "dolphin": "Dolphin - $30-100/month (regular packs)",
+        "orca": "Orca - $100-500/month (heavy spender)",
+        "whale": "Whale - $500+/month (unlimited)"
+    }
+    spending_keys = list(spending_options.keys())
+    current_spending_idx = spending_keys.index(profile.spending_profile) if profile.spending_profile in spending_keys else 0
+
+    selected_spending = st.selectbox(
+        "💰 Spending Profile",
+        spending_keys,
+        index=current_spending_idx,
+        format_func=lambda x: spending_options[x],
+        help="Affects which upgrades are recommended (F2P skips whale-only content)"
+    )
+    profile.spending_profile = selected_spending
+
+    # Show efficiency threshold info
+    efficiency_thresholds = {"f2p": 0.8, "minnow": 0.7, "dolphin": 0.5, "orca": 0.3, "whale": 0.0}
+    threshold = efficiency_thresholds.get(selected_spending, 0.5)
+    if threshold > 0:
+        st.caption(f"Efficiency threshold: {threshold:.0%} (lower-value upgrades filtered)")
+    else:
+        st.caption("No efficiency filter (all upgrades shown)")
+
+    # Priority Focus
+    focus_options = {
+        "svs_combat": "SvS Combat - Maximize troop power and combat stats",
+        "balanced_growth": "Balanced Growth - Steady progression across all systems",
+        "economy_focus": "Economy Focus - Resource generation and efficiency"
+    }
+    focus_keys = list(focus_options.keys())
+    current_focus_idx = focus_keys.index(profile.priority_focus) if profile.priority_focus in focus_keys else 1
+
+    selected_focus = st.selectbox(
+        "🎯 Priority Focus",
+        focus_keys,
+        index=current_focus_idx,
+        format_func=lambda x: focus_options[x],
+        help="Determines which systems get priority in recommendations"
+    )
+    profile.priority_focus = selected_focus
+
+    # Alliance Role
+    role_options = {
+        "rally_lead": "Rally Lead - Leads rallies in SvS and events",
+        "filler": "Filler - Joins rallies and reinforces",
+        "farmer": "Farmer - Resource generation focus",
+        "casual": "Casual - Plays for fun, no specific role"
+    }
+    role_keys = list(role_options.keys())
+    current_role_idx = role_keys.index(profile.alliance_role) if profile.alliance_role in role_keys else 1
+
+    selected_role = st.selectbox(
+        "👥 Alliance Role",
+        role_keys,
+        index=current_role_idx,
+        format_func=lambda x: role_options[x],
+        help="Rally leads get troop priority boosts"
+    )
+    profile.alliance_role = selected_role
+
+    st.markdown("---")
+
+    st.markdown("## 🎯 Detailed Priorities")
+    st.markdown("Fine-tune your gameplay focus. Higher = more important for recommendations.")
 
     # Priority sliders
     st.markdown("### Combat Priorities")
@@ -276,7 +386,100 @@ if st.button("💾 Save All Settings", type="primary", use_container_width=True)
     profile.name = chief_name
     db.commit()
     st.success("Settings saved!")
-    st.balloons()
+
+    # Lightning strike effect - forking from top-left to bottom-right
+    st.markdown("""
+    <style>
+    @keyframes lightning-flash {
+        0% { opacity: 0; }
+        5% { opacity: 1; }
+        10% { opacity: 0.3; }
+        15% { opacity: 1; }
+        20% { opacity: 0; }
+        25% { opacity: 0.7; }
+        30% { opacity: 0; }
+        100% { opacity: 0; }
+    }
+    @keyframes bolt-draw {
+        0% { stroke-dashoffset: 2000; opacity: 0; }
+        10% { opacity: 1; }
+        50% { stroke-dashoffset: 0; opacity: 1; }
+        70% { stroke-dashoffset: 0; opacity: 0.6; }
+        100% { stroke-dashoffset: 0; opacity: 0; }
+    }
+    @keyframes glow-pulse {
+        0% { filter: drop-shadow(0 0 5px #4A90D9); }
+        50% { filter: drop-shadow(0 0 30px #E8F4F8) drop-shadow(0 0 60px #4A90D9); }
+        100% { filter: drop-shadow(0 0 5px #4A90D9); }
+    }
+    .lightning-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 9999;
+        overflow: hidden;
+    }
+    .lightning-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(ellipse at 20% 10%, rgba(74, 144, 217, 0.5) 0%, transparent 50%),
+                    radial-gradient(ellipse at 60% 40%, rgba(232, 244, 248, 0.3) 0%, transparent 40%);
+        animation: lightning-flash 0.8s ease-out forwards;
+    }
+    .lightning-svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
+    .lightning-svg path {
+        fill: none;
+        stroke: url(#lightning-gradient);
+        stroke-width: 3;
+        stroke-linecap: round;
+        stroke-dasharray: 2000;
+        stroke-dashoffset: 2000;
+        animation: bolt-draw 0.9s ease-out forwards, glow-pulse 0.3s ease-in-out 3;
+    }
+    .lightning-svg .main-bolt { stroke-width: 4; animation-delay: 0s; }
+    .lightning-svg .fork-1 { stroke-width: 3; animation-delay: 0.05s; }
+    .lightning-svg .fork-2 { stroke-width: 2.5; animation-delay: 0.1s; }
+    .lightning-svg .fork-3 { stroke-width: 2; animation-delay: 0.08s; }
+    .lightning-svg .fork-4 { stroke-width: 2; animation-delay: 0.12s; }
+    .lightning-svg .fork-5 { stroke-width: 1.5; animation-delay: 0.15s; }
+    </style>
+    <div class="lightning-container">
+        <div class="lightning-overlay"></div>
+        <svg class="lightning-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+                <linearGradient id="lightning-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#E8F4F8;stop-opacity:1" />
+                    <stop offset="50%" style="stop-color:#4A90D9;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#E8F4F8;stop-opacity:1" />
+                </linearGradient>
+            </defs>
+            <!-- Main bolt: top-left to bottom-right with jagged path -->
+            <path class="main-bolt" d="M5,2 L12,15 L8,16 L18,32 L14,33 L28,52 L22,53 L38,72 L32,73 L50,95" />
+            <!-- Fork 1: branches right-up from 20% -->
+            <path class="fork-1" d="M12,15 L22,12 L28,22 L38,18" />
+            <!-- Fork 2: branches right from 35% -->
+            <path class="fork-2" d="M18,32 L32,28 L38,38 L52,35 L58,45" />
+            <!-- Fork 3: branches down-right from 50% -->
+            <path class="fork-3" d="M28,52 L45,48 L52,58 L68,55 L75,68" />
+            <!-- Fork 4: small branch -->
+            <path class="fork-4" d="M38,72 L55,68 L62,78 L78,75" />
+            <!-- Fork 5: thin tendril -->
+            <path class="fork-5" d="M22,53 L35,58 L42,52" />
+        </svg>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Data management
 st.markdown("---")
@@ -295,8 +498,11 @@ with col6:
         profile.priority_castle_battle = 4
         profile.priority_exploration = 3
         profile.priority_gathering = 2
+        profile.spending_profile = "f2p"
+        profile.priority_focus = "balanced_growth"
+        profile.alliance_role = "filler"
         db.commit()
-        st.success("Priorities reset to defaults!")
+        st.success("Priorities and optimizer settings reset to defaults!")
         st.rerun()
 
 with col7:
