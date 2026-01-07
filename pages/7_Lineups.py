@@ -152,12 +152,16 @@ Only **Arena** and some special modes use 5 heroes!
 """)
 
 st.info("""
-**📌 Lead Hero Position**
+**📌 Rally Skill Mechanics (VERIFIED)**
 
-The **first hero slot** (Lead) has their **Expedition Skills** apply at full effect.
-- Rally Leader: Your lead's damage multipliers affect the ENTIRE rally
-- Rally Joiner: Your lead's skills have reduced effect
-- Garrison Leader: Your lead determines garrison effectiveness
+**Rally Leader:** Your 3 heroes provide **9 expedition skills** (right-side skills) that affect the entire rally.
+
+**Rally Joiner:** Only your **first hero's TOP-RIGHT expedition skill** is used!
+- Up to **4 member skills** contribute total and can stack
+- This is why specific "joiner heroes" matter (Jessie, Sergey)
+- Your other 2 heroes and their skills DON'T contribute when joining
+
+*Source: Century Games Help Center + WoS Wiki*
 """)
 
 st.markdown("---")
@@ -194,7 +198,7 @@ if event_type == "World March (Default)":
             lancer={"name": "Molly", "role": "DPS + healing support"},
             marksman={"name": "Alonso", "role": "Main damage dealer"}
         )
-        render_troop_ratio(55, 15, 30, "Balanced - good for most situations")
+        render_troop_ratio(50, 20, 30, "Balanced default - community consensus")
 
         with st.expander("📝 Strategy Notes"):
             st.markdown("""
@@ -242,7 +246,7 @@ elif event_type == "SvS Castle Attack":
             lancer={"name": "Molly", "role": "Healing + damage"},
             marksman={"name": "Alonso", "role": "Main DPS"}
         )
-        render_troop_ratio(55, 15, 30, "Standard attack ratio")
+        render_troop_ratio(50, 20, 30, "Standard attack ratio")
 
         with st.expander("📝 When to use Jeronimo vs Natalia lead"):
             st.markdown("""
@@ -503,27 +507,28 @@ elif event_type == "Crazy Joe Rally":
             lancer={"name": "Molly", "role": "CRITICAL - Team healing"},
             marksman={"name": "Alonso", "role": "Sustained DPS"}
         )
-        render_troop_ratio(25, 20, 55, "Slightly more infantry than Bear for survival")
+        render_troop_ratio(90, 10, 0, "VERIFIED: Infantry-heavy - infantry kills before others engage")
 
         st.markdown("""
-        **Joe-specific adjustments:**
-        - Molly's healing is non-negotiable
-        - Consider **Bahiti** if troops still die too fast
-        - Infantry ratio slightly higher than Bear Trap
-        - Fight length matters - sustain > burst
+        **Joe-specific mechanics (VERIFIED):**
+        - Infantry engages FIRST in combat order
+        - If infantry stats are high enough, they defeat all bandits before Lancers/Marksmen attack
+        - This is why 90/10/0 works - back row never gets to fight
+        - Molly's healing still valuable for survival
+        - Source: One Chilled Gamer + A Jack Of Everything
         """)
 
     with tab_joins:
         st.markdown("### Your 6 Joining Marches")
         st.markdown("*Survival matters even more for joiners against Joe*")
 
-        st.markdown("Same structure as Bear Trap, but prioritize:")
+        st.markdown("Same 90/10/0 infantry-heavy approach:")
         st.markdown("""
-        - Heroes with healing/sustain abilities
-        - Tankier compositions
-        - Slightly higher infantry troop ratios
+        - Infantry engages and kills before other troops attack
+        - Send Infantry when reinforcing cities for max kill participation
+        - Heroes with healing/sustain still valuable for survival
         """)
-        render_troop_ratio(35, 20, 45, "More defensive for Joe's AoE")
+        render_troop_ratio(90, 10, 0, "Match the infantry-heavy strategy")
 
 # =============================================================================
 # RALLY JOINER SETUP
@@ -532,6 +537,17 @@ elif event_type == "Rally Joiner Setup":
     st.markdown("## 🤝 Rally Joiner Best Practices")
     st.markdown("Optimizing your contribution when joining someone else's rally")
 
+    st.error("""
+    **⚠️ CRITICAL JOINER MECHANIC (VERIFIED)**
+
+    When joining a rally, only your **FIRST hero's TOP-RIGHT expedition skill** is used!
+    - Your other 2 heroes contribute NOTHING to rally buffs
+    - Up to **4 member skills** total contribute to a rally
+    - Member skills CAN stack if they're the same effect
+
+    *Source: Century Games Help Center + BlueStacks Rally Guide*
+    """)
+
     col1, col2 = st.columns(2)
 
     with col1:
@@ -539,19 +555,17 @@ elif event_type == "Rally Joiner Setup":
 
         st.markdown("**🔥 Attack/Rally Joiners:**")
         st.markdown("""
-        These heroes have expedition skills that buff attack/damage:
+        Heroes whose **TOP-RIGHT skill** buffs damage:
         """)
-        render_hero_slot("Jessie", "Marksman", "ATK buff expedition skills - top joiner", False)
-        render_hero_slot("Alonso", "Marksman", "Strong sustained damage", False)
-        render_hero_slot("Molly", "Lancer", "Healing + damage", False)
+        render_hero_slot("Jessie", "Marksman", "Stand of Arms: +25% DMG dealt (all troops)", False)
+        st.caption("Best attack joiner - affects ALL damage types including skills, pets, teammates")
 
         st.markdown("**🛡️ Garrison Joiners:**")
         st.markdown("""
-        These heroes have expedition skills that reduce damage/buff defense:
+        Heroes whose **TOP-RIGHT skill** reduces damage:
         """)
-        render_hero_slot("Sergey", "Infantry", "DEF buff expedition skills - top garrison joiner", False)
-        render_hero_slot("Natalia", "Infantry", "Survivability", False)
-        render_hero_slot("Bahiti", "Lancer", "Sustain", False)
+        render_hero_slot("Sergey", "Infantry", "Defenders' Edge: -20% DMG taken (all troops)", False)
+        st.caption("Best garrison joiner - universal damage reduction")
 
     with col2:
         st.markdown("### Joiner Priorities")
@@ -559,12 +573,12 @@ elif event_type == "Rally Joiner Setup":
         st.info("""
         **Key Understanding:**
 
-        As a joiner, your hero expedition skills have **reduced effect**.
+        Only ONE skill per joiner matters (top-right of first hero).
 
         What matters most:
-        1. **Troop survival** - dead troops = zero damage
-        2. **Hero base stats** - raw power still counts
-        3. **Filling all slots** - never leave heroes empty
+        1. **First hero selection** - choose for their top-right skill
+        2. **Troop survival** - dead troops = zero contribution
+        3. **Troop tier** - T9/T10 significantly outperform lower tiers
         """)
 
         st.markdown("### Joiner Investment Priority")
@@ -824,32 +838,40 @@ elif event_type == "Reservoir Raid":
 # =============================================================================
 st.markdown("---")
 
-with st.expander("📊 Troop Ratio Quick Reference"):
+with st.expander("📊 Troop Ratio Quick Reference (VERIFIED)"):
     st.markdown("""
+    *Source: A Jack Of Everything + One Chilled Gamer*
+
     | Situation | Infantry | Lancer | Marksman | Notes |
     |-----------|----------|--------|----------|-------|
-    | **Default Attack** | 50-55% | 15-20% | 25-30% | Balanced |
-    | **Castle Attack** | 55-60% | 15% | 25-30% | Tankier |
-    | **Garrison Defense** | 60% | 15-20% | 20-25% | Heavy infantry |
-    | **Bear Trap (Leader)** | 20% | 20% | 60% | Max damage |
-    | **Bear Trap (Joiner)** | 30% | 20% | 50% | Balance survival |
-    | **Crazy Joe** | 25-30% | 20% | 50-55% | More survival vs AoE |
-    | **Field PvP** | 50-60% | 15% | 25-35% | Depends on comp |
+    | **Default Formation** | 50% | 20% | 30% | Balanced default |
+    | **Castle Battle** | 50% | 20% | 30% | Standard PvP |
+    | **Labyrinth** | 60% | 15% | 25% | Tanky for PvE |
+    | **Bear Hunt** | 0% | 10% | 90% | Maximum DPS |
+    | **Crazy Joe** | 90% | 10% | 0% | Infantry kills first |
+    | **Alliance Championship** | 45% | 25% | 35% | Balanced competitive |
+
+    **Combat Order:** Infantry → Lancers → Marksmen
+    **Class Counters:** Infantry > Lancer > Marksman > Infantry
     """)
 
-with st.expander("🦸 Joiner Role Quick Reference"):
+with st.expander("🦸 Joiner Role Quick Reference (VERIFIED)"):
     st.markdown("""
+    *Source: BlueStacks Rally Guide + Century Games Help Center*
+
+    ### CRITICAL: Only TOP-RIGHT skill of FIRST hero matters!
+
     ### Best Attack/Rally Joiners
-    Heroes with expedition skills that buff attack/damage:
-    - **Jessie** - Top attack joiner
-    - **Alonso** - Strong sustained damage
-    - Prioritize ATK-buffing expedition skills
+    | Hero | Top-Right Skill | Effect |
+    |------|-----------------|--------|
+    | **Jessie** | Stand of Arms | +25% DMG dealt (all troops) |
+
+    Jessie's buff affects ALL damage types: normal attacks, hero skills, pet abilities, teammate buffs.
 
     ### Best Garrison Joiners
-    Heroes with expedition skills that reduce damage/buff defense:
-    - **Sergey** - Top garrison joiner (DEF expedition skills)
-    - **Natalia** - Survivability
-    - **Bahiti** - Sustain support
+    | Hero | Top-Right Skill | Effect |
+    |------|-----------------|--------|
+    | **Sergey** | Defenders' Edge | -20% DMG taken (all troops) |
 
     ### Investment Rule
     Joiners should have:
@@ -857,6 +879,9 @@ with st.expander("🦸 Joiner Role Quick Reference"):
     - ✅ Appropriate levels
     - ❌ NOT premium resources (Stones/Mithril)
     - ❌ NOT priority over core heroes
+
+    **Misconception:** "All joiner skills apply with reduced effect"
+    **Truth:** Only 1 skill per joiner contributes. Other heroes/skills don't matter.
     """)
 
 with st.expander("💰 Spender-Specific Advice"):

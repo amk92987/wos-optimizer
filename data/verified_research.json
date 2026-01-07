@@ -1,0 +1,119 @@
+{
+  "research_date": "2025-01-06",
+  "sources": {
+    "wos_wiki": "https://www.whiteoutsurvival.wiki/",
+    "century_games_help": "https://centurygames.helpshift.com/",
+    "bluestacks_guides": "https://www.bluestacks.com/blog/game-guides/white-out-survival/",
+    "lootbar_rally_guide": "https://lootbar.gg/blog/en/whiteout-survival-rally-heroes-formation-guide-lead-to-victory.html",
+    "allclash_tier_list": "https://www.allclash.com/best-heroes-in-whiteout-survival-tier-list/",
+    "one_chilled_gamer": "https://onechilledgamer.com/"
+  },
+  "hero_skills": {
+    "jeronimo": {
+      "class": "Infantry",
+      "generation": 1,
+      "expedition_skills": {
+        "battle_manifesto": {
+          "effect": "Increases damage dealt for all troops",
+          "scaling": [5, 10, 15, 20, 25],
+          "unit": "percent"
+        },
+        "swordmentor": {
+          "effect": "Increases attack for all troops",
+          "scaling": [5, 10, 15, 20, 25],
+          "unit": "percent"
+        },
+        "expert_swordsmanship": {
+          "effect": "Increases damage dealt for all troops for 2 turns every 4 turns",
+          "scaling": [6, 12, 18, 24, 30],
+          "unit": "percent"
+        }
+      },
+      "notes": "Multiple 'all troops' offensive effects make him valuable as rally leader"
+    },
+    "jessie": {
+      "class": "Marksman",
+      "generation": 5,
+      "expedition_skills": {
+        "stand_of_arms": {
+          "effect": "Increases damage dealt for all troops",
+          "scaling": [5, 10, 15, 20, 25],
+          "unit": "percent",
+          "position": "top_right",
+          "joiner_value": "best_attack_joiner"
+        },
+        "bulwarks": {
+          "effect": "Reduces damage taken for all troops",
+          "scaling": [4, 8, 12, 16, 20],
+          "unit": "percent"
+        }
+      },
+      "notes": "Top-right skill is damage dealt buff - makes her best attack/rally joiner"
+    },
+    "sergey": {
+      "class": "Infantry",
+      "generation": 1,
+      "expedition_skills": {
+        "defenders_edge": {
+          "effect": "Reduces damage taken for all troops",
+          "scaling": [4, 8, 12, 16, 20],
+          "unit": "percent",
+          "position": "top_right",
+          "joiner_value": "best_garrison_joiner"
+        },
+        "weaken": {
+          "effect": "Reduces enemy troops' attack",
+          "scaling": [4, 8, 12, 16, 20],
+          "unit": "percent"
+        },
+        "shield_block": {
+          "effect": "Reduces damage taken",
+          "scaling": [10, 15, 20, 25, 30],
+          "unit": "percent"
+        }
+      },
+      "notes": "Top-right skill is damage reduction - makes him best garrison joiner"
+    }
+  },
+  "rally_mechanics": {
+    "leader_skills": {
+      "count": 9,
+      "description": "Rally leader's 3 heroes provide 9 expedition skills (right-side skills)",
+      "source": "LootBar rally guide"
+    },
+    "joiner_skills": {
+      "rule": "Only the first hero's TOP-RIGHT expedition skill is used per joiner",
+      "max_contributing": 4,
+      "stacking": "Member skills CAN stack if they are the same effect",
+      "source": "Century Games Help Center + BlueStacks guide"
+    },
+    "common_misconception": "People think all joiner skills apply with reduced effect - WRONG. Only 1 skill per joiner (top-right of first hero) matters."
+  },
+  "troop_ratios": {
+    "source_note": "No official ratios exist - all community-derived consensus",
+    "generic_offensive_rally": {
+      "infantry": 50,
+      "lancer": 20,
+      "marksman": 30,
+      "source": "A Jack Of Everything guide"
+    },
+    "crazy_joe": {
+      "infantry": 90,
+      "lancer": 5,
+      "marksman": 5,
+      "note": "Infantry-heavy (90-100%), infantry engages first and secures kills/points earlier",
+      "source": "BlueStacks + One Chilled Gamer"
+    }
+  },
+  "generation_timeline": {
+    "gen1": {"day_start": 0},
+    "gen2": {"day_start": 40},
+    "gen3": {"day_start": 120, "note": "60-80 days after Gen 2"},
+    "source": "WoS Wiki Server Timeline"
+  },
+  "spender_strategies": {
+    "premium_players": "Invest early in Jeronimo and Alonso",
+    "f2p": "Build around accessible heroes, prioritize progress milestones",
+    "source": "BlueStacks hero combinations guide"
+  }
+}

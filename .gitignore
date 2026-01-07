@@ -26,8 +26,9 @@ build/
 .env
 .env.local
 
-# Claude Code
-.claude/
+# Claude Code (keep skills for sharing)
+.claude/*
+!.claude/skills/
 
 # OS files
 .DS_Store

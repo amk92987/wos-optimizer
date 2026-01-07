@@ -1,6 +1,13 @@
 """
 Recommendation Engine for Whiteout Survival hero upgrades.
 Prioritizes upgrades based on user's goals and current hero states.
+
+VERIFIED MECHANICS (from WOS_REFERENCE.md):
+- Rally Leader: 3 heroes provide 9 expedition skills (all right-side skills)
+- Rally Joiner: Only FIRST hero's TOP-RIGHT expedition skill contributes
+- Best Attack Joiner: Jessie (Stand of Arms: +25% DMG dealt all troops)
+- Best Garrison Joiner: Sergey (Defenders' Edge: -20% DMG taken all troops)
+- Combat Order: Infantry → Lancers → Marksmen
 """
 
 import json
@@ -16,6 +23,7 @@ class UpgradeType(Enum):
     EXPLORATION_SKILL = "exploration_skill"
     EXPEDITION_SKILL = "expedition_skill"
     GEAR = "gear"
+    JOINER_ROLE = "joiner_role"  # Special recommendation for joiner heroes
 
 
 @dataclass
@@ -39,6 +47,37 @@ class Recommendation:
             'reason': self.reason,
             'category': self.category
         }
+
+
+# Verified joiner hero data
+JOINER_HEROES = {
+    'attack': {
+        'Jessie': {
+            'skill_name': 'Stand of Arms',
+            'effect': '+25% DMG dealt (all troops)',
+            'reason': 'Best attack joiner - affects ALL damage types including skills, pets, teammates'
+        }
+    },
+    'garrison': {
+        'Sergey': {
+            'skill_name': 'Defenders\' Edge',
+            'effect': '-20% DMG taken (all troops)',
+            'reason': 'Best garrison joiner - universal damage reduction'
+        }
+    }
+}
+
+# Heroes with strong rally leader potential (verified)
+RALLY_LEADERS = {
+    'Jeronimo': {
+        'reason': 'Multiple "all troops" offensive expedition skills (+25% DMG, +25% ATK, +30% periodic DMG)',
+        'priority_modes': ['svs', 'rally']
+    },
+    'Natalia': {
+        'reason': 'Strong defensive expedition skills, +30% DMG dealt, +15% Lethality for rally troops',
+        'priority_modes': ['castle_battle', 'garrison']
+    }
+}
 
 
 class RecommendationEngine:
@@ -311,6 +350,109 @@ class RecommendationEngine:
 
         return recommendations
 
+    def _generate_joiner_recommendations(self) -> List[Recommendation]:
+        """Generate recommendations for joiner role heroes (VERIFIED MECHANICS).
+
+        Critical: When joining rallies, only the FIRST hero's TOP-RIGHT
+        expedition skill contributes. This makes specific heroes very valuable.
+        """
+        recommendations = []
+
+        # Check user's priorities
+        rally_priority = self.priority_weights.get('rally', 0)
+        svs_priority = self.priority_weights.get('svs', 0)
+        castle_priority = self.priority_weights.get('castle_battle', 0)
+
+        attack_priority = rally_priority + svs_priority
+        defense_priority = castle_priority
+
+        # Get list of owned hero names
+        owned_names = set()
+        for uh in self.user_heroes:
+            name = uh.hero.name if hasattr(uh, 'hero') else uh.get('name', '')
+            owned_names.add(name)
+
+        # Check for attack joiner (Jessie)
+        if attack_priority > 0.2:  # User cares about rally/SvS
+            if 'Jessie' not in owned_names:
+                # HIGH priority - user needs Jessie but doesn't have her
+                recommendations.append(Recommendation(
+                    hero_name='Jessie',
+                    upgrade_type=UpgradeType.JOINER_ROLE,
+                    current_value=0,
+                    target_value=1,
+                    priority_score=0.9 * attack_priority,
+                    reason="UNLOCK JESSIE: Best attack joiner. Her top-right skill (+25% DMG dealt) applies when joining rallies. Only this skill matters as joiner!",
+                    category="high"
+                ))
+            else:
+                # Check if Jessie's expedition skills are leveled
+                for uh in self.user_heroes:
+                    name = uh.hero.name if hasattr(uh, 'hero') else uh.get('name', '')
+                    if name == 'Jessie':
+                        exp_skill = getattr(uh, 'expedition_skill_1_level', 1)
+                        if exp_skill < 5:
+                            recommendations.append(Recommendation(
+                                hero_name='Jessie',
+                                upgrade_type=UpgradeType.EXPEDITION_SKILL,
+                                current_value=exp_skill,
+                                target_value=5,
+                                priority_score=0.85 * attack_priority,
+                                reason=f"MAX JESSIE'S EXPEDITION SKILL: Her Stand of Arms (+{exp_skill * 5}% → +25% DMG) is the ONLY skill that matters when joining rallies!",
+                                category="high"
+                            ))
+                        break
+
+        # Check for garrison joiner (Sergey)
+        if defense_priority > 0.15:  # User cares about castle defense
+            if 'Sergey' not in owned_names:
+                recommendations.append(Recommendation(
+                    hero_name='Sergey',
+                    upgrade_type=UpgradeType.JOINER_ROLE,
+                    current_value=0,
+                    target_value=1,
+                    priority_score=0.8 * defense_priority,
+                    reason="UNLOCK SERGEY: Best garrison joiner. His top-right skill (-20% DMG taken) applies when reinforcing garrisons.",
+                    category="high"
+                ))
+            else:
+                for uh in self.user_heroes:
+                    name = uh.hero.name if hasattr(uh, 'hero') else uh.get('name', '')
+                    if name == 'Sergey':
+                        exp_skill = getattr(uh, 'expedition_skill_1_level', 1)
+                        if exp_skill < 5:
+                            recommendations.append(Recommendation(
+                                hero_name='Sergey',
+                                upgrade_type=UpgradeType.EXPEDITION_SKILL,
+                                current_value=exp_skill,
+                                target_value=5,
+                                priority_score=0.75 * defense_priority,
+                                reason=f"LEVEL SERGEY'S EXPEDITION SKILL: His Defenders' Edge (-{exp_skill * 4}% → -20% DMG taken) is key for garrison defense!",
+                                category="medium"
+                            ))
+                        break
+
+        # Check for rally leader (Jeronimo)
+        if attack_priority > 0.25:
+            if 'Jeronimo' in owned_names:
+                for uh in self.user_heroes:
+                    name = uh.hero.name if hasattr(uh, 'hero') else uh.get('name', '')
+                    if name == 'Jeronimo':
+                        level = getattr(uh, 'level', 1)
+                        if level < 60:
+                            recommendations.append(Recommendation(
+                                hero_name='Jeronimo',
+                                upgrade_type=UpgradeType.LEVEL,
+                                current_value=level,
+                                target_value=60,
+                                priority_score=0.9 * attack_priority,
+                                reason="RALLY LEADER PRIORITY: Jeronimo's 9 expedition skills buff your ENTIRE rally. His +25% DMG + +25% ATK affects all troops!",
+                                category="high"
+                            ))
+                        break
+
+        return recommendations
+
     def _categorize_score(self, score: float) -> str:
         """Categorize priority score into high/medium/low."""
         if score >= 0.6:
@@ -328,6 +470,11 @@ class RecommendationEngine:
 
         Returns:
             List of Recommendation objects, sorted by priority_score descending
+
+        VERIFIED MECHANICS APPLIED:
+        - Joiner heroes (Jessie/Sergey) prioritized for rally-focused users
+        - Rally leader (Jeronimo) prioritized for SvS/rally users
+        - Expedition skills weighted higher for PvP priorities
         """
         all_recommendations = []
 
@@ -335,6 +482,9 @@ class RecommendationEngine:
         all_recommendations.extend(self._generate_level_recommendations())
         all_recommendations.extend(self._generate_skill_recommendations())
         all_recommendations.extend(self._generate_star_recommendations())
+
+        # Add joiner/leader specific recommendations (VERIFIED MECHANICS)
+        all_recommendations.extend(self._generate_joiner_recommendations())
 
         # Sort by priority score
         all_recommendations.sort(key=lambda r: r.priority_score, reverse=True)
