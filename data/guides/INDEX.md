@@ -3,6 +3,10 @@
 ## Purpose
 These guides provide detailed reasoning and explanations for optimizer recommendations. Each guide is structured to answer "why" not just "what".
 
+## Data Files (Not Guides)
+- **`../events.json`** - Event calendar, schedules, point systems, optimization tips
+- **`../vip_system.json`** - VIP levels, speed buffs, stamina system, buff stacking
+
 ## Available Guides
 
 ### Hero Lineups (`hero_lineup_reasoning.json`)
@@ -45,6 +49,21 @@ These guides provide detailed reasoning and explanations for optimizer recommend
 - Common mistakes (Economy tree early, spreading speedups)
 
 **Critical rule:** Tool Enhancement VII reduces ALL future research by 35%. This is THE mid-game milestone.
+
+---
+
+### Combat Formulas (`combat_formulas.json`)
+**Use when:** Understanding damage calculations, optimizing troop compositions, rally mechanics
+
+**Key sections:**
+- Damage formula breakdown (Attack, Lethality, Defense, Health, SkillModifier)
+- Class counters (Infantry→Lancer→Marksman→Infantry)
+- Formation ratios for different situations
+- Rally joiner mechanics (leftmost hero expedition skill only!)
+- Troop tier importance
+- Exploration vs Expedition skills
+
+**Critical rule:** When joining rallies, ONLY the leftmost hero's expedition skill applies. Jessie (+25% DMG) or Jeronimo (ATK multiplier) are best attack joiners.
 
 ---
 

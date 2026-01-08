@@ -1,0 +1,510 @@
+{
+  "system": "combat_optimization_audit",
+  "description": "Combat stat sources guide - all the hidden multipliers that determine who wins battles",
+  "version": "1.0",
+  "last_updated": "2026-01-08",
+
+  "core_insight": {
+    "title": "Why You Lost With Similar Troops",
+    "explanation": "Two players with identical hero levels and troop counts can have WILDLY different combat results. The difference is in the 'hidden multipliers' - stats from Research, Daybreak Island, Chief Gear, Charms, Pets, and Alliance Tech that compound in the background.",
+    "key_formula": "Damage = sqrt(Troops) × (Attack × Lethality) / (Enemy Defense × Enemy Health) × SkillModifier",
+    "implication": "Attack and Lethality MULTIPLY together. A 10% boost to each = 21% more damage. These stats come from places most players neglect."
+  },
+
+  "stat_sources": {
+    "research_battle_tree": {
+      "name": "Research - Battle Tree",
+      "category": "permanent",
+      "impact": "HIGH",
+      "often_neglected": true,
+      "stats_provided": {
+        "infantry_attack": "Increases Infantry damage dealt",
+        "infantry_defense": "Reduces damage taken by Infantry",
+        "infantry_health": "Increases Infantry HP pool",
+        "marksman_attack": "Increases Marksman damage dealt",
+        "marksman_defense": "Reduces damage taken by Marksman",
+        "marksman_lethality": "CRITICAL - Multiplies Marksman damage",
+        "lancer_attack": "Increases Lancer damage dealt",
+        "lancer_defense": "Reduces damage taken by Lancers",
+        "lancer_lethality": "CRITICAL - Multiplies Lancer damage",
+        "regimental_expansion": "More troops per march"
+      },
+      "priority_order": [
+        "1. Lethality (your main troop type) - BIGGEST damage multiplier",
+        "2. Attack (your main troop type) - Base damage increase",
+        "3. Defense (your main troop type) - Reduces losses",
+        "4. Regimental Expansion - More troops = more damage",
+        "5. Other troop types"
+      ],
+      "common_mistake": "Researching Growth/Economy tree while ignoring Battle tree after Tool Enhancement VII",
+      "quick_check": "Have you researched Tier 4+ in your main troop type's Lethality?"
+    },
+
+    "daybreak_island": {
+      "name": "Daybreak Island - Battle Enhancer Decorations",
+      "category": "permanent",
+      "impact": "VERY HIGH",
+      "often_neglected": true,
+      "overview": "Combat stats come from DECORATIONS you place on the island, not just Tree of Life progression.",
+      "tree_of_life_stats": {
+        "level_4": "Troops Defense +5%",
+        "level_6": "Troops Attack +5%",
+        "level_9": "Troops Health +5%",
+        "level_10": "Troops Lethality +5%"
+      },
+      "mythic_decorations": {
+        "description": "These are the BIG combat stat sources - 10% bonuses at max level each",
+        "infantry": {
+          "Floating Market": "Infantry Attack +10%",
+          "Snow Castle": "Infantry Defense +10%"
+        },
+        "lancer": {
+          "Amphitheatre": "Lancer Attack +10%",
+          "Elegant Villa": "Lancer Defense +10%"
+        },
+        "marksman": {
+          "Observation Deck": "Marksman Attack +10%",
+          "Art Gallery": "Marksman Defense +10%"
+        }
+      },
+      "epic_decorations": {
+        "description": "2.5% bonuses at max - stepping stones to Mythic",
+        "infantry": {
+          "Rural Mill": "Infantry Attack +2.5%",
+          "Warm Greenhouse": "Infantry Defense +2.5%"
+        },
+        "lancer": {
+          "Crystal Garden": "Lancer Attack +2.5%",
+          "Sailor's Cottage": "Lancer Defense +2.5%"
+        },
+        "marksman": {
+          "Clock Hut": "Marksman Attack +2.5%",
+          "Fisherman's Chalet": "Marksman Defense +2.5%"
+        }
+      },
+      "limited_mythic": {
+        "Serpent Sanctuary": "+20% ALL four combat stats (Attack, Defense, Health, Lethality)",
+        "Ferris Wheel": "+10% Troop Attack",
+        "Carousel": "+10% Troop Defense"
+      },
+      "max_potential": {
+        "per_troop_type": "+10% Attack, +10% Defense from Mythic decorations alone",
+        "with_tree_of_life": "+15% Attack, +15% Defense, +5% Health, +5% Lethality total",
+        "with_limited_mythic": "Even higher with Serpent Sanctuary (+20% all stats)"
+      },
+      "priority_order": [
+        "1. Build Mythic decorations for your MAIN troop type first",
+        "2. Get both Attack AND Defense Mythic for main type (+20% combined)",
+        "3. Tree of Life to L10 for universal buffs",
+        "4. Epic decorations as stepping stones while building Mythic"
+      ],
+      "common_mistake": "Players ignore Daybreak decorations or build random ones for aesthetics. Someone with maxed Floating Market + Snow Castle has +20% Infantry stats you don't.",
+      "quick_check": "Do you have Mythic decorations for your main troop type? Are they leveled up?"
+    },
+
+    "chief_gear": {
+      "name": "Chief Gear",
+      "category": "permanent",
+      "impact": "VERY HIGH",
+      "often_neglected": false,
+      "stats_provided": {
+        "ring": "Troop Attack (ALL troops) - HIGHEST PRIORITY",
+        "amulet": "Troop Lethality - CRITICAL for damage",
+        "gloves": "Marksman Attack",
+        "boots": "Lancer Attack",
+        "helmet": "Infantry Defense",
+        "armor": "Infantry Health"
+      },
+      "priority_order": [
+        "1. Ring - Universal attack boost, affects everything",
+        "2. Amulet - Lethality multiplier, huge damage impact",
+        "3. Gloves/Boots - Attack for your main troop type",
+        "4. Helmet/Armor - Defensive stats"
+      ],
+      "quality_goal": "Mythic Ring and Amulet should be top priority",
+      "common_mistake": "Upgrading Helmet/Armor first because 'infantry tanks need defense'. Wrong - damage wins fights, not tanking.",
+      "quick_check": "Are your Ring and Amulet at Legendary or Mythic quality?"
+    },
+
+    "chief_charms": {
+      "name": "Chief Charms",
+      "category": "permanent",
+      "impact": "MEDIUM-HIGH",
+      "often_neglected": true,
+      "unlock": "Furnace Level 25",
+      "stats_provided": {
+        "cap": "Lancer Attack/Defense",
+        "watch": "Lancer Attack/Defense",
+        "coat": "Infantry Attack/Defense",
+        "pants": "Infantry Attack/Defense",
+        "belt": "Marksman Attack/Defense",
+        "weapon": "Marksman Attack/Defense"
+      },
+      "priority_order": [
+        "1. Upgrade evenly for army-wide bonus",
+        "2. Focus on your main troop type's charms",
+        "3. Target Level 11 on priority charms before spreading"
+      ],
+      "uniformity_bonus": "Evenly upgrading all charms grants an ARMY-WIDE attack/defense boost on top of individual bonuses",
+      "common_mistake": "Ignoring charms because the UI is confusing and materials seem scarce. Each charm level adds combat stats.",
+      "quick_check": "Are all your charms at Level 5+? Is your main troop type at Level 8+?"
+    },
+
+    "pets": {
+      "name": "Pet Combat Skills",
+      "category": "temporary (2h buffs)",
+      "impact": "HIGH (during activation)",
+      "often_neglected": true,
+      "combat_pets": {
+        "saber_tooth_tiger": {
+          "skill": "Lethality Boost",
+          "effect": "+10% troop lethality for 2h",
+          "priority": "S-TIER for attack"
+        },
+        "cave_lion": {
+          "skill": "Attack Boost",
+          "effect": "+10% troop attack for 2h",
+          "priority": "A-TIER for attack"
+        },
+        "mammoth": {
+          "skill": "Defense Boost",
+          "effect": "+10% troop defense for 2h",
+          "priority": "S-TIER for defense"
+        },
+        "frost_gorilla": {
+          "skill": "Health Boost",
+          "effect": "+10% troop health for 2h",
+          "priority": "S-TIER for survivability"
+        },
+        "snow_leopard": {
+          "skill": "Lightning Raid",
+          "effect": "+30% march speed, -5% enemy lethality",
+          "priority": "A-TIER utility"
+        },
+        "iron_rhino": {
+          "skill": "Rally Capacity",
+          "effect": "+150 rally capacity",
+          "priority": "Niche - rally leads only"
+        }
+      },
+      "priority_order": [
+        "1. Saber-tooth Tiger for attack (Lethality +10%)",
+        "2. Mammoth for defense (+10% defense)",
+        "3. Frost Gorilla for health (+10% health)",
+        "4. Cave Lion for attack (+10% attack)"
+      ],
+      "common_mistake": "Not activating combat pets before SvS/battles. Also not leveling combat pets - a L50 pet gives much smaller buff than L100.",
+      "quick_check": "Do you own Saber-tooth Tiger or Mammoth? Are they leveled to 50+?"
+    },
+
+    "alliance_tech": {
+      "name": "Alliance Technology",
+      "category": "permanent (while in alliance)",
+      "impact": "MEDIUM",
+      "often_neglected": true,
+      "stats_provided": {
+        "troop_attack": "Percentage boost to all troop attack",
+        "troop_defense": "Percentage boost to all troop defense",
+        "troop_health": "Percentage boost to all troop health",
+        "march_capacity": "More troops per march",
+        "rally_capacity": "Bigger rallies"
+      },
+      "you_cant_control": "This is alliance-wide. Strong alliances have better tech.",
+      "what_you_can_do": [
+        "Donate to alliance tech daily",
+        "Join an active alliance that prioritizes combat tech",
+        "Check alliance tech levels before joining"
+      ],
+      "common_mistake": "Joining a dead alliance for 'peace' and missing out on tech bonuses.",
+      "quick_check": "Is your alliance actively researching combat tech? Do they have Troop Attack/Defense researched?"
+    },
+
+    "vip_level": {
+      "name": "VIP Level",
+      "category": "permanent",
+      "impact": "LOW-MEDIUM (for combat)",
+      "often_neglected": false,
+      "combat_relevant_bonuses": {
+        "march_speed": "Up to +30% at VIP 12",
+        "rally_capacity": "Bonus at VIP 9",
+        "stamina_cap": "More attacks per session"
+      },
+      "indirect_combat_value": "Higher VIP = faster research/training = faster stat gains",
+      "common_mistake": "None really - most players understand VIP.",
+      "quick_check": "N/A - VIP is well understood"
+    },
+
+    "hero_expedition_skills": {
+      "name": "Hero Expedition Skills",
+      "category": "permanent",
+      "impact": "VERY HIGH",
+      "often_neglected": false,
+      "critical_understanding": {
+        "rally_joining": "ONLY the leftmost hero's expedition skill (top-right skill) applies",
+        "rally_leading": "All your expedition skills apply",
+        "garrison": "All defending expedition skills apply"
+      },
+      "best_joiner_skills": [
+        {"hero": "Jessie", "skill": "+25% DMG dealt to all troops", "why": "Best rally joiner skill in game"},
+        {"hero": "Jeronimo", "skill": "Infantry ATK multiplier", "why": "Strong attack boost"}
+      ],
+      "best_garrison_skills": [
+        {"hero": "Sergey", "skill": "-20% DMG taken", "why": "Best defensive skill"}
+      ],
+      "common_mistake": "Using wrong hero in leftmost slot when joining rallies. Their expedition skill is wasted.",
+      "quick_check": "Do you put Jessie or Jeronimo in leftmost slot when joining rallies?"
+    },
+
+    "troop_tier": {
+      "name": "Troop Tier",
+      "category": "permanent",
+      "impact": "HIGH",
+      "often_neglected": false,
+      "stats_by_tier": {
+        "T8": {"power": 16, "base_stats": "High"},
+        "T9": {"power": 18, "base_stats": "Very High"},
+        "T10": {"power": 20, "base_stats": "Maximum"},
+        "T11": {"power": 22, "base_stats": "Maximum+"}
+      },
+      "key_insight": "Higher tier troops have better BASE attack/defense/health. All percentage bonuses multiply off this base.",
+      "common_mistake": "Having millions of T6-T7 troops instead of promoting to T9-T10.",
+      "quick_check": "Are your main combat troops T9 or T10?"
+    }
+  },
+
+  "quick_audit_checklist": {
+    "description": "High-impact items to check. If you answer 'No' to these, you've found a weakness.",
+    "milestones": [
+      {
+        "id": "research_tool_vii",
+        "question": "Have you completed Tool Enhancement VII?",
+        "impact": "Critical",
+        "why": "35% faster research on everything. Must be done first.",
+        "phase": "mid_game"
+      },
+      {
+        "id": "research_lethality",
+        "question": "Have you researched Tier 4+ Lethality for your main troop type?",
+        "impact": "Very High",
+        "why": "Lethality is a damage MULTIPLIER. This is often the difference in close fights.",
+        "phase": "mid_game"
+      },
+      {
+        "id": "daybreak_mythic_attack",
+        "question": "Do you have a Mythic Attack decoration for your main troop type (Floating Market/Amphitheatre/Observation Deck)?",
+        "impact": "Very High",
+        "why": "+10% Attack for your troop type. This is a massive damage boost most players skip.",
+        "phase": "mid_game"
+      },
+      {
+        "id": "daybreak_mythic_defense",
+        "question": "Do you have a Mythic Defense decoration for your main troop type (Snow Castle/Elegant Villa/Art Gallery)?",
+        "impact": "Very High",
+        "why": "+10% Defense for your troop type. Combined with Attack decoration = +20% stats.",
+        "phase": "mid_game"
+      },
+      {
+        "id": "daybreak_decorations_leveled",
+        "question": "Are your Mythic battle decorations upgraded to high levels?",
+        "impact": "High",
+        "why": "Mythic decorations scale to +10% at max level. Unleveled ones give much less.",
+        "phase": "late_game"
+      },
+      {
+        "id": "daybreak_tree_of_life",
+        "question": "Have you reached Tree of Life Level 10?",
+        "impact": "High",
+        "why": "+5% Attack, +5% Defense, +5% Health, +5% Lethality - universal bonuses for all troops.",
+        "phase": "late_game"
+      },
+      {
+        "id": "chief_ring_amulet",
+        "question": "Are your Chief Ring and Amulet at Legendary or Mythic?",
+        "impact": "Very High",
+        "why": "Ring (Attack) and Amulet (Lethality) affect ALL troops in ALL battles.",
+        "phase": "mid_game"
+      },
+      {
+        "id": "charms_level_5",
+        "question": "Are all your Chief Charms at Level 5+?",
+        "impact": "Medium-High",
+        "why": "Each charm level adds combat stats. Even upgrades unlock army-wide bonus.",
+        "phase": "mid_game"
+      },
+      {
+        "id": "charms_main_troop",
+        "question": "Are your main troop type's Charms at Level 8+?",
+        "impact": "High",
+        "why": "Focused investment in your primary class pays off in every fight.",
+        "phase": "late_game"
+      },
+      {
+        "id": "combat_pet",
+        "question": "Do you own a combat pet (Saber-tooth, Mammoth, Frost Gorilla)?",
+        "impact": "High",
+        "why": "+10% stat buffs for 2 hours. Activate before every major battle.",
+        "phase": "mid_game"
+      },
+      {
+        "id": "combat_pet_leveled",
+        "question": "Is your combat pet at Level 50+?",
+        "impact": "Medium-High",
+        "why": "Higher level = bigger buff. L100 pet gives ~2x the buff of L50.",
+        "phase": "late_game"
+      },
+      {
+        "id": "rally_joiner_hero",
+        "question": "Do you use Jessie/Jeronimo in leftmost slot when joining rallies?",
+        "impact": "High",
+        "why": "Only leftmost hero's expedition skill applies. Wrong hero = wasted slot.",
+        "phase": "early_game"
+      },
+      {
+        "id": "troop_tier",
+        "question": "Are your main combat troops T9 or T10?",
+        "impact": "Very High",
+        "why": "Higher tier = higher base stats. All % bonuses multiply off this base.",
+        "phase": "late_game"
+      },
+      {
+        "id": "alliance_tech",
+        "question": "Is your alliance actively researching combat tech?",
+        "impact": "Medium",
+        "why": "Alliance tech provides permanent stat boosts while you're a member.",
+        "phase": "early_game"
+      }
+    ]
+  },
+
+  "common_blind_spots": {
+    "description": "Things most players skip that cost them battles",
+    "blind_spots": [
+      {
+        "name": "Battle Research Lethality",
+        "severity": "CRITICAL",
+        "explanation": "Most players research Attack before Lethality. But Lethality is a MULTIPLIER on Attack. If you have high Attack but low Lethality, you're leaving damage on the table.",
+        "fix": "Prioritize Lethality research for your main troop type. It's often buried in the Battle tree."
+      },
+      {
+        "name": "Daybreak Island Battle Decorations",
+        "severity": "CRITICAL",
+        "explanation": "Daybreak seems like a cosmetic minigame. Most players build random decorations or ignore it. But Mythic battle decorations (Floating Market, Snow Castle, Amphitheatre, etc.) give +10% Attack or Defense PER DECORATION for your troop type. An opponent with both Attack + Defense Mythics has +20% stats you don't have.",
+        "fix": "Build Mythic decorations for your MAIN troop type: Infantry (Floating Market + Snow Castle), Lancer (Amphitheatre + Elegant Villa), Marksman (Observation Deck + Art Gallery). Level them up for full +10% each."
+      },
+      {
+        "name": "Chief Charms",
+        "severity": "HIGH",
+        "explanation": "The Charm UI is confusing and materials are scattered. Most players upgrade randomly or ignore them.",
+        "fix": "Upgrade all charms evenly for army-wide bonus, then focus on your main troop type."
+      },
+      {
+        "name": "Amulet Priority",
+        "severity": "MEDIUM-HIGH",
+        "explanation": "Many players upgrade Helmet/Armor first because infantry 'needs defense'. But damage wins fights - dead enemies deal no damage.",
+        "fix": "Ring > Amulet > Gloves/Boots > Helmet/Armor. Always."
+      },
+      {
+        "name": "Pet Buff Activation",
+        "severity": "MEDIUM",
+        "explanation": "Combat pets give +10% buffs but only for 2 hours. Players forget to activate before battles.",
+        "fix": "Always activate Saber-tooth Tiger (Lethality) or Mammoth (Defense) before SvS/major fights."
+      },
+      {
+        "name": "Alliance Tech",
+        "severity": "MEDIUM",
+        "explanation": "Players join weak/dead alliances for 'peace' and miss out on tech bonuses that strong alliances have.",
+        "fix": "Check alliance tech levels before joining. An active alliance's tech gives permanent stat boosts."
+      },
+      {
+        "name": "Rally Joiner Hero Slot",
+        "severity": "MEDIUM",
+        "explanation": "When joining rallies, ONLY the leftmost hero's expedition skill applies. Using the wrong hero wastes a skill slot.",
+        "fix": "Always put Jessie (best) or Jeronimo in leftmost slot when joining rallies."
+      }
+    ]
+  },
+
+  "priority_by_phase": {
+    "early_game": {
+      "phase": "Furnace 9-19",
+      "top_priorities": [
+        "1. Tool Enhancement research (I-III minimum)",
+        "2. Unlock and level your core heroes",
+        "3. Troop tier upgrades (T5-T6)",
+        "4. Join an active alliance for tech"
+      ],
+      "combat_focus": "Not yet - focus on progression",
+      "skip_for_now": ["Daybreak Island (not unlocked until F19)", "Deep Battle research"]
+    },
+    "mid_game": {
+      "phase": "Furnace 20-29",
+      "top_priorities": [
+        "1. Tool Enhancement VII (CRITICAL)",
+        "2. Daybreak Mythic decorations for main troop type (Attack + Defense)",
+        "3. Chief Ring + Amulet to Epic/Legendary",
+        "4. Battle Research - your main troop type's Lethality",
+        "5. Chief Charms to L5 across the board"
+      ],
+      "combat_focus": "Building foundation - these stats compound",
+      "skip_for_now": ["Economy research", "Defensive gear"]
+    },
+    "late_game": {
+      "phase": "Furnace 30+ / FC Era",
+      "top_priorities": [
+        "1. Battle Research - Max Lethality and Attack",
+        "2. Max level Daybreak Mythic decorations (both Attack + Defense)",
+        "3. Chief Ring + Amulet to Mythic",
+        "4. Chief Charms to L11 (main troop type)",
+        "5. Combat pets to L50+",
+        "6. T10 troops",
+        "7. Tree of Life L10"
+      ],
+      "combat_focus": "Maximizing multipliers - every % matters",
+      "skip_for_now": ["Nothing - optimize everything"]
+    },
+    "endgame": {
+      "phase": "FC5+ / Competitive",
+      "top_priorities": [
+        "1. Max all Battle Research",
+        "2. Max all Daybreak decorations + Starry Lighthouse",
+        "3. All Chief Gear to Mythic",
+        "4. All Charms to L11-16",
+        "5. Combat pets to L100",
+        "6. T11 troops"
+      ],
+      "combat_focus": "Marginal gains - the 1-2% differences decide close fights"
+    }
+  },
+
+  "stat_stacking_example": {
+    "title": "How Stats Compound",
+    "scenario": "Two players with 100,000 T10 Infantry each",
+    "player_a": {
+      "label": "Neglected Hidden Stats",
+      "battle_research_attack": "+15%",
+      "battle_research_lethality": "+5%",
+      "daybreak_decorations": "No Mythics (0% from decorations)",
+      "chief_ring": "Epic (+10% attack)",
+      "chief_amulet": "Rare (+5% lethality)",
+      "charms": "L3 average (+3% attack)",
+      "pet_buff": "None active",
+      "total_attack_bonus": "+28%",
+      "total_lethality_bonus": "+10%",
+      "effective_damage_multiplier": "1.28 × 1.10 = 1.41"
+    },
+    "player_b": {
+      "label": "Optimized Hidden Stats",
+      "battle_research_attack": "+25%",
+      "battle_research_lethality": "+20%",
+      "daybreak_decorations": "Floating Market (+10% Inf ATK) + Snow Castle (+10% Inf DEF) + Tree of Life L10 (+5% ATK)",
+      "chief_ring": "Mythic (+25% attack)",
+      "chief_amulet": "Legendary (+15% lethality)",
+      "charms": "L8 average (+12% attack)",
+      "pet_buff": "Saber-tooth (+10% lethality)",
+      "total_attack_bonus": "+77%",
+      "total_lethality_bonus": "+50%",
+      "effective_damage_multiplier": "1.77 × 1.50 = 2.66"
+    },
+    "result": "Player B deals 88% more damage with identical troops and heroes. That's the difference between winning and getting crushed."
+  }
+}

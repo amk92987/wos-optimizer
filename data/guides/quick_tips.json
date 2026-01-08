@@ -1,0 +1,462 @@
+{
+  "system": "quick_tips",
+  "description": "Consolidated cheat sheet of key game knowledge - the stuff most players get wrong",
+  "version": "1.0",
+  "last_updated": "2026-01-08",
+
+  "categories": {
+    "daybreak_island": {
+      "name": "Daybreak Island",
+      "icon": "island",
+      "tips": [
+        {
+          "tip": "Mythic decorations give +10% stats, Epic only +2.5%",
+          "detail": "Epic = 5 levels × 0.5% = 2.5% max. Mythic = 10 levels × 1% = 10% max. Skip straight to Mythic.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Build BOTH Attack and Defense Mythics for your main troop type",
+          "detail": "Infantry: Floating Market (+10% ATK) + Snow Castle (+10% DEF). Lancer: Amphitheatre + Elegant Villa. Marksman: Observation Deck + Art Gallery.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Decorations give bigger bonuses than Tree of Life",
+          "detail": "Two Mythic decorations = +20% for your troop type. Tree of Life L10 = only +5% Attack, +5% Defense universal.",
+          "priority": "high"
+        },
+        {
+          "tip": "Tree of Life combat buffs: L4 (DEF), L6 (ATK), L9 (HP), L10 (Lethality)",
+          "detail": "Each is +5%. L1-3, L5, L7-8 are just Healing Speed - rush past them.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Mythic decorations cost 10,000 Life Essence, give 10,000 Prosperity",
+          "detail": "Best Prosperity-per-Life-Essence ratio. Build L1 of all Mythics first, then level them.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "svs_prep": {
+      "name": "SvS Prep Phase",
+      "icon": "battle",
+      "tips": [
+        {
+          "tip": "SPEEDUPS ONLY GIVE POINTS ON DAY 1, 2, AND 5",
+          "detail": "Day 3 (Beast Slay) and Day 4 (Hero Development) give ZERO points for speedups. Save them!",
+          "priority": "critical"
+        },
+        {
+          "tip": "General Hero Shards do NOT give points",
+          "detail": "Only NAMED hero shards (Jeronimo, Natalia, etc.) count. General shards = 0 points.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Day 4: Promote troops, don't train new ones",
+          "detail": "T9→T10 promotion: 0.71 pts/sec. T8→T9: 0.64 pts/sec. Training NEW T10: only 0.39 pts/sec. Promoting beats speedups.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Mithril = 40,000 points each on Day 4",
+          "detail": "NEVER use Mithril outside SvS Prep. Save every single one for Day 4.",
+          "priority": "high"
+        },
+        {
+          "tip": "Lucky Wheel = 8,000 points per spin on Day 2 or 3",
+          "detail": "Save all Lucky Wheel tickets for SvS Prep.",
+          "priority": "high"
+        },
+        {
+          "tip": "Fire Crystals = 2,000 points each on Day 1",
+          "detail": "Save ALL Fire Crystals and FC Shards for SvS Prep Day 1.",
+          "priority": "high"
+        },
+        {
+          "tip": "Building upgrades just need to START on that day",
+          "detail": "You don't need to finish the upgrade - just start it during the point window.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "research": {
+      "name": "Research",
+      "icon": "research",
+      "tips": [
+        {
+          "tip": "Tool Enhancement VII before ANYTHING else",
+          "detail": "35% faster research on everything after. Every research you do before VII takes 35% longer than it should.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Lethality research is a damage MULTIPLIER",
+          "detail": "Attack and Lethality multiply together. +10% each = +21% damage. Prioritize Lethality over raw Attack.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Battle tree > Growth tree > Economy tree (after Tool Enhancement VII)",
+          "detail": "Economy tree is lowest priority. Only do it after Battle and Growth are solid.",
+          "priority": "high"
+        },
+        {
+          "tip": "Research your MAIN troop type first",
+          "detail": "If you're Infantry-focused, max Infantry Lethality/Attack/Defense before touching Marksman or Lancer.",
+          "priority": "high"
+        }
+      ]
+    },
+
+    "chief_gear": {
+      "name": "Chief Gear",
+      "icon": "gear",
+      "tips": [
+        {
+          "tip": "Ring > Amulet > everything else",
+          "detail": "Ring = universal Attack. Amulet = Lethality (damage multiplier). These affect ALL troops in ALL battles.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Don't upgrade Helmet/Armor first",
+          "detail": "Common mistake: 'Infantry needs defense'. Wrong - damage wins fights. Dead enemies deal no damage.",
+          "priority": "high"
+        },
+        {
+          "tip": "Chief Gear > Hero Gear for most players",
+          "detail": "Chief Gear affects ALL heroes. Hero Gear only affects one hero. Prioritize Chief Gear unless you're a whale.",
+          "priority": "high"
+        },
+        {
+          "tip": "Target Mythic quality for Ring and Amulet",
+          "detail": "Epic/Legendary are temporary. Mythic is the real goal. Focus resources on Ring and Amulet first.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "chief_charms": {
+      "name": "Chief Charms",
+      "icon": "charm",
+      "tips": [
+        {
+          "tip": "Upgrade all charms evenly for army-wide bonus",
+          "detail": "There's a hidden bonus for keeping charms at similar levels. Don't max one while ignoring others.",
+          "priority": "high"
+        },
+        {
+          "tip": "6 charm slots match troop types",
+          "detail": "2 Infantry (Coat, Pants), 2 Lancer (Cap, Watch), 2 Marksman (Belt, Weapon). Focus on your main type.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Unlocks at Furnace 25",
+          "detail": "Don't worry about charms until F25. After that, they're a significant stat source.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "combat": {
+      "name": "Combat & Rallies",
+      "icon": "combat",
+      "tips": [
+        {
+          "tip": "Rally joining: ONLY leftmost hero's expedition skill applies",
+          "detail": "Put Jessie (+25% DMG) or Jeronimo in leftmost slot. Other heroes' expedition skills are wasted.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Exploration skills for PvE, Expedition skills for PvP",
+          "detail": "Bear Trap, Crazy Joe = Exploration. SvS, rallies = Expedition. Don't mix them up.",
+          "priority": "high"
+        },
+        {
+          "tip": "Sergey in leftmost slot for DEFENSE",
+          "detail": "Sergey's -20% DMG taken is best defensive skill. Use him when reinforcing garrisons.",
+          "priority": "high"
+        },
+        {
+          "tip": "Class counters: Infantry > Lancer > Marksman > Infantry",
+          "detail": "~30% damage bonus against weak class. Match your composition to counter enemy's main type.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Troop quantity has diminishing returns",
+          "detail": "Damage scales with sqrt(troops). Doubling troops = only 41% more damage. Quality > quantity.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "pets": {
+      "name": "Pets",
+      "icon": "pet",
+      "tips": [
+        {
+          "tip": "Activate combat pets BEFORE battles",
+          "detail": "Saber-tooth Tiger (+10% Lethality), Mammoth (+10% Defense), Frost Gorilla (+10% Health). 2-hour buffs.",
+          "priority": "high"
+        },
+        {
+          "tip": "Pet level matters - L100 gives ~2x the buff of L50",
+          "detail": "Don't just own combat pets, level them. Higher level = bigger percentage buff.",
+          "priority": "medium"
+        },
+        {
+          "tip": "S-tier pets: Saber-tooth, Mammoth, Frost Gorilla, Iron Rhino, Snow Ape",
+          "detail": "These unlock at 200-370 server days. Worth investing in when available.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "events": {
+      "name": "Events",
+      "icon": "event",
+      "tips": [
+        {
+          "tip": "NEVER spend Flames outside Flame Lotto",
+          "detail": "Save every single Flame for Flame Lotto event. Best value for flame currency.",
+          "priority": "high"
+        },
+        {
+          "tip": "Snowbusters and Fishing are pay-to-progress",
+          "detail": "F2P players hit a wall quickly. Do free attempts only, don't buy packs for these.",
+          "priority": "high"
+        },
+        {
+          "tip": "Bear Trap is S-tier for F2P",
+          "detail": "Best rewards for effort. Always participate. Use EXPLORATION skills team (not expedition).",
+          "priority": "high"
+        },
+        {
+          "tip": "Only craft gear during Artisan's Trove",
+          "detail": "Save all crafting materials. Bonus rewards during event make it worth waiting.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "packs": {
+      "name": "Pack Value",
+      "icon": "pack",
+      "tips": [
+        {
+          "tip": "Wood/Meat/Iron/Coal inflate pack % values",
+          "detail": "These basic resources have near-zero real value. A '500% value' pack is often 80% filler.",
+          "priority": "high"
+        },
+        {
+          "tip": "Look for Essence Stones, Legendary Shards, Speedups",
+          "detail": "These are S/A-tier resources. Packs without them are usually bad value.",
+          "priority": "high"
+        },
+        {
+          "tip": "Compare gems-per-dollar across pack tiers",
+          "detail": "Higher price tier isn't always better value. Calculate useful_gems / price.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "heroes": {
+      "name": "Heroes",
+      "icon": "hero",
+      "tips": [
+        {
+          "tip": "Don't invest in heroes that will be replaced next generation",
+          "detail": "Check hero tier lists. S+ heroes (Jeronimo, Blanchette, Wu Ming) stay relevant. B/C tier heroes get replaced.",
+          "priority": "high"
+        },
+        {
+          "tip": "Jessie is the best rally joiner in the game",
+          "detail": "+25% DMG dealt to all troops. Even at low investment, her expedition skill is top tier.",
+          "priority": "high"
+        },
+        {
+          "tip": "Philly is essential for PvE content",
+          "detail": "Healer is critical for Bear Trap, Crazy Joe, exploration. Max her exploration skills.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "alliance": {
+      "name": "Alliance",
+      "icon": "alliance",
+      "tips": [
+        {
+          "tip": "Alliance tech gives permanent stat boosts",
+          "detail": "Join an active alliance that researches combat tech. Dead alliances = missing free stats.",
+          "priority": "high"
+        },
+        {
+          "tip": "Donate to alliance tech daily",
+          "detail": "Your donations help unlock tech bonuses that benefit YOU. Don't skip this.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Check alliance tech before joining",
+          "detail": "A strong alliance's tech advantage is permanent while you're a member.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "svs_battle": {
+      "name": "SvS Battle Phase",
+      "icon": "battle",
+      "tips": [
+        {
+          "tip": "SHIELD UP during entire Battle Phase unless actively fighting",
+          "detail": "Enemies can teleport to your state and attack unshielded cities. They get points for killing your troops.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Attacking or joining rally DROPS your shield for 30 minutes",
+          "detail": "You can't re-shield for 30 min after attacking. Time your attacks carefully or you become a target.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Losing SvS = enemy can become Supreme President of BOTH states",
+          "detail": "If enemy captures your Sunfire Castle, their alliance leader rules both states. Your president is removed.",
+          "priority": "high"
+        },
+        {
+          "tip": "Field Triage recovers 30-90% of troops lost in SvS",
+          "detail": "Base 30% recovery. Use Rebirth Tomes with allies to increase up to 90%. Coordinate with alliance.",
+          "priority": "high"
+        },
+        {
+          "tip": "Reinforce offline alliance members who forgot to shield",
+          "detail": "Send troops to garrison allies without shields. Stops enemies from farming free kills.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Bookmark weak enemy targets BEFORE battle starts",
+          "detail": "Scout enemy state during prep phase. Mark easy targets so you're ready when portals open.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "new_player": {
+      "name": "New Player / Resource Management",
+      "icon": "newbie",
+      "tips": [
+        {
+          "tip": "DON'T spend resources just because the red dot appears",
+          "detail": "The game shows upgrade notifications constantly. Ignore them. Save resources for KEY events, not every event.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Save ALL speedups for SvS Prep and Hall of Chiefs",
+          "detail": "These events give massive rewards for speedup usage. Using speedups randomly = wasted value.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Not all events are worth participating in",
+          "detail": "Snowbusters, Fishing = pay-to-progress traps. SvS Prep, Bear Trap, Hall of Chiefs = high value. Be selective.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Save Fire Crystals for SvS Prep Day 1 (2,000 pts each)",
+          "detail": "Don't use FC for building upgrades randomly. Hoard them for SvS Prep where they give huge points.",
+          "priority": "high"
+        },
+        {
+          "tip": "Save Mithril for SvS Prep Day 4 (40,000 pts each)",
+          "detail": "Mithril is extremely valuable during SvS. NEVER use it outside the event.",
+          "priority": "high"
+        },
+        {
+          "tip": "Save Lucky Wheel tickets for SvS Prep (8,000 pts per spin)",
+          "detail": "Don't spin Lucky Wheel randomly. Save tickets for Day 2/3 of SvS Prep for massive points.",
+          "priority": "high"
+        },
+        {
+          "tip": "Save Flames for Flame Lotto event ONLY",
+          "detail": "Never spend Flames outside Flame Lotto. The event gives much better value per Flame.",
+          "priority": "high"
+        },
+        {
+          "tip": "Early game: focus on Furnace level, not power",
+          "detail": "Furnace unlocks systems and troops. Power is meaningless if you're behind on Furnace level.",
+          "priority": "high"
+        },
+        {
+          "tip": "Don't spread resources across all heroes",
+          "detail": "Focus on 5-8 core heroes. Spreading thin = weak everywhere. Concentrated investment = strong team.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Join events for participation rewards even if you can't compete",
+          "detail": "Many events give rewards just for participating. Don't skip entirely - get the free stuff.",
+          "priority": "medium"
+        }
+      ]
+    }
+  },
+
+  "most_common_mistakes": [
+    {
+      "mistake": "Spending resources whenever the red dot appears",
+      "correction": "Ignore red dots. Save speedups/FC/Mithril for SvS Prep and Hall of Chiefs - that's where the value is.",
+      "category": "new_player"
+    },
+    {
+      "mistake": "Not shielding during SvS Battle Phase",
+      "correction": "Enemies can teleport to your state and attack. Shield up or lose troops and give them points.",
+      "category": "svs_battle"
+    },
+    {
+      "mistake": "Using speedups on SvS Day 3 or 4",
+      "correction": "Speedups only give points on Day 1, 2, and 5",
+      "category": "svs_prep"
+    },
+    {
+      "mistake": "Ignoring Daybreak Island battle decorations",
+      "correction": "Mythic decorations give +10% Attack/Defense per decoration - huge stat source",
+      "category": "daybreak_island"
+    },
+    {
+      "mistake": "Researching Battle tree before Tool Enhancement VII",
+      "correction": "Every research takes 35% longer without VII. Do it first.",
+      "category": "research"
+    },
+    {
+      "mistake": "Wrong hero in leftmost rally slot",
+      "correction": "Only leftmost hero's expedition skill applies. Use Jessie or Jeronimo.",
+      "category": "combat"
+    },
+    {
+      "mistake": "Upgrading Chief Helmet/Armor before Ring/Amulet",
+      "correction": "Damage wins fights. Ring (Attack) and Amulet (Lethality) first always.",
+      "category": "chief_gear"
+    },
+    {
+      "mistake": "Using General Hero Shards during SvS",
+      "correction": "General shards give ZERO points. Only named hero shards count.",
+      "category": "svs_prep"
+    },
+    {
+      "mistake": "Training new troops on SvS Day 4 with speedups",
+      "correction": "PROMOTING troops (0.64-0.71 p/s) beats speedup value (0.50 p/s). Train new = 0.39 p/s = bad.",
+      "category": "svs_prep"
+    },
+    {
+      "mistake": "Building Epic Daybreak decorations instead of Mythic",
+      "correction": "Epic = 2.5% max. Mythic = 10% max. Skip to Mythic for 4x the bonus.",
+      "category": "daybreak_island"
+    },
+    {
+      "mistake": "Spending Flames outside of Flame Lotto",
+      "correction": "Save ALL Flames for Flame Lotto event. Best value per Flame by far.",
+      "category": "new_player"
+    },
+    {
+      "mistake": "Attacking during SvS without planning shield timing",
+      "correction": "Attacking drops shield for 30 min. You become a target. Time attacks with alliance coordination.",
+      "category": "svs_battle"
+    }
+  ]
+}

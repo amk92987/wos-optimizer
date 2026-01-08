@@ -1,31 +1,45 @@
 # Whiteout Survival Optimizer
 
-A web-based tool to help Whiteout Survival players track their heroes, manage inventory, and get personalized upgrade recommendations optimized for SvS and combat.
+A comprehensive web-based tool to help Whiteout Survival players track their heroes, manage resources, and get personalized upgrade recommendations optimized for SvS (State vs State) and combat.
 
 ## Features
 
 ### Hero Management
-- Track all heroes from Gen 1-10 with detailed stats
-- Visual hero cards with tier badges, rarity borders, and class symbols
-- Inline editing for level, stars, ascension, skills, and gear
-- Partial star progress tracking (ascension tiers)
-- Hero gear tracking (4 slots + mythic gear)
+- Track all 56+ heroes from Gen 1-14 with detailed stats
+- **Actual hero portrait images** from the game
+- Visual hero cards with tier badges (S+ through D), rarity borders, and generation badges
+- Inline editing for level (1-80), stars (0-5), ascension, skills, and gear
+- Hero gear tracking (4 slots + mythic gear per hero)
+- Tier descriptions explaining hero value
 
-### Gear System
-- Track 4 gear slots per hero (Weapon, Armor, Helmet, Boots)
-- Quality levels: Gray, Green, Blue, Purple, Orange, Mythic
-- Mythic hero gear support (e.g., Jeronimo's Dawnbreak)
-- Quality-based max level caps
+### Strategy Guides
+- **Combat Optimization** - All hidden stat sources (Research, Daybreak decorations, Chief Gear, Charms, Pets)
+- **Quick Tips** - 13 categories of consolidated game knowledge with priority ratings
+- **Events Guide** - Event calendar and point optimization strategies
+- **Daybreak Island** - Battle enhancer decorations and Tree of Life priorities
 
 ### Recommendations
-- Priority-based upgrade recommendations
+- Priority-based upgrade recommendations (SvS, Rally, Castle Battle, PvE, Gathering)
 - AI-powered advisor (requires OpenAI API key)
 - Combat-focused analysis for SvS optimization
+- Rally joiner hero selection with verified game mechanics
 
-### User Profile
+### Lineup Builder
+- Hero lineup optimization for different content types
+- March composition builder
+- Expedition vs Exploration skill tracking
+
+### Resource Management
+- Backpack inventory tracking
+- OCR screenshot parsing (EasyOCR)
+- Pack analysis with efficiency ratings
+
+### User Profiles
+- Multiple profile support
 - Server age and generation tracking
-- Priority settings for SvS, Rally, Castle Battle, PvE, Gathering
-- Furnace level tracking
+- Spending profile selection (F2P to Whale)
+- Priority focus configuration
+- Alliance role settings
 
 ## Screenshots
 
@@ -61,7 +75,12 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. (Optional) Set OpenAI API key for AI recommendations:
+4. (Optional) Download hero images:
+```bash
+py scripts/download_hero_images.py
+```
+
+5. (Optional) Set OpenAI API key for AI recommendations:
 ```bash
 # Windows
 set OPENAI_API_KEY=your-key-here
@@ -70,76 +89,74 @@ set OPENAI_API_KEY=your-key-here
 export OPENAI_API_KEY=your-key-here
 ```
 
-5. Run the application:
+6. Run the application:
 ```bash
 streamlit run app.py
 ```
 
-6. Open http://localhost:8501 in your browser
+7. Open http://localhost:8501 in your browser
 
-## Usage
+## Application Pages
 
-### Heroes Page
-1. Browse all heroes by generation
-2. Filter by generation, class, or tier
-3. Click "Edit" to expand the inline editor
-4. Set level, stars, ascension, skills, and gear
-5. Click "Save" to store your hero data
+| Page | Description |
+|------|-------------|
+| **Home** | Welcome, quick start guide, generation calculator |
+| **Heroes** | Hero management with portraits, inline editing |
+| **Backpack** | Inventory tracking via OCR or manual entry |
+| **Recommendations** | Priority-weighted upgrade suggestions |
+| **Settings** | User profile and priority configuration |
+| **AI Advisor** | OpenAI-powered personalized recommendations |
+| **Profiles** | Multi-profile management |
+| **Lineups** | Hero lineup builder for rallies and events |
+| **Pack Analyzer** | Backpack efficiency analysis |
+| **Events Guide** | Event calendar and optimization |
+| **Combat Optimization** | SvS/combat stat source guide |
+| **Quick Tips** | Consolidated cheat sheet of key game knowledge |
 
-### Star/Ascension System
-- Stars: 0-5 (heroes start with 0 stars)
-- Ascension: 0-5 tiers within each star
-- When you'd reach ascension 6, you gain the next star instead
-- At 5 stars, ascension is maxed out
+## Key Game Mechanics
 
-### Gear Quality
-| Quality | Color | Max Level |
-|---------|-------|-----------|
-| Gray | Silver | 20 |
-| Green | Green | 40 |
-| Blue | Blue | 60 |
-| Purple | Purple | 80 |
-| Orange | Orange | 100 |
-| Mythic | Pink | 120 |
+### Rally Joiner System
+When joining a rally, only the **leftmost hero's top-right expedition skill** applies. The top 4 highest LEVEL skills from all joiners are used.
 
-### Settings Page
-Configure your priorities to get personalized recommendations:
-- SvS priority (1-5)
-- Rally priority (1-5)
-- Castle Battle priority (1-5)
-- Exploration/PvE priority (1-5)
-- Gathering priority (1-5)
+**Best Attack Joiners**: Jessie (+25% DMG), Jeronimo (Infantry ATK)
+**Best Defense Joiners**: Sergey (-20% DMG taken)
+
+### Daybreak Island
+Combat stats come from **Battle Enhancer Decorations**, not just Tree of Life:
+- Mythic decorations: 10 levels × 1% = **10% max** (Floating Market, Snow Castle, etc.)
+- Epic decorations: 5 levels × 0.5% = **2.5% max**
+
+### SvS Prep Phase
+**SPEEDUPS ONLY GIVE POINTS ON DAY 1, 2, AND 5**
+- Fire Crystals: 2,000 pts each (Day 1)
+- Lucky Wheel: 8,000 pts per spin (Day 2/3)
+- Mithril: 40,000 pts each (Day 4)
 
 ## Tech Stack
 
 - **Frontend**: Streamlit
 - **Database**: SQLite with SQLAlchemy ORM
 - **AI**: OpenAI API (optional)
-- **OCR**: EasyOCR (optional, for screenshot parsing)
+- **OCR**: EasyOCR (optional)
+- **Data**: 59 JSON files covering all game systems
 
 ## Project Structure
 
 ```
 WoS/
 ├── app.py                    # Main entry point
-├── database/
-│   ├── models.py             # SQLAlchemy models
-│   └── db.py                 # Database management
-├── data/
-│   └── heroes.json           # Hero data (tiers, skills, etc.)
-├── engine/
-│   ├── recommender.py        # Recommendation engine
-│   └── ai_recommender.py     # AI-powered recommendations
-├── pages/
-│   ├── 1_Heroes.py           # Hero management
-│   ├── 2_Backpack.py         # Inventory tracking
-│   ├── 3_Recommendations.py  # Upgrade recommendations
-│   ├── 4_Settings.py         # User settings
-│   └── 5_AI_Advisor.py       # AI advisor
-├── styles/
-│   └── custom.css            # Custom styling
-└── utils/
-    └── image_downloader.py   # Hero image downloader
+├── pages/                    # 12 Streamlit pages (5,100+ lines)
+├── database/                 # SQLAlchemy models and DB management
+├── data/                     # 59 JSON data files
+│   ├── heroes.json           # All hero data
+│   ├── guides/               # Strategy guides
+│   ├── optimizer/            # Decision engine config
+│   └── upgrades/             # Upgrade edge graphs (920+ edges)
+├── assets/heroes/            # 56 hero portrait images
+├── engine/                   # Recommendation engines
+├── scripts/                  # Data building utilities
+├── styles/                   # CSS styling
+└── .claude/skills/           # 5 Claude Code skills
 ```
 
 ## Contributing
@@ -152,6 +169,8 @@ MIT License - feel free to use this project for personal or commercial purposes.
 
 ## Acknowledgments
 
-- [Whiteout Survival Wiki](https://www.whiteoutsurvival.wiki/) for game data
-- [AllClash](https://www.allclash.com/) for tier list information
-- [WhiteoutData](https://whiteoutdata.com/) for additional resources
+- [Whiteout Survival Wiki](https://www.whiteoutsurvival.wiki/) - Hero data and images
+- [WhiteoutData](https://whiteoutdata.com/) - Game mechanics
+- [WhiteoutSurvival.app](https://whiteoutsurvival.app/) - FC building data
+- [Quackulator](https://www.quackulator.com/) - Cost calculators
+- [AllClash](https://www.allclash.com/) - Tier list information

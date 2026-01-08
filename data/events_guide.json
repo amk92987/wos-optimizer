@@ -1,0 +1,728 @@
+{
+  "system": "events_guide",
+  "description": "Event value analysis - which events are worth your time/money and how to prepare",
+  "last_updated": "2026-01-08",
+
+  "cost_categories": {
+    "free": {
+      "label": "Free",
+      "description": "Full rewards achievable through normal gameplay",
+      "color": "#2ECC71"
+    },
+    "light_spend": {
+      "label": "Light Spend ($5-20)",
+      "description": "Small purchase significantly improves rewards",
+      "color": "#F1C40F"
+    },
+    "medium_spend": {
+      "label": "Medium Spend ($20-50)",
+      "description": "Moderate spending needed for good rewards",
+      "color": "#E67E22"
+    },
+    "heavy_spend": {
+      "label": "Heavy Spend ($50+)",
+      "description": "Requires significant spending to compete",
+      "color": "#E74C3C"
+    },
+    "whale_event": {
+      "label": "Whale Event",
+      "description": "Top rewards require $100+ spending",
+      "color": "#9B59B6"
+    }
+  },
+
+  "priority_tiers": {
+    "S": {"label": "Must Do", "description": "High value rewards for effort/cost. Never skip."},
+    "A": {"label": "High Priority", "description": "Good rewards, worth prioritizing."},
+    "B": {"label": "Do If Active", "description": "Decent rewards but not essential."},
+    "C": {"label": "Low Priority", "description": "Skip unless you have excess resources."},
+    "D": {"label": "Skip/Whale Only", "description": "Poor value for F2P/low spenders."}
+  },
+
+  "events": {
+    "bear_trap": {
+      "name": "Bear Trap",
+      "type": "alliance",
+      "frequency": "Every 2 days",
+      "duration": "30 minutes",
+      "cost_category": "free",
+      "priority": "S",
+      "description": "Alliance rallies against Raging Bear. Damage-based rewards.",
+      "rewards": {
+        "primary": ["Bear Fragments", "Pet Materials", "Speedups"],
+        "quality": "high",
+        "backpack_items": ["Bear Claw", "Bear Pelt", "Arrowheads", "General Speedups"]
+      },
+      "preparation": {
+        "save_before": ["Stamina", "Rally attempts"],
+        "heroes_needed": "exploration",
+        "key_heroes": ["Philly", "Blanchette", "Wu Ming", "Mia"],
+        "tips": [
+          "Use exploration skills team, NOT expedition",
+          "Coordinate rally timing with alliance",
+          "Healer (Philly) is critical for sustain"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "One of the best F2P events. Always participate."
+    },
+
+    "crazy_joe": {
+      "name": "Crazy Joe",
+      "type": "alliance",
+      "frequency": "Weekly",
+      "duration": "24 hours",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "Alliance PvE boss stages. Progress through difficulty levels.",
+      "rewards": {
+        "primary": ["Speedups", "Resources", "Hero XP"],
+        "quality": "medium-high",
+        "backpack_items": ["General Speedups", "Research Speedups", "Hero XP Items"]
+      },
+      "preparation": {
+        "save_before": ["Stamina"],
+        "heroes_needed": "exploration",
+        "key_heroes": ["Philly", "Wu Ming", "Blanchette"],
+        "tips": [
+          "Similar to Bear Trap - exploration skills matter",
+          "Coordinate with alliance for harder stages"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Good consistent rewards. Always participate."
+    },
+
+    "svs_prep": {
+      "name": "SvS Preparation Phase",
+      "type": "competitive",
+      "frequency": "Monthly (6 days before battle)",
+      "duration": "6 days",
+      "cost_category": "free",
+      "priority": "S",
+      "description": "5 days of daily tasks earning points. Winning state gets attack advantage in Battle Phase.",
+      "rewards": {
+        "primary": ["Seasonal Hero Shards", "State Bonuses", "Ranking Rewards"],
+        "quality": "very_high",
+        "backpack_items": ["Legendary Hero Shards", "Speedups", "Resources", "Alliance Rewards"]
+      },
+      "phases": {
+        "day_1_city_construction": {
+          "name": "Day 1: City Construction",
+          "focus": "Buildings, Research, Fire Crystals",
+          "best_value_tasks": [
+            {"task": "Use Fire Crystal", "points": 2000, "per": "1 FC"},
+            {"task": "Use Refined Fire Crystal", "points": 6000, "per": "1 RFC"},
+            {"task": "Construction Speedup", "points": 30, "per": "minute"},
+            {"task": "Research Speedup", "points": 30, "per": "minute"},
+            {"task": "Chief Charm upgrades", "points": "varies"}
+          ],
+          "save_for_this_day": ["Fire Crystals", "Fire Crystal Shards", "Refined FC", "Construction Speedups", "Charm Materials"]
+        },
+        "day_2_basic_skills": {
+          "name": "Day 2: Basic Skills Up",
+          "focus": "Heroes, Lucky Wheel, Gathering",
+          "best_value_tasks": [
+            {"task": "Lucky Wheel Spin", "points": 8000, "per": "spin"},
+            {"task": "Mythic Hero Shard", "points": 3040, "per": "shard"},
+            {"task": "Legendary Hero Shard", "points": 1520, "per": "shard"},
+            {"task": "Epic Hero Shard", "points": 760, "per": "shard"},
+            {"task": "Rare Hero Shard", "points": 350, "per": "shard"},
+            {"task": "Expert Sigil", "points": "varies"},
+            {"task": "Book of Knowledge", "points": "varies"}
+          ],
+          "save_for_this_day": ["Lucky Wheel Tickets", "Hero Shards (NOT General)", "Expert Sigils", "Books of Knowledge"],
+          "note": "General Shards do NOT count - only specific hero shards"
+        },
+        "day_3_beast_slay": {
+          "name": "Day 3: Beast Slay",
+          "focus": "Pets, Beast Hunting, Rallies",
+          "best_value_tasks": [
+            {"task": "Polar Terror Rally", "points": 30000, "per": "rally"},
+            {"task": "Advanced Wild Mark", "points": 15000, "per": "mark"},
+            {"task": "Basic Wild Mark", "points": 5000, "per": "mark"},
+            {"task": "Pet Advancement", "points": "50-15000", "per": "varies"},
+            {"task": "Beast Hunt (by level)", "points": "9000-12000", "per": "beast"},
+            {"task": "Lucky Wheel", "points": 8000, "per": "spin"},
+            {"task": "Hero Shards", "points": "350-3040", "per": "shard"}
+          ],
+          "save_for_this_day": ["Stamina", "Wild Marks", "Pet Refinement Materials"],
+          "note": "NO SPEEDUP POINTS on Day 3! Coordinate Polar Terror rallies with alliance.",
+          "speedups_give_points": false
+        },
+        "day_4_hero_development": {
+          "name": "Day 4: Hero Development / Training",
+          "focus": "Troop Training, Mithril, Essence Stones",
+          "best_value_tasks": [
+            {"task": "Mithril", "points": 40000, "per": "unit"},
+            {"task": "Essence Stone", "points": 4000, "per": "stone"},
+            {"task": "Exclusive Gear Widget", "points": 40000, "per": "widget"},
+            {"task": "Train T11 Troops", "points": 75, "per": "troop"},
+            {"task": "Train T10 Troops", "points": 60, "per": "troop"},
+            {"task": "Train T9 Troops", "points": 45, "per": "troop"},
+            {"task": "Train T8 Troops", "points": 35, "per": "troop"},
+            {"task": "Chief Charm increase", "points": 70, "per": "point"}
+          ],
+          "save_for_this_day": ["Mithril", "Essence Stones", "Gear Widgets"],
+          "speedups_give_points": false,
+          "efficiency_analysis": {
+            "description": "Should you use speedups to train more troops, or save them for Day 1/2/5?",
+            "speedup_value_other_days": "0.50 pts/sec (30 pts/min)",
+            "promotion_rates": {
+              "T9_to_T10": "0.71 pts/sec - BEST VALUE",
+              "T8_to_T9": "0.64 pts/sec - Great value",
+              "T8_to_T10": "0.64 pts/sec - Great value (multi-tier)",
+              "T7_to_T8": "0.42 pts/sec - Mediocre",
+              "T6_to_T7": "0.35 pts/sec - Poor",
+              "earlier_tiers": "0.27-0.35 pts/sec - Avoid"
+            },
+            "training_new_t10": "0.39 pts/sec - WORSE than speedup days",
+            "conclusion": "PROMOTE existing troops (better than speedups). T9→T10 is best. Don't train NEW troops with speedups.",
+            "optimal_strategy": [
+              "1st: Promote T9→T10 (0.71 p/s) - BEST efficiency",
+              "2nd: Promote T8→T9 (0.64 p/s) - still beats speedups",
+              "Save speedups for Day 1/2/5 instead of training new troops",
+              "Training new T10 directly (0.39 p/s) is worse than speedup points",
+              "Don't bother promoting lower tiers (T7 and below) - poor value"
+            ]
+          },
+          "note": "NO SPEEDUP POINTS on Day 4! T9→T10 promotion (0.71 p/s) is BEST, beats speedups. T8→T9 also good. Training NEW troops loses to speedups."
+        },
+        "day_5_power_boost": {
+          "name": "Day 5: Power Boost (All Combined)",
+          "focus": "Everything - final push",
+          "best_value_tasks": [
+            {"task": "All speedup types", "points": 30, "per": "minute"},
+            {"task": "Pet Advancement", "points": "varies"},
+            {"task": "Chief Gear upgrades", "points": "varies"},
+            {"task": "Fire Crystals", "points": 2000, "per": "FC"},
+            {"task": "Mithril", "points": 40000, "per": "unit"}
+          ],
+          "save_for_this_day": ["Remaining speedups", "Leftover materials"],
+          "note": "Use everything you have left"
+        }
+      },
+      "preparation": {
+        "save_before": [
+          "ALL Fire Crystals (Day 1)",
+          "ALL Speedups (Day 1, 2, 5 only - NOT Day 3 or 4!)",
+          "Lucky Wheel Tickets (Day 2 or 3)",
+          "Hero Shards - NOT General (Day 2 or 3)",
+          "Wild Marks (Day 3)",
+          "Stamina for Polar Terror (Day 3)",
+          "Mithril (Day 4)",
+          "Essence Stones (Day 4)",
+          "Gear Widgets (Day 4)"
+        ],
+        "heroes_needed": "none",
+        "tips": [
+          "SPEEDUPS ONLY GIVE POINTS ON DAY 1, 2, AND 5 - not Day 3 or 4!",
+          "General Hero Shards do NOT give points - only named hero shards count!",
+          "Day 4: T9→T10 promotion is BEST (0.71 p/s), beats speedup value (0.50 p/s)",
+          "Day 4: T8→T9 also great (0.64 p/s). Lower tiers are poor value.",
+          "Day 4: Training NEW troops (0.39 p/s) loses to speedups - save speedups for Day 5",
+          "Wait for President buffs before using resources",
+          "Coordinate Polar Terror rallies on Day 3",
+          "Save Mithril specifically for Day 4 - 40,000 points each!",
+          "Building upgrades just need to START on that day - don't need to finish"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Prep phase is as important as battle. Winning prep = attack advantage + healing buffs in battle."
+    },
+
+    "svs_battle": {
+      "name": "SvS Battle Phase",
+      "type": "competitive",
+      "frequency": "Monthly (after prep phase)",
+      "duration": "5-6 hours",
+      "cost_category": "free",
+      "priority": "S",
+      "description": "Cross-state PvP combat. Capture Sunfire Castle to win.",
+      "rewards": {
+        "primary": ["Supreme President Title", "City Skins", "State Bonuses", "Ranking Rewards"],
+        "quality": "very_high",
+        "backpack_items": ["Legendary Hero Shards", "Exclusive City Skins", "Resources"]
+      },
+      "mechanics": {
+        "cross_state_teleport": "3 free teleports to enemy state",
+        "attack_range": "Can only attack within ±3 Furnace levels",
+        "castle_battle": "Starts 2 hours after portals open",
+        "win_condition": "Hold Sunfire Castle for 2.5 hours consecutively",
+        "troop_revival": "Field Triage phase after - 30-90% troop recovery"
+      },
+      "preparation": {
+        "save_before": ["Stamina (MAX)", "Shields", "Cross-State Teleports", "Healing Speedups", "Rebirth Tomes"],
+        "heroes_needed": "expedition",
+        "key_heroes": ["Jeronimo", "Jessie", "Wu Ming", "Sergey", "Blanchette"],
+        "tips": [
+          "EXPEDITION skills matter, not exploration",
+          "Jessie or Jeronimo in leftmost slot for attack rallies",
+          "Sergey in leftmost slot for garrison defense",
+          "Bookmark weak targets before battle starts",
+          "Keep shield up when not actively fighting",
+          "Defense is as important as offense",
+          "Reinforce allies even if low power",
+          "Coordinate rally timing with R4/R5"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Prep phase winner attacks. Organized states beat higher power disorganized states."
+    },
+
+    "alliance_showdown": {
+      "name": "Alliance Showdown",
+      "type": "competitive",
+      "frequency": "Weekly (Week 1)",
+      "duration": "2 hours",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "Real-time alliance vs alliance battle.",
+      "rewards": {
+        "primary": ["Alliance Coins", "Speedups", "Resources"],
+        "quality": "medium-high",
+        "backpack_items": ["Alliance Coins", "General Speedups"]
+      },
+      "preparation": {
+        "save_before": ["Stamina"],
+        "heroes_needed": "expedition",
+        "key_heroes": ["Jeronimo", "Jessie", "Wu Ming", "Sergey"],
+        "tips": [
+          "Must be online during the event window",
+          "Coordinate with alliance leadership",
+          "Defense is as important as offense"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Good rewards but requires being online at specific time."
+    },
+
+    "hall_of_chiefs": {
+      "name": "Hall of Chiefs",
+      "type": "competitive",
+      "frequency": "Monthly",
+      "duration": "7 days",
+      "cost_category": "light_spend",
+      "priority": "S",
+      "description": "Month-long power competition. Points from upgrades, training, research.",
+      "rewards": {
+        "primary": ["Legendary Hero Shards", "Exclusive Titles", "Massive Resources"],
+        "quality": "very_high",
+        "backpack_items": ["Legendary Hero Shards", "General Speedups", "Resources", "VIP Points"]
+      },
+      "preparation": {
+        "save_before": ["ALL speedups", "Resources", "Building upgrades ready", "Research queued"],
+        "heroes_needed": "none",
+        "tips": [
+          "SAVE ALL SPEEDUPS for this event",
+          "Queue expensive upgrades beforehand",
+          "Coordinate with alliance for territory bonuses",
+          "Points come from completing upgrades during event"
+        ]
+      },
+      "f2p_friendly": "partially",
+      "notes": "Best rewards in game but competitive. F2P can rank well by saving speedups."
+    },
+
+    "king_of_icefield": {
+      "name": "King of Icefield",
+      "type": "competitive",
+      "frequency": "Bi-weekly (Week 2)",
+      "duration": "48 hours",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "Cross-state territory control event.",
+      "rewards": {
+        "primary": ["Hero Shards", "Titles", "Resources"],
+        "quality": "high",
+        "backpack_items": ["Legendary Hero Shards", "Speedups", "Resources"]
+      },
+      "preparation": {
+        "save_before": ["Stamina", "Teleports"],
+        "heroes_needed": "expedition",
+        "key_heroes": ["Jeronimo", "Wu Ming", "Gordon", "Blanchette"],
+        "tips": [
+          "March speed matters",
+          "Coordinate timing with alliance",
+          "Control points = sustained rewards"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Good alternative to SvS weeks. Territory control rewards active alliances."
+    },
+
+    "snowbusters": {
+      "name": "Snowbusters",
+      "type": "solo",
+      "frequency": "Monthly",
+      "duration": "7 days",
+      "cost_category": "medium_spend",
+      "priority": "C",
+      "description": "Mini-game: Drive snowplow, collect coal, rescue survivors.",
+      "rewards": {
+        "primary": ["Exclusive Skins", "Resources", "Speedups"],
+        "quality": "medium",
+        "backpack_items": ["Speedups", "Resources", "Cosmetic Items"]
+      },
+      "preparation": {
+        "save_before": ["Money if you want rewards"],
+        "heroes_needed": "none",
+        "tips": [
+          "FREE players hit a wall quickly",
+          "Packs required to progress past early stages",
+          "Rewards are mostly cosmetic + small resources",
+          "Skip if F2P or light spender"
+        ]
+      },
+      "f2p_friendly": false,
+      "notes": "FUN but PAY-TO-PROGRESS. F2P should skip or just do free attempts."
+    },
+
+    "fishing_tournament": {
+      "name": "Fishing Tournament",
+      "type": "solo",
+      "frequency": "Weekly",
+      "duration": "3 days",
+      "cost_category": "medium_spend",
+      "priority": "C",
+      "description": "Catch fish for points. Bait costs resources or money.",
+      "rewards": {
+        "primary": ["Resources", "Speedups", "Fish-themed items"],
+        "quality": "low-medium",
+        "backpack_items": ["Speedups", "Resources"]
+      },
+      "preparation": {
+        "save_before": ["Bait items", "Money if competing"],
+        "heroes_needed": "none",
+        "tips": [
+          "Bait is the bottleneck",
+          "Free bait = minimal rewards",
+          "Not worth spending money on",
+          "Do free attempts only"
+        ]
+      },
+      "f2p_friendly": false,
+      "notes": "Poor value. Do free attempts only. Don't buy bait packs."
+    },
+
+    "lucky_wheel": {
+      "name": "Lucky Wheel",
+      "type": "solo",
+      "frequency": "Rotating",
+      "duration": "Varies",
+      "cost_category": "heavy_spend",
+      "priority": "B",
+      "description": "Spin for hero shards. Main way to get new legendary heroes.",
+      "rewards": {
+        "primary": ["Legendary Hero Shards", "Resources"],
+        "quality": "high",
+        "backpack_items": ["Legendary Hero Shards", "Epic Hero Shards", "Resources"]
+      },
+      "preparation": {
+        "save_before": ["Gems (13,500 for 10-spin)", "Lucky Wheel tickets"],
+        "heroes_needed": "none",
+        "tips": [
+          "ONLY spin for heroes you actually need",
+          "Check hero tier before investing",
+          "Save tickets/gems for featured S+ heroes",
+          "10-spin is more efficient than singles"
+        ]
+      },
+      "f2p_friendly": "partially",
+      "notes": "Primary hero acquisition method. Be selective - don't spin for every hero."
+    },
+
+    "artisans_trove": {
+      "name": "Artisan's Trove",
+      "type": "solo",
+      "frequency": "Weekly",
+      "duration": "3-4 days",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "Craft chief gear and charms at discount during event.",
+      "rewards": {
+        "primary": ["Chief Gear", "Chief Charms", "Crafting Bonuses"],
+        "quality": "high",
+        "backpack_items": ["Chief Gear Materials", "Charm Materials"]
+      },
+      "preparation": {
+        "save_before": ["Crafting materials", "Gear upgrade materials"],
+        "heroes_needed": "none",
+        "tips": [
+          "SAVE all gear crafting for this event",
+          "Bonus rewards for crafting during event",
+          "Focus on one gear set at a time"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Best time to craft gear. Save materials and craft during event only."
+    },
+
+    "tundra_trading": {
+      "name": "Tundra Trading Station",
+      "type": "solo",
+      "frequency": "Weekly",
+      "duration": "24 hours",
+      "cost_category": "free",
+      "priority": "B",
+      "description": "Trade resources at special exchange rates.",
+      "rewards": {
+        "primary": ["Resource Exchange", "Bonus Items"],
+        "quality": "medium",
+        "backpack_items": ["Various resources based on trades"]
+      },
+      "preparation": {
+        "save_before": ["Excess resources you don't need"],
+        "heroes_needed": "none",
+        "tips": [
+          "Good for converting excess resources",
+          "Check exchange rates before trading",
+          "Don't trade resources you actually need"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Useful for resource balancing. Free value."
+    },
+
+    "flame_lotto": {
+      "name": "Flame Lotto",
+      "type": "solo",
+      "frequency": "Periodic",
+      "duration": "72 hours",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "Spend flames for randomized rewards.",
+      "rewards": {
+        "primary": ["Hero Shards", "Speedups", "Resources", "Rare Items"],
+        "quality": "high",
+        "backpack_items": ["Varies - can include legendary shards, speedups, rare materials"]
+      },
+      "preparation": {
+        "save_before": ["ALL flames - don't spend between events"],
+        "heroes_needed": "none",
+        "tips": [
+          "NEVER spend flames outside this event",
+          "Save all flames for Flame Lotto",
+          "Best value for flame currency"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Save ALL flames for this event. Best flame value."
+    },
+
+    "mix_and_match": {
+      "name": "Mix and Match",
+      "type": "solo",
+      "frequency": "Weekly",
+      "duration": "3 days",
+      "cost_category": "light_spend",
+      "priority": "B",
+      "description": "Purchase packs to unlock matching rewards.",
+      "rewards": {
+        "primary": ["Bonus resources matching purchases"],
+        "quality": "medium",
+        "backpack_items": ["Depends on pack type - FC, Steel, etc."]
+      },
+      "preparation": {
+        "save_before": ["Purchase budget if participating"],
+        "heroes_needed": "none",
+        "tips": [
+          "Only worth it if you were buying packs anyway",
+          "Focus on ONE material type for best bonuses",
+          "Don't buy packs JUST for this event"
+        ]
+      },
+      "f2p_friendly": false,
+      "notes": "Good if you're already spending. Don't spend BECAUSE of this event."
+    },
+
+    "treasure_hunter": {
+      "name": "Treasure Hunter",
+      "type": "solo",
+      "frequency": "Weekly",
+      "duration": "3 days",
+      "cost_category": "free",
+      "priority": "B",
+      "description": "Complete tasks to dig for treasure rewards.",
+      "rewards": {
+        "primary": ["Resources", "Speedups", "Random items"],
+        "quality": "medium",
+        "backpack_items": ["Speedups", "Resources", "Various items"]
+      },
+      "preparation": {
+        "save_before": ["Daily tasks"],
+        "heroes_needed": "none",
+        "tips": [
+          "Complete daily tasks to earn digs",
+          "Free rewards for normal gameplay",
+          "No special preparation needed"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Free rewards for playing normally. Always participate."
+    },
+
+    "canyon_clash": {
+      "name": "Canyon Clash",
+      "type": "alliance",
+      "frequency": "Weekly (Week 3)",
+      "duration": "2 hours",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "Alliance territory battle in canyon map.",
+      "rewards": {
+        "primary": ["Alliance rewards", "Territory bonuses", "Resources"],
+        "quality": "high",
+        "backpack_items": ["Alliance Coins", "Speedups", "Resources"]
+      },
+      "preparation": {
+        "save_before": ["Stamina"],
+        "heroes_needed": "expedition",
+        "key_heroes": ["Jeronimo", "Wu Ming", "Gordon"],
+        "tips": [
+          "Requires online participation",
+          "Coordinate with alliance",
+          "Territory control = ongoing rewards"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Good alliance event. Requires coordination and online presence."
+    },
+
+    "foundry_battle": {
+      "name": "Foundry Battle",
+      "type": "alliance",
+      "frequency": "Weekly",
+      "duration": "1 hour",
+      "cost_category": "free",
+      "priority": "B",
+      "description": "Alliance competes for foundry control.",
+      "rewards": {
+        "primary": ["Foundry access", "Crafting bonuses"],
+        "quality": "medium",
+        "backpack_items": ["Crafting materials", "Foundry tokens"]
+      },
+      "preparation": {
+        "save_before": ["Stamina"],
+        "heroes_needed": "expedition",
+        "tips": [
+          "Short event - must be online",
+          "Foundry control = crafting bonuses"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Quick event. Worth doing if online."
+    },
+
+    "hero_rally": {
+      "name": "Hero Rally",
+      "type": "solo",
+      "frequency": "Periodic",
+      "duration": "7 days",
+      "cost_category": "medium_spend",
+      "priority": "B",
+      "description": "Accumulate points from various activities for hero shards.",
+      "rewards": {
+        "primary": ["Featured Hero Shards"],
+        "quality": "high",
+        "backpack_items": ["Legendary Hero Shards"]
+      },
+      "preparation": {
+        "save_before": ["Activity for point generation"],
+        "heroes_needed": "none",
+        "tips": [
+          "Check if featured hero is worth it",
+          "Points come from normal gameplay",
+          "Spending accelerates progress"
+        ]
+      },
+      "f2p_friendly": "partially",
+      "notes": "Good way to get specific heroes. Value depends on featured hero."
+    }
+  },
+
+  "summary_by_priority": {
+    "S_tier_never_skip": ["bear_trap", "svs_prep", "svs_battle", "hall_of_chiefs"],
+    "A_tier_high_value": ["crazy_joe", "alliance_showdown", "king_of_icefield", "artisans_trove", "flame_lotto", "canyon_clash"],
+    "B_tier_do_if_active": ["lucky_wheel", "tundra_trading", "mix_and_match", "treasure_hunter", "foundry_battle", "hero_rally"],
+    "C_tier_low_priority": ["snowbusters", "fishing_tournament"],
+    "D_tier_skip": []
+  },
+
+  "resource_saving_guide": {
+    "speedups": {
+      "save_for": ["hall_of_chiefs", "svs_prep"],
+      "tip": "Hall of Chiefs is primary. SvS Prep Day 1, 2, and 5 ONLY - Days 3 & 4 give NO speedup points!"
+    },
+    "fire_crystals": {
+      "save_for": ["svs_prep"],
+      "tip": "Save ALL Fire Crystals for SvS Prep Day 1. 2,000 points per FC."
+    },
+    "hero_shards": {
+      "save_for": ["svs_prep"],
+      "tip": "Save specific hero shards for SvS Prep Day 2. General shards DON'T count!"
+    },
+    "lucky_wheel_tickets": {
+      "save_for": ["svs_prep"],
+      "tip": "Save tickets for SvS Prep Day 2. 8,000 points per spin."
+    },
+    "wild_marks": {
+      "save_for": ["svs_prep"],
+      "tip": "Save Wild Marks for SvS Prep Day 3. Advanced = 15,000 pts each."
+    },
+    "mithril": {
+      "save_for": ["svs_prep"],
+      "tip": "NEVER use Mithril outside SvS Prep Day 4. 40,000 points per unit!"
+    },
+    "essence_stones": {
+      "save_for": ["svs_prep"],
+      "tip": "Save Essence Stones for SvS Prep Day 4."
+    },
+    "stamina": {
+      "save_for": ["svs_prep", "svs_battle", "bear_trap", "alliance_showdown", "canyon_clash"],
+      "tip": "Day 3 Polar Terror rallies need stamina. Max before Battle Phase."
+    },
+    "flames": {
+      "save_for": ["flame_lotto"],
+      "tip": "NEVER spend flames outside Flame Lotto. Save every single one."
+    },
+    "gems": {
+      "save_for": ["lucky_wheel"],
+      "tip": "Save gems for Lucky Wheel spins on S+ tier heroes only."
+    },
+    "crafting_materials": {
+      "save_for": ["artisans_trove"],
+      "tip": "Don't craft gear outside of Artisan's Trove event."
+    }
+  },
+
+  "svs_prep_resource_calendar": {
+    "description": "What to save for each SvS Prep day",
+    "day_1": {
+      "resources": ["Fire Crystals", "Refined Fire Crystals", "FC Shards", "Speedups (any type)", "Chief Charm Materials"],
+      "speedups_give_points": true,
+      "do_not_use": ["Hero Shards", "Lucky Wheel Tickets", "Mithril", "Wild Marks"]
+    },
+    "day_2": {
+      "resources": ["Lucky Wheel Tickets", "Hero Shards (NOT General)", "Expert Sigils", "Books of Knowledge", "Speedups (any type)"],
+      "speedups_give_points": true,
+      "do_not_use": ["Mithril", "Wild Marks", "Essence Stones"]
+    },
+    "day_3": {
+      "resources": ["Stamina", "Wild Marks", "Pet Refinement Materials", "Lucky Wheel", "Hero Shards"],
+      "speedups_give_points": false,
+      "do_not_use": ["Mithril", "Essence Stones", "Gear Widgets", "Speedups (save for Day 5)"]
+    },
+    "day_4": {
+      "resources": ["Mithril", "Essence Stones", "Gear Widgets", "Troop Training"],
+      "speedups_give_points": false,
+      "do_not_use": ["Speedups (save for Day 5)"],
+      "note": "Speedups help train faster but give ZERO points - save them for Day 5"
+    },
+    "day_5": {
+      "resources": ["Everything remaining", "ALL leftover Speedups"],
+      "speedups_give_points": true,
+      "do_not_use": []
+    }
+  }
+}

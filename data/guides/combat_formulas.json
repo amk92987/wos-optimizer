@@ -1,0 +1,184 @@
+{
+  "overview": {
+    "title": "Combat Mechanics Guide",
+    "purpose": "Understanding how damage is calculated in WoS for optimal hero/troop investment",
+    "last_updated": "2026-01-08"
+  },
+  "damage_formula": {
+    "basic_formula": "Kills = sqrt(Troops) * (Attack * Lethality) / (Enemy Defense * Enemy Health) * SkillModifier",
+    "components": {
+      "troops": {
+        "description": "Number of troops in the march",
+        "note": "Square root means doubling troops only increases damage by ~41%",
+        "optimization": "Troop count has diminishing returns - focus on quality over quantity"
+      },
+      "attack": {
+        "description": "Total attack stat from troops, heroes, gear, research, buffs",
+        "sources": ["Troop base attack", "Hero attack stat", "Chief gear", "Research bonuses", "Alliance tech", "Buff items"]
+      },
+      "lethality": {
+        "description": "Damage multiplier from various sources",
+        "sources": ["Hero skills", "Pet abilities", "Chief gear bonuses", "Research"]
+      },
+      "defense": {
+        "description": "Enemy's total defense stat",
+        "note": "Higher defense = fewer troops killed"
+      },
+      "health": {
+        "description": "Enemy troop health pool",
+        "note": "Higher health = more damage needed to kill"
+      },
+      "skill_modifier": {
+        "description": "Multiplier from hero expedition skills in combat",
+        "note": "Only leftmost hero's expedition skill applies when joining rallies"
+      }
+    }
+  },
+  "class_counters": {
+    "system": "Rock-Paper-Scissors",
+    "counters": {
+      "infantry": {
+        "strong_against": "Lancer",
+        "weak_against": "Marksman",
+        "bonus": "~30% damage bonus against weak class"
+      },
+      "lancer": {
+        "strong_against": "Marksman",
+        "weak_against": "Infantry",
+        "bonus": "~30% damage bonus against weak class"
+      },
+      "marksman": {
+        "strong_against": "Infantry",
+        "weak_against": "Lancer",
+        "bonus": "~30% damage bonus against weak class"
+      }
+    },
+    "optimization": "Match your composition to counter enemy's primary class"
+  },
+  "formation_ratios": {
+    "common_compositions": {
+      "balanced": {
+        "infantry": 50,
+        "lancer": 20,
+        "marksman": 30,
+        "use_case": "Default for most situations"
+      },
+      "infantry_heavy": {
+        "infantry": 70,
+        "lancer": 15,
+        "marksman": 15,
+        "use_case": "Against marksman-heavy enemies"
+      },
+      "lancer_heavy": {
+        "infantry": 20,
+        "lancer": 60,
+        "marksman": 20,
+        "use_case": "Against marksman-heavy enemies, high mobility"
+      },
+      "marksman_heavy": {
+        "infantry": 30,
+        "lancer": 10,
+        "marksman": 60,
+        "use_case": "Against infantry-heavy enemies, maximum damage"
+      }
+    },
+    "rally_formation": {
+      "note": "Rally leader sets the formation, joiners add troops proportionally",
+      "tip": "Coordinate with rally leader on intended composition"
+    }
+  },
+  "rally_mechanics": {
+    "rally_capacity": {
+      "base": "Determined by Command Center level",
+      "max": 840000,
+      "scaling": "More troops = more damage but diminishing returns"
+    },
+    "joiner_mechanics": {
+      "critical_rule": "ONLY the leftmost hero's expedition skill (top-right skill) applies",
+      "best_attack_joiners": [
+        {"hero": "Jessie", "skill": "+25% DMG dealt to all troops", "why": "Affects all damage types including skills and pets"},
+        {"hero": "Jeronimo", "skill": "Infantry ATK multiplier", "why": "Boosts overall rally damage"}
+      ],
+      "best_defense_joiners": [
+        {"hero": "Sergey", "skill": "-20% DMG taken", "why": "Best garrison reinforcement"}
+      ],
+      "common_mistake": "Using wrong hero in leftmost slot - their expedition skill is wasted"
+    },
+    "rally_leader": {
+      "importance": "Sets march composition and contributes their full hero lineup",
+      "best_leaders": ["Jeronimo", "Wu Ming", "Blanchette", "Gordon"]
+    }
+  },
+  "march_capacity": {
+    "base": "Determined by Furnace level",
+    "bonuses": [
+      {"source": "Research", "type": "permanent"},
+      {"source": "VIP level", "type": "permanent"},
+      {"source": "Alliance tech", "type": "permanent"},
+      {"source": "Chief gear", "type": "permanent"},
+      {"source": "Buff items", "type": "temporary"}
+    ],
+    "optimization": "Higher capacity = more troops = more power, but diminishing returns on damage"
+  },
+  "troop_tiers": {
+    "importance": "Higher tier troops have better base stats",
+    "tiers": {
+      "T1": {"power_per_troop": 2, "use": "Meat shields, resource gathering"},
+      "T2": {"power_per_troop": 4, "use": "Early game"},
+      "T3": {"power_per_troop": 6, "use": "Early-mid game"},
+      "T4": {"power_per_troop": 8, "use": "Mid game"},
+      "T5": {"power_per_troop": 10, "use": "Mid-late game"},
+      "T6": {"power_per_troop": 12, "use": "Late game"},
+      "T7": {"power_per_troop": 14, "use": "Late game"},
+      "T8": {"power_per_troop": 16, "use": "End game"},
+      "T9": {"power_per_troop": 18, "use": "End game"},
+      "T10": {"power_per_troop": 20, "use": "Max tier"}
+    },
+    "optimization": "Always train highest available tier. Promote lower tiers when possible."
+  },
+  "hero_skills_in_combat": {
+    "exploration_vs_expedition": {
+      "exploration_skills": {
+        "when_used": "PvE content - Bear Trap, Crazy Joe, Labyrinth, Intel Missions",
+        "what_matters": "All 4 exploration skills of your 5 heroes"
+      },
+      "expedition_skills": {
+        "when_used": "PvP combat - SvS, rallies, city attacks",
+        "what_matters": "Only leftmost hero's top-right skill when joining rallies",
+        "full_use": "Rally leader uses all expedition skills"
+      }
+    },
+    "critical_understanding": "Don't upgrade expedition skills for rally joiners (except leftmost hero)"
+  },
+  "power_calculation": {
+    "components": [
+      {"source": "Troops", "formula": "count * tier_power"},
+      {"source": "Heroes", "varies": true},
+      {"source": "Buildings", "based_on": "level"},
+      {"source": "Research", "based_on": "completed research"},
+      {"source": "Chief Gear", "based_on": "level and quality"},
+      {"source": "Pets", "based_on": "level and skills"}
+    ],
+    "note": "Power is a rough indicator but combat effectiveness depends on composition and skills"
+  },
+  "optimization_priorities": {
+    "for_svs_attack": [
+      "Max Jeronimo expedition skills",
+      "Get Jessie for rally joining",
+      "Focus on troop tier over quantity",
+      "Upgrade chief gear for attack stats"
+    ],
+    "for_svs_defense": [
+      "Max Sergey expedition skills",
+      "Build garrison troops",
+      "Upgrade defensive research",
+      "Coordinate reinforcement timing"
+    ],
+    "for_pve": [
+      "Max Philly healing skills",
+      "Build balanced exploration team",
+      "Focus on exploration skills",
+      "Upgrade hero levels"
+    ]
+  }
+}

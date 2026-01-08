@@ -1,0 +1,249 @@
+{
+  "events": {
+    "svs": {
+      "name": "State vs State (SvS)",
+      "short_name": "SvS",
+      "category": "competitive",
+      "frequency": "weekly",
+      "typical_day": "Saturday-Sunday",
+      "duration_hours": 48,
+      "description": "Cross-state PvP competition. Rally enemy cities, kill troops, gather points.",
+      "point_sources": [
+        {"action": "Kill enemy troops", "points_per_unit": "varies by tier"},
+        {"action": "Burn enemy cities", "points": "based on furnace level"},
+        {"action": "Rally participation", "points": "based on damage dealt"},
+        {"action": "Gather resources in enemy state", "points": "based on amount"}
+      ],
+      "optimizer_relevance": {
+        "priority_systems": ["hero_expedition_skills", "troop_tier", "rally_capacity", "chief_gear"],
+        "key_heroes": ["Jeronimo", "Jessie", "Wu Ming", "Blanchette", "Norah", "Sergey"],
+        "tip": "Focus on expedition skills over exploration. Jessie and Jeronimo are best rally joiners for attack."
+      },
+      "rewards": ["Hero shards", "Speedups", "Resources", "State buffs"]
+    },
+    "hall_of_chiefs": {
+      "name": "Hall of Chiefs",
+      "short_name": "HoC",
+      "category": "competitive",
+      "frequency": "monthly",
+      "duration_hours": 168,
+      "description": "Month-long server-wide competition for top rankings.",
+      "point_sources": [
+        {"action": "Power increase", "points": "1 point per power"},
+        {"action": "Building upgrades", "points": "based on level"},
+        {"action": "Research completion", "points": "based on tier"},
+        {"action": "Troop training", "points": "based on tier and count"}
+      ],
+      "optimizer_relevance": {
+        "priority_systems": ["buildings", "research", "troops", "hero_levels"],
+        "tip": "Save speedups and resources for HoC weeks. Coordinate big upgrades with alliance."
+      },
+      "rewards": ["Legendary hero shards", "Exclusive titles", "Resources", "Speedups"]
+    },
+    "king_of_icefield": {
+      "name": "King of Icefield",
+      "short_name": "KoI",
+      "category": "competitive",
+      "frequency": "bi-weekly",
+      "duration_hours": 48,
+      "description": "Cross-state king-of-the-hill style event.",
+      "point_sources": [
+        {"action": "Hold control points", "points": "per minute"},
+        {"action": "Kill enemies", "points": "based on power"},
+        {"action": "Capture monuments", "points": "one-time bonus"}
+      ],
+      "optimizer_relevance": {
+        "priority_systems": ["march_capacity", "hero_expedition_skills", "troop_tier"],
+        "key_heroes": ["Jeronimo", "Wu Ming", "Gordon", "Blanchette"],
+        "tip": "March speed and capacity matter. Coordinate with alliance for timing."
+      },
+      "rewards": ["Hero shards", "Titles", "Resources"]
+    },
+    "alliance_showdown": {
+      "name": "Alliance Showdown",
+      "short_name": "ASD",
+      "category": "competitive",
+      "frequency": "weekly",
+      "typical_day": "Wednesday",
+      "duration_hours": 2,
+      "description": "Alliance vs Alliance real-time battle.",
+      "point_sources": [
+        {"action": "Kill enemy troops", "points": "based on tier"},
+        {"action": "Capture flags", "points": "based on flag level"},
+        {"action": "Hold positions", "points": "per minute"}
+      ],
+      "optimizer_relevance": {
+        "priority_systems": ["rally_capacity", "hero_expedition_skills", "alliance_tech"],
+        "key_heroes": ["Jeronimo", "Jessie", "Wu Ming", "Sergey"],
+        "tip": "Coordinate rally timing with R4/R5. Defense matters as much as offense."
+      },
+      "rewards": ["Alliance coins", "Speedups", "Resources"]
+    },
+    "bear_trap": {
+      "name": "Bear Trap",
+      "short_name": "BT",
+      "category": "pve",
+      "frequency": "weekly",
+      "typical_day": "Tuesday",
+      "duration_hours": 24,
+      "description": "Alliance PvE event. Defeat bears together.",
+      "point_sources": [
+        {"action": "Deal damage to bears", "points": "based on damage"},
+        {"action": "Kill bears", "points": "bonus for kill shot"}
+      ],
+      "optimizer_relevance": {
+        "priority_systems": ["hero_exploration_skills", "hero_level", "pets"],
+        "key_heroes": ["Philly", "Mia", "Blanchette", "Jeronimo"],
+        "tip": "Exploration skills matter here, not expedition. Healing is important."
+      },
+      "rewards": ["Bear fragments", "Pet items", "Resources"]
+    },
+    "crazy_joe": {
+      "name": "Crazy Joe",
+      "short_name": "CJ",
+      "category": "pve",
+      "frequency": "weekly",
+      "typical_day": "Thursday",
+      "duration_hours": 24,
+      "description": "Solo/Alliance PvE boss event.",
+      "point_sources": [
+        {"action": "Deal damage", "points": "based on damage"},
+        {"action": "Complete stages", "points": "stage completion bonus"}
+      ],
+      "optimizer_relevance": {
+        "priority_systems": ["hero_exploration_skills", "hero_level"],
+        "key_heroes": ["Philly", "Wu Ming", "Blanchette"],
+        "tip": "Similar to Bear Trap. Focus on sustained damage and healing."
+      },
+      "rewards": ["Resources", "Speedups", "Hero XP"]
+    },
+    "flame_lotto": {
+      "name": "Flame Lotto",
+      "short_name": "FL",
+      "category": "resource",
+      "frequency": "periodic",
+      "duration_hours": 72,
+      "description": "Spend flames for random rewards.",
+      "optimizer_relevance": {
+        "tip": "Save flames for Flame Lotto. Don't spend flames randomly."
+      },
+      "rewards": ["Hero shards", "Resources", "Speedups", "Rare items"]
+    },
+    "bear_hunt": {
+      "name": "Bear Hunt",
+      "short_name": "BH",
+      "category": "pve",
+      "frequency": "weekly",
+      "duration_hours": 168,
+      "description": "Hunt powerful bears on the map for rewards.",
+      "point_sources": [
+        {"action": "Kill bears", "points": "based on bear level"}
+      ],
+      "optimizer_relevance": {
+        "priority_systems": ["march_capacity", "hero_expedition_skills"],
+        "key_heroes": ["Gordon", "Jeronimo", "Blanchette"],
+        "tip": "Gordon's poison is especially effective here. Coordinate with alliance."
+      },
+      "rewards": ["Bear materials", "Resources", "Hero shards"]
+    },
+    "lucky_wheel": {
+      "name": "Lucky Wheel",
+      "short_name": "LW",
+      "category": "gacha",
+      "frequency": "rotating",
+      "description": "Spin for hero shards and items.",
+      "optimizer_relevance": {
+        "tip": "Save spins for featured heroes you need. Check hero tier before investing."
+      },
+      "rewards": ["Hero shards", "Resources", "Rare items"]
+    },
+    "intel_missions": {
+      "name": "Lighthouse Intel Missions",
+      "short_name": "Intel",
+      "category": "pve",
+      "frequency": "daily",
+      "duration_hours": 24,
+      "description": "Daily exploration missions from the Lighthouse.",
+      "point_sources": [
+        {"action": "Complete missions", "points": "based on difficulty"}
+      ],
+      "optimizer_relevance": {
+        "priority_systems": ["hero_exploration_skills", "hero_level"],
+        "key_heroes": ["Philly", "Wu Ming", "Blanchette", "Mia"],
+        "tip": "Use your best exploration team. Philly's healing is essential."
+      },
+      "rewards": ["Intel points", "Resources", "Hero XP"]
+    },
+    "labyrinth": {
+      "name": "Labyrinth",
+      "short_name": "Lab",
+      "category": "pve",
+      "frequency": "permanent",
+      "description": "Multi-zone exploration dungeon with 6 zones.",
+      "zones": ["Frozen Tundra", "Scorched Desert", "Verdant Forest", "Dark Caverns", "Crystal Caves", "Infernal Depths"],
+      "optimizer_relevance": {
+        "priority_systems": ["hero_exploration_skills", "hero_level", "hero_gear"],
+        "key_heroes": ["Philly", "Wu Ming", "Blanchette", "Jeronimo", "Mia"],
+        "tip": "Progress through zones systematically. Don't skip ahead without proper gear."
+      },
+      "rewards": ["Zone-specific materials", "Resources", "Exclusive gear"]
+    },
+    "state_of_power": {
+      "name": "State of Power",
+      "short_name": "SoP",
+      "category": "competitive",
+      "frequency": "weekly",
+      "description": "State-wide power competition.",
+      "point_sources": [
+        {"action": "Power increase", "points": "1 point per power gained"}
+      ],
+      "optimizer_relevance": {
+        "priority_systems": ["buildings", "research", "troops", "heroes"],
+        "tip": "Coordinate with alliance. Save upgrades for this event."
+      },
+      "rewards": ["Resources", "Speedups", "Buffs"]
+    },
+    "alliance_expedition": {
+      "name": "Alliance Expedition",
+      "short_name": "AE",
+      "category": "pve",
+      "frequency": "weekly",
+      "description": "Alliance cooperative exploration event.",
+      "optimizer_relevance": {
+        "priority_systems": ["hero_exploration_skills", "alliance_tech"],
+        "tip": "Coordinate with alliance. Complete stages together."
+      },
+      "rewards": ["Alliance coins", "Resources", "Materials"]
+    }
+  },
+  "event_calendar": {
+    "monday": ["Intel Missions", "Labyrinth"],
+    "tuesday": ["Bear Trap", "Intel Missions", "Labyrinth"],
+    "wednesday": ["Alliance Showdown", "Intel Missions", "Labyrinth"],
+    "thursday": ["Crazy Joe", "Intel Missions", "Labyrinth"],
+    "friday": ["Intel Missions", "Labyrinth", "State of Power"],
+    "saturday": ["SvS (Day 1)", "Intel Missions", "Labyrinth"],
+    "sunday": ["SvS (Day 2)", "Intel Missions", "Labyrinth"]
+  },
+  "event_tips": {
+    "resource_management": [
+      "Save speedups for Hall of Chiefs",
+      "Save flames for Flame Lotto events",
+      "Coordinate big upgrades with alliance during competitive events",
+      "Don't waste stamina outside of events"
+    ],
+    "hero_selection": {
+      "pve_events": "Use exploration skills team: Philly (healer), Wu Ming, Blanchette, Mia",
+      "pvp_events": "Use expedition skills team: Jeronimo, Jessie (attack) or Sergey (defense)",
+      "rallies": "Jessie or Jeronimo in leftmost slot for attack rallies"
+    }
+  },
+  "point_multipliers": {
+    "note": "Some events have point multipliers based on VIP level, buffs, or alliance tech",
+    "common_multipliers": [
+      {"source": "VIP level", "effect": "Increases event point gains"},
+      {"source": "Alliance tech", "effect": "Increases specific event bonuses"},
+      {"source": "Buff items", "effect": "Temporary point multipliers"}
+    ]
+  }
+}

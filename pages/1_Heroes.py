@@ -6,9 +6,13 @@ import streamlit as st
 import json
 from pathlib import Path
 import sys
+import base64
 
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
+
+# Hero images directory
+HERO_IMAGES_DIR = PROJECT_ROOT / "assets" / "heroes"
 
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import Hero, UserHero
@@ -86,6 +90,20 @@ def get_quality_color(quality: int) -> str:
 def get_quality_name(quality: int) -> str:
     """Get name for gear quality."""
     return QUALITY_LEVELS.get(str(quality), {}).get('name', 'None')
+
+
+@st.cache_data
+def get_hero_image_base64(image_filename: str) -> str:
+    """Get hero image as base64 string for embedding in HTML."""
+    image_path = HERO_IMAGES_DIR / image_filename
+    if image_path.exists():
+        with open(image_path, "rb") as f:
+            data = base64.b64encode(f.read()).decode()
+            # Determine mime type from extension
+            ext = image_filename.split('.')[-1].lower()
+            mime = "image/png" if ext == "png" else "image/jpeg"
+            return f"data:{mime};base64,{data}"
+    return None
 
 
 def render_star_rating(stars: int, ascension: int = 0, max_stars: int = 5) -> str:
@@ -231,6 +249,10 @@ def render_hero_card_with_editor(hero: dict, owned_data=None, show_editor: bool 
     best_use = hero.get('best_use', '')
     mythic_gear = hero.get('mythic_gear')
 
+    # Get hero portrait image
+    image_filename = hero.get('image_filename', '')
+    hero_image_b64 = get_hero_image_base64(image_filename) if image_filename else None
+
     # Card styling
     bg_opacity = "0.2" if not owned_data else "0.35"
 
@@ -274,7 +296,9 @@ def render_hero_card_with_editor(hero: dict, owned_data=None, show_editor: bool 
         f'<span style="background:rgba(255,255,255,0.1);border-left:3px solid {class_color};padding:2px 8px;font-size:11px;color:#E8F4F8;">{hero["hero_class"]}</span>',
         '</div>',
         '<div style="text-align:center;margin:8px 0;">',
-        f'<div style="width:60px;height:60px;margin:0 auto;background:rgba(30,42,58,0.8);border:2px solid {class_color};border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;">{class_symbol}</div>',
+        f'<div style="width:70px;height:70px;margin:0 auto;background:rgba(30,42,58,0.8);border:2px solid {class_color};border-radius:8px;overflow:hidden;display:flex;align-items:center;justify-content:center;">' +
+        (f'<img src="{hero_image_b64}" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" />' if hero_image_b64 else f'<span style="font-size:32px;">{class_symbol}</span>') +
+        '</div>',
         '</div>',
         '<div style="text-align:center;">',
         f'<div style="font-weight:bold;color:#E8F4F8;font-size:16px;">{hero["name"]}{gen_badge}</div>',

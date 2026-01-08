@@ -1,0 +1,357 @@
+{
+  "system": "resource_value_hierarchy",
+  "description": "Categorizes resources by actual utility for spending analysis. Used by pack analyzer to calculate real value vs inflated value.",
+  "last_updated": "2026-01-08",
+
+  "value_tiers": {
+    "S": {
+      "name": "Critical",
+      "description": "Hard to obtain, always needed, directly impacts power/progression",
+      "utility_multiplier": 1.0,
+      "color": "#FFD700"
+    },
+    "A": {
+      "name": "High Value",
+      "description": "Valuable and frequently needed, speeds progression significantly",
+      "utility_multiplier": 0.8,
+      "color": "#9B59B6"
+    },
+    "B": {
+      "name": "Medium Value",
+      "description": "Useful but obtainable through normal gameplay",
+      "utility_multiplier": 0.5,
+      "color": "#3498DB"
+    },
+    "C": {
+      "name": "Low Value",
+      "description": "Nice to have, but rarely a bottleneck",
+      "utility_multiplier": 0.2,
+      "color": "#2ECC71"
+    },
+    "D": {
+      "name": "Near Zero",
+      "description": "Easily farmable, often overflow. Pack filler to inflate %.",
+      "utility_multiplier": 0.02,
+      "color": "#95A5A6"
+    }
+  },
+
+  "resources": {
+    "essence_stone": {
+      "display_name": "Essence Stone",
+      "tier": "S",
+      "category": "hero_materials",
+      "gem_value_estimate": 50,
+      "gem_value_source": "estimated_from_pack_rates",
+      "notes": "Critical for hero gear. Very hard to farm. Always valuable.",
+      "pack_common": true
+    },
+    "legendary_hero_shard": {
+      "display_name": "Legendary Hero Shard",
+      "tier": "S",
+      "category": "hero_materials",
+      "gem_value_estimate": 150,
+      "gem_value_source": "lucky_wheel_spin_rate",
+      "notes": "~10 shards per 10-spin (1,350 gems). Specific hero shards worth more.",
+      "pack_common": true
+    },
+    "mythic_gear_material": {
+      "display_name": "Mythic Gear Material",
+      "tier": "S",
+      "category": "hero_materials",
+      "gem_value_estimate": 100,
+      "gem_value_source": "estimated",
+      "notes": "Required for mythic hero gear. Very rare.",
+      "pack_common": false
+    },
+    "life_essence": {
+      "display_name": "Life Essence",
+      "tier": "S",
+      "category": "daybreak",
+      "gem_value_estimate": 40,
+      "gem_value_source": "estimated",
+      "notes": "Daybreak Island currency. Hard to obtain.",
+      "pack_common": true
+    },
+
+    "speedup_general": {
+      "display_name": "General Speedup",
+      "tier": "A",
+      "category": "speedups",
+      "gem_value_estimate": 1.5,
+      "gem_value_per": "minute",
+      "gem_value_source": "instant_finish_rates",
+      "notes": "1 gem per ~40 seconds based on instant finish. Very useful.",
+      "pack_common": true
+    },
+    "speedup_research": {
+      "display_name": "Research Speedup",
+      "tier": "A",
+      "category": "speedups",
+      "gem_value_estimate": 1.5,
+      "gem_value_per": "minute",
+      "gem_value_source": "instant_finish_rates",
+      "notes": "Same value as general, but research-specific.",
+      "pack_common": true
+    },
+    "speedup_construction": {
+      "display_name": "Construction Speedup",
+      "tier": "A",
+      "category": "speedups",
+      "gem_value_estimate": 1.5,
+      "gem_value_per": "minute",
+      "gem_value_source": "instant_finish_rates",
+      "notes": "Same value as general, but construction-specific.",
+      "pack_common": true
+    },
+    "speedup_training": {
+      "display_name": "Training Speedup",
+      "tier": "A",
+      "category": "speedups",
+      "gem_value_estimate": 1.2,
+      "gem_value_per": "minute",
+      "gem_value_source": "estimated",
+      "notes": "Slightly less valuable than general speedups.",
+      "pack_common": true
+    },
+    "stamina": {
+      "display_name": "Chief Stamina",
+      "tier": "A",
+      "category": "misc",
+      "gem_value_estimate": 10,
+      "gem_value_per": "point",
+      "gem_value_source": "vip_shop",
+      "notes": "100 gems for 10 stamina in VIP shop.",
+      "pack_common": true
+    },
+    "vip_points": {
+      "display_name": "VIP Points",
+      "tier": "A",
+      "category": "misc",
+      "gem_value_estimate": 2,
+      "gem_value_per": "point",
+      "gem_value_source": "gem_shop",
+      "notes": "2,000 gems for 1,000 VIP points.",
+      "pack_common": true
+    },
+    "epic_hero_shard": {
+      "display_name": "Epic Hero Shard",
+      "tier": "A",
+      "category": "hero_materials",
+      "gem_value_estimate": 30,
+      "gem_value_source": "estimated",
+      "notes": "Less valuable than legendary but still useful early game.",
+      "pack_common": true
+    },
+    "hero_gear_box": {
+      "display_name": "Hero Gear Box",
+      "tier": "A",
+      "category": "hero_materials",
+      "gem_value_estimate": 80,
+      "gem_value_source": "estimated",
+      "notes": "Random hero gear. Value varies by quality.",
+      "pack_common": true
+    },
+
+    "gems": {
+      "display_name": "Gems",
+      "tier": "B",
+      "category": "currency",
+      "gem_value_estimate": 1,
+      "gem_value_per": "gem",
+      "gem_value_source": "base",
+      "notes": "Base currency. 1 gem = 1 gem.",
+      "pack_common": true
+    },
+    "fire_crystal": {
+      "display_name": "Fire Crystal",
+      "tier": "B",
+      "category": "building_materials",
+      "gem_value_estimate": 5,
+      "gem_value_source": "estimated",
+      "notes": "Building currency. Important but farmable.",
+      "pack_common": true
+    },
+    "refined_fire_crystal": {
+      "display_name": "Refined Fire Crystal",
+      "tier": "B",
+      "category": "building_materials",
+      "gem_value_estimate": 15,
+      "gem_value_source": "estimated",
+      "notes": "Higher tier FC building currency.",
+      "pack_common": true
+    },
+    "pet_item": {
+      "display_name": "Pet Items (Generic)",
+      "tier": "B",
+      "category": "pets",
+      "gem_value_estimate": 20,
+      "gem_value_source": "estimated",
+      "notes": "Pet advancement materials. Value varies.",
+      "pack_common": true
+    },
+    "chief_gear_material": {
+      "display_name": "Chief Gear Materials",
+      "tier": "B",
+      "category": "chief_gear",
+      "gem_value_estimate": 10,
+      "gem_value_source": "estimated",
+      "notes": "Hardened Alloy, Polishing Solution, etc.",
+      "pack_common": true
+    },
+    "charm_material": {
+      "display_name": "Charm Materials",
+      "tier": "B",
+      "category": "chief_gear",
+      "gem_value_estimate": 15,
+      "gem_value_source": "estimated",
+      "notes": "Chief charm upgrade materials.",
+      "pack_common": true
+    },
+    "hero_xp": {
+      "display_name": "Hero XP",
+      "tier": "B",
+      "category": "hero_materials",
+      "gem_value_estimate": 0.01,
+      "gem_value_per": "xp_point",
+      "gem_value_source": "estimated",
+      "notes": "Farmable through exploration. Low value per unit.",
+      "pack_common": true
+    },
+    "rare_hero_shard": {
+      "display_name": "Rare Hero Shard",
+      "tier": "B",
+      "category": "hero_materials",
+      "gem_value_estimate": 5,
+      "gem_value_source": "estimated",
+      "notes": "Low tier heroes. Minimal value late game.",
+      "pack_common": false
+    },
+
+    "alliance_coins": {
+      "display_name": "Alliance Coins",
+      "tier": "C",
+      "category": "currency",
+      "gem_value_estimate": 0.5,
+      "gem_value_source": "estimated",
+      "notes": "Farmable through alliance activities.",
+      "pack_common": false
+    },
+    "exploration_tickets": {
+      "display_name": "Exploration Tickets",
+      "tier": "C",
+      "category": "misc",
+      "gem_value_estimate": 5,
+      "gem_value_source": "estimated",
+      "notes": "Regenerate over time. Minor value.",
+      "pack_common": false
+    },
+    "bear_materials": {
+      "display_name": "Bear Materials",
+      "tier": "C",
+      "category": "pets",
+      "gem_value_estimate": 3,
+      "gem_value_source": "estimated",
+      "notes": "Farmable from bear events.",
+      "pack_common": false
+    },
+    "random_teleport": {
+      "display_name": "Random Teleport",
+      "tier": "C",
+      "category": "misc",
+      "gem_value_estimate": 50,
+      "gem_value_source": "gem_shop",
+      "notes": "Cheap in shop. Often given free.",
+      "pack_common": true
+    },
+
+    "meat": {
+      "display_name": "Meat",
+      "tier": "D",
+      "category": "basic_resources",
+      "gem_value_estimate": 0.00001,
+      "gem_value_per": "unit",
+      "gem_value_source": "effectively_zero",
+      "notes": "PACK FILLER. Easily farmed from hunting. Never buy with real money.",
+      "pack_common": true,
+      "warning": "This resource inflates pack % value but has near-zero real value."
+    },
+    "wood": {
+      "display_name": "Wood",
+      "tier": "D",
+      "category": "basic_resources",
+      "gem_value_estimate": 0.00001,
+      "gem_value_per": "unit",
+      "gem_value_source": "effectively_zero",
+      "notes": "PACK FILLER. Easily gathered from map. Never buy with real money.",
+      "pack_common": true,
+      "warning": "This resource inflates pack % value but has near-zero real value."
+    },
+    "coal": {
+      "display_name": "Coal",
+      "tier": "D",
+      "category": "basic_resources",
+      "gem_value_estimate": 0.00002,
+      "gem_value_per": "unit",
+      "gem_value_source": "effectively_zero",
+      "notes": "PACK FILLER. Gathered from map. Slightly more scarce than wood/meat.",
+      "pack_common": true,
+      "warning": "This resource inflates pack % value but has near-zero real value."
+    },
+    "iron": {
+      "display_name": "Iron",
+      "tier": "D",
+      "category": "basic_resources",
+      "gem_value_estimate": 0.00003,
+      "gem_value_per": "unit",
+      "gem_value_source": "effectively_zero",
+      "notes": "PACK FILLER. Most scarce basic resource but still farmable.",
+      "pack_common": true,
+      "warning": "This resource inflates pack % value but has near-zero real value."
+    }
+  },
+
+  "pack_analysis_rules": {
+    "exclude_from_value": ["meat", "wood", "coal", "iron"],
+    "high_value_indicators": ["essence_stone", "legendary_hero_shard", "speedup_general", "life_essence"],
+    "red_flags": [
+      "Pack % heavily based on basic resources",
+      "High price tier with same essentials as lower tier",
+      "No essence stones or legendary shards in expensive pack"
+    ],
+    "value_formula": "real_value = Σ(quantity[i] * gem_value[i] * utility_multiplier[tier[i]])",
+    "efficiency_formula": "efficiency = real_value / price_usd / 500"
+  },
+
+  "player_need_profiles": {
+    "early_game": {
+      "description": "FC 1-20, first few weeks",
+      "boost_tiers": {"speedup_construction": 1.5, "speedup_research": 1.5},
+      "reduce_tiers": {"essence_stone": 0.5},
+      "notes": "Speedups matter more. Hero gear comes later."
+    },
+    "mid_game": {
+      "description": "FC 20-30, established player",
+      "boost_tiers": {"essence_stone": 1.2, "hero_gear_box": 1.2},
+      "reduce_tiers": {},
+      "notes": "Hero investment becomes critical."
+    },
+    "late_game": {
+      "description": "FC 30+, competitive player",
+      "boost_tiers": {"essence_stone": 1.5, "legendary_hero_shard": 1.3, "mythic_gear_material": 1.5},
+      "reduce_tiers": {"speedup_general": 0.8},
+      "notes": "Hero materials are everything. Speedups less critical."
+    },
+    "svs_focused": {
+      "description": "Player prioritizing SvS combat",
+      "boost_tiers": {"essence_stone": 1.5, "speedup_training": 1.3, "stamina": 1.3},
+      "reduce_tiers": {"fire_crystal": 0.7},
+      "notes": "Combat power over economy."
+    }
+  },
+
+  "common_pack_templates": {
+    "description": "Templates for frequently seen pack types. Users can load and modify.",
+    "packs": {}
+  }
+}

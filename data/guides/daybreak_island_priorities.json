@@ -17,24 +17,68 @@
   },
 
   "tree_of_life_priority": {
-    "description": "Tree of Life is the PRIMARY goal - decorations are just means to unlock it",
+    "description": "Tree of Life provides universal buffs, but DECORATIONS provide the BIG troop-type-specific bonuses",
     "buff_progression": [
       {"level": 1, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": "Free starting buff"},
       {"level": 2, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": ""},
       {"level": 3, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": ""},
-      {"level": 4, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": ""},
+      {"level": 4, "buff": "Troops Defense +5%", "combat_value": "Medium", "notes": "First combat buff"},
       {"level": 5, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": ""},
-      {"level": 6, "buff": "Troops Health +5%", "combat_value": "HIGH", "notes": "First real combat buff - priority milestone"},
-      {"level": 7, "buff": "Troops Health +5%", "combat_value": "HIGH", "notes": "Stacks with L6"},
-      {"level": 8, "buff": "Troops Defense +5%", "combat_value": "HIGH", "notes": "Reduces damage taken"},
-      {"level": 9, "buff": "Troops Defense +5%", "combat_value": "HIGH", "notes": "Stacks with L8"},
+      {"level": 6, "buff": "Troops Attack +5%", "combat_value": "HIGH", "notes": "Universal attack buff"},
+      {"level": 7, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": ""},
+      {"level": 8, "buff": "Healing Speed +30%", "combat_value": "Low", "notes": ""},
+      {"level": 9, "buff": "Troops Health +5%", "combat_value": "HIGH", "notes": "Universal health buff"},
       {"level": 10, "buff": "Troops Lethality +5%", "combat_value": "CRITICAL", "notes": "Max level - unlocks Starry Lighthouse"}
     ],
     "milestone_priorities": {
-      "first_priority": "Tree of Life L6 - Troops Health +5% is first real combat value",
-      "second_priority": "Tree of Life L10 - Troops Lethality +5% + Starry Lighthouse unlock",
-      "skip_until_needed": "L2-L5 are just Healing Speed - rush past these"
+      "first_priority": "Mythic Battle Decorations for your main troop type (+10% Attack AND +10% Defense)",
+      "second_priority": "Tree of Life L10 for universal +5% Attack, Defense, Health, Lethality",
+      "key_insight": "Decorations give BIGGER bonuses per troop type than Tree of Life gives universally"
     }
+  },
+
+  "battle_enhancer_decorations": {
+    "description": "The MAIN source of combat stats from Daybreak - more impactful than Tree of Life",
+    "mythic_decorations": {
+      "infantry": {
+        "Floating Market": {"effect": "Infantry Attack +10%", "priority": "CRITICAL"},
+        "Snow Castle": {"effect": "Infantry Defense +10%", "priority": "CRITICAL"}
+      },
+      "lancer": {
+        "Amphitheatre": {"effect": "Lancer Attack +10%", "priority": "CRITICAL"},
+        "Elegant Villa": {"effect": "Lancer Defense +10%", "priority": "CRITICAL"}
+      },
+      "marksman": {
+        "Observation Deck": {"effect": "Marksman Attack +10%", "priority": "CRITICAL"},
+        "Art Gallery": {"effect": "Marksman Defense +10%", "priority": "CRITICAL"}
+      }
+    },
+    "epic_decorations": {
+      "infantry": {
+        "Rural Mill": "Infantry Attack +2.5%",
+        "Warm Greenhouse": "Infantry Defense +2.5%"
+      },
+      "lancer": {
+        "Crystal Garden": "Lancer Attack +2.5%",
+        "Sailor's Cottage": "Lancer Defense +2.5%"
+      },
+      "marksman": {
+        "Clock Hut": "Marksman Attack +2.5%",
+        "Fisherman's Chalet": "Marksman Defense +2.5%"
+      }
+    },
+    "limited_mythic": {
+      "Serpent Sanctuary": "+20% ALL combat stats (Attack, Defense, Health, Lethality)",
+      "Ferris Wheel": "+10% Troop Attack",
+      "Carousel": "+10% Troop Defense"
+    },
+    "priority_order": [
+      "1. Build BOTH Mythic decorations for your main troop type (Attack + Defense)",
+      "2. Level them to max for full +10% each",
+      "3. Tree of Life to L10 for universal buffs",
+      "4. Consider other troop types if you use mixed compositions"
+    ],
+    "max_potential_per_type": "+10% Attack, +10% Defense from Mythic decorations + Tree of Life buffs"
   },
 
   "decoration_strategy": {

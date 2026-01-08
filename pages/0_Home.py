@@ -25,22 +25,17 @@ profile = get_or_create_profile(db)
 
 def get_current_generation(server_age_days: int) -> int:
     """Calculate current hero generation based on server age."""
-    if server_age_days < 40:
-        return 1
-    elif server_age_days < 120:
-        return 2
-    elif server_age_days < 200:
-        return 3
-    elif server_age_days < 280:
-        return 4
-    elif server_age_days < 360:
-        return 5
-    elif server_age_days < 440:
-        return 6
-    elif server_age_days < 520:
-        return 7
-    else:
-        return 8 + ((server_age_days - 520) // 80)
+    # Gen 1-10 have specific day ranges, Gen 11+ follows 80-day pattern
+    gen_thresholds = [
+        (40, 1), (120, 2), (200, 3), (280, 4), (360, 5),
+        (440, 6), (520, 7), (600, 8), (680, 9), (760, 10),
+        (840, 11), (920, 12), (1000, 13), (1080, 14)
+    ]
+    for threshold, gen in gen_thresholds:
+        if server_age_days < threshold:
+            return gen
+    # Beyond Gen 14, continue 80-day pattern
+    return 14 + ((server_age_days - 1080) // 80)
 
 
 def render_home():
@@ -102,16 +97,23 @@ def render_home():
 
     gen = get_current_generation(profile.server_age_days)
     timeline_data = [
-        ("Gen 1", "0-40 days", "Jeronimo, Natalia, Molly, Zinman, Jessie, Sergey", gen == 1),
-        ("Gen 2", "40-120 days", "Flint, Philly, Alonso", gen == 2),
-        ("Gen 3", "120-200 days", "Logan, Mia, Greg", gen == 3),
-        ("Gen 4", "200-280 days", "Ahmose, Reina, Lynn", gen == 4),
-        ("Gen 5", "280-360 days", "Hector, Wu Ming", gen == 5),
-        ("Gen 6", "360-440 days", "Patrick, Charlie, Cloris", gen == 6),
-        ("Gen 7", "440-520 days", "Gordon, Renee, Eugene", gen == 7),
-        ("Gen 8+", "520+ days", "Blanchette, and more...", gen >= 8),
+        ("Gen 1", "0-40", "Jeronimo, Natalia, Jessie, Sergey", gen == 1),
+        ("Gen 2", "40-120", "Flint, Philly, Alonso", gen == 2),
+        ("Gen 3", "120-200", "Logan, Mia, Greg", gen == 3),
+        ("Gen 4", "200-280", "Ahmose, Reina, Lynn", gen == 4),
+        ("Gen 5", "280-360", "Hector, Norah, Gwen", gen == 5),
+        ("Gen 6", "360-440", "Wu Ming, Renee, Wayne", gen == 6),
+        ("Gen 7", "440-520", "Gordon, Edith, Bradley", gen == 7),
+        ("Gen 8", "520-600", "Gatot, Hendrik, Sonya", gen == 8),
+        ("Gen 9", "600-680", "Magnus, Fred, Xura", gen == 9),
+        ("Gen 10", "680-760", "Blanchette, Gregory, Freya", gen == 10),
+        ("Gen 11", "760-840", "Eleonora, Lloyd, Rufus", gen == 11),
+        ("Gen 12", "840-920", "Hervor, Karol, Ligeia", gen == 12),
+        ("Gen 13", "920-1000", "Gisela, Flora, Vulcanus", gen == 13),
+        ("Gen 14", "1000+", "Elif, Dominic, Cara", gen >= 14),
     ]
 
+    # Display in rows of 4
     cols = st.columns(4)
     for i, (gen_name, days, heroes, is_current) in enumerate(timeline_data):
         with cols[i % 4]:

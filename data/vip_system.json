@@ -1,0 +1,202 @@
+{
+  "vip_levels": {
+    "0": {
+      "level": 0,
+      "points_required": 0,
+      "construction_speed": 0,
+      "research_speed": 0,
+      "training_speed": 0,
+      "march_speed": 0,
+      "gathering_speed": 0,
+      "chief_stamina_cap": 100,
+      "daily_free_speedups_minutes": 0,
+      "features": []
+    },
+    "1": {
+      "level": 1,
+      "points_required": 100,
+      "construction_speed": 2,
+      "research_speed": 2,
+      "training_speed": 2,
+      "march_speed": 0,
+      "gathering_speed": 0,
+      "chief_stamina_cap": 105,
+      "daily_free_speedups_minutes": 5,
+      "features": ["Auto-complete exploration"]
+    },
+    "2": {
+      "level": 2,
+      "points_required": 500,
+      "construction_speed": 4,
+      "research_speed": 4,
+      "training_speed": 4,
+      "march_speed": 2,
+      "gathering_speed": 2,
+      "chief_stamina_cap": 110,
+      "daily_free_speedups_minutes": 10,
+      "features": ["Second building queue unlock"]
+    },
+    "3": {
+      "level": 3,
+      "points_required": 1500,
+      "construction_speed": 6,
+      "research_speed": 6,
+      "training_speed": 6,
+      "march_speed": 4,
+      "gathering_speed": 4,
+      "chief_stamina_cap": 115,
+      "daily_free_speedups_minutes": 15,
+      "features": ["Enhanced daily rewards"]
+    },
+    "4": {
+      "level": 4,
+      "points_required": 4000,
+      "construction_speed": 8,
+      "research_speed": 8,
+      "training_speed": 8,
+      "march_speed": 6,
+      "gathering_speed": 6,
+      "chief_stamina_cap": 120,
+      "daily_free_speedups_minutes": 20,
+      "features": ["Rally attack boost"]
+    },
+    "5": {
+      "level": 5,
+      "points_required": 8000,
+      "construction_speed": 10,
+      "research_speed": 10,
+      "training_speed": 10,
+      "march_speed": 8,
+      "gathering_speed": 8,
+      "chief_stamina_cap": 125,
+      "daily_free_speedups_minutes": 25,
+      "features": ["Third march slot unlock"]
+    },
+    "6": {
+      "level": 6,
+      "points_required": 15000,
+      "construction_speed": 12,
+      "research_speed": 12,
+      "training_speed": 12,
+      "march_speed": 10,
+      "gathering_speed": 10,
+      "chief_stamina_cap": 130,
+      "daily_free_speedups_minutes": 30,
+      "features": ["Enhanced alliance help"]
+    },
+    "7": {
+      "level": 7,
+      "points_required": 30000,
+      "construction_speed": 15,
+      "research_speed": 15,
+      "training_speed": 15,
+      "march_speed": 12,
+      "gathering_speed": 12,
+      "chief_stamina_cap": 140,
+      "daily_free_speedups_minutes": 40,
+      "features": ["Fourth march slot unlock"]
+    },
+    "8": {
+      "level": 8,
+      "points_required": 60000,
+      "construction_speed": 18,
+      "research_speed": 18,
+      "training_speed": 18,
+      "march_speed": 15,
+      "gathering_speed": 15,
+      "chief_stamina_cap": 150,
+      "daily_free_speedups_minutes": 50,
+      "features": ["Enhanced gathering rewards"]
+    },
+    "9": {
+      "level": 9,
+      "points_required": 100000,
+      "construction_speed": 22,
+      "research_speed": 22,
+      "training_speed": 22,
+      "march_speed": 18,
+      "gathering_speed": 18,
+      "chief_stamina_cap": 160,
+      "daily_free_speedups_minutes": 60,
+      "features": ["Rally capacity boost"]
+    },
+    "10": {
+      "level": 10,
+      "points_required": 200000,
+      "construction_speed": 26,
+      "research_speed": 26,
+      "training_speed": 26,
+      "march_speed": 22,
+      "gathering_speed": 22,
+      "chief_stamina_cap": 175,
+      "daily_free_speedups_minutes": 75,
+      "features": ["Fifth march slot unlock"]
+    },
+    "11": {
+      "level": 11,
+      "points_required": 400000,
+      "construction_speed": 30,
+      "research_speed": 30,
+      "training_speed": 30,
+      "march_speed": 26,
+      "gathering_speed": 26,
+      "chief_stamina_cap": 190,
+      "daily_free_speedups_minutes": 90,
+      "features": ["Enhanced expedition rewards"]
+    },
+    "12": {
+      "level": 12,
+      "points_required": 800000,
+      "construction_speed": 35,
+      "research_speed": 35,
+      "training_speed": 35,
+      "march_speed": 30,
+      "gathering_speed": 30,
+      "chief_stamina_cap": 200,
+      "daily_free_speedups_minutes": 120,
+      "features": ["Maximum VIP benefits", "Exclusive VIP 12 title"]
+    }
+  },
+  "speed_buff_stacking": {
+    "note": "VIP speed buffs stack additively with other speed buffs",
+    "sources": [
+      {"name": "VIP Level", "type": "permanent", "max_construction": 35, "max_research": 35},
+      {"name": "Alliance Tech", "type": "permanent", "max_construction": 30, "max_research": 30},
+      {"name": "Chief Gear", "type": "permanent", "varies": true},
+      {"name": "Research Buffs", "type": "permanent", "max_construction": 0, "max_research": 35},
+      {"name": "Buff Items", "type": "temporary", "typical_values": [10, 20, 50]}
+    ]
+  },
+  "chief_stamina": {
+    "base_cap": 100,
+    "recovery_rate_per_minute": 1,
+    "uses": [
+      {"action": "Attack city", "cost": 10},
+      {"action": "Rally join", "cost": 5},
+      {"action": "Gather resources", "cost": 2},
+      {"action": "Scout", "cost": 1}
+    ],
+    "recovery_items": [
+      {"name": "Stamina Potion (Small)", "recovery": 20},
+      {"name": "Stamina Potion (Medium)", "recovery": 50},
+      {"name": "Stamina Potion (Large)", "recovery": 100}
+    ]
+  },
+  "vip_points_sources": {
+    "purchases": "Main source - gem purchases give VIP points",
+    "daily_login": "Small amount of VIP points",
+    "events": "Some events reward VIP points",
+    "monthly_card": "Daily VIP point bonus"
+  },
+  "optimizer_integration": {
+    "construction_time_formula": "base_time / (1 + (vip_speed + alliance_speed + research_speed + gear_speed + buff_speed) / 100)",
+    "research_time_formula": "base_time / (1 + (vip_speed + alliance_speed + tool_enhancement_speed + gear_speed + buff_speed) / 100)",
+    "training_time_formula": "base_time / (1 + (vip_speed + alliance_speed + research_speed + gear_speed + buff_speed) / 100)",
+    "important_notes": [
+      "Tool Enhancement VII adds 35% research speed - critical milestone",
+      "VIP 5+ unlocks additional march slots",
+      "VIP 10+ is significant power spike",
+      "Stamina management critical for SvS"
+    ]
+  }
+}
