@@ -178,19 +178,27 @@ else:
     # Priority summary
     st.markdown("### Your Priority Settings")
 
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        st.metric("SvS", f"{'⭐' * profile.priority_svs}")
-    with col2:
-        st.metric("Rally", f"{'⭐' * profile.priority_rally}")
-    with col3:
-        st.metric("Castle", f"{'⭐' * profile.priority_castle_battle}")
-    with col4:
-        st.metric("PvE", f"{'⭐' * profile.priority_exploration}")
-    with col5:
-        st.metric("Gather", f"{'⭐' * profile.priority_gathering}")
+    priorities = [
+        ("SvS Combat", profile.priority_svs),
+        ("Rally", profile.priority_rally),
+        ("Castle Battle", profile.priority_castle_battle),
+        ("Exploration", profile.priority_exploration),
+        ("Gathering", profile.priority_gathering),
+    ]
 
-    st.caption("Adjust priorities in ⚙️ Settings to change recommendation focus")
+    cols = st.columns(5)
+    for col, (name, value) in zip(cols, priorities):
+        with col:
+            filled = "★" * value
+            empty = "☆" * (5 - value)
+            st.markdown(f"""
+            <div style="text-align:center;padding:10px;background:rgba(74,144,217,0.15);border-radius:8px;">
+                <div style="font-size:14px;color:#B8D4E8;margin-bottom:6px;">{name}</div>
+                <div style="font-size:22px;color:#FFD700;">{filled}<span style="color:#4A5568;">{empty}</span></div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    st.caption("Adjust priorities on the sidebar to change recommendation focus")
 
     st.markdown("---")
 
@@ -230,81 +238,90 @@ else:
             recommendations = [r for r in recommendations if r.category == filter_priority.lower()]
 
         if recommendations:
-            # Show recommendations in two columns
-            col1, col2 = st.columns(2)
-
+            # Show recommendations in a single list, ordered by priority
             for i, rec in enumerate(recommendations[:20]):
-                with col1 if i % 2 == 0 else col2:
-                    render_recommendation_card(rec, i)
+                render_recommendation_card(rec, i)
         else:
             st.info("No recommendations match your filters. Try adjusting the filters above.")
 
     with tab2:
         st.markdown("### Best Heroes to Invest In")
-        st.markdown("Based on your priorities and current generation:")
+        st.markdown(f"Based on your priorities, generation, and spending profile ({profile.spending_profile.upper()}):")
 
         top_heroes = engine.get_top_heroes_to_invest(limit=10)
 
-        for i, hero in enumerate(top_heroes):
-            tier_color = get_tier_color(hero['tier'])
-            class_color = get_class_color(hero['class'])
-            owned_badge = "✅ Owned" if hero['owned'] else "❌ Not Owned"
-            owned_color = "#2ECC71" if hero['owned'] else "#E74C3C"
+        if not top_heroes:
+            st.info("No owned heroes yet. Go to Heroes page to add your heroes first!")
+        else:
+            for i, hero in enumerate(top_heroes):
+                tier_color = get_tier_color(hero['tier'])
+                class_color = get_class_color(hero['class'])
 
-            st.markdown(f"""
-            <div style="
-                background: rgba(46, 90, 140, 0.25);
-                border: 1px solid rgba(74, 144, 217, 0.3);
-                border-radius: 12px;
-                padding: 16px;
-                margin-bottom: 12px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            ">
-                <div style="display: flex; align-items: center; gap: 16px;">
-                    <div style="
-                        font-size: 24px;
-                        font-weight: bold;
-                        color: #4A90D9;
-                        width: 40px;
-                    ">#{i+1}</div>
-                    <div>
-                        <div style="font-size: 18px; font-weight: bold; color: #E8F4F8;">
-                            {hero['name']}
+                # Current vs target display
+                current_level = hero.get('current_level', 1)
+                current_stars = hero.get('current_stars', 0)
+                target_level = hero.get('target_level', 50)
+                target_stars = hero.get('target_stars', 2)
+                advice = hero.get('advice', '')
+
+                # Progress indicator
+                level_progress = f"L{current_level} → L{target_level}" if current_level < target_level else f"L{current_level} ✓"
+                stars_display = f"{'★' * current_stars}{'☆' * (5-current_stars)}"
+                target_stars_display = f"{'★' * target_stars}{'☆' * (5-target_stars)}"
+
+                st.markdown(f"""
+                <div style="
+                    background: rgba(46, 90, 140, 0.25);
+                    border: 1px solid rgba(74, 144, 217, 0.3);
+                    border-radius: 12px;
+                    padding: 16px;
+                    margin-bottom: 12px;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div style="display: flex; align-items: center; gap: 16px;">
+                            <div style="
+                                font-size: 24px;
+                                font-weight: bold;
+                                color: #4A90D9;
+                                width: 40px;
+                            ">#{i+1}</div>
+                            <div>
+                                <div style="font-size: 18px; font-weight: bold; color: #E8F4F8;">
+                                    {hero['name']}
+                                </div>
+                                <div style="display: flex; gap: 8px; margin-top: 4px; align-items: center;">
+                                    <span style="
+                                        background: {tier_color};
+                                        color: white;
+                                        padding: 2px 8px;
+                                        border-radius: 4px;
+                                        font-size: 11px;
+                                    ">{hero['tier']}</span>
+                                    <span style="
+                                        background: rgba(255,255,255,0.1);
+                                        border-left: 3px solid {class_color};
+                                        padding: 2px 8px;
+                                        font-size: 11px;
+                                        color: #E8F4F8;
+                                    ">{hero['class']}</span>
+                                    <span style="color: #B8D4E8; font-size: 11px;">Gen {hero['generation']}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div style="display: flex; gap: 8px; margin-top: 4px; align-items: center;">
-                            <span style="
-                                background: {tier_color};
-                                color: white;
-                                padding: 2px 8px;
-                                border-radius: 4px;
-                                font-size: 11px;
-                            ">{hero['tier']}</span>
-                            <span style="
-                                background: rgba(255,255,255,0.1);
-                                border-left: 3px solid {class_color};
-                                padding: 2px 8px;
-                                font-size: 11px;
-                                color: #E8F4F8;
-                            ">{hero['class']}</span>
-                            <span style="color: #B8D4E8; font-size: 11px;">Gen {hero['generation']}</span>
+                        <div style="text-align: right;">
+                            <div style="color: #4A90D9; font-size: 14px; font-weight: bold;">{level_progress}</div>
+                            <div style="color: #FFD700; font-size: 12px;">{stars_display}</div>
+                            <div style="color: #888; font-size: 10px;">Target: {target_stars_display}</div>
                         </div>
-                        <div style="color: #B8D4E8; font-size: 12px; margin-top: 8px;">
-                            {hero['notes']}
-                        </div>
+                    </div>
+                    <div style="color: #4CAF50; font-size: 13px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(74,144,217,0.2);">
+                        💡 {advice}
+                    </div>
+                    <div style="color: #B8D4E8; font-size: 11px; margin-top: 6px;">
+                        {hero['notes']}
                     </div>
                 </div>
-                <div style="text-align: right;">
-                    <div style="color: {owned_color}; font-size: 12px; font-weight: bold;">
-                        {owned_badge}
-                    </div>
-                    <div style="color: #4A90D9; font-size: 14px; margin-top: 4px;">
-                        Score: {hero['score']:.2f}
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
     with tab3:
         st.markdown("### Hero Analysis")

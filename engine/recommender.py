@@ -224,8 +224,8 @@ class RecommendationEngine:
         recommendations = []
 
         for user_hero in self.user_heroes:
-            hero_name = user_hero.hero.name if hasattr(user_hero, 'hero') else user_hero.get('name', '')
-            current_level = getattr(user_hero, 'level', user_hero.get('level', 1))
+            hero_name = user_hero.hero.name if hasattr(user_hero, 'hero') else ''
+            current_level = getattr(user_hero, 'level', 1)
 
             if current_level >= 80:
                 continue  # Already maxed
@@ -278,7 +278,7 @@ class RecommendationEngine:
         )
 
         for user_hero in self.user_heroes:
-            hero_name = user_hero.hero.name if hasattr(user_hero, 'hero') else user_hero.get('name', '')
+            hero_name = user_hero.hero.name if hasattr(user_hero, 'hero') else ''
 
             base_score = self._get_hero_base_score(hero_name)
             gen_relevance = self._check_generation_relevance(hero_name)
@@ -326,7 +326,7 @@ class RecommendationEngine:
         recommendations = []
 
         for user_hero in self.user_heroes:
-            hero_name = user_hero.hero.name if hasattr(user_hero, 'hero') else user_hero.get('name', '')
+            hero_name = user_hero.hero.name if hasattr(user_hero, 'hero') else ''
             current_stars = getattr(user_hero, 'stars', 1)
 
             if current_stars >= 5:
@@ -372,7 +372,7 @@ class RecommendationEngine:
         # Get list of owned hero names
         owned_names = set()
         for uh in self.user_heroes:
-            name = uh.hero.name if hasattr(uh, 'hero') else uh.get('name', '')
+            name = uh.hero.name if hasattr(uh, 'hero') else ''
             owned_names.add(name)
 
         # Check for attack joiner (Jessie)
@@ -391,7 +391,7 @@ class RecommendationEngine:
             else:
                 # Check if Jessie's expedition skills are leveled
                 for uh in self.user_heroes:
-                    name = uh.hero.name if hasattr(uh, 'hero') else uh.get('name', '')
+                    name = uh.hero.name if hasattr(uh, 'hero') else ''
                     if name == 'Jessie':
                         exp_skill = getattr(uh, 'expedition_skill_1_level', 1)
                         if exp_skill < 5:
@@ -420,7 +420,7 @@ class RecommendationEngine:
                 ))
             else:
                 for uh in self.user_heroes:
-                    name = uh.hero.name if hasattr(uh, 'hero') else uh.get('name', '')
+                    name = uh.hero.name if hasattr(uh, 'hero') else ''
                     if name == 'Sergey':
                         exp_skill = getattr(uh, 'expedition_skill_1_level', 1)
                         if exp_skill < 5:
@@ -439,7 +439,7 @@ class RecommendationEngine:
         if attack_priority > 0.25:
             if 'Jeronimo' in owned_names:
                 for uh in self.user_heroes:
-                    name = uh.hero.name if hasattr(uh, 'hero') else uh.get('name', '')
+                    name = uh.hero.name if hasattr(uh, 'hero') else ''
                     if name == 'Jeronimo':
                         level = getattr(uh, 'level', 1)
                         if level < 60:
@@ -492,37 +492,102 @@ class RecommendationEngine:
         # Sort by priority score
         all_recommendations.sort(key=lambda r: r.priority_score, reverse=True)
 
+        # Deduplicate - only keep top recommendation per hero
+        seen_heroes = set()
+        unique_recommendations = []
+        for rec in all_recommendations:
+            if rec.hero_name not in seen_heroes:
+                seen_heroes.add(rec.hero_name)
+                unique_recommendations.append(rec)
+
         # Return top recommendations
-        return all_recommendations[:limit]
+        return unique_recommendations[:limit]
 
     def get_top_heroes_to_invest(self, limit: int = 5) -> List[Dict]:
         """Get the top heroes to invest in based on user's priorities.
 
         Returns hero data with investment reasoning.
+        Only includes heroes the user owns.
         """
         hero_scores = []
+        spending_profile = getattr(self.profile, 'spending_profile', 'f2p')
+        current_gen = self._get_current_generation()
 
-        for hero_data in self.heroes_data.get('heroes', []):
-            name = hero_data['name']
+        for user_hero in self.user_heroes:
+            if not hasattr(user_hero, 'hero') or not user_hero.hero:
+                continue
 
-            # Check if user owns this hero
-            owned = any(
-                (uh.hero.name if hasattr(uh, 'hero') else uh.get('name', '')) == name
-                for uh in self.user_heroes
-            )
+            hero = user_hero.hero
+            name = hero.name
+            hero_data = self.hero_lookup.get(name, {})
 
             base_score = self._get_hero_base_score(name)
             gen_relevance = self._check_generation_relevance(name)
+            hero_gen = hero_data.get('generation', 1)
 
             final_score = base_score * gen_relevance
+
+            # Determine target level based on spender type and generation
+            current_level = user_hero.level
+            current_stars = user_hero.stars
+
+            # Investment targets based on spender profile
+            if spending_profile in ['whale', 'orca']:
+                # Heavy spenders: max out top tier heroes
+                target_level = 80
+                target_stars = 5
+            elif spending_profile == 'dolphin':
+                # Medium spenders: high investment in current gen, moderate in older
+                if hero_gen >= current_gen - 1:
+                    target_level = 70
+                    target_stars = 4
+                else:
+                    target_level = 60
+                    target_stars = 3
+            elif spending_profile == 'minnow':
+                # Light spenders: focus on a few key heroes
+                if hero_gen >= current_gen - 2:
+                    target_level = 60
+                    target_stars = 3
+                else:
+                    target_level = 50
+                    target_stars = 2
+            else:  # f2p
+                # F2P: selective investment, save resources
+                if hero_gen >= current_gen - 1:
+                    target_level = 50
+                    target_stars = 2
+                else:
+                    target_level = 40
+                    target_stars = 1
+
+            # Generate investment advice
+            if hero_gen < current_gen - 2:
+                advice = f"Outdated (Gen {hero_gen}). Save resources for newer heroes."
+                target_level = min(target_level, current_level)  # Don't suggest upgrading
+            elif hero_gen == current_gen:
+                advice = f"Current gen! Worth investing heavily."
+            elif hero_gen == current_gen + 1:
+                advice = f"Coming soon! Save resources to invest when available."
+            else:
+                advice = f"Still relevant. Upgrade to L{target_level}, {target_stars}★ recommended."
+
+            # Skip if already at or above target
+            if current_level >= target_level and current_stars >= target_stars:
+                advice = "At target level. Maintain and focus elsewhere."
 
             hero_scores.append({
                 'name': name,
                 'tier': hero_data.get('tier_overall', '?'),
                 'class': hero_data.get('hero_class', '?'),
-                'generation': hero_data.get('generation', 0),
+                'generation': hero_gen,
                 'score': final_score,
-                'owned': owned,
+                'owned': True,
+                'current_level': current_level,
+                'current_stars': current_stars,
+                'target_level': target_level,
+                'target_stars': target_stars,
+                'advice': advice,
                 'notes': hero_data.get('notes', '')
             })
 

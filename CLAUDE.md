@@ -196,6 +196,25 @@ Hero editor (expander) includes:
 - **Gear** 4 slots with quality dropdown, level (0-100), mastery (0-20 for Gold+)
 - **Exclusive gear** section for heroes with mythic gear
 
+### Upgrade Recommendations
+
+**Priority Settings Display:**
+- Shows 5 priority categories with visual star ratings (★☆)
+- Categories: SvS Combat, Rally, Castle Battle, Exploration, Gathering
+- Adjustable via sidebar (renamed from PvE to Exploration)
+
+**Top Recommendations Tab:**
+- One recommendation per hero (deduplicated, highest priority shown)
+- Filterable by upgrade type and priority level
+- Single column list ordered by priority score
+
+**Best Heroes to Invest Tab:**
+- Only shows owned heroes
+- Investment targets based on spending profile (F2P → Whale)
+- Shows current level → target level with star progression
+- Generation-aware advice (save vs invest based on hero age)
+- Considers upcoming generations for resource planning
+
 ### Hero Classes
 - **Infantry**: Frontline tanks - Chief Gear: Coat, Pants
 - **Marksman**: Ranged damage - Chief Gear: Belt, Shortstaff

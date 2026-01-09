@@ -145,6 +145,30 @@ Please cite sources.
 
 ---
 
+## Backpack & UI Research
+**Status:** PENDING
+
+### Shop Items & Currencies
+- [ ] Research all shop types and their currencies (Glowstones, etc.)
+- [ ] Mystery Shop items and costs
+- [ ] Arena Shop items
+- [ ] Alliance Shop items
+- [ ] SvS Shop items
+- [ ] Event-specific shops
+
+### Missing Chest Types
+- [ ] Fishing event chests (Ice Fishing rewards)
+- [ ] Labyrinth chests and rewards
+- [ ] Other event-specific chests
+
+### Hero Skill Descriptions
+- [ ] Research all hero skill descriptions for tooltip hovers
+- [ ] Exploration skills (what each skill does at each level)
+- [ ] Expedition skills (what each skill does at each level)
+- [ ] Document in heroes.json using `_desc` suffix fields
+
+---
+
 ## Data Files Reference
 
 ### Core Schema

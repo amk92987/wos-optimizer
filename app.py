@@ -51,7 +51,7 @@ def update_priority(priority_name: str, value: int):
         profile.priority_rally = value
     elif priority_name == "Castle":
         profile.priority_castle_battle = value
-    elif priority_name == "PvE":
+    elif priority_name == "Explore":
         profile.priority_exploration = value
     elif priority_name == "Gather":
         profile.priority_gathering = value
@@ -101,7 +101,7 @@ with st.sidebar:
         ("SvS", profile.priority_svs),
         ("Rally", profile.priority_rally),
         ("Castle", profile.priority_castle_battle),
-        ("PvE", profile.priority_exploration),
+        ("Explore", profile.priority_exploration),
         ("Gather", profile.priority_gathering),
     ]
 
