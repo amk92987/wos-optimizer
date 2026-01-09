@@ -44,7 +44,8 @@
       "gem_value_estimate": 50,
       "gem_value_source": "estimated_from_pack_rates",
       "notes": "Critical for hero gear. Very hard to farm. Always valuable.",
-      "pack_common": true
+      "pack_common": true,
+      "image": "essence_stone.png"
     },
     "legendary_hero_shard": {
       "display_name": "Legendary Hero Shard",
@@ -112,6 +113,16 @@
       "gem_value_per": "minute",
       "gem_value_source": "estimated",
       "notes": "Slightly less valuable than general speedups.",
+      "pack_common": true
+    },
+    "speedup_healing": {
+      "display_name": "Healing Speedup",
+      "tier": "A",
+      "category": "speedups",
+      "gem_value_estimate": 1.0,
+      "gem_value_per": "minute",
+      "gem_value_source": "estimated",
+      "notes": "Less valuable than general, mainly for post-battle recovery.",
       "pack_common": true
     },
     "stamina": {

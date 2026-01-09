@@ -1,0 +1,774 @@
+{
+  "system": "battle_strategies",
+  "description": "Advanced battle tactics for Castle Battles, Foundry Clash, Frostfire Mine, and other competitive events",
+  "version": "1.1",
+  "last_updated": "2026-01-09",
+  "sources": {
+    "castle_battles": "Player experience and community guides",
+    "foundry": {
+      "tier_1": "https://www.whiteoutsurvival.wiki/events/foundry-battle/",
+      "tier_2": ["https://whiteout-survival.com/events/foundry-battle-guide/", "https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-foundry-battle-event-guide-en.html"]
+    },
+    "frostfire_mine": {
+      "tier_1": "https://www.whiteoutsurvival.wiki/frostfire-mine",
+      "tier_2": "https://onechilledgamer.com/whiteout-survival-frostfire-mine-guide"
+    }
+  },
+
+  "castle_battles": {
+    "name": "Castle Battles / Facility Battles",
+    "description": "Tactics for attacking and defending facilities like Sunfire Castle, Bear Trap buildings, and SvS facilities",
+    "overview": "Castle battles are won through coordination, timing, and overwhelming force. A well-timed double rally beats a stronger garrison every time.",
+
+    "attack_tactics": {
+      "double_rally": {
+        "name": "Double Rally (Synchronized Strike)",
+        "priority": "CRITICAL",
+        "description": "Two rallies timed to hit the exact same second, overwhelming even strong garrisons",
+        "how_it_works": [
+          "Two rally leaders start rallies against the same target",
+          "Coordinate countdown so both rallies LAND at the exact same time",
+          "Garrison can only defend against one rally at a time",
+          "Second rally hits while garrison is still fighting first rally",
+          "Combined damage often wipes garrison that could handle either rally alone"
+        ],
+        "execution_tips": [
+          "Use voice chat (Discord) for precise countdown",
+          "Account for march time differences - farther leader starts first",
+          "Standard countdown: '3... 2... 1... GO' on rally launch",
+          "Both leaders should have similar march speeds",
+          "Practice with alliance before important battles"
+        ],
+        "why_effective": "A garrison of 2M troops might beat a 1.5M rally, but two 1.5M rallies hitting simultaneously = 3M attackers vs 2M defenders. The math changes completely.",
+        "common_mistakes": [
+          "Starting rallies at same time instead of timing ARRIVAL",
+          "Not accounting for different march speeds",
+          "Poor communication leading to 5-10 second gaps"
+        ]
+      },
+
+      "post_rally_swarm": {
+        "name": "Post-Rally Troop Swarm",
+        "priority": "HIGH",
+        "description": "Individual attacks timed to arrive immediately after double rally, before enemy can reinforce",
+        "how_it_works": [
+          "Double rally wipes or heavily damages garrison",
+          "Pre-staged individual marches arrive 1-5 seconds after rally lands",
+          "These 'cleanup' attacks hit the weakened/empty facility",
+          "Enemy has no time to send new garrison troops",
+          "Facility flips to your alliance before reinforcements arrive"
+        ],
+        "execution_tips": [
+          "Have 5-10 players stage attacks timed to land RIGHT after rally",
+          "Use faster march speeds or closer positions",
+          "Stagger arrivals by 1-2 seconds to maintain pressure",
+          "First individual attack should aim to land within 3 seconds of rally",
+          "Keep sending waves until facility is secured"
+        ],
+        "timing_window": "You typically have 10-30 seconds before enemy can react and send new garrison. Use this window aggressively."
+      },
+
+      "garrison_sandwich": {
+        "name": "Garrison Sandwich",
+        "priority": "MEDIUM",
+        "description": "Time reinforcement troops to arrive between double rally hits",
+        "how_it_works": [
+          "First rally hits and engages garrison",
+          "Individual troop marches arrive DURING the battle",
+          "Second rally hits while garrison is split/engaged",
+          "Reinforcement troops add to attacking power mid-battle"
+        ],
+        "advanced_note": "This requires very precise timing and is harder to execute than standard double rally. Use only with experienced coordinators."
+      },
+
+      "rally_chain": {
+        "name": "Rally Chain (Sustained Pressure)",
+        "priority": "MEDIUM",
+        "description": "Multiple rallies hitting in sequence to maintain constant pressure",
+        "how_it_works": [
+          "Rally 1 hits, damages garrison",
+          "Rally 2 hits 30-60 seconds later on weakened garrison",
+          "Rally 3 follows up if needed",
+          "Enemy cannot rebuild garrison between hits"
+        ],
+        "when_to_use": [
+          "When you have more rally leaders than enemy has garrison capacity",
+          "Against alliances with slower coordination",
+          "When double rally alone isn't enough"
+        ]
+      },
+
+      "feint_rally": {
+        "name": "Feint Rally (Bait and Switch)",
+        "priority": "LOW",
+        "description": "Start a rally to draw garrison, then cancel and hit real target",
+        "how_it_works": [
+          "Start rally against decoy target (visible to enemy)",
+          "Enemy moves garrison troops to defend",
+          "Cancel rally at last moment",
+          "Immediately double rally the REAL target (now undefended)"
+        ],
+        "risks": "Enemy may call your bluff. Only works against reactive defenders."
+      }
+    },
+
+    "defense_tactics": {
+      "garrison_rotation": {
+        "name": "Garrison Rotation",
+        "priority": "CRITICAL",
+        "description": "Keeping fresh troops in garrison at all times",
+        "how_it_works": [
+          "Assign garrison slots to specific players",
+          "When rally is incoming, garrison commander calls for reinforcements",
+          "Fresh troops replace wounded troops immediately after battle",
+          "Never leave garrison empty or below capacity"
+        ],
+        "tips": [
+          "Use highest troop count players for garrison",
+          "Have backup garrison players ready",
+          "Rotate between battles to spread healing costs"
+        ]
+      },
+
+      "counter_timing": {
+        "name": "Counter-Timing",
+        "priority": "HIGH",
+        "description": "Sending garrison troops timed to arrive DURING enemy rally",
+        "how_it_works": [
+          "Watch incoming rally timer",
+          "Calculate when your troops will arrive",
+          "Send reinforcements timed to land DURING the battle",
+          "Your fresh troops join mid-fight, turning the tide"
+        ],
+        "math": "A 2M garrison fighting a 3M rally is losing. But 500K fresh troops arriving mid-battle can swing it back."
+      },
+
+      "anti_swarm": {
+        "name": "Anti-Swarm Protocol",
+        "priority": "HIGH",
+        "description": "Defending against post-rally individual attacks",
+        "how_it_works": [
+          "Immediately after surviving a rally, flood garrison with troops",
+          "Don't wait to see if more attacks are coming",
+          "Multiple players send small reinforcements simultaneously",
+          "Overwhelm the 'cleanup' attacks with numbers"
+        ],
+        "key_insight": "Enemy expects you to be slow. React in under 5 seconds to deny their swarm."
+      }
+    },
+
+    "coordination_requirements": {
+      "voice_chat": "Discord or similar - text chat is too slow for precise timing",
+      "rally_leaders": "Need 2+ strong rally leaders for double rally",
+      "scout_reports": "Know enemy garrison strength before attacking",
+      "march_calculators": "Know exact march times for coordination",
+      "backup_plans": "Have Plan B if double rally fails"
+    },
+
+    "common_mistakes": [
+      {
+        "mistake": "Launching rallies at the same TIME instead of timing ARRIVAL",
+        "correction": "Account for different march distances. Farther rally starts first so both LAND together."
+      },
+      {
+        "mistake": "No follow-up after successful double rally",
+        "correction": "Have players staged to send individual attacks immediately. Don't give enemy time to react."
+      },
+      {
+        "mistake": "Garrison is empty after a battle",
+        "correction": "Assign backup garrison players. Fresh troops should arrive within 5-10 seconds of battle ending."
+      },
+      {
+        "mistake": "Attacking without scouting",
+        "correction": "Always scout first. Know if you need double rally or triple rally based on garrison strength."
+      },
+      {
+        "mistake": "Using text chat for timing coordination",
+        "correction": "Voice chat only for double rallies. The 2-3 second delay in text can ruin timing."
+      }
+    ],
+
+    "quick_reference": {
+      "double_rally_checklist": [
+        "Both rally leaders ready with full troops",
+        "Voice chat connected",
+        "March times calculated for simultaneous arrival",
+        "Post-rally swarm players staged",
+        "Countdown agreed upon (usually 3-2-1-GO)",
+        "Backup rally leader on standby"
+      ],
+      "garrison_defense_checklist": [
+        "Garrison at max capacity",
+        "Backup garrison players assigned",
+        "Rally timer being watched",
+        "Reinforcement timing calculated",
+        "Post-battle refresh troops ready"
+      ]
+    }
+  },
+
+  "foundry": {
+    "name": "Foundry Clash (Foundry Battle)",
+    "confidence": "A-",
+    "description": "Biweekly Alliance-vs-Alliance event fighting for control of an imperial weapons foundry",
+    "overview": "A 60-minute strategic battle where alliances compete to capture buildings and accumulate Arsenal Points. Buildings generate points over time when controlled.",
+
+    "event_basics": {
+      "duration": "60 minutes",
+      "frequency": "Every 2 weeks (biweekly), usually Sundays",
+      "team_size": "Up to 2 Legions (30 combatants + 10 substitutes each = 80 total)",
+      "requirements": {
+        "alliance": "Top 20 on Alliance Power Leaderboard",
+        "individual": "Furnace Level 16+",
+        "timing": "Must join alliance BEFORE registration closes"
+      },
+      "key_mechanic": "Troops don't die - all casualties are injuries only, automatic healing after battle"
+    },
+
+    "phases": {
+      "phase_1": {
+        "time": "0-15 minutes",
+        "buildings": ["Repair Facilities", "Prototype Sites", "Central Transit Station", "Boiler Room"],
+        "priority": "Secure Transit Station FIRST (50% teleport cooldown reduction)"
+      },
+      "phase_2": {
+        "time": "15-30 minutes",
+        "buildings": ["Imperial Foundry", "Munitions Warehouse", "Mercenary Camp"],
+        "priority": "Imperial Foundry is highest value target"
+      },
+      "phase_3": {
+        "time": "30-60 minutes",
+        "buildings": ["Weapon Workshops (random spawns, two waves)"],
+        "priority": "Hunt workshops + defend held buildings"
+      }
+    },
+
+    "buildings": {
+      "imperial_foundry": {
+        "first_capture": 9000,
+        "points_per_minute": 1800,
+        "priority": "CRITICAL",
+        "note": "Highest value target in the event"
+      },
+      "prototype_sites": {
+        "first_capture": 6000,
+        "points_per_minute": 1200,
+        "priority": "HIGH"
+      },
+      "repair_facilities": {
+        "first_capture": 3000,
+        "points_per_minute": 600,
+        "priority": "MEDIUM"
+      },
+      "munitions_warehouse": {
+        "first_capture": 1200,
+        "points_per_minute": 240,
+        "priority": "HIGH",
+        "special": "+15% troop damage, -15% enemy damage"
+      },
+      "mercenary_camp": {
+        "first_capture": 1200,
+        "points_per_minute": 240,
+        "priority": "MEDIUM",
+        "special": "Deploy strike teams against enemies"
+      },
+      "transit_station": {
+        "priority": "CRITICAL",
+        "special": "50% teleport cooldown reduction - secure FIRST"
+      },
+      "boiler_room": {
+        "priority": "HIGH",
+        "special": "50% faster building capture time"
+      }
+    },
+
+    "strategies": {
+      "team_organization": {
+        "name": "Team Division",
+        "priority": "CRITICAL",
+        "structure": {
+          "attack_group": "8 strongest players (excluding rank 1)",
+          "defense_group": "Rank 1 player + 7 others",
+          "rally_captain": "Designated coordinator for movements"
+        }
+      },
+      "phase_1_strategy": {
+        "name": "Phase 1 Opening",
+        "priority": "CRITICAL",
+        "steps": [
+          "Rush Transit Station immediately (50% teleport CD is huge)",
+          "Capture Boiler Room (faster building captures)",
+          "Control Prototype Sites for early points",
+          "Establish defensive positions"
+        ]
+      },
+      "phase_2_strategy": {
+        "name": "Phase 2 Push",
+        "priority": "HIGH",
+        "steps": [
+          "Send strongest troops to Imperial Foundry",
+          "Use coordinated double rallies (time ARRIVALS, not launches)",
+          "Control Munitions Warehouse for damage bonus",
+          "Deploy Mercenary Camp strike teams"
+        ]
+      },
+      "phase_3_strategy": {
+        "name": "Phase 3 Cleanup",
+        "priority": "HIGH",
+        "steps": [
+          "Hunt Weapon Workshops (great F2P opportunity)",
+          "Maintain control of high-value buildings",
+          "If trailing, target unguarded neutral sites",
+          "Final push with maximum point accumulation"
+        ]
+      },
+      "point_looting": {
+        "name": "Point Scattering Mechanic",
+        "priority": "HIGH",
+        "description": "When enemies lose buildings, 50% of accumulated points scatter as lootable supplies",
+        "tip": "Watch the mini-map for yellow dots - these are free points!"
+      },
+      "smart_recovery": {
+        "name": "12-Minute Reset",
+        "priority": "MEDIUM",
+        "description": "Leave battlefield for 12 minutes for full heal instead of using speedups",
+        "when_to_use": "When not in critical battle phase"
+      }
+    },
+
+    "player_strategies": {
+      "f2p": {
+        "focus": "Target low-contest areas; gather Weapon Workshops; reinforce stronger allies",
+        "avoid": "Direct confrontation with whales"
+      },
+      "mid_spender": {
+        "focus": "Join whale-led rallies; support defense; capture secondary buildings",
+        "avoid": "Solo attacks on main targets"
+      },
+      "whale": {
+        "focus": "Lead aggressive captures; control Imperial Foundry; organize mass rallies",
+        "responsibility": "Coordinate alliance movements"
+      }
+    },
+
+    "rewards": {
+      "primary_currency": "Arsenal Tokens (exchanged in Foundry Shop)",
+      "shop_items": ["Hero Fragments", "Design Plans", "Charm Designs", "Consumables"],
+      "distribution": {
+        "alliance_ranking": "Based on Legion 1's final Point Ranking",
+        "personal_merit": "Based on individual Arsenal Point ranking",
+        "top_performer": "Tiered rewards for top performers"
+      }
+    },
+
+    "common_mistakes": [
+      {
+        "mistake": "Ignoring Transit Station in Phase 1",
+        "correction": "50% teleport cooldown is MASSIVE. Secure it immediately."
+      },
+      {
+        "mistake": "Solo attacking instead of coordinating rallies",
+        "correction": "Always coordinate with alliance. Double rallies beat single attacks."
+      },
+      {
+        "mistake": "Launching rallies simultaneously instead of timing arrivals",
+        "correction": "Time ARRIVALS, not launch times. Farther player starts first."
+      },
+      {
+        "mistake": "Leaving buildings undefended after capture",
+        "correction": "Maintain 4-5 player garrisons on controlled buildings."
+      },
+      {
+        "mistake": "Ignoring scattered points (yellow dots)",
+        "correction": "50% of points scatter when buildings are lost. Collect them!"
+      },
+      {
+        "mistake": "Wasting gems on healing",
+        "correction": "Use 12-minute leave for full free heal when possible."
+      },
+      {
+        "mistake": "Neglecting Weapon Workshops in Phase 3",
+        "correction": "Great F2P opportunity - these spawn randomly and give good points."
+      },
+      {
+        "mistake": "No rally captain designated",
+        "correction": "Assign one person to coordinate all movements via voice chat."
+      }
+    ],
+
+    "quick_reference": {
+      "pre_battle_checklist": [
+        "Troops trained (minimum T7-8)",
+        "10+ Advanced Teleporters stocked",
+        "Healing speedups ready",
+        "VIP, tech, Chief Gear buffs active",
+        "Joined alliance before registration closed"
+      ],
+      "phase_priorities": [
+        "Phase 1: Transit Station > Boiler Room > Prototype Sites",
+        "Phase 2: Imperial Foundry > Munitions Warehouse > Mercenary Camp",
+        "Phase 3: Weapon Workshops > Defend holdings > Target unguarded buildings"
+      ]
+    }
+  },
+
+  "bear_trap": {
+    "name": "Bear Trap (Bear Hunt)",
+    "confidence": "A",
+    "description": "Alliance rally event where you hunt bears for valuable rewards including pet fragments and essence stones",
+    "overview": "Bear Trap is an S-Tier event that should NEVER be skipped. Your alliance rallies against powerful bears using expedition skills. Proper troop composition and hero selection are critical for success.",
+
+    "event_basics": {
+      "priority": "S-TIER - Never skip this event",
+      "mechanics": "Alliance rallies against NPC bears",
+      "skill_type": "EXPEDITION skills (top-right) are used, NOT exploration skills",
+      "rally_system": "Leader's 3 heroes use their expedition skills, plus top 4 highest-LEVEL skills from all joiners"
+    },
+
+    "rally_mechanics": {
+      "leader_contribution": {
+        "description": "Rally leader's 3 deployed heroes contribute their expedition skills",
+        "note": "Place your STRONGEST expedition skill hero in leftmost slot"
+      },
+      "joiner_contribution": {
+        "description": "Only the leftmost hero's TOP-RIGHT expedition skill is considered from each joiner",
+        "selection": "System picks top 4 highest LEVEL skills from all joiners combined",
+        "tip": "Level matters more than the skill itself - a level 5 mediocre skill beats a level 1 great skill"
+      }
+    },
+
+    "troop_composition": {
+      "optimal": {
+        "infantry": "0-10%",
+        "lancer": "10%",
+        "marksman": "80-90%"
+      },
+      "why_marksman": "Bears are weak to ranged damage. Marksman troops deal significantly more damage to bears.",
+      "common_mistake": "Using balanced 33/33/33 composition wastes damage potential"
+    },
+
+    "hero_selection": {
+      "best_joiners": [
+        {
+          "hero": "Jessie",
+          "skill": "+25% Troop DMG",
+          "priority": "BEST",
+          "note": "Highest damage boost available for rallies"
+        },
+        {
+          "hero": "Jasser",
+          "skill": "Lancer ATK boost",
+          "priority": "HIGH",
+          "note": "Strong offensive expedition skill"
+        },
+        {
+          "hero": "Seo-yoon",
+          "skill": "Marksman ATK boost",
+          "priority": "HIGH",
+          "note": "Excellent for marksman-heavy comps"
+        },
+        {
+          "hero": "Jeronimo",
+          "skill": "Infantry ATK boost",
+          "priority": "HIGH",
+          "note": "Good general attacker"
+        }
+      ],
+      "heroes_to_avoid": [
+        {
+          "hero": "Sergey",
+          "reason": "His expedition skill is DEFENSIVE (-20% damage taken). Great for garrison defense, USELESS for attack rallies.",
+          "common_mistake": "Many players put Sergey in attack rallies thinking he's universally good"
+        }
+      ],
+      "slot_placement": "Strongest expedition skill hero goes in LEFTMOST slot - only that skill is counted from joiners"
+    },
+
+    "strategies": {
+      "as_leader": {
+        "name": "Rally Leader Strategy",
+        "priority": "CRITICAL",
+        "steps": [
+          "Fill rally with 80-90% Marksman troops",
+          "Place 3 heroes with strongest EXPEDITION (not exploration) skills",
+          "Leftmost hero should have best single expedition skill",
+          "Wait for rally to fill before launching",
+          "Communicate rally timing with alliance"
+        ]
+      },
+      "as_joiner": {
+        "name": "Rally Joiner Strategy",
+        "priority": "HIGH",
+        "steps": [
+          "Put hero with best expedition skill in LEFTMOST slot",
+          "Level up your expedition skills - level matters most",
+          "Join with high troop count (more troops = more damage)",
+          "Jessie is almost always the best choice for leftmost slot",
+          "If you don't have Jessie, use Jasser/Seo-yoon/Jeronimo"
+        ]
+      },
+      "alliance_coordination": {
+        "name": "Alliance-Wide Strategy",
+        "priority": "HIGH",
+        "steps": [
+          "Assign dedicated rally leaders (strongest players)",
+          "Coordinate rally times so members can join",
+          "Focus on highest level bears for best rewards",
+          "Don't waste rallies on low-level bears",
+          "Track who has Jessie for optimal joiner placement"
+        ]
+      }
+    },
+
+    "rewards": {
+      "primary": [
+        "Bear Fragments (for pet evolution)",
+        "Pet Materials",
+        "Essence Stones"
+      ],
+      "scaling": "Higher level bears = better rewards",
+      "tip": "Always target highest level bear your alliance can reliably defeat"
+    },
+
+    "common_mistakes": [
+      {
+        "mistake": "Using Sergey in attack rallies",
+        "correction": "Sergey's expedition skill is DEFENSIVE. Use offensive heroes like Jessie, Jasser, Jeronimo."
+      },
+      {
+        "mistake": "Putting wrong hero in leftmost slot as joiner",
+        "correction": "Only leftmost hero's expedition skill counts. Put your best expedition skill there."
+      },
+      {
+        "mistake": "Using balanced troop composition",
+        "correction": "80-90% Marksman is optimal for bear damage."
+      },
+      {
+        "mistake": "Confusing expedition vs exploration skills",
+        "correction": "Bear Trap uses EXPEDITION (top-right) skills, NOT exploration skills."
+      },
+      {
+        "mistake": "Joining with low-level expedition skills",
+        "correction": "Level your expedition skills! A level 5 skill beats a level 1 skill regardless of effect."
+      },
+      {
+        "mistake": "Starting rallies without waiting for joiners",
+        "correction": "Wait for rally to fill - more joiners = more damage + more top skills selected."
+      },
+      {
+        "mistake": "Targeting low-level bears",
+        "correction": "Focus on highest level bears for best rewards per rally."
+      }
+    ],
+
+    "quick_reference": {
+      "joiner_checklist": [
+        "Leftmost hero has best expedition skill (Jessie if you have her)",
+        "All skills are highest level possible",
+        "Full troop march (high quantity)",
+        "80-90% Marksman composition"
+      ],
+      "leader_checklist": [
+        "3 heroes with strong expedition skills",
+        "80-90% Marksman troops",
+        "Wait for rally to fill",
+        "Target highest level bear possible"
+      ],
+      "best_expedition_skills": [
+        "Jessie: +25% Troop DMG (BEST)",
+        "Jasser: Lancer ATK boost",
+        "Seo-yoon: Marksman ATK boost",
+        "Jeronimo: Infantry ATK boost"
+      ]
+    }
+  },
+
+  "frostfire_mine": {
+    "name": "Frostfire Mine",
+    "confidence": "A",
+    "description": "Competitive 30-minute mining battle for Orichalcum with PvP elements",
+    "overview": "Players compete to gather Orichalcum by occupying veins, defeating patrol guards, and engaging in PvP. NO TROOP LOSSES - all troops are unlimited, making this very F2P-friendly.",
+
+    "event_basics": {
+      "duration": "30 minutes active (+ 3 min prep phase)",
+      "frequency": "Every 2 weeks (biweekly)",
+      "requirements": "Furnace Level 16+",
+      "key_mechanic": "NO troop losses - troops are unlimited and don't die permanently",
+      "hero_cooldown": "5 minutes after defeat",
+      "teleport": "Free Advanced Teleporter (6-minute cooldown)"
+    },
+
+    "time_slots_utc": [
+      {"slot": 1, "time": "02:00 UTC"},
+      {"slot": 2, "time": "05:00 UTC"},
+      {"slot": 3, "time": "11:00 UTC"},
+      {"slot": 4, "time": "14:00 UTC"},
+      {"slot": 5, "time": "16:00 UTC"},
+      {"slot": 6, "time": "18:00 UTC"},
+      {"slot": 7, "time": "21:00 UTC"}
+    ],
+
+    "map_elements": {
+      "veins": {
+        "description": "Mining nodes that generate Orichalcum over time",
+        "levels": [
+          {"level": 1, "rate": "+8/s", "capacity": 8640, "deplete_time": "18 min"},
+          {"level": 2, "rate": "+16/s", "capacity": 17280, "deplete_time": "18 min"},
+          {"level": 3, "rate": "+32/s", "capacity": 34560, "deplete_time": "18 min"}
+        ],
+        "loot_mechanic": "When defeated, veins drop THREE lootable piles of Orichalcum"
+      },
+      "vein_outbursts": {
+        "description": "High-value spawns that appear temporarily",
+        "capacity": 4000,
+        "rate": "+200/s",
+        "deplete_time": "20 seconds!",
+        "spawn_times": ["Minute 8", "Minute 9", "Minute 10", "Minute 18", "Minute 19", "Minute 20"],
+        "alerts": "Banner appears 60 seconds and 10 seconds before spawn",
+        "priority": "CRITICAL - Drop everything and rush these!"
+      },
+      "smelter": {
+        "description": "Central map objective that opens late",
+        "opens_at": "7:30 remaining (minute 22:30)",
+        "rewards": {
+          "1st_place": 100000,
+          "10th_place": 20000
+        },
+        "priority": "HIGH - Massive point multiplier"
+      },
+      "mine_patrols": {
+        "description": "NPCs on map periphery",
+        "reward": "Frostfire XP (unlocks skill upgrades)",
+        "location": "Map edges"
+      }
+    },
+
+    "skill_progression": {
+      "description": "Defeat Mine Patrols to earn XP and unlock 5 skill levels. Choose LEFT or RIGHT at each level.",
+      "recommended_build": {
+        "name": "Hunting Strategy (F2P-Recommended)",
+        "level_1": {"choice": "RIGHT", "effect": "1,500 Orichalcum per patrol defeated"},
+        "level_2": {"choice": "RIGHT", "effect": "25% march speed increase"},
+        "level_3": {"choice": "LEFT", "effect": "5,000 Orichalcum every 60s when occupying vein"},
+        "level_4": {"choice": "LEFT", "effect": "15% gathering efficiency boost"},
+        "level_5": {"choice": "RIGHT", "effect": "+50 gathering speed for 60s (5-min CD, manual activation)"}
+      },
+      "skill_5_tip": "Save Skill 5 activation for Vein Outbursts ONLY for maximum efficiency!"
+    },
+
+    "strategies": {
+      "hunting_approach": {
+        "name": "Hunting Strategy (F2P-Recommended)",
+        "priority": "HIGH",
+        "philosophy": "Avoid PvP, focus on consistent accumulation",
+        "steps": [
+          "Start on map periphery defeating Mine Patrols",
+          "Build up skills through patrol defeats",
+          "Prioritize Skill 1 Right (1,500 per patrol)",
+          "Save Skill 5 ONLY for Vein Outbursts",
+          "Reserve one hero squad for periodic vein occupation",
+          "Teleport strategically to find uncontested areas"
+        ],
+        "pros": "Lower risk, consistent rewards, less hero cooldown issues",
+        "cons": "May not reach top rankings"
+      },
+      "gathering_approach": {
+        "name": "Gathering Strategy (Competitive)",
+        "priority": "HIGH",
+        "philosophy": "Dominate high-value veins and Smelter",
+        "steps": [
+          "Rush to high-level veins (Level 2-3)",
+          "PRIORITIZE Vein Outbursts above all else",
+          "Compete for Smelter control at 7:30 remaining",
+          "Engage in PvP to capture occupied veins",
+          "Loot scattered piles from defeated veins"
+        ],
+        "pros": "Higher ceiling for top rankings",
+        "cons": "Requires stronger heroes, more PvP exposure"
+      }
+    },
+
+    "critical_timing": [
+      {"time_remaining": "22-20 min", "event": "First Vein Outburst wave (minutes 8-10)"},
+      {"time_remaining": "12-10 min", "event": "Second Vein Outburst wave (minutes 18-20)"},
+      {"time_remaining": "7:30 min", "event": "Smelter opens - rush for control!"}
+    ],
+
+    "rewards": {
+      "primary_value": "Charm Designs and Charm Guides - key materials for Chief Charm upgrades",
+      "milestones": [
+        {"threshold": 10000, "rewards": "Training Speedups, Resources"},
+        {"threshold": 25000, "rewards": "Additional rewards"},
+        {"threshold": 40000, "rewards": "Charm materials"},
+        {"threshold": 75000, "rewards": "Enhanced rewards"},
+        {"threshold": 100000, "rewards": "Major reward tier"},
+        {"threshold": 150000, "rewards": "Maximum milestone rewards"}
+      ],
+      "top_rank_rewards": {
+        "1st": "14-Day Blue Flame Avatar, 80 Charm Designs, 50 Charm Guides, 4,000 Gems",
+        "2nd_10th": "Decreasing Charm Designs, Guides, Gems"
+      }
+    },
+
+    "common_mistakes": [
+      {
+        "mistake": "Neglecting Mine Patrols at the start",
+        "correction": "Start with patrols to unlock skills - they multiply your efficiency!"
+      },
+      {
+        "mistake": "Ignoring Vein Outbursts",
+        "correction": "4,000 Orichalcum in 20 seconds! Watch banner alerts, drop everything for these."
+      },
+      {
+        "mistake": "Using Skill 5 on regular veins",
+        "correction": "Save Skill 5 (+50 speed for 60s) for Vein Outbursts ONLY."
+      },
+      {
+        "mistake": "Not teleporting strategically",
+        "correction": "Use free teleport (6-min CD) actively to find uncontested areas."
+      },
+      {
+        "mistake": "Sending partial marches to veins",
+        "correction": "Always send FULL march - partial marches are easy targets."
+      },
+      {
+        "mistake": "Missing dropped loot piles",
+        "correction": "Always collect the 3 loot piles from defeated veins - free Orichalcum!"
+      },
+      {
+        "mistake": "Unnecessary PvP engagement",
+        "correction": "Hero cooldowns hurt gathering. Only PvP when necessary."
+      },
+      {
+        "mistake": "Forgetting pre-event buffs",
+        "correction": "Activate pet/item gathering bonuses BEFORE event starts."
+      },
+      {
+        "mistake": "Missing the Smelter opening",
+        "correction": "Smelter opens at 7:30 remaining - set a timer and rush for it!"
+      }
+    ],
+
+    "quick_reference": {
+      "before_event": [
+        "Furnace 16+ (requirement)",
+        "Register for preferred time slot",
+        "Activate gathering buffs (pets, items)"
+      ],
+      "during_event": [
+        "Start by defeating Mine Patrols (skill XP)",
+        "Unlock skills 1-5 (RIGHT/RIGHT/LEFT/LEFT/RIGHT)",
+        "Watch for Vein Outbursts at min 8-10 and 18-20",
+        "Save Skill 5 for Outbursts only!",
+        "Keep one squad for vein occupation",
+        "Teleport to low-competition areas",
+        "Rush Smelter at 7:30 remaining"
+      ],
+      "dont_forget": [
+        "Loot scattered piles from defeated veins",
+        "Full marches to veins (not partial)",
+        "Heroes cooldown 5 min after defeat - manage carefully"
+      ]
+    }
+  }
+}

@@ -82,10 +82,16 @@ def render_home():
         </div>
         """, unsafe_allow_html=True)
 
+        # Display furnace level properly (including FC levels)
+        if profile.furnace_level >= 30 and profile.furnace_fc_level:
+            furnace_display = profile.furnace_fc_level
+        else:
+            furnace_display = str(profile.furnace_level)
+
         st.markdown(f"""
         <div style="background: rgba(255, 215, 0, 0.2); padding: 20px; border-radius: 12px;">
             <div style="font-size: 14px; color: #B8D4E8;">Furnace Level</div>
-            <div style="font-size: 32px; font-weight: bold; color: #FFD700;">{profile.furnace_level}</div>
+            <div style="font-size: 32px; font-weight: bold; color: #FFD700;">{furnace_display}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -120,11 +126,10 @@ def render_home():
             bg_color = "rgba(255, 107, 53, 0.3)" if is_current else "rgba(74, 144, 217, 0.2)"
             border = "2px solid #FF6B35" if is_current else "1px solid rgba(74, 144, 217, 0.3)"
             st.markdown(f"""
-            <div style="background: {bg_color}; border: {border}; padding: 16px; border-radius: 8px; margin-bottom: 12px; min-height: 120px;">
+            <div style="background: {bg_color}; border: {border}; padding: 16px; border-radius: 8px; margin-bottom: 12px; min-height: 100px;">
                 <div style="font-weight: bold; color: #E8F4F8; font-size: 16px;">{gen_name}</div>
                 <div style="color: #B8D4E8; font-size: 12px; margin-bottom: 8px;">{days}</div>
                 <div style="color: #E8F4F8; font-size: 13px;">{heroes}</div>
-                {"<div style='color: #FF6B35; font-size: 11px; margin-top: 8px;'>◆ CURRENT</div>" if is_current else ""}
             </div>
             """, unsafe_allow_html=True)
 

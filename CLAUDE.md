@@ -163,15 +163,15 @@ WoS/
 
 **Hero**:
 - Static reference data (name, generation 1-14, class, tier ratings)
-- Skills: exploration_skill_1/2, expedition_skill_1/2
+- Skills: exploration_skill_1/2/3, expedition_skill_1/2/3 (with optional _desc fields for tooltips)
 - Image filename reference (points to assets/heroes/)
 
 **UserHero**:
 - User's owned heroes with levels (1-80)
 - Stars (0-5) and ascension tier (0-5)
-- Skill levels (1-5 for each of 4 skills)
-- Hero gear: 4 slots with quality (0-6) and level
-- Mythic gear: unlocked status, quality, level
+- Skill levels (1-5 for each of 6 skills: 3 exploration + 3 expedition)
+- Hero gear: 4 slots with quality (0=None through 6=Legendary), level (0-100), mastery (0-20 for Gold+)
+- Exclusive gear: unlocked status, quality, level, mastery
 
 **UserInventory**: Backpack items and quantities
 
@@ -181,15 +181,20 @@ WoS/
 
 ### Hero Card Features
 
-Each hero card displays:
-- **Hero portrait** - Actual hero image from assets/heroes/ (70x70px)
+Each hero row displays:
+- **Hero portrait** - Actual hero image from assets/heroes/ (80x80px)
 - **Tier badge** with hover tooltip (S+ through D)
 - **Rarity border** color-coded (Blue=Rare, Purple=Epic, Gold=Legendary)
-- **Generation badge** for non-Gen 1 heroes
-- **Star rating** with partial ascension progress
-- **Best use blurb** explaining optimal hero usage
-- **Gear widgets** showing 4 gear slots with quality colors
-- **Mythic gear** indicator for heroes with exclusive gear
+- **Generation** column
+- **Star rating** with purple ascension pips (shown when not at max stars)
+- **Level** display
+- **Owned checkbox** - auto-expands editor when checked
+
+Hero editor (expander) includes:
+- **Level/Stars/Ascension** row with visual pips
+- **Skills** side-by-side with hoverable names showing descriptions
+- **Gear** 4 slots with quality dropdown, level (0-100), mastery (0-20 for Gold+)
+- **Exclusive gear** section for heroes with mythic gear
 
 ### Hero Classes
 - **Infantry**: Frontline tanks - Chief Gear: Coat, Pants
@@ -198,18 +203,20 @@ Each hero card displays:
 
 ### Hero Skill System
 
-Each hero has two types of skills:
+Each hero has two types of skills (up to 3 each):
 
 **Exploration Skills (Left Side)**
 - Upgraded with Exploration Manuals
 - Used for PvE content (exploration, events)
 - Levels 1-5
+- Skill descriptions available via hover tooltips (populated from `_desc` fields in heroes.json)
 
 **Expedition Skills (Right Side)**
 - Upgraded with Expedition Manuals
 - Used for PvP content (rallies, garrison, SvS)
 - Levels 1-5
 - **Top-right skill** applies when joining rallies
+- Skill descriptions available via hover tooltips
 
 ### Rally Joiner Mechanics
 

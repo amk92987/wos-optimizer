@@ -58,9 +58,44 @@ def update_priority(priority_name: str, value: int):
     db.commit()
 
 
-# Render global sidebar with priorities
+# Define pages with shorter names
+# Home - standalone at top (no header)
+home_page = st.Page("pages/0_Home.py", title="Home", icon="🏠", default=True)
+
+# Main section
+heroes_page = st.Page("pages/1_Heroes.py", title="Heroes", icon="🦸")
+backpack_page = st.Page("pages/2_Backpack.py", title="Backpack", icon="🎒")
+lineups_page = st.Page("pages/4_Lineups.py", title="Lineups", icon="⚔️")
+
+# Analysis section
+upgrades_page = st.Page("pages/3_Recommendations.py", title="Upgrades", icon="📈")
+packs_page = st.Page("pages/7_Pack_Analyzer.py", title="Packs", icon="📦")
+ai_advisor_page = st.Page("pages/5_AI_Advisor.py", title="AI Advisor", icon="🤖")
+
+# Guides section
+events_page = st.Page("pages/8_Events_Guide.py", title="Events", icon="📅")
+combat_page = st.Page("pages/9_Combat_Optimization.py", title="Combat Stats", icon="⚡")
+tips_page = st.Page("pages/10_Quick_Tips.py", title="Tips", icon="💡")
+battle_page = st.Page("pages/11_Battle_Strategies.py", title="Battle Tactics", icon="🎯")
+
+# Standalone - Profiles (no header)
+profiles_page = st.Page("pages/6_Profiles.py", title="Profiles", icon="👤")
+
+# Settings page (will appear after Priorities)
+settings_page = st.Page("pages/12_Settings.py", title="Settings", icon="⚙️")
+
+# Navigation with grouped sections - include all pages so they're routable
+pg = st.navigation({
+    "": [home_page],
+    "Main": [heroes_page, lineups_page],
+    "Analysis": [upgrades_page, packs_page, ai_advisor_page],
+    "Guides": [backpack_page, events_page, combat_page, tips_page, battle_page],
+    "Account": [profiles_page, settings_page],
+}, expanded=True)
+
+# Render priorities in sidebar
 with st.sidebar:
-    st.markdown("**Priorities**")
+    st.markdown("##### Priorities")
 
     priorities = [
         ("SvS", profile.priority_svs),
@@ -71,7 +106,6 @@ with st.sidebar:
     ]
 
     for name, value in priorities:
-        stars = "★" * value + "☆" * (5 - value)
         col1, col2, col3, col4, col5, col6 = st.columns([1.2, 0.6, 0.6, 0.6, 0.6, 0.6])
         col1.markdown(f"<small>{name}</small>", unsafe_allow_html=True)
         for i, col in enumerate([col2, col3, col4, col5, col6], 1):
@@ -80,17 +114,6 @@ with st.sidebar:
                     update_priority(name, i)
                     st.rerun()
 
-# Define pages
-home_page = st.Page("pages/0_Home.py", title="Home", icon="🏠", default=True)
-heroes_page = st.Page("pages/1_Heroes.py", title="Heroes", icon="🦸")
-backpack_page = st.Page("pages/2_Backpack.py", title="Backpack", icon="🎒")
-recommendations_page = st.Page("pages/3_Recommendations.py", title="Recommendations", icon="📈")
-settings_page = st.Page("pages/4_Settings.py", title="Settings", icon="⚙️")
-ai_advisor_page = st.Page("pages/5_AI_Advisor.py", title="AI Advisor", icon="🤖")
-profiles_page = st.Page("pages/6_Profiles.py", title="Profiles", icon="👤")
-lineups_page = st.Page("pages/7_Lineups.py", title="Lineups", icon="⚔️")
-
-pg = st.navigation([home_page, heroes_page, backpack_page, recommendations_page, lineups_page, settings_page, ai_advisor_page, profiles_page])
 pg.run()
 
 # Close database

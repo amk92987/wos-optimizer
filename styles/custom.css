@@ -35,21 +35,45 @@
     color: var(--frost-white);
 }
 
-/* Sidebar navigation links - larger font */
+/* Sidebar navigation links - compact spacing */
 [data-testid="stSidebar"] [data-testid="stSidebarNav"] a {
-    font-size: 1.1rem !important;
-    padding: 12px 16px !important;
+    font-size: 0.95rem !important;
+    padding: 6px 12px !important;
+    min-height: unset !important;
 }
 
 [data-testid="stSidebar"] [data-testid="stSidebarNav"] a span {
-    font-size: 1.1rem !important;
+    font-size: 0.95rem !important;
     font-weight: 500 !important;
 }
 
-/* Navigation link icons */
+/* Navigation link icons - smaller */
 [data-testid="stSidebar"] [data-testid="stSidebarNav"] a svg {
-    width: 24px !important;
-    height: 24px !important;
+    width: 18px !important;
+    height: 18px !important;
+}
+
+/* Compact section headers */
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] h2,
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] [data-testid="stMarkdownContainer"] p {
+    font-size: 0.75rem !important;
+    margin: 8px 0 4px 0 !important;
+    padding: 0 12px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888 !important;
+}
+
+/* Reduce gaps between nav items */
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] ul {
+    gap: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] li {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* Hide sidebar collapse button - keep sidebar always visible */
@@ -58,7 +82,7 @@
     display: none !important;
 }
 
-/* Hide tooltips but NOT selectbox dropdowns */
+/* Hide tooltips, link previews, and status indicators */
 [data-testid="stSidebar"] [data-testid="stTooltipHoverTarget"],
 [data-testid="stSidebar"] [data-baseweb="tooltip"],
 [data-testid="stStatusWidget"],
@@ -67,17 +91,49 @@
 [data-testid="stSidebar"] [data-testid="stAppDeployButton"],
 [data-baseweb="tooltip"],
 [role="tooltip"],
-.stTooltipIcon {
+.stTooltipIcon,
+[data-testid="stLinkButtonContainer"],
+.stLinkButton,
+[data-testid="stSidebar"] [title],
+div[data-testid="stSidebarNavLink"]::after,
+[data-testid="stBottomBlockContainer"],
+.stBottom,
+iframe[title="streamlit_status"],
+[data-testid="stNotification"] {
     display: none !important;
     visibility: hidden !important;
     opacity: 0 !important;
 }
 
-/* Hide any status/connection indicator */
+/* Hide the URL preview bar at bottom of browser-like elements */
+[data-testid="stSidebar"] a[href]::after {
+    content: none !important;
+}
+
+/* Remove title attributes that cause hover tooltips */
+[data-testid="stSidebar"] a {
+    pointer-events: auto;
+}
+
+/* Hide any status/connection indicator and header bar */
 [data-testid="stStatusWidget"],
 [data-testid="stToolbar"],
+[data-testid="stHeader"],
+header[data-testid="stHeader"],
+.stApp > header,
 .streamlit-footer {
     display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+}
+
+/* Remove top padding that header leaves behind */
+.stApp > div:first-child {
+    padding-top: 0 !important;
+}
+
+.block-container {
+    padding-top: 1rem !important;
 }
 
 /* Star buttons in sidebar - clean and compact */

@@ -125,8 +125,11 @@ with col1:
         if st.button("Use this estimate"):
             profile.server_age_days = estimated_days
             db.commit()
-            st.success(f"Set server age to {estimated_days} days")
+            st.session_state.estimate_updated = True
             st.rerun()
+        if st.session_state.get('estimate_updated'):
+            st.markdown('<span style="color: #4CAF50; font-size: 14px;">✓ Updated</span>', unsafe_allow_html=True)
+            st.session_state.estimate_updated = False
 
     else:
         profile.server_age_days = st.number_input(
