@@ -1,5 +1,5 @@
 """
-AI-Powered Recommendation Engine using OpenAI API.
+AI-Powered Recommendation Engine using OpenAI or Claude API.
 Submits compact, structured data for intelligent analysis.
 Includes verified game mechanics to prevent hallucination.
 """
@@ -7,7 +7,7 @@ Includes verified game mechanics to prevent hallucination.
 import os
 import json
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Literal
 from dataclasses import dataclass
 
 
@@ -19,6 +19,10 @@ class AIRecommendation:
     hero: str  # Which hero (if applicable)
     reason: str  # Why
     resources_needed: str  # What you need
+
+
+# Supported AI providers
+AIProvider = Literal["openai", "anthropic", "auto"]
 
 
 # Condensed verified game mechanics for AI context
@@ -132,7 +136,7 @@ CORE TRUTHS:
 
 
 class AIRecommender:
-    """Generate recommendations using OpenAI API."""
+    """Generate recommendations using OpenAI or Claude API."""
 
     SYSTEM_PROMPT = f"""You are a Whiteout Survival expert advisor. Analyze the player's data and give specific upgrade recommendations.
 
@@ -158,12 +162,58 @@ Give 5-10 specific, actionable recommendations sorted by priority (1=do first)."
 
 CRITICAL: Only reference heroes and mechanics from the verified data above. If you don't know something specific, say so rather than guessing."""
 
-    def __init__(self, api_key: Optional[str] = None):
-        """Initialize with OpenAI API key from param or environment."""
-        self.api_key = api_key or os.environ.get('OPENAI_API_KEY')
+    def __init__(self, provider: AIProvider = "auto", api_key: Optional[str] = None):
+        """
+        Initialize with AI provider and API key.
+
+        Args:
+            provider: "openai", "anthropic", or "auto" (tries both)
+            api_key: Optional API key (otherwise uses environment variables)
+        """
+        self.provider = provider
+        self.openai_client = None
+        self.anthropic_client = None
+        self.active_provider = None
+
+        # Try to initialize based on provider preference
+        if provider in ["auto", "anthropic"]:
+            self._init_anthropic(api_key if provider == "anthropic" else None)
+
+        if provider in ["auto", "openai"]:
+            self._init_openai(api_key if provider == "openai" else None)
+
+    def _init_anthropic(self, api_key: Optional[str] = None):
+        """Initialize Anthropic/Claude client."""
+        anthropic_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
 
         # On Windows, also check user environment variables
-        if not self.api_key:
+        if not anthropic_key:
+            try:
+                import subprocess
+                result = subprocess.run(
+                    ['powershell', '-Command', "[Environment]::GetEnvironmentVariable('ANTHROPIC_API_KEY', 'User')"],
+                    capture_output=True, text=True, timeout=5
+                )
+                if result.stdout.strip():
+                    anthropic_key = result.stdout.strip()
+            except Exception:
+                pass
+
+        if anthropic_key:
+            try:
+                import anthropic
+                self.anthropic_client = anthropic.Anthropic(api_key=anthropic_key)
+                if not self.active_provider:
+                    self.active_provider = "anthropic"
+            except ImportError:
+                pass
+
+    def _init_openai(self, api_key: Optional[str] = None):
+        """Initialize OpenAI client."""
+        openai_key = api_key or os.environ.get('OPENAI_API_KEY')
+
+        # On Windows, also check user environment variables
+        if not openai_key:
             try:
                 import subprocess
                 result = subprocess.run(
@@ -171,22 +221,26 @@ CRITICAL: Only reference heroes and mechanics from the verified data above. If y
                     capture_output=True, text=True, timeout=5
                 )
                 if result.stdout.strip():
-                    self.api_key = result.stdout.strip()
+                    openai_key = result.stdout.strip()
             except Exception:
                 pass
 
-        self.client = None
-
-        if self.api_key:
+        if openai_key:
             try:
                 from openai import OpenAI
-                self.client = OpenAI(api_key=self.api_key)
+                self.openai_client = OpenAI(api_key=openai_key)
+                if not self.active_provider:
+                    self.active_provider = "openai"
             except ImportError:
                 pass
 
     def is_available(self) -> bool:
-        """Check if OpenAI is available."""
-        return self.client is not None
+        """Check if any AI provider is available."""
+        return self.anthropic_client is not None or self.openai_client is not None
+
+    def get_provider_name(self) -> str:
+        """Get the name of the active AI provider."""
+        return self.active_provider or "none"
 
     def format_user_data(self, profile, user_heroes: list, heroes_data: dict, inventory: dict = None) -> str:
         """
@@ -290,7 +344,7 @@ CRITICAL: Only reference heroes and mechanics from the verified data above. If y
             List of recommendation dicts
         """
         if not self.is_available():
-            return [{"error": "OpenAI not available. Set OPENAI_API_KEY environment variable."}]
+            return [{"error": "No AI provider available. Set OPENAI_API_KEY or ANTHROPIC_API_KEY environment variable."}]
 
         # Format the data
         user_data = self.format_user_data(profile, user_heroes, heroes_data, inventory)
@@ -302,18 +356,7 @@ CRITICAL: Only reference heroes and mechanics from the verified data above. If y
             user_message = f"{user_data}\n\nWhat should I upgrade next? Give me a prioritized action plan."
 
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",  # Fast and cheap, good for this use case
-                messages=[
-                    {"role": "system", "content": self.SYSTEM_PROMPT},
-                    {"role": "user", "content": user_message}
-                ],
-                temperature=0.7,
-                max_tokens=1000
-            )
-
-            # Parse the response
-            content = response.choices[0].message.content.strip()
+            content = self._call_ai(self.SYSTEM_PROMPT, user_message, max_tokens=1000)
 
             # Try to extract JSON from response
             # Handle cases where AI might wrap in markdown code blocks
@@ -338,25 +381,62 @@ CRITICAL: Only reference heroes and mechanics from the verified data above. If y
         Returns plain text response.
         """
         if not self.is_available():
-            return "OpenAI not available. Set OPENAI_API_KEY environment variable."
+            return "No AI provider available. Set OPENAI_API_KEY or ANTHROPIC_API_KEY environment variable."
 
         user_data = self.format_user_data(profile, user_heroes, heroes_data, inventory)
+        user_message = f"{user_data}\n\nQUESTION: {question}"
 
         try:
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": self.QUESTION_PROMPT},
-                    {"role": "user", "content": f"{user_data}\n\nQUESTION: {question}"}
-                ],
-                temperature=0.7,
-                max_tokens=800
-            )
-
-            return response.choices[0].message.content.strip()
-
+            return self._call_ai(self.QUESTION_PROMPT, user_message, max_tokens=800)
         except Exception as e:
             return f"Error: {str(e)}"
+
+    def _call_ai(self, system_prompt: str, user_message: str, max_tokens: int = 1000) -> str:
+        """
+        Call the appropriate AI provider.
+
+        Args:
+            system_prompt: System prompt for the AI
+            user_message: User message/question
+            max_tokens: Maximum tokens in response
+
+        Returns:
+            AI response text
+        """
+        # Prefer Anthropic if available (usually more accurate for structured tasks)
+        if self.anthropic_client and self.active_provider == "anthropic":
+            return self._call_anthropic(system_prompt, user_message, max_tokens)
+        elif self.openai_client:
+            return self._call_openai(system_prompt, user_message, max_tokens)
+        elif self.anthropic_client:
+            return self._call_anthropic(system_prompt, user_message, max_tokens)
+        else:
+            raise Exception("No AI provider available")
+
+    def _call_anthropic(self, system_prompt: str, user_message: str, max_tokens: int) -> str:
+        """Call Anthropic Claude API."""
+        response = self.anthropic_client.messages.create(
+            model="claude-sonnet-4-20250514",  # Latest Claude model
+            max_tokens=max_tokens,
+            system=system_prompt,
+            messages=[
+                {"role": "user", "content": user_message}
+            ]
+        )
+        return response.content[0].text.strip()
+
+    def _call_openai(self, system_prompt: str, user_message: str, max_tokens: int) -> str:
+        """Call OpenAI API."""
+        response = self.openai_client.chat.completions.create(
+            model="gpt-4o-mini",  # Fast and cheap, good for this use case
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message}
+            ],
+            temperature=0.7,
+            max_tokens=max_tokens
+        )
+        return response.choices[0].message.content.strip()
 
 
 def format_data_preview(profile, user_heroes: list, heroes_data: dict) -> str:

@@ -19,7 +19,7 @@ Whiteout Survival Optimizer - A comprehensive web-based tool to help Whiteout Su
 - Virtual environment: `.venv/`
 - Framework: Streamlit
 - Database: SQLite with SQLAlchemy ORM
-- AI: OpenAI API for AI-powered recommendations
+- AI: Claude (Anthropic) or OpenAI API for AI-powered recommendations
 - OCR: EasyOCR (optional, for screenshot parsing)
 
 ## Commands
@@ -32,9 +32,11 @@ source .venv/bin/activate  # Unix
 # Install dependencies
 pip install -r requirements.txt
 
-# Set OpenAI API key for AI recommendations
-set OPENAI_API_KEY=your-key-here  # Windows
-export OPENAI_API_KEY=your-key-here  # Unix
+# Set AI API key for AI recommendations (choose one)
+set ANTHROPIC_API_KEY=your-key-here  # Windows (Claude - preferred)
+set OPENAI_API_KEY=your-key-here     # Windows (OpenAI - fallback)
+export ANTHROPIC_API_KEY=your-key-here  # Unix (Claude)
+export OPENAI_API_KEY=your-key-here     # Unix (OpenAI)
 
 # Run the application
 streamlit run app.py
@@ -120,8 +122,15 @@ WoS/
 │   └── 11_Quick_Tips.py      # Quick reference (283 lines)
 │
 ├── engine/                   # Recommendation engines
-│   ├── recommender.py        # Rule-based recommendations (532 lines)
-│   └── ai_recommender.py     # OpenAI integration (368 lines)
+│   ├── recommendation_engine.py  # Main engine orchestrator
+│   ├── recommender.py            # Legacy rule-based recommendations
+│   ├── ai_recommender.py         # Claude/OpenAI fallback integration
+│   └── analyzers/                # Specialized analyzers
+│       ├── hero_analyzer.py      # Hero upgrade recommendations
+│       ├── gear_advisor.py       # Chief/hero gear priorities
+│       ├── lineup_builder.py     # Game mode lineup builder
+│       ├── progression_tracker.py # Game phase detection
+│       └── request_classifier.py  # Routes questions to rules vs AI
 │
 ├── ocr/                      # Screenshot parsing
 │   └── screenshot_parser.py  # EasyOCR integration

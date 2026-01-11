@@ -19,8 +19,9 @@ A comprehensive web-based tool to help Whiteout Survival players track their her
 - **Daybreak Island** - Battle enhancer decorations and Tree of Life priorities
 
 ### Recommendations
+- **Rule-based recommendation engine** with curated game knowledge (instant responses)
+- AI-powered fallback (Claude or OpenAI) for complex questions
 - Priority-based upgrade recommendations (SvS, Rally, Castle Battle, PvE, Gathering)
-- AI-powered advisor (requires OpenAI API key)
 - Combat-focused analysis for SvS optimization
 - Rally joiner hero selection with verified game mechanics
 
@@ -32,7 +33,11 @@ A comprehensive web-based tool to help Whiteout Survival players track their her
 ### Resource Management
 - Backpack inventory tracking
 - OCR screenshot parsing (EasyOCR)
-- Pack analysis with efficiency ratings
+- **Pack Analyzer** with Frost Star valuation system (1 FS = $0.01)
+  - 100+ items with researched values across 12 categories
+  - Speedup and resource grids for quick entry
+  - Efficiency ratings and filler detection
+  - "Farmer Mode" to zero-out farmable resources
 
 ### User Profiles
 - Multiple profile support

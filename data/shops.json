@@ -1,0 +1,546 @@
+{
+  "system": "shops",
+  "retrieved_at": "2026-01-10T00:00:00Z",
+  "data_completeness": "partial",
+  "sources": [
+    {"source_id": "SRC_GAME_KNOWLEDGE", "confidence": "B", "note": "Based on general game knowledge, needs in-game verification"}
+  ],
+
+  "shops": {
+    "mystery_shop": {
+      "name": "Mystery Shop",
+      "currency": "gems",
+      "unlock": "Available from start",
+      "refresh": "Every 6 hours, manual refresh costs gems",
+      "description": "Random selection of items at discounted gem prices",
+      "priority_items": [
+        {"item": "Legendary Hero Shards", "priority": "S", "note": "Best value for gems"},
+        {"item": "Epic Hero Shards", "priority": "A", "note": "Good for early game"},
+        {"item": "Speedups", "priority": "A", "note": "When discounted"},
+        {"item": "Essence Stones", "priority": "B", "note": "For Hero Gear Mastery"},
+        {"item": "Resources", "priority": "C", "note": "Only if desperate"}
+      ]
+    },
+
+    "arena_shop": {
+      "name": "Arena Shop",
+      "currency": "arena_coins",
+      "unlock": "Arena unlocked at Furnace 10",
+      "refresh": "Daily reset",
+      "currency_source": "Arena battles and daily rewards",
+      "priority_items": [
+        {"item": "Epic Hero Shards", "priority": "S", "note": "Best use of Arena Coins"},
+        {"item": "Essence Stones", "priority": "A", "note": "For Hero Gear Mastery"},
+        {"item": "Hero Gear XP", "priority": "B", "note": "When maxed on shards"},
+        {"item": "Speedups", "priority": "B", "note": "If no better options"}
+      ]
+    },
+
+    "alliance_shop": {
+      "name": "Alliance Shop",
+      "currency": "alliance_coins",
+      "unlock": "Join an alliance",
+      "refresh": "Daily reset",
+      "currency_source": "Alliance activities, donations, rallies",
+      "priority_items": [
+        {"item": "Legendary Hero Shards", "priority": "S", "note": "Top priority"},
+        {"item": "Epic Hero Shards", "priority": "A", "note": "For early game"},
+        {"item": "Speedups", "priority": "A", "note": "Good value"},
+        {"item": "Essence Stones", "priority": "B", "note": "For Hero Gear"},
+        {"item": "Resources", "priority": "C", "note": "Low priority"}
+      ]
+    },
+
+    "foundry_shop": {
+      "name": "Foundry Shop",
+      "currency": "foundry_coins",
+      "unlock": "Furnace 30 / FC",
+      "refresh": "Weekly reset",
+      "currency_source": "Foundry battles, alliance activities",
+      "priority_items": [
+        {"item": "Legendary Hero Shards (specific)", "priority": "S", "note": "Edith, Gregory, etc."},
+        {"item": "Charm Guides", "priority": "A", "note": "For Chief Gear Charms"},
+        {"item": "Charm Designs", "priority": "A", "note": "For Chief Gear Charms"},
+        {"item": "Essence Stones", "priority": "B", "note": "For Mastery"}
+      ]
+    },
+
+    "vip_shop": {
+      "name": "VIP Shop",
+      "currency": "gems",
+      "unlock": "VIP level dependent",
+      "refresh": "Weekly reset",
+      "description": "Exclusive items based on VIP level",
+      "priority_items": [
+        {"item": "Essence Stones", "priority": "S", "note": "Limited quantity, great value"},
+        {"item": "Legendary Hero Shards", "priority": "S", "note": "When available"},
+        {"item": "Speedups", "priority": "A", "note": "Good value at higher VIP"}
+      ]
+    },
+
+    "svs_shop": {
+      "name": "SvS Shop",
+      "currency": "svs_coins",
+      "unlock": "After SvS events",
+      "refresh": "After each SvS",
+      "currency_source": "SvS participation rewards",
+      "priority_items": [
+        {"item": "Legendary Hero Shards", "priority": "S", "note": "Norah shards if available"},
+        {"item": "Charm Materials", "priority": "A", "note": "Charm Guides/Designs"},
+        {"item": "Speedups", "priority": "B", "note": "Flexible use"}
+      ]
+    },
+
+    "canyon_shop": {
+      "name": "Canyon Shop",
+      "currency": "canyon_coins",
+      "unlock": "Canyon of the Sun event",
+      "refresh": "Event-based",
+      "currency_source": "Canyon event participation",
+      "priority_items": [
+        {"item": "Legendary Hero Shards", "priority": "S"},
+        {"item": "Charm Materials", "priority": "A"},
+        {"item": "Essence Stones", "priority": "B"}
+      ]
+    },
+
+    "frostdragon_shop": {
+      "name": "Frostdragon Tyrant Shop",
+      "currency": "frostdragon_coins",
+      "unlock": "Frostdragon Tyrant event",
+      "refresh": "Event-based",
+      "currency_source": "Frostdragon event damage",
+      "priority_items": [
+        {"item": "Legendary Hero Shards", "priority": "S"},
+        {"item": "Essence Stones", "priority": "A"},
+        {"item": "Speedups", "priority": "B"}
+      ]
+    },
+
+    "tundra_trading_station": {
+      "name": "Tundra Trading Station",
+      "currency": "gems",
+      "unlock": "Tundra Trading Station event",
+      "refresh": "Event-based",
+      "description": "Event shop with rotating deals",
+      "priority_items": [
+        {"item": "Limited Hero Shards", "priority": "S", "note": "Event-exclusive heroes"},
+        {"item": "Charm Materials", "priority": "A"},
+        {"item": "Essence Stones", "priority": "B"}
+      ]
+    },
+
+    "power_region_shop": {
+      "name": "Power Region Shop",
+      "currency": "power_region_coins",
+      "unlock": "Power Region event",
+      "refresh": "Event-based",
+      "priority_items": [
+        {"item": "Charm Designs", "priority": "S", "note": "Best source of Charm Designs"},
+        {"item": "Legendary Hero Shards", "priority": "A"}
+      ]
+    },
+
+    "labyrinth_shop": {
+      "name": "Labyrinth Shop",
+      "currency": "glowstones",
+      "unlock": "Furnace 19 (Labyrinth unlock)",
+      "refresh": "Weekly reset",
+      "currency_source": "Labyrinth raiding rewards, Glowstone Mine (F25+)",
+      "description": "Exchange Glowstones earned from Labyrinth for valuable items",
+      "priority_items": [
+        {"item": "Mythic General Shards", "priority": "S", "note": "Top priority - hard to collect early"},
+        {"item": "Lucky Hero Gear Chest", "priority": "A", "note": "Strengthens Hero Gear"},
+        {"item": "Enhancement XP Component (100)", "priority": "A", "note": "Hero Gear upgrades"},
+        {"item": "Mithril", "priority": "B", "note": "Save for future - pays dividends later"},
+        {"item": "Charm Design", "priority": "B", "note": "NOT Charm Guide - Designs are rarer"},
+        {"item": "Fire Crystal Shards", "priority": "B", "note": "Added after War Academy unlock (~day 220)"}
+      ],
+      "notes": "Save surplus Glowstones - new items added over time"
+    },
+
+    "nomadic_merchant": {
+      "name": "Nomadic Merchant",
+      "currency": "resources",
+      "unlock": "Available from start",
+      "refresh": "Daily reset",
+      "description": "Exchange resources for useful items",
+      "priority_items": [
+        {"item": "Advanced Teleport", "priority": "S", "note": "Best value for late-game"},
+        {"item": "Speedups", "priority": "A"},
+        {"item": "Resources", "priority": "B"}
+      ]
+    },
+
+    "skin_shop": {
+      "name": "Skin Shop",
+      "currency": "gems",
+      "unlock": "Available from start",
+      "refresh": "Permanent items",
+      "description": "Cosmetic skins with permanent stat boosts",
+      "priority_items": [
+        {"item": "City Skins with Defense Boost", "priority": "A", "note": "Permanent defensive bonuses"},
+        {"item": "March Skins", "priority": "B"}
+      ]
+    },
+
+    "hall_of_heroes_shop": {
+      "name": "Hall of Heroes Shop",
+      "currency": "gems",
+      "unlock": "Hall of Heroes event",
+      "refresh": "Event-based",
+      "description": "Purchase current generation hero widgets",
+      "priority_items": [
+        {"item": "Current Gen Hero Widgets", "priority": "S", "note": "Latest season heroes"},
+        {"item": "Hero Shards", "priority": "A"}
+      ]
+    },
+
+    "dawn_academy_shop": {
+      "name": "Dawn Academy Shop",
+      "currency": "gems",
+      "unlock": "Dawn Academy feature (August 2025+)",
+      "refresh": "Event-based",
+      "description": "Expert system shop for Expert Hero Sigils",
+      "priority_items": [
+        {"item": "Expert Hero Sigils", "priority": "S", "note": "Top priority for Expert upgrades"},
+        {"item": "Expert Materials", "priority": "A"}
+      ]
+    },
+
+    "trade_shop": {
+      "name": "Trade Shop",
+      "currency": "trade_coins",
+      "unlock": "Exploration activities",
+      "refresh": "Daily reset",
+      "currency_source": "Exploration, events, activity completions",
+      "priority_items": [
+        {"item": "Speedups", "priority": "A"},
+        {"item": "Resources", "priority": "B"}
+      ]
+    }
+  },
+
+  "deal_event_shops": {
+    "description": "Temporary event shops that rotate with deal events",
+
+    "mias_fortune_hut": {
+      "name": "Mia's Fortune Hut",
+      "currency": "fortune_tokens",
+      "event_type": "Deal Event",
+      "description": "Fortune-themed orb reveal event - find your Wish Reward hidden in 1 of 10 orbs",
+      "mechanics": {
+        "orb_costs": "1/2/3/4/5/8/12/15/20/25 tokens per orb reveal",
+        "daily_free_tokens": 23,
+        "daily_breakdown": "22 from daily missions + 1 free bonus",
+        "multipliers": "2x, 3x, 4x - only apply to NEXT orb, consecutive multipliers stack (2x + 4x = 6x)",
+        "strategy": "Reset after 6 attempts unless multiplier is active"
+      },
+      "priority_items": [
+        {"item": "Wish Reward (chosen item)", "priority": "S"},
+        {"item": "Multiplier orbs", "priority": "A", "note": "Stack for big rewards"}
+      ],
+      "notes": "Unused Fortune Tokens carry over to next event in backpack"
+    },
+
+    "tundra_trading_station": {
+      "name": "Tundra Trading Station",
+      "currency": "trade_vouchers",
+      "event_type": "Deal Event",
+      "frequency": "Monthly, runs 2 days",
+      "description": "Exchange maxed (5-star) hero shards, skill manuals, widgets for Trade Vouchers",
+      "requirements": "Hero must be at 5 stars to exchange their shards",
+      "priority_items": [
+        {"item": "Expert Hero Sigils", "priority": "S", "note": "Best buy since Dawn Academy (Aug 2025)"},
+        {"item": "Custom Hero Widget Chest", "priority": "A"},
+        {"item": "Essence Stones", "priority": "A"},
+        {"item": "Mythic General Hero Shards", "priority": "A"},
+        {"item": "Expedition/Exploration Manuals", "priority": "B"},
+        {"item": "100 Enhancement XP Component", "priority": "B"}
+      ],
+      "notes": "Trade Vouchers don't expire - carry over to next event. Redeemed items don't count toward consumption missions."
+    },
+
+    "hall_of_heroes": {
+      "name": "Hall of Heroes",
+      "currency": "marks_of_valor",
+      "event_type": "Deal Event",
+      "frequency": "Weekly (Sun-Tue) or every 3 weeks in Deals section",
+      "description": "Redeem Marks of Valor for Mythic Hero Shards based on your hero generation",
+      "how_to_obtain_currency": "Purchase with gems or via Hall of Heroes packs",
+      "priority_items": [
+        {"item": "Mythic Hero Shards (current gen)", "priority": "S"},
+        {"item": "Hero Widgets", "priority": "A"}
+      ],
+      "notes": "Heroes available vary by your server's generation"
+    },
+
+    "frosty_fortune": {
+      "name": "Frosty Fortune (Emporium of Enigma)",
+      "currency": "gem_of_enigma",
+      "secondary_currency": "thorns_of_enigma",
+      "event_type": "Deal Event",
+      "frequency": "Monthly",
+      "description": "Spend Gems of Enigma to open chests → get Thorns of Enigma → spend Thorns in Emporium",
+      "mechanics": {
+        "chest_cost": "60 Gems of Enigma per chest",
+        "gem_source": "Treasure Hunt Drill daily missions, packs",
+        "gems_carry_over": true,
+        "thorns_carry_over": false
+      },
+      "priority_items": [
+        {"item": "Widgets", "priority": "S"},
+        {"item": "Essence Stones", "priority": "A"},
+        {"item": "Pet Chests", "priority": "A"},
+        {"item": "Fire Crystals", "priority": "B"}
+      ],
+      "notes": "Gems of Enigma carry over between events. Thorns of Enigma EXPIRE - spend before timer ends!"
+    },
+
+    "journey_of_light": {
+      "name": "Journey of Light",
+      "currency": "pocket_watch",
+      "event_type": "Deal Event",
+      "description": "Send teams on expeditions to earn rare rewards",
+      "mechanics": {
+        "expedition_duration": "8 hours",
+        "pocket_watch_effect": "Reduces expedition time by 1 hour",
+        "goal": "Complete more expeditions to unlock premium milestone rewards"
+      },
+      "priority_items": [
+        {"item": "Milestone Rewards", "priority": "S"},
+        {"item": "Expedition Rewards", "priority": "A"}
+      ]
+    },
+
+    "snowbusters": {
+      "name": "Snowbusters Event",
+      "currency": "fuel",
+      "secondary_currency": "rocket_v2",
+      "event_type": "Deal Event",
+      "description": "Snow-clearing mini-game with gear upgrades",
+      "mechanics": {
+        "starting_fuel": 200,
+        "fuel_regen": "12 points every 5 minutes",
+        "fuel_uses": "Snow clearing, monster fights, rescuing survivors",
+        "rocket_use": "Clears remaining snow when at 95% cleared",
+        "gear_upgrades": "Gloves and Coat improve fuel efficiency and recovery"
+      },
+      "what_carries_over": {
+        "yes": ["Unopened Fuel Supply Chests", "Rocket V2", "Toolkit Chests"],
+        "no": ["Opened fuel", "Gear upgrades", "Coal", "Stage progress"]
+      },
+      "tips": [
+        "Don't waste fuel near fire - clears automatically when upgraded",
+        "Leftover coal converts to extra fuel at end of stage",
+        "Use Rocket at 95% to save fuel for next area"
+      ]
+    },
+
+    "bear_trap_upgrade": {
+      "name": "Bear Trap Enhancement",
+      "currency": "explosive_arrowheads",
+      "event_type": "Alliance Event Enhancement",
+      "description": "Donate Explosive Arrowheads to level up Bear Trap for damage bonus",
+      "mechanics": {
+        "max_level": 5,
+        "damage_bonus_per_level": "+5%",
+        "max_damage_bonus": "+25% at level 5",
+        "total_arrowheads_needed": 2500,
+        "arrowhead_source": "Intel missions",
+        "alliance_token_bonus": "200 Alliance Tokens per 1 arrowhead donated"
+      },
+      "notes": [
+        "Each Bear Trap has SEPARATE enhancement progress (2 traps per alliance)",
+        "Can donate past max level for Alliance Tokens",
+        "Use Jessie as leftmost joiner for +25% damage buff"
+      ]
+    }
+  },
+
+  "currencies": {
+    "gems": {
+      "name": "Gems",
+      "description": "Premium currency",
+      "sources": ["Purchase", "Events", "Daily rewards", "Achievements"],
+      "priority_use": ["Mystery Shop legendary shards", "VIP Shop essentials", "Lucky Wheel"]
+    },
+    "arena_coins": {
+      "name": "Arena Coins",
+      "description": "Earned from Arena battles",
+      "sources": ["Arena battles", "Daily Arena rewards", "Season rewards"],
+      "priority_use": ["Epic Hero Shards", "Essence Stones"]
+    },
+    "alliance_coins": {
+      "name": "Alliance Coins",
+      "description": "Earned from alliance activities",
+      "sources": ["Alliance help", "Donations", "Rally participation", "Alliance events"],
+      "priority_use": ["Legendary Hero Shards", "Speedups"]
+    },
+    "foundry_coins": {
+      "name": "Foundry Coins",
+      "description": "Earned from Foundry battles (FC era)",
+      "sources": ["Foundry Battle participation", "Alliance Foundry events"],
+      "priority_use": ["Specific Legendary Heroes", "Charm materials"]
+    },
+    "svs_coins": {
+      "name": "SvS Coins",
+      "description": "Earned from State vs State events",
+      "sources": ["SvS participation", "SvS phase rewards", "Victory bonuses"],
+      "priority_use": ["Norah shards", "Charm materials"]
+    },
+    "glowstones": {
+      "name": "Glowstones",
+      "description": "Currency earned from Labyrinth raiding and Glowstone Mine",
+      "sources": ["Labyrinth Raiding Rewards", "Glowstone Mine (F25+)"],
+      "priority_use": ["Mythic General Shards", "Lucky Hero Gear Chest", "Enhancement XP", "Mithril"]
+    },
+    "trade_coins": {
+      "name": "Trade Coins",
+      "description": "Earned from exploration and activities",
+      "sources": ["Exploration", "Events", "Activity completions"],
+      "priority_use": ["Speedups", "Resources"]
+    },
+    "mystery_badges": {
+      "name": "Mystery Badges",
+      "description": "Earned from daily missions (80/day)",
+      "sources": ["Last daily challenge completion"],
+      "priority_use": ["Widgets", "Mythic General Shards"]
+    },
+    "mark_of_valor": {
+      "name": "Mark of Valor",
+      "description": "Combat achievement currency",
+      "sources": ["Combat events", "Ranked play"],
+      "priority_use": ["Hero Widgets"]
+    },
+    "lost_coins": {
+      "name": "Lost Coins",
+      "description": "Currency from Canyon Clash event",
+      "sources": ["Canyon Clash event"],
+      "priority_use": ["Canyon Shop items"]
+    },
+    "frost_stars": {
+      "name": "Frost Stars",
+      "description": "Premium token for official store purchases",
+      "sources": ["Purchase", "Special events"],
+      "priority_use": ["Pack purchases at equal value"]
+    },
+    "loyalty_tags": {
+      "name": "Loyalty Tags",
+      "description": "Loyalty reward currency",
+      "sources": ["Daily login", "Loyalty rewards"],
+      "priority_use": ["Gem Shop items"]
+    },
+    "expert_hero_sigils": {
+      "name": "Expert Hero Sigils",
+      "description": "Currency for Expert hero upgrades (Dawn Academy)",
+      "sources": ["Dawn Academy", "Alliance Championship Shop"],
+      "priority_use": ["Expert upgrades"]
+    },
+    "arsenal_tokens": {
+      "name": "Arsenal Tokens",
+      "description": "Foundry Battle currency",
+      "sources": ["Foundry Battle"],
+      "priority_use": ["Design Plans"]
+    },
+    "sunfire_tokens": {
+      "name": "Sunfire Tokens",
+      "description": "State of Power event currency",
+      "sources": ["State of Power event"],
+      "priority_use": ["Design Plans", "Charm materials", "Fire Crystal"]
+    },
+    "championship_badges": {
+      "name": "Championship Badges",
+      "description": "Alliance Championship currency",
+      "sources": ["Alliance Championship event"],
+      "priority_use": ["Polishing Solution", "Hardened Alloy", "Expert Sigils"]
+    },
+    "fortune_tokens": {
+      "name": "Fortune Tokens",
+      "description": "Mia's Fortune Hut currency - reveal orbs to find your Wish Reward",
+      "sources": ["Daily missions (22/day)", "Free daily bonus (1/day)", "Event packs"],
+      "daily_free": 23,
+      "carry_over": true,
+      "priority_use": ["Reveal orbs for Wish Reward", "Stack multipliers for big rewards"]
+    },
+    "trade_vouchers": {
+      "name": "Trade Vouchers",
+      "description": "Tundra Trading Station currency - exchange maxed hero items for valuable rewards",
+      "sources": ["Exchange 5-star hero shards", "Exchange skill manuals", "Exchange widgets"],
+      "carry_over": true,
+      "priority_use": ["Expert Hero Sigils", "Custom Widget Chest", "Essence Stones", "Mythic General Shards"]
+    },
+    "pocket_watch": {
+      "name": "Pocket Watch",
+      "description": "Journey of Light currency - reduces expedition time by 1 hour (expeditions take 8h)",
+      "sources": ["Journey of Light event", "Event packs"],
+      "priority_use": ["Speed up expeditions", "Complete more expeditions for milestone rewards"]
+    },
+    "gem_of_enigma": {
+      "name": "Gem of Enigma",
+      "description": "Frosty Fortune currency - costs 60 per chest, gives Thorns of Enigma for Emporium shop",
+      "sources": ["Treasure Hunt Drill daily missions", "Event packs"],
+      "carry_over": true,
+      "priority_use": ["Open chests for Thorns → spend on Widgets, Essence Stones, Pet Chests, Fire Crystals"]
+    },
+    "thorns_of_enigma": {
+      "name": "Thorns of Enigma",
+      "description": "Secondary Frosty Fortune currency earned from chests - spend in Emporium of Enigma",
+      "sources": ["Opening chests with Gems of Enigma"],
+      "carry_over": false,
+      "warning": "EXPIRES when event ends - spend before timer runs out!",
+      "priority_use": ["Widgets", "Essence Stones", "Pet Chests", "Fire Crystals"]
+    },
+    "rocket_v2": {
+      "name": "Rocket V2",
+      "description": "Snowbusters item - instantly clears remaining snow when at 95% cleared",
+      "sources": ["Snowbusters event", "Event packs"],
+      "carry_over": true,
+      "priority_use": ["Save fuel by clearing last 5% instantly"]
+    },
+    "fuel": {
+      "name": "Fuel (Snowbusters)",
+      "description": "Snowbusters energy - used for snow clearing, monster fights, rescuing survivors",
+      "sources": ["Start with 200 per event", "Regenerates 12 per 5 minutes", "Fuel Supply Chests"],
+      "carry_over": "Only unopened Fuel Supply Chests carry over - opened fuel is lost",
+      "priority_use": ["Snow clearing", "Monster fights", "Rescuing survivors"]
+    },
+    "marks_of_valor": {
+      "name": "Marks of Valor",
+      "description": "Hall of Heroes currency - redeem for Mythic Hero Shards based on your generation",
+      "sources": ["Purchase with gems", "Hall of Heroes packs"],
+      "priority_use": ["Mythic Hero Shards (current gen)", "Hero Widgets"]
+    },
+    "explosive_arrowheads": {
+      "name": "Explosive Arrowheads",
+      "description": "Bear Trap enhancement item - donate to level up trap (+5% damage per level, max +25%)",
+      "sources": ["Intel missions"],
+      "total_to_max": 2500,
+      "bonus": "200 Alliance Tokens per arrowhead donated (even past max level)",
+      "priority_use": ["Enhance Bear Trap to level 5", "Farm Alliance Tokens after max"]
+    }
+  },
+
+  "shop_priority_by_phase": {
+    "early_game": {
+      "phase": "Furnace 1-18",
+      "priorities": ["Mystery Shop (Epic shards)", "Alliance Shop (Speedups)", "Arena Shop (Epic shards)"]
+    },
+    "mid_game": {
+      "phase": "Furnace 19-29",
+      "priorities": ["Mystery Shop (Legendary shards)", "Alliance Shop (Legendary shards)", "VIP Shop"]
+    },
+    "late_game": {
+      "phase": "FC era",
+      "priorities": ["Foundry Shop (Specific heroes)", "All charm material sources", "Essence Stone sources"]
+    }
+  },
+
+  "notes": [
+    "Always prioritize Legendary Hero Shards in any shop",
+    "Essence Stones become critical at FC30 for Mastery Forging",
+    "Charm materials (Guides, Designs) are key for Chief Gear Charms starting at F25",
+    "Speedups should be saved for Tool Enhancement research and SvS prep",
+    "Never buy resources with gems unless absolutely necessary"
+  ]
+}

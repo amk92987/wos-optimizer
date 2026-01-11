@@ -72,8 +72,49 @@ def get_available_hero(preferred: str, fallback: str, hero_class: str, max_gen: 
     return preferred  # Return preferred anyway as placeholder
 
 
-# Get user's current generation
+# Get user's current generation (default)
 USER_GEN = get_current_generation(profile.server_age_days)
+
+
+def get_user_heroes(db, profile_id: int) -> dict:
+    """Get user's owned heroes with their levels."""
+    from database.models import UserHero, Hero
+    user_heroes = db.query(UserHero).filter(UserHero.profile_id == profile_id).all()
+    heroes_dict = {}
+    for uh in user_heroes:
+        hero = db.query(Hero).filter(Hero.id == uh.hero_id).first()
+        if hero:
+            heroes_dict[hero.name] = {
+                "level": uh.level,
+                "stars": uh.star_rank,
+                "exploration_skill": uh.exploration_skill_level,
+                "expedition_skill": uh.expedition_skill_level,
+                "owned": True
+            }
+    return heroes_dict
+
+
+def get_best_available_hero(preferred_heroes: list, user_heroes: dict, hero_class: str, use_personalized: bool, max_gen: int) -> tuple:
+    """
+    Get the best available hero from a preference list.
+    Returns (hero_name, availability_note)
+    """
+    if not use_personalized:
+        # General mode - just check generation
+        for hero_name in preferred_heroes:
+            if hero_available(hero_name, max_gen):
+                return (hero_name, None)
+        return (preferred_heroes[0], "Not yet available")
+
+    # Personalized mode - check ownership and level
+    for hero_name in preferred_heroes:
+        if hero_name in user_heroes:
+            hero_data = user_heroes[hero_name]
+            level_note = f"Lv.{hero_data['level']}" if hero_data['level'] else "Owned"
+            return (hero_name, level_note)
+
+    # None owned - return first preferred with note
+    return (preferred_heroes[0], "⚠️ Not owned")
 
 
 def get_class_symbol(hero_class: str) -> str:
@@ -99,7 +140,7 @@ def get_tier_color(tier: str) -> str:
     return colors.get(tier, "#808080")
 
 
-def render_hero_slot(hero_name: str, hero_class: str, role: str = "", is_lead: bool = False):
+def render_hero_slot(hero_name: str, hero_class: str, role: str = "", is_lead: bool = False, availability_note: str = None):
     """Render a single hero slot in the lineup."""
     hero = HEROES_BY_NAME.get(hero_name, {})
 
@@ -126,20 +167,19 @@ def render_hero_slot(hero_name: str, hero_class: str, role: str = "", is_lead: b
 
     role_text = f" - {role}" if role else ""
 
-    st.markdown(f"""
-    <div style="background:rgba(46,90,140,0.3);border-radius:8px;padding:10px;margin:4px 0;display:flex;align-items:center;gap:12px;">
-        <div style="font-size:24px;">{class_symbol}</div>
-        <div style="flex:1;">
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                <span style="color:{pos_color};font-weight:bold;font-size:12px;">{pos_label}</span>
-                <span style="background:{tier_color};color:white;padding:1px 6px;border-radius:3px;font-size:11px;">{tier}</span>
-                <span style="color:#E8F4F8;font-weight:bold;">{hero_name}</span>
-                <span style="color:#808080;font-size:11px;">Gen {generation}</span>
-            </div>
-            <div style="color:#B8D4E8;font-size:12px;">{role_text}</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    # Availability note styling
+    if availability_note:
+        if "Not owned" in availability_note:
+            avail_html = f'<span style="color:#E74C3C;font-size:11px;margin-left:8px;">{availability_note}</span>'
+        elif "Lv." in availability_note:
+            avail_html = f'<span style="color:#2ECC71;font-size:11px;margin-left:8px;">✓ {availability_note}</span>'
+        else:
+            avail_html = f'<span style="color:#F1C40F;font-size:11px;margin-left:8px;">{availability_note}</span>'
+    else:
+        avail_html = ""
+
+    html = f'''<div style="background:rgba(46,90,140,0.3);border-radius:8px;padding:10px;margin:4px 0;display:flex;align-items:center;gap:12px;"><div style="font-size:24px;">{class_symbol}</div><div style="flex:1;"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="color:{pos_color};font-weight:bold;font-size:12px;">{pos_label}</span><span style="background:{tier_color};color:white;padding:1px 6px;border-radius:3px;font-size:11px;">{tier}</span><span style="color:#E8F4F8;font-weight:bold;">{hero_name}</span><span style="color:#808080;font-size:11px;">Gen {generation}</span>{avail_html}</div><div style="color:#B8D4E8;font-size:12px;">{role_text}</div></div></div>'''
+    st.markdown(html, unsafe_allow_html=True)
 
 
 def render_troop_ratio(infantry: int, lancer: int, marksman: int, note: str = ""):
@@ -164,9 +204,9 @@ def render_3hero_lineup(infantry: dict, lancer: dict, marksman: dict, title: str
     if description:
         st.markdown(f"*{description}*")
 
-    render_hero_slot(infantry["name"], "Infantry", infantry.get("role", ""), infantry.get("lead", False))
-    render_hero_slot(lancer["name"], "Lancer", lancer.get("role", ""), lancer.get("lead", False))
-    render_hero_slot(marksman["name"], "Marksman", marksman.get("role", ""), marksman.get("lead", False))
+    render_hero_slot(infantry["name"], "Infantry", infantry.get("role", ""), infantry.get("lead", False), infantry.get("avail"))
+    render_hero_slot(lancer["name"], "Lancer", lancer.get("role", ""), lancer.get("lead", False), lancer.get("avail"))
+    render_hero_slot(marksman["name"], "Marksman", marksman.get("role", ""), marksman.get("lead", False), marksman.get("avail"))
 
 
 def render_5hero_lineup(heroes: list, title: str = "", description: str = ""):
@@ -185,6 +225,85 @@ def render_5hero_lineup(heroes: list, title: str = "", description: str = ""):
 # Page content
 st.markdown("# ⚔️ Best Lineups & Compositions")
 st.markdown("Optimal hero and troop setups for every game mode")
+
+st.markdown("---")
+
+# =============================================================================
+# MODE SELECTOR - General Guide vs Personalized
+# =============================================================================
+st.markdown("### How would you like to view lineups?")
+
+col_mode1, col_mode2 = st.columns(2)
+
+with col_mode1:
+    lineup_mode = st.radio(
+        "Lineup Mode:",
+        options=["General Guide", "My Setup (Personalized)"],
+        help="General Guide shows ideal lineups by generation. Personalized uses your actual hero inventory."
+    )
+
+with col_mode2:
+    if lineup_mode == "General Guide":
+        selected_gen = st.selectbox(
+            "Select your hero generation:",
+            options=[1, 2, 3, 4, 5, 6, 7, 8],
+            index=min(USER_GEN - 1, 7),
+            help="Choose what generation of heroes you have access to"
+        )
+        USE_PERSONALIZED = False
+        ACTIVE_GEN = selected_gen
+        USER_HEROES = {}
+        st.caption(f"Showing recommendations for Gen {selected_gen} heroes")
+    else:
+        USE_PERSONALIZED = True
+        ACTIVE_GEN = USER_GEN
+        USER_HEROES = get_user_heroes(db, profile.id)
+        if USER_HEROES:
+            st.success(f"Found {len(USER_HEROES)} heroes in your profile")
+        else:
+            st.warning("No heroes in profile yet. Add heroes in the Heroes page for personalized recommendations.")
+            USE_PERSONALIZED = False
+            USER_HEROES = {}
+
+st.markdown("---")
+
+# =============================================================================
+# PROMINENT NATALIA VS JERONIMO EXPLANATION
+# =============================================================================
+with st.container():
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, rgba(255,140,0,0.2), rgba(138,43,226,0.2));
+                border: 2px solid #FF8C00; border-radius: 12px; padding: 20px; margin: 10px 0;">
+        <h3 style="color: #FFD700; margin-top: 0;">⚔️ The Natalia vs Jeronimo Debate</h3>
+        <p style="color: #E8F4F8; font-size: 14px;">
+            <strong>Legacy players often use Jeronimo as main march leader.</strong> This isn't wrong - it depends on your situation.
+        </p>
+        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px;">
+            <div style="flex: 1; min-width: 200px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
+                <strong style="color: #FF6B6B;">Jeronimo Lead - Better when:</strong>
+                <ul style="color: #B8D4E8; font-size: 13px; margin: 8px 0;">
+                    <li>Your infantry gear is strong enough to survive</li>
+                    <li>Rally coordination is tight</li>
+                    <li>You need maximum burst damage</li>
+                    <li>Enemy dies before your infantry</li>
+                </ul>
+            </div>
+            <div style="flex: 1; min-width: 200px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
+                <strong style="color: #4ECDC4;">Natalia Lead - Better when:</strong>
+                <ul style="color: #B8D4E8; font-size: 13px; margin: 8px 0;">
+                    <li>Infantry dies before fight ends</li>
+                    <li>Enemy garrison is very strong</li>
+                    <li>You need sustained pressure over burst</li>
+                    <li>Undergeared or early game</li>
+                </ul>
+            </div>
+        </div>
+        <p style="color: #FFD700; font-size: 13px; margin-top: 15px; margin-bottom: 0;">
+            <strong>The Test:</strong> If your infantry dies before the fight ends, Natalia wins.
+            If you kill them first, Jeronimo's ATK multiplier is better. Both are valid!
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 st.markdown("---")
 
@@ -223,14 +342,19 @@ if event_type == "World March (Default)":
     st.markdown("## 🗡️ Default World March")
     st.markdown("Standard 3-hero composition for attacks, rally joins, and general PvP")
 
+    # Get best available heroes for this mode
+    inf_main, inf_avail = get_best_available_hero(["Natalia", "Jeronimo", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
+    lan_main, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
+    mar_main, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
+
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("### Main March (Recommended)")
         render_3hero_lineup(
-            infantry={"name": "Natalia", "role": "Primary tank, sustain", "lead": True},
-            lancer={"name": "Molly", "role": "Damage + healing support"},
-            marksman={"name": "Alonso", "role": "Main damage dealer"}
+            infantry={"name": inf_main, "role": "Primary tank, sustain", "lead": True, "avail": inf_avail},
+            lancer={"name": lan_main, "role": "Damage + healing support", "avail": lan_avail},
+            marksman={"name": mar_main, "role": "Main damage dealer", "avail": mar_avail}
         )
         render_troop_ratio(50, 20, 30, "Balanced default - community consensus")
 
@@ -245,19 +369,26 @@ if event_type == "World March (Default)":
     with col2:
         st.markdown("### Alternative Compositions")
 
+        # Get burst damage heroes
+        inf_burst, inf_burst_avail = get_best_available_hero(["Jeronimo", "Natalia"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
+
         st.markdown("**Burst Damage Focus:**")
         render_3hero_lineup(
-            infantry={"name": "Jeronimo", "role": "ATK multiplier", "lead": True},
-            lancer={"name": "Molly", "role": "Damage"},
-            marksman={"name": "Alonso", "role": "Burst damage"}
+            infantry={"name": inf_burst, "role": "ATK multiplier", "lead": True, "avail": inf_burst_avail},
+            lancer={"name": lan_main, "role": "Damage", "avail": lan_avail},
+            marksman={"name": mar_main, "role": "Burst damage", "avail": mar_avail}
         )
         st.caption("Use when you need fast kills, not sustain")
 
+        # Get marksman heavy heroes
+        lan_alt, lan_alt_avail = get_best_available_hero(["Zinman", "Molly", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
+        mar_alt, mar_alt_avail = get_best_available_hero(["Philly", "Alonso", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
+
         st.markdown("**Marksman Heavy:**")
         render_3hero_lineup(
-            infantry={"name": "Natalia", "role": "Tank", "lead": True},
-            lancer={"name": "Zinman", "role": "Lancer support"},
-            marksman={"name": "Philly", "role": "Ranged focus"}
+            infantry={"name": inf_main, "role": "Tank", "lead": True, "avail": inf_avail},
+            lancer={"name": lan_alt, "role": "Lancer support", "avail": lan_alt_avail},
+            marksman={"name": mar_alt, "role": "Ranged focus", "avail": mar_alt_avail}
         )
         st.caption("Good against slower infantry comps")
 
@@ -270,38 +401,33 @@ elif event_type == "SvS Castle Attack":
 
     st.warning("Castle attacks are **attrition fights**. The side whose infantry survives longest usually wins.")
 
+    # Get heroes for this mode
+    inf_jer, inf_jer_avail = get_best_available_hero(["Jeronimo", "Natalia", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
+    inf_nat, inf_nat_avail = get_best_available_hero(["Natalia", "Jeronimo", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
+    lan_main, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
+    mar_main, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
+
     col1, col2 = st.columns(2)
 
     with col1:
         st.markdown("### Rally Leader")
         st.markdown("*When YOU are leading the castle rally*")
         render_3hero_lineup(
-            infantry={"name": "Jeronimo", "role": "ATK boost to entire rally", "lead": True},
-            lancer={"name": "Molly", "role": "Healing + damage"},
-            marksman={"name": "Alonso", "role": "Main damage dealer"}
+            infantry={"name": inf_jer, "role": "ATK boost to entire rally", "lead": True, "avail": inf_jer_avail},
+            lancer={"name": lan_main, "role": "Healing + damage", "avail": lan_avail},
+            marksman={"name": mar_main, "role": "Main damage dealer", "avail": mar_avail}
         )
         render_troop_ratio(50, 20, 30, "Standard attack ratio")
 
-        with st.expander("📝 When to use Jeronimo vs Natalia lead"):
-            st.markdown("""
-            **Use Jeronimo lead when:**
-            - Your rally is well-coordinated
-            - Infantry gear is strong enough to survive
-            - You need maximum damage output
-
-            **Use Natalia lead when:**
-            - Infantry dies too quickly
-            - Enemy garrison is very strong
-            - You need sustained pressure over burst
-            """)
+        st.caption("See the Natalia vs Jeronimo box above for when to swap leads!")
 
     with col2:
         st.markdown("### Rally Joiner")
         st.markdown("*When joining someone else's rally*")
         render_3hero_lineup(
-            infantry={"name": "Natalia", "role": "Survivability", "lead": True},
-            lancer={"name": "Molly", "role": "Support"},
-            marksman={"name": "Alonso", "role": "Damage"}
+            infantry={"name": inf_nat, "role": "Survivability", "lead": True, "avail": inf_nat_avail},
+            lancer={"name": lan_main, "role": "Support", "avail": lan_avail},
+            marksman={"name": mar_main, "role": "Damage", "avail": mar_avail}
         )
         render_troop_ratio(60, 15, 25, "Tankier - keep troops alive")
 
@@ -421,7 +547,10 @@ elif event_type == "Bear Trap Rally":
     st.markdown("## 🐻 Bear Trap Rally")
     st.markdown("Alliance rally against Bear Trap boss")
 
-    st.caption(f"*Showing heroes for your server: Generation {USER_GEN}*")
+    if USE_PERSONALIZED:
+        st.caption(f"*Showing heroes from your profile*")
+    else:
+        st.caption(f"*Showing heroes for Generation {ACTIVE_GEN}*")
 
     st.info("""
     **📌 Rally Joiner Mechanics**
@@ -438,15 +567,15 @@ elif event_type == "Bear Trap Rally":
         st.markdown("### Rally Leader Setup")
         st.markdown("*When YOU are leading the rally - all 3 of your heroes' expedition skills apply*")
 
-        # Use generation-appropriate heroes
-        infantry_hero = get_available_hero("Jeronimo", "Natalia", "Infantry", USER_GEN)
-        lancer_hero = get_available_hero("Molly", "Zinman", "Lancer", USER_GEN)
-        marksman_hero = get_available_hero("Alonso", "Philly", "Marksman", USER_GEN)
+        # Use mode-appropriate heroes
+        infantry_hero, inf_avail = get_best_available_hero(["Jeronimo", "Natalia", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
+        lancer_hero, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
+        marksman_hero, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
 
         render_3hero_lineup(
-            infantry={"name": infantry_hero, "role": "ATK boost to rally", "lead": True},
-            lancer={"name": lancer_hero, "role": "Healing support"},
-            marksman={"name": marksman_hero, "role": "Main damage dealer"}
+            infantry={"name": infantry_hero, "role": "ATK boost to rally", "lead": True, "avail": inf_avail},
+            lancer={"name": lancer_hero, "role": "Healing support", "avail": lan_avail},
+            marksman={"name": marksman_hero, "role": "Main damage dealer", "avail": mar_avail}
         )
         render_troop_ratio(20, 20, 60, "Heavy Marksman for maximum damage")
 
@@ -491,7 +620,7 @@ elif event_type == "Bear Trap Rally":
 
         available_joiners = []
         for name, hero_class, skill, gen in valuable_joiners:
-            if gen <= USER_GEN:
+            if gen <= ACTIVE_GEN:
                 available_joiners.append((name, hero_class, skill))
                 render_hero_slot(name, hero_class, skill, False)
 

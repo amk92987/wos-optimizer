@@ -1,10 +1,10 @@
 """
-AI Advisor Page - Get intelligent recommendations powered by OpenAI.
+AI Advisor Page - Get intelligent recommendations powered by rules and AI fallback.
+Uses rule-based analysis first, with AI (Claude or OpenAI) for complex questions.
 """
 
 import streamlit as st
 import json
-import os
 from pathlib import Path
 import sys
 
@@ -13,7 +13,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import UserHero, UserInventory
-from engine.ai_recommender import AIRecommender, format_data_preview
+from engine import RecommendationEngine, AIRecommender
+from engine.ai_recommender import format_data_preview
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -47,159 +48,282 @@ def get_inventory_dict():
 
 inventory = get_inventory_dict()
 
-# Initialize recommender (auto-detects API key from Windows env)
-recommender = AIRecommender()
+# Initialize recommendation engine and AI recommender
+engine = RecommendationEngine(PROJECT_ROOT / "data")
+ai_recommender = AIRecommender()
 
 # Page content
-st.markdown("# 🤖 AI Advisor")
-st.markdown("Get intelligent, personalized recommendations powered by AI.")
+st.markdown("# AI Advisor")
+st.markdown("Get personalized recommendations powered by rules and AI.")
 
 st.info("""
-**How it works:** The AI receives your profile data (heroes, levels, skills, priorities) along with
-**verified game mechanics** (rally rules, skill scaling, troop ratios). This prevents hallucination
-and ensures recommendations are based on accurate WoS knowledge.
+**How it works:** The advisor uses a **rule-based engine** with curated game knowledge for most questions.
+For complex, contextual questions, it falls back to AI (Claude or OpenAI) with verified game mechanics.
+This gives you **instant, accurate answers** for common questions, with AI power when needed.
 """)
 
 st.markdown("---")
 
-# API Key status
-if not recommender.is_available():
-    st.warning("""
-    **OpenAI API Key not found!**
+# AI Provider status
+col_status1, col_status2 = st.columns(2)
 
-    Set your API key as a Windows environment variable:
-    ```
-    setx OPENAI_API_KEY "your-key-here"
-    ```
+with col_status1:
+    st.markdown("**Rules Engine:** Active")
 
-    Or enter it below (session only):
-    """)
-    manual_key = st.text_input("OpenAI API Key", type="password", help="Your key is not stored")
-    if manual_key:
-        recommender = AIRecommender(api_key=manual_key)
-else:
-    st.success("✅ OpenAI API key detected")
+with col_status2:
+    if ai_recommender.is_available():
+        provider = ai_recommender.get_provider_name()
+        st.success(f"**AI Fallback:** {provider.title()} available")
+    else:
+        st.warning("""
+        **AI Fallback:** Not configured
 
-# Show data preview
-st.markdown("## 📋 Your Data (What AI Sees)")
-st.markdown("This is exactly what gets sent to the AI - compact and clear:")
+        Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` environment variable for AI features.
+        """)
 
-data_preview = format_data_preview(profile, user_heroes, HERO_DATA)
-
-st.code(data_preview, language="text")
+# Show current phase
+phase_info = engine.get_phase_info(profile)
+st.markdown(f"""
+<div style="background:rgba(74,144,217,0.15);border-radius:8px;padding:12px;margin:16px 0;">
+    <span style="font-weight:bold;color:#4A90D9;">Current Phase:</span>
+    <span style="color:#E8F4F8;margin-left:8px;">{phase_info['phase_name']}</span>
+    <span style="color:#888;margin-left:16px;">Next milestone: {phase_info['next_milestone']['name']}</span>
+</div>
+""", unsafe_allow_html=True)
 
 st.markdown("---")
 
-# Tabs for different AI features
-tab1, tab2, tab3 = st.tabs(["🎯 Get Recommendations", "❓ Ask a Question", "📊 Data Format"])
+# Tabs for different features
+tab1, tab2, tab3, tab4 = st.tabs(["Recommendations", "Lineups", "Ask a Question", "Data Preview"])
 
 with tab1:
-    st.markdown("### Get AI-Powered Recommendations")
+    st.markdown("### Your Top Priorities")
 
     if not user_heroes:
-        st.info("Add some heroes first in the 🦸 Heroes page to get personalized recommendations.")
+        st.info("Add some heroes first in the Heroes page to get personalized recommendations.")
     else:
-        col1, col2 = st.columns([2, 1])
+        # Get rule-based recommendations
+        recommendations = engine.get_recommendations(profile, user_heroes, limit=10)
 
-        with col1:
-            include_inventory = st.checkbox("Include inventory data", value=bool(inventory))
+        if recommendations:
+            for rec in recommendations:
+                priority = rec.priority
+                action = rec.action
+                hero = rec.hero or ""
+                reason = rec.reason
+                resources = rec.resources
+                category = rec.category
+                source = rec.source
 
-        with col2:
-            model_choice = st.selectbox("Model", ["gpt-4o-mini (fast)", "gpt-4o (best)"])
+                # Priority colors
+                if priority == 1:
+                    border_color = "#FF4444"
+                    bg_color = "rgba(255, 68, 68, 0.15)"
+                    label = "DO FIRST"
+                elif priority == 2:
+                    border_color = "#FF8C00"
+                    bg_color = "rgba(255, 140, 0, 0.15)"
+                    label = "HIGH"
+                elif priority <= 4:
+                    border_color = "#FFD700"
+                    bg_color = "rgba(255, 215, 0, 0.1)"
+                    label = "MEDIUM"
+                else:
+                    border_color = "#4A90D9"
+                    bg_color = "rgba(74, 144, 217, 0.1)"
+                    label = "LOW"
 
-        if st.button("🚀 Get AI Recommendations", type="primary", use_container_width=True):
-            if not recommender.is_available():
-                st.error("Please provide an OpenAI API key above.")
-            else:
-                with st.spinner("Analyzing your account..."):
-                    inv_data = inventory if include_inventory else None
-                    recommendations = recommender.get_recommendations(
-                        profile, user_heroes, HERO_DATA, inv_data
+                # Category badge
+                cat_colors = {
+                    "hero": "#9B59B6",
+                    "gear": "#E67E22",
+                    "progression": "#3498DB",
+                    "lineup": "#27AE60"
+                }
+                cat_color = cat_colors.get(category, "#888")
+
+                st.markdown(f"""
+                <div style="
+                    background: {bg_color};
+                    border-left: 4px solid {border_color};
+                    border-radius: 8px;
+                    padding: 16px;
+                    margin-bottom: 12px;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div>
+                            <span style="
+                                background: {border_color};
+                                color: white;
+                                padding: 2px 8px;
+                                border-radius: 4px;
+                                font-size: 11px;
+                                font-weight: bold;
+                            ">{label}</span>
+                            <span style="
+                                background: {cat_color};
+                                color: white;
+                                padding: 2px 6px;
+                                border-radius: 4px;
+                                font-size: 10px;
+                                margin-left: 6px;
+                            ">{category.upper()}</span>
+                            {f'<span style="color:#B8D4E8;font-size:12px;margin-left:8px;">{hero}</span>' if hero else ''}
+                        </div>
+                    </div>
+                    <div style="font-size: 16px; font-weight: bold; color: #E8F4F8; margin: 8px 0;">
+                        {action}
+                    </div>
+                    <div style="color: #B8D4E8; font-size: 13px; margin-bottom: 4px;">
+                        {reason}
+                    </div>
+                    {f'<div style="color:#808080;font-size:12px;">Resources: {resources}</div>' if resources else ''}
+                </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.info("No recommendations available. Add more heroes or update your profile.")
+
+        # Option to get AI recommendations
+        st.markdown("---")
+        st.markdown("### Want AI Analysis?")
+
+        if ai_recommender.is_available():
+            if st.button("Get AI-Powered Recommendations", type="secondary"):
+                with st.spinner("Analyzing with AI..."):
+                    ai_recs = ai_recommender.get_recommendations(
+                        profile, user_heroes, HERO_DATA, inventory
                     )
 
-                if recommendations and 'error' not in recommendations[0]:
-                    st.success(f"Generated {len(recommendations)} recommendations!")
-
-                    for i, rec in enumerate(recommendations):
-                        priority = rec.get('priority', i + 1)
-                        action = rec.get('action', 'Unknown action')
-                        hero = rec.get('hero', '')
-                        reason = rec.get('reason', '')
-                        resources = rec.get('resources', '')
-
-                        # Priority colors
-                        if priority == 1:
-                            border_color = "#FF4444"
-                            bg_color = "rgba(255, 68, 68, 0.15)"
-                            label = "🔥 DO FIRST"
-                        elif priority == 2:
-                            border_color = "#FF8C00"
-                            bg_color = "rgba(255, 140, 0, 0.15)"
-                            label = "⚡ HIGH"
-                        elif priority <= 4:
-                            border_color = "#FFD700"
-                            bg_color = "rgba(255, 215, 0, 0.1)"
-                            label = "📌 MEDIUM"
-                        else:
-                            border_color = "#4A90D9"
-                            bg_color = "rgba(74, 144, 217, 0.1)"
-                            label = "📋 LOW"
-
+                if ai_recs and 'error' not in ai_recs[0]:
+                    st.success(f"AI generated {len(ai_recs)} additional recommendations")
+                    for rec in ai_recs:
                         st.markdown(f"""
                         <div style="
-                            background: {bg_color};
-                            border-left: 4px solid {border_color};
+                            background: rgba(155, 89, 182, 0.15);
+                            border-left: 4px solid #9B59B6;
                             border-radius: 8px;
-                            padding: 16px;
-                            margin-bottom: 12px;
+                            padding: 12px;
+                            margin-bottom: 8px;
                         ">
-                            <div style="display: flex; justify-content: space-between; align-items: start;">
-                                <div>
-                                    <span style="
-                                        background: {border_color};
-                                        color: white;
-                                        padding: 2px 8px;
-                                        border-radius: 4px;
-                                        font-size: 11px;
-                                        font-weight: bold;
-                                    ">{label}</span>
-                                    <span style="color: #B8D4E8; font-size: 12px; margin-left: 8px;">
-                                        {hero}
-                                    </span>
-                                </div>
-                                <span style="color: #4A90D9; font-size: 12px;">#{priority}</span>
-                            </div>
-                            <div style="font-size: 16px; font-weight: bold; color: #E8F4F8; margin: 8px 0;">
-                                {action}
-                            </div>
-                            <div style="color: #B8D4E8; font-size: 13px; margin-bottom: 4px;">
-                                {reason}
-                            </div>
-                            <div style="color: #808080; font-size: 12px;">
-                                📦 Needs: {resources}
-                            </div>
+                            <div style="font-weight:bold;color:#E8F4F8;">{rec.get('action', 'Action')}</div>
+                            <div style="color:#B8D4E8;font-size:13px;">{rec.get('reason', '')}</div>
                         </div>
                         """, unsafe_allow_html=True)
-
                 else:
-                    error_msg = recommendations[0].get('error', 'Unknown error') if recommendations else 'No response'
-                    st.error(f"Error: {error_msg}")
-                    if 'raw' in recommendations[0]:
-                        st.code(recommendations[0]['raw'], language="text")
+                    error = ai_recs[0].get('error', 'Unknown error') if ai_recs else 'No response'
+                    st.error(f"AI error: {error}")
+        else:
+            st.info("Set up an AI provider (Claude or OpenAI) for additional analysis.")
 
 with tab2:
-    st.markdown("### Ask the AI Advisor")
-    st.markdown("Ask specific questions about your account, strategy, or heroes.")
+    st.markdown("### Lineup Recommendations")
+
+    # Mode selector
+    mode_options = {
+        "rally_joiner_attack": "Rally Joiner (Attack)",
+        "rally_joiner_defense": "Rally Joiner (Defense)",
+        "bear_trap": "Bear Trap Rally",
+        "crazy_joe": "Crazy Joe Rally",
+        "garrison": "Castle Garrison",
+        "exploration": "Exploration/PvE",
+        "svs_march": "SvS Field March"
+    }
+
+    selected_mode = st.selectbox(
+        "Select Game Mode",
+        options=list(mode_options.keys()),
+        format_func=lambda x: mode_options[x]
+    )
+
+    if user_heroes:
+        lineup = engine.get_lineup(selected_mode, user_heroes, profile)
+
+        # Show lineup
+        st.markdown(f"**{lineup['mode']}**")
+
+        # Confidence indicator
+        conf_colors = {"high": "#27AE60", "medium": "#F1C40F", "low": "#E74C3C"}
+        conf_color = conf_colors.get(lineup['confidence'], "#888")
+        st.markdown(f"""
+        <span style="background:{conf_color};color:white;padding:2px 8px;border-radius:4px;font-size:11px;">
+            {lineup['confidence'].upper()} CONFIDENCE
+        </span>
+        """, unsafe_allow_html=True)
+
+        st.markdown("")
+
+        # Heroes table
+        cols = st.columns([1, 2, 2, 2])
+        with cols[0]:
+            st.markdown("**Slot**")
+        with cols[1]:
+            st.markdown("**Hero**")
+        with cols[2]:
+            st.markdown("**Role**")
+        with cols[3]:
+            st.markdown("**Your Status**")
+
+        for hero_info in lineup['heroes']:
+            cols = st.columns([1, 2, 2, 2])
+            with cols[0]:
+                st.markdown(hero_info['slot'])
+            with cols[1]:
+                st.markdown(f"**{hero_info['hero']}**")
+            with cols[2]:
+                st.markdown(hero_info['role'])
+            with cols[3]:
+                status = hero_info['your_status']
+                color = "#27AE60" if "Lv" in status else "#E74C3C"
+                st.markdown(f"<span style='color:{color}'>{status}</span>", unsafe_allow_html=True)
+
+        # Troop ratio
+        st.markdown("---")
+        st.markdown("**Recommended Troop Ratio:**")
+        ratio = lineup['troop_ratio']
+        cols = st.columns(3)
+        with cols[0]:
+            st.metric("Infantry", f"{ratio.get('infantry', 0)}%")
+        with cols[1]:
+            st.metric("Lancer", f"{ratio.get('lancer', 0)}%")
+        with cols[2]:
+            st.metric("Marksman", f"{ratio.get('marksman', 0)}%")
+
+        # Notes
+        st.info(lineup['notes'])
+
+        # Joiner recommendation
+        if "joiner" in selected_mode:
+            st.markdown("---")
+            attack = "attack" in selected_mode
+            joiner_rec = engine.get_joiner_recommendation(user_heroes, attack)
+
+            if joiner_rec.get('status') == 'owned':
+                st.success(f"""
+                **Joiner Recommendation:** {joiner_rec['recommendation']}
+
+                {joiner_rec.get('action', '')}
+                """)
+            else:
+                st.warning(f"""
+                **No good joiner hero!** {joiner_rec['action']}
+
+                {joiner_rec['critical_note']}
+                """)
+    else:
+        st.info("Add heroes to see personalized lineup recommendations.")
+
+with tab3:
+    st.markdown("### Ask the Advisor")
 
     # Quick question buttons
     st.markdown("**Quick Questions:**")
     col1, col2 = st.columns(2)
 
     quick_questions = [
-        ("Best rally team?", "What's my best rally attack team composition?"),
-        ("SvS prep?", "How should I prepare for the next SvS? What should I focus on this week?"),
-        ("Who to ascend?", "Which hero should I ascend next with my general shards?"),
-        ("Weakest link?", "What's my biggest weakness and how do I fix it?"),
+        ("Best rally joiner?", "What hero should I use when joining attack rallies?"),
+        ("SvS prep?", "How should I prepare for the next SvS?"),
+        ("Who to level?", "Which hero should I level next?"),
+        ("Gear priority?", "What's my chief gear upgrade priority?"),
     ]
 
     selected_question = None
@@ -220,95 +344,76 @@ with tab2:
     custom_q = st.text_area(
         "Or ask your own question:",
         value=selected_question or "",
-        placeholder="e.g., Should I invest in Philly or save for Mia?",
+        placeholder="e.g., What's my best Bear Trap lineup?",
         height=80
     )
 
-    if st.button("🤔 Ask AI", type="primary"):
+    force_ai = st.checkbox("Force AI response (skip rules)", value=False)
+
+    if st.button("Ask", type="primary"):
         if not custom_q:
             st.warning("Please enter a question.")
-        elif not recommender.is_available():
-            st.error("Please provide an OpenAI API key.")
         else:
             with st.spinner("Thinking..."):
-                answer = recommender.ask_question(
-                    profile, user_heroes, HERO_DATA, custom_q, inventory
+                result = engine.ask(
+                    profile, user_heroes, custom_q,
+                    force_ai=force_ai
                 )
 
-            st.markdown("### Answer")
-            st.markdown(f"""
-            <div style="
-                background: rgba(74, 144, 217, 0.15);
-                border: 1px solid rgba(74, 144, 217, 0.3);
-                border-radius: 12px;
-                padding: 20px;
-            ">
-                <div style="color: #E8F4F8; font-size: 15px; line-height: 1.6;">
-                    {answer}
+            # Show source
+            source = result.get('source', 'unknown')
+            if source == 'rules':
+                st.success("Answered using game rules (instant)")
+            elif source == 'ai':
+                st.info(f"Answered using AI ({ai_recommender.get_provider_name()})")
+            elif source == 'error':
+                st.error("Could not process request")
+
+            # Show answer
+            if 'answer' in result:
+                st.markdown(f"""
+                <div style="
+                    background: rgba(74, 144, 217, 0.15);
+                    border: 1px solid rgba(74, 144, 217, 0.3);
+                    border-radius: 12px;
+                    padding: 20px;
+                ">
+                    <div style="color: #E8F4F8; font-size: 15px; line-height: 1.6;">
+                        {result['answer']}
+                    </div>
                 </div>
-            </div>
-            """, unsafe_allow_html=True)
+                """, unsafe_allow_html=True)
 
-with tab3:
-    st.markdown("### Data Format Explained")
+            # Show lineup if present
+            if 'lineup' in result:
+                lineup = result['lineup']
+                st.markdown(f"**Lineup for {lineup['mode']}:**")
+                for h in lineup['heroes']:
+                    st.markdown(f"- **{h['slot']}:** {h['hero']} ({h['role']})")
 
-    st.markdown("""
-    The AI receives your data in this compact format:
+            # Show recommendations if present
+            if result.get('recommendations'):
+                st.markdown("**Related recommendations:**")
+                for rec in result['recommendations'][:3]:
+                    action = rec.get('action', '')
+                    reason = rec.get('reason', '')
+                    st.markdown(f"- {action}: {reason}")
 
-    ```
-    PROFILE: Gen2 (Day 85), Furnace 18
-    PRIORITIES: SvS=5, Rally=4, Castle=4, PvE=2, Gather=1
+with tab4:
+    st.markdown("### Data Preview")
+    st.markdown("This is what gets sent to AI when using AI features:")
 
-    MY HEROES:
-    - Jeronimo [S+|Inf|Gen1] Lv45 ★★★☆☆ Skills: Expl 3/2 Exped 4/3
-    - Natalia [A|Inf|Gen1] Lv30 ★★☆☆☆ Skills: Expl 2/2 Exped 2/2
-
-    INVENTORY: 50 Epic Shards, 20 Legendary Shards, 500 Combat Manuals
-    ```
-
-    **Format breakdown:**
-    """)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("""
-        **PROFILE Line:**
-        - `Gen2` = Your current hero generation
-        - `Day 85` = Server age in days
-        - `Furnace 18` = Your furnace level
-
-        **PRIORITIES Line:**
-        - Scale: 1 (low) to 5 (critical)
-        - SvS = State vs State focus
-        - Rally = Rally attacks focus
-        - Castle = Castle battles
-        - PvE = Exploration/stages
-        - Gather = Resource gathering
-        """)
-
-    with col2:
-        st.markdown("""
-        **HERO Line Format:**
-        ```
-        Name [Tier|Class|Gen] Lv## ★★★☆☆ Skills: Expl #/# Exped #/#
-        ```
-
-        - `[S+|Inf|Gen1]` = S+ tier, Infantry, Generation 1
-        - `Lv45` = Current level
-        - `★★★☆☆` = 3 out of 5 stars
-        - `Expl 3/2` = Exploration skills at 3 and 2
-        - `Exped 4/3` = Expedition skills at 4 and 3
-        """)
+    data_preview = format_data_preview(profile, user_heroes, HERO_DATA)
+    st.code(data_preview, language="text")
 
     st.markdown("---")
-
     st.markdown("""
-    **Why this format?**
-    - **Compact**: Fits more data in fewer tokens = faster & cheaper
-    - **Clear**: AI can easily parse structured data
-    - **Complete**: Contains everything needed for good recommendations
-    - **No confusion**: Abbreviations are consistent and explained in system prompt
+    **Format breakdown:**
+
+    - **PROFILE:** Generation, server age, furnace level
+    - **PRIORITIES:** Your focus areas (1=low, 5=critical)
+    - **MY HEROES:** Name [Tier|Class|Gen] Level Stars Skills
+    - **INVENTORY:** Resources you have (if included)
     """)
 
 # Close database

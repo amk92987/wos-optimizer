@@ -70,7 +70,8 @@ def get_category_icon(icon):
         "hero": "🦸",
         "alliance": "🏰",
         "newbie": "🆕",
-        "shield": "🛡️"
+        "shield": "🛡️",
+        "upgrade": "📈"
     }
     return icons.get(icon, "📌")
 
@@ -132,11 +133,11 @@ def render_critical_tips():
 
     for tip in critical_tips:
         st.markdown(f"""
-        <div style="background: rgba(231, 76, 60, 0.15); border: 1px solid #E74C3C;
+        <div style="background: rgba(74, 144, 217, 0.1); border-left: 4px solid #E74C3C;
                     padding: 16px; border-radius: 8px; margin-bottom: 12px;">
             <div style="display: flex; align-items: center; margin-bottom: 8px;">
                 <span style="font-size: 20px; margin-right: 8px;">{tip['icon']}</span>
-                <span style="color: #E74C3C; font-size: 12px; font-weight: bold;">{tip['category']}</span>
+                <span style="color: #B8D4E8; font-size: 12px; font-weight: bold;">{tip['category']}</span>
             </div>
             <div style="font-weight: bold; color: #E8F4F8; font-size: 16px; margin-bottom: 8px;">
                 {tip['tip']}
@@ -178,64 +179,16 @@ def render_common_mistakes():
         """, unsafe_allow_html=True)
 
 
-def render_search_tips():
-    """Render searchable tips section."""
-    categories = QUICK_TIPS.get("categories", {})
-
-    # Flatten all tips
-    all_tips = []
-    for cat_id, cat_data in categories.items():
-        icon = get_category_icon(cat_data.get("icon", ""))
-        name = cat_data.get("name", cat_id)
-        for tip in cat_data.get("tips", []):
-            all_tips.append({
-                "category": name,
-                "icon": icon,
-                "tip": tip.get("tip", ""),
-                "detail": tip.get("detail", ""),
-                "priority": tip.get("priority", "medium"),
-                "searchable": f"{tip.get('tip', '')} {tip.get('detail', '')}".lower()
-            })
-
-    search = st.text_input("Search tips...", placeholder="e.g., speedup, daybreak, lethality")
-
-    if search:
-        search_lower = search.lower()
-        filtered = [t for t in all_tips if search_lower in t["searchable"]]
-
-        if filtered:
-            st.markdown(f"**Found {len(filtered)} tips:**")
-            for tip in filtered:
-                priority_color = get_priority_color(tip["priority"])
-                st.markdown(f"""
-                <div style="background: rgba(74, 144, 217, 0.1); border-left: 4px solid {priority_color};
-                            padding: 12px; border-radius: 4px; margin-bottom: 8px;">
-                    <div style="font-size: 12px; color: #B8D4E8; margin-bottom: 4px;">
-                        {tip['icon']} {tip['category']}
-                    </div>
-                    <div style="font-weight: bold; color: #E8F4F8;">
-                        {tip['tip']}
-                    </div>
-                    <div style="color: #B8D4E8; font-size: 13px; margin-top: 4px;">
-                        {tip['detail']}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
-        else:
-            st.info("No tips found matching your search.")
-
-
 def render_quick_tips():
     """Render the quick tips page."""
     st.markdown("# Quick Tips & Cheat Sheet")
     st.markdown("Key game knowledge in one place. The stuff most players get wrong.")
 
     # Navigation tabs
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3 = st.tabs([
         "Critical Tips",
         "By Category",
-        "Common Mistakes",
-        "Search"
+        "Common Mistakes"
     ])
 
     with tab1:
@@ -249,7 +202,7 @@ def render_quick_tips():
 
         # Define display order
         category_order = [
-            "new_player", "svs_prep", "svs_battle", "daybreak_island", "research", "combat",
+            "new_player", "upgrade_priorities", "svs_prep", "svs_battle", "daybreak_island", "research", "combat",
             "chief_gear", "chief_charms", "pets", "events",
             "heroes", "alliance", "packs"
         ]
@@ -265,9 +218,6 @@ def render_quick_tips():
 
     with tab3:
         render_common_mistakes()
-
-    with tab4:
-        render_search_tips()
 
     # Footer with tip count
     categories = QUICK_TIPS.get("categories", {})

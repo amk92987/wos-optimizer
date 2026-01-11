@@ -1,0 +1,452 @@
+{
+  "system": "chests",
+  "retrieved_at": "2026-01-10T00:00:00Z",
+  "data_completeness": "partial",
+  "sources": [
+    {"source_id": "SRC_GAME_KNOWLEDGE", "confidence": "B", "note": "Based on general game knowledge, needs in-game verification"}
+  ],
+
+  "chest_categories": {
+    "hero_recruitment": {
+      "name": "Hero Recruitment Chests",
+      "description": "Primary source of hero shards",
+      "types": [
+        {
+          "name": "Basic Recruitment",
+          "currency": "basic_tickets",
+          "possible_drops": ["Rare hero shards", "Hero XP", "Resources"],
+          "guaranteed": "1 Rare shard minimum",
+          "notes": "Free daily attempts available"
+        },
+        {
+          "name": "Epic Recruitment",
+          "currency": "epic_tickets",
+          "possible_drops": ["Epic hero shards", "Rare hero shards", "Hero XP"],
+          "guaranteed": "1 Epic shard minimum",
+          "notes": "Good for early game Epic heroes"
+        },
+        {
+          "name": "Legendary Recruitment",
+          "currency": "legendary_tickets",
+          "possible_drops": ["Legendary hero shards", "Epic hero shards", "Hero XP"],
+          "guaranteed": "1 Legendary shard at pity",
+          "pity_system": "Guaranteed legendary at certain pull count",
+          "notes": "Save for Lucky Wheel events"
+        }
+      ]
+    },
+
+    "lucky_wheel": {
+      "name": "Lucky Wheel Chests/Rewards",
+      "description": "Event-based hero acquisition",
+      "svs_points": 8000,
+      "possible_drops": ["Featured Legendary Hero shards", "Hero XP", "Speedups", "Resources"],
+      "notes": "Primary F2P method for getting new generation heroes"
+    },
+
+    "fishing_event": {
+      "name": "Ice Fishing Event Chests",
+      "description": "Seasonal fishing event rewards",
+      "event_name": "Ice Fishing / Polar Fishing",
+      "types": [
+        {
+          "name": "Fish Catch Rewards",
+          "possible_drops": ["Speedups", "Resources", "Event currency", "Hero shards (rare)"]
+        },
+        {
+          "name": "Fish Collection Milestones",
+          "possible_drops": ["Legendary shards", "Essence Stones", "Premium rewards"]
+        }
+      ],
+      "notes": "Participate daily for best rewards"
+    },
+
+    "bear_trap": {
+      "name": "Bear Trap Event Chests",
+      "description": "Alliance attack event rewards",
+      "event_type": "Alliance PvE",
+      "types": [
+        {
+          "name": "Damage Ranking Rewards",
+          "possible_drops": ["Hero shards based on rank", "Speedups", "Resources"]
+        },
+        {
+          "name": "Participation Rewards",
+          "possible_drops": ["Basic rewards", "Alliance coins"]
+        }
+      ],
+      "notes": "Use Jessie as leftmost joiner for +25% damage buff"
+    },
+
+    "polar_terror": {
+      "name": "Polar Terror Event Chests",
+      "description": "Alliance boss event rewards",
+      "event_type": "Alliance Boss",
+      "types": [
+        {
+          "name": "Damage Ranking Chest",
+          "possible_drops": ["Hero shards", "Speedups", "Essence Stones"]
+        },
+        {
+          "name": "Kill Participation Chest",
+          "possible_drops": ["Resources", "Speedups", "Basic rewards"]
+        }
+      ]
+    },
+
+    "intel_missions": {
+      "name": "Intel Mission Rewards",
+      "description": "Daily mission chest rewards",
+      "types": [
+        {
+          "name": "Intel Chest (Common)",
+          "possible_drops": ["Resources", "Speedups", "Hero XP"]
+        },
+        {
+          "name": "Intel Chest (Epic)",
+          "possible_drops": ["Epic hero shards", "Essence Stones", "Better speedups"]
+        },
+        {
+          "name": "Intel Chest (Legendary)",
+          "possible_drops": ["Legendary hero shards", "Premium items"]
+        }
+      ]
+    },
+
+    "growth_missions": {
+      "name": "Growth Mission Chests",
+      "description": "Milestone achievement rewards",
+      "types": [
+        {
+          "name": "Chapter Completion Chest",
+          "possible_drops": ["Resources", "Speedups", "Hero shards"]
+        },
+        {
+          "name": "Major Milestone Chest",
+          "possible_drops": ["Legendary shards", "Premium currency", "Large speedups"]
+        }
+      ]
+    },
+
+    "seasonal_events": {
+      "name": "Seasonal Event Chests",
+      "description": "Limited-time event rewards",
+      "examples": ["Winter Festival", "Anniversary", "Holiday Events"],
+      "types": [
+        {
+          "name": "Event Currency Exchange",
+          "possible_drops": ["Event-exclusive items", "Hero shards", "Cosmetics"]
+        },
+        {
+          "name": "Event Milestone Rewards",
+          "possible_drops": ["Limited heroes", "Exclusive decorations", "Premium items"]
+        }
+      ]
+    },
+
+    "daily_login": {
+      "name": "Daily Login Chests",
+      "description": "Rewards for consecutive logins",
+      "types": [
+        {
+          "name": "Daily Chest",
+          "possible_drops": ["Resources", "Basic speedups", "Hero XP"]
+        },
+        {
+          "name": "7-Day Chest",
+          "possible_drops": ["Epic shards", "Better speedups", "Gems"]
+        },
+        {
+          "name": "Monthly Chest",
+          "possible_drops": ["Legendary shards", "Large gem rewards"]
+        }
+      ]
+    },
+
+    "vip_chests": {
+      "name": "VIP Chests",
+      "description": "VIP level milestone rewards",
+      "types": [
+        {
+          "name": "VIP Level Up Chest",
+          "possible_drops": ["Scaling with VIP level", "Gems", "Speedups", "Hero shards"]
+        },
+        {
+          "name": "Daily VIP Chest",
+          "possible_drops": ["Resources", "Speedups", "VIP-exclusive items"]
+        }
+      ]
+    },
+
+    "labyrinth_chests": {
+      "name": "Labyrinth Chests",
+      "description": "Rewards from Labyrinth game mode",
+      "unlock": "Furnace 19",
+      "types": [
+        {
+          "name": "Labyrinth Treasure",
+          "source": "First Win Rewards, Raid Rewards",
+          "possible_drops": ["Luminary Citadel decoration", "Glowstones", "Resources"]
+        },
+        {
+          "name": "Splendid Labyrinth Treasure",
+          "source": "Higher-tier Labyrinth rewards",
+          "possible_drops": ["Luminary Citadel decoration", "Premium Glowstones", "Rare items"]
+        },
+        {
+          "name": "Floor Clear Chest",
+          "possible_drops": ["Glowstones", "Resources", "Speedups"]
+        },
+        {
+          "name": "Boss Defeat Chest",
+          "possible_drops": ["Large Glowstone rewards", "Hero shards", "Premium items"]
+        }
+      ],
+      "notes": "Luminary Citadel gives +1% Troops Attack per level (max +10%). Need 58 copies to max."
+    },
+
+    "daybreak_island": {
+      "name": "Daybreak Island Chests",
+      "description": "Rewards from Daybreak Island exploration",
+      "unlock": "Furnace 19 (Dock unlock, ~3 days to discover)",
+      "types": [
+        {
+          "name": "Tree Clearing Chest",
+          "source": "Random chance when clearing trees",
+          "possible_drops": ["Life Essence", "Hero Shards", "Gear", "Resources"]
+        },
+        {
+          "name": "Daybreak Expedition Chest",
+          "source": "Daily mission rewards",
+          "possible_drops": ["Daybreak Points", "Resources", "Speedups"]
+        },
+        {
+          "name": "Expedition Milestone Chest",
+          "source": "Daybreak Expedition level rewards",
+          "possible_drops": ["Premium rewards", "Hero shards", "Decoration materials"]
+        }
+      ],
+      "notes": "Life Essence is primary material for constructing decorations"
+    },
+
+    "treasure_hunt": {
+      "name": "Treasure Hunt Chests",
+      "description": "Special treasure chests from various activities",
+      "types": [
+        {
+          "name": "Treasure Hunt Chest",
+          "source": "Treasure Keeper rewards",
+          "possible_drops": ["Gem of Enigma", "Rare items", "Resources"]
+        },
+        {
+          "name": "Custom Mythic Hero Gear Chest",
+          "source": "Arena Shop (Arena Tokens)",
+          "possible_drops": ["Choose specific mythic gear"],
+          "notes": "Only F2P source for choosing specific mythic gear"
+        },
+        {
+          "name": "Lucky Hero Gear Chest",
+          "source": "Labyrinth Shop (Glowstones)",
+          "possible_drops": ["Random Hero Gear", "Enhancement materials"]
+        }
+      ]
+    },
+
+    "hall_of_chiefs": {
+      "name": "Hall of Chiefs Rewards",
+      "description": "Bi-weekly competitive event rewards",
+      "unlock": "Generation 1 server event",
+      "types": [
+        {
+          "name": "Stage Milestone Chest",
+          "source": "Daily stage point milestones",
+          "possible_drops": ["Gems", "Speedups", "Resources", "Hero shards"]
+        },
+        {
+          "name": "Total Ranking Chest",
+          "source": "Final total ranking position",
+          "possible_drops": ["Jeronimo shards (Gen 1)", "Philly shards (Gen 2)", "Large gem rewards"]
+        },
+        {
+          "name": "Final Milestone Chest",
+          "source": "Completing all milestones",
+          "possible_drops": ["Large gems", "Mythic Expedition Manuals", "Mythic Exploration Manuals"]
+        }
+      ],
+      "notes": "Top 10 players get featured hero shards. Event transitions to King of Icefield after Gen 2."
+    },
+
+    "exploration_chests": {
+      "name": "Exploration Event Chests",
+      "description": "Rewards from exploration activities",
+      "types": [
+        {
+          "name": "Explorer Chest",
+          "source": "Exploration missions",
+          "possible_drops": ["Resources", "Speedups", "Hero XP", "Glowstones"]
+        },
+        {
+          "name": "Expedition Reward Chest",
+          "source": "Expedition completion",
+          "possible_drops": ["Hero shards", "Expedition Manuals", "Resources"]
+        }
+      ]
+    },
+
+    "deal_event_chests": {
+      "name": "Deal Event Chests & Rewards",
+      "description": "Chests and rewards from rotating deal events",
+      "types": [
+        {
+          "name": "Mia's Fortune Hut Orbs",
+          "currency": "fortune_tokens",
+          "event": "Mia's Fortune Hut",
+          "mechanics": {
+            "orb_count": 10,
+            "costs": "1/2/3/4/5/8/12/15/20/25 tokens per reveal",
+            "multipliers": "2x, 3x, 4x (apply to next orb only, stackable)"
+          },
+          "possible_drops": ["Wish Reward (your chosen item)", "Multiplier orbs", "Smaller rewards"],
+          "strategy": "Reset after 6 attempts unless multiplier active"
+        },
+        {
+          "name": "Tundra Trading Station Shop",
+          "currency": "trade_vouchers",
+          "event": "Tundra Trading Station",
+          "frequency": "Monthly, 2 days",
+          "exchange_requirements": "Hero must be 5-star to exchange their shards",
+          "possible_purchases": ["Expert Hero Sigils", "Custom Hero Widget Chest", "Essence Stones", "Mythic General Shards", "Manuals", "Enhancement XP"],
+          "notes": "Vouchers carry over. Redeemed items don't count for consumption missions."
+        },
+        {
+          "name": "Frosty Fortune Chests",
+          "currency": "gem_of_enigma",
+          "secondary_currency": "thorns_of_enigma",
+          "event": "Frosty Fortune / Emporium of Enigma",
+          "frequency": "Monthly",
+          "mechanics": {
+            "chest_cost": "60 Gems of Enigma",
+            "gems_source": "Treasure Hunt Drill daily missions"
+          },
+          "possible_drops": ["Thorns of Enigma (roses)"],
+          "emporium_purchases": ["Widgets", "Essence Stones", "Pet Chests", "Fire Crystals"],
+          "warning": "Gems carry over but Thorns EXPIRE - spend before event ends!"
+        },
+        {
+          "name": "Journey of Light Expedition Rewards",
+          "currency": "pocket_watch",
+          "event": "Journey of Light",
+          "mechanics": {
+            "expedition_duration": "8 hours",
+            "pocket_watch_effect": "-1 hour per watch"
+          },
+          "possible_drops": ["Expedition rewards", "Milestone rewards"],
+          "notes": "More expeditions completed = better milestone rewards"
+        },
+        {
+          "name": "Snowbusters Rewards",
+          "currency": "fuel",
+          "secondary_items": ["rocket_v2", "fuel_supply_chest", "toolkit_chest"],
+          "event": "Snowbusters",
+          "mechanics": {
+            "starting_fuel": 200,
+            "fuel_regen": "12 per 5 minutes",
+            "rocket_use": "Clears remaining snow at 95%"
+          },
+          "what_carries_over": ["Unopened Fuel Supply Chests", "Rocket V2", "Toolkit Chests"],
+          "what_resets": ["Opened fuel", "Gear upgrades", "Coal", "Stage progress"],
+          "tips": ["Don't clear snow near fire - auto-clears", "Coal converts to fuel at stage end", "Use rocket at 95%"]
+        },
+        {
+          "name": "Hall of Heroes Shop",
+          "currency": "marks_of_valor",
+          "event": "Hall of Heroes",
+          "frequency": "Weekly (Sun-Tue) or every 3 weeks",
+          "possible_purchases": ["Mythic Hero Shards (varies by generation)", "Hero Widgets"],
+          "notes": "Currency obtained via gems or packs"
+        }
+      ],
+      "notes": "Deal events rotate - check Deals section for active events"
+    },
+
+    "bear_trap_enhancement": {
+      "name": "Bear Trap Enhancement System",
+      "description": "Donate Explosive Arrowheads to level up Bear Trap for alliance-wide damage bonus",
+      "upgrade_currency": "explosive_arrowheads",
+      "mechanics": {
+        "max_level": 5,
+        "damage_bonus_per_level": "+5%",
+        "max_damage_bonus": "+25%",
+        "total_arrowheads_needed": 2500,
+        "arrowhead_source": "Intel missions",
+        "alliance_token_bonus": "200 Alliance Tokens per 1 arrowhead donated"
+      },
+      "levels": [
+        {"level": 1, "bonus": "+5% damage"},
+        {"level": 2, "bonus": "+10% damage"},
+        {"level": 3, "bonus": "+15% damage"},
+        {"level": 4, "bonus": "+20% damage"},
+        {"level": 5, "bonus": "+25% damage (max)"}
+      ],
+      "notes": [
+        "Each Bear Trap has SEPARATE enhancement progress",
+        "2 Bear Traps per alliance (for different time zones)",
+        "Can donate past max level to keep earning Alliance Tokens",
+        "Use Jessie as leftmost joiner for additional +25% damage buff"
+      ]
+    }
+  },
+
+  "backpack_item_categories": {
+    "speedups": {
+      "general": ["1m", "5m", "10m", "30m", "1h", "3h", "8h", "24h", "3d", "7d"],
+      "research": ["Research Speedup 1h", "Research Speedup 3h", "Research Speedup 8h"],
+      "training": ["Training Speedup 1h", "Training Speedup 3h", "Training Speedup 8h"],
+      "building": ["Building Speedup 1h", "Building Speedup 3h", "Building Speedup 8h"],
+      "healing": ["Healing Speedup 1h", "Healing Speedup 3h"]
+    },
+    "resources": {
+      "basic": ["Meat", "Wood", "Coal", "Iron"],
+      "advanced": ["Fire Crystal", "Fire Crystal Shards", "Fire Crystal Embers", "Refined Fire Crystal"],
+      "special": ["Steel", "Mithril", "Life Essence"]
+    },
+    "hero_items": {
+      "xp": ["Hero XP", "Hero XP (Small)", "Hero XP (Large)"],
+      "manuals": ["Exploration Manuals", "Expedition Manuals", "Mythic Exploration Manuals", "Mythic Expedition Manuals"],
+      "shards": ["Hero Shards", "Mythic General Shards"],
+      "widgets": ["Hero Widgets"]
+    },
+    "gear_items": {
+      "xp": ["Hero Gear XP", "Enhancement XP Component"],
+      "materials": ["Essence Stones", "Forge Stones", "Lunar Amber"],
+      "upgrade": ["Hardened Alloy", "Polishing Solution", "Design Plans"]
+    },
+    "charm_items": ["Charm Guides", "Charm Designs", "Charm Secrets", "Jewel Secrets"],
+    "pet_items": ["Pet Food", "Taming Manual", "Energizing Potion", "Strengthening Serum"],
+    "currencies": {
+      "premium": ["Gems", "Frost Stars"],
+      "shop": ["Arena Coins", "Alliance Coins", "Foundry Coins", "SvS Coins", "Glowstones"],
+      "event": ["Canyon Coins", "Frostdragon Coins", "Power Region Coins", "Lost Coins", "Sunfire Tokens"],
+      "special": ["Trade Coins", "Mystery Badges", "Mark of Valor", "Loyalty Tags", "Arsenal Tokens", "Championship Badges"],
+      "tickets": ["Basic Recruitment Tickets", "Epic Recruitment Tickets", "Legendary Recruitment Tickets"],
+      "deal_event": ["Fortune Tokens", "Trade Vouchers", "Pocket Watch", "Gem of Enigma", "Thorns of Enigma", "Marks of Valor", "Rocket V2"],
+      "event_resources": ["Fuel", "Fuel Supply Chest", "Explosive Arrowheads", "Toolkit Chest"]
+    },
+    "expert_items": ["Expert Hero Sigils", "Cyrille Sigil", "Agnes Sigil", "Holger Sigil", "Romulus Sigil", "Fabian Sigil", "Baldur Sigil", "Valeria Sigil"],
+    "teleporters": ["Random Teleporter", "Advanced Teleporter", "Alliance Teleporter", "Territory Teleporter"],
+    "combat_buffs": {
+      "attack": ["Troops Attack Boost (2h)", "Troops Attack Boost (8h)", "Troops Attack Boost (12h)"],
+      "defense": ["Troops Defense Boost (2h)", "Troops Defense Boost (8h)", "Shield (8h)", "Shield (24h)", "Shield (72h)"],
+      "march": ["March Accelerator", "Counter-Recon"]
+    },
+    "decorations": ["Luminary Citadel", "Daybreak decorations", "Event decorations"]
+  },
+
+  "notes": [
+    "Lucky Wheel is best source of new generation heroes for F2P",
+    "Save legendary tickets for Lucky Wheel events",
+    "Intel Missions provide consistent Essence Stones",
+    "Bear Trap and Polar Terror give alliance-wide benefits",
+    "Event chests often have best value items"
+  ]
+}

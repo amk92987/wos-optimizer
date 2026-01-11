@@ -1,0 +1,950 @@
+{
+  "_description": "Gem costs for Pack Analyzer items - sourced from in-game data",
+  "_last_updated": "2025-01-10",
+  "_notes": "Values are gems per single item. Use these to calibrate pack valuations.",
+
+  "known_gem_costs": {
+    "_comment": "Items with confirmed gem costs from in-game",
+    "VIP XP 10": 20,
+    "Stamina 10": 300,
+    "Hero XP 1000": 30,
+    "Gold Key": 1500,
+    "Platinum Key": 500,
+    "Rare Exploration Manual": 150,
+    "Epic Exploration Manual": 500,
+    "Rare Expedition Manual": 150,
+    "Epic Expedition Manual": 500,
+    "Common Wild Mark": 500,
+    "Random Teleporter": 1000,
+    "Speedup 1 minute": 13.34,
+    "_speedup_note": "119 minutes = 1587 gems when using gems to speed up",
+    "Speedup Healing 1 minute": 0,
+    "_healing_note": "Healing speedups have near-zero value - alliance batch healing (Help feature) provides free healing speedups"
+  },
+
+  "resource_ratios": {
+    "_comment": "Relative values of resources",
+    "meat": 1,
+    "wood": 1,
+    "coal": 5,
+    "iron": 20,
+    "_notes": "400k wood = 20k iron, 1m meat = 200k coal",
+    "gems_per_1M": {
+      "meat": 163,
+      "wood": 163,
+      "coal": 815,
+      "iron": 3260,
+      "_source": "Derived from City Lifeline Pack"
+    }
+  },
+
+  "pack_price_data": {
+    "_comment": "Track real $ pack contents to back-calculate values",
+    "packs": [
+      {
+        "name": "Mystery Badge Pack",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "mystery_badges": 2500,
+          "vip_xp_100": 25,
+          "meat_10k": 130,
+          "wood_10k": 130,
+          "coal_1k": 240,
+          "iron_1k": 60
+        },
+        "calculated_totals": {
+          "vip_xp": 2500,
+          "meat": 1300000,
+          "wood": 1300000,
+          "coal": 240000,
+          "iron": 60000
+        },
+        "known_gem_value": {
+          "gems": 2500,
+          "vip_xp_2500": 5000,
+          "mystery_badges_2500": 7500,
+          "total_gems": 15000,
+          "_note": "2500 gems + 2500 VIP XP @ 2 gems + 2500 badges @ 3 gems = 15000 gems"
+        },
+        "value_analysis": {
+          "total_gem_value": 15000,
+          "gems_per_dollar": 3006,
+          "_note": "$4.99 = 15000 gems → $1 = ~3006 gems"
+        }
+      },
+      {
+        "name": "Standard Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "fire_crystal": 15,
+          "speedup_general_1h": 4,
+          "speedup_general_5m": 48,
+          "vip_xp_100": 25,
+          "meat_10k": 500,
+          "wood_10k": 500,
+          "coal_10k": 100,
+          "iron_10k": 25
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "fire_crystal": 15,
+          "speedup_minutes": 480,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        }
+      },
+      {
+        "name": "Charm Design Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "charm_design": 10,
+          "vip_xp_100": 25,
+          "meat_10k": 130,
+          "wood_10k": 130,
+          "coal_1k": 240,
+          "iron_1k": 60
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "charm_design": 10,
+          "vip_xp": 2500,
+          "meat": 1300000,
+          "wood": 1300000,
+          "coal": 240000,
+          "iron": 60000
+        }
+      },
+      {
+        "name": "Charm Craftsman Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "charm_guide": 18,
+          "charm_design": 6,
+          "vip_xp_100": 25
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "charm_guide": 18,
+          "charm_design": 6,
+          "vip_xp": 2500
+        },
+        "_note": "No resources in this pack"
+      },
+      {
+        "name": "Chief Gear Tool Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "polishing_solution": 18,
+          "hardened_alloy": 1500,
+          "vip_xp_100": 25,
+          "meat_10k": 130,
+          "wood_10k": 130,
+          "coal_1k": 240,
+          "iron_1k": 60
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "polishing_solution": 18,
+          "hardened_alloy": 1500,
+          "vip_xp": 2500,
+          "meat": 1300000,
+          "wood": 1300000,
+          "coal": 240000,
+          "iron": 60000
+        }
+      },
+      {
+        "name": "Chief Gear Enhancement Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "design_plans": 20,
+          "polishing_solution": 9,
+          "hardened_alloy": 900,
+          "vip_xp_100": 25
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "design_plans": 20,
+          "polishing_solution": 9,
+          "hardened_alloy": 900,
+          "vip_xp": 2500
+        },
+        "_note": "No resources"
+      },
+      {
+        "name": "Mastery Forging Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "essence_stone": 10,
+          "vip_xp_100": 25,
+          "meat_10k": 130,
+          "wood_10k": 130,
+          "coal_1k": 240,
+          "iron_1k": 60
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "essence_stone": 10,
+          "vip_xp": 2500,
+          "meat": 1300000,
+          "wood": 1300000,
+          "coal": 240000,
+          "iron": 60000
+        }
+      },
+      {
+        "name": "Gear Empowerment Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "mithril": 1,
+          "vip_xp_100": 25,
+          "meat_10k": 500,
+          "wood_10k": 500,
+          "coal_10k": 100,
+          "iron_10k": 25
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "mithril": 1,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        }
+      },
+      {
+        "name": "Accessory Construction Contract Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "general_accessory_construction_contract": 2,
+          "speedup_general_5m": 10,
+          "vip_xp_100": 25,
+          "meat_10k": 500,
+          "wood_10k": 500,
+          "coal_10k": 100,
+          "iron_10k": 25
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "general_accessory_construction_contract": 2,
+          "speedup_minutes": 50,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        },
+        "_note": "New item type: accessory construction contracts"
+      },
+      {
+        "name": "Pet Food Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "pet_food": 6000,
+          "vip_xp_100": 25,
+          "meat_10k": 500,
+          "wood_10k": 500,
+          "coal_10k": 100,
+          "iron_10k": 25
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "pet_food": 6000,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        }
+      },
+      {
+        "name": "Taming Manual Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "taming_manual": 35,
+          "vip_xp_100": 25,
+          "resources": "heavy"
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "taming_manual": 35,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        }
+      },
+      {
+        "name": "Pet Energy Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "energizing_potion": 10,
+          "vip_xp_100": 25,
+          "resources": "heavy"
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "energizing_potion": 10,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        }
+      },
+      {
+        "name": "Pet Serum Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "strengthening_serum": 5,
+          "vip_xp_100": 25,
+          "resources": "heavy"
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "strengthening_serum": 5,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        }
+      },
+      {
+        "name": "Wild Mark Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "advanced_wild_mark": 2,
+          "vip_xp_100": 25,
+          "resources": "heavy"
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "advanced_wild_mark": 2,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        }
+      },
+      {
+        "name": "Hero Gear Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "enhancement_xp_component_100": 10,
+          "lucky_hero_gear_chest": 4,
+          "vip_xp_100": 25,
+          "resources": "light"
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "enhancement_xp_component": 1000,
+          "lucky_hero_gear_chest": 4,
+          "vip_xp": 2500,
+          "meat": 1300000,
+          "wood": 1300000,
+          "coal": 240000,
+          "iron": 60000
+        }
+      },
+      {
+        "name": "City Construction Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "speedup_general_1h": 3,
+          "speedup_general_5m": 36,
+          "speedup_construction_1h": 2,
+          "speedup_construction_5m": 24,
+          "vip_xp_100": 25,
+          "resources": "heavy"
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "speedup_general_minutes": 360,
+          "speedup_construction_minutes": 240,
+          "speedup_total_minutes": 600,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        }
+      },
+      {
+        "name": "Troop Training Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "speedup_general_1h": 3,
+          "speedup_general_5m": 36,
+          "speedup_training_1h": 2,
+          "speedup_training_5m": 24,
+          "vip_xp_100": 25,
+          "resources": "heavy"
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "speedup_general_minutes": 360,
+          "speedup_training_minutes": 240,
+          "speedup_total_minutes": 600,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        },
+        "_note": "Same structure as City Construction Pack"
+      },
+      {
+        "name": "Tech Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "speedup_general_1h": 3,
+          "speedup_general_5m": 36,
+          "speedup_research_1h": 2,
+          "speedup_research_5m": 24,
+          "vip_xp_100": 25,
+          "resources": "heavy"
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "speedup_general_minutes": 360,
+          "speedup_research_minutes": 240,
+          "speedup_total_minutes": 600,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        },
+        "_note": "Same structure as City Construction Pack"
+      },
+      {
+        "name": "Skill Manual Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "mythic_exploration_manual": 30,
+          "mythic_expedition_manual": 30,
+          "vip_xp_100": 25,
+          "resources": "light"
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "mythic_exploration_manual": 30,
+          "mythic_expedition_manual": 30,
+          "vip_xp": 2500,
+          "meat": 1300000,
+          "wood": 1300000,
+          "coal": 240000,
+          "iron": 60000
+        },
+        "_note": "Mythic manuals - value TBD. If pack ~15k gems: 60 mythic manuals = ~7500 gems → ~125 gems each"
+      },
+      {
+        "name": "Steel Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "steel": 40000,
+          "vip_xp_100": 25,
+          "resources": "light"
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "steel": 40000,
+          "vip_xp": 2500,
+          "meat": 1300000,
+          "wood": 1300000,
+          "coal": 240000,
+          "iron": 60000
+        },
+        "_note": "If pack ~15k gems: 40k steel = ~7500 gems → ~0.19 gems per steel"
+      },
+      {
+        "name": "Transfer Pack Pass $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "transfer_pass": 1,
+          "speedup_general_1h": 12,
+          "vip_xp_100": 25,
+          "resources": "heavy"
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "transfer_pass": 1,
+          "speedup_general_minutes": 720,
+          "vip_xp": 2500,
+          "meat": 5000000,
+          "wood": 5000000,
+          "coal": 1000000,
+          "iron": 250000
+        },
+        "_note": "Speedups alone = 9600 gems. Pack is excellent value - transfer pass is bonus"
+      },
+      {
+        "name": "City Lifeline Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "meat_10k": 1150,
+          "wood_10k": 1150,
+          "coal_10k": 230,
+          "iron_10k": 57,
+          "vip_xp_100": 25
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "meat": 11500000,
+          "wood": 11500000,
+          "coal": 2300000,
+          "iron": 570000,
+          "vip_xp": 2500
+        },
+        "resource_value_analysis": {
+          "_note": "Pure resource pack - great for calibration",
+          "ratios_check": "11.5M meat + 11.5M wood + 2.3M coal(x5) + 570k iron(x20) = ~46M equivalent units",
+          "remaining_gems_for_resources": 7500,
+          "gems_per_1M_meat_wood": 163,
+          "gems_per_1M_coal": 815,
+          "gems_per_1M_iron": 3260
+        }
+      },
+      {
+        "name": "Conqueror Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "advanced_teleport": 1,
+          "random_teleport": 1,
+          "march_accelerator_1": 4,
+          "expedition_recall": 2,
+          "counter_recon_2hr": 1,
+          "speedup_healing_1h": 25,
+          "speedup_healing_5m": 120
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "advanced_teleport": 1,
+          "random_teleport": 1,
+          "march_accelerator_1": 4,
+          "expedition_recall": 2,
+          "counter_recon_2hr": 1,
+          "speedup_healing_minutes": 2100,
+          "vip_xp": 0,
+          "resources": "none"
+        },
+        "_note": "Healing speedups = ~0 value (batch healing is free). Real value is teleports + war items."
+      },
+      {
+        "name": "Molly's Blessing Pack $4.99",
+        "price_usd": 4.99,
+        "contents": {
+          "gems": 2500,
+          "molly_shards": 10,
+          "mythic_exploration_manual": 5,
+          "mythic_expedition_manual": 5,
+          "hero_xp_5k": 5,
+          "vip_xp_100": 25
+        },
+        "calculated_totals": {
+          "gems": 2500,
+          "molly_shards": 10,
+          "mythic_exploration_manual": 5,
+          "mythic_expedition_manual": 5,
+          "hero_xp": 25000,
+          "vip_xp": 2500,
+          "resources": "none"
+        },
+        "_note": "Hero-specific shard pack. No resources."
+      }
+    ]
+  },
+
+  "event_shop_prices": {
+    "_comment": "What items cost in event currencies (mystery badges, etc)",
+    "mystery_shop": {
+      "currency": "mystery_badges",
+      "items": [
+        {"item": "S2 Custom Hero Gear Chest", "qty": 5, "cost": 2500, "per_unit": 500},
+        {"item": "S1 Custom Hero Gear Chest", "qty": 5, "cost": 2000, "per_unit": 400},
+        {"item": "Essence Stone", "qty": 10, "cost": 2500, "per_unit": 250},
+        {"item": "Mythic Shard", "qty": 1, "cost": 500, "per_unit": 500},
+        {"item": "Hero XP", "qty": 50000, "cost": 500, "per_unit": 0.01},
+        {"item": "Pet Custom Chest", "qty": 5, "cost": 2500, "per_unit": 500},
+        {"item": "Advanced Wild Mark", "qty": 2, "cost": 2500, "per_unit": 1250}
+      ]
+    },
+    "alliance_shop": {
+      "currency": "alliance_tokens",
+      "_comment": "Alliance shop prices - helps establish relative item values",
+      "items": [
+        {"item": "5m Research Speedup", "qty": 1, "cost": 2200, "per_unit": 2200},
+        {"item": "5m Speedup (all specific types)", "qty": 1, "cost": 2200, "per_unit": 2200, "_note": "All specific speedups same price"},
+        {"item": "Bahiti Shard", "qty": 1, "cost": 33000, "per_unit": 33000},
+        {"item": "2hr Shield", "qty": 1, "cost": 13000, "per_unit": 13000},
+        {"item": "Expedition (March Recall)", "qty": 1, "cost": 26000, "per_unit": 26000},
+        {"item": "Alliance Teleporter", "qty": 1, "cost": 40000, "per_unit": 40000, "_note": "40% off sale price, normal ~66,667"},
+        {"item": "Random Teleporter", "qty": 1, "cost": 9900, "per_unit": 9900, "_note": "70% off sale price, normal = 33,000"}
+      ],
+      "value_analysis": {
+        "_note": "Cross-reference with gem costs",
+        "random_teleporter_gems": 1000,
+        "random_teleporter_tokens_normal": 33000,
+        "tokens_per_gem": 33,
+        "_derived": "If 1 Random Teleporter = 1000 gems = 33,000 tokens → 33 tokens = 1 gem"
+      }
+    },
+    "arena_shop": {
+      "currency": "arena_tokens",
+      "_comment": "Arena shop prices",
+      "items": [
+        {"item": "Zinman Shard", "qty": 1, "cost": 2000, "per_unit": 2000},
+        {"item": "General Mythic Shard", "qty": 1, "cost": 2500, "per_unit": 2500, "_note": "Works for all mythic heroes EXCEPT Natalia & Jeronimo (purchase-only heroes)"},
+        {"item": "Epic Shard", "qty": 1, "cost": 500, "per_unit": 500},
+        {"item": "Rare Shard", "qty": 1, "cost": 250, "per_unit": 250},
+        {"item": "Rare Manual", "qty": 1, "cost": 150, "per_unit": 150},
+        {"item": "Epic Manual", "qty": 1, "cost": 500, "per_unit": 500},
+        {"item": "Mythic Manual", "qty": 1, "cost": 1000, "per_unit": 1000},
+        {"item": "Hero XP 5k", "qty": 1, "cost": 150, "per_unit": 150},
+        {"item": "Custom Mythic Hero Gear Chest", "qty": 1, "cost": 12000, "per_unit": 12000},
+        {"item": "Custom Epic Hero Gear Chest", "qty": 1, "cost": 3750, "per_unit": 3750}
+      ],
+      "value_ratios": {
+        "shards_rare_epic_mythic": "250:500:2500 = 1:2:10",
+        "manuals_rare_epic_mythic": "150:500:1000 = 1:3.33:6.67",
+        "hero_gear_epic_mythic": "3750:12000 = 1:3.2"
+      }
+    },
+    "alliance_championship_shop": {
+      "currency": "championship_badges",
+      "_comment": "Alliance championship shop prices",
+      "items": [
+        {"item": "Polishing Solution", "qty": 1, "cost": 100, "per_unit": 100},
+        {"item": "Hardened Alloy", "qty": 1, "cost": 1, "per_unit": 1},
+        {"item": "Patrick Shard", "qty": 1, "cost": 500, "per_unit": 500},
+        {"item": "Taming Manual", "qty": 1, "cost": 150, "per_unit": 150}
+      ],
+      "value_ratios": {
+        "polishing_solution_to_hardened_alloy": "100:1",
+        "_note": "1 Polishing Solution = 100 Hardened Alloy in value"
+      }
+    },
+    "foundry_shop": {
+      "currency": "arsenal_tokens",
+      "_comment": "Foundry shop prices",
+      "items": [
+        {"item": "Gen2 Hero Shard", "qty": 1, "cost": 2500, "per_unit": 2500, "_note": "Same cost as general mythic shards"},
+        {"item": "General Mythic Shard", "qty": 1, "cost": 2500, "per_unit": 2500},
+        {"item": "Enhancement XP Component 100", "qty": 1, "cost": 250, "per_unit": 250},
+        {"item": "Charm Design", "qty": 1, "cost": 500, "per_unit": 500},
+        {"item": "Charm Guide", "qty": 1, "cost": 500, "per_unit": 500},
+        {"item": "1hr Speedup (all types including general)", "qty": 1, "cost": 250, "per_unit": 250}
+      ],
+      "value_ratios": {
+        "charm_design_to_charm_guide": "1:1",
+        "speedup_1hr_to_enhancement_xp_100": "1:1",
+        "_note": "1hr speedup = 100 enhancement XP component in value"
+      }
+    },
+    "labyrinth_shop": {
+      "currency": "glowstones",
+      "_comment": "Labyrinth shop - earned from labyrinth achievements",
+      "items": [
+        {"item": "Mithril", "qty": 1, "cost": 2500, "per_unit": 2500},
+        {"item": "Charm Design", "qty": 1, "cost": 250, "per_unit": 250},
+        {"item": "Charm Guide", "qty": 1, "cost": 250, "per_unit": 250},
+        {"item": "Mythic Shard", "qty": 1, "cost": 500, "per_unit": 500},
+        {"item": "Enhancement XP Component 100", "qty": 1, "cost": 50, "per_unit": 50},
+        {"item": "Lucky Hero Gear Chest", "qty": 1, "cost": 250, "per_unit": 250},
+        {"item": "Mythic General Decoration Component", "qty": 1, "cost": 1000, "per_unit": 1000},
+        {"item": "1hr General Speedup", "qty": 1, "cost": 400, "per_unit": 400}
+      ],
+      "value_ratios": {
+        "mithril_to_mythic_shard": "5:1",
+        "charm_design_to_charm_guide": "1:1",
+        "lucky_hero_gear_chest_to_charm": "1:1",
+        "_note": "1 Mithril = 5 Mythic Shards in value"
+      }
+    }
+  },
+
+  "observations": {
+    "_comment": "Notes about pricing patterns",
+    "hero_gear_chests": "Prior generations get cheaper",
+    "frost_stars": "1 Frost Star = $0.01 USD. $4.99 = 499 Frost Stars. Consider using Frost Stars as currency in UI."
+  },
+
+  "pack_analyzer_insights": {
+    "_comment": "Key insights for Pack Analyzer UI",
+
+    "the_fluff_problem": {
+      "description": "Packs bundle items together, making specific items feel more valuable than they are",
+      "example": {
+        "scenario": "You want Essence Stones for hero gear",
+        "pack_cost": 499,
+        "essence_stone_value": 22,
+        "quantity_in_pack": 10,
+        "target_value": 220,
+        "target_percentage": "4.4%",
+        "effective_markup": "23x",
+        "insight": "You pay $4.99 but only $0.22 is what you actually want"
+      }
+    },
+
+    "resource_reality": {
+      "description": "Resources are FREE for active players who gather/mine/farm",
+      "for_farmers": {
+        "meat_value": 0,
+        "wood_value": 0,
+        "coal_value": 0,
+        "iron_value": 0,
+        "heavy_resources_value": 0,
+        "light_resources_value": 0
+      },
+      "for_new_players": {
+        "note": "Early game players may value resources, use standard values"
+      },
+      "insight": "A player with 800M meat/wood sees 'heavy resources' as pure fluff"
+    },
+
+    "ui_recommendations": {
+      "toggle_farmer_mode": "Let users set resources to 0 value if they farm",
+      "show_two_values": "Display 'Full Pack Value' vs 'Target Items Only'",
+      "target_efficiency": "Show what % of pack cost goes to items user wants",
+      "category_breakdown": "Pie chart or bar showing gems/vip/resources/unique items"
+    }
+  },
+
+  "derived_item_values": {
+    "_comment": "All values in Frost Stars (1 FS = $0.01 USD = ~30 gems)",
+    "_baseline": "$4.99 pack = 499 Frost Stars",
+    "_method": "Pack back-calculation primary, shop ratios for gaps",
+
+    "baseline_values": {
+      "_comment": "Fixed values used in calculations",
+      "2500 gems": 83,
+      "2500 VIP (25x100)": 167,
+      "Heavy Resources": 108,
+      "Light Resources": 27
+    },
+
+    "confirmed_from_gems": {
+      "_comment": "From direct gem costs (gems ÷ 30)",
+      "VIP XP (per 1)": 0.07,
+      "Stamina (per 1)": 1,
+      "Hero XP (per 1000)": 1,
+      "Gold Key": 50,
+      "Platinum Key": 17,
+      "Rare Manual": 5,
+      "Epic Manual": 17,
+      "Common Wild Mark": 17,
+      "Random Teleporter": 33,
+      "Healing Speedup": 0
+    },
+
+    "resources_per_1M": {
+      "_source": "City Lifeline Pack back-calculation",
+      "Meat": 5.4,
+      "Wood": 5.4,
+      "Coal": 27,
+      "Iron": 108
+    },
+
+    "speedups": {
+      "_source": "City Construction Pack: 600 min = 141 FS remaining",
+      "per_minute": 0.24,
+      "per_hour": 14,
+      "healing": 0,
+      "_note": "Pack value is ~half of gem-purchase rate"
+    },
+
+    "from_packs_primary": {
+      "_method": "499 FS - known values = remaining for unique items",
+      "Charm Design": {"fs": 22, "source": "Charm Design Pack: 222 FS / 10"},
+      "Charm Guide": {"fs": 6.5, "source": "Charm Craftsman Pack: 117 FS / 18"},
+      "Essence Stone": {"fs": 22, "source": "Mastery Forging Pack: 222 FS / 10"},
+      "Mithril": {"fs": 141, "source": "Gear Empowerment Pack: 141 FS / 1"},
+      "Pet Food (per 1)": {"fs": 0.024, "source": "Pet Food Pack: 141 FS / 6000"},
+      "Taming Manual": {"fs": 4, "source": "Taming Manual Pack: 141 FS / 35"},
+      "Energizing Potion": {"fs": 14, "source": "Pet Energy Pack: 141 FS / 10"},
+      "Strengthening Serum": {"fs": 28, "source": "Pet Serum Pack: 141 FS / 5"},
+      "Advanced Wild Mark": {"fs": 71, "source": "Wild Mark Pack: 141 FS / 2"},
+      "Steel (per 1k)": {"fs": 5.6, "source": "Steel Pack: 222 FS / 40k"},
+      "Mythic Manual": {"fs": 3.7, "source": "Skill Manual Pack: 222 FS / 60"},
+      "Fire Crystal": {"fs": 1.7, "source": "Standard Pack: 26 FS / 15"},
+      "Hero-Specific Shard": {"fs": 19, "source": "Molly Pack: 187 FS / 10"},
+      "Enhancement XP (per 100)": {"fs": 13, "source": "Hero Gear Pack: 134 FS / 1000 × 100"},
+      "Lucky Hero Gear Chest": {"fs": 22, "source": "Hero Gear Pack: assumed = Charm Design"},
+      "Polishing Solution": {"fs": 6.7, "source": "Chief Gear Tool Pack: 222 FS / 3300 units × 100"},
+      "Hardened Alloy": {"fs": 0.067, "source": "Chief Gear Tool Pack: 222 FS / 3300 units"}
+    },
+
+    "from_alliance_shop_ratios": {
+      "_anchor": "Random Teleporter = 33 FS = 33000 tokens → 1000 tokens = 1 FS",
+      "Bahiti Shard": 33,
+      "2hr Shield": 13,
+      "Expedition Recall": 26,
+      "Alliance Teleporter": 67
+    },
+
+    "from_arena_shop_ratios": {
+      "_note": "Using Rare Manual = 5 FS as anchor, ratios 1:3.33:6.67",
+      "Rare Shard": 8,
+      "Epic Shard": 17,
+      "Mythic Shard (general)": 83,
+      "Custom Epic Hero Gear Chest": 125,
+      "Custom Mythic Hero Gear Chest": 400,
+      "_caveat": "Shop prices higher than pack prices - use for relative comparison only"
+    },
+
+    "from_labyrinth_shop_ratios": {
+      "_note": "Used for relative values only - shop gives discount vs real value",
+      "Mythic Decoration Component": {"relative_to_mithril": 0.4, "estimated_fs": 56}
+    },
+
+    "war_items_estimated": {
+      "_source": "Conqueror Pack: 331 FS for 1 Adv Teleport + 4 March Accel + 1 Counter Recon",
+      "_alliance_derived": "Expedition Recall = 26 FS each",
+      "Advanced Teleport": {"fs": 100, "note": "Estimate - more valuable than random (33)"},
+      "March Accelerator": {"fs": 30, "note": "Estimate"},
+      "Counter Recon 2hr": {"fs": 41, "note": "Estimate from remaining"},
+      "Transfer Pass": {"fs": 5, "note": "Low value filler in Transfer Pack"}
+    },
+
+    "contracts": {
+      "Accessory Construction Contract": {"fs": 55, "source": "Accessory Pack: estimate from 110 FS / 2"}
+    },
+
+    "summary_table_fs": {
+      "_format": "item: Frost Stars (1 FS = $0.01)",
+      "Mithril": 141,
+      "Advanced Wild Mark": 71,
+      "Alliance Teleporter": 67,
+      "Accessory Construction Contract": 55,
+      "Gold Key": 50,
+      "Random Teleporter": 33,
+      "Strengthening Serum": 28,
+      "Bahiti Shard": 33,
+      "Expedition Recall": 26,
+      "Charm Design": 22,
+      "Essence Stone": 22,
+      "Lucky Hero Gear Chest": 22,
+      "Hero-Specific Shard": 19,
+      "Platinum Key": 17,
+      "Epic Manual": 17,
+      "Common Wild Mark": 17,
+      "1hr Speedup": 14,
+      "Energizing Potion": 14,
+      "Enhancement XP (per 100)": 13,
+      "2hr Shield": 13,
+      "Polishing Solution": 6.7,
+      "Charm Guide": 6.5,
+      "Rare Manual": 5,
+      "Taming Manual": 4,
+      "Mythic Manual": 3.7,
+      "Fire Crystal": 1.7,
+      "Stamina": 1,
+      "Hero XP (per 1k)": 1,
+      "VIP XP (per 1)": 0.07,
+      "Hardened Alloy": 0.067,
+      "Pet Food": 0.024
+    }
+  },
+
+  "missing_from_pack_analyzer": {
+    "_comment": "Items found in packs that may need to be added to Pack Analyzer UI",
+    "chief_gear": [
+      {"name": "Polishing Solution", "description": "TBD"},
+      {"name": "Hardened Alloy", "description": "TBD"},
+      {"name": "Design Plans", "description": "TBD"}
+    ],
+    "hero_gear": [
+      {"name": "Enhancement XP Component", "description": "TBD"},
+      {"name": "Lucky Hero Gear Chest", "description": "TBD"}
+    ],
+    "charms": [
+      {"name": "Charm Design", "description": "TBD"},
+      {"name": "Charm Guide", "description": "TBD"}
+    ],
+    "progression": [
+      {"name": "Essence Stone", "description": "TBD"},
+      {"name": "Mithril", "description": "TBD"},
+      {"name": "Fire Crystal", "description": "TBD"},
+      {"name": "Mythic General Decoration Component", "description": "TBD"}
+    ],
+    "pets": [
+      {"name": "Pet Food", "description": "TBD"},
+      {"name": "Taming Manual", "description": "TBD"},
+      {"name": "Energizing Potion", "description": "TBD"},
+      {"name": "Strengthening Serum", "description": "TBD"},
+      {"name": "Advanced Wild Mark", "description": "TBD"}
+    ],
+    "resources": [
+      {"name": "Steel", "description": "TBD"}
+    ],
+    "war_pvp": [
+      {"name": "Advanced Teleport", "description": "TBD"},
+      {"name": "Random Teleport", "description": "TBD", "gem_cost": 1000},
+      {"name": "March Accelerator 1", "description": "TBD"},
+      {"name": "Expedition Recall", "description": "Recalls troops from marching to destination"},
+      {"name": "Counter Recon 2hr", "description": "TBD"},
+      {"name": "Transfer Pass", "description": "TBD"}
+    ],
+    "contracts": [
+      {"name": "General Accessory Construction Contract", "description": "TBD"}
+    ],
+    "skill_manuals": [
+      {"name": "Mythic Exploration Manual", "description": "TBD"},
+      {"name": "Mythic Expedition Manual", "description": "TBD"}
+    ],
+    "hero_shards": [
+      {"name": "Hero-Specific Shards", "description": "Shards for specific heroes (e.g., Molly Shards)", "examples": ["Molly Shards"]}
+    ],
+    "currency": [
+      {"name": "Mystery Badges", "description": "Event currency", "gem_ratio": 3}
+    ]
+  },
+
+  "raw_data": [
+    {"item": "VIP XP 10", "gems": 20, "per_unit": 2.0, "notes": "10 VIP XP = 20 gems, so 1 VIP XP = 2 gems"},
+    {"item": "Stamina 10", "gems": 300, "per_unit": 30.0, "notes": "10 stamina = 300 gems, so 1 stamina = 30 gems"},
+    {"item": "Hero XP 1000", "gems": 30, "per_unit": 0.03, "notes": "1k hero xp = 30 gems, so 1 hero xp = 0.03 gems"},
+    {"item": "Gold Key", "gems": 1500, "per_unit": 1500, "notes": "1 gold key = 1500 gems"},
+    {"item": "Platinum Key", "gems": 500, "per_unit": 500, "notes": "1 platinum key = 500 gems (cheaper than gold!)"},
+    {"item": "Rare Exploration Manual", "gems": 150, "per_unit": 150, "notes": ""},
+    {"item": "Epic Exploration Manual", "gems": 500, "per_unit": 500, "notes": ""},
+    {"item": "Rare Expedition Manual", "gems": 150, "per_unit": 150, "notes": "Same as exploration"},
+    {"item": "Epic Expedition Manual", "gems": 500, "per_unit": 500, "notes": "Same as exploration"},
+    {"item": "Common Wild Mark", "gems": 500, "per_unit": 500, "notes": ""},
+    {"item": "Meat", "gems": null, "per_unit": null, "notes": "Same value as Wood. 1m meat = 200k coal"},
+    {"item": "Wood", "gems": null, "per_unit": null, "notes": "Same value as Meat. 400k wood = 20k iron"},
+    {"item": "Coal", "gems": null, "per_unit": null, "notes": "5x more valuable than meat/wood (1m meat = 200k coal)"},
+    {"item": "Iron", "gems": null, "per_unit": null, "notes": "20x more valuable than wood (400k wood = 20k iron)"},
+    {"item": "Random Teleporter", "gems": 1000, "per_unit": 1000, "notes": "Not currently in Pack Analyzer - may need to add"}
+  ]
+}

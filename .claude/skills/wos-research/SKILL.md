@@ -126,8 +126,54 @@ For meta claims:
 4. **Fetch and extract** - WebFetch with specific prompt
 5. **Apply confidence** - Based on source tier
 6. **Label meta claims** - If Tier 3+, must label as meta
-7. **Update files** - data/WOS_REFERENCE.md, relevant JSON files
+7. **ALWAYS WRITE TO FILES** - Save findings to appropriate data files (see below)
 8. **Cite sources** - Always include URL and access date
+
+## CRITICAL: Persisting Research Results
+
+**Research is USELESS if not saved to files.** After gathering data, you MUST:
+
+### File Destinations by Topic
+
+| Topic | Write To | Format |
+|-------|----------|--------|
+| Hero skills/descriptions | `data/heroes.json` | Add `_desc` suffix fields |
+| Hero mechanics | `data/heroes.json` + `data/WOS_REFERENCE.md` | JSON + markdown |
+| Building costs | `data/upgrades/buildings.*.json` | Edge graph JSON |
+| Chief gear | `data/chief_gear.json` | Structured JSON |
+| Pets | `data/raw/pets.research.json` | Research JSON |
+| Charms | `data/raw/chief_charms.research.json` | Research JSON |
+| Research tree | `data/guides/research_priorities.json` | Guide JSON |
+| Daybreak Island | `data/raw/daybreak_island.research.json` | Research JSON |
+| Shop items | `data/shops.json` (create if missing) | Structured JSON |
+| Chest types | `data/chests.json` (create if missing) | Structured JSON |
+| General mechanics | `data/WOS_REFERENCE.md` | Markdown section |
+| New system research | `data/raw/{system}.research.json` | Research JSON |
+
+### Write Procedure
+
+1. **Read existing file first** (required before editing)
+2. **Merge new data** with existing (don't overwrite good data)
+3. **Add metadata**: `retrieved_at`, `sources` array with URLs
+4. **Validate JSON** before writing
+5. **Update RESEARCH_QUESTIONS.md** - Mark items complete, add notes
+
+### Research JSON Template
+
+```json
+{
+  "system": "topic_name",
+  "retrieved_at": "2026-01-10T00:00:00Z",
+  "sources": [
+    {"source_id": "SRC_NAME", "url": "https://...", "confidence": "A"}
+  ],
+  "data_completeness": "complete|partial",
+  "overview": { ... },
+  "details": { ... }
+}
+```
+
+**If you complete research but don't write to files, the research is LOST.**
 
 ## Disallowed Sources (REFUSE TO USE)
 

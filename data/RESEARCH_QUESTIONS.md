@@ -14,11 +14,14 @@ Track progress on gathering verified game data.
 | Explanation System | COMPLETE | `explanation_system.json`, `explanation_builder.json` |
 | Confidence Scoring | COMPLETE | `confidence_scoring.json` |
 | Upgrade Costs/Benefits | IN PROGRESS | (next priority) |
-| Q2: Hero Gear | PENDING | - |
-| Q3: Chief Gear Charms | PENDING | - |
-| Q4: Pets | PENDING | - |
-| Q5: Research Priorities | PENDING | - |
-| Q6: Daybreak Island | PENDING | - |
+| Q2: Hero Gear | COMPLETE | `raw/hero_gear.research.json` |
+| Q3: Chief Gear Charms | COMPLETE | `raw/chief_charms.research.json` |
+| Q4: Pets | COMPLETE | `raw/pets.research.json` |
+| Q5: Research Priorities | COMPLETE | `guides/research_priorities.json` |
+| Q6: Daybreak Island | COMPLETE | `raw/daybreak_island.research.json` |
+| Shop Items & Currencies | PARTIAL | `shops.json` (needs verification) |
+| Chest Types | PARTIAL | `chests.json` (needs verification) |
+| Hero Skill Descriptions | PARTIAL | `heroes.json` (14 heroes done, Gen 4-14 pending) |
 
 ---
 
@@ -146,26 +149,30 @@ Please cite sources.
 ---
 
 ## Backpack & UI Research
-**Status:** PENDING
+**Status:** PARTIAL - Data files created 2026-01-10
 
 ### Shop Items & Currencies
-- [ ] Research all shop types and their currencies (Glowstones, etc.)
-- [ ] Mystery Shop items and costs
-- [ ] Arena Shop items
-- [ ] Alliance Shop items
-- [ ] SvS Shop items
-- [ ] Event-specific shops
+- [x] Research all shop types and their currencies (Glowstones, etc.) - Created `data/shops.json`
+- [x] Mystery Shop items and costs
+- [x] Arena Shop items
+- [x] Alliance Shop items
+- [x] SvS Shop items
+- [x] Event-specific shops
+- [ ] NEEDS VERIFICATION: Actual in-game costs and exact item lists
 
 ### Missing Chest Types
-- [ ] Fishing event chests (Ice Fishing rewards)
-- [ ] Labyrinth chests and rewards
-- [ ] Other event-specific chests
+- [x] Fishing event chests (Ice Fishing rewards) - Created `data/chests.json`
+- [x] Labyrinth chests and rewards
+- [x] Other event-specific chests
+- [ ] NEEDS VERIFICATION: Exact drop rates and item lists from in-game
 
 ### Hero Skill Descriptions
-- [ ] Research all hero skill descriptions for tooltip hovers
-- [ ] Exploration skills (what each skill does at each level)
-- [ ] Expedition skills (what each skill does at each level)
-- [ ] Document in heroes.json using `_desc` suffix fields
+- [x] Research hero skill descriptions for tooltip hovers - Added to `data/heroes.json`
+- [x] Exploration skills (what each skill does at each level)
+- [x] Expedition skills (what each skill does at each level)
+- [x] Document in heroes.json using `_desc` suffix fields
+- **Heroes with descriptions added:** Sergey, Jessie, Jeronimo, Natalia, Bahiti, Patrick, Molly, Flint, Philly, Alonso, Gina, Mia, Greg
+- [ ] TODO: Add descriptions for remaining heroes (Gen 4-14)
 
 ---
 

@@ -339,6 +339,43 @@
       ]
     },
 
+    "upgrade_priorities": {
+      "name": "Upgrade Priorities",
+      "icon": "upgrade",
+      "tips": [
+        {
+          "tip": "Hero Power (Essence Stones) and Research are the REAL long-term investments",
+          "detail": "In mid/late game, these give permanent, multiplicative stat boosts that affect all combat. This is where serious players concentrate.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Troop Power is FAKE power",
+          "detail": "Having more troops seems great... until you have enough. Once you hit troop caps for rallies/marches, extra troops just sit there. Quality beats quantity.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Damage scales with square root of troops",
+          "detail": "Doubling your troops only gives +41% damage. But +10% Lethality from research? That's +10% forever on every fight.",
+          "priority": "high"
+        },
+        {
+          "tip": "Essence Stones boost Hero Gear Mastery permanently",
+          "detail": "Each mastery level is a permanent stat increase. This compounds with research, gear, and everything else.",
+          "priority": "high"
+        },
+        {
+          "tip": "Research bonuses multiply with everything",
+          "detail": "+10% Attack research × +10% Lethality research × hero skills × gear = massive combined effect. Research never goes away.",
+          "priority": "high"
+        },
+        {
+          "tip": "Stop training troops once you have enough for rallies",
+          "detail": "If you can fill rally slots and have reserves for losses, more troops = wasted resources. Invest in quality instead.",
+          "priority": "medium"
+        }
+      ]
+    },
+
     "new_player": {
       "name": "New Player / Resource Management",
       "icon": "newbie",
@@ -457,6 +494,11 @@
       "mistake": "Attacking during SvS without planning shield timing",
       "correction": "Attacking drops shield for 30 min. You become a target. Time attacks with alliance coordination.",
       "category": "svs_battle"
+    },
+    {
+      "mistake": "Chasing troop count / troop power as main goal",
+      "correction": "Troop power is fake power. Once you have enough for rallies, invest in Research and Essence Stones instead - permanent quality > temporary quantity.",
+      "category": "upgrade_priorities"
     }
   ]
 }

@@ -527,17 +527,23 @@ def render_bear_trap():
         col1, col2 = st.columns(2)
 
         with col1:
-            st.markdown("#### Rally Leader")
-            st.markdown(leader.get("description", ""))
-            if leader.get("note"):
-                st.info(leader.get("note"))
+            st.markdown(f"""
+            <div style="background:rgba(74,144,217,0.15);border-left:4px solid #3498DB;padding:16px;border-radius:8px;">
+                <div style="font-weight:bold;color:#3498DB;font-size:16px;margin-bottom:8px;">Rally Leader</div>
+                <div style="color:#E8F4F8;margin-bottom:12px;">{leader.get("description", "")}</div>
+                <div style="color:#B8D4E8;font-size:13px;font-style:italic;">{leader.get("note", "")}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
         with col2:
-            st.markdown("#### Rally Joiner")
-            st.markdown(joiner.get("description", ""))
-            st.markdown(f"**Selection**: {joiner.get('selection', '')}")
-            if joiner.get("tip"):
-                st.warning(joiner.get("tip"))
+            st.markdown(f"""
+            <div style="background:rgba(46,204,113,0.15);border-left:4px solid #2ECC71;padding:16px;border-radius:8px;">
+                <div style="font-weight:bold;color:#2ECC71;font-size:16px;margin-bottom:8px;">Rally Joiner</div>
+                <div style="color:#E8F4F8;margin-bottom:8px;">{joiner.get("description", "")}</div>
+                <div style="color:#E8F4F8;margin-bottom:12px;"><strong>Selection:</strong> {joiner.get('selection', '')}</div>
+                <div style="color:#F39C12;font-size:13px;font-style:italic;">{joiner.get("tip", "")}</div>
+            </div>
+            """, unsafe_allow_html=True)
 
     # Troop composition
     troop_comp = bear_data.get("troop_composition", {})
