@@ -124,24 +124,32 @@ CHARM_TYPES = {
 
 def get_or_create_chief_gear():
     """Get or create chief gear record for current profile."""
-    gear = db.query(UserChiefGear).filter(UserChiefGear.profile_id == profile.id).first()
-    if not gear:
-        gear = UserChiefGear(profile_id=profile.id)
-        db.add(gear)
-        db.commit()
-        db.refresh(gear)
-    return gear
+    try:
+        gear = db.query(UserChiefGear).filter(UserChiefGear.profile_id == profile.id).first()
+        if not gear:
+            gear = UserChiefGear(profile_id=profile.id)
+            db.add(gear)
+            db.commit()
+            db.refresh(gear)
+        return gear
+    except Exception as e:
+        st.error(f"Database error loading gear: {e}. Try deleting wos_optimizer.db and restarting.")
+        return None
 
 
 def get_or_create_chief_charms():
     """Get or create chief charms record for current profile."""
-    charms = db.query(UserChiefCharm).filter(UserChiefCharm.profile_id == profile.id).first()
-    if not charms:
-        charms = UserChiefCharm(profile_id=profile.id)
-        db.add(charms)
-        db.commit()
-        db.refresh(charms)
-    return charms
+    try:
+        charms = db.query(UserChiefCharm).filter(UserChiefCharm.profile_id == profile.id).first()
+        if not charms:
+            charms = UserChiefCharm(profile_id=profile.id)
+            db.add(charms)
+            db.commit()
+            db.refresh(charms)
+        return charms
+    except Exception as e:
+        st.error(f"Database error loading charms: {e}. Try deleting wos_optimizer.db and restarting.")
+        return None
 
 
 def render_gear_slot(slot_id, slot_info, gear_data):
@@ -238,16 +246,18 @@ def render_chief_gear_tab():
     )
 
     gear_data = get_or_create_chief_gear()
+    if gear_data is None:
+        return
 
-    # Group by troop type
-    troop_groups = {
-        "Infantry": ["coat", "pants"],
-        "Lancer": ["cap", "watch"],
-        "Marksman": ["belt", "weapon"],
-    }
+    # Group by troop type - Order: Lancer (cap/watch), Infantry (coat/pants), Marksman (belt/weapon)
+    troop_groups = [
+        ("Lancer", ["cap", "watch"]),
+        ("Infantry", ["coat", "pants"]),
+        ("Marksman", ["belt", "weapon"]),
+    ]
     troop_colors = {"Infantry": "#E74C3C", "Lancer": "#2ECC71", "Marksman": "#3498DB"}
 
-    for troop_type, slots in troop_groups.items():
+    for troop_type, slots in troop_groups:
         st.markdown(
             f'<div style="background:{troop_colors[troop_type]}22;border-left:4px solid {troop_colors[troop_type]};'
             f'padding:8px 12px;margin:16px 0 8px 0;border-radius:4px;">'
@@ -336,15 +346,18 @@ def render_chief_charms_tab():
     )
 
     charm_data = get_or_create_chief_charms()
+    if charm_data is None:
+        return
 
     # Organize by gear piece - each piece has 3 charms
+    # Order: Lancer (cap/watch), Infantry (coat/pants), Marksman (belt/weapon)
     gear_pieces = [
-        ("cap", "Cap", "🎩", "#2ECC71"),
-        ("watch", "Watch", "⌚", "#2ECC71"),
-        ("coat", "Coat", "🧥", "#E74C3C"),
-        ("pants", "Pants", "👖", "#E74C3C"),
-        ("belt", "Belt", "🎯", "#3498DB"),
-        ("weapon", "Weapon", "⚔️", "#3498DB"),
+        ("cap", "Cap", "🎩", "#2ECC71"),      # Lancer
+        ("watch", "Watch", "⌚", "#2ECC71"),   # Lancer
+        ("coat", "Coat", "🧥", "#E74C3C"),     # Infantry
+        ("pants", "Pants", "👖", "#E74C3C"),   # Infantry
+        ("belt", "Belt", "🎯", "#3498DB"),     # Marksman
+        ("weapon", "Weapon", "⚔️", "#3498DB"), # Marksman
     ]
 
     for gear_id, gear_name, gear_icon, gear_color in gear_pieces:

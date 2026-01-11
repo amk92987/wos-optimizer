@@ -115,6 +115,15 @@ with st.sidebar:
                     update_priority(name, i)
                     st.rerun()
 
+    # Branding at bottom
+    st.markdown("---")
+    st.markdown(
+        '<div style="text-align:center;color:#666;font-size:11px;padding:8px 0;">'
+        '🎲 <span style="font-weight:bold;">Random Chaos Labs</span>'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
 pg.run()
 
 # Close database

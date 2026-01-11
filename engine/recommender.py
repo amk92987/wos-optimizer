@@ -595,3 +595,24 @@ class RecommendationEngine:
         hero_scores.sort(key=lambda h: h['score'], reverse=True)
 
         return hero_scores[:limit]
+
+    def _get_current_generation(self) -> int:
+        """Calculate user's current generation based on server age."""
+        server_age = getattr(self.profile, 'server_age_days', 0)
+
+        if server_age < 40:
+            return 1
+        elif server_age < 120:
+            return 2
+        elif server_age < 200:
+            return 3
+        elif server_age < 280:
+            return 4
+        elif server_age < 360:
+            return 5
+        elif server_age < 440:
+            return 6
+        elif server_age < 520:
+            return 7
+        else:
+            return 8
