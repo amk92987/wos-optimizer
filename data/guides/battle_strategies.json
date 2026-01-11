@@ -336,6 +336,129 @@
       }
     },
 
+    "team_coordination": {
+      "description": "Advanced coordination strategies for alliances using Discord/voice chat. These tactics require real-time communication and win against stronger but disorganized opponents.",
+      "team_structure": {
+        "name": "4-Team Formation",
+        "overview": "Split your 30 players into 4 specialized teams for maximum efficiency",
+        "teams": {
+          "A1": {
+            "name": "Attack Team 1 (Primary)",
+            "size": "8 players",
+            "composition": "Your 2nd-8th strongest players (NOT rank 1)",
+            "role": "Lead offensive pushes, initiate rallies on high-value targets"
+          },
+          "A2": {
+            "name": "Attack Team 2 (Support)",
+            "size": "7 players",
+            "composition": "Next strongest players",
+            "role": "Follow-up attacks, assist defense when A1 is active, take over when A1 heals"
+          },
+          "D1": {
+            "name": "Defense Team 1",
+            "size": "8 players",
+            "composition": "Rank 1 player + 7 solid defenders",
+            "role": "Hold Boiler Room + Prototype Sites",
+            "why_rank_1": "Rank 1 leads defense because losing your strongest attacker to garrison duty wastes offensive potential"
+          },
+          "D2": {
+            "name": "Defense Team 2",
+            "size": "7 players",
+            "composition": "Remaining players",
+            "role": "Hold Transit Station + Repair Facilities"
+          }
+        },
+        "substitutes": "10 subs enter after 3 minutes - use them to reinforce weak points or replace defeated players"
+      },
+      "attack_rotation": {
+        "name": "Continuous Pressure Rotation",
+        "description": "Never let the enemy rest. When one attack team heals, the other attacks.",
+        "cycle": [
+          {"phase": "Opening", "A1": "Full assault on priority targets", "A2": "Assist D1/D2 securing buildings"},
+          {"phase": "A1 Depleted", "A1": "Retreat to heal (12 min auto-heal)", "A2": "Take over attacking role"},
+          {"phase": "A1 Recovered", "A1": "Resume attacking", "A2": "Return to support/defense role"},
+          {"phase": "Repeat", "note": "Continue rotation throughout the hour"}
+        ],
+        "key_insight": "This rotation means you ALWAYS have a fresh attack team. Enemy can never consolidate."
+      },
+      "coordinated_strikes": {
+        "name": "Double Rally Strike",
+        "priority": "CRITICAL",
+        "description": "Two rallies timed to overwhelm even strong garrisons",
+        "execution": [
+          "Rally Captain calls target on Discord",
+          "A1 leader starts rally, announces 'Rally up!'",
+          "A2 leader waits exactly 10 seconds, then starts second rally",
+          "Both rallies land within seconds of each other",
+          "Individual troops from both teams follow immediately after"
+        ],
+        "timing_script": {
+          "captain": "'A1 rally Imperial Foundry in 3... 2... 1... GO'",
+          "a1_leader": "Starts rally immediately",
+          "captain": "'A2 follow in 10... 9... 8...' (countdown)",
+          "a2_leader": "Starts rally at zero",
+          "captain": "'Swarm troops NOW' (after rallies land)"
+        },
+        "why_10_seconds": "10-second gap ensures rallies land close together but not simultaneously (which could bug out). Second rally hits while garrison is still engaged with first."
+      },
+      "final_push": {
+        "name": "Final 10-Minute Blitz",
+        "priority": "CRITICAL",
+        "description": "All-out coordinated assault in the final phase to flip the match",
+        "when_to_use": "When trailing OR to secure victory in final 10 minutes",
+        "execution": [
+          "Rally Captain: 'Final push in 60 seconds, everyone teleport to rally point'",
+          "All players use Advanced Teleport to staging area near Imperial Foundry",
+          "Captain: 'A1 rally in 3-2-1-GO'",
+          "10 seconds later: 'A2 rally GO'",
+          "After rallies land: 'Everyone swarm - full troops, all marches'",
+          "Repeat on next building immediately - don't let them recover"
+        ],
+        "success_factors": [
+          "Pre-positioned teleports (need 3-5 Advanced Teleporters saved)",
+          "Everyone online and listening",
+          "D teams maintain existing holdings during push",
+          "Speedups ready for emergency heals"
+        ]
+      },
+      "discord_callouts": {
+        "name": "Voice Chat Communication",
+        "description": "Standard callouts for efficient coordination",
+        "roles": {
+          "rally_captain": "One person (usually R4/R5) calls all movements. Everyone else stays quiet unless reporting.",
+          "scout": "One person monitors enemy movements and reports positions",
+          "timekeeper": "Announces phase changes and final push countdown"
+        },
+        "standard_callouts": [
+          "'Rally [building] in [seconds]' - Prepare to join rally",
+          "'A1/A2 swap' - Attack teams switch roles",
+          "'Reinforce [building]' - Defense team move to support",
+          "'Yellow dots [location]' - Scattered points to collect",
+          "'Enemy rally incoming [building]' - Prepare defense",
+          "'Final push 60 seconds' - Get ready for all-out assault",
+          "'GG hold positions' - We're winning, just defend"
+        ]
+      },
+      "building_assignments": {
+        "description": "Pre-assign buildings so there's no confusion",
+        "phase_1": {
+          "D1": ["Boiler Room", "Prototype Site North"],
+          "D2": ["Transit Station", "Repair Facility"],
+          "A1": "Push remaining Prototype Sites",
+          "A2": "Assist D1/D2 until buildings secured"
+        },
+        "phase_2": {
+          "D1": "Hold existing + add Munitions Warehouse",
+          "D2": "Hold existing + add Mercenary Camp",
+          "A1": "Imperial Foundry assault",
+          "A2": "Support A1 or cover gaps"
+        },
+        "phase_3": {
+          "all_teams": "Weapon Workshops are free-for-all, but coordinate final push on Imperial Foundry"
+        }
+      }
+    },
+
     "player_strategies": {
       "f2p": {
         "focus": "Target low-contest areas; gather Weapon Workshops; reinforce stronger allies",
@@ -448,37 +571,133 @@
     },
 
     "hero_selection": {
+      "jeronimo_decision": {
+        "question": "Should Jeronimo lead or join rallies?",
+        "answer": "LEAD (in most cases)",
+        "reasoning": "Jeronimo's skills are ALL-TROOP universal, not Infantry-specific. As leader, all 3 expedition skills apply. As joiner, only 1 skill applies - the SAME value as Jessie. Leading maximizes his value.",
+        "leader_value": {
+          "skills_applied": 3,
+          "effects": ["+25% DMG all troops", "+25% ATK all troops", "+30% periodic DMG all troops"]
+        },
+        "joiner_value": {
+          "skills_applied": 1,
+          "effects": ["+25% DMG all troops"],
+          "comparison": "Same as Jessie's joiner contribution"
+        },
+        "optimal_strategy": "Jeronimo LEADS, Jessie JOINS. Both contribute damage, but Jeronimo's 2 extra leader skills aren't wasted."
+      },
+      "generation_recommendations": {
+        "description": "Best rally leader changes as you unlock new generations. Jeronimo remains best for most players.",
+        "by_generation": {
+          "gen_1_to_7": {
+            "best_leader": "Jeronimo",
+            "reason": "No hero matches his 3 all-troop offensive skills. All alternatives have class-specific skills.",
+            "best_joiners": ["Jessie (+25% DMG)", "Jasser (+25% DMG)", "Norah (Gen 5 - Combined Arms)"]
+          },
+          "gen_8_plus": {
+            "best_leader": "Jeronimo (still)",
+            "alternative": "Hendrik",
+            "hendrik_case": "Hendrik's -25% enemy Defense is massive damage amplification. BUT using him as leader wastes his unique debuff as a joiner. Jeronimo as joiner = same as Jessie (no unique value lost).",
+            "recommendation": "Keep Jeronimo as leader. Use Hendrik as joiner for his unique -25% enemy Defense debuff.",
+            "best_joiners": ["Jessie (+25% DMG)", "Hendrik (-25% enemy DEF)", "Norah", "Blanchette (Gen 10)"]
+          },
+          "gen_12_plus": {
+            "best_leader": "Jeronimo (still)",
+            "alternatives": ["Hervor", "Vulcanus"],
+            "why_jeronimo_wins": "Hervor and Vulcanus have strong skills but most are class-specific (Infantry/Marksman). Jeronimo's 3 all-troop skills still provide more universal value.",
+            "hervor_note": "Hervor has Call For Blood (+25% DMG all troops) but his other 2 skills are Infantry-specific. As leader, you lose 2/3 value on non-Infantry troops.",
+            "vulcanus_note": "Vulcanus has strong Marksman buffs but defense reduction works best as joiner debuff.",
+            "best_joiners": ["Jessie", "Hendrik", "Vulcanus (-60% enemy Inf/Lancer DEF)", "Hervor (+25% DMG)"]
+          }
+        },
+        "exception": "Only switch leader from Jeronimo if: (1) Your Jeronimo is severely underleveled, AND (2) You have a max-level Hendrik/Hervor/Vulcanus. Even then, the math usually favors Jeronimo."
+      },
+      "full_allocation": {
+        "description": "Bear Trap gives you 1 lead rally + 6 join rallies = 7 total. Here's optimal hero placement.",
+        "critical_insight": {
+          "title": "When to Join WITHOUT a Hero",
+          "explanation": "The system picks top 4 highest LEVEL skills from all joiners. If your hero has a high-level NON-COMBAT skill (gathering, march speed, healing), it could get selected over someone else's lower-level COMBAT skill like Jessie's +25% DMG.",
+          "rule": "If your best available hero has a useless expedition skill, join with NO HERO. You still contribute troops without polluting the skill pool.",
+          "useless_skills": ["Gathering Speed", "March Speed", "Stamina Cost", "Healing Speed", "Training Speed", "Research Speed", "Building Speed", "Resource Production"],
+          "example": "Your level 5 'Gathering Speed +50%' gets picked → wastes a skill slot → does NOTHING. Meanwhile someone's level 3 Jessie (+15% DMG) gets bumped. Better to join with just troops."
+        },
+        "lead_rally": {
+          "slots": 3,
+          "all_skills_apply": true,
+          "recommended": ["Jeronimo (BEST - all 3 skills apply)", "Natalia (3 good all-troop skills)", "Any strong expedition hero"]
+        },
+        "join_rallies": {
+          "slots_per_rally": 1,
+          "only_leftmost_counts": true,
+          "join_decision": "Only use a hero if their expedition skill is COMBAT-relevant. Otherwise join with troops only.",
+          "priority_order": [
+            {"rank": 1, "hero": "Jessie", "skill": "+25% DMG all troops (Stand of Arms)", "tier": "S+", "gen": 1},
+            {"rank": 2, "hero": "Hendrik", "skill": "-25% enemy DEF (huge!)", "tier": "S+", "gen": 8},
+            {"rank": 3, "hero": "Norah", "skill": "+15% DMG/−15% taken + Sneak Strike", "tier": "S+", "gen": 5},
+            {"rank": 4, "hero": "Vulcanus", "skill": "-60% enemy Inf/Lancer DEF", "tier": "S+", "gen": 13},
+            {"rank": 5, "hero": "Jasser", "skill": "+25% DMG all troops (Tactical Genius)", "tier": "A", "gen": 1},
+            {"rank": 6, "hero": "Seo-yoon", "skill": "+25% ATK all troops (Rallying Beat)", "tier": "B", "gen": 1},
+            {"rank": 7, "hero": "Hervor", "skill": "+25% DMG all troops", "tier": "S+", "gen": 12},
+            {"rank": 8, "hero": "Wu Ming", "skill": "+20% DMG all troops", "tier": "S+", "gen": 6},
+            {"rank": 9, "hero": "Blanchette", "skill": "+25% vs wounded (Blood Hunter)", "tier": "S+", "gen": 10},
+            {"rank": 10, "hero": "Bradley", "skill": "+25% ATK all troops", "tier": "S", "gen": 7},
+            {"rank": "—", "hero": "NO HERO", "skill": "Better than a non-combat skill!", "tier": "—", "gen": 0}
+          ],
+          "note": "Use heroes you have based on your generation. If you don't have a combat-skill hero available, join with NO HERO."
+        },
+        "example_allocation": {
+          "description": "Use your combat-skill heroes first, then NO HERO for remaining rallies",
+          "lead": "Jeronimo + 2 others (all 3 Jeronimo skills apply)",
+          "join_1": "Jessie (+25% DMG) - BEST",
+          "join_2": "Jasser (+25% DMG) - Gen 1 Epic",
+          "join_3": "Seo-yoon (+25% ATK) - Gen 1 Epic",
+          "join_4": "Later-gen hero if available (Norah, Wu Ming, etc.)",
+          "join_5": "NO HERO (troops only)",
+          "join_6": "NO HERO (troops only)"
+        },
+        "realistic_note": "Most players have 2-4 heroes with combat expedition skills. Use those, then join remaining rallies with JUST TROOPS (no hero) to avoid polluting the skill pool."
+      },
       "best_joiners": [
         {
           "hero": "Jessie",
-          "skill": "+25% Troop DMG",
+          "skill": "+25% Troop DMG (Stand of Arms)",
           "priority": "BEST",
-          "note": "Highest damage boost available for rallies"
+          "note": "#1 joiner - same effect as Jeronimo but frees him to lead"
         },
         {
           "hero": "Jasser",
-          "skill": "Lancer ATK boost",
+          "skill": "+25% Troop DMG (Tactical Genius)",
           "priority": "HIGH",
-          "note": "Strong offensive expedition skill"
+          "note": "Gen 1 Epic with solid damage buff"
         },
         {
           "hero": "Seo-yoon",
-          "skill": "Marksman ATK boost",
+          "skill": "+25% Troop ATK (Rallying Beat)",
           "priority": "HIGH",
-          "note": "Excellent for marksman-heavy comps"
+          "note": "Gen 1 Epic with attack buff - great early game option"
         },
         {
           "hero": "Jeronimo",
-          "skill": "Infantry ATK boost",
-          "priority": "HIGH",
-          "note": "Good general attacker"
+          "skill": "+25% Troop DMG (all troops)",
+          "priority": "LOW",
+          "note": "WASTE - use him as LEADER instead. As joiner = same as Jessie."
         }
       ],
       "heroes_to_avoid": [
         {
           "hero": "Sergey",
-          "reason": "His expedition skill is DEFENSIVE (-20% damage taken). Great for garrison defense, USELESS for attack rallies.",
+          "reason": "DEFENSIVE skill (-20% damage taken). For GARRISON defense, not attack rallies.",
           "common_mistake": "Many players put Sergey in attack rallies thinking he's universally good"
+        },
+        {
+          "hero": "Gina",
+          "reason": "Stamina cost reduction + March speed. USELESS for combat - only good for Beast Hunting.",
+          "common_mistake": "Players assume she's a combat hero because she's Epic"
+        },
+        {
+          "hero": "Patrick",
+          "reason": "Health buff (+25% HP). Better for GARRISON defense as Sergey alternative, not attack.",
+          "common_mistake": "Health buffs don't help kill bears faster"
         }
       ],
       "slot_placement": "Strongest expedition skill hero goes in LEFTMOST slot - only that skill is counted from joiners"
@@ -532,8 +751,8 @@
 
     "common_mistakes": [
       {
-        "mistake": "Using Sergey in attack rallies",
-        "correction": "Sergey's expedition skill is DEFENSIVE. Use offensive heroes like Jessie, Jasser, Jeronimo."
+        "mistake": "Using Sergey, Gina, or Patrick in attack rallies",
+        "correction": "Sergey = defensive (-20% DMG taken). Gina = stamina/march speed (useless). Patrick = health buff (garrison only). Use Jessie or Jasser instead."
       },
       {
         "mistake": "Putting wrong hero in leftmost slot as joiner",
@@ -552,6 +771,10 @@
         "correction": "Level your expedition skills! A level 5 skill beats a level 1 skill regardless of effect."
       },
       {
+        "mistake": "Using a hero with non-combat expedition skill",
+        "correction": "Your high-level gathering/march speed skill can bump someone else's combat skill. Join with NO HERO if you don't have a combat-relevant expedition skill."
+      },
+      {
         "mistake": "Starting rallies without waiting for joiners",
         "correction": "Wait for rally to fill - more joiners = more damage + more top skills selected."
       },
@@ -563,23 +786,28 @@
 
     "quick_reference": {
       "joiner_checklist": [
-        "Leftmost hero has best expedition skill (Jessie if you have her)",
-        "All skills are highest level possible",
-        "Full troop march (high quantity)",
+        "Join MORE rallies > fewer full marches (sqrt damage scaling)",
+        "Prioritize strongest alliance members' rallies (more points)",
+        "Only use hero if expedition skill is COMBAT-relevant",
+        "NO HERO is better than a non-combat skill (gathering, march speed, etc.)",
+        "Leftmost hero: Jessie = +25% DMG (DON'T use Jeronimo - he should lead)",
         "80-90% Marksman composition"
       ],
       "leader_checklist": [
+        "Lead with Jeronimo if you have him (wastes skills as joiner)",
         "3 heroes with strong expedition skills",
         "80-90% Marksman troops",
-        "Wait for rally to fill",
-        "Target highest level bear possible"
+        "Wait for rally to fill before launching",
+        "Target highest level bear for best rewards"
       ],
       "best_expedition_skills": [
-        "Jessie: +25% Troop DMG (BEST)",
-        "Jasser: Lancer ATK boost",
-        "Seo-yoon: Marksman ATK boost",
-        "Jeronimo: Infantry ATK boost"
-      ]
+        "Jessie: +25% Troop DMG (BEST JOINER)",
+        "Jasser: +25% Troop DMG (Tactical Genius)",
+        "Seo-yoon: +25% Troop ATK (Rallying Beat)",
+        "Jeronimo: Use as LEADER, not joiner",
+        "AVOID: Gina, Patrick, Sergey (non-combat skills)"
+      ],
+      "key_math": "Damage scales with sqrt(troops). Joining 3 rallies with 1/3 troops each = 73% MORE total damage than 1 rally with full troops."
     }
   },
 
@@ -634,7 +862,23 @@
           "1st_place": 100000,
           "10th_place": 20000
         },
-        "priority": "HIGH - Massive point multiplier"
+        "is_it_worth_it": {
+          "short_answer": "NO for most players",
+          "explanation": "The middle smelter is a trap for average players. Only the strongest players who can get there FIRST and hold it benefit. Everyone else wastes time fighting over it while missing valuable vein gathering.",
+          "go_for_it_if": [
+            "You're one of the top 3 strongest players in the match",
+            "You can teleport there immediately when it opens",
+            "You have heroes available (not on cooldown)"
+          ],
+          "skip_it_if": [
+            "You're mid-tier or below in power",
+            "Your heroes are on cooldown from PvP",
+            "Others are already fighting over it",
+            "Vein Outbursts are spawning soon (minute 18-20)"
+          ],
+          "better_alternative": "Focus on Vein Outbursts at minutes 18-20 instead - guaranteed 4,000 each with less competition"
+        },
+        "priority": "SITUATIONAL - Only worth it if you're strongest"
       },
       "mine_patrols": {
         "description": "NPCs on map periphery",
@@ -643,7 +887,8 @@
       }
     },
 
-    "skill_progression": {
+    "skill_build": {
+      "tldr": "R-R-L-L-R",
       "description": "Defeat Mine Patrols to earn XP and unlock 5 skill levels. Choose LEFT or RIGHT at each level.",
       "recommended_build": {
         "name": "Hunting Strategy (F2P-Recommended)",
@@ -654,6 +899,87 @@
         "level_5": {"choice": "RIGHT", "effect": "+50 gathering speed for 60s (5-min CD, manual activation)"}
       },
       "skill_5_tip": "Save Skill 5 activation for Vein Outbursts ONLY for maximum efficiency!"
+    },
+
+    "minute_by_minute": {
+      "description": "What to do at each phase of the 30-minute event",
+      "phases": [
+        {
+          "time": "30:00-27:00",
+          "phase": "Opening Rush",
+          "priority": "HIGH",
+          "actions": [
+            "Immediately start defeating Mine Patrols on map edges",
+            "Build up skill XP as fast as possible",
+            "Goal: Unlock skills 1-3 before first Outburst wave",
+            "Don't waste time on veins yet - skills first!"
+          ]
+        },
+        {
+          "time": "27:00-23:00",
+          "phase": "Skill Building",
+          "priority": "MEDIUM",
+          "actions": [
+            "Continue hunting patrols for skill XP",
+            "Once you have skills 1-3, send ONE squad to occupy a vein",
+            "Keep main force on patrols",
+            "Watch for first Outburst alert at ~23:00 (60s warning)"
+          ]
+        },
+        {
+          "time": "22:00-20:00",
+          "phase": "FIRST OUTBURST WAVE",
+          "priority": "CRITICAL",
+          "actions": [
+            "DROP EVERYTHING - Outbursts spawn at minutes 8, 9, 10",
+            "Activate Skill 5 if unlocked (+50 gathering speed)",
+            "Rush to Outburst locations - 4,000 Orichalcum in 20 seconds!",
+            "This is the most valuable time in the event"
+          ]
+        },
+        {
+          "time": "20:00-13:00",
+          "phase": "Mid-Game Grind",
+          "priority": "MEDIUM",
+          "actions": [
+            "Resume patrol hunting if skills not maxed",
+            "Occupy veins with available squads",
+            "Teleport to find uncontested areas if needed",
+            "Avoid unnecessary PvP - save heroes for Outbursts"
+          ]
+        },
+        {
+          "time": "12:00-10:00",
+          "phase": "SECOND OUTBURST WAVE",
+          "priority": "CRITICAL",
+          "actions": [
+            "DROP EVERYTHING - Outbursts at minutes 18, 19, 20",
+            "Skill 5 should be off cooldown - activate it!",
+            "Same priority as first wave - rush for these"
+          ]
+        },
+        {
+          "time": "10:00-7:30",
+          "phase": "Pre-Smelter",
+          "priority": "MEDIUM",
+          "actions": [
+            "Max out skills if not done",
+            "Occupy highest-value veins available",
+            "Prepare for Smelter decision at 7:30"
+          ]
+        },
+        {
+          "time": "7:30-0:00",
+          "phase": "Smelter Opens",
+          "priority": "SITUATIONAL",
+          "actions": [
+            "IF you're top 3 power: Rush smelter immediately",
+            "IF you're mid-tier: SKIP smelter, focus on veins",
+            "Don't get baited into fighting stronger players",
+            "Continue gathering until time expires"
+          ]
+        }
+      ]
     },
 
     "strategies": {

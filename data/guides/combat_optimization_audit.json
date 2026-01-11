@@ -7,7 +7,7 @@
   "core_insight": {
     "title": "Why You Lost With Similar Troops",
     "explanation": "Two players with identical hero levels and troop counts can have WILDLY different combat results. The difference is in the 'hidden multipliers' - stats from Research, Daybreak Island, Chief Gear, Charms, Pets, and Alliance Tech that compound in the background.",
-    "key_formula": "Damage = sqrt(Troops) × (Attack × Lethality) / (Enemy Defense × Enemy Health) × SkillModifier",
+    "key_formula": "Damage = (sqrt(Troops) x Attack x Lethality x SkillModifier) / (Enemy Defense x Enemy Health)",
     "implication": "Attack and Lethality MULTIPLY together. A 10% boost to each = 21% more damage. These stats come from places most players neglect."
   },
 
@@ -490,7 +490,7 @@
       "pet_buff": "None active",
       "total_attack_bonus": "+28%",
       "total_lethality_bonus": "+10%",
-      "effective_damage_multiplier": "1.28 × 1.10 = 1.41"
+      "effective_damage_multiplier": "1.28 x 1.10 = 1.41"
     },
     "player_b": {
       "label": "Optimized Hidden Stats",
@@ -503,7 +503,7 @@
       "pet_buff": "Saber-tooth (+10% lethality)",
       "total_attack_bonus": "+77%",
       "total_lethality_bonus": "+50%",
-      "effective_damage_multiplier": "1.77 × 1.50 = 2.66"
+      "effective_damage_multiplier": "1.77 x 1.50 = 2.66"
     },
     "result": "Player B deals 88% more damage with identical troops and heroes. That's the difference between winning and getting crushed."
   }

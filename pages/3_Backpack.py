@@ -212,7 +212,7 @@ def render_item_table(items):
 
 # Page content
 st.markdown("# Item Guide")
-st.markdown("Reference for backpack items - what they are, where to get them, and what they're used for.")
+st.markdown("Reference for game items - what they are, where to get them, and what they're used for.")
 
 # Search
 search = st.text_input("Search items", placeholder="Type to filter items...")

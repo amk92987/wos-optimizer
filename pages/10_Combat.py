@@ -62,23 +62,16 @@ def render_core_insight():
     """Render the core insight section."""
     insight = COMBAT_GUIDE.get("core_insight", {})
 
+    st.markdown(f"### {insight.get('title', 'Why You Lost')}")
+    st.markdown(insight.get('explanation', ''))
+
     st.markdown(f"""
-    <div style="background: linear-gradient(135deg, rgba(231, 76, 60, 0.2), rgba(142, 68, 173, 0.2));
-                border: 2px solid #E74C3C; padding: 24px; border-radius: 12px; margin-bottom: 24px;">
-        <div style="font-size: 22px; font-weight: bold; color: #E74C3C; margin-bottom: 12px;">
-            {insight.get('title', 'Why You Lost')}
-        </div>
-        <div style="color: #E8F4F8; font-size: 15px; line-height: 1.6;">
-            {insight.get('explanation', '')}
-        </div>
-        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-top: 16px; font-family: monospace;">
-            <span style="color: #F1C40F;">Formula:</span> {insight.get('key_formula', '')}
-        </div>
-        <div style="color: #F39C12; margin-top: 12px; font-style: italic;">
-            {insight.get('implication', '')}
-        </div>
+    <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; margin: 12px 0; font-family: monospace;">
+        <span style="color: #F1C40F;">Formula:</span> {insight.get('key_formula', '')}
     </div>
     """, unsafe_allow_html=True)
+
+    st.caption(insight.get('implication', ''))
 
 
 def render_stat_source(source_id, source_data):
@@ -183,12 +176,12 @@ def render_stat_source(source_id, source_data):
 
 
 def render_quick_audit():
-    """Render the quick audit checklist."""
+    """Render the quick audit as informational list."""
     checklist = COMBAT_GUIDE.get("quick_audit_checklist", {})
     milestones = checklist.get("milestones", [])
 
-    st.markdown("### Quick Audit Checklist")
-    st.markdown("Answer these questions. Every 'No' is a weakness to fix.")
+    st.markdown("### Combat Stat Priorities")
+    st.markdown("Key milestones to check at each game phase.")
 
     # Group by phase
     phases = {"early_game": [], "mid_game": [], "late_game": []}
@@ -203,66 +196,35 @@ def render_quick_audit():
         "late_game": ("Late Game (F30+)", "#9B59B6")
     }
 
-    # Session state for checklist
-    if "audit_answers" not in st.session_state:
-        st.session_state.audit_answers = {}
-
-    weaknesses_found = []
-
     for phase_id, (phase_label, phase_color) in phase_labels.items():
         phase_milestones = phases.get(phase_id, [])
         if not phase_milestones:
             continue
 
-        st.markdown(f"""
-        <div style="background:{phase_color}22;border-left:4px solid {phase_color};padding:8px 12px;margin:16px 0 8px 0;border-radius:4px;">
-            <span style="color:{phase_color};font-weight:bold;">{phase_label}</span>
-        </div>
-        """, unsafe_allow_html=True)
+        with st.expander(f"{phase_label}", expanded=(phase_id == "early_game")):
+            # Sort by impact
+            impact_order = {"Critical": 0, "Very High": 1, "High": 2, "Medium-High": 3, "Medium": 4}
+            sorted_milestones = sorted(phase_milestones, key=lambda x: impact_order.get(x.get("impact", "Medium"), 5))
 
-        for m in phase_milestones:
-            m_id = m.get("id", "")
-            impact = m.get("impact", "Medium")
-            impact_color = get_impact_color(impact)
+            for m in sorted_milestones:
+                impact = m.get("impact", "Medium")
+                impact_color = get_impact_color(impact)
+                # Clean up question text and ensure it starts with capital letter
+                question = m.get("question", "")
+                question = question.replace("Have you ", "").replace("Do you have ", "").replace("Are your ", "").replace("?", "")
+                if question:
+                    question = question[0].upper() + question[1:]
+                why = m.get("why", "")
 
-            col1, col2 = st.columns([4, 1])
-            with col1:
                 st.markdown(f"""
-                <div style="display:flex;align-items:center;">
-                    <span style="background:{impact_color};padding:2px 6px;border-radius:3px;font-size:10px;margin-right:8px;">
-                        {impact}
-                    </span>
-                    <span>{m.get('question', '')}</span>
+                <div style="background:rgba(74,144,217,0.1);border-left:3px solid {impact_color};padding:8px 12px;margin:6px 0;border-radius:4px;">
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span style="background:{impact_color};color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5);padding:2px 6px;border-radius:3px;font-size:10px;">{impact}</span>
+                        <span style="font-weight:bold;color:#E8F4F8;">{question}</span>
+                    </div>
+                    <div style="font-size:12px;color:#B8D4E8;margin-top:4px;">{why}</div>
                 </div>
                 """, unsafe_allow_html=True)
-                st.caption(m.get("why", ""))
-            with col2:
-                answer = st.checkbox("Yes", key=f"audit_{m_id}", label_visibility="collapsed")
-                st.session_state.audit_answers[m_id] = answer
-                if not answer:
-                    weaknesses_found.append(m)
-
-    # Summary
-    st.markdown("---")
-    total = len(milestones)
-    completed = sum(1 for m in milestones if st.session_state.audit_answers.get(m.get("id", ""), False))
-
-    if weaknesses_found:
-        st.warning(f"**Weaknesses Found: {len(weaknesses_found)}** out of {total} checks")
-        st.markdown("**Top priorities to fix:**")
-        # Sort by impact
-        impact_order = {"Critical": 0, "Very High": 1, "High": 2, "Medium-High": 3, "Medium": 4}
-        sorted_weak = sorted(weaknesses_found, key=lambda x: impact_order.get(x.get("impact", "Medium"), 5))
-        for w in sorted_weak[:5]:
-            impact_color = get_impact_color(w.get("impact", "Medium"))
-            st.markdown(f"""
-            <div style="background:rgba(231,76,60,0.1);border-left:3px solid {impact_color};padding:8px 12px;margin:4px 0;border-radius:4px;">
-                <strong>{w.get('question', '').replace('Have you ', '').replace('?', '')}</strong>
-                <div style="font-size:12px;color:#B8D4E8;">{w.get('why', '')}</div>
-            </div>
-            """, unsafe_allow_html=True)
-    else:
-        st.success(f"**All {total} checks passed!** Your combat stats are well optimized.")
 
 
 def render_blind_spots():

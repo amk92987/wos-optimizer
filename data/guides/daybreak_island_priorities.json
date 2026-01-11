@@ -180,6 +180,48 @@
     }
   },
 
+  "new_player_tips": {
+    "title": "Getting Started on Your Island",
+    "priority_message": "Focus on COMBAT STATS (Attack/Defense decorations), NOT on chasing a high Prosperity score!",
+    "tips": [
+      {
+        "tip": "Upgrade Lumber Camps and Tree of Life ASAP",
+        "why": "Higher levels = faster Life Essence production. This compounds over time - every day you delay costs you resources.",
+        "priority": "CRITICAL"
+      },
+      {
+        "tip": "Collect Life Essence every 12 hours",
+        "why": "Storage fills up and you stop generating. Set reminders or collect during daily reset routine.",
+        "priority": "HIGH"
+      },
+      {
+        "tip": "Move Lumber Camps to direct workers",
+        "why": "Workers cut trees nearest to the camp. Move camps to control which areas get cleared first.",
+        "priority": "HIGH"
+      },
+      {
+        "tip": "Use decorations to block worker paths",
+        "why": "Place water or decorations to funnel workers toward areas you want cleared (like where you spotted a chest).",
+        "priority": "MEDIUM"
+      },
+      {
+        "tip": "Unlock second Lumber Camp at Tree L5",
+        "why": "Doubles your clearing speed. Rush to Tree L5 to unlock this.",
+        "priority": "HIGH"
+      },
+      {
+        "tip": "Use alliance assists daily",
+        "why": "You can help allies 3 times and receive 3 assists per day = 6 bonus Life Essence boosts.",
+        "priority": "MEDIUM"
+      }
+    ],
+    "treasure_chests": {
+      "spawn_type": "Random - chests appear randomly as trees are cleared",
+      "contents": "Life Essence, Hero Shards, Gear, and other rewards",
+      "strategy": "Move Lumber Camps toward chest locations when you spot them. Use decorations to block paths and direct workers to the chest area."
+    }
+  },
+
   "common_mistakes": [
     {
       "mistake": "Building decorations without a Prosperity goal",
@@ -200,6 +242,16 @@
       "mistake": "Ignoring Daybreak entirely",
       "why_bad": "Free combat stats with no downside",
       "fix": "At minimum, get Tree of Life L6 for Troops Health +5%"
+    },
+    {
+      "mistake": "Not upgrading Lumber Camps early",
+      "why_bad": "Lower production rate = less Life Essence over time. This compounds significantly.",
+      "fix": "Rush Lumber Camp and Tree upgrades first before buying decorations."
+    },
+    {
+      "mistake": "Letting Life Essence storage fill up",
+      "why_bad": "Once storage is full, you stop generating. Wasted production.",
+      "fix": "Collect every 12 hours or set reminders."
     }
   ],
 

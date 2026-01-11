@@ -159,6 +159,54 @@ class UserInventory(Base):
     item = relationship("Item")
 
 
+class UserChiefGear(Base):
+    """User's Chief Gear levels."""
+    __tablename__ = 'user_chief_gear'
+
+    id = Column(Integer, primary_key=True)
+    profile_id = Column(Integer, ForeignKey('user_profile.id'), nullable=False)
+
+    # 6 Chief Gear slots - quality: 1=Gray, 2=Green, 3=Blue, 4=Purple, 5=Gold, 6=Legendary, 7=Mythic
+    helmet_quality = Column(Integer, default=1)
+    helmet_level = Column(Integer, default=1)
+    armor_quality = Column(Integer, default=1)
+    armor_level = Column(Integer, default=1)
+    gloves_quality = Column(Integer, default=1)
+    gloves_level = Column(Integer, default=1)
+    boots_quality = Column(Integer, default=1)
+    boots_level = Column(Integer, default=1)
+    ring_quality = Column(Integer, default=1)
+    ring_level = Column(Integer, default=1)
+    amulet_quality = Column(Integer, default=1)
+    amulet_level = Column(Integer, default=1)
+
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship
+    profile = relationship("UserProfile", backref="chief_gear")
+
+
+class UserChiefCharm(Base):
+    """User's Chief Charm levels."""
+    __tablename__ = 'user_chief_charms'
+
+    id = Column(Integer, primary_key=True)
+    profile_id = Column(Integer, ForeignKey('user_profile.id'), nullable=False)
+
+    # 6 Chief Charm slots - levels 1-16
+    lancer_cap_level = Column(Integer, default=1)  # Lancer Attack/Defense
+    watch_level = Column(Integer, default=1)  # Lancer Attack/Defense
+    infantry_coat_level = Column(Integer, default=1)  # Infantry Attack/Defense
+    pants_level = Column(Integer, default=1)  # Infantry Attack/Defense
+    marksman_belt_level = Column(Integer, default=1)  # Marksman Attack/Defense
+    weapon_level = Column(Integer, default=1)  # Marksman Attack/Defense
+
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationship
+    profile = relationship("UserProfile", backref="chief_charms")
+
+
 class UpgradeHistory(Base):
     """Track upgrade decisions for analytics."""
     __tablename__ = 'upgrade_history'

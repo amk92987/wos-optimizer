@@ -48,6 +48,7 @@
       "cost_category": "free",
       "priority": "S",
       "description": "Alliance rallies against Raging Bear. Damage-based rewards.",
+      "gameplay": "A giant bear spawns near your alliance territory. Your alliance takes turns launching 5-hero rallies against it. You select your best exploration heroes (NOT expedition) and join the rally. The bear has massive HP and fights back, so you need a healer like Philly. Your damage dealt earns points for rewards. Coordinate with alliance to maximize rally efficiency.",
       "rewards": {
         "primary": ["Bear Fragments", "Pet Materials", "Speedups"],
         "quality": "high",
@@ -75,6 +76,7 @@
       "cost_category": "free",
       "priority": "A",
       "description": "Alliance PvE boss stages. Progress through difficulty levels.",
+      "gameplay": "Crazy Joe attacks your alliance! Empty all your troops to reinforce alliance members' cities - hopefully they reinforce you too so your city doesn't burn! Joe sends waves of attacks at random members. When he targets you, your troops defend automatically. The whole alliance works together to survive waves and defeat Joe. Higher stages = better rewards but tougher fights.",
       "rewards": {
         "primary": ["Speedups", "Resources", "Hero XP"],
         "quality": "medium-high",
@@ -101,6 +103,7 @@
       "cost_category": "free",
       "priority": "S",
       "description": "5 days of daily tasks earning points. Winning state gets attack advantage in Battle Phase.",
+      "gameplay": "Your entire state competes against another state by earning points. Each day has different point-earning activities (Day 1: building/research, Day 2: heroes, Day 3: beasts, etc.). You do normal gameplay but DURING the right day to earn points. Save your speedups, shards, and materials beforehand, then spend them on the matching day. Your state's total points vs theirs determines who attacks in the battle phase.",
       "rewards": {
         "primary": ["Seasonal Hero Shards", "State Bonuses", "Ranking Rewards"],
         "quality": "very_high",
@@ -239,6 +242,7 @@
       "cost_category": "free",
       "priority": "S",
       "description": "Cross-state PvP combat. Capture Sunfire Castle to win.",
+      "gameplay": "Portals open to the enemy state! You teleport to their territory and attack enemy cities, or stay home and defend yours. The main goal is capturing Sunfire Castle in the center and holding it. Your alliance coordinates rallies on enemy cities and the castle. When attacked, your heroes and troops defend. Killing enemies and holding the castle earns points. Troop losses are partially recovered after the battle ends.",
       "rewards": {
         "primary": ["Supreme President Title", "City Skins", "State Bonuses", "Ranking Rewards"],
         "quality": "very_high",
@@ -278,6 +282,7 @@
       "cost_category": "free",
       "priority": "A",
       "description": "Real-time alliance vs alliance battle.",
+      "gameplay": "Your alliance is matched against another alliance for a 2-hour battle. You're teleported to a special battlefield map. Capture buildings and flags to earn points, and attack enemy players who get in your way. It's real-time chaos - you need to be online and coordinating with your alliance. March speed and quick reactions matter. The alliance with more points at the end wins.",
       "rewards": {
         "primary": ["Alliance Coins", "Speedups", "Resources"],
         "quality": "medium-high",
@@ -305,6 +310,7 @@
       "cost_category": "light_spend",
       "priority": "S",
       "description": "Month-long power competition. Points from upgrades, training, research.",
+      "gameplay": "A week-long competition where everything you upgrade earns points. Complete buildings, finish research, train troops, level heroes - all of it counts. You're ranked against other players in your state and across states. The key is SAVING all your speedups and materials beforehand, then dumping everything during this event. Top rankers get massive rewards including legendary hero shards.",
       "rewards": {
         "primary": ["Legendary Hero Shards", "Exclusive Titles", "Massive Resources"],
         "quality": "very_high",
@@ -332,6 +338,7 @@
       "cost_category": "free",
       "priority": "A",
       "description": "Cross-state territory control event.",
+      "gameplay": "Your state battles another for control of territory tiles on a shared map. You march your troops to capture empty tiles or attack enemy-held tiles. Holding tiles generates points over time. Alliances coordinate to hold clusters of tiles. It's a 48-hour tug-of-war where being online and quick to respond to attacks matters. Think of it as a slower, strategic SvS focused on map control rather than city burning.",
       "rewards": {
         "primary": ["Hero Shards", "Titles", "Resources"],
         "quality": "high",
@@ -359,6 +366,7 @@
       "cost_category": "medium_spend",
       "priority": "C",
       "description": "Mini-game: Drive snowplow, collect coal, rescue survivors.",
+      "gameplay": "A mini-game where you drive a snowplow through a snowy map. Use fuel to move and clear snow, collecting coal and rescuing survivors along the way. Clearing sections earns rewards. The catch? Fuel regenerates slowly, and you hit a wall fast without buying fuel packs. Fun but pay-to-progress. F2P players should just do the free daily attempts and not stress about it.",
       "rewards": {
         "primary": ["Exclusive Skins", "Resources", "Speedups"],
         "quality": "medium",
@@ -386,6 +394,7 @@
       "cost_category": "medium_spend",
       "priority": "C",
       "description": "Catch fish for points. Bait costs resources or money.",
+      "gameplay": "Cast your line into an ice fishing hole and wait for fish to bite. You spend bait items to fish - each cast might catch common junk or rare valuable fish. Different fish are worth different points. You rank against other players based on total points. The problem? Bait regenerates slowly for free, and you hit a wall fast. Buying bait packs lets you fish more, but the rewards rarely justify the cost. Just do your free casts and move on.",
       "rewards": {
         "primary": ["Resources", "Speedups", "Fish-themed items"],
         "quality": "low-medium",
@@ -413,6 +422,7 @@
       "cost_category": "heavy_spend",
       "priority": "B",
       "description": "Spin for hero shards. Main way to get new legendary heroes.",
+      "gameplay": "A gacha wheel featuring a specific hero. You spend gems (1,350 per spin, or 13,500 for 10 spins) or free tickets to spin. Each spin gives random rewards - mostly small stuff, but you have a chance at the featured hero's shards. Reaching spin milestones guarantees shards. This is THE main way to unlock new legendary heroes. Be selective - only spin for heroes worth building.",
       "rewards": {
         "primary": ["Legendary Hero Shards", "Resources"],
         "quality": "high",
@@ -440,6 +450,7 @@
       "cost_category": "free",
       "priority": "A",
       "description": "Craft chief gear and charms at discount during event.",
+      "gameplay": "The blacksmith offers bonus rewards when you craft chief gear! Spend your saved gear materials (Hardened Alloy, Design Plans, etc.) to craft or upgrade chief gear. You get the normal gear PLUS bonus rewards like speedups and resources. Never craft gear outside this event - always wait for Artisan's Trove to get the free bonuses.",
       "rewards": {
         "primary": ["Chief Gear", "Chief Charms", "Crafting Bonuses"],
         "quality": "high",
@@ -466,6 +477,7 @@
       "cost_category": "free",
       "priority": "B",
       "description": "Trade resources at special exchange rates.",
+      "gameplay": "A traveling merchant arrives with special exchange rates! You can trade resources you have excess of (like meat or wood) for resources you need (like iron or coal). Check the exchange rates carefully - some trades are good value, others aren't. Good for balancing your resource stockpile. Quick event, just check once, do your trades, done.",
       "rewards": {
         "primary": ["Resource Exchange", "Bonus Items"],
         "quality": "medium",
@@ -492,6 +504,7 @@
       "cost_category": "free",
       "priority": "A",
       "description": "Spend flames for randomized rewards.",
+      "gameplay": "A lottery wheel where you spend Flame currency to spin. Each spin gives random rewards - speedups, resources, hero shards, or even rare items. You accumulate Flames from various activities throughout the week. The KEY rule: NEVER spend Flames outside this event! Hoard every single Flame you earn, then dump them all during Flame Lotto for maximum spins and milestone rewards.",
       "rewards": {
         "primary": ["Hero Shards", "Speedups", "Resources", "Rare Items"],
         "quality": "high",
@@ -518,6 +531,7 @@
       "cost_category": "light_spend",
       "priority": "B",
       "description": "Purchase packs to unlock matching rewards.",
+      "gameplay": "A spending event where buying packs unlocks bonus rewards. The more packs you buy of a certain type (like FC packs or Steel packs), the more bonus materials you unlock. Think of it as a 'buy 5 get 1 free' deal. Only worthwhile if you were already planning to buy packs - don't let this event trick you into spending money you weren't going to spend anyway.",
       "rewards": {
         "primary": ["Bonus resources matching purchases"],
         "quality": "medium",
@@ -544,6 +558,7 @@
       "cost_category": "free",
       "priority": "B",
       "description": "Complete tasks to dig for treasure rewards.",
+      "gameplay": "Complete daily tasks to earn shovels, then dig for buried treasure on a grid. Each dig reveals either a reward or nothing. Some tiles have better loot than others. It's basically a mini-game that rewards you for normal gameplay - complete your dailies, get shovels, dig for free stuff. No special strategy needed, just participate.",
       "rewards": {
         "primary": ["Resources", "Speedups", "Random items"],
         "quality": "medium",
@@ -570,6 +585,7 @@
       "cost_category": "free",
       "priority": "A",
       "description": "Alliance territory battle in canyon map.",
+      "gameplay": "Your alliance fights on a canyon map against other alliances. You capture buildings scattered across the map by marching troops to them. Holding buildings generates points over time. Enemy alliances attack your buildings while you attack theirs. It's 2 hours of real-time chaos - you need to be online, marching fast, and coordinating with your alliance to hold key positions. Similar to Alliance Showdown but in a canyon terrain.",
       "rewards": {
         "primary": ["Alliance rewards", "Territory bonuses", "Resources"],
         "quality": "high",
@@ -589,6 +605,108 @@
       "notes": "Good alliance event. Requires coordination and online presence."
     },
 
+    "flame_and_fang": {
+      "name": "Flame and Fang",
+      "type": "solo",
+      "frequency": "Every 2 weeks (Mon-Tue)",
+      "duration": "2 days",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "PvE event: Hunt Firebeasts, complete Intel Missions, earn Crystallite Cores for Fire Crystals and speedups.",
+      "gameplay": "Firebeasts appear on the map! Hunt them solo with your exploration heroes for Crystallite Cores. Also complete Intel Missions (refresh 3x daily) for more cores. Spend your cores in the event shop on Fire Crystals, speedups, or resources. The trick is saving yesterday's Intel missions and claiming them after the event starts for bonus cores. Spend ALL cores before event ends or they turn into worthless meat!",
+      "rewards": {
+        "primary": ["Crystallite Cores", "Fire Crystals", "Refined Fire Crystals", "Speedups"],
+        "quality": "high",
+        "backpack_items": ["Fire Crystals", "Refined Fire Crystals", "Speedups", "Resources"]
+      },
+      "intel_strategy": {
+        "description": "The Extra 16 Cores Trick",
+        "refresh_times": ["00:00", "08:00", "16:00"],
+        "cores_per_refresh": {
+          "standard_missions": 8,
+          "firebeast_missions": 2,
+          "cores_each": {"standard": 1, "firebeast": 10},
+          "total_per_refresh": 28
+        },
+        "normal_total": 168,
+        "with_trick_total": 184,
+        "timeline": [
+          {
+            "day": "Day 0 (Before Event)",
+            "time": "08:00",
+            "action": "Claim Intel missions normally",
+            "type": "normal"
+          },
+          {
+            "day": "Day 0 (Before Event)",
+            "time": "16:00",
+            "action": "Complete missions but DO NOT CLAIM",
+            "type": "warning"
+          },
+          {
+            "day": "Day 1 (Event Starts)",
+            "time": "00:00",
+            "action": "CLAIM saved missions + complete new refresh",
+            "type": "claim"
+          },
+          {
+            "day": "Day 1",
+            "time": "08:00",
+            "action": "Complete + claim Intel missions",
+            "type": "normal"
+          },
+          {
+            "day": "Day 1",
+            "time": "16:00",
+            "action": "Complete + claim Intel missions",
+            "type": "normal"
+          },
+          {
+            "day": "Day 2",
+            "time": "00:00",
+            "action": "Complete + claim Intel missions",
+            "type": "normal"
+          },
+          {
+            "day": "Day 2",
+            "time": "08:00",
+            "action": "Complete + claim Intel missions",
+            "type": "normal"
+          },
+          {
+            "day": "Day 2",
+            "time": "16:00",
+            "action": "Complete + claim + SPEND ALL CORES",
+            "type": "final"
+          }
+        ]
+      },
+      "spending_priority": {
+        "order": [
+          {"item": "Refined Fire Crystals", "note": "Requires FC6 unlock", "priority": 1},
+          {"item": "Fire Crystals", "note": "Best value for cores", "priority": 2},
+          {"item": "Speedups", "note": "Research, Construction, Training", "priority": 3},
+          {"item": "Resources", "note": "Only with leftover cores", "priority": 4}
+        ],
+        "avoid": ["Hero EXP - poor value"],
+        "warning": "Unspent cores convert to 10K Meat each - total waste!"
+      },
+      "preparation": {
+        "save_before": ["Stamina for Firebeast hunts"],
+        "heroes_needed": "exploration",
+        "key_heroes": ["Any exploration team"],
+        "tips": [
+          "DAY BEFORE: At 16:00, complete Intel missions but DON'T CLAIM",
+          "This trick gives you 16 extra cores (184 vs 168)",
+          "Intel missions only last 15 hours - don't miss refreshes",
+          "Spend ALL cores before event ends - leftover = wasted as Meat",
+          "Prioritize Fire Crystals over everything else"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Great F2P event. Use the pre-event trick for 16 extra cores. NEVER leave cores unspent."
+    },
+
     "foundry_battle": {
       "name": "Foundry Battle",
       "type": "alliance",
@@ -597,6 +715,7 @@
       "cost_category": "free",
       "priority": "B",
       "description": "Alliance competes for foundry control.",
+      "gameplay": "Alliances fight over control of the Foundry building on the map. You send troops to capture and hold buildings on a battlefield. Holding buildings generates points. Enemy alliances try to take them from you. The alliance controlling the Foundry at the end gets crafting bonuses. Quick 1-hour event - you need to be online and sending marches to capture/defend.",
       "rewards": {
         "primary": ["Foundry access", "Crafting bonuses"],
         "quality": "medium",
@@ -622,6 +741,7 @@
       "cost_category": "medium_spend",
       "priority": "B",
       "description": "Accumulate points from various activities for hero shards.",
+      "gameplay": "A week-long event featuring a specific hero. You earn points through normal gameplay activities - completing buildings, training troops, using speedups, etc. Reaching point milestones rewards you with the featured hero's shards. It's basically a bonus for playing the game normally, with extra rewards if you spend. Check if the featured hero is actually worth building before going hard on this event.",
       "rewards": {
         "primary": ["Featured Hero Shards"],
         "quality": "high",
@@ -643,7 +763,7 @@
 
   "summary_by_priority": {
     "S_tier_never_skip": ["bear_trap", "svs_prep", "svs_battle", "hall_of_chiefs"],
-    "A_tier_high_value": ["crazy_joe", "alliance_showdown", "king_of_icefield", "artisans_trove", "flame_lotto", "canyon_clash"],
+    "A_tier_high_value": ["crazy_joe", "alliance_showdown", "king_of_icefield", "artisans_trove", "flame_lotto", "canyon_clash", "flame_and_fang"],
     "B_tier_do_if_active": ["lucky_wheel", "tundra_trading", "mix_and_match", "treasure_hunter", "foundry_battle", "hero_rally"],
     "C_tier_low_priority": ["snowbusters", "fishing_tournament"],
     "D_tier_skip": []

@@ -51,15 +51,15 @@ def render_home():
 
         This tool helps you:
         - **Track your heroes** - Record levels, skills, and gear
-        - **Analyze your backpack** - Upload screenshots to track resources
+        - **Track chief equipment** - Monitor chief gear and charms
         - **Get recommendations** - Know exactly what to upgrade next
         - **Optimize for SvS** - Focus on what matters for combat
 
         ### Getting Started
-        1. Go to **⚙️ Settings** to set your server age and priorities
-        2. Visit **🦸 Heroes** to add your owned heroes
-        3. Upload backpack screenshots in **🎒 Backpack**
-        4. Check **📈 Recommendations** for your personalized upgrade path
+        1. Go to **⚙️ Settings** to set your server age and spending profile
+        2. Visit **🦸 Heroes** to add your owned heroes and their levels
+        3. Visit **👑 Chief** to track your chief gear and charms
+        4. Check **📈 Upgrades** for your personalized upgrade path
         """)
 
     with col2:

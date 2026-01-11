@@ -59,37 +59,38 @@ def update_priority(priority_name: str, value: int):
 
 
 # Define pages with shorter names
-# Home - standalone at top (no header)
+# Home section
 home_page = st.Page("pages/0_Home.py", title="Home", icon="🏠", default=True)
+beginners_page = st.Page("pages/00_Beginners.py", title="Beginners", icon="📖")
 
-# Main section
+# Tracker section - tracking current status
 heroes_page = st.Page("pages/1_Heroes.py", title="Heroes", icon="🦸")
-backpack_page = st.Page("pages/2_Backpack.py", title="Backpack", icon="🎒")
-lineups_page = st.Page("pages/4_Lineups.py", title="Lineups", icon="⚔️")
+chief_page = st.Page("pages/2_Chief.py", title="Chief", icon="👑")
 
 # Analysis section
-upgrades_page = st.Page("pages/3_Recommendations.py", title="Upgrades", icon="📈")
-packs_page = st.Page("pages/7_Pack_Analyzer.py", title="Packs", icon="📦")
-ai_advisor_page = st.Page("pages/5_AI_Advisor.py", title="AI Advisor", icon="🤖")
+upgrades_page = st.Page("pages/4_Upgrades.py", title="Upgrades", icon="📈")
+lineups_page = st.Page("pages/5_Lineups.py", title="Lineups", icon="⚔️")
+packs_page = st.Page("pages/8_Packs.py", title="Packs", icon="📦")
+ai_advisor_page = st.Page("pages/6_Advisor.py", title="Advisor", icon="🤖")
 
 # Guides section
-events_page = st.Page("pages/8_Events_Guide.py", title="Events", icon="📅")
-combat_page = st.Page("pages/9_Combat_Optimization.py", title="Combat Stats", icon="⚡")
-tips_page = st.Page("pages/10_Quick_Tips.py", title="Tips", icon="💡")
-battle_page = st.Page("pages/11_Battle_Strategies.py", title="Battle Tactics", icon="🎯")
+items_page = st.Page("pages/3_Backpack.py", title="Items", icon="🎒")
+events_page = st.Page("pages/9_Events.py", title="Events", icon="📅")
+combat_page = st.Page("pages/10_Combat.py", title="Combat", icon="⚡")
+tips_page = st.Page("pages/11_Tips.py", title="Tips", icon="💡")
+tactics_page = st.Page("pages/12_Tactics.py", title="Tactics", icon="🎯")
+daybreak_page = st.Page("pages/14_Daybreak.py", title="Daybreak", icon="🏝️")
 
-# Standalone - Profiles (no header)
-profiles_page = st.Page("pages/6_Profiles.py", title="Profiles", icon="👤")
+# Account section
+profiles_page = st.Page("pages/7_Profiles.py", title="Profiles", icon="👤")
+settings_page = st.Page("pages/13_Settings.py", title="Settings", icon="⚙️")
 
-# Settings page (will appear after Priorities)
-settings_page = st.Page("pages/12_Settings.py", title="Settings", icon="⚙️")
-
-# Navigation with grouped sections - include all pages so they're routable
+# Navigation with grouped sections
 pg = st.navigation({
-    "": [home_page],
-    "Main": [heroes_page, lineups_page],
-    "Analysis": [upgrades_page, packs_page, ai_advisor_page],
-    "Guides": [backpack_page, events_page, combat_page, tips_page, battle_page],
+    "": [home_page, beginners_page],
+    "Tracker": [heroes_page, chief_page],
+    "Analysis": [upgrades_page, lineups_page, packs_page, ai_advisor_page],
+    "Guides": [items_page, events_page, combat_page, tips_page, tactics_page, daybreak_page],
     "Account": [profiles_page, settings_page],
 }, expanded=True)
 
