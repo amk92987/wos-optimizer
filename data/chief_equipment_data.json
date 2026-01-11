@@ -1,0 +1,143 @@
+{
+  "meta": {
+    "description": "Whiteout Survival Chief Gear and Charms progression data",
+    "last_updated": "2025-01-11",
+    "sources": [
+      "https://www.whiteoutsurvival.wiki/chief-gear/chief-gear/",
+      "https://whiteoutdata.com/items/chief-gear/",
+      "https://whiteoutdata.com/items/chief-charms/",
+      "https://quackulator.com/chiefgear.php",
+      "https://github.com/zenpaiang/wos-database"
+    ]
+  },
+  "chief_gear": {
+    "unlocks_at": "Furnace Level 22",
+    "slots": {
+      "cap": {"troop_type": "Lancer", "stats": ["Attack", "Defense"]},
+      "watch": {"troop_type": "Lancer", "stats": ["Attack", "Defense"]},
+      "coat": {"troop_type": "Infantry", "stats": ["Attack", "Defense"]},
+      "pants": {"troop_type": "Infantry", "stats": ["Attack", "Defense"]},
+      "belt": {"troop_type": "Marksman", "stats": ["Attack", "Defense"]},
+      "weapon": {"troop_type": "Marksman", "stats": ["Attack", "Defense"]}
+    },
+    "set_bonuses": {
+      "3_piece": "Defense boost for ALL troop types",
+      "6_piece": "Attack boost for ALL troop types",
+      "note": "Bonuses scale with tier quality"
+    },
+    "tier_progression": [
+      {"tier": 1, "name": "Green 0★", "color": "#2ECC71", "bonus_percent": 9.35},
+      {"tier": 2, "name": "Green 1★", "color": "#2ECC71", "bonus_percent": 12.75},
+      {"tier": 3, "name": "Blue 0★", "color": "#3498DB", "bonus_percent": 17.00},
+      {"tier": 4, "name": "Blue 1★", "color": "#3498DB", "bonus_percent": 20.25},
+      {"tier": 5, "name": "Blue 2★", "color": "#3498DB", "bonus_percent": 24.50},
+      {"tier": 6, "name": "Blue 3★", "color": "#3498DB", "bonus_percent": 29.75},
+      {"tier": 7, "name": "Purple 0★", "color": "#9B59B6", "bonus_percent": 34.00},
+      {"tier": 8, "name": "Purple 1★", "color": "#9B59B6", "bonus_percent": 38.00},
+      {"tier": 9, "name": "Purple 2★", "color": "#9B59B6", "bonus_percent": 42.50},
+      {"tier": 10, "name": "Purple 3★", "color": "#9B59B6", "bonus_percent": 47.00},
+      {"tier": 11, "name": "Purple T1 0★", "color": "#9B59B6", "bonus_percent": 48.50},
+      {"tier": 12, "name": "Purple T1 1★", "color": "#9B59B6", "bonus_percent": 50.00},
+      {"tier": 13, "name": "Purple T1 2★", "color": "#9B59B6", "bonus_percent": 52.00},
+      {"tier": 14, "name": "Purple T1 3★", "color": "#9B59B6", "bonus_percent": 54.23},
+      {"tier": 15, "name": "Gold 0★", "color": "#F1C40F", "bonus_percent": 56.78},
+      {"tier": 16, "name": "Gold 1★", "color": "#F1C40F", "bonus_percent": 59.50},
+      {"tier": 17, "name": "Gold 2★", "color": "#F1C40F", "bonus_percent": 62.50},
+      {"tier": 18, "name": "Gold 3★", "color": "#F1C40F", "bonus_percent": 66.00},
+      {"tier": 19, "name": "Gold T1 0★", "color": "#F1C40F", "bonus_percent": 69.00},
+      {"tier": 20, "name": "Gold T1 1★", "color": "#F1C40F", "bonus_percent": 72.00},
+      {"tier": 21, "name": "Gold T1 2★", "color": "#F1C40F", "bonus_percent": 75.50},
+      {"tier": 22, "name": "Gold T1 3★", "color": "#F1C40F", "bonus_percent": 79.00},
+      {"tier": 23, "name": "Gold T2 0★", "color": "#F1C40F", "bonus_percent": 80.50},
+      {"tier": 24, "name": "Gold T2 1★", "color": "#F1C40F", "bonus_percent": 82.00},
+      {"tier": 25, "name": "Gold T2 2★", "color": "#F1C40F", "bonus_percent": 83.50},
+      {"tier": 26, "name": "Gold T2 3★", "color": "#F1C40F", "bonus_percent": 85.00},
+      {"tier": 27, "name": "Pink 0★", "color": "#E84393", "bonus_percent": 89.25},
+      {"tier": 28, "name": "Pink 1★", "color": "#E84393", "bonus_percent": 94.00},
+      {"tier": 29, "name": "Pink 2★", "color": "#E84393", "bonus_percent": 99.00},
+      {"tier": 30, "name": "Pink 3★", "color": "#E84393", "bonus_percent": 104.50},
+      {"tier": 31, "name": "Pink T1 0★", "color": "#E84393", "bonus_percent": 110.00},
+      {"tier": 32, "name": "Pink T1 1★", "color": "#E84393", "bonus_percent": 116.00},
+      {"tier": 33, "name": "Pink T1 2★", "color": "#E84393", "bonus_percent": 122.50},
+      {"tier": 34, "name": "Pink T1 3★", "color": "#E84393", "bonus_percent": 129.00},
+      {"tier": 35, "name": "Pink T2 0★", "color": "#E84393", "bonus_percent": 136.00},
+      {"tier": 36, "name": "Pink T2 1★", "color": "#E84393", "bonus_percent": 143.50},
+      {"tier": 37, "name": "Pink T2 2★", "color": "#E84393", "bonus_percent": 151.50},
+      {"tier": 38, "name": "Pink T2 3★", "color": "#E84393", "bonus_percent": 160.00},
+      {"tier": 39, "name": "Pink T3 0★", "color": "#E84393", "bonus_percent": 165.00},
+      {"tier": 40, "name": "Pink T3 1★", "color": "#E84393", "bonus_percent": 171.00},
+      {"tier": 41, "name": "Pink T3 2★", "color": "#E84393", "bonus_percent": 178.00},
+      {"tier": 42, "name": "Pink T3 3★", "color": "#E84393", "bonus_percent": 187.00}
+    ],
+    "upgrade_materials": {
+      "hardened_alloy": "All tier upgrades",
+      "polishing_solution": "All tier upgrades (attribute enhancement)",
+      "design_plans": "Required starting from Blue 2-star",
+      "lunar_amber": "Required starting from Pink/Red tier"
+    },
+    "milestones": {
+      "gold_t2_3star": "Unlocks Enhancement Material Exchange"
+    },
+    "upgrade_priority": [
+      "1. Infantry gear first (Coat & Pants) - Frontline absorbs damage",
+      "2. Marksman gear second (Belt & Weapon) - Key damage dealers",
+      "3. Lancer gear last (Cap & Watch) - Less exposed to direct fire"
+    ]
+  },
+  "chief_charms": {
+    "unlocks_at": "Furnace Level 25",
+    "max_level": 16,
+    "level_16_requires": "State Generation 7",
+    "types": {
+      "protection": {"color": "#2ECC71", "troop_type": "Infantry", "stats": ["Lethality", "Health"]},
+      "keenness": {"color": "#3498DB", "troop_type": "Lancer", "stats": ["Lethality", "Health"]},
+      "vision": {"color": "#F1C40F", "troop_type": "Marksman", "stats": ["Lethality", "Health"]}
+    },
+    "total_charms": 18,
+    "charms_per_gear_piece": 3,
+    "level_progression": [
+      {"level": 1, "bonus_percent": 9.0, "shape": "Triangle", "sides": 3},
+      {"level": 2, "bonus_percent": 15.0, "shape": "Diamond", "sides": 4},
+      {"level": 3, "bonus_percent": 22.0, "shape": "Square", "sides": 4},
+      {"level": 4, "bonus_percent": 29.0, "shape": "Square", "sides": 4},
+      {"level": 5, "bonus_percent": 36.0, "shape": "Pentagon", "sides": 5},
+      {"level": 6, "bonus_percent": 43.0, "shape": "Pentagon", "sides": 5},
+      {"level": 7, "bonus_percent": 50.0, "shape": "Hexagon", "sides": 6},
+      {"level": 8, "bonus_percent": 57.0, "shape": "Hexagon", "sides": 6},
+      {"level": 9, "bonus_percent": 64.0, "shape": "Heptagon", "sides": 7},
+      {"level": 10, "bonus_percent": 71.0, "shape": "Octagon", "sides": 8},
+      {"level": 11, "bonus_percent": 78.0, "shape": "Nonagon", "sides": 9},
+      {"level": 12, "bonus_percent": 83.0, "shape": "Decagon", "sides": 10},
+      {"level": 13, "bonus_percent": 88.0, "shape": "Hendecagon", "sides": 11},
+      {"level": 14, "bonus_percent": 93.0, "shape": "Dodecagon", "sides": 12},
+      {"level": 15, "bonus_percent": 97.0, "shape": "Near-Circle", "sides": 13},
+      {"level": 16, "bonus_percent": 100.0, "shape": "Circle", "sides": 16}
+    ],
+    "upgrade_materials": {
+      "charm_designs": "Levels 1-16",
+      "charm_guides": "Levels 1-16",
+      "jewel_secrets": "Levels 12-16 only"
+    },
+    "material_exchange": {
+      "unlocks_at": "Level 11 charm",
+      "rate": "40 Charm Guides or 40 Charm Designs = 1 Jewel Secret"
+    },
+    "upgrade_priority": [
+      "1. Protection Charms (Infantry) - Frontline protection",
+      "2. Vision Charms (Marksman) - Critical damage output",
+      "3. Keenness Charms (Lancer) - Mid-line support"
+    ]
+  },
+  "images": {
+    "chief_gear": {
+      "source": "https://github.com/zenpaiang/wos-database",
+      "local_path": "assets/chief_gear/",
+      "files": ["hat.png", "watch.png", "coat.png", "pants.png", "ring.png", "staff.png"]
+    },
+    "chief_charms": {
+      "source": "https://github.com/zenpaiang/wos-database",
+      "local_path": "assets/chief_charms/",
+      "files": ["lvl1.png", "lvl2.png", "lvl3.png", "lvl4.png", "lvl5.png", "lvl6.png", "lvl7.png", "lvl8.png", "lvl9.png", "lvl10.png", "lvl11.png"]
+    }
+  }
+}

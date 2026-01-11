@@ -1,0 +1,118 @@
+{
+  "meta": {
+    "description": "Whiteout Survival troop stats, power, and unlock requirements",
+    "last_updated": "2025-01-11",
+    "sources": [
+      "https://onechilledgamer.com/whiteout-survival-troop-guide/",
+      "https://whiteoutdata.com/buildings/infantry-camp/",
+      "https://whiteoutdata.com/buildings/command-center/",
+      "https://wostools.net/wiki/troops",
+      "https://www.whiteoutsurvival.wiki/fire-crystal-troop-stats/",
+      "https://www.whiteoutsurvival.wiki/increase-power-per-troops/"
+    ]
+  },
+  "power_per_unit": {
+    "description": "Power contributed to account total per single troop unit",
+    "note": "Power stat does NOT affect combat - only account power total",
+    "tiers": {
+      "T1": {"infantry": 3, "lancer": 3, "marksman": 3},
+      "T2": {"infantry": 4, "lancer": 4, "marksman": 4},
+      "T3": {"infantry": 6, "lancer": 5, "marksman": 5},
+      "T4": {"infantry": 8, "lancer": 9, "marksman": 9},
+      "T5": {"infantry": 9, "lancer": 10, "marksman": 10},
+      "T6": {"infantry": 10, "lancer": 11, "marksman": 11},
+      "T7": {"infantry": 12, "lancer": 12, "marksman": 12},
+      "T8": {"infantry": 13, "lancer": 13, "marksman": 13},
+      "T9": {"infantry": 14, "lancer": 14, "marksman": 14},
+      "T10": {"infantry": 15, "lancer": 15, "marksman": 15},
+      "T11": {"infantry": 17, "lancer": 80, "marksman": 80}
+    }
+  },
+  "troop_stats": {
+    "infantry": {
+      "role": "Defensive specialists - counter Lancers, weak to Marksmen",
+      "tiers": {
+        "T1": {"defense": 4, "lethality": 1, "attack": 1, "health": 6, "load": 108},
+        "T2": {"defense": 5, "lethality": 2, "attack": 2, "health": 7, "load": 124},
+        "T3": {"defense": 6, "lethality": 3, "attack": 3, "health": 8, "load": 142},
+        "T4": {"defense": 7, "lethality": 4, "attack": 4, "health": 9, "load": 164},
+        "T5": {"defense": 8, "lethality": 5, "attack": 5, "health": 10, "load": 188},
+        "T6": {"defense": 9, "lethality": 6, "attack": 6, "health": 11, "load": 217},
+        "T7": {"defense": 10, "lethality": 7, "attack": 7, "health": 12, "load": 249},
+        "T8": {"defense": 11, "lethality": 8, "attack": 8, "health": 13, "load": 287},
+        "T9": {"defense": 12, "lethality": 9, "attack": 9, "health": 14, "load": 330},
+        "T10": {"defense": 13, "lethality": 10, "attack": 10, "health": 15, "load": 379},
+        "T11": {"defense": 15, "lethality": 12, "attack": 12, "health": 17, "load": 400}
+      }
+    },
+    "lancer": {
+      "role": "Balanced - counter Marksmen, weak to Infantry",
+      "tiers": {
+        "T1": {"defense": 2, "lethality": 5, "attack": 4, "health": 2, "load": 108},
+        "T2": {"defense": 3, "lethality": 6, "attack": 5, "health": 3, "load": 124},
+        "T3": {"defense": 4, "lethality": 7, "attack": 6, "health": 4, "load": 142},
+        "T4": {"defense": 5, "lethality": 8, "attack": 7, "health": 5, "load": 164},
+        "T5": {"defense": 6, "lethality": 9, "attack": 8, "health": 6, "load": 188},
+        "T6": {"defense": 7, "lethality": 10, "attack": 9, "health": 7, "load": 217},
+        "T7": {"defense": 8, "lethality": 11, "attack": 10, "health": 8, "load": 249},
+        "T8": {"defense": 9, "lethality": 12, "attack": 11, "health": 9, "load": 287},
+        "T9": {"defense": 10, "lethality": 13, "attack": 12, "health": 10, "load": 330},
+        "T10": {"defense": 11, "lethality": 14, "attack": 13, "health": 11, "load": 379},
+        "T11": {"defense": 13, "lethality": 16, "attack": 15, "health": 13, "load": 400}
+      }
+    },
+    "marksman": {
+      "role": "Offensive specialists - counter Infantry, weak to Lancers",
+      "tiers": {
+        "T1": {"defense": 1, "lethality": 5, "attack": 5, "health": 1, "load": 108},
+        "T2": {"defense": 2, "lethality": 7, "attack": 6, "health": 2, "load": 124},
+        "T3": {"defense": 3, "lethality": 8, "attack": 7, "health": 3, "load": 142},
+        "T4": {"defense": 4, "lethality": 9, "attack": 8, "health": 4, "load": 164},
+        "T5": {"defense": 5, "lethality": 10, "attack": 9, "health": 5, "load": 188},
+        "T6": {"defense": 6, "lethality": 11, "attack": 10, "health": 6, "load": 217},
+        "T7": {"defense": 7, "lethality": 12, "attack": 11, "health": 7, "load": 249},
+        "T8": {"defense": 8, "lethality": 13, "attack": 12, "health": 8, "load": 287},
+        "T9": {"defense": 9, "lethality": 14, "attack": 13, "health": 9, "load": 330},
+        "T10": {"defense": 10, "lethality": 15, "attack": 14, "health": 10, "load": 379},
+        "T11": {"defense": 12, "lethality": 17, "attack": 16, "health": 12, "load": 400}
+      }
+    }
+  },
+  "unlock_requirements": {
+    "T1": {"camp_level": 1, "furnace_level": 7, "names": {"infantry": "Recruit Infantry", "lancer": "Recruit Lancer", "marksman": "Recruit Marksman"}},
+    "T2": {"camp_level": 4, "furnace_level": 7, "names": {"infantry": "Trained Infantry", "lancer": "Trained Lancer", "marksman": "Trained Marksman"}},
+    "T3": {"camp_level": 7, "furnace_level": 7, "names": {"infantry": "Senior Infantry", "lancer": "Senior Lancer", "marksman": "Senior Marksman"}},
+    "T4": {"camp_level": 11, "furnace_level": 11, "names": {"infantry": "Veteran Infantry", "lancer": "Veteran Lancer", "marksman": "Veteran Marksman"}},
+    "T5": {"camp_level": 13, "furnace_level": 13, "names": {"infantry": "Hardy Infantry", "lancer": "Hardy Lancer", "marksman": "Hardy Marksman"}},
+    "T6": {"camp_level": 16, "furnace_level": 16, "names": {"infantry": "Heroic Infantry", "lancer": "Heroic Lancer", "marksman": "Heroic Marksman"}},
+    "T7": {"camp_level": 19, "furnace_level": 19, "names": {"infantry": "Brave Infantry", "lancer": "Brave Lancer", "marksman": "Brave Marksman"}},
+    "T8": {"camp_level": 22, "furnace_level": 22, "names": {"infantry": "Elite Infantry", "lancer": "Elite Lancer", "marksman": "Elite Marksman"}},
+    "T9": {"camp_level": 26, "furnace_level": 26, "names": {"infantry": "Supreme Infantry", "lancer": "Supreme Lancer", "marksman": "Supreme Marksman"}},
+    "T10": {"camp_level": 30, "furnace_level": 30, "names": {"infantry": "Apex Infantry", "lancer": "Apex Lancer", "marksman": "Apex Marksman"}},
+    "T11": {"camp_level": null, "furnace_level": 30, "unlock_method": "War Academy Research", "names": {"infantry": "Helios Infantry", "lancer": "Helios Lancer", "marksman": "Helios Marksman"}}
+  },
+  "march_capacity": {
+    "description": "March and Rally capacity by Command Center level",
+    "command_center_unlocks_at": "Furnace 10",
+    "levels": {
+      "1": {"rally": 1500, "march": 400},
+      "5": {"rally": 7500, "march": 2000},
+      "10": {"rally": 35500, "march": 8000},
+      "15": {"rally": 88500, "march": 18000},
+      "20": {"rally": 195000, "march": 38000},
+      "25": {"rally": 455000, "march": 51500},
+      "30": {"rally": 840000, "march": 67000}
+    },
+    "fc_bonuses": {
+      "FC10_max": {"rally": 915000, "march": 77500}
+    }
+  },
+  "combat_stat_explanations": {
+    "defense": "Absorbs damage; must be depleted before Health is damaged",
+    "attack": "Base damage dealt; limited by enemy Defense until depleted",
+    "health": "HP of the troop; troop dies when this reaches zero",
+    "lethality": "Bypasses enemy Defense to deal direct Health damage (most important offensive stat)",
+    "load": "Carrying capacity for gathering and looting resources"
+  },
+  "stat_priority": ["lethality", "attack", "defense", "health"]
+}

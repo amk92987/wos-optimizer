@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "description": "Whiteout Survival hero power calculation data, XP requirements, and stat formulas",
+    "last_updated": "2025-01-11",
+    "sources": [
+      "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/faq/6570-how-is-squad-power-calculated/",
+      "https://whiteoutdata.com/data/hero-xp-chart/",
+      "https://whiteoutsurvival.app/heroes/",
+      "https://www.whiteoutsurvival.wiki/hero-gears/hero-gear/",
+      "https://www.whiteoutsurvival.wiki/combat-stats-special-bonuses/",
+      "https://kingshotguides.com/guide/lethality-attack-defense-health-what-they-actually-do/",
+      "https://www.appgamer.com/white-out-survival/how-many-hero-shards-do-you-need-to-fully-ascend-them",
+      "https://heaven-guardian.com/whiteout-survival-hero-xp-chart-leveling-guide/"
+    ],
+    "spreadsheet_resource": "https://docs.google.com/spreadsheets/d/112Gi0_kr85KHK-YOEG1zVsz33O3A7HLQH4ccONHZFRo/"
+  },
+  "power_formula": {
+    "official_statement": "Squad Power is derived from a special formula based on your Hero Power and Troop Level.",
+    "formula_disclosed": false,
+    "components": [
+      "Hero Level (1-80)",
+      "Star Level/Ascension (0-5 stars, 6 tiers per star)",
+      "Skills (Exploration & Expedition, levels 1-5)",
+      "Hero Gear (4 slots: Headgear, Gloves, Belt, Boots)",
+      "Exclusive Gear (5th slot for Gold/Mythic heroes)"
+    ]
+  },
+  "hero_xp_requirements": {
+    "description": "XP needed to level heroes and associated unlocks",
+    "levels": {
+      "1": {"xp": 0, "furnace_req": 1, "troop_capacity": 65, "escorts": 2},
+      "2": {"xp": 480, "furnace_req": 4, "troop_capacity": 130, "escorts": 2},
+      "3": {"xp": 660, "furnace_req": 4, "troop_capacity": 195, "escorts": 2},
+      "4": {"xp": 1350, "furnace_req": 4, "troop_capacity": 260, "escorts": 2},
+      "5": {"xp": 1530, "furnace_req": 4, "troop_capacity": 455, "escorts": 3},
+      "10": {"xp": 3800, "furnace_req": 4, "troop_capacity": 1295, "escorts": 4},
+      "15": {"xp": 7500, "furnace_req": 10, "troop_capacity": 1815, "escorts": 4},
+      "20": {"xp": 13000, "furnace_req": 10, "troop_capacity": 2605, "escorts": 5},
+      "25": {"xp": 19000, "furnace_req": 15, "troop_capacity": 3110, "escorts": 5},
+      "30": {"xp": 28000, "furnace_req": 15, "troop_capacity": 3745, "escorts": 6},
+      "35": {"xp": 38000, "furnace_req": 18, "troop_capacity": 4260, "escorts": 6},
+      "40": {"xp": 55000, "furnace_req": 18, "troop_capacity": 4905, "escorts": 7},
+      "45": {"xp": 75000, "furnace_req": 20, "troop_capacity": 5360, "escorts": 7},
+      "50": {"xp": 130000, "furnace_req": 20, "troop_capacity": 6045, "escorts": 8},
+      "55": {"xp": 190000, "furnace_req": 22, "troop_capacity": 6530, "escorts": 8},
+      "60": {"xp": 300000, "furnace_req": 22, "troop_capacity": 7185, "escorts": 9},
+      "65": {"xp": 500000, "furnace_req": 24, "troop_capacity": 7670, "escorts": 9},
+      "70": {"xp": 900000, "furnace_req": 24, "troop_capacity": 13070, "escorts": 10},
+      "75": {"xp": 1500000, "furnace_req": 26, "troop_capacity": 13265, "escorts": 10},
+      "80": {"xp": 2400000, "furnace_req": 26, "troop_capacity": 13470, "escorts": 10}
+    }
+  },
+  "hero_stars": {
+    "shards_required": {
+      "unlock": 10,
+      "1_star": 10,
+      "2_stars": 40,
+      "3_stars": 115,
+      "4_stars": 300,
+      "5_stars": 600
+    },
+    "cumulative_shards": {
+      "unlock": 10,
+      "1_star": 20,
+      "2_stars": 60,
+      "3_stars": 175,
+      "4_stars": 475,
+      "5_stars": 1075
+    },
+    "tiers_per_star": 6,
+    "total_tiers": 30,
+    "unlocks": {
+      "1_star": "Exclusive Gear slot (requires 5 Widgets)",
+      "4_stars": "Can max all Exploration and Expedition skills"
+    }
+  },
+  "hero_skills": {
+    "skills_by_rarity": {
+      "rare": {"exploration": 2, "expedition": 2},
+      "epic": {"exploration": 3, "expedition": 2},
+      "mythic": {"exploration": 3, "expedition": 3}
+    },
+    "max_level": 5,
+    "example_scaling": {
+      "sergey_damage": ["200%", "220%", "240%", "260%", "280%"],
+      "sergey_defense_buff": ["5%", "7.5%", "10%", "12.5%", "15%"],
+      "sergey_damage_reduction": ["10%", "15%", "20%", "25%", "30%"],
+      "jessie_troop_damage": ["+5%", "+10%", "+15%", "+20%", "+25%"],
+      "jessie_defense_upgrade": ["+25%", "+37.5%", "+50%", "+62.5%", "+70%"]
+    }
+  },
+  "hero_gear": {
+    "slots": {
+      "headgear": {"stats": ["Hero Attack", "Health"]},
+      "gloves": {"stats": ["Hero Defense", "Health"]},
+      "belt": {"stats": ["Hero Defense", "Health"]},
+      "boots": {"stats": ["Hero Attack", "Health"]}
+    },
+    "quality_tiers": {
+      "grey": {"enhancement_points": 10, "can_sacrifice": true},
+      "green": {"enhancement_points": 30, "can_sacrifice": true},
+      "blue": {"enhancement_points": 60, "can_sacrifice": true},
+      "purple": {"enhancement_points": 150, "can_sacrifice": true},
+      "gold": {"enhancement_points": null, "can_sacrifice": false}
+    },
+    "enhancement_max_level": 20,
+    "mastery": {
+      "requirements": ["Gold gear only", "Furnace Level 20+", "Enhancement Level 20+"],
+      "max_level": 20,
+      "material": "Essence Stones"
+    },
+    "svs_points": {
+      "essence_stone": 4000,
+      "mithril": 144000
+    }
+  },
+  "exclusive_gear": {
+    "unlock_requirements": [
+      "Hero must be Gold/Mythic quality",
+      "Hero must be ascended to at least 1 Star",
+      "5 Widgets specific to that hero required"
+    ],
+    "provides": [
+      "Hero Attack, Defense, Health buffs",
+      "Troop Health and Lethality command buffs",
+      "2 additional Exclusive Skills"
+    ],
+    "legendary_upgrade": {
+      "requires": "Mythic Level 100 + Mastery 10",
+      "empowerment_milestones": {
+        "20": {"mithril": 10, "mythic_gear": 3},
+        "40": {"mithril": 20, "mythic_gear": 5},
+        "60": {"mithril": 30, "mythic_gear": 5},
+        "80": {"mithril": 40, "mythic_gear": 10},
+        "100": {"mithril": 50, "mythic_gear": 10}
+      }
+    }
+  },
+  "combat_damage_formula": {
+    "description": "Community reverse-engineered combat formula",
+    "source": "https://kingshotguides.com/guide/lethality-attack-defense-health-what-they-actually-do/",
+    "formula": "Kills = sqrt(Troops) x (Attack x Lethality) / (Enemy Defense x Enemy Health) x SkillMod",
+    "skill_mod_formula": "SkillMod = (DamageUp x OppDefenseDown) / (OppDamageDown x DefenseUp)",
+    "insights": [
+      "Attack and Lethality multiply together (equal importance)",
+      "Defense and Health multiply together in the denominator",
+      "Troop count scales with square root (diminishing returns)",
+      "SkillMod is the most impactful factor (hero skills)"
+    ]
+  },
+  "special_bonus_formula": {
+    "source": "https://www.whiteoutsurvival.wiki/combat-stats-special-bonuses/",
+    "formula": "Final Stat = (Base Combat Stats x Special Bonus) + Special Bonus",
+    "example": "400% base attack with 15% bonus = (400 x 1.15) + 15 = 475%"
+  },
+  "example_hero_stats": {
+    "description": "Max stats for reference heroes",
+    "gen15_heroes": {
+      "hank": {"type": "Infantry", "attack": 23637, "defense": 30812, "health": 462204, "expedition_total": "1961.56%"},
+      "estella": {"type": "Lancer", "attack": 30812, "defense": 30812, "health": 308136, "expedition_total": "1961.56%"},
+      "viveca": {"type": "Marksmen", "attack": 37433, "defense": 30812, "health": 231102, "expedition_total": "1961.56%"}
+    },
+    "gen1_baseline": {
+      "jeronimo": {"type": "Infantry", "attack": 2128, "defense": 2220, "health": 41624}
+    },
+    "stat_scaling_note": "Gen 15 heroes have approximately 10-11x the stats of Gen 1 heroes"
+  },
+  "calculators": {
+    "wos_calculator": {"url": "https://woscalculator.com/", "features": ["Hero Gear", "Charms", "Chief Gear", "Fire Crystals", "War Academy", "Troops", "Pets", "Experts"]},
+    "wos_tools": {"url": "https://wostools.net/", "features": ["Building", "Troop", "SvS calculators with power gain display"]},
+    "quackulator": {"url": "https://quackulator.com/", "features": ["Chief Gear upgrade calculator"]},
+    "theria_games": {"url": "https://theriagames.com/guide/whiteout-survival-hero-gear-calculator/", "features": ["Hero Gear calculator with SvS points"]},
+    "fluffy_wos_calc": {"url": "https://fluffy-woscalc.vercel.app/", "features": ["Building planner", "hero shards tracker"]},
+    "whiteoutsurvival_app": {"url": "https://whiteoutsurvival.app/heroes/", "features": ["Full hero database with stats and upgrade charts"]}
+  }
+}
