@@ -215,70 +215,6 @@ def render_gear_slot(slot_id, slot_info, gear_data):
         st.rerun()
 
 
-def render_charm_group(troop_type, slots, charm_data):
-    """Render charm slots for a troop type."""
-    charm_type_info = {
-        "Infantry": CHARM_TYPES["protection"],
-        "Lancer": CHARM_TYPES["keenness"],
-        "Marksman": CHARM_TYPES["vision"],
-    }
-
-    charm_image_prefix = {
-        "Infantry": "protection",
-        "Lancer": "keenness",
-        "Marksman": "vision",
-    }
-
-    charm_info = charm_type_info[troop_type]
-    text_shadow = "text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"
-
-    for slot_id in slots:
-        level_attr = f"{slot_id}_level"
-        current_level = getattr(charm_data, level_attr, 1)
-        charm_stat = CHARM_STATS.get(current_level, {"bonus": 9.0, "shape": "Triangle", "sides": 3})
-        bonus = charm_stat["bonus"]
-        shape = charm_stat["shape"]
-
-        slot_name = slot_id.replace("_", " ").title()
-
-        # Try to load charm image
-        charm_image_path = PROJECT_ROOT / "assets" / "chief_charms" / f"lvl{current_level}.png"
-
-        col_img, col_info = st.columns([1, 4])
-
-        with col_img:
-            if charm_image_path.exists():
-                st.image(str(charm_image_path), width=50)
-            else:
-                st.markdown(f'<div style="font-size:32px;text-align:center;">{charm_info["icon"]}</div>', unsafe_allow_html=True)
-
-        with col_info:
-            st.markdown(
-                f'<div style="display:flex;justify-content:space-between;align-items:center;">'
-                f'<span style="font-weight:bold;color:#E8F4F8;{text_shadow}">{slot_name}</span>'
-                f'<span style="color:{charm_info["color"]};font-weight:bold;{text_shadow}">Lv.{current_level}</span>'
-                f'</div>'
-                f'<div style="color:#B8D4E8;font-size:12px;{text_shadow}">'
-                f'{shape} · +{bonus:.0f}%'
-                f'</div>',
-                unsafe_allow_html=True
-            )
-
-        new_level = st.slider(
-            f"{slot_name} Level",
-            min_value=1,
-            max_value=16,
-            value=current_level,
-            key=f"charm_{slot_id}",
-            label_visibility="collapsed"
-        )
-
-        if new_level != current_level:
-            setattr(charm_data, level_attr, new_level)
-            db.commit()
-            st.rerun()
-
-
 def render_chief_gear_tab():
     """Render the Chief Gear tracking tab."""
     st.markdown("### Chief Gear")
@@ -326,6 +262,51 @@ def render_chief_gear_tab():
                 render_gear_slot(slot_id, GEAR_SLOTS[slot_id], gear_data)
 
 
+def render_single_charm(gear_name, charm_type, charm_data, key_prefix):
+    """Render a single charm with its level selector."""
+    charm_info = CHARM_TYPES[charm_type]
+    field_name = f"{gear_name}_{charm_type}"
+    current_level = getattr(charm_data, field_name, 1)
+    charm_stat = CHARM_STATS.get(current_level, {"bonus": 9.0, "shape": "Triangle"})
+
+    text_shadow = "text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"
+
+    # Try to load charm image
+    charm_image_path = PROJECT_ROOT / "assets" / "chief_charms" / f"lvl{current_level}.png"
+
+    col_img, col_info, col_slider = st.columns([1, 2, 3])
+
+    with col_img:
+        if charm_image_path.exists():
+            st.image(str(charm_image_path), width=40)
+        else:
+            st.markdown(f'<div style="font-size:24px;text-align:center;">{charm_info["icon"]}</div>', unsafe_allow_html=True)
+
+    with col_info:
+        st.markdown(
+            f'<div style="color:{charm_info["color"]};font-weight:bold;font-size:13px;{text_shadow}">'
+            f'{charm_info["name"]}</div>'
+            f'<div style="color:#B8D4E8;font-size:11px;{text_shadow}">'
+            f'Lv.{current_level} · {charm_stat["shape"]}</div>',
+            unsafe_allow_html=True
+        )
+
+    with col_slider:
+        new_level = st.slider(
+            f"{gear_name} {charm_type}",
+            min_value=1,
+            max_value=16,
+            value=current_level,
+            key=f"{key_prefix}_{field_name}",
+            label_visibility="collapsed"
+        )
+
+        if new_level != current_level:
+            setattr(charm_data, field_name, new_level)
+            db.commit()
+            st.rerun()
+
+
 def render_chief_charms_tab():
     """Render the Chief Charms tracking tab."""
     st.markdown("### Chief Charms")
@@ -338,13 +319,17 @@ def render_chief_charms_tab():
         f'<div style="background:rgba(74,144,217,0.15);border:1px solid rgba(74,144,217,0.3);'
         f'padding:12px;border-radius:8px;margin-bottom:16px;">'
         f'<div style="color:#E8F4F8;{text_shadow}">'
-        f'Each gear piece has 3 charm slots - one per troop type. Charms boost Lethality and Health '
-        f'for their specific troop type. Focus on your main troop type first.'
+        f'Each gear piece has <strong>3 charm slots</strong> - one per troop type. '
+        f'Each charm levels from 1 to 16 independently. That\'s 18 charms total (6 gear × 3 types).'
         f'</div>'
         f'<div style="margin-top:8px;display:flex;gap:16px;flex-wrap:wrap;">'
         f'<span style="color:#2ECC71;{text_shadow}">🛡️ Protection = Infantry</span>'
         f'<span style="color:#3498DB;{text_shadow}">⚡ Keenness = Lancer</span>'
         f'<span style="color:#F1C40F;{text_shadow}">👁️ Vision = Marksman</span>'
+        f'</div>'
+        f'<div style="color:#B8D4E8;font-size:12px;margin-top:8px;{text_shadow}">'
+        f'Shape progression: Triangle (1) → Diamond (2) → Square (3-4) → Pentagon (5-6) → '
+        f'Hexagon (7-8) → Higher polygons → Circle (16)'
         f'</div>'
         f'</div>',
         unsafe_allow_html=True
@@ -352,67 +337,69 @@ def render_chief_charms_tab():
 
     charm_data = get_or_create_chief_charms()
 
-    # Group by troop type
-    troop_groups = {
-        "Infantry": ["infantry_coat", "pants"],
-        "Lancer": ["lancer_cap", "watch"],
-        "Marksman": ["marksman_belt", "weapon"],
-    }
-    troop_colors = {"Infantry": "#E74C3C", "Lancer": "#2ECC71", "Marksman": "#3498DB"}
+    # Organize by gear piece - each piece has 3 charms
+    gear_pieces = [
+        ("cap", "Cap", "🎩", "#2ECC71"),
+        ("watch", "Watch", "⌚", "#2ECC71"),
+        ("coat", "Coat", "🧥", "#E74C3C"),
+        ("pants", "Pants", "👖", "#E74C3C"),
+        ("belt", "Belt", "🎯", "#3498DB"),
+        ("weapon", "Weapon", "⚔️", "#3498DB"),
+    ]
 
-    for troop_type, slots in troop_groups.items():
-        st.markdown(
-            f'<div style="background:{troop_colors[troop_type]}22;border-left:4px solid {troop_colors[troop_type]};'
-            f'padding:8px 12px;margin:16px 0 8px 0;border-radius:4px;">'
-            f'<span style="color:{troop_colors[troop_type]};font-weight:bold;{text_shadow}">{troop_type} Charms</span>'
-            f'</div>',
-            unsafe_allow_html=True
-        )
+    for gear_id, gear_name, gear_icon, gear_color in gear_pieces:
+        with st.expander(f"{gear_icon} {gear_name} Charms", expanded=False):
+            for charm_type in ["protection", "keenness", "vision"]:
+                render_single_charm(gear_id, charm_type, charm_data, f"charm_{gear_id}")
+            st.markdown("")
 
-        col1, col2 = st.columns(2)
-        for i, slot_id in enumerate(slots):
-            with col1 if i == 0 else col2:
-                render_charm_group(troop_type, [slot_id], charm_data)
-
-    # Summary
+    # Summary by troop type
     st.markdown("---")
-    st.markdown("### Summary")
+    st.markdown("### Summary by Troop Type")
 
-    lancer_total = getattr(charm_data, "lancer_cap_level", 1) + getattr(charm_data, "watch_level", 1)
-    infantry_total = getattr(charm_data, "infantry_coat_level", 1) + getattr(charm_data, "pants_level", 1)
-    marksman_total = getattr(charm_data, "marksman_belt_level", 1) + getattr(charm_data, "weapon_level", 1)
+    # Calculate totals for each troop type (6 charms each)
+    infantry_charms = ["cap_protection", "watch_protection", "coat_protection",
+                       "pants_protection", "belt_protection", "weapon_protection"]
+    lancer_charms = ["cap_keenness", "watch_keenness", "coat_keenness",
+                     "pants_keenness", "belt_keenness", "weapon_keenness"]
+    marksman_charms = ["cap_vision", "watch_vision", "coat_vision",
+                       "pants_vision", "belt_vision", "weapon_vision"]
+
+    infantry_total = sum(getattr(charm_data, c, 1) for c in infantry_charms)
+    lancer_total = sum(getattr(charm_data, c, 1) for c in lancer_charms)
+    marksman_total = sum(getattr(charm_data, c, 1) for c in marksman_charms)
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        avg_level = infantry_total / 2
+        avg_level = infantry_total / 6
         avg_bonus = CHARM_STATS.get(int(avg_level), {"bonus": 9.0})["bonus"]
         st.markdown(
             f'<div style="background:rgba(231,76,60,0.15);padding:12px;border-radius:8px;text-align:center;">'
-            f'<div style="font-weight:bold;color:#E74C3C;{text_shadow}">Infantry</div>'
-            f'<div style="font-size:24px;color:#E8F4F8;{text_shadow}">{infantry_total}/32</div>'
-            f'<div style="font-size:12px;color:#B8D4E8;{text_shadow}">~{avg_bonus:.0f}% bonus</div>'
+            f'<div style="font-weight:bold;color:#E74C3C;{text_shadow}">🛡️ Infantry</div>'
+            f'<div style="font-size:24px;color:#E8F4F8;{text_shadow}">{infantry_total}/96</div>'
+            f'<div style="font-size:12px;color:#B8D4E8;{text_shadow}">Avg Lv.{avg_level:.1f} (~{avg_bonus:.0f}%)</div>'
             f'</div>',
             unsafe_allow_html=True
         )
     with col2:
-        avg_level = lancer_total / 2
+        avg_level = lancer_total / 6
         avg_bonus = CHARM_STATS.get(int(avg_level), {"bonus": 9.0})["bonus"]
         st.markdown(
             f'<div style="background:rgba(46,204,113,0.15);padding:12px;border-radius:8px;text-align:center;">'
-            f'<div style="font-weight:bold;color:#2ECC71;{text_shadow}">Lancer</div>'
-            f'<div style="font-size:24px;color:#E8F4F8;{text_shadow}">{lancer_total}/32</div>'
-            f'<div style="font-size:12px;color:#B8D4E8;{text_shadow}">~{avg_bonus:.0f}% bonus</div>'
+            f'<div style="font-weight:bold;color:#2ECC71;{text_shadow}">⚡ Lancer</div>'
+            f'<div style="font-size:24px;color:#E8F4F8;{text_shadow}">{lancer_total}/96</div>'
+            f'<div style="font-size:12px;color:#B8D4E8;{text_shadow}">Avg Lv.{avg_level:.1f} (~{avg_bonus:.0f}%)</div>'
             f'</div>',
             unsafe_allow_html=True
         )
     with col3:
-        avg_level = marksman_total / 2
+        avg_level = marksman_total / 6
         avg_bonus = CHARM_STATS.get(int(avg_level), {"bonus": 9.0})["bonus"]
         st.markdown(
             f'<div style="background:rgba(52,152,219,0.15);padding:12px;border-radius:8px;text-align:center;">'
-            f'<div style="font-weight:bold;color:#3498DB;{text_shadow}">Marksman</div>'
-            f'<div style="font-size:24px;color:#E8F4F8;{text_shadow}">{marksman_total}/32</div>'
-            f'<div style="font-size:12px;color:#B8D4E8;{text_shadow}">~{avg_bonus:.0f}% bonus</div>'
+            f'<div style="font-weight:bold;color:#3498DB;{text_shadow}">👁️ Marksman</div>'
+            f'<div style="font-size:24px;color:#E8F4F8;{text_shadow}">{marksman_total}/96</div>'
+            f'<div style="font-size:12px;color:#B8D4E8;{text_shadow}">Avg Lv.{avg_level:.1f} (~{avg_bonus:.0f}%)</div>'
             f'</div>',
             unsafe_allow_html=True
         )

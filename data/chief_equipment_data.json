@@ -88,10 +88,18 @@
     "unlocks_at": "Furnace Level 25",
     "max_level": 16,
     "level_16_requires": "State Generation 7",
+    "structure": {
+      "description": "Each of the 6 gear pieces has 3 charm slots (one per troop type)",
+      "gear_pieces": ["cap", "watch", "coat", "pants", "belt", "weapon"],
+      "charm_types_per_piece": ["protection", "keenness", "vision"],
+      "total_charms": 18,
+      "charms_per_gear_piece": 3,
+      "max_total_levels": 288
+    },
     "types": {
-      "protection": {"color": "#2ECC71", "troop_type": "Infantry", "stats": ["Lethality", "Health"]},
-      "keenness": {"color": "#3498DB", "troop_type": "Lancer", "stats": ["Lethality", "Health"]},
-      "vision": {"color": "#F1C40F", "troop_type": "Marksman", "stats": ["Lethality", "Health"]}
+      "protection": {"color": "#2ECC71", "troop_type": "Infantry", "stats": ["Lethality", "Health"], "icon": "🛡️"},
+      "keenness": {"color": "#3498DB", "troop_type": "Lancer", "stats": ["Lethality", "Health"], "icon": "⚡"},
+      "vision": {"color": "#F1C40F", "troop_type": "Marksman", "stats": ["Lethality", "Health"], "icon": "👁️"}
     },
     "total_charms": 18,
     "charms_per_gear_piece": 3,

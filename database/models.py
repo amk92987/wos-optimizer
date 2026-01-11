@@ -187,19 +187,41 @@ class UserChiefGear(Base):
 
 
 class UserChiefCharm(Base):
-    """User's Chief Charm levels."""
+    """User's Chief Charm levels - 18 charms total (6 gear pieces × 3 charm types)."""
     __tablename__ = 'user_chief_charms'
 
     id = Column(Integer, primary_key=True)
     profile_id = Column(Integer, ForeignKey('user_profile.id'), nullable=False)
 
-    # 6 Chief Charm slots - levels 1-16
-    lancer_cap_level = Column(Integer, default=1)  # Lancer Attack/Defense
-    watch_level = Column(Integer, default=1)  # Lancer Attack/Defense
-    infantry_coat_level = Column(Integer, default=1)  # Infantry Attack/Defense
-    pants_level = Column(Integer, default=1)  # Infantry Attack/Defense
-    marksman_belt_level = Column(Integer, default=1)  # Marksman Attack/Defense
-    weapon_level = Column(Integer, default=1)  # Marksman Attack/Defense
+    # Cap charms (3 types) - levels 1-16
+    cap_protection = Column(Integer, default=1)  # Infantry
+    cap_keenness = Column(Integer, default=1)    # Lancer
+    cap_vision = Column(Integer, default=1)      # Marksman
+
+    # Watch charms (3 types)
+    watch_protection = Column(Integer, default=1)
+    watch_keenness = Column(Integer, default=1)
+    watch_vision = Column(Integer, default=1)
+
+    # Coat charms (3 types)
+    coat_protection = Column(Integer, default=1)
+    coat_keenness = Column(Integer, default=1)
+    coat_vision = Column(Integer, default=1)
+
+    # Pants charms (3 types)
+    pants_protection = Column(Integer, default=1)
+    pants_keenness = Column(Integer, default=1)
+    pants_vision = Column(Integer, default=1)
+
+    # Belt charms (3 types)
+    belt_protection = Column(Integer, default=1)
+    belt_keenness = Column(Integer, default=1)
+    belt_vision = Column(Integer, default=1)
+
+    # Weapon charms (3 types)
+    weapon_protection = Column(Integer, default=1)
+    weapon_keenness = Column(Integer, default=1)
+    weapon_vision = Column(Integer, default=1)
 
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
