@@ -20,6 +20,12 @@ A comprehensive web-based tool to help Whiteout Survival players track their her
 
 ### Recommendations
 - **Rule-based recommendation engine** with curated game knowledge (instant responses)
+- **Power Optimizer** - Upgrade recommendations backed by actual power calculations:
+  - Chief Gear: 42 tiers with exact % bonuses (9.35% → 187%)
+  - Chief Charms: 16 levels with exact % bonuses (9% → 100%)
+  - War Academy: Exact power_gain values per level (6,888 → 8,784)
+  - Troop Tiers: Exact power per unit (T11 lancers/marksmen = 80 power!)
+  - Hero upgrades: Level, star, and skill power estimates
 - AI-powered fallback (Claude or OpenAI) for complex questions
 - Priority-based upgrade recommendations (SvS, Rally, Castle Battle, PvE, Gathering)
 - Combat-focused analysis for SvS optimization
@@ -159,6 +165,8 @@ WoS/
 │   └── upgrades/             # Upgrade edge graphs (920+ edges)
 ├── assets/heroes/            # 56 hero portrait images
 ├── engine/                   # Recommendation engines
+│   ├── recommendation_engine.py  # Main orchestrator
+│   └── analyzers/            # HeroAnalyzer, GearAdvisor, PowerOptimizer, etc.
 ├── scripts/                  # Data building utilities
 ├── styles/                   # CSS styling
 └── .claude/skills/           # 5 Claude Code skills

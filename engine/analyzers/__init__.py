@@ -8,11 +8,14 @@ from .gear_advisor import GearAdvisor
 from .lineup_builder import LineupBuilder
 from .progression_tracker import ProgressionTracker
 from .request_classifier import RequestClassifier
+from .power_optimizer import PowerOptimizer, PowerUpgrade
 
 __all__ = [
     'HeroAnalyzer',
     'GearAdvisor',
     'LineupBuilder',
     'ProgressionTracker',
-    'RequestClassifier'
+    'RequestClassifier',
+    'PowerOptimizer',
+    'PowerUpgrade'
 ]

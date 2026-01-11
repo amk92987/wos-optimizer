@@ -426,3 +426,175 @@ div[style*="background:rgba(0,0,0,0.3)"][style*="font-size:10px"] {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--frost-white);
 }
+
+/* ============================================
+   CONTENT CARD UTILITIES
+   ============================================ */
+
+/* Base content card - use for major sections */
+.content-card {
+    background: linear-gradient(135deg, rgba(46, 90, 140, 0.25) 0%, rgba(30, 42, 58, 0.4) 100%);
+    border: 1px solid rgba(74, 144, 217, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Info card - lighter, for tips and notes */
+.info-card {
+    background: rgba(74, 144, 217, 0.15);
+    border-left: 4px solid var(--primary-ice);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 12px 0;
+}
+
+/* Warning card - for important notices */
+.warning-card {
+    background: rgba(255, 107, 53, 0.15);
+    border-left: 4px solid var(--accent-fire);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 12px 0;
+}
+
+/* Success card - for completed/good status */
+.success-card {
+    background: rgba(46, 204, 113, 0.15);
+    border-left: 4px solid #2ECC71;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 12px 0;
+}
+
+/* Stats grid card */
+.stats-card {
+    background: var(--background-card);
+    border: 1px solid rgba(74, 144, 217, 0.2);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+
+.stats-card .value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary-ice);
+    line-height: 1.2;
+}
+
+.stats-card .label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
+/* ============================================
+   TYPOGRAPHY IMPROVEMENTS
+   ============================================ */
+
+/* Page titles */
+h1 {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.5rem !important;
+    letter-spacing: -0.5px;
+}
+
+/* Section headers */
+h2 {
+    font-size: 1.4rem !important;
+    font-weight: 600 !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 0.75rem !important;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(74, 144, 217, 0.3);
+}
+
+/* Subsection headers */
+h3 {
+    font-size: 1.15rem !important;
+    font-weight: 600 !important;
+    color: var(--text-secondary) !important;
+    margin-top: 1rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+/* Body text improvements */
+p, li {
+    line-height: 1.6;
+    color: var(--frost-white);
+}
+
+/* Small/caption text */
+small, .caption {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* ============================================
+   SPACING UTILITIES
+   ============================================ */
+
+/* Reduce default streamlit gaps */
+.block-container {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    max-width: 1200px !important;
+}
+
+/* Tighter column gaps for grids */
+[data-testid="stHorizontalBlock"] {
+    gap: 1rem !important;
+}
+
+/* Tab content padding */
+.stTabs [data-baseweb="tab-panel"] {
+    padding-top: 1rem;
+}
+
+/* Divider styling */
+hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(74, 144, 217, 0.4), transparent);
+    margin: 1.5rem 0;
+}
+
+/* ============================================
+   TABLE IMPROVEMENTS
+   ============================================ */
+
+/* Cleaner table styling */
+.stDataFrame, [data-testid="stTable"] {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+[data-testid="stTable"] table {
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+[data-testid="stTable"] th {
+    background: rgba(74, 144, 217, 0.3) !important;
+    color: var(--frost-white) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 12px !important;
+}
+
+[data-testid="stTable"] td {
+    background: rgba(30, 42, 58, 0.5) !important;
+    border-bottom: 1px solid rgba(74, 144, 217, 0.15) !important;
+    padding: 10px 12px !important;
+}
+
+[data-testid="stTable"] tr:hover td {
+    background: rgba(74, 144, 217, 0.2) !important;
+}

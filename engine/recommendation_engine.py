@@ -13,7 +13,9 @@ from .analyzers import (
     GearAdvisor,
     LineupBuilder,
     ProgressionTracker,
-    RequestClassifier
+    RequestClassifier,
+    PowerOptimizer,
+    PowerUpgrade
 )
 from .analyzers.request_classifier import RequestType
 
@@ -51,6 +53,8 @@ class RecommendationEngine:
         """
         if data_dir is None:
             data_dir = Path(__file__).parent.parent / "data"
+        elif isinstance(data_dir, str):
+            data_dir = Path(data_dir)
 
         self.data_dir = data_dir
 
@@ -64,6 +68,7 @@ class RecommendationEngine:
         self.lineup_builder = LineupBuilder(self.heroes_data)
         self.progression_tracker = ProgressionTracker()
         self.request_classifier = RequestClassifier()
+        self.power_optimizer = PowerOptimizer(str(data_dir))
 
         # AI fallback (lazy loaded)
         self._ai_recommender = None
@@ -91,8 +96,11 @@ class RecommendationEngine:
         self,
         profile,
         user_heroes: list,
-        user_gear: dict = None,
-        limit: int = 10
+        user_gear: list = None,
+        user_charms: list = None,
+        gear_dict: dict = None,
+        limit: int = 10,
+        include_power: bool = True
     ) -> List[Recommendation]:
         """
         Get personalized recommendations based on user's profile and heroes.
@@ -100,8 +108,11 @@ class RecommendationEngine:
         Args:
             profile: User profile with priorities and server info
             user_heroes: List of user's owned heroes with stats
-            user_gear: Optional dict with chief_gear and hero_gear status
+            user_gear: Optional list of user's chief gear ORM objects (for PowerOptimizer)
+            user_charms: Optional list of user's chief charms ORM objects (for PowerOptimizer)
+            gear_dict: Optional dict for GearAdvisor (format: {'chief_gear': {...}, 'hero_gear': {...}})
             limit: Maximum recommendations to return
+            include_power: Whether to include power-based recommendations
 
         Returns:
             List of Recommendation objects, sorted by priority
@@ -125,8 +136,9 @@ class RecommendationEngine:
                 source="rules"
             ))
 
-        # Get gear recommendations
-        gear_recs = self.gear_advisor.analyze(profile, user_gear or {})
+        # Get gear recommendations (from rule-based GearAdvisor)
+        # GearAdvisor expects dict format: {'chief_gear': {...}, 'hero_gear': {...}}
+        gear_recs = self.gear_advisor.analyze(profile, gear_dict or {})
         for rec in gear_recs:
             all_recommendations.append(Recommendation(
                 priority=rec.priority,
@@ -153,6 +165,34 @@ class RecommendationEngine:
                 source="rules"
             ))
 
+        # Get power-based recommendations
+        if include_power:
+            user_data = {
+                "user_heroes": user_heroes,
+                "user_gear": user_gear or [],
+                "user_charms": user_charms or []
+            }
+            power_recs = self.power_optimizer.get_top_recommendations(profile, user_data, limit=limit)
+            for rec in power_recs:
+                # Convert PowerUpgrade to Recommendation
+                power_str = f"+{rec.power_gain:,.0f} power" if rec.power_gain > 0 else ""
+                bonus_str = f"+{rec.bonus_gain:.1f}%" if rec.bonus_gain > 0 else ""
+                efficiency_str = f"Efficiency: {rec.efficiency:.1f}" if rec.efficiency > 0 else ""
+
+                detail_parts = [p for p in [power_str, bonus_str, efficiency_str] if p]
+                detail = f" ({', '.join(detail_parts)})" if detail_parts else ""
+
+                all_recommendations.append(Recommendation(
+                    priority=rec.priority,
+                    action=f"Upgrade {rec.target}: {rec.from_level} → {rec.to_level}",
+                    category=rec.upgrade_type,
+                    hero=rec.target if rec.upgrade_type in ["hero_level", "hero_star"] else None,
+                    reason=f"{rec.reason}{detail}",
+                    resources=", ".join(f"{k}: {v}" for k, v in rec.resource_cost.items()) if rec.resource_cost else "",
+                    relevance_tags=rec.relevance_tags,
+                    source="power"
+                ))
+
         # Sort by priority and deduplicate
         all_recommendations.sort(key=lambda x: x.priority)
 
@@ -166,6 +206,34 @@ class RecommendationEngine:
                 unique_recommendations.append(rec)
 
         return unique_recommendations[:limit]
+
+    def get_power_recommendations(
+        self,
+        profile,
+        user_heroes: list,
+        user_gear: list = None,
+        user_charms: list = None,
+        limit: int = 10
+    ) -> List[PowerUpgrade]:
+        """
+        Get power-based upgrade recommendations only.
+
+        Args:
+            profile: User profile
+            user_heroes: List of user's heroes
+            user_gear: List of user's chief gear
+            user_charms: List of user's chief charms
+            limit: Maximum recommendations
+
+        Returns:
+            List of PowerUpgrade objects sorted by efficiency
+        """
+        user_data = {
+            "user_heroes": user_heroes,
+            "user_gear": user_gear or [],
+            "user_charms": user_charms or []
+        }
+        return self.power_optimizer.get_top_recommendations(profile, user_data, limit)
 
     def get_lineup(
         self,

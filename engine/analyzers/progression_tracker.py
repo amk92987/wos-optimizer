@@ -2,8 +2,23 @@
 Progression Tracker - Identifies player's current game phase and provides phase-specific tips.
 """
 
-from typing import List, Dict, Any
+import re
+from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
+
+
+def parse_fc_level(fc_level_raw) -> Optional[int]:
+    """Parse FC level from various formats (int, 'FC5', 'FC2-0', '5', etc.)."""
+    if fc_level_raw is None:
+        return None
+    if isinstance(fc_level_raw, int):
+        return fc_level_raw
+    if isinstance(fc_level_raw, str):
+        # Extract first number from strings like "FC5", "FC10", "FC2-0", "5"
+        match = re.search(r'\d+', fc_level_raw)
+        if match:
+            return int(match.group())
+    return None
 
 
 @dataclass
@@ -122,7 +137,7 @@ class ProgressionTracker:
         """
         furnace_level = getattr(profile, 'furnace_level', 1)
         server_age = getattr(profile, 'server_age_days', 0)
-        fc_level = getattr(profile, 'furnace_fc_level', None)
+        fc_level = parse_fc_level(getattr(profile, 'furnace_fc_level', None))
 
         # Check for endgame (FC5+)
         if fc_level and fc_level >= 5:
@@ -192,7 +207,7 @@ class ProgressionTracker:
         """
         furnace_level = getattr(profile, 'furnace_level', 1)
         server_age = getattr(profile, 'server_age_days', 0)
-        fc_level = getattr(profile, 'furnace_fc_level', 0)
+        fc_level = parse_fc_level(getattr(profile, 'furnace_fc_level', None)) or 0
 
         milestones = [
             {"level": 9, "name": "Research Center", "benefit": "Unlock research tree"},
@@ -222,13 +237,13 @@ class ProgressionTracker:
         # At L30, check FC milestones
         if furnace_level >= 30:
             for milestone in fc_milestones:
-                if (fc_level or 0) < milestone["fc"]:
+                if fc_level < milestone["fc"]:
                     return {
                         "type": "fc",
                         "target": f"FC{milestone['fc']}",
                         "name": milestone["name"],
                         "benefit": milestone["benefit"],
-                        "distance": milestone["fc"] - (fc_level or 0)
+                        "distance": milestone["fc"] - fc_level
                     }
 
         return {

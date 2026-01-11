@@ -8,11 +8,40 @@ from datetime import datetime
 Base = declarative_base()
 
 
+class User(Base):
+    """User account for authentication. AWS-ready design."""
+    __tablename__ = 'users'
+
+    id = Column(Integer, primary_key=True)
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    email = Column(String(255), unique=True, nullable=True, index=True)
+    password_hash = Column(String(255), nullable=False)  # bcrypt hash
+
+    # Role: 'admin' or 'user'
+    role = Column(String(20), default='user', nullable=False)
+
+    # Account status
+    is_active = Column(Boolean, default=True)
+    is_verified = Column(Boolean, default=False)  # For email verification (AWS SES)
+
+    # AWS Cognito compatibility fields (for future migration)
+    cognito_sub = Column(String(100), unique=True, nullable=True)  # Cognito user ID
+
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_login = Column(DateTime, nullable=True)
+
+    # Relationships
+    profiles = relationship("UserProfile", back_populates="user")
+
+
 class UserProfile(Base):
     """User's game profile and preferences."""
     __tablename__ = 'user_profile'
 
     id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)  # Nullable for migration
     name = Column(String(100), default="Chief")
     server_age_days = Column(Integer, default=0)
     furnace_level = Column(Integer, default=1)
@@ -39,6 +68,7 @@ class UserProfile(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     # Relationships
+    user = relationship("User", back_populates="profiles")
     heroes = relationship("UserHero", back_populates="profile")
     inventory = relationship("UserInventory", back_populates="profile")
 

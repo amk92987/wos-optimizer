@@ -20,6 +20,23 @@ if css_file.exists():
     with open(css_file) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+# CSS to make tab labels wrap and evenly spaced
+st.markdown("""
+<style>
+.stTabs [data-baseweb="tab-list"] {
+    justify-content: space-evenly !important;
+    width: 100% !important;
+}
+.stTabs [data-baseweb="tab-list"] button {
+    flex: 1 1 0 !important;
+}
+.stTabs [data-baseweb="tab-list"] button p {
+    white-space: pre-wrap !important;
+    text-align: center !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # Initialize
 init_db()
 db = get_db()
@@ -43,7 +60,7 @@ PRICE_OPTIONS = [0.99, 1.99, 2.99, 4.99, 9.99, 14.99, 19.99, 29.99, 49.99, 99.99
 # Values derived from pack back-calculations and shop cross-references
 PACK_ITEMS = {
     "hero": {
-        "label": "Hero Items",
+        "label": "Hero\nItems",
         "category": "unique",
         "items": [
             {"id": "mythic_shard", "name": "Mythic Shards", "image": "mythic_hero_shard.png", "fs_value": 33, "tier": "A", "desc": "Gold/orange shards for Mythic (Legendary) heroes"},
@@ -61,7 +78,7 @@ PACK_ITEMS = {
         ]
     },
     "hero_gear": {
-        "label": "Hero Gear",
+        "label": "Hero\nGear",
         "category": "unique",
         "items": [
             {"id": "essence_stone", "name": "Essence Stones", "image": "essence_stone.png", "fs_value": 22, "tier": "A", "desc": "For Mythic gear mastery. $0.22 each"},
@@ -73,7 +90,7 @@ PACK_ITEMS = {
         ]
     },
     "hero_gear_chests": {
-        "label": "Custom Gear Chests",
+        "label": "Custom\nGear",
         "category": "unique",
         "items": [
             {"id": "custom_hero_gear_s1", "name": "Custom Gear S1", "image": "mythic_hero_gear_chest.png", "fs_value": 22, "tier": "B", "desc": "Choose hero gear (Gen 1 - oldest)"},
@@ -94,7 +111,7 @@ PACK_ITEMS = {
         ]
     },
     "chief_gear": {
-        "label": "Chief Gear & Charms",
+        "label": "Chief Gear\n& Charms",
         "category": "unique",
         "items": [
             {"id": "hardened_alloy", "name": "Hardened Alloy", "image": "hardened_alloy.png", "fs_value": 0.067, "tier": "C", "desc": "Primary material for chief gear (cheap)"},
@@ -106,7 +123,7 @@ PACK_ITEMS = {
         ]
     },
     "currency": {
-        "label": "Currency & Premium",
+        "label": "Currency\n& Premium",
         "category": "currency",
         "items": [
             {"id": "gems", "name": "Gems", "image": "gems.png", "fs_value": 0.033, "tier": "A", "desc": "Premium currency (30 gems = 1 FS)"},
@@ -123,7 +140,7 @@ PACK_ITEMS = {
         ]
     },
     "war_items": {
-        "label": "War & Utility",
+        "label": "War\n& Utility",
         "category": "unique",
         "items": [
             {"id": "advanced_teleport", "name": "Advanced Teleport", "image": "advanced_teleporter.png", "fs_value": 67, "tier": "A", "desc": "Teleport to any location on the map"},
@@ -142,7 +159,7 @@ PACK_ITEMS = {
         ]
     },
     "pets": {
-        "label": "Pet Items",
+        "label": "Pets",
         "category": "unique",
         "items": [
             {"id": "pet_food", "name": "Pet Food", "image": "pet_food.png", "fs_value": 0.024, "tier": "C", "desc": "Nutrient substance for leveling up pets"},
@@ -224,7 +241,7 @@ PACK_ITEMS = {
         ]
     },
     "late_game": {
-        "label": "Late Game (FC5+)",
+        "label": "Late Game\n(FC5+)",
         "category": "unique",
         "items": [
             {"id": "expert_sigil", "name": "Expert Sigils", "image": "common_expert_sigil.png", "fs_value": 20, "tier": "A", "desc": "Material for hero expertise trees"},
@@ -235,7 +252,7 @@ PACK_ITEMS = {
         ]
     },
     "boosts": {
-        "label": "Boosts & Buffs",
+        "label": "Boosts\n& Buffs",
         "category": "unique",
         "items": [
             # Troop Attack Boost - 2hr and 12hr
@@ -265,7 +282,7 @@ PACK_ITEMS = {
         ]
     },
     "resources": {
-        "label": "Resources (Filler)",
+        "label": "Resources\n(Filler)",
         "category": "resources",
         "is_resource_grid": True,
         "columns": {
