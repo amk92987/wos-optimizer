@@ -38,6 +38,39 @@ QUALITY_LEVELS = GEAR_SYSTEM.get('quality_levels', {})
 GEAR_SLOTS = GEAR_SYSTEM.get('slots', ['Weapon', 'Armor', 'Helmet', 'Boots'])
 TIER_DESCRIPTIONS = HERO_DATA.get('tier_descriptions', {})
 
+# Hero special roles - what each hero is good for beyond combat
+HERO_ROLES = {
+    # Gatherers (Growth heroes for specific resources)
+    "Smith": {"role": "Gatherer", "detail": "Iron", "icon": "Fe", "color": "#95A5A6"},
+    "Eugene": {"role": "Gatherer", "detail": "Wood", "icon": "W", "color": "#8B4513"},
+    "Charlie": {"role": "Gatherer", "detail": "Coal", "icon": "C", "color": "#34495E"},
+    "Cloris": {"role": "Gatherer", "detail": "Meat", "icon": "M", "color": "#E74C3C"},
+
+    # Stamina/Intel - reduces stamina for beast hunting and intel missions
+    "Gina": {"role": "Stamina Saver", "detail": "-20% stamina (hunts/intel)", "icon": "S", "color": "#F39C12"},
+
+    # Research & Building speed boosts
+    "Jasser": {"role": "Research Boost", "detail": "+15% research speed", "icon": "R", "color": "#9B59B6"},
+    "Zinman": {"role": "Construction", "detail": "+15% build speed, -15% cost", "icon": "B", "color": "#E67E22"},
+
+    # Rally Joiners - Attack (put in leftmost slot when joining rallies)
+    "Jessie": {"role": "BEST Attack Joiner", "detail": "+25% DMG dealt (all troops)", "icon": "ATK", "color": "#E74C3C"},
+    "Seo-yoon": {"role": "Attack Joiner", "detail": "+25% ATK (all troops)", "icon": "ATK", "color": "#E74C3C"},
+    "Natalia": {"role": "Rally Leader", "detail": "+30% DMG, +15% Lethality", "icon": "RL", "color": "#F1C40F"},
+
+    # Rally Joiners - Defense/Garrison (put in leftmost slot when reinforcing)
+    "Sergey": {"role": "BEST Garrison Joiner", "detail": "-20% DMG taken (all troops)", "icon": "DEF", "color": "#3498DB"},
+    "Logan": {"role": "Best Defender", "detail": "Essential for garrison defense", "icon": "DEF", "color": "#3498DB"},
+
+    # Healers - essential for exploration/PvE content
+    "Philly": {"role": "BEST Healer", "detail": "Essential for exploration/PvE", "icon": "HP", "color": "#2ECC71"},
+
+    # Special combat roles
+    "Jeronimo": {"role": "Rally Leader", "detail": "+25% DMG, +25% ATK to all", "icon": "RL", "color": "#F1C40F"},
+    "Patrick": {"role": "Top Rally Joiner", "detail": "+100% extra damage (Sneak Strike)", "icon": "ATK", "color": "#9B59B6"},
+    "Ahmose": {"role": "Defensive Infantry", "detail": "Shield + 30% DMG reflect", "icon": "DEF", "color": "#3498DB"},
+}
+
 
 def get_tier_color(tier: str) -> str:
     colors = {
@@ -45,6 +78,29 @@ def get_tier_color(tier: str) -> str:
         "B": "#4169E1", "C": "#32CD32", "D": "#808080"
     }
     return colors.get(tier, "#808080")
+
+
+def get_hero_role_badge(hero_name: str) -> str:
+    """Get HTML badge for hero's special role, if any."""
+    role_info = HERO_ROLES.get(hero_name)
+    if not role_info:
+        return ""
+
+    role = role_info["role"]
+    detail = role_info["detail"]
+    color = role_info["color"]
+
+    return f'''<div style="
+        display:inline-block;
+        background:{color}22;
+        border:1px solid {color};
+        border-radius:4px;
+        padding:2px 6px;
+        font-size:10px;
+        color:{color};
+        margin-top:2px;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    " title="{detail}"><b>{role}</b>: {detail}</div>'''
 
 
 def get_class_color(hero_class: str) -> str:
@@ -224,7 +280,12 @@ def render_hero_row(hero: dict, user_hero, hero_key: str):
         info_cols = st.columns([2.5, 1.5, 1, 1, 2, 1, 1.5])
 
         with info_cols[0]:
-            st.markdown(f'<div style="font-weight:bold;color:#E8F4F8;opacity:{opacity};padding-top:4px;font-size:16px;">{hero["name"]}</div>', unsafe_allow_html=True)
+            # Hero name and role badge
+            role_badge = get_hero_role_badge(hero["name"])
+            name_html = f'<div style="font-weight:bold;color:#E8F4F8;opacity:{opacity};padding-top:4px;font-size:16px;">{hero["name"]}</div>'
+            if role_badge:
+                name_html += role_badge
+            st.markdown(name_html, unsafe_allow_html=True)
 
         with info_cols[1]:
             st.markdown(f'<div style="color:{class_color};opacity:{opacity};padding-top:4px;">{hero["hero_class"]}</div>', unsafe_allow_html=True)
