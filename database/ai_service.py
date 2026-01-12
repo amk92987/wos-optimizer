@@ -178,7 +178,9 @@ def log_ai_conversation(
     tokens_output: int = None,
     response_time_ms: int = None,
     source_page: str = None,
-    question_type: str = None
+    question_type: str = None,
+    thread_id: str = None,
+    thread_title: str = None
 ) -> AIConversation:
     """
     Log an AI conversation for training data collection.
@@ -210,7 +212,9 @@ def log_ai_conversation(
         tokens_output=tokens_output,
         response_time_ms=response_time_ms,
         source_page=source_page,
-        question_type=question_type
+        question_type=question_type,
+        thread_id=thread_id,
+        thread_title=thread_title
     )
     db.add(conversation)
 
@@ -343,6 +347,48 @@ def get_recent_conversations(db: Session, user_id: int, limit: int = 5) -> List[
     ).order_by(AIConversation.created_at.desc()).limit(limit).all()
 
 
+def toggle_favorite(db: Session, conversation_id: int, user_id: int) -> bool:
+    """
+    Toggle the favorite status of a conversation.
+
+    Args:
+        db: Database session
+        conversation_id: The conversation ID
+        user_id: The user's ID (for security - only owner can favorite)
+
+    Returns:
+        New favorite status (True if now favorited, False if unfavorited)
+    """
+    conv = db.query(AIConversation).filter(
+        AIConversation.id == conversation_id,
+        AIConversation.user_id == user_id
+    ).first()
+
+    if conv:
+        conv.is_favorite = not (conv.is_favorite or False)
+        db.commit()
+        return conv.is_favorite
+    return False
+
+
+def get_favorite_conversations(db: Session, user_id: int, limit: int = 20) -> List[AIConversation]:
+    """
+    Get favorited conversations for a user.
+
+    Args:
+        db: Database session
+        user_id: The user's ID
+        limit: Maximum number to return
+
+    Returns:
+        List of favorited AIConversation objects, most recent first.
+    """
+    return db.query(AIConversation).filter(
+        AIConversation.user_id == user_id,
+        AIConversation.is_favorite == True
+    ).order_by(AIConversation.created_at.desc()).limit(limit).all()
+
+
 def get_ai_stats(db: Session) -> Dict[str, Any]:
     """Get AI usage statistics for admin dashboard."""
     settings = get_ai_settings(db)
@@ -389,3 +435,103 @@ def get_ai_stats(db: Session) -> Dict[str, Any]:
         'routed_to_hybrid': hybrid_count,
         'rules_percentage': round(rules_count / total_conversations * 100, 1) if total_conversations > 0 else 0,
     }
+
+
+# ============================================
+# CONVERSATION THREADING
+# ============================================
+
+def create_thread_id() -> str:
+    """Generate a new unique thread ID."""
+    import uuid
+    return str(uuid.uuid4())
+
+
+def generate_thread_title(question: str) -> str:
+    """Generate a thread title from the first question (truncated)."""
+    # Clean up and truncate
+    title = question.strip()
+    if len(title) > 60:
+        title = title[:57] + "..."
+    return title
+
+
+def get_user_threads(db: Session, user_id: int, limit: int = 20) -> List[Dict[str, Any]]:
+    """
+    Get conversation threads for a user, grouped by thread_id.
+
+    Returns list of thread summaries with:
+    - thread_id
+    - thread_title (from first message or auto-generated)
+    - message_count
+    - last_message_time
+    - first_question_preview
+    """
+    from sqlalchemy import func, desc
+
+    # Get threads with their stats
+    threads = db.query(
+        AIConversation.thread_id,
+        AIConversation.thread_title,
+        func.count(AIConversation.id).label('message_count'),
+        func.max(AIConversation.created_at).label('last_message'),
+        func.min(AIConversation.created_at).label('first_message')
+    ).filter(
+        AIConversation.user_id == user_id,
+        AIConversation.thread_id != None
+    ).group_by(
+        AIConversation.thread_id
+    ).order_by(desc('last_message')).limit(limit).all()
+
+    result = []
+    for thread in threads:
+        # Get first question for preview
+        first_conv = db.query(AIConversation).filter(
+            AIConversation.thread_id == thread.thread_id
+        ).order_by(AIConversation.created_at.asc()).first()
+
+        result.append({
+            'thread_id': thread.thread_id,
+            'title': thread.thread_title or (first_conv.question[:50] + "..." if first_conv and len(first_conv.question) > 50 else first_conv.question if first_conv else "Chat"),
+            'message_count': thread.message_count,
+            'last_message': thread.last_message,
+            'first_question': first_conv.question if first_conv else None
+        })
+
+    return result
+
+
+def get_thread_conversations(db: Session, thread_id: str, user_id: int) -> List[AIConversation]:
+    """
+    Get all conversations in a thread, ordered by creation time.
+
+    Args:
+        db: Database session
+        thread_id: The thread UUID
+        user_id: User ID for security (only return threads owned by this user)
+
+    Returns:
+        List of AIConversation objects in chronological order.
+    """
+    return db.query(AIConversation).filter(
+        AIConversation.thread_id == thread_id,
+        AIConversation.user_id == user_id
+    ).order_by(AIConversation.created_at.asc()).all()
+
+
+def get_standalone_conversations(db: Session, user_id: int, limit: int = 10) -> List[AIConversation]:
+    """
+    Get recent conversations that are NOT part of a thread (single Q&A).
+
+    Args:
+        db: Database session
+        user_id: The user's ID
+        limit: Maximum number to return
+
+    Returns:
+        List of AIConversation objects without a thread_id.
+    """
+    return db.query(AIConversation).filter(
+        AIConversation.user_id == user_id,
+        AIConversation.thread_id == None
+    ).order_by(AIConversation.created_at.desc()).limit(limit).all()

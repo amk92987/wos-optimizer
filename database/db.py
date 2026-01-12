@@ -37,6 +37,9 @@ def _run_migrations():
         ("users", "ai_requests_today", "INTEGER", "0"),
         ("users", "ai_request_reset_date", "DATETIME", None),
         ("users", "last_ai_request", "DATETIME", None),
+        ("ai_conversations", "is_favorite", "BOOLEAN", "0"),
+        ("ai_conversations", "thread_id", "VARCHAR(36)", None),
+        ("ai_conversations", "thread_title", "VARCHAR(100)", None),
     ]
 
     for table, column, col_type, default in migrations:

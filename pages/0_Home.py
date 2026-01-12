@@ -98,6 +98,42 @@ with col2:
 st.markdown("---")
 render_donate_message()
 
+# ============================================
+# MOBILE APP INSTALL BANNER (PWA)
+# ============================================
+# This banner shows on mobile devices to encourage adding to home screen
+st.markdown("""
+<div class="pwa-install-banner" id="pwa-banner">
+    <h4>Use Bear's Den like an App!</h4>
+    <p>Add to your home screen for quick access and a better mobile experience.</p>
+    <div id="install-instructions">
+        <p style="font-size: 13px; color: #B8D4E8;">
+            <strong>iOS:</strong> Tap the Share button, then "Add to Home Screen"<br>
+            <strong>Android:</strong> Tap the menu (3 dots), then "Add to Home Screen"
+        </p>
+    </div>
+</div>
+<script>
+    // Hide banner on desktop or if already installed as PWA
+    (function() {
+        var banner = document.getElementById('pwa-banner');
+        if (banner) {
+            // Check if running as standalone PWA
+            var isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                || window.navigator.standalone
+                || document.referrer.includes('android-app://');
+
+            // Check if desktop (screen width > 1024px)
+            var isDesktop = window.innerWidth > 1024;
+
+            if (isStandalone || isDesktop) {
+                banner.style.display = 'none';
+            }
+        }
+    })();
+</script>
+""", unsafe_allow_html=True)
+
 st.markdown("---")
 
 # Generation Timeline

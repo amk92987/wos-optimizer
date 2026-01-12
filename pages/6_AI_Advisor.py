@@ -17,11 +17,14 @@ from database.auth import get_current_user_id, is_authenticated
 from database.ai_service import (
     get_ai_mode, check_rate_limit, record_ai_request,
     log_ai_conversation, rate_conversation, get_ai_settings,
-    get_recent_conversations
+    get_recent_conversations, toggle_favorite, get_favorite_conversations,
+    create_thread_id, generate_thread_title, get_user_threads,
+    get_thread_conversations, get_standalone_conversations
 )
 from engine import RecommendationEngine, AIRecommender, HeroRecommender
 from engine.ai_recommender import format_data_preview
 from utils.toolbar import render_donate_message, render_feedback_form
+from datetime import datetime
 import time
 
 # Load CSS
@@ -164,7 +167,7 @@ st.markdown(f"""
 st.markdown("---")
 
 # Tabs for different features
-tab1, tab2, tab3, tab4 = st.tabs(["Recommendations", "Hero Investment", "Lineups", "Ask a Question"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["Recommendations", "Hero Investment", "Lineups", "Ask a Question", "⭐ Favorites"])
 
 with tab1:
     st.markdown("### Your Top Priorities")
@@ -594,9 +597,11 @@ with tab3:
 with tab4:
     st.markdown("### Ask the Advisor")
 
-    # Initialize chat history in session state
+    # Initialize chat history and thread tracking in session state
     if 'chat_messages' not in st.session_state:
         st.session_state.chat_messages = []
+    if 'current_thread_id' not in st.session_state:
+        st.session_state.current_thread_id = None
 
     # Top controls: New Chat + Past Chats
     col_new, col_past = st.columns([1, 2])
@@ -604,45 +609,100 @@ with tab4:
     with col_new:
         if st.button("🔄 New Chat", use_container_width=True):
             st.session_state.chat_messages = []
+            st.session_state.current_thread_id = None  # Will be created on first message
             if 'last_ai_conversation_id' in st.session_state:
                 del st.session_state['last_ai_conversation_id']
             st.rerun()
 
     with col_past:
-        # Get past conversations from database
-        past_convos = []
+        # Get threads and standalone conversations
+        threads = []
+        standalone = []
         if current_user_id:
-            past_convos = get_recent_conversations(db, current_user_id, limit=10)
+            threads = get_user_threads(db, current_user_id, limit=10)
+            standalone = get_standalone_conversations(db, current_user_id, limit=5)
 
-        if past_convos:
-            with st.expander(f"📜 Past Chats ({len(past_convos)})"):
-                for conv in past_convos:
-                    q_preview = conv.question[:40] + "..." if len(conv.question) > 40 else conv.question
-                    time_ago = ""
-                    if conv.created_at:
-                        from datetime import datetime
-                        delta = datetime.now() - conv.created_at
-                        if delta.days > 0:
-                            time_ago = f"{delta.days}d ago"
-                        elif delta.seconds > 3600:
-                            time_ago = f"{delta.seconds // 3600}h ago"
-                        else:
-                            time_ago = f"{delta.seconds // 60}m ago"
+        total_count = len(threads) + len(standalone)
 
-                    col_q, col_load = st.columns([3, 1])
-                    with col_q:
-                        st.caption(f"{q_preview} • {time_ago}")
-                    with col_load:
-                        if st.button("Load", key=f"load_conv_{conv.id}"):
-                            # Load this conversation into chat
-                            st.session_state.chat_messages = [
-                                {"role": "user", "content": conv.question},
-                                {"role": "assistant", "content": conv.answer, "source": conv.routed_to or "unknown"}
-                            ]
-                            st.session_state['last_ai_conversation_id'] = conv.id
-                            st.rerun()
+        if total_count > 0:
+            with st.expander(f"📜 Past Chats ({total_count})"):
+                # Show threaded conversations first
+                if threads:
+                    st.markdown("**Conversations:**")
+                    for thread in threads:
+                        time_ago = ""
+                        if thread['last_message']:
+                            delta = datetime.now() - thread['last_message']
+                            if delta.days > 0:
+                                time_ago = f"{delta.days}d ago"
+                            elif delta.seconds > 3600:
+                                time_ago = f"{delta.seconds // 3600}h ago"
+                            else:
+                                time_ago = f"{delta.seconds // 60}m ago"
+
+                        msg_count = thread['message_count']
+                        title_preview = thread['title'][:45] + "..." if len(thread['title']) > 45 else thread['title']
+
+                        col_q, col_load = st.columns([3, 1])
+                        with col_q:
+                            st.caption(f"💬 {title_preview} ({msg_count} msgs) • {time_ago}")
+                        with col_load:
+                            if st.button("Load", key=f"load_thread_{thread['thread_id']}"):
+                                # Load entire thread into chat
+                                thread_convos = get_thread_conversations(db, thread['thread_id'], current_user_id)
+                                st.session_state.chat_messages = []
+                                for conv in thread_convos:
+                                    st.session_state.chat_messages.append({"role": "user", "content": conv.question})
+                                    st.session_state.chat_messages.append({
+                                        "role": "assistant",
+                                        "content": conv.answer,
+                                        "source": conv.routed_to or "unknown"
+                                    })
+                                st.session_state.current_thread_id = thread['thread_id']
+                                if thread_convos:
+                                    st.session_state['last_ai_conversation_id'] = thread_convos[-1].id
+                                st.rerun()
+
+                # Show standalone conversations
+                if standalone:
+                    if threads:
+                        st.markdown("---")
+                        st.markdown("**Single Q&A:**")
+                    for conv in standalone:
+                        q_preview = conv.question[:40] + "..." if len(conv.question) > 40 else conv.question
+                        time_ago = ""
+                        if conv.created_at:
+                            delta = datetime.now() - conv.created_at
+                            if delta.days > 0:
+                                time_ago = f"{delta.days}d ago"
+                            elif delta.seconds > 3600:
+                                time_ago = f"{delta.seconds // 3600}h ago"
+                            else:
+                                time_ago = f"{delta.seconds // 60}m ago"
+
+                        col_q, col_load = st.columns([3, 1])
+                        with col_q:
+                            st.caption(f"{q_preview} • {time_ago}")
+                        with col_load:
+                            if st.button("Load", key=f"load_conv_{conv.id}"):
+                                # Load single conversation - create a new thread for follow-ups
+                                st.session_state.chat_messages = [
+                                    {"role": "user", "content": conv.question},
+                                    {"role": "assistant", "content": conv.answer, "source": conv.routed_to or "unknown"}
+                                ]
+                                st.session_state.current_thread_id = None  # No thread yet
+                                st.session_state['last_ai_conversation_id'] = conv.id
+                                st.rerun()
 
     st.markdown("---")
+
+    # Show thread indicator if there's an active conversation
+    if st.session_state.chat_messages:
+        msg_count = len([m for m in st.session_state.chat_messages if m['role'] == 'user'])
+        if msg_count > 1:
+            st.caption(f"💬 Conversation with {msg_count} messages • Follow-up questions will be added to this thread")
+        elif msg_count == 1:
+            st.caption("💬 New conversation • Ask follow-up questions to continue")
 
     # Display chat history
     if st.session_state.chat_messages:
@@ -678,20 +738,31 @@ with tab4:
                 </div>
                 """, unsafe_allow_html=True)
 
-        # Rating buttons for the last message if it was from AI
+        # Rating and bookmark buttons for the last message
         if (st.session_state.chat_messages and
             st.session_state.chat_messages[-1].get('role') == 'assistant' and
-            st.session_state.chat_messages[-1].get('source') == 'ai' and
             'last_ai_conversation_id' in st.session_state):
-            col_rate1, col_rate2, col_rate3 = st.columns([1, 1, 4])
-            with col_rate1:
-                if st.button("👍 Helpful", key="rate_helpful"):
-                    rate_conversation(db, st.session_state['last_ai_conversation_id'], is_helpful=True)
-                    st.success("Thanks!")
-            with col_rate2:
-                if st.button("👎 Not helpful", key="rate_not_helpful"):
-                    rate_conversation(db, st.session_state['last_ai_conversation_id'], is_helpful=False)
-                    st.info("Thanks for the feedback!")
+            col_rate1, col_rate2, col_bookmark, col_spacer = st.columns([1, 1, 1, 3])
+
+            # Only show rating for AI responses
+            if st.session_state.chat_messages[-1].get('source') == 'ai':
+                with col_rate1:
+                    if st.button("👍 Helpful", key="rate_helpful"):
+                        rate_conversation(db, st.session_state['last_ai_conversation_id'], is_helpful=True)
+                        st.success("Thanks!")
+                with col_rate2:
+                    if st.button("👎 Not helpful", key="rate_not_helpful"):
+                        rate_conversation(db, st.session_state['last_ai_conversation_id'], is_helpful=False)
+                        st.info("Thanks for the feedback!")
+
+            # Bookmark button for all responses
+            with col_bookmark:
+                if st.button("⭐ Save", key="bookmark_conv"):
+                    new_status = toggle_favorite(db, st.session_state['last_ai_conversation_id'], current_user_id)
+                    if new_status:
+                        st.success("Saved to favorites!")
+                    else:
+                        st.info("Removed from favorites")
 
         st.markdown("---")
 
@@ -780,6 +851,14 @@ with tab4:
                 "source": source
             })
 
+            # Threading logic: create a new thread for first message, continue existing thread for follow-ups
+            is_new_thread = st.session_state.current_thread_id is None
+            if is_new_thread:
+                # Start a new thread with this conversation
+                st.session_state.current_thread_id = create_thread_id()
+
+            thread_title = generate_thread_title(custom_q) if is_new_thread else None
+
             # Log AI responses
             if source == 'ai' and current_user:
                 record_ai_request(db, current_user)
@@ -796,7 +875,9 @@ with tab4:
                     response_time_ms=response_time_ms,
                     source_page='ai_advisor',
                     question_type='custom' if not selected_question else 'quick',
-                    routed_to=source
+                    routed_to=source,
+                    thread_id=st.session_state.current_thread_id,
+                    thread_title=thread_title
                 )
                 st.session_state['last_ai_conversation_id'] = conversation.id
             elif source == 'rules' and current_user:
@@ -813,11 +894,87 @@ with tab4:
                     response_time_ms=response_time_ms,
                     source_page='ai_advisor',
                     question_type='custom' if not selected_question else 'quick',
-                    routed_to='rules'
+                    routed_to='rules',
+                    thread_id=st.session_state.current_thread_id,
+                    thread_title=thread_title
                 )
                 st.session_state['last_ai_conversation_id'] = conversation.id
 
             st.rerun()
+
+# ============================================
+# TAB 5: FAVORITES
+# ============================================
+with tab5:
+    st.markdown("### Your Saved Conversations")
+    st.markdown("Quick access to your bookmarked Q&A pairs.")
+
+    # Get favorites
+    favorites = []
+    if current_user_id:
+        favorites = get_favorite_conversations(db, current_user_id, limit=20)
+
+    if favorites:
+        for fav in favorites:
+            # Time ago
+            time_ago = ""
+            if fav.created_at:
+                delta = datetime.now() - fav.created_at
+                if delta.days > 0:
+                    time_ago = f"{delta.days}d ago"
+                elif delta.seconds > 3600:
+                    time_ago = f"{delta.seconds // 3600}h ago"
+                else:
+                    time_ago = f"{delta.seconds // 60}m ago"
+
+            source_label = "Rules" if fav.routed_to == 'rules' else "AI" if fav.routed_to == 'ai' else ""
+
+            with st.container():
+                # Header with question preview and actions
+                col_q, col_actions = st.columns([4, 1])
+                with col_q:
+                    q_preview = fav.question[:80] + "..." if len(fav.question) > 80 else fav.question
+                    st.markdown(f"**Q:** {q_preview}")
+                    st.caption(f"{time_ago} • {source_label}")
+
+                with col_actions:
+                    col_load, col_unfav = st.columns(2)
+                    with col_load:
+                        if st.button("Load", key=f"load_fav_{fav.id}"):
+                            # If favorite has a thread, load the whole thread
+                            if fav.thread_id:
+                                thread_convos = get_thread_conversations(db, fav.thread_id, current_user_id)
+                                st.session_state.chat_messages = []
+                                for conv in thread_convos:
+                                    st.session_state.chat_messages.append({"role": "user", "content": conv.question})
+                                    st.session_state.chat_messages.append({
+                                        "role": "assistant",
+                                        "content": conv.answer,
+                                        "source": conv.routed_to or "unknown"
+                                    })
+                                st.session_state.current_thread_id = fav.thread_id
+                            else:
+                                # Single conversation
+                                st.session_state.chat_messages = [
+                                    {"role": "user", "content": fav.question},
+                                    {"role": "assistant", "content": fav.answer, "source": fav.routed_to or "unknown"}
+                                ]
+                                st.session_state.current_thread_id = None
+                            st.session_state['last_ai_conversation_id'] = fav.id
+                            # Switch to Ask tab
+                            st.rerun()
+                    with col_unfav:
+                        if st.button("🗑️", key=f"unfav_{fav.id}", help="Remove from favorites"):
+                            toggle_favorite(db, fav.id, current_user_id)
+                            st.rerun()
+
+                # Answer preview (expandable)
+                with st.expander("View answer", expanded=False):
+                    st.markdown(fav.answer)
+
+                st.markdown("---")
+    else:
+        st.info("No saved conversations yet. Use the ⭐ Save button after getting an answer to bookmark it here.")
 
 # ============================================
 # FEEDBACK SECTION

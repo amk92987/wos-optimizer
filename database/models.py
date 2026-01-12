@@ -434,6 +434,13 @@ class AIConversation(Base):
     source_page = Column(String(50), nullable=True)  # Which page the question came from
     question_type = Column(String(50), nullable=True)  # quick_question, custom, recommendations, etc.
 
+    # User favorites
+    is_favorite = Column(Boolean, default=False)  # User bookmarked this conversation
+
+    # Conversation threading
+    thread_id = Column(String(36), nullable=True, index=True)  # UUID to group related conversations
+    thread_title = Column(String(100), nullable=True)  # Auto-generated from first question
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships

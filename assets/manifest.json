@@ -1,0 +1,27 @@
+{
+  "name": "Whiteout Survival Optimizer",
+  "short_name": "WoS Advisor",
+  "description": "AI-powered game advisor for Whiteout Survival - track heroes, get recommendations, and optimize your gameplay",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09131E",
+  "theme_color": "#4A90D9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/app/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/app/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["games", "utilities"],
+  "screenshots": [],
+  "prefer_related_applications": false
+}

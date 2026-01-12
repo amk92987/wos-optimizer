@@ -943,3 +943,244 @@ hr {
     padding: 6px 10px !important;
     font-size: 18px !important;
 }
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+/* Mobile screens (under 768px) */
+@media screen and (max-width: 768px) {
+    /* Hide sidebar on mobile by default */
+    [data-testid="stSidebar"] {
+        min-width: 0 !important;
+        width: 0 !important;
+    }
+
+    [data-testid="stSidebar"][aria-expanded="true"] {
+        min-width: 280px !important;
+        width: 280px !important;
+    }
+
+    /* Show sidebar collapse button on mobile */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="collapsedControl"] {
+        display: flex !important;
+    }
+
+    /* Adjust main content padding */
+    .block-container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        max-width: 100% !important;
+    }
+
+    /* Stack columns vertically */
+    [data-testid="stHorizontalBlock"] {
+        flex-direction: column !important;
+        gap: 0.75rem !important;
+    }
+
+    [data-testid="column"] {
+        width: 100% !important;
+        min-width: 100% !important;
+        flex: none !important;
+    }
+
+    /* Larger touch targets for buttons */
+    .stButton > button {
+        min-height: 48px !important;
+        min-width: 48px !important;
+        padding: 12px 20px !important;
+        font-size: 16px !important;
+    }
+
+    /* Larger form inputs for touch */
+    input, textarea, select,
+    [data-baseweb="input"],
+    [data-baseweb="textarea"],
+    [data-baseweb="select"] {
+        min-height: 48px !important;
+        font-size: 16px !important;
+    }
+
+    /* Larger selectbox */
+    .stSelectbox > div > div {
+        min-height: 48px !important;
+    }
+
+    /* Tab styling for mobile */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0 !important;
+        flex-wrap: wrap !important;
+    }
+
+    .stTabs [data-baseweb="tab"] {
+        padding: 12px 8px !important;
+        font-size: 13px !important;
+        flex: 1 1 auto !important;
+        min-width: 80px !important;
+        justify-content: center !important;
+    }
+
+    /* Hero cards - single column */
+    .hero-card {
+        margin: 4px 0 !important;
+        padding: 12px !important;
+    }
+
+    /* Smaller headers on mobile */
+    h1 {
+        font-size: 1.5rem !important;
+    }
+
+    h2 {
+        font-size: 1.2rem !important;
+    }
+
+    h3 {
+        font-size: 1rem !important;
+    }
+
+    /* Chat message boxes - full width */
+    [data-testid="stChatMessage"] {
+        max-width: 100% !important;
+    }
+
+    /* Expander improvements for touch */
+    .streamlit-expanderHeader {
+        padding: 16px !important;
+    }
+
+    /* Metrics - stack on mobile */
+    [data-testid="stMetric"] {
+        padding: 16px !important;
+    }
+
+    /* Table scroll on mobile */
+    [data-testid="stTable"] {
+        overflow-x: auto !important;
+    }
+
+    /* Popover adjustments for mobile */
+    [data-testid="stPopoverBody"] {
+        min-width: 260px !important;
+        max-width: calc(100vw - 40px) !important;
+    }
+
+    /* Rating buttons larger touch targets */
+    [data-testid="stMainBlockContainer"] .stButton > button {
+        min-height: 44px !important;
+        min-width: 44px !important;
+    }
+}
+
+/* Small mobile screens (under 480px) */
+@media screen and (max-width: 480px) {
+    .block-container {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+
+    /* Even smaller text on tiny screens */
+    h1 {
+        font-size: 1.3rem !important;
+    }
+
+    h2 {
+        font-size: 1.1rem !important;
+    }
+
+    /* Compact tab labels */
+    .stTabs [data-baseweb="tab"] {
+        padding: 10px 6px !important;
+        font-size: 12px !important;
+    }
+
+    /* Stack quick question buttons */
+    [data-testid="stHorizontalBlock"]:has(.stButton) {
+        gap: 0.5rem !important;
+    }
+}
+
+/* Tablet screens (768px - 1024px) */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    .block-container {
+        padding-left: 1.5rem !important;
+        padding-right: 1.5rem !important;
+    }
+
+    /* Two columns max on tablet */
+    [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+    }
+
+    [data-testid="column"] {
+        min-width: 45% !important;
+    }
+}
+
+/* Touch device detection - make interactive elements more touch-friendly */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger tap targets */
+    .stButton > button,
+    .stCheckbox,
+    .stRadio,
+    [data-testid="stExpander"] summary {
+        min-height: 48px !important;
+    }
+
+    /* More padding on clickable items */
+    a, button, input[type="submit"], input[type="button"] {
+        padding: 12px !important;
+    }
+
+    /* Disable hover effects that don't work on touch */
+    .hero-card:hover {
+        transform: none !important;
+    }
+
+    .stButton > button:hover {
+        transform: none !important;
+    }
+}
+
+/* ============================================
+   PWA INSTALL PROMPT STYLING
+   ============================================ */
+
+.pwa-install-banner {
+    background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(255, 215, 0, 0.1));
+    border: 2px solid var(--accent-fire);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 16px 0;
+    text-align: center;
+}
+
+.pwa-install-banner h4 {
+    color: var(--accent-fire);
+    margin-bottom: 8px;
+}
+
+.pwa-install-banner p {
+    color: var(--frost-white);
+    font-size: 14px;
+    margin-bottom: 12px;
+}
+
+.pwa-install-button {
+    background: linear-gradient(135deg, var(--accent-fire), #E55A2B) !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px 24px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+}
+
+/* Hide PWA banner on desktop */
+@media screen and (min-width: 1025px) {
+    .pwa-install-banner {
+        display: none !important;
+    }
+}
