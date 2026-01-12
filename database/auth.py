@@ -105,6 +105,28 @@ def update_user_role(db: Session, user_id: int, new_role: str) -> bool:
     return True
 
 
+def get_user_theme(db: Session, user_id: int) -> str:
+    """Get user's theme preference."""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return 'dark'
+    return getattr(user, 'theme', 'dark') or 'dark'
+
+
+def update_user_theme(db: Session, user_id: int, theme: str) -> bool:
+    """Update user's theme preference."""
+    if theme not in ('dark', 'light'):
+        return False
+
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return False
+
+    user.theme = theme
+    db.commit()
+    return True
+
+
 def delete_user(db: Session, user_id: int) -> bool:
     """Delete a user account."""
     user = get_user_by_id(db, user_id)
@@ -135,6 +157,13 @@ def init_session_state():
         st.session_state.username = None
     if 'user_role' not in st.session_state:
         st.session_state.user_role = None
+    # Impersonation state
+    if 'impersonating' not in st.session_state:
+        st.session_state.impersonating = False
+    if 'original_admin_id' not in st.session_state:
+        st.session_state.original_admin_id = None
+    if 'original_admin_username' not in st.session_state:
+        st.session_state.original_admin_username = None
 
 
 def login_user(user: User):
@@ -147,10 +176,44 @@ def login_user(user: User):
 
 def logout_user():
     """Clear session state for logout."""
-    st.session_state.authenticated = False
-    st.session_state.user_id = None
-    st.session_state.username = None
-    st.session_state.user_role = None
+    # If impersonating, return to admin
+    if st.session_state.get('impersonating'):
+        st.session_state.authenticated = True
+        st.session_state.user_id = st.session_state.original_admin_id
+        st.session_state.username = st.session_state.original_admin_username
+        st.session_state.user_role = 'admin'
+        st.session_state.impersonating = False
+        st.session_state.original_admin_id = None
+        st.session_state.original_admin_username = None
+    else:
+        st.session_state.authenticated = False
+        st.session_state.user_id = None
+        st.session_state.username = None
+        st.session_state.user_role = None
+        st.session_state.impersonating = False
+
+
+def login_as_user(user: User):
+    """Admin impersonation - login as another user while preserving admin session."""
+    if not is_admin():
+        return False
+
+    # Store original admin info
+    st.session_state.original_admin_id = st.session_state.user_id
+    st.session_state.original_admin_username = st.session_state.username
+    st.session_state.impersonating = True
+
+    # Switch to target user
+    st.session_state.user_id = user.id
+    st.session_state.username = user.username
+    st.session_state.user_role = user.role
+
+    return True
+
+
+def is_impersonating() -> bool:
+    """Check if admin is currently impersonating a user."""
+    return st.session_state.get('impersonating', False)
 
 
 def is_authenticated() -> bool:

@@ -26,7 +26,8 @@ Nginx acts as a reverse proxy that:
 1. User visits `www.randomchaoslabs.com` → sees static landing page
 2. User clicks "Sign In" → goes to `/app?page=login` → Streamlit login
 3. User clicks "Register" → goes to `/app?page=register` → Streamlit register
-4. After login → redirected to `/app` → Streamlit main app
+4. User clicks "Back to Home" on login/register → goes to `/` → static landing page
+5. After login → redirected to `/app` → Streamlit main app
 
 ## Local Development
 

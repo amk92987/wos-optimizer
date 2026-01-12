@@ -11,12 +11,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import UserChiefGear, UserChiefCharm
-
-# Load CSS
-css_file = PROJECT_ROOT / "styles" / "custom.css"
-if css_file.exists():
-    with open(css_file, encoding='utf-8') as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+from utils.theme_colors import get_colors, text_shadow
 
 # Initialize
 init_db()

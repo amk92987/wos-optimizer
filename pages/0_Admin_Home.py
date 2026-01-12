@@ -1,0 +1,382 @@
+"""
+Admin Dashboard - System overview and analytics for administrators.
+"""
+
+import streamlit as st
+import pandas as pd
+from pathlib import Path
+from datetime import datetime, timedelta, date
+import sys
+
+PROJECT_ROOT = Path(__file__).parent.parent
+sys.path.insert(0, str(PROJECT_ROOT))
+
+from database.db import get_db, init_db
+from database.auth import require_admin, get_all_users, login_as_user
+from database.models import User, UserProfile, UserHero, UserInventory, AdminMetrics, AuditLog, Announcement, Base
+
+# Ensure tables exist
+init_db()
+
+# Load CSS
+css_file = PROJECT_ROOT / "styles" / "custom.css"
+if css_file.exists():
+    with open(css_file) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+# Require admin access
+require_admin()
+
+db = get_db()
+
+# Create new tables if they don't exist
+from sqlalchemy import inspect
+inspector = inspect(db.bind)
+existing_tables = inspector.get_table_names()
+if 'admin_metrics' not in existing_tables:
+    AdminMetrics.__table__.create(db.bind, checkfirst=True)
+if 'audit_log' not in existing_tables:
+    AuditLog.__table__.create(db.bind, checkfirst=True)
+if 'announcements' not in existing_tables:
+    Announcement.__table__.create(db.bind, checkfirst=True)
+
+
+def record_daily_metrics():
+    """Record today's metrics snapshot."""
+    today = date.today()
+    today_start = datetime.combine(today, datetime.min.time())
+
+    # Check if we already have today's metrics
+    existing = db.query(AdminMetrics).filter(AdminMetrics.date == today_start).first()
+    if existing:
+        return  # Already recorded
+
+    all_users = get_all_users(db)
+    regular_users = [u for u in all_users if u.role != 'admin']
+
+    # Calculate metrics
+    total_users = len(regular_users)
+    new_users = len([u for u in regular_users if u.created_at and u.created_at >= today_start])
+    active_users = len([u for u in regular_users if u.last_login and u.last_login >= today_start])
+    total_profiles = db.query(UserProfile).count()
+    total_heroes = db.query(UserHero).count()
+    total_inventory = db.query(UserInventory).count()
+
+    # Create metrics record
+    metrics = AdminMetrics(
+        date=today_start,
+        total_users=total_users,
+        new_users=new_users,
+        active_users=active_users,
+        total_profiles=total_profiles,
+        total_heroes_tracked=total_heroes,
+        total_inventory_items=total_inventory,
+        total_logins=active_users  # Simplified
+    )
+    db.add(metrics)
+    db.commit()
+
+
+def get_historical_metrics(days: int = 30) -> pd.DataFrame:
+    """Get historical metrics for charting."""
+    cutoff = datetime.now() - timedelta(days=days)
+    metrics = db.query(AdminMetrics).filter(AdminMetrics.date >= cutoff).order_by(AdminMetrics.date).all()
+
+    if not metrics:
+        return pd.DataFrame()
+
+    data = []
+    for m in metrics:
+        data.append({
+            'Date': m.date.strftime('%m/%d'),
+            'Users': m.total_users,
+            'Active': m.active_users,
+            'New': m.new_users,
+            'Heroes': m.total_heroes_tracked,
+        })
+
+    return pd.DataFrame(data)
+
+
+# Record today's metrics
+record_daily_metrics()
+
+# ============================================
+# Header
+# ============================================
+
+st.markdown("# 📊 Admin Dashboard")
+st.caption(f"System overview • {datetime.now().strftime('%B %d, %Y at %I:%M %p')}")
+
+# ============================================
+# Calculate current metrics
+# ============================================
+
+all_users = get_all_users(db)
+now = datetime.now()
+
+# Separate admins from regular users
+admin_users = [u for u in all_users if u.role == 'admin']
+regular_users = [u for u in all_users if u.role != 'admin']
+
+# Active users calculations (regular users only)
+def count_active_users(users: list, days: int) -> int:
+    cutoff = now - timedelta(days=days)
+    return len([u for u in users if u.last_login and u.last_login >= cutoff])
+
+dau = count_active_users(regular_users, 1)
+wau = count_active_users(regular_users, 7)
+mau = count_active_users(regular_users, 30)
+
+# New users (regular users only)
+new_today = len([u for u in regular_users if u.created_at and u.created_at >= now - timedelta(days=1)])
+new_this_week = len([u for u in regular_users if u.created_at and u.created_at >= now - timedelta(days=7)])
+new_this_month = len([u for u in regular_users if u.created_at and u.created_at >= now - timedelta(days=30)])
+
+# Content stats
+total_profiles = db.query(UserProfile).count()
+total_heroes_tracked = db.query(UserHero).count()
+total_inventory_items = db.query(UserInventory).count()
+
+# Inactive users (30+ days)
+inactive_30d = len([u for u in regular_users if not u.last_login or u.last_login < now - timedelta(days=30)])
+
+# ============================================
+# Top KPI Cards
+# ============================================
+
+st.markdown("### Key Metrics")
+
+col1, col2, col3, col4, col5 = st.columns(5)
+
+with col1:
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(52, 152, 219, 0.1));
+                padding: 20px; border-radius: 12px; text-align: center; border: 1px solid rgba(52, 152, 219, 0.3);">
+        <div style="font-size: 32px; font-weight: bold; color: #3498DB;">{len(regular_users)}</div>
+        <div style="font-size: 12px; color: #888; margin-top: 4px;">Total Users</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col2:
+    delta_color = "#2ECC71" if new_this_week > 0 else "#888"
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.2), rgba(46, 204, 113, 0.1));
+                padding: 20px; border-radius: 12px; text-align: center; border: 1px solid rgba(46, 204, 113, 0.3);">
+        <div style="font-size: 32px; font-weight: bold; color: #2ECC71;">{dau}</div>
+        <div style="font-size: 12px; color: #888; margin-top: 4px;">Active Today</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col3:
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, rgba(155, 89, 182, 0.2), rgba(155, 89, 182, 0.1));
+                padding: 20px; border-radius: 12px; text-align: center; border: 1px solid rgba(155, 89, 182, 0.3);">
+        <div style="font-size: 32px; font-weight: bold; color: #9B59B6;">{wau}</div>
+        <div style="font-size: 12px; color: #888; margin-top: 4px;">Active This Week</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col4:
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, rgba(241, 196, 15, 0.2), rgba(241, 196, 15, 0.1));
+                padding: 20px; border-radius: 12px; text-align: center; border: 1px solid rgba(241, 196, 15, 0.3);">
+        <div style="font-size: 32px; font-weight: bold; color: #F1C40F;">{total_profiles}</div>
+        <div style="font-size: 12px; color: #888; margin-top: 4px;">Chiefs Created</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col5:
+    st.markdown(f"""
+    <div style="background: linear-gradient(135deg, rgba(230, 126, 34, 0.2), rgba(230, 126, 34, 0.1));
+                padding: 20px; border-radius: 12px; text-align: center; border: 1px solid rgba(230, 126, 34, 0.3);">
+        <div style="font-size: 32px; font-weight: bold; color: #E67E22;">{total_heroes_tracked}</div>
+        <div style="font-size: 12px; color: #888; margin-top: 4px;">Heroes Tracked</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
+
+# ============================================
+# Charts Section
+# ============================================
+
+st.markdown("### Trends")
+
+# Get historical data
+historical_df = get_historical_metrics(30)
+
+if not historical_df.empty and len(historical_df) > 1:
+    chart_col1, chart_col2 = st.columns(2)
+
+    with chart_col1:
+        st.markdown("##### User Growth")
+        st.line_chart(historical_df.set_index('Date')[['Users']], color=["#3498DB"])
+
+    with chart_col2:
+        st.markdown("##### Daily Active Users")
+        st.bar_chart(historical_df.set_index('Date')[['Active']], color=["#2ECC71"])
+
+else:
+    st.info("📈 Charts will appear after a few days of data collection. Check back soon!")
+
+    # Show sample/placeholder
+    st.markdown("""
+    <div style="background: rgba(74, 144, 217, 0.1); padding: 40px; border-radius: 12px; text-align: center; border: 1px dashed rgba(74, 144, 217, 0.3);">
+        <div style="font-size: 48px; margin-bottom: 12px;">📊</div>
+        <div style="color: #888;">Historical data is being collected.</div>
+        <div style="color: #666; font-size: 12px; margin-top: 8px;">Daily snapshots are recorded automatically.</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
+
+# ============================================
+# Two column layout for detailed stats
+# ============================================
+
+col_left, col_right = st.columns(2)
+
+with col_left:
+    st.markdown("### New Registrations")
+
+    reg_col1, reg_col2, reg_col3 = st.columns(3)
+    with reg_col1:
+        st.markdown(f"""
+        <div style="background: rgba(46, 204, 113, 0.15); padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 28px; font-weight: bold; color: #2ECC71;">{new_today}</div>
+            <div style="font-size: 11px; color: #888;">Today</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with reg_col2:
+        st.markdown(f"""
+        <div style="background: rgba(52, 152, 219, 0.15); padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 28px; font-weight: bold; color: #3498DB;">{new_this_week}</div>
+            <div style="font-size: 11px; color: #888;">This Week</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with reg_col3:
+        st.markdown(f"""
+        <div style="background: rgba(155, 89, 182, 0.15); padding: 20px; border-radius: 8px; text-align: center;">
+            <div style="font-size: 28px; font-weight: bold; color: #9B59B6;">{new_this_month}</div>
+            <div style="font-size: 11px; color: #888;">This Month</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("")
+    st.markdown("### User Health")
+
+    # Retention indicator
+    if len(regular_users) > 0:
+        retention_rate = ((len(regular_users) - inactive_30d) / len(regular_users)) * 100
+    else:
+        retention_rate = 0
+
+    retention_color = "#2ECC71" if retention_rate >= 70 else "#F1C40F" if retention_rate >= 40 else "#E74C3C"
+
+    st.markdown(f"""
+    <div style="background: rgba(74, 144, 217, 0.1); padding: 16px; border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span>Active Users (30d)</span>
+            <strong style="color: #2ECC71;">{len(regular_users) - inactive_30d}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span>Inactive Users (30d+)</span>
+            <strong style="color: #E74C3C;">{inactive_30d}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span>Retention Rate</span>
+            <strong style="color: {retention_color};">{retention_rate:.0f}%</strong>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with col_right:
+    st.markdown("### Content Statistics")
+
+    st.markdown(f"""
+    <div style="background: rgba(74, 144, 217, 0.1); padding: 20px; border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+            <span>👤 Chiefs/Profiles</span>
+            <strong style="font-size: 18px;">{total_profiles}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+            <span>🦸 Heroes Tracked</span>
+            <strong style="font-size: 18px;">{total_heroes_tracked}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span>🎒 Inventory Items</span>
+            <strong style="font-size: 18px;">{total_inventory_items}</strong>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("")
+    st.markdown("### System Status")
+
+    db_path = PROJECT_ROOT / "wos.db"
+    db_size = db_path.stat().st_size / (1024 * 1024) if db_path.exists() else 0
+
+    st.markdown(f"""
+    <div style="background: rgba(46, 204, 113, 0.1); padding: 16px; border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span>💾 Database Size</span>
+            <strong>{db_size:.2f} MB</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span>👑 Admin Accounts</span>
+            <strong>{len(admin_users)}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span>🟢 Status</span>
+            <strong style="color: #2ECC71;">Healthy</strong>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+st.markdown("---")
+
+# ============================================
+# Recent Activity
+# ============================================
+
+st.markdown("### Recent User Activity")
+
+# Get recent logins (regular users only, last 10)
+recent_users = sorted(
+    [u for u in regular_users if u.last_login],
+    key=lambda x: x.last_login,
+    reverse=True
+)[:8]
+
+if recent_users:
+    for user in recent_users:
+        time_ago = now - user.last_login
+        if time_ago.days > 0:
+            time_str = f"{time_ago.days}d ago"
+        elif time_ago.seconds > 3600:
+            time_str = f"{time_ago.seconds // 3600}h ago"
+        elif time_ago.seconds > 60:
+            time_str = f"{time_ago.seconds // 60}m ago"
+        else:
+            time_str = "Just now"
+
+        col1, col2, col3, col4 = st.columns([2, 2, 1.5, 1])
+
+        with col1:
+            st.markdown(f"🛡️ **{user.username}**")
+
+        with col2:
+            st.caption(user.email or "No email")
+
+        with col3:
+            st.caption(time_str)
+
+        with col4:
+            if st.button("👁️", key=f"view_{user.id}", help=f"View as {user.username}"):
+                login_as_user(user)
+                st.rerun()
+else:
+    st.info("No recent user activity.")
+
+db.close()

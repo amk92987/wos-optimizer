@@ -24,10 +24,10 @@ def render_login():
         if username and password:
             db = get_db()
             user = authenticate_user(db, username, password)
-            db.close()
 
             if user:
                 login_user(user)
+                db.close()
                 # Clear form state
                 st.session_state.pop("login_submitted", None)
                 st.session_state.pop("login_username", None)
@@ -35,6 +35,7 @@ def render_login():
                 st.session_state.pop("login_error", None)
                 st.rerun()
             else:
+                db.close()
                 st.session_state["login_error"] = "Invalid username or password"
 
         st.session_state.pop("login_submitted", None)
@@ -63,9 +64,11 @@ def render_login():
 
     /* Center content */
     .main .block-container {
-        max-width: 380px !important;
+        max-width: 400px !important;
         padding-top: 1rem !important;
         padding-bottom: 2rem !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
 
     /* Style all text inputs */
@@ -169,18 +172,22 @@ def render_login():
     <p style="text-align: center; color: #93C5E0; margin-bottom: 30px; font-size: 15px;">Sign in to continue</p>
     """, unsafe_allow_html=True)
 
-    # Error message
-    if st.session_state.get("login_error"):
-        st.error(st.session_state["login_error"])
-        st.session_state.pop("login_error", None)
+    # Center the form using columns
+    col1, col2, col3 = st.columns([1, 2, 1])
 
-    # Form
-    username = st.text_input("Username", placeholder="Enter your username", key="login_username")
-    password = st.text_input("Password", type="password", placeholder="Enter your password", key="login_password")
+    with col2:
+        # Error message
+        if st.session_state.get("login_error"):
+            st.error(st.session_state["login_error"])
+            st.session_state.pop("login_error", None)
 
-    if st.button("Sign In", key="login_btn"):
-        st.session_state["login_submitted"] = True
-        st.rerun()
+        # Form
+        username = st.text_input("Username", placeholder="Enter your username", key="login_username")
+        password = st.text_input("Password", type="password", placeholder="Enter your password", key="login_password")
+
+        if st.button("Sign In", key="login_btn", use_container_width=True):
+            st.session_state["login_submitted"] = True
+            st.rerun()
 
     # Register link
     st.markdown("""
@@ -192,7 +199,8 @@ def render_login():
     # Footer
     st.markdown("""
     <div style="margin-top: 50px; text-align: center;">
-        <p style="font-size: 11px; color: #5AADD6;">
+        <div style="font-size: 24px;">&#127922;</div>
+        <p style="font-size: 11px; color: #5AADD6; margin-top: 5px;">
             <a href="https://www.randomchaoslabs.com">Random Chaos Labs</a>
         </p>
         <div style="margin-top: 15px; padding: 15px; background: rgba(125, 211, 252, 0.08);

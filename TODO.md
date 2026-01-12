@@ -26,6 +26,32 @@
 
 - [x] **Create admin page for usernames/passwords** - User model with bcrypt hashing, Admin page at pages/15_Admin.py, login/logout in sidebar. Default admin: admin/admin123
 
+- [x] **Complete Admin Dashboard System** - Full admin interface with 10 dedicated pages:
+  - **Dashboard** (0_Admin_Home.py) - System overview with key metrics
+  - **Users** (15_Admin.py) - User management with inline editing, suspend/activate, impersonation
+  - **Announcements** (1_Admin_Announcements.py) - System-wide notifications
+  - **Audit Log** (2_Admin_Audit_Log.py) - User action tracking
+  - **Feature Flags** (3_Admin_Feature_Flags.py) - Toggle features on/off (8 default flags)
+  - **Database** (4_Admin_Database.py) - Database browser and management
+  - **Feedback** (5_Admin_Feedback.py) - User feedback collection
+  - **Game Data** (6_Admin_Game_Data.py) - Game data management
+  - **Data Integrity** (7_Admin_Data_Integrity.py) - Data validation tools
+  - **Usage Reports** (8_Admin_Usage_Reports.py) - Analytics and metrics
+  - **Export** (9_Admin_Export.py) - Data export (CSV/Excel/JSON)
+
+- [x] **User Authentication System** - Complete auth flow:
+  - Landing page with login/register links
+  - Login page with "Remember me" option
+  - Registration page with email validation
+  - Session management with impersonation support
+  - Password change in user popover menu
+  - Role-based navigation (admin vs user views)
+
+- [x] **Admin Impersonation** - "Login as User" feature with:
+  - Red banner showing impersonation status
+  - "Switch Back" button in banner and user menu
+  - Preserves original admin session for return
+
 - [ ] **Add Stripe Donate button** - Monetization option
 
 - [ ] **Consider moving off Streamlit to AWS** - Major architecture decision for scaling
@@ -55,6 +81,39 @@
 - Database schema was updated - users may need to delete `wos_optimizer.db` if they see errors
 - Hero role data is in `pages/1_Heroes.py` in the `HERO_ROLES` dict
 - Game data files are in `data/` folder (hero_stats_database.json, troop_data.json, chief_equipment_data.json, hero_power_data.json)
+
+### Admin System Architecture
+
+**Database Models** (`database/models.py`):
+- `User` - id, username, email, password_hash, role (admin/user), is_active, created_at, last_login
+- `FeatureFlag` - name, description, is_enabled, created_at, updated_at
+- `Announcement`, `AuditLog`, `Feedback` - Supporting models
+
+**Auth System** (`database/auth.py`):
+- `authenticate_user()` - Verify credentials with bcrypt
+- `login_user()` / `logout_user()` - Session management
+- `login_as_user()` - Admin impersonation (preserves original admin session)
+- `is_impersonating()` - Check if admin is viewing as another user
+- `require_admin()` - Page-level access control
+- `ensure_admin_exists()` - Creates default admin on first run
+
+**Page Routing** (`app.py`):
+- Unauthenticated: Landing → Login/Register pages
+- Authenticated Admin: Admin navigation (Dashboard, Users, etc.)
+- Authenticated User: Game navigation (Heroes, Advisor, etc.)
+- Impersonation: Shows user view with red banner + Switch Back button
+
+**Feature Flags** (8 defaults):
+- `hero_recommendations` - AI-powered recommendations (enabled)
+- `inventory_ocr` - Screenshot scanning (disabled)
+- `alliance_features` - Alliance tools (disabled)
+- `beta_features` - Experimental features (disabled)
+- `maintenance_mode` - Show maintenance notice (disabled)
+- `new_user_onboarding` - Guided setup (enabled)
+- `dark_theme_only` - Force Arctic Night (disabled)
+- `analytics_tracking` - Usage analytics (enabled)
+
+**Streamlit Button Quirk**: Buttons with emoji characters don't render in certain column/loop contexts. Use plain text labels (Edit, Delete, Save, etc.).
 
 ### Power Optimizer Architecture
 

@@ -10,9 +10,9 @@
   <circle cx="12" cy="10" r="4" fill="url(#logoGrad)"/>
   <circle cx="22" cy="6" r="4" fill="url(#logoGrad)"/>
   <circle cx="32" cy="10" r="4" fill="url(#logoGrad)"/>
-  <!-- Text -->
+  <!-- Text - all white -->
   <text x="48" y="32" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#E8F4F8">Bear&#39;s Den</text>
-  <!-- Snowflake accent (SVG path) -->
+  <!-- Snowflake accent -->
   <g transform="translate(178, 18)" fill="#4A90D9">
     <line x1="0" y1="-8" x2="0" y2="8" stroke="#4A90D9" stroke-width="2"/>
     <line x1="-7" y1="-4" x2="7" y2="4" stroke="#4A90D9" stroke-width="2"/>

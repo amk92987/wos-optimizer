@@ -107,19 +107,40 @@ WoS/
 ├── assets/                   # Static assets
 │   └── heroes/               # Hero portrait images (56 files, PNG/JPG)
 │
-├── pages/                    # Streamlit multi-page app (12 pages, 5,129 lines)
-│   ├── 0_Home.py             # Welcome, quick start (136 lines)
-│   ├── 1_Heroes.py           # Hero management with portraits (564 lines)
-│   ├── 2_Backpack.py         # Inventory tracking, OCR (317 lines)
-│   ├── 3_Recommendations.py  # Priority-weighted suggestions (401 lines)
-│   ├── 4_Settings.py         # User profile config (520 lines)
-│   ├── 5_AI_Advisor.py       # OpenAI-powered advice (315 lines)
-│   ├── 6_Profiles.py         # Multi-profile management (477 lines)
-│   ├── 7_Lineups.py          # Hero lineup builder (963 lines)
-│   ├── 8_Pack_Analyzer.py    # Backpack analysis (397 lines)
-│   ├── 9_Events_Guide.py     # Event calendar (306 lines)
-│   ├── 10_Combat_Optimization.py # SvS/combat guide (450 lines)
-│   └── 11_Quick_Tips.py      # Quick reference (283 lines)
+├── pages/                    # Streamlit multi-page app
+│   │   # User Pages (game-focused)
+│   ├── 0_Home.py             # Welcome, quick start
+│   ├── 00_Beginner_Guide.py  # New player guide
+│   ├── 1_Hero_Tracker.py     # Hero management with portraits
+│   ├── 2_Chief_Tracker.py    # Chief gear and charms
+│   ├── 3_Backpack.py         # Inventory tracking, OCR
+│   ├── 5_Lineups.py          # Hero lineup builder
+│   ├── 6_AI_Advisor.py       # AI-powered advice
+│   ├── 7_Save_Load.py        # Profile management
+│   ├── 8_Packs.py            # Pack analyzer
+│   ├── 9_Events.py           # Event calendar
+│   ├── 10_Combat.py          # Combat optimization guide
+│   ├── 11_Quick_Tips.py      # Quick reference
+│   ├── 12_Battle_Tactics.py  # Battle tactics guide
+│   ├── 13_Settings.py        # User settings
+│   ├── 14_Daybreak_Island.py # Daybreak Island guide
+│   │   # Admin Pages (system management)
+│   ├── 0_Admin_Home.py       # Admin dashboard
+│   ├── 1_Admin_Announcements.py # System announcements
+│   ├── 2_Admin_Audit_Log.py  # User action tracking
+│   ├── 3_Admin_Feature_Flags.py # Toggle features
+│   ├── 4_Admin_Database.py   # Database browser
+│   ├── 5_Admin_Feedback.py   # User feedback
+│   ├── 6_Admin_Game_Data.py  # Game data management
+│   ├── 7_Admin_Data_Integrity.py # Data validation
+│   ├── 8_Admin_Usage_Reports.py # Analytics
+│   ├── 9_Admin_Export.py     # Data export (CSV/Excel/JSON)
+│   └── 15_Admin.py           # User management
+│
+├── auth_pages/               # Authentication pages (unauthenticated users)
+│   ├── landing.py            # Public landing page
+│   ├── auth_login.py         # Login form
+│   └── auth_register.py      # Registration form
 │
 ├── engine/                   # Recommendation engines
 │   ├── recommendation_engine.py  # Main engine orchestrator
@@ -187,6 +208,48 @@ WoS/
 **Item**: Backpack item definitions with OCR aliases
 
 **UpgradeHistory**: Analytics tracking for upgrades
+
+### Authentication & Admin System
+
+**User Model** (`database/models.py`):
+- id, username (unique), email, password_hash (bcrypt)
+- role: 'admin' or 'user'
+- is_active: boolean for suspend/activate
+- created_at, last_login timestamps
+
+**Auth Functions** (`database/auth.py`):
+- `authenticate_user(db, username, password)` - Verify credentials
+- `login_user(user)` / `logout_user()` - Session management
+- `login_as_user(user)` - Admin impersonation (preserves original session)
+- `is_impersonating()` - Check impersonation status
+- `require_admin()` - Page-level access control decorator
+- `ensure_admin_exists(db)` - Creates default admin (admin/admin123)
+
+**Page Routing** (`app.py`):
+- Unauthenticated users see: Landing → Login/Register
+- Admin users see: Admin navigation with 10 management pages
+- Regular users see: Game navigation with tracker/advisor pages
+- Impersonation shows: User view + red banner with "Switch Back"
+
+**Admin Pages** (10 pages):
+| Page | Purpose |
+|------|---------|
+| Dashboard | Key metrics overview |
+| Users | CRUD, suspend/activate, impersonation |
+| Announcements | System-wide notifications |
+| Feature Flags | Toggle features (8 defaults) |
+| Database | Browse/manage tables |
+| Feedback | User feedback inbox |
+| Game Data | Game data management |
+| Data Integrity | Validation tools |
+| Usage Reports | Analytics |
+| Export | CSV/Excel/JSON export |
+
+**Feature Flags** (defaults):
+- `hero_recommendations`, `new_user_onboarding`, `analytics_tracking` - enabled
+- `inventory_ocr`, `alliance_features`, `beta_features`, `maintenance_mode`, `dark_theme_only` - disabled
+
+**Known Streamlit Quirk**: Buttons with emoji characters don't render in certain column/loop contexts. Use plain text labels.
 
 ### Hero Card Features
 

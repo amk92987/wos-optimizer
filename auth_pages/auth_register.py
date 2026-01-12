@@ -36,15 +36,16 @@ def render_register():
             db = get_db()
             email_val = email if email else None
             user = create_user(db, username, password, email=email_val)
-            db.close()
 
             if user:
                 login_user(user)
+                db.close()
                 # Clear form state
                 for key in ["register_submitted", "reg_username", "reg_email", "reg_password", "reg_password2", "register_error"]:
                     st.session_state.pop(key, None)
                 st.rerun()
             else:
+                db.close()
                 error = "Username or email already exists"
 
         if error:
@@ -76,9 +77,11 @@ def render_register():
 
     /* Center content */
     .main .block-container {
-        max-width: 380px !important;
+        max-width: 400px !important;
         padding-top: 1rem !important;
         padding-bottom: 2rem !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
     }
 
     /* Style all text inputs */
@@ -182,32 +185,35 @@ def render_register():
     <p style="text-align: center; color: #93C5E0; margin-bottom: 20px; font-size: 15px;">Join Bear's Den - it's free!</p>
     """, unsafe_allow_html=True)
 
-    # Benefits
-    st.markdown("""
-    <div style="background: rgba(125, 211, 252, 0.08); border: 1px solid rgba(125, 211, 252, 0.15);
-                border-radius: 10px; padding: 15px 20px; margin-bottom: 25px;">
-        <ul style="margin: 0; padding-left: 20px; color: #93C5E0; font-size: 13px; line-height: 1.7;">
-            <li>Track your heroes, gear, and progress</li>
-            <li>Get AI-powered upgrade recommendations</li>
-            <li>Analyze pack values before buying</li>
-        </ul>
-    </div>
-    """, unsafe_allow_html=True)
+    # Center the form using columns
+    col1, col2, col3 = st.columns([1, 2, 1])
 
-    # Error message
-    if st.session_state.get("register_error"):
-        st.error(st.session_state["register_error"])
-        st.session_state.pop("register_error", None)
+    with col2:
+        # Benefits
+        st.markdown("""
+        <div style="background: rgba(125, 211, 252, 0.08); border: 1px solid rgba(125, 211, 252, 0.15);
+                    border-radius: 10px; padding: 15px 20px; margin-bottom: 25px;">
+            <ul style="margin: 0; padding-left: 20px; color: #93C5E0; font-size: 13px; line-height: 1.7;">
+                <li>Track your heroes, gear, and progress</li>
+                <li>Get AI-powered upgrade recommendations</li>
+                <li>Analyze pack values before buying</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+        # Error message
+        if st.session_state.get("register_error"):
+            st.error(st.session_state["register_error"])
+            st.session_state.pop("register_error", None)
 
-    # Form
-    username = st.text_input("Username", placeholder="Min 3 characters", key="reg_username")
-    email = st.text_input("Email (optional)", placeholder="For account recovery", key="reg_email")
-    password = st.text_input("Password", type="password", placeholder="Min 6 characters", key="reg_password")
-    password2 = st.text_input("Confirm Password", type="password", placeholder="Re-enter password", key="reg_password2")
+        # Form
+        username = st.text_input("Username", placeholder="Min 3 characters", key="reg_username")
+        email = st.text_input("Email (optional)", placeholder="For account recovery", key="reg_email")
+        password = st.text_input("Password", type="password", placeholder="Min 6 characters", key="reg_password")
+        password2 = st.text_input("Confirm Password", type="password", placeholder="Re-enter password", key="reg_password2")
 
-    if st.button("Create Account", key="register_btn"):
-        st.session_state["register_submitted"] = True
-        st.rerun()
+        if st.button("Create Account", key="register_btn", use_container_width=True):
+            st.session_state["register_submitted"] = True
+            st.rerun()
 
     # Login link
     st.markdown("""
@@ -219,7 +225,8 @@ def render_register():
     # Footer
     st.markdown("""
     <div style="margin-top: 40px; text-align: center;">
-        <p style="font-size: 11px; color: #5AADD6;">
+        <div style="font-size: 24px;">&#127922;</div>
+        <p style="font-size: 11px; color: #5AADD6; margin-top: 5px;">
             <a href="https://www.randomchaoslabs.com">Random Chaos Labs</a>
         </p>
         <div style="margin-top: 15px; padding: 15px; background: rgba(125, 211, 252, 0.08);

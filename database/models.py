@@ -20,6 +20,9 @@ class User(Base):
     # Role: 'admin' or 'user'
     role = Column(String(20), default='user', nullable=False)
 
+    # User preferences
+    theme = Column(String(20), default='dark', nullable=False)  # 'dark' (Arctic Night) or 'light' (Arctic Day)
+
     # Account status
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)  # For email verification (AWS SES)
@@ -272,3 +275,100 @@ class UpgradeHistory(Base):
     to_value = Column(Integer)
 
     created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class Feedback(Base):
+    """User feedback and suggestions."""
+    __tablename__ = 'feedback'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True)  # Nullable for anonymous feedback
+
+    category = Column(String(50), nullable=False)  # bug, feature, data_error, other
+    page = Column(String(100), nullable=True)  # Which page the feedback is about
+    description = Column(String(2000), nullable=False)
+
+    # Status for admin review
+    status = Column(String(20), default='new')  # new, reviewed, implemented, wont_fix
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationship
+    user = relationship("User", backref="feedback")
+
+
+class AdminMetrics(Base):
+    """Daily snapshots of system metrics for analytics charts."""
+    __tablename__ = 'admin_metrics'
+
+    id = Column(Integer, primary_key=True)
+    date = Column(DateTime, nullable=False, unique=True, index=True)
+
+    # User metrics (excludes admins)
+    total_users = Column(Integer, default=0)
+    new_users = Column(Integer, default=0)
+    active_users = Column(Integer, default=0)  # Logged in that day
+
+    # Content metrics
+    total_profiles = Column(Integer, default=0)
+    total_heroes_tracked = Column(Integer, default=0)
+    total_inventory_items = Column(Integer, default=0)
+
+    # Engagement metrics
+    total_logins = Column(Integer, default=0)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class AuditLog(Base):
+    """Track admin actions for accountability."""
+    __tablename__ = 'audit_log'
+
+    id = Column(Integer, primary_key=True)
+    admin_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    admin_username = Column(String(50), nullable=False)
+
+    action = Column(String(50), nullable=False)  # user_created, user_deleted, password_reset, role_changed, impersonation_started
+    target_type = Column(String(50), nullable=True)  # user, system, etc.
+    target_id = Column(Integer, nullable=True)
+    target_name = Column(String(100), nullable=True)
+    details = Column(String(500), nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+
+class Announcement(Base):
+    """System-wide announcements for users."""
+    __tablename__ = 'announcements'
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(200), nullable=False)
+    message = Column(String(2000), nullable=False)
+    type = Column(String(20), default='info')  # info, warning, success, error
+
+    # Display settings
+    is_active = Column(Boolean, default=True)
+    show_from = Column(DateTime, nullable=True)
+    show_until = Column(DateTime, nullable=True)
+
+    # Who created it
+    created_by = Column(Integer, ForeignKey('users.id'), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class FeatureFlag(Base):
+    """Feature flags for controlling app features."""
+    __tablename__ = 'feature_flags'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), unique=True, nullable=False)
+    description = Column(String(500), nullable=True)
+    is_enabled = Column(Boolean, default=False)
+
+    # Optional: limit to specific roles or users
+    enabled_for_roles = Column(JSON, nullable=True)  # ["admin", "user"] or None for all
+    enabled_for_users = Column(JSON, nullable=True)  # [user_id, ...] or None for all
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

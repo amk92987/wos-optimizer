@@ -52,6 +52,16 @@ A comprehensive web-based tool to help Whiteout Survival players track their her
 - Priority focus configuration
 - Alliance role settings
 
+### Admin Dashboard
+- **User Management** - Create, edit, suspend/activate users with role-based access
+- **Admin Impersonation** - "Login as User" to see exactly what users see
+- **Feature Flags** - Toggle features on/off without code changes
+- **Announcements** - System-wide notification management
+- **Audit Log** - Track user actions and system events
+- **Usage Reports** - Analytics and metrics dashboard
+- **Data Export** - Export data to CSV, Excel, or JSON
+- **Database Browser** - Direct database inspection and management
+
 ## Screenshots
 
 *Coming soon*
@@ -109,20 +119,38 @@ streamlit run app.py
 
 ## Application Pages
 
+### User Pages (Game-Focused)
 | Page | Description |
 |------|-------------|
 | **Home** | Welcome, quick start guide, generation calculator |
-| **Heroes** | Hero management with portraits, inline editing |
+| **Beginner Guide** | New player onboarding guide |
+| **Hero Tracker** | Hero management with portraits, inline editing |
+| **Chief Tracker** | Chief gear and charms tracking |
 | **Backpack** | Inventory tracking via OCR or manual entry |
-| **Recommendations** | Priority-weighted upgrade suggestions |
-| **Settings** | User profile and priority configuration |
-| **AI Advisor** | OpenAI-powered personalized recommendations |
-| **Profiles** | Multi-profile management |
+| **AI Advisor** | AI-powered personalized recommendations |
 | **Lineups** | Hero lineup builder for rallies and events |
-| **Pack Analyzer** | Backpack efficiency analysis |
-| **Events Guide** | Event calendar and optimization |
-| **Combat Optimization** | SvS/combat stat source guide |
+| **Save/Load** | Multi-profile management |
+| **Packs** | Pack value analysis with Frost Star valuation |
+| **Events** | Event calendar and optimization |
+| **Combat** | SvS/combat stat source guide |
 | **Quick Tips** | Consolidated cheat sheet of key game knowledge |
+| **Battle Tactics** | Advanced battle strategies |
+| **Daybreak Island** | Tree of Life and decoration priorities |
+| **Settings** | User profile and priority configuration |
+
+### Admin Pages (System Management)
+| Page | Description |
+|------|-------------|
+| **Dashboard** | System overview with key metrics |
+| **Users** | User CRUD, suspend/activate, impersonation |
+| **Announcements** | System-wide notification management |
+| **Feature Flags** | Toggle features on/off (8 default flags) |
+| **Database** | Database browser and table management |
+| **Feedback** | User feedback collection inbox |
+| **Game Data** | Game data file management |
+| **Data Integrity** | Data validation and consistency checks |
+| **Usage Reports** | Analytics and user engagement metrics |
+| **Export** | Data export (CSV, Excel, JSON formats) |
 
 ## Key Game Mechanics
 
