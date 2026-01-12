@@ -52,6 +52,25 @@
   - "Switch Back" button in banner and user menu
   - Preserves original admin session for return
 
+- [x] **AI Advisor System** - Complete AI integration:
+  - Admin toggle: Off / On (rate limited) / Unlimited modes
+  - Rate limiting: daily limits, cooldown between requests
+  - Conversation logging for training data collection
+  - User feedback: thumbs up/down, star ratings
+  - Admin curation: mark good/bad examples
+  - Training data export (JSONL for fine-tuning, CSV)
+  - Jailbreak protection (only answers WoS questions)
+  - Game-specific personality: addresses user as "Chief", uses WoS terminology
+
+- [x] **State Number Tracking** - Track players across states:
+  - State number field in Settings page
+  - State column in Admin Users page with filtering
+  - State distribution analytics in Usage Reports
+  - State included in User Summary and Content Statistics exports
+  - Unique states metric in admin dashboard
+
+- [ ] **Add CAPTCHA or login attempt protection** - Security enhancement
+
 - [ ] **Add Stripe Donate button** - Monetization option
 
 - [ ] **Consider moving off Streamlit to AWS** - Major architecture decision for scaling

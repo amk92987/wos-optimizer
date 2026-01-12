@@ -184,6 +184,7 @@ WoS/
 ### Database Models (`database/models.py`)
 
 **UserProfile**:
+- State number (server/state identifier for cross-state tracking)
 - Server age, furnace level (1-30+FC), priority settings
 - Spending profile: f2p, minnow, dolphin, orca, whale
 - Priority focus: svs_combat, balanced_growth, economy_focus
@@ -250,6 +251,39 @@ WoS/
 - `inventory_ocr`, `alliance_features`, `beta_features`, `maintenance_mode`, `dark_theme_only` - disabled
 
 **Known Streamlit Quirk**: Buttons with emoji characters don't render in certain column/loop contexts. Use plain text labels.
+
+### AI System (`database/ai_service.py`, `engine/ai_recommender.py`)
+
+**AI Settings Model** (`database/models.py`):
+- `AISettings` - Global singleton for AI configuration
+- Mode: 'off', 'on' (rate limited), 'unlimited'
+- Rate limits: daily_limit_free (10), daily_limit_admin (1000), cooldown_seconds (30)
+- Provider settings: primary_provider, fallback_provider, model names
+
+**AI Conversation Logging**:
+- `AIConversation` - Logs all Q&A for training data
+- Fields: question, answer, provider, model, tokens, response_time
+- User feedback: rating (1-5), is_helpful (thumbs up/down), user_feedback
+- Admin curation: is_good_example, is_bad_example, admin_notes
+
+**Rate Limiting**:
+- Per-user daily limits reset at midnight UTC
+- Cooldown between requests (configurable)
+- Admin toggle: Off (disabled), On (limited), Unlimited
+
+**AI Personality & Syntax** (`engine/ai_recommender.py`):
+- Address users as "Chief" (game terminology)
+- Use WoS vocabulary: Settlement, Furnace, Accelerators, Supplies, etc.
+- Soft trigger keywords adapt tone: optimize, SvS, furnace, gems, farm
+- "Pause & Ask" pattern: one clarifying question max when uncertain
+- Jailbreak protection: only answers WoS questions
+
+**Admin AI Page** (`pages/10_Admin_AI.py`):
+- Mode toggle (Off/On/Unlimited) with visual indicators
+- Usage statistics and rate limit configuration
+- Conversation browser with filtering
+- Training data curation (mark good/bad examples)
+- Export for fine-tuning (JSONL, CSV)
 
 ### Hero Card Features
 

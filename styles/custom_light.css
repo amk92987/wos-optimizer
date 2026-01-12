@@ -1,0 +1,776 @@
+/* Whiteout Survival Optimizer - Arctic Day Theme (Light Glacier Blue) */
+
+/* Color Variables - Light Glacier Theme */
+:root {
+    --primary-ice: #68B3E8;
+    --primary-dark: #4C8CCB;
+    --accent-depth: #396AA8;
+    --frost-white: #9FCBF5;
+    --accent-fire: #E55A2B;
+    --accent-gold: #D4A000;
+    --background-light: #B4B6C5;
+    --background-card: rgba(104, 179, 232, 0.3);
+    --text-primary: #1A2A3A;
+    --text-secondary: #3A5A7A;
+    --glacier-light: #9FCBF5;
+    --glacier-mid: #68B3E8;
+    --glacier-deep: #4C8CCB;
+    --tier-splus: #DC2626;
+    --tier-s: #EA580C;
+    --tier-a: #7C3AED;
+    --tier-b: #2563EB;
+    --tier-c: #16A34A;
+    --tier-d: #6B7280;
+}
+
+/* Main app background - light glacier blue */
+.stApp {
+    background: linear-gradient(135deg, #68B3E8 0%, #9FCBF5 30%, #B4B6C5 100%);
+}
+
+/* Sidebar styling - glacier blue gradient */
+[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #68B3E8 0%, #4C8CCB 100%);
+    border-right: 1px solid rgba(57, 106, 168, 0.4);
+    min-width: 80px !important;
+    transition: all 0.3s ease;
+}
+
+
+[data-testid="stSidebar"] .stMarkdown {
+    color: var(--text-primary);
+}
+
+/* Sidebar navigation links */
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] a {
+    font-size: 0.95rem !important;
+    padding: 6px 12px !important;
+    min-height: unset !important;
+    color: var(--text-primary) !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] a span {
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    color: var(--text-primary) !important;
+}
+
+/* Navigation link icons */
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] a svg {
+    width: 18px !important;
+    height: 18px !important;
+}
+
+/* Section headers */
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] h2,
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] [data-testid="stMarkdownContainer"] p {
+    font-size: 0.75rem !important;
+    margin: 8px 0 4px 0 !important;
+    padding: 0 12px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6B7280 !important;
+}
+
+/* Reduce gaps between nav items */
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] ul {
+    gap: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stSidebarNav"] li {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Hide various UI elements */
+[data-testid="stSidebarCollapseButton"],
+[data-testid="collapsedControl"],
+[data-testid="stStatusWidget"],
+[data-testid="stToolbar"],
+[data-testid="stHeader"],
+header[data-testid="stHeader"],
+.stApp > header,
+.streamlit-footer {
+    display: none !important;
+    visibility: hidden !important;
+}
+
+/* Remove top padding */
+.stApp > div:first-child {
+    padding-top: 0 !important;
+}
+
+.block-container {
+    padding-top: 1rem !important;
+}
+
+/* Star buttons in sidebar */
+[data-testid="stSidebar"] .stButton > button {
+    background: transparent !important;
+    border: none !important;
+    color: #D4A000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    min-height: 24px !important;
+    height: 24px !important;
+    font-size: 16px !important;
+    line-height: 24px !important;
+}
+
+[data-testid="stSidebar"] .stButton > button:hover {
+    background: transparent !important;
+    color: #EA580C !important;
+    transform: scale(1.15);
+}
+
+/* Headers - dark text with subtle shadow */
+h1, h2, h3 {
+    color: var(--text-primary) !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+/* Text styling - no heavy shadows needed */
+.stMarkdown p, .stMarkdown li, .stMarkdown span {
+    text-shadow: none;
+    color: var(--text-primary);
+}
+
+/* Hero card container - Frosted glacier glass */
+.hero-card {
+    background: rgba(180, 215, 240, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(74, 144, 217, 0.25);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 8px;
+    transition: all 0.3s ease;
+    box-shadow:
+        0 4px 6px rgba(74, 144, 217, 0.15),
+        inset 0 1px 0 rgba(200, 230, 255, 0.9);
+}
+
+.hero-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+        0 8px 25px rgba(74, 144, 217, 0.25),
+        inset 0 1px 0 rgba(200, 230, 255, 1);
+    border-color: rgba(74, 144, 217, 0.5);
+    background: rgba(190, 225, 250, 0.8);
+}
+
+/* Hero portrait frame */
+.hero-portrait {
+    border: 3px solid var(--primary-ice);
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(74, 144, 217, 0.3);
+}
+
+/* Tier badges */
+.tier-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.tier-splus { background: var(--tier-splus); color: white; }
+.tier-s { background: var(--tier-s); color: white; }
+.tier-a { background: var(--tier-a); color: white; }
+.tier-b { background: var(--tier-b); color: white; }
+.tier-c { background: var(--tier-c); color: white; }
+.tier-d { background: var(--tier-d); color: white; }
+
+/* Class icons */
+.class-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    background: rgba(74, 144, 217, 0.1);
+    color: var(--text-primary);
+}
+
+.class-infantry { border-left: 3px solid #DC2626; }
+.class-marksman { border-left: 3px solid #2563EB; }
+.class-lancer { border-left: 3px solid #16A34A; }
+
+/* Star rating */
+.star-rating {
+    color: var(--accent-gold);
+    font-size: 18px;
+    letter-spacing: 2px;
+}
+
+.star-empty {
+    color: #CBD5E1;
+}
+
+/* Progress bars */
+.stProgress > div > div {
+    background: linear-gradient(90deg, var(--primary-ice), #60A5FA);
+    border-radius: 10px;
+}
+
+/* Buttons */
+.stButton > button {
+    background: linear-gradient(135deg, var(--primary-ice), var(--primary-dark));
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 24px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.stButton > button:hover {
+    background: linear-gradient(135deg, var(--accent-fire), #C44A1E);
+    box-shadow: 0 4px 15px rgba(229, 90, 43, 0.3);
+}
+
+/* Content card - Frosted glacier glass */
+.content-card {
+    background: rgba(180, 215, 240, 0.6);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(74, 144, 217, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+    box-shadow:
+        0 4px 12px rgba(74, 144, 217, 0.15),
+        inset 0 1px 0 rgba(200, 230, 255, 0.9);
+}
+
+/* Info card */
+.info-card {
+    background: rgba(74, 144, 217, 0.15);
+    border-left: 4px solid var(--primary-ice);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 12px 0;
+    color: var(--text-primary);
+}
+
+/* Warning card */
+.warning-card {
+    background: rgba(229, 90, 43, 0.15);
+    border-left: 4px solid var(--accent-fire);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 12px 0;
+    color: var(--text-primary);
+}
+
+/* Success card */
+.success-card {
+    background: rgba(22, 163, 74, 0.15);
+    border-left: 4px solid #16A34A;
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    margin: 12px 0;
+    color: var(--text-primary);
+}
+
+/* Stats grid card */
+.stats-card {
+    background: rgba(180, 215, 240, 0.7);
+    border: 1px solid rgba(74, 144, 217, 0.2);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+
+.stats-card .value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary-ice);
+    line-height: 1.2;
+}
+
+.stats-card .label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 4px;
+}
+
+/* Typography */
+h1 {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.5rem !important;
+    letter-spacing: -0.5px;
+    color: var(--text-primary) !important;
+}
+
+h2 {
+    font-size: 1.4rem !important;
+    font-weight: 600 !important;
+    margin-top: 1.5rem !important;
+    margin-bottom: 0.75rem !important;
+    padding-bottom: 8px;
+    border-bottom: 2px solid rgba(74, 144, 217, 0.2);
+    color: var(--text-primary) !important;
+}
+
+h3 {
+    font-size: 1.15rem !important;
+    font-weight: 600 !important;
+    color: var(--text-secondary) !important;
+    margin-top: 1rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+p, li {
+    line-height: 1.6;
+    color: var(--text-primary);
+}
+
+small, .caption {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* Spacing */
+.block-container {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    max-width: 1200px !important;
+}
+
+[data-testid="stHorizontalBlock"] {
+    gap: 1rem !important;
+}
+
+.stTabs [data-baseweb="tab-panel"] {
+    padding-top: 1rem;
+}
+
+/* Divider */
+hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(74, 144, 217, 0.3), transparent);
+    margin: 1.5rem 0;
+}
+
+/* Tables */
+.stDataFrame, [data-testid="stTable"] {
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+[data-testid="stTable"] th {
+    background: rgba(74, 144, 217, 0.15) !important;
+    color: var(--text-primary) !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    padding: 12px !important;
+}
+
+[data-testid="stTable"] td {
+    background: rgba(180, 215, 240, 0.5) !important;
+    border-bottom: 1px solid rgba(74, 144, 217, 0.15) !important;
+    padding: 10px 12px !important;
+    color: var(--text-primary) !important;
+}
+
+[data-testid="stTable"] tr:hover td {
+    background: rgba(74, 144, 217, 0.2) !important;
+}
+
+/* Metric cards */
+[data-testid="stMetric"] {
+    background: rgba(180, 215, 240, 0.6);
+    padding: 12px;
+    border-radius: 8px;
+}
+
+[data-testid="stMetricValue"] {
+    color: var(--primary-dark) !important;
+}
+
+[data-testid="stMetricLabel"] {
+    color: var(--text-secondary) !important;
+}
+
+/* Selectbox */
+.stSelectbox > div > div {
+    background: rgba(190, 225, 250, 0.8);
+    border-color: rgba(74, 144, 217, 0.3);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #B8DCF5;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-ice);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-dark);
+}
+
+/* Alerts */
+.stAlert {
+    background: rgba(180, 215, 240, 0.7);
+    border-left: 4px solid var(--primary-ice);
+    color: var(--text-primary);
+}
+
+/* Expander */
+.streamlit-expanderHeader {
+    background: rgba(180, 215, 240, 0.6);
+    border-radius: 8px;
+    color: var(--text-primary);
+}
+
+/* File uploader */
+[data-testid="stFileUploader"] {
+    border: 2px dashed rgba(74, 144, 217, 0.4);
+    border-radius: 12px;
+    padding: 20px;
+    background: rgba(180, 215, 240, 0.5);
+}
+
+/* ============================================
+   THEME-AWARE UTILITY CLASSES (Light Theme)
+   ============================================ */
+
+/* Primary text - use for main content */
+.text-primary {
+    color: var(--text-primary) !important;
+}
+
+/* Secondary text - use for captions, labels */
+.text-secondary {
+    color: var(--text-secondary) !important;
+}
+
+/* Accent colors - adjusted for light theme visibility */
+.text-gold {
+    color: #B8860B !important; /* Darker gold for light bg */
+}
+
+.text-fire {
+    color: #D4510A !important; /* Darker orange for light bg */
+}
+
+.text-ice {
+    color: var(--primary-ice) !important;
+}
+
+.text-danger {
+    color: #C0392B !important; /* Darker red for light bg */
+}
+
+.text-success {
+    color: #27AE60 !important;
+}
+
+.text-warning {
+    color: #D68910 !important; /* Darker yellow for light bg */
+}
+
+/* Card backgrounds */
+.bg-card {
+    background: var(--background-card);
+}
+
+.bg-card-hover {
+    background: rgba(255, 255, 255, 0.8);
+}
+
+/* ============================================
+   CRITICAL: Override hardcoded light colors
+   These would be invisible on light backgrounds
+   ============================================ */
+
+/* Override any inline #E8F4F8 colors (frost-white from dark theme) */
+[style*="color:#E8F4F8"], [style*="color: #E8F4F8"],
+[style*="color:#e8f4f8"], [style*="color: #e8f4f8"] {
+    color: var(--text-primary) !important;
+}
+
+/* Override #B8D4E8 (secondary text from dark theme) */
+[style*="color:#B8D4E8"], [style*="color: #B8D4E8"],
+[style*="color:#b8d4e8"], [style*="color: #b8d4e8"] {
+    color: var(--text-secondary) !important;
+}
+
+/* Override white text that isn't on colored backgrounds */
+[style*="color:#fff"]:not([style*="background"]),
+[style*="color: #fff"]:not([style*="background"]),
+[style*="color:#FFF"]:not([style*="background"]),
+[style*="color: #FFF"]:not([style*="background"]),
+[style*="color:white"]:not([style*="background"]),
+[style*="color: white"]:not([style*="background"]) {
+    color: var(--text-primary) !important;
+}
+
+/* Force dark text on elements with light text inline styles */
+div[style*="color:#E8F4F8"],
+span[style*="color:#E8F4F8"],
+p[style*="color:#E8F4F8"],
+div[style*="color: #E8F4F8"],
+span[style*="color: #E8F4F8"],
+p[style*="color: #E8F4F8"] {
+    color: var(--text-primary) !important;
+}
+
+div[style*="color:#B8D4E8"],
+span[style*="color:#B8D4E8"],
+p[style*="color:#B8D4E8"],
+div[style*="color: #B8D4E8"],
+span[style*="color: #B8D4E8"],
+p[style*="color: #B8D4E8"] {
+    color: var(--text-secondary) !important;
+}
+
+/* Ensure markdown text uses proper colors */
+.stMarkdown, .stMarkdown p, .stMarkdown li, .stMarkdown span, .stMarkdown div {
+    color: var(--text-primary);
+}
+
+/* Fix sidebar text */
+[data-testid="stSidebar"] .stMarkdown,
+[data-testid="stSidebar"] .stMarkdown p,
+[data-testid="stSidebar"] small {
+    color: var(--text-primary) !important;
+}
+
+/* Fix expander content */
+.streamlit-expanderContent {
+    color: var(--text-primary);
+}
+
+/* Fix popover text */
+[data-baseweb="popover"] {
+    color: var(--text-primary);
+}
+
+/* Fix selectbox dropdown text */
+[data-baseweb="select"] span,
+[data-baseweb="menu"] li {
+    color: var(--text-primary) !important;
+}
+
+/* Fix input labels */
+.stTextInput label, .stNumberInput label, .stSelectbox label {
+    color: var(--text-primary) !important;
+}
+
+/* Fix caption text */
+.stCaption, [data-testid="stCaptionContainer"] {
+    color: var(--text-secondary) !important;
+}
+
+/* Override dark-theme text shadows with light-appropriate ones */
+[style*="text-shadow: 1px 1px 2px rgba(0,0,0"] {
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Fix tab text colors */
+.stTabs [data-baseweb="tab"] {
+    color: var(--text-primary) !important;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    color: var(--primary-ice) !important;
+}
+
+/* Fix radio button text */
+.stRadio label, .stCheckbox label {
+    color: var(--text-primary) !important;
+}
+
+/* Fix multiselect and tags */
+[data-baseweb="tag"] {
+    color: var(--text-primary) !important;
+}
+
+/* Fix toast/notification text */
+[data-testid="stToast"] {
+    color: var(--text-primary) !important;
+}
+
+/* Ensure column text has proper contrast */
+[data-testid="column"] {
+    color: var(--text-primary);
+}
+
+/* Fix number input text */
+.stNumberInput input {
+    color: var(--text-primary) !important;
+}
+
+/* Fix text input text */
+.stTextInput input {
+    color: var(--text-primary) !important;
+}
+
+/* Fix text area */
+.stTextArea textarea {
+    color: var(--text-primary) !important;
+}
+
+/* Make sure dark background cards have readable text */
+div[style*="background:rgba(46,90,140"],
+div[style*="background: rgba(46,90,140"],
+div[style*="background:rgba(74,144,217"],
+div[style*="background: rgba(74,144,217"] {
+    color: var(--text-primary);
+}
+
+/* Override frost-white variable references in inline styles */
+* {
+    --frost-white: var(--text-primary);
+}
+
+/* ============================================
+   USER MENU POPOVER BUTTON
+   ============================================ */
+
+/* Container wrapper - add background to cover black */
+[data-testid="stPopover"] {
+    position: relative !important;
+}
+
+[data-testid="stPopover"]::before {
+    content: "" !important;
+    position: absolute !important;
+    top: -8px !important;
+    left: -8px !important;
+    right: -8px !important;
+    bottom: -8px !important;
+    background: #9FCBF5 !important;
+    border-radius: 12px !important;
+    z-index: -1 !important;
+}
+
+/* Clear all internal backgrounds */
+[data-testid="stPopover"] button,
+[data-testid="stPopover"] button > div,
+[data-testid="stPopover"] button > span,
+[data-testid="stPopover"] button div,
+[data-testid="stPopover"] button span,
+[data-testid="stPopover"] [data-baseweb],
+[data-testid="stPopover"] [class*="Button"],
+[data-testid="stPopover"] [class*="button"] {
+    background: none !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+
+/* Style the popover button */
+[data-testid="stPopover"] button {
+    border: 1px solid rgba(57, 106, 168, 0.5) !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    color: #396AA8 !important;
+    font-size: 13px !important;
+    white-space: nowrap !important;
+    background: rgba(159, 203, 245, 0.9) !important;
+    box-shadow: 0 0 0 8px #9FCBF5 !important;
+}
+
+[data-testid="stPopover"] button:hover {
+    border-color: #4C8CCB !important;
+    background: rgba(76, 140, 203, 0.3) !important;
+    box-shadow: 0 0 0 8px #9FCBF5 !important;
+}
+
+[data-testid="stPopover"] button:focus,
+[data-testid="stPopover"] button:active {
+    background: rgba(76, 140, 203, 0.35) !important;
+    outline: none !important;
+    box-shadow: 0 0 0 8px #9FCBF5 !important;
+}
+
+/* Style the popover dropdown content */
+[data-testid="stPopoverBody"],
+[data-testid="stPopoverBody"] > div,
+[data-testid="stPopoverBody"] > div > div,
+div[data-baseweb="popover"] > div,
+div[data-baseweb="popover"] > div > div {
+    background: linear-gradient(180deg, #68B3E8 0%, #4C8CCB 100%) !important;
+    border-radius: 12px !important;
+}
+
+div[data-baseweb="popover"],
+div[data-baseweb="popover"] * {
+    background-color: transparent !important;
+}
+
+div[data-baseweb="popover"] > div:first-child {
+    background: linear-gradient(180deg, #68B3E8 0%, #4C8CCB 100%) !important;
+    border: 1px solid rgba(57, 106, 168, 0.4) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 32px rgba(57, 106, 168, 0.3) !important;
+}
+
+/* ============================================
+   ACTION BUTTONS (Admin/Users page)
+   Ensure buttons are visible in light theme
+   ============================================ */
+
+/* Main content area buttons (not sidebar) */
+.main .stButton > button,
+[data-testid="stMainBlockContainer"] .stButton > button {
+    background: linear-gradient(135deg, #4C8CCB, #396AA8) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(57, 106, 168, 0.5) !important;
+    border-radius: 8px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+}
+
+.main .stButton > button:hover,
+[data-testid="stMainBlockContainer"] .stButton > button:hover {
+    background: linear-gradient(135deg, var(--accent-fire), #C44A1E) !important;
+    border-color: var(--accent-fire) !important;
+    box-shadow: 0 4px 12px rgba(229, 90, 43, 0.3) !important;
+    color: #FFFFFF !important;
+}
+
+/* Small action buttons (emoji icons) */
+.main .stButton > button:has(span:only-child),
+[data-testid="stMainBlockContainer"] .stButton > button:has(span:only-child) {
+    padding: 4px 8px !important;
+    font-size: 16px !important;
+}
+
+/* Style tooltips (button help text) for light theme */
+[data-baseweb="tooltip"],
+[role="tooltip"] {
+    background: #396AA8 !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(57, 106, 168, 0.5) !important;
+    border-radius: 6px !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    box-shadow: 0 4px 12px rgba(57, 106, 168, 0.3) !important;
+}
+
+[data-baseweb="tooltip"] *,
+[role="tooltip"] * {
+    color: #FFFFFF !important;
+}

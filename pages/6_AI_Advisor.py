@@ -12,9 +12,15 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
-from database.models import UserHero, UserInventory, UserChiefGear, UserChiefCharm
+from database.models import UserHero, UserInventory, UserChiefGear, UserChiefCharm, User
+from database.auth import get_current_user_id, is_authenticated
+from database.ai_service import (
+    get_ai_mode, check_rate_limit, record_ai_request,
+    log_ai_conversation, rate_conversation, get_ai_settings
+)
 from engine import RecommendationEngine, AIRecommender, HeroRecommender
 from engine.ai_recommender import format_data_preview
+import time
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -99,22 +105,46 @@ This gives you **instant, accurate answers** for common questions, with AI power
 
 st.markdown("---")
 
+# Get current user for rate limiting
+current_user_id = get_current_user_id()
+current_user = db.query(User).filter(User.id == current_user_id).first() if current_user_id else None
+
+# AI Mode and status
+ai_mode = get_ai_mode(db)
+ai_settings = get_ai_settings(db)
+
+# Check rate limit status
+if current_user:
+    can_use_ai, rate_message, remaining = check_rate_limit(db, current_user)
+else:
+    can_use_ai, rate_message, remaining = False, "Please log in to use AI features", 0
+
 # AI Provider status
-col_status1, col_status2 = st.columns(2)
+col_status1, col_status2, col_status3 = st.columns(3)
 
 with col_status1:
     st.markdown("**Rules Engine:** Active")
 
 with col_status2:
-    if ai_recommender.is_available():
+    if ai_mode == 'off':
+        st.error("**AI:** Disabled")
+    elif ai_recommender.is_available():
         provider = ai_recommender.get_provider_name()
-        st.success(f"**AI Fallback:** {provider.title()} available")
+        st.success(f"**AI:** {provider.title()}")
     else:
-        st.warning("""
-        **AI Fallback:** Not configured
+        st.warning("**AI:** Not configured")
 
-        Set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` environment variable for AI features.
-        """)
+with col_status3:
+    if ai_mode == 'off':
+        st.markdown("**Requests:** AI disabled")
+    elif ai_mode == 'unlimited':
+        st.markdown("**Requests:** Unlimited")
+    elif remaining == -1:
+        st.markdown("**Requests:** Unlimited")
+    elif remaining > 0:
+        st.markdown(f"**Requests:** {remaining} remaining today")
+    else:
+        st.warning("**Requests:** Daily limit reached")
 
 # Show current phase
 phase_info = engine.get_phase_info(profile)
@@ -594,22 +624,66 @@ with tab4:
 
     force_ai = st.checkbox("Force AI response (skip rules)", value=False)
 
+    # Show AI availability for forced AI
+    if force_ai:
+        if ai_mode == 'off':
+            st.error("AI features are currently disabled by administrator.")
+        elif not can_use_ai:
+            st.warning(rate_message)
+
     if st.button("Ask", type="primary"):
         if not custom_q:
-            st.warning("Please enter a question.")
+            st.warning("Chief, please enter a question!")
         else:
+            # Check if forcing AI and if rate limited
+            use_ai = force_ai
+            if use_ai:
+                if ai_mode == 'off':
+                    st.error("AI features are currently disabled.")
+                    use_ai = False
+                elif not can_use_ai:
+                    st.warning(rate_message)
+                    use_ai = False
+
+            start_time = time.time()
+
             with st.spinner("Thinking..."):
                 result = engine.ask(
                     profile, user_heroes, custom_q,
-                    force_ai=force_ai
+                    force_ai=use_ai
                 )
+
+            response_time_ms = int((time.time() - start_time) * 1000)
 
             # Show source
             source = result.get('source', 'unknown')
             if source == 'rules':
                 st.success("Answered using game rules (instant)")
             elif source == 'ai':
-                st.info(f"Answered using AI ({ai_recommender.get_provider_name()})")
+                provider = ai_recommender.get_provider_name()
+                st.info(f"Answered using AI ({provider})")
+
+                # Record the AI request for rate limiting
+                if current_user:
+                    record_ai_request(db, current_user)
+
+                    # Log the conversation for training
+                    context_summary = f"FC{profile.furnace_level}, {len(user_heroes)} heroes, {profile.spending_profile}"
+                    conversation = log_ai_conversation(
+                        db=db,
+                        user_id=current_user.id,
+                        question=custom_q,
+                        answer=result.get('answer', ''),
+                        provider=provider,
+                        model=ai_settings.openai_model if provider == 'openai' else ai_settings.anthropic_model,
+                        context_summary=context_summary,
+                        response_time_ms=response_time_ms,
+                        source_page='ai_advisor',
+                        question_type='custom' if not selected_question else 'quick'
+                    )
+                    # Store conversation ID for rating
+                    st.session_state['last_ai_conversation_id'] = conversation.id
+
             elif source == 'error':
                 st.error("Could not process request")
 
@@ -627,6 +701,22 @@ with tab4:
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
+
+                # Rating buttons for AI responses
+                if source == 'ai' and 'last_ai_conversation_id' in st.session_state:
+                    st.markdown("---")
+                    st.markdown("**Was this helpful?**")
+                    col_rate1, col_rate2, col_rate3 = st.columns([1, 1, 4])
+
+                    with col_rate1:
+                        if st.button("👍 Yes", key="rate_helpful"):
+                            rate_conversation(db, st.session_state['last_ai_conversation_id'], is_helpful=True)
+                            st.success("Thanks for the feedback, Chief!")
+
+                    with col_rate2:
+                        if st.button("👎 No", key="rate_not_helpful"):
+                            rate_conversation(db, st.session_state['last_ai_conversation_id'], is_helpful=False)
+                            st.info("Thanks! We'll work on improving.")
 
             # Show lineup if present
             if 'lineup' in result:

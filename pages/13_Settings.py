@@ -66,6 +66,18 @@ with col1:
     # Chief name - use key to prevent overwriting on rerender
     chief_name = st.text_input("Chief Name", value=profile.name or "Chief", key="chief_name_input")
 
+    # State Number
+    st.markdown("### State Number")
+    state_number = st.number_input(
+        "Your State/Server Number",
+        min_value=1,
+        max_value=9999,
+        value=profile.state_number if profile.state_number else 1,
+        help="Enter your state number (e.g., 123, 456). Find this in-game next to your state name."
+    )
+
+    st.markdown("---")
+
     # Server age estimation
     st.markdown("### Server Age")
     st.markdown("*Estimate based on what you see in-game:*")
@@ -385,8 +397,9 @@ st.markdown("---")
 
 # Save button
 if st.button("💾 Save All Settings", type="primary", use_container_width=True):
-    # Save chief name from the input
+    # Save chief name and state number from the inputs
     profile.name = chief_name
+    profile.state_number = state_number
     db.commit()
     st.success("Settings saved!")
 

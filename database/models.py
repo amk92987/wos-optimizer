@@ -30,6 +30,11 @@ class User(Base):
     # AWS Cognito compatibility fields (for future migration)
     cognito_sub = Column(String(100), unique=True, nullable=True)  # Cognito user ID
 
+    # AI Rate Limiting
+    ai_requests_today = Column(Integer, default=0)
+    ai_request_reset_date = Column(DateTime, nullable=True)  # Date when count resets
+    last_ai_request = Column(DateTime, nullable=True)  # For cooldown
+
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -37,6 +42,7 @@ class User(Base):
 
     # Relationships
     profiles = relationship("UserProfile", back_populates="user")
+    ai_conversations = relationship("AIConversation", back_populates="user")
 
 
 class UserProfile(Base):
@@ -46,6 +52,7 @@ class UserProfile(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=True)  # Nullable for migration
     name = Column(String(100), default="Chief")
+    state_number = Column(Integer, nullable=True)  # Game state/server number (e.g., 123, 456)
     server_age_days = Column(Integer, default=0)
     furnace_level = Column(Integer, default=1)
     furnace_fc_level = Column(String(10), nullable=True)  # e.g., "FC3-0", "30-1"
@@ -366,9 +373,81 @@ class FeatureFlag(Base):
     description = Column(String(500), nullable=True)
     is_enabled = Column(Boolean, default=False)
 
+    # For multi-state flags like AI mode (off/on/unlimited)
+    value = Column(String(50), nullable=True)  # Optional string value for complex flags
+
     # Optional: limit to specific roles or users
     enabled_for_roles = Column(JSON, nullable=True)  # ["admin", "user"] or None for all
     enabled_for_users = Column(JSON, nullable=True)  # [user_id, ...] or None for all
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class AIConversation(Base):
+    """Log AI conversations for training data collection."""
+    __tablename__ = 'ai_conversations'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+
+    # The conversation
+    question = Column(String(2000), nullable=False)
+    answer = Column(String(5000), nullable=False)
+    context_summary = Column(String(1000), nullable=True)  # Summary of user's profile/heroes for context
+
+    # AI metadata
+    provider = Column(String(20), nullable=False)  # openai, anthropic
+    model = Column(String(50), nullable=False)  # gpt-4o-mini, claude-sonnet-4-20250514, etc.
+    tokens_input = Column(Integer, nullable=True)
+    tokens_output = Column(Integer, nullable=True)
+    response_time_ms = Column(Integer, nullable=True)  # How long the API call took
+
+    # User feedback for training
+    rating = Column(Integer, nullable=True)  # 1-5 or null if not rated
+    is_helpful = Column(Boolean, nullable=True)  # Thumbs up/down
+    user_feedback = Column(String(500), nullable=True)  # Optional text feedback
+
+    # Admin curation for training data
+    is_good_example = Column(Boolean, default=False)  # Admin marks as good training data
+    is_bad_example = Column(Boolean, default=False)  # Admin marks as bad (hallucination, wrong info)
+    admin_notes = Column(String(500), nullable=True)  # Admin notes about this conversation
+
+    # Source tracking
+    source_page = Column(String(50), nullable=True)  # Which page the question came from
+    question_type = Column(String(50), nullable=True)  # quick_question, custom, recommendations, etc.
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User", back_populates="ai_conversations")
+
+
+class AISettings(Base):
+    """Global AI settings (singleton - only one row)."""
+    __tablename__ = 'ai_settings'
+
+    id = Column(Integer, primary_key=True)
+
+    # AI Mode: off, on, unlimited
+    mode = Column(String(20), default='off', nullable=False)
+
+    # Rate limits (when mode='on')
+    daily_limit_free = Column(Integer, default=10)  # Requests per day for free users
+    daily_limit_admin = Column(Integer, default=1000)  # Requests per day for admins (effectively unlimited)
+    cooldown_seconds = Column(Integer, default=30)  # Seconds between requests
+
+    # Provider settings
+    primary_provider = Column(String(20), default='openai')  # openai or anthropic
+    fallback_provider = Column(String(20), nullable=True)  # Use this if primary fails
+
+    # Model settings
+    openai_model = Column(String(50), default='gpt-4o-mini')
+    anthropic_model = Column(String(50), default='claude-sonnet-4-20250514')
+
+    # Cost tracking
+    total_requests = Column(Integer, default=0)
+    total_tokens_used = Column(Integer, default=0)
+
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_by = Column(Integer, ForeignKey('users.id'), nullable=True)

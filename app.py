@@ -33,7 +33,7 @@ init_session_state()
 
 # DEV MODE: Auto-login for local development (remove before production!)
 DEV_AUTO_LOGIN = True  # Set to False to disable
-DEV_AUTO_LOGIN_USER = "admin"  # Which user to auto-login as
+DEV_AUTO_LOGIN_USER = "Adam"  # Which user to auto-login as
 
 if DEV_AUTO_LOGIN and not is_authenticated():
     from database.auth import get_user_by_username
@@ -208,6 +208,7 @@ if is_admin_view:
     admin_announcements = st.Page("pages/1_Admin_Announcements.py", title="Announcements", icon="📢")
     admin_audit = st.Page("pages/2_Admin_Audit_Log.py", title="Audit Log", icon="📜")
     admin_flags = st.Page("pages/3_Admin_Feature_Flags.py", title="Feature Flags", icon="🚩")
+    admin_ai = st.Page("pages/10_Admin_AI.py", title="AI Settings", icon="🤖")
     admin_feedback = st.Page("pages/5_Admin_Feedback.py", title="Feedback", icon="📬")
     admin_database = st.Page("pages/4_Admin_Database.py", title="Database", icon="🗄️")
     admin_game_data = st.Page("pages/6_Admin_Game_Data.py", title="Game Data", icon="🎮")
@@ -218,7 +219,7 @@ if is_admin_view:
     pg = st.navigation({
         "Overview": [admin_home, admin_users],
         "Communication": [admin_announcements, admin_feedback],
-        "System": [admin_flags, admin_audit, admin_database, admin_integrity],
+        "System": [admin_flags, admin_ai, admin_audit, admin_database, admin_integrity],
         "Data": [admin_game_data, admin_reports, admin_export],
     }, expanded=True)
 
@@ -330,7 +331,7 @@ with st.sidebar:
 
     else:
         # Regular user sidebar - game priorities
-        st.markdown("##### Priorities")
+        st.markdown("<h5 style='text-align: center; margin-bottom: 8px;'>Priorities</h5>", unsafe_allow_html=True)
 
         priorities = [
             ("SvS", profile.priority_svs),
@@ -341,11 +342,14 @@ with st.sidebar:
         ]
 
         for name, value in priorities:
-            col1, col2, col3, col4, col5, col6 = st.columns([1.2, 0.6, 0.6, 0.6, 0.6, 0.6])
-            col1.markdown(f"<small>{name}</small>", unsafe_allow_html=True)
+            col1, col2, col3, col4, col5, col6 = st.columns([1.3, 0.7, 0.7, 0.7, 0.7, 0.7])
+            col1.markdown(f"<div style='display: flex; align-items: center; height: 36px;'><small>{name}</small></div>", unsafe_allow_html=True)
             for i, col in enumerate([col2, col3, col4, col5, col6], 1):
                 with col:
-                    if st.button("★" if i <= value else "☆", key=f"s_{name}_{i}"):
+                    is_filled = i <= value
+                    # Use emoji star (yellow) vs outline star (gray) for contrast
+                    star = "⭐" if is_filled else "✩"
+                    if st.button(star, key=f"s_{name}_{i}"):
                         update_priority(name, i)
                         st.rerun()
 

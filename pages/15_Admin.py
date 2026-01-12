@@ -16,7 +16,7 @@ from database.auth import (
     update_user_password, update_user_role, delete_user,
     login_as_user, get_current_user_id
 )
-from database.models import User
+from database.models import User, UserProfile
 
 # Load Arctic Night theme CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -114,6 +114,14 @@ all_users = get_all_users(db)
 regular_users = [u for u in all_users if u.role != 'admin']
 admin_users = [u for u in all_users if u.role == 'admin']
 
+# Get user's state number from their profile
+def get_user_state(user_id: int) -> str:
+    """Get the user's state number from their profile."""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
+    if profile and profile.state_number:
+        return str(profile.state_number)
+    return "—"
+
 # Calculate usage stats (days active in last 7 days)
 def get_usage_stat(user) -> tuple:
     """Returns (days_active, label, css_class)"""
@@ -139,8 +147,17 @@ def get_usage_stat(user) -> tuple:
     css = "usage-high" if days_active >= 5 else "usage-medium" if days_active >= 2 else "usage-low"
     return (days_active, f"{days_active}/7", css)
 
+# Get unique states for metrics
+def get_unique_states():
+    """Get count of unique state numbers across all profiles."""
+    profiles = db.query(UserProfile).filter(UserProfile.state_number != None).all()
+    states = set(p.state_number for p in profiles if p.state_number)
+    return len(states), states
+
+unique_state_count, unique_states = get_unique_states()
+
 # Top stats
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.metric("Total Users", len(regular_users))
 with col2:
@@ -149,6 +166,8 @@ with col3:
     active_7d = len([u for u in regular_users if u.last_login and (datetime.now() - u.last_login).days <= 7])
     st.metric("Active (7d)", active_7d)
 with col4:
+    st.metric("States", unique_state_count)
+with col5:
     suspended = len([u for u in all_users if not u.is_active])
     st.metric("Suspended", suspended)
 
@@ -159,11 +178,14 @@ tab_users, tab_create = st.tabs(["📋 User Database", "➕ Create User"])
 
 with tab_users:
     # Search and filters
-    col_search, col_filter = st.columns([2, 1])
+    col_search, col_filter, col_state = st.columns([2, 1, 1])
     with col_search:
         search = st.text_input("🔍 Search", placeholder="Username or email...", label_visibility="collapsed")
     with col_filter:
         filter_status = st.selectbox("Status", ["All", "Active", "Suspended", "Inactive (30d+)"], label_visibility="collapsed")
+    with col_state:
+        state_options = ["All States"] + sorted([str(s) for s in unique_states])
+        filter_state = st.selectbox("State", state_options, label_visibility="collapsed")
 
     # Filter users
     filtered_users = all_users.copy()
@@ -182,13 +204,23 @@ with tab_users:
         cutoff = datetime.now() - timedelta(days=30)
         filtered_users = [u for u in filtered_users if not u.last_login or u.last_login < cutoff]
 
+    # Filter by state
+    if filter_state != "All States":
+        target_state = int(filter_state)
+        user_ids_in_state = set()
+        profiles_in_state = db.query(UserProfile).filter(UserProfile.state_number == target_state).all()
+        for p in profiles_in_state:
+            if p.user_id:
+                user_ids_in_state.add(p.user_id)
+        filtered_users = [u for u in filtered_users if u.id in user_ids_in_state]
+
     # Sort by last login (most recent first)
     filtered_users = sorted(filtered_users, key=lambda x: x.last_login or datetime.min, reverse=True)
 
     st.caption(f"Showing {len(filtered_users)} users")
 
-    # Header row (matches data row: 10 columns)
-    header_cols = st.columns([0.3, 1.4, 1.6, 0.7, 0.5, 0.6, 0.6, 0.6, 0.7, 0.6])
+    # Header row (matches data row: 11 columns)
+    header_cols = st.columns([0.3, 1.2, 1.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.6, 0.5])
     with header_cols[0]:
         st.caption("Role")
     with header_cols[1]:
@@ -196,12 +228,14 @@ with tab_users:
     with header_cols[2]:
         st.caption("Email")
     with header_cols[3]:
-        st.caption("Status")
+        st.caption("State")
     with header_cols[4]:
-        st.caption("Usage")
+        st.caption("Status")
     with header_cols[5]:
-        st.caption("Last")
+        st.caption("Usage")
     with header_cols[6]:
+        st.caption("Last")
+    with header_cols[7]:
         st.caption("Actions")
 
     st.markdown("<hr style='margin: 2px 0 8px 0; border-color: rgba(74, 144, 217, 0.4);'>", unsafe_allow_html=True)
@@ -240,8 +274,11 @@ with tab_users:
         role_icon = "👑" if user.role == 'admin' else "🛡️"
         is_self = user.id == current_user_id
 
-        # User row with inline actions
-        row_cols = st.columns([0.3, 1.4, 1.6, 0.7, 0.5, 0.6, 0.6, 0.6, 0.7, 0.6])
+        # Get user's state
+        user_state = get_user_state(user.id)
+
+        # User row with inline actions (11 columns)
+        row_cols = st.columns([0.3, 1.2, 1.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.6, 0.5])
 
         with row_cols[0]:
             st.markdown(role_icon)
@@ -254,27 +291,30 @@ with tab_users:
             st.caption(user.email or "—")
 
         with row_cols[3]:
-            st.markdown(f"<span class='{status_css}'>{status_label}</span>", unsafe_allow_html=True)
+            st.caption(user_state)
 
         with row_cols[4]:
-            st.markdown(f"<span class='{usage_css}'>{usage_label}</span>", unsafe_allow_html=True)
+            st.markdown(f"<span class='{status_css}'>{status_label}</span>", unsafe_allow_html=True)
 
         with row_cols[5]:
+            st.markdown(f"<span class='{usage_css}'>{usage_label}</span>", unsafe_allow_html=True)
+
+        with row_cols[6]:
             st.caption(last_login)
 
         # Action buttons inline (no help param, no emoji issues)
-        with row_cols[6]:
+        with row_cols[7]:
             if st.button("Edit", key=f"edit_{user.id}"):
                 st.session_state[f"editing_{user.id}"] = True
                 st.rerun()
 
-        with row_cols[7]:
+        with row_cols[8]:
             if not is_self:
                 if st.button("Login", key=f"impersonate_{user.id}"):
                     login_as_user(user)
                     st.rerun()
 
-        with row_cols[8]:
+        with row_cols[9]:
             if not is_self:
                 if user.is_active:
                     if st.button("Suspend", key=f"suspend_{user.id}"):
@@ -287,7 +327,7 @@ with tab_users:
                         db.commit()
                         st.rerun()
 
-        with row_cols[9]:
+        with row_cols[10]:
             if not is_self:
                 if st.button("Delete", key=f"del_{user.id}", type="primary"):
                     st.session_state[f"confirm_del_{user.id}"] = True

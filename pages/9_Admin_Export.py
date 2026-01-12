@@ -74,6 +74,7 @@ with tab_reports:
                     "Username": user.username,
                     "Email": user.email or "",
                     "Role": user.role,
+                    "State": profile.state_number if profile and profile.state_number else "",
                     "Is Active": user.is_active,
                     "Created": user.created_at.strftime("%Y-%m-%d") if user.created_at else "",
                     "Last Login": user.last_login.strftime("%Y-%m-%d %H:%M") if user.last_login else "Never",
@@ -126,6 +127,7 @@ with tab_reports:
                 data.append({
                     "Profile Name": profile.name,
                     "Username": user.username if user else "Unknown",
+                    "State": profile.state_number or "",
                     "Server Age (Days)": profile.server_age_days,
                     "Furnace Level": profile.furnace_level,
                     "Spending Profile": profile.spending_profile,
@@ -220,7 +222,7 @@ with tab_data:
 
     tables = {
         "Users": (User, ["id", "username", "email", "role", "is_active", "created_at", "last_login"]),
-        "Profiles": (UserProfile, ["id", "user_id", "name", "server_age_days", "furnace_level", "spending_profile", "alliance_role"]),
+        "Profiles": (UserProfile, ["id", "user_id", "name", "state_number", "server_age_days", "furnace_level", "spending_profile", "alliance_role"]),
         "User Heroes": (UserHero, ["id", "profile_id", "hero_id", "level", "stars", "owned"]),
         "Heroes (Reference)": (Hero, ["id", "name", "generation", "hero_class", "rarity", "tier_overall"]),
         "Items (Reference)": (Item, ["id", "name", "category", "subcategory", "rarity"]),

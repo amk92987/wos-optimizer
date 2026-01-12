@@ -349,6 +349,65 @@ with tab_content:
         else:
             st.info("No profile data")
 
+    st.markdown("---")
+
+    # State Distribution
+    st.markdown("#### State Distribution")
+
+    state_counts = db.query(
+        UserProfile.state_number, func.count(UserProfile.id).label('count')
+    ).filter(UserProfile.state_number != None).group_by(UserProfile.state_number).order_by(func.count(UserProfile.id).desc()).all()
+
+    if state_counts:
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("**Users by State**")
+            total_with_state = sum(c[1] for c in state_counts)
+            max_count = state_counts[0][1] if state_counts else 1
+
+            for state, count in state_counts[:15]:  # Show top 15 states
+                pct = (count / max_count) * 100
+                st.markdown(f"""
+                <div style="margin-bottom: 6px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                        <span>State {state}</span>
+                        <strong>{count}</strong>
+                    </div>
+                    <div style="background: rgba(74, 144, 217, 0.2); border-radius: 4px; height: 6px;">
+                        <div style="background: #9B59B6; width: {pct}%; height: 100%; border-radius: 4px;"></div>
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            if len(state_counts) > 15:
+                st.caption(f"Showing top 15 of {len(state_counts)} states")
+
+        with col2:
+            st.markdown("**State Summary**")
+            profiles_without_state = db.query(UserProfile).filter(
+                (UserProfile.state_number == None) | (UserProfile.state_number == 0)
+            ).count()
+
+            st.markdown(f"""
+            <div style="background: rgba(74, 144, 217, 0.1); padding: 16px; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <span>🌍 Unique States</span>
+                    <strong style="color: #9B59B6;">{len(state_counts)}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <span>👥 Users with State</span>
+                    <strong style="color: #2ECC71;">{total_with_state}</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>❓ No State Set</span>
+                    <strong style="color: #E74C3C;">{profiles_without_state}</strong>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+    else:
+        st.info("No state data yet. Users can set their state in Settings.")
+
 with tab_trends:
     st.markdown("### Historical Trends")
 
