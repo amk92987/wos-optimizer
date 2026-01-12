@@ -464,6 +464,24 @@ py scripts/download_hero_images.py
 - [Quackulator](https://www.quackulator.com/) - Cost calculators
 - [AllClash](https://www.allclash.com/) - Tier list information
 
+## Current Work - Resume Here
+
+**AI System Testing (IN PROGRESS):**
+1. OpenAI API key has been set as Windows User environment variable
+2. Restart PyCharm to pick up the key
+3. Verify key works: `[Environment]::GetEnvironmentVariable("OPENAI_API_KEY", "User")`
+4. Run app and test AI Advisor page
+5. Go to Admin → AI Settings and set mode to "On" (rate limited)
+6. Test with questions like "What should I upgrade next?" or "How do I prepare for SvS?"
+
+**AI Features Ready:**
+- Rate limiting (10 requests/day for users, 1000 for admins)
+- Conversation logging for training data
+- Thumbs up/down feedback
+- Admin curation (mark good/bad examples)
+- WoS-specific syntax and terminology
+- Jailbreak protection
+
 ## Future Enhancements
 
 - Gem shadow prices (needs in-game screenshots)
@@ -471,3 +489,4 @@ py scripts/download_hero_images.py
 - Goal pathfinding ("How do I reach X milestone?")
 - Power calculators (per-upgrade power gain)
 - Alliance coordination features
+- CAPTCHA or login attempt protection
