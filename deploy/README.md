@@ -3,29 +3,49 @@
 ## Architecture
 
 ```
-[Users] --> [Nginx (port 80/443)] --> [Streamlit App (port 8501)]
+[Users] --> [Nginx (port 80/443)]
                   |
-                  +--> /login    --> /?page=login
-                  +--> /register --> /?page=register
-                  +--> /signup   --> /?page=register
+                  +--> /                    --> static/landing.html (marketing page)
+                  +--> /app?page=login      --> Streamlit login page
+                  +--> /app?page=register   --> Streamlit register page
+                  +--> /app                 --> Streamlit app (authenticated)
 ```
 
+**Two-tier setup:**
+1. **Static Landing Page** (`static/landing.html`) - Pure HTML marketing page served by nginx
+2. **Streamlit App** - Handles authentication and the main application
+
 Nginx acts as a reverse proxy that:
-1. Handles SSL termination (HTTPS)
-2. Rewrites clean URLs to query parameters (if someone types /login directly)
-3. Proxies WebSocket connections for Streamlit
+1. Serves the static landing page at root `/`
+2. Proxies `/app` requests to Streamlit
+3. Handles SSL termination (HTTPS)
+4. Proxies WebSocket connections for Streamlit
+
+## Page Flow
+
+1. User visits `www.randomchaoslabs.com` → sees static landing page
+2. User clicks "Sign In" → goes to `/app?page=login` → Streamlit login
+3. User clicks "Register" → goes to `/app?page=register` → Streamlit register
+4. After login → redirected to `/app` → Streamlit main app
 
 ## Local Development
 
-Works without nginx - just run Streamlit directly:
+**Option 1: Test landing page separately**
+1. Run Streamlit: `streamlit run app.py`
+2. Open `static/landing.html` directly in browser
+3. Links point to `http://localhost:8501?page=login` etc.
 
+**Option 2: Streamlit only**
 ```bash
 streamlit run app.py
 ```
+Access at: http://localhost:8501 (shows simplified landing page)
 
-Access at: http://localhost:8501
+## Production URLs
 
-The app uses query parameters (`?page=login`) internally, which work both locally and in production.
+Before deploying, update the links in `static/landing.html`:
+- Change `http://localhost:8510?page=login` to `/app?page=login`
+- Change `http://localhost:8510?page=register` to `/app?page=register`
 
 ## Production Deployment (Docker)
 
