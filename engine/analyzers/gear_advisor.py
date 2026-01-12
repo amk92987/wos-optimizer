@@ -60,9 +60,21 @@ CHIEF_GEAR_ORDER = [
     }
 ]
 
-# Quality tiers
-QUALITY_TIERS = ["Common", "Uncommon", "Rare", "Epic", "Legendary", "Mythic"]
-QUALITY_VALUES = {"Common": 1, "Uncommon": 2, "Rare": 3, "Epic": 4, "Legendary": 5, "Mythic": 6}
+# Quality tiers (matching database: 1=Gray/Common, 2=Green/Uncommon, 3=Blue/Rare, 4=Purple/Epic, 5=Gold, 6=Legendary, 7=Mythic)
+QUALITY_TIERS = ["Common", "Uncommon", "Rare", "Epic", "Gold", "Legendary", "Mythic"]
+QUALITY_VALUES = {"Common": 1, "Uncommon": 2, "Rare": 3, "Epic": 4, "Gold": 5, "Legendary": 6, "Mythic": 7}
+
+# Reverse mapping for numeric qualities from database
+QUALITY_NAMES = {1: "Common", 2: "Uncommon", 3: "Rare", 4: "Epic", 5: "Gold", 6: "Legendary", 7: "Mythic"}
+
+
+def normalize_quality(quality) -> int:
+    """Convert quality to numeric value, handling both strings and ints."""
+    if isinstance(quality, int):
+        return quality
+    if isinstance(quality, str):
+        return QUALITY_VALUES.get(quality, 1)
+    return 1
 
 # Hero gear limits by spender type
 HERO_GEAR_LIMITS = {
@@ -178,11 +190,12 @@ class GearAdvisor:
         # Analyze each piece
         for piece_info in CHIEF_GEAR_ORDER:
             slot = piece_info["slot"]
-            current_quality = chief_gear.get(slot.lower(), "Common")
-            quality_value = QUALITY_VALUES.get(current_quality, 1)
+            current_quality = chief_gear.get(slot.lower(), 1)
+            quality_value = normalize_quality(current_quality)
+            quality_name = QUALITY_NAMES.get(quality_value, "Common")
 
-            # Check if this piece needs upgrading
-            if quality_value < 5:  # Not Legendary yet
+            # Check if this piece needs upgrading (Legendary = 6)
+            if quality_value < 6:  # Not Legendary yet
                 priority = piece_info["priority"]
 
                 # Adjust priority based on current quality gap
@@ -191,7 +204,7 @@ class GearAdvisor:
 
                 recommendations.append(GearRecommendation(
                     priority=priority,
-                    action=f"Upgrade {slot} to Legendary (currently {current_quality})",
+                    action=f"Upgrade {slot} to Legendary (currently {quality_name})",
                     gear_type="chief",
                     piece=slot,
                     reason=piece_info["reason"],
@@ -201,11 +214,11 @@ class GearAdvisor:
                 ))
 
         # Check for Mythic push on Ring/Amulet
-        ring_quality = QUALITY_VALUES.get(chief_gear.get('ring', 'Common'), 1)
-        amulet_quality = QUALITY_VALUES.get(chief_gear.get('amulet', 'Common'), 1)
+        ring_quality = normalize_quality(chief_gear.get('ring', 1))
+        amulet_quality = normalize_quality(chief_gear.get('amulet', 1))
 
-        if ring_quality >= 5 and amulet_quality >= 5:  # Both at Legendary
-            if ring_quality < 6:
+        if ring_quality >= 6 and amulet_quality >= 6:  # Both at Legendary or higher
+            if ring_quality < 7:  # Not Mythic yet
                 recommendations.append(GearRecommendation(
                     priority=2,
                     action="Push Ring to Mythic",
@@ -216,7 +229,7 @@ class GearAdvisor:
                     relevance_tags=['endgame'],
                     rule_id="mythic_ring"
                 ))
-            if amulet_quality < 6:
+            if amulet_quality < 7:  # Not Mythic yet
                 recommendations.append(GearRecommendation(
                     priority=3,
                     action="Push Amulet to Mythic",
@@ -307,12 +320,12 @@ class GearAdvisor:
         hero_gear = user_gear.get('hero_gear', {})
 
         # Mistake: Hero gear before Ring/Amulet
-        ring_quality = QUALITY_VALUES.get(chief_gear.get('ring', 'Common'), 1)
-        amulet_quality = QUALITY_VALUES.get(chief_gear.get('amulet', 'Common'), 1)
+        ring_quality = normalize_quality(chief_gear.get('ring', 1))
+        amulet_quality = normalize_quality(chief_gear.get('amulet', 1))
 
         geared_heroes = [h for h, g in hero_gear.items() if g.get('has_gear', False)]
 
-        if geared_heroes and (ring_quality < 5 or amulet_quality < 5):
+        if geared_heroes and (ring_quality < 6 or amulet_quality < 6):  # 6 = Legendary
             recommendations.append(GearRecommendation(
                 priority=1,
                 action="Prioritize Chief Gear Ring/Amulet over Hero Gear",
@@ -325,8 +338,8 @@ class GearAdvisor:
             ))
 
         # Mistake: Upgrading Helmet/Armor before Ring/Amulet
-        helmet_quality = QUALITY_VALUES.get(chief_gear.get('helmet', 'Common'), 1)
-        armor_quality = QUALITY_VALUES.get(chief_gear.get('armor', 'Common'), 1)
+        helmet_quality = normalize_quality(chief_gear.get('helmet', 1))
+        armor_quality = normalize_quality(chief_gear.get('armor', 1))
 
         if (helmet_quality > ring_quality or armor_quality > amulet_quality):
             recommendations.append(GearRecommendation(

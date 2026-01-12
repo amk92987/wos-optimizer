@@ -157,7 +157,7 @@ def get_unique_states():
 unique_state_count, unique_states = get_unique_states()
 
 # Top stats
-col1, col2, col3, col4, col5 = st.columns(5)
+col1, col2, col3, col4, col5, col6 = st.columns(6)
 with col1:
     st.metric("Total Users", len(regular_users))
 with col2:
@@ -170,6 +170,9 @@ with col4:
 with col5:
     suspended = len([u for u in all_users if not u.is_active])
     st.metric("Suspended", suspended)
+with col6:
+    test_count = len([u for u in all_users if getattr(u, 'is_test_account', False)])
+    st.metric("Test Accts", test_count)
 
 st.markdown("---")
 
@@ -178,7 +181,7 @@ tab_users, tab_create = st.tabs(["📋 User Database", "➕ Create User"])
 
 with tab_users:
     # Search and filters
-    col_search, col_filter, col_state = st.columns([2, 1, 1])
+    col_search, col_filter, col_state, col_test = st.columns([2, 1, 1, 0.8])
     with col_search:
         search = st.text_input("🔍 Search", placeholder="Username or email...", label_visibility="collapsed")
     with col_filter:
@@ -186,6 +189,8 @@ with tab_users:
     with col_state:
         state_options = ["All States"] + sorted([str(s) for s in unique_states])
         filter_state = st.selectbox("State", state_options, label_visibility="collapsed")
+    with col_test:
+        filter_test = st.checkbox("Test Only", help="Show only test accounts")
 
     # Filter users
     filtered_users = all_users.copy()
@@ -213,6 +218,10 @@ with tab_users:
             if p.user_id:
                 user_ids_in_state.add(p.user_id)
         filtered_users = [u for u in filtered_users if u.id in user_ids_in_state]
+
+    # Filter by test accounts
+    if filter_test:
+        filtered_users = [u for u in filtered_users if getattr(u, 'is_test_account', False)]
 
     # Sort by last login (most recent first)
     filtered_users = sorted(filtered_users, key=lambda x: x.last_login or datetime.min, reverse=True)
@@ -284,7 +293,8 @@ with tab_users:
             st.markdown(role_icon)
 
         with row_cols[1]:
-            label = f"**{user.username}**" + (" _(you)_" if is_self else "")
+            test_badge = " `TEST`" if getattr(user, 'is_test_account', False) else ""
+            label = f"**{user.username}**{test_badge}" + (" _(you)_" if is_self else "")
             st.markdown(label)
 
         with row_cols[2]:
@@ -337,7 +347,7 @@ with tab_users:
         if st.session_state.get(f"editing_{user.id}"):
             with st.container():
                 st.markdown(f"<div style='background: rgba(26, 58, 92, 0.3); padding: 8px 12px; border-radius: 6px; margin: 4px 0;'>", unsafe_allow_html=True)
-                edit_cols = st.columns([2, 2, 1, 0.5, 0.5])
+                edit_cols = st.columns([2, 2, 1, 0.6, 0.5, 0.5])
                 with edit_cols[0]:
                     new_email = st.text_input("Email", value=user.email or "", key=f"email_{user.id}", label_visibility="collapsed", placeholder="Email")
                 with edit_cols[1]:
@@ -345,6 +355,9 @@ with tab_users:
                 with edit_cols[2]:
                     new_role = st.selectbox("Role", ["user", "admin"], index=0 if user.role == "user" else 1, key=f"role_{user.id}", label_visibility="collapsed")
                 with edit_cols[3]:
+                    is_test = getattr(user, 'is_test_account', False)
+                    new_is_test = st.checkbox("Test", value=is_test, key=f"test_{user.id}")
+                with edit_cols[4]:
                     if st.button("Save", key=f"save_{user.id}"):
                         if new_email != user.email:
                             user.email = new_email if new_email else None
@@ -352,10 +365,12 @@ with tab_users:
                             update_user_password(db, user.id, new_pass)
                         if new_role != user.role:
                             update_user_role(db, user.id, new_role)
+                        if new_is_test != is_test:
+                            user.is_test_account = new_is_test
                         db.commit()
                         st.session_state[f"editing_{user.id}"] = False
                         st.rerun()
-                with edit_cols[4]:
+                with edit_cols[5]:
                     if st.button("Cancel", key=f"cancel_{user.id}"):
                         st.session_state[f"editing_{user.id}"] = False
                         st.rerun()
@@ -385,6 +400,7 @@ with tab_create:
         with form_cols[0]:
             new_username = st.text_input("Username *")
             new_password = st.text_input("Password *", type="password")
+            new_is_test = st.checkbox("Test Account", help="Mark as test account for easy filtering")
 
         with form_cols[1]:
             new_email = st.text_input("Email")
@@ -404,7 +420,11 @@ with tab_create:
                                   email=new_email if new_email else None,
                                   role=new_role)
                 if user:
-                    st.success(f"✅ Created user: {new_username}")
+                    # Set test account flag if checked
+                    if new_is_test:
+                        user.is_test_account = True
+                        db.commit()
+                    st.success(f"✅ Created user: {new_username}" + (" (test account)" if new_is_test else ""))
                 else:
                     st.error("Username or email already exists")
 

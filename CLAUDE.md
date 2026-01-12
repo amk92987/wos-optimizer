@@ -11,7 +11,7 @@ Whiteout Survival Optimizer - A comprehensive web-based tool to help Whiteout Su
 - 56 hero portraits downloaded from wiki
 - 59 JSON data files covering all game systems
 - SQLite database with 6 primary tables
-- 5 Claude Code skills for domain-specific tasks
+- 6 Claude Code skills for domain-specific tasks
 
 ## Development Environment
 
@@ -183,6 +183,13 @@ WoS/
 
 ### Database Models (`database/models.py`)
 
+**User**:
+- Authentication (username, email, password_hash)
+- Role: 'admin' or 'user'
+- Account status: is_active, is_verified, is_test_account
+- AI rate limiting: ai_requests_today, last_ai_request
+- Has many UserProfiles (one user can have multiple game accounts)
+
 **UserProfile**:
 - State number (server/state identifier for cross-state tracking)
 - Server age, furnace level (1-30+FC), priority settings
@@ -190,6 +197,7 @@ WoS/
 - Priority focus: svs_combat, balanced_growth, economy_focus
 - Alliance role: rally_lead, filler, farmer, casual
 - Priority levels (1-5 scale): SvS, Rally, Castle Battle, PvE, Gathering
+- Farm account: is_farm_account, linked_main_profile_id
 - SvS tracking (wins, losses, last date)
 
 **Hero**:
@@ -236,7 +244,7 @@ WoS/
 | Page | Purpose |
 |------|---------|
 | Dashboard | Key metrics overview |
-| Users | CRUD, suspend/activate, impersonation |
+| Users | CRUD, suspend/activate, impersonation, test account management |
 | Announcements | System-wide notifications |
 | Feature Flags | Toggle features (8 defaults) |
 | Database | Browse/manage tables |
@@ -245,6 +253,13 @@ WoS/
 | Data Integrity | Validation tools |
 | Usage Reports | Analytics |
 | Export | CSV/Excel/JSON export |
+
+**Test Account Management** (Admin → Users):
+- "Test Accts" metric shows count of test accounts
+- "Test Only" checkbox filters to show only test accounts
+- `TEST` badge displayed next to test account usernames
+- Create User: "Test Account" checkbox to mark new users
+- Edit User: "Test" checkbox to toggle test status
 
 **Feature Flags** (defaults):
 - `hero_recommendations`, `new_user_onboarding`, `analytics_tracking` - enabled
@@ -435,6 +450,7 @@ Located in `.claude/skills/`:
 - `/wos-research` - Tiered source lookup with confidence grades
 - `/wos-recommend` - Upgrade recommendations
 - `/wos-upgrades` - Cost data access
+- `/wos-test-ai` - Run comprehensive AI and recommendation tests
 
 ## Important Notes
 
@@ -466,27 +482,105 @@ py scripts/download_hero_images.py
 
 ## Current Work - Resume Here
 
-**AI System Testing (IN PROGRESS):**
-1. OpenAI API key has been set as Windows User environment variable
-2. Restart PyCharm to pick up the key
-3. Verify key works: `[Environment]::GetEnvironmentVariable("OPENAI_API_KEY", "User")`
-4. Run app and test AI Advisor page
-5. Go to Admin → AI Settings and set mode to "On" (rate limited)
-6. Test with questions like "What should I upgrade next?" or "How do I prepare for SvS?"
+**Donate & Feedback System (Jan 2026):**
+- Ko-fi donate button in user menu (top-right popover)
+- Donate message on Homepage (under Quick Start) and AI Advisor page
+- Inline feedback form in user menu with hint to use AI Advisor for bad recommendations
+- Full feedback form on AI Advisor with "Report Bad Recommendation" option
+- Ko-fi URL: `https://ko-fi.com/bearsdenwos` (update in `app.py` line ~291 and `utils/toolbar.py`)
 
-**AI Features Ready:**
-- Rate limiting (10 requests/day for users, 1000 for admins)
-- Conversation logging for training data
-- Thumbs up/down feedback
-- Admin curation (mark good/bad examples)
-- WoS-specific syntax and terminology
-- Jailbreak protection
+**AI Advisor Chat System (Jan 2026):**
+- **Chat History**: Messages persist within session, displayed in chat bubble format
+- **New Chat Button**: Clears current conversation to start fresh
+- **Past Chats**: Shows last 10 conversations with "Load" buttons to revisit
+- **Logging**: Both rules AND AI responses now logged to database (previously only AI)
+- **Rating**: Thumbs up/down buttons on AI responses
+- **Source Labels**: Shows (Rules) or (AI) on each response
+
+**User Menu Features (`app.py`):**
+- User popover (top-right) contains:
+  - ☕ Support Bear's Den (Ko-fi link, deep orange gradient)
+  - 💬 Send Feedback (expandable form)
+  - 🔑 Change Password
+  - Logout / Switch Back (if impersonating)
+
+**AI System (WORKING - Unlimited mode for testing):**
+- OpenAI API key configured and tested
+- AI Mode: UNLIMITED (for testing, switch back to ON for production)
+- Provider: OpenAI (gpt-4o-mini)
+- 92.3% of questions handled by rules engine (saves API costs)
+
+**Test Account System:**
+- User model has `is_test_account` flag for easy filtering
+- Admin → Users shows "Test Accts" count, `TEST` badge, and "Test Only" filter
+- Create/Edit users can toggle test account status
+- Run `/wos-test-ai` to reset test data (keeps users, recreates profiles)
+
+**Comprehensive Test Suite (`/wos-test-ai`):**
+- Script: `scripts/test_ai_comprehensive.py`
+- 6 test users, 9 profiles total (password: test123):
+
+| User | Profiles | State | Notes |
+|------|----------|-------|-------|
+| test_gen10_dolphin | Main + Farm | 456 | Dolphin, FC30, 28 heroes |
+| test_gen4_f2p | Single | 789 | F2P, FC27, 13 heroes |
+| test_gen2_whale | Main + Farm | 999 | Whale, FC25, 15 heroes |
+| test_multi_state | 2 profiles | 200, 850 | Different states |
+| test_new_player | Single | 900 | Day 7, F18, 3 heroes |
+| test_rally_leader | Single | 350 | Orca, rally_lead role |
+
+**Spending-Profile-Aware Recommendations:**
+- F2P/minnow: Only recommends upgrades for top 3-4 heroes
+- Dolphin: Shows "lower priority" notes for non-core heroes
+- Whale: Recommends all heroes
+- Farm accounts: "Focus on 1-2 heroes only", Jessie for joining
+
+**Bugs Fixed (Jan 2026):**
+1. Skill level detection - was using wrong attribute names
+2. Gear quality Mythic detection - updated QUALITY_VALUES (Mythic=7)
+3. Rally joiner confidence - only counts critical slots
+4. Unreachable code in get_generation_relevance() fixed
+
+**Test Results:**
+- Recommendations: Working - spending-aware, farm-aware
+- Lineups: Correct heroes and troop ratios
+- AI routing: 92.3% rules, 7.7% AI
+
+**Troop Ratio Reference (Infantry/Lancer/Marksman):**
+| Mode | Ratio | Reasoning |
+|------|-------|-----------|
+| Bear Trap | 0/10/90 | Bear is slow, maximize marksman DPS |
+| Crazy Joe | 90/10/0 | Infantry kills before Joe's backline attacks |
+| Garrison | 60/25/15 | Defense - lancers survive better than marksmen |
+| SvS March | 40/20/40 | Balanced for field combat |
+| Rally Joiner Attack | 30/20/50 | Support rally leader's composition |
+| Rally Joiner Defense | 50/30/20 | Infantry-heavy for garrison support |
+
+**Remaining Tasks:**
+1. ~~Enhance AI conversation logging with full user snapshot~~ (DONE - user_snapshot field)
+2. ~~Add spending-profile-aware recommendations~~ (DONE - F2P/whale advice differs)
+3. ~~Add farm account detection logic~~ (DONE - farm-specific recommendations)
+4. More recommendation diversity (not all hero upgrades)
+
+**To Test in App:**
+```bash
+streamlit run app.py
+```
+Login as test user or admin, go to AI Advisor page
 
 ## Future Enhancements
 
+**Planned (Next Sprint):**
+- Mobile optimization (responsive design, touch-friendly)
+- PWA "Save to Home Screen" support for mobile users
+- Favorite/bookmark AI responses
+- Conversation threading (group follow-up questions together)
+
+**Backlog:**
 - Gem shadow prices (needs in-game screenshots)
 - Research tree granular costs
 - Goal pathfinding ("How do I reach X milestone?")
 - Power calculators (per-upgrade power gain)
 - Alliance coordination features
 - CAPTCHA or login attempt protection
+- Email notifications for admin (new feedback alerts)

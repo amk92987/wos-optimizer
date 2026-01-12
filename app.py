@@ -25,6 +25,7 @@ from database.auth import (
     authenticate_user, ensure_admin_exists, get_current_username, is_impersonating,
     get_current_user_id, update_user_password
 )
+from database.models import Feedback
 
 # Initialize database and auth
 init_db()
@@ -283,6 +284,69 @@ with login_container:
                 <div style="font-size: 11px; color: #8F9DB4;">{role_title}</div>
             </div>
             """, unsafe_allow_html=True)
+
+            st.markdown("---")
+
+            # Donate link - deeper orange for contrast, centered text
+            st.markdown("""
+            <a href="https://ko-fi.com/bearsdenwos" target="_blank" style="
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                padding: 10px 12px;
+                background: linear-gradient(135deg, #D35400, #E67E22);
+                color: white;
+                text-decoration: none;
+                border-radius: 8px;
+                font-weight: 600;
+                margin-bottom: 8px;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            ">
+                <span>☕</span>
+                <span>Support Bear's Den</span>
+            </a>
+            """, unsafe_allow_html=True)
+
+            # Feedback section - inline form
+            with st.expander("💬 Send Feedback"):
+                feedback_type = st.selectbox(
+                    "Type",
+                    ["Feature Request", "Bug Report", "Data Error", "Other"],
+                    key="menu_feedback_type",
+                    label_visibility="collapsed"
+                )
+                feedback_text = st.text_area(
+                    "Description",
+                    placeholder="What's on your mind?",
+                    max_chars=500,
+                    key="menu_feedback_text",
+                    label_visibility="collapsed",
+                    height=80
+                )
+                st.caption("To report a bad AI recommendation, use the feedback form on the AI Advisor page.")
+                if st.button("Submit", key="menu_submit_feedback", use_container_width=True):
+                    if feedback_text and len(feedback_text.strip()) >= 10:
+                        category_map = {
+                            "Feature Request": "feature",
+                            "Bug Report": "bug",
+                            "Data Error": "data_error",
+                            "Other": "other"
+                        }
+                        try:
+                            new_feedback = Feedback(
+                                user_id=get_current_user_id(),
+                                category=category_map.get(feedback_type, "other"),
+                                description=feedback_text.strip()
+                            )
+                            db.add(new_feedback)
+                            db.commit()
+                            st.success("Thanks, Chief!")
+                        except Exception:
+                            st.error("Failed to submit")
+                            db.rollback()
+                    else:
+                        st.warning("Please add more detail")
 
             st.markdown("---")
 

@@ -149,7 +149,9 @@ class LineupBuilder:
 
         lineup_heroes = []
         confidence_score = 0
-        max_confidence = len(ideal["slots"])
+        # Only count slots that have specific hero requirements (not "any") for confidence
+        critical_slots = [s for s in ideal["slots"] if s["heroes"] != ["any"]]
+        max_confidence = len(critical_slots) if critical_slots else 1
 
         for slot_info in ideal["slots"]:
             position = slot_info["position"]
@@ -160,7 +162,9 @@ class LineupBuilder:
             best_hero, status = self._get_best_available(preferred_heroes, user_heroes)
 
             if best_hero and best_hero != "any":
-                confidence_score += 1
+                # Only count toward confidence if this is a critical slot
+                if preferred_heroes != ["any"]:
+                    confidence_score += 1
                 hero_stats = user_heroes.get(best_hero, {})
                 level = hero_stats.get('level', 1)
                 lineup_heroes.append({
@@ -177,10 +181,10 @@ class LineupBuilder:
                     "your_status": "Not owned" if preferred_heroes[0] != "any" else "Filler slot"
                 })
 
-        # Calculate confidence
+        # Calculate confidence based on critical slots filled
         if confidence_score == max_confidence:
             confidence = "high"
-        elif confidence_score >= max_confidence * 0.6:
+        elif confidence_score >= max_confidence * 0.5:
             confidence = "medium"
         else:
             confidence = "low"
@@ -255,7 +259,8 @@ class LineupBuilder:
         for joiner in best_joiners:
             if joiner in user_heroes:
                 stats = user_heroes[joiner]
-                exp_skill = stats.get('expedition_skill', 1)
+                # Joiner skill is expedition_skill_1 (top-right position)
+                exp_skill = stats.get('expedition_skill_1', stats.get('expedition_skill', 1))
                 return {
                     "hero": joiner,
                     "status": "owned",

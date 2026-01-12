@@ -37,6 +37,24 @@
     transition: all 0.3s ease;
 }
 
+/* Remove sidebar bottom dead space */
+[data-testid="stSidebar"] > div:first-child {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+[data-testid="stSidebarContent"],
+[data-testid="stSidebarUserContent"] {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* Ensure sidebar content fills without extra scroll space */
+[data-testid="stSidebar"] [data-testid="stVerticalBlockBorderWrapper"]:last-child {
+    padding-bottom: 1rem !important;
+    margin-bottom: 0 !important;
+}
+
 /* Reduce sidebar padding for more menu space */
 [data-testid="stSidebar"] > div,
 [data-testid="stSidebar"] > div > div,
@@ -835,26 +853,64 @@ hr {
     box-shadow: 0 0 0 8px #1A3A5C !important;
 }
 
-/* Style the popover dropdown content */
-[data-testid="stPopoverBody"],
-[data-testid="stPopoverBody"] > div,
-[data-testid="stPopoverBody"] > div > div,
-div[data-baseweb="popover"] > div,
-div[data-baseweb="popover"] > div > div {
-    background: linear-gradient(180deg, #1A3A5C 0%, #122340 40%, #0A1628 100%) !important;
-    border-radius: 12px !important;
-}
-
-div[data-baseweb="popover"],
-div[data-baseweb="popover"] * {
+/* Popover - remove double background issue */
+/* Make ALL outer layers transparent, only innermost content has background */
+[data-baseweb="popover"] {
+    background: transparent !important;
     background-color: transparent !important;
 }
 
-div[data-baseweb="popover"] > div:first-child {
+[data-baseweb="popover"] > div {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* The body wrapper - also transparent */
+[data-baseweb="popover-body"] {
+    background: transparent !important;
+    background-color: transparent !important;
+}
+
+/* Only the actual content area gets the styled background */
+[data-testid="stPopoverBody"] {
     background: linear-gradient(180deg, #1A3A5C 0%, #122340 40%, #0A1628 100%) !important;
-    border: 1px solid rgba(74, 144, 217, 0.3) !important;
-    border-radius: 12px !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+    border-radius: 8px !important;
+    border: none !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+    padding: 0 !important;
+    min-width: 280px !important;
+    max-width: 320px !important;
+}
+
+[data-testid="stPopoverBody"] > div {
+    background: transparent !important;
+    padding: 12px !important;
+    width: 100% !important;
+}
+
+/* Ensure popover doesn't get cut off on the right */
+[data-baseweb="popover"] {
+    right: auto !important;
+}
+
+/* Make inputs in popover fit properly */
+[data-testid="stPopoverBody"] textarea,
+[data-testid="stPopoverBody"] input,
+[data-testid="stPopoverBody"] select,
+[data-testid="stPopoverBody"] [data-baseweb="select"],
+[data-testid="stPopoverBody"] .stTextArea,
+[data-testid="stPopoverBody"] .stSelectbox {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Override any Streamlit emotion cache classes that add backgrounds */
+[class*="st-emotion-cache"][data-baseweb="popover"],
+[class*="st-emotion-cache"][data-baseweb="popover"] > div {
+    background: transparent !important;
+    background-color: transparent !important;
 }
 
 /* ============================================

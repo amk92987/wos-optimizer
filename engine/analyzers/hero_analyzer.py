@@ -77,26 +77,50 @@ class HeroAnalyzer:
         """Calculate how relevant a hero is based on generation."""
         hero_data = self.hero_lookup.get(hero_name, {})
         hero_gen = hero_data.get('generation', 1)
+        tier = hero_data.get('tier_overall', 'C')
 
         gen_diff = current_gen - hero_gen
 
+        # Base relevance by generation gap
         if gen_diff <= 0:
-            return 1.0  # Current or future gen
+            relevance = 1.0  # Current or future gen
         elif gen_diff == 1:
-            return 0.9  # Still very relevant
+            relevance = 0.9  # Still very relevant
         elif gen_diff == 2:
-            return 0.7  # Moderately relevant
+            relevance = 0.7  # Moderately relevant
         elif gen_diff == 3:
-            return 0.5  # Getting outdated
+            relevance = 0.5  # Getting outdated
         else:
-            return 0.3  # Very old
+            relevance = 0.3  # Very old
 
         # S+ tier heroes stay relevant longer
-        tier = hero_data.get('tier_overall', 'C')
         if tier == 'S+' and gen_diff <= 3:
-            return min(1.0, relevance + 0.15)
+            relevance = min(1.0, relevance + 0.15)
 
         return relevance
+
+    def rank_heroes_by_value(self, hero_stats: dict, current_gen: int) -> List[str]:
+        """
+        Rank owned heroes by investment value (tier * generation relevance).
+
+        Returns list of hero names sorted by value (highest first).
+        """
+        hero_values = []
+        for name in hero_stats.keys():
+            hero_data = self.hero_lookup.get(name, {})
+            tier = hero_data.get('tier_overall', 'C')
+            tier_score = TIER_SCORES.get(tier, 0.3)
+            gen_relevance = self.get_generation_relevance(name, current_gen)
+            level = hero_stats[name].get('level', 1)
+
+            # Value = tier * generation relevance * level factor
+            level_factor = min(1.0, level / 50)  # Incentivize investing in already-leveled heroes
+            value = tier_score * gen_relevance * (0.5 + 0.5 * level_factor)
+            hero_values.append((name, value))
+
+        # Sort by value descending
+        hero_values.sort(key=lambda x: x[1], reverse=True)
+        return [name for name, _ in hero_values]
 
     def analyze(self, profile, user_heroes: list) -> List[HeroRecommendation]:
         """
@@ -119,6 +143,20 @@ class HeroAnalyzer:
         priority_castle = getattr(profile, 'priority_castle_battle', 4)
         priority_pve = getattr(profile, 'priority_exploration', 3)
 
+        # Get spending profile and farm status
+        spending_profile = getattr(profile, 'spending_profile', 'f2p')
+        is_farm = getattr(profile, 'is_farm_account', False)
+
+        # Hero investment limits by spending profile
+        hero_limits = {
+            'f2p': 3,       # F2P should focus on 3 core heroes
+            'minnow': 4,    # Minnows can invest in 4 heroes
+            'dolphin': 6,   # Dolphins can spread across 6 heroes
+            'orca': 10,     # Orcas have more flexibility
+            'whale': 999,   # Whales can max everything
+        }
+        max_hero_focus = hero_limits.get(spending_profile, 3)
+
         # Build owned heroes set
         owned_heroes = set()
         hero_stats = {}
@@ -126,11 +164,28 @@ class HeroAnalyzer:
             name = uh.hero.name if hasattr(uh, 'hero') and uh.hero else getattr(uh, 'name', '')
             if name:
                 owned_heroes.add(name)
+
+                # Get individual skill levels (UserHero has 3 of each type)
+                exp_skill_1 = getattr(uh, 'expedition_skill_1_level', 1)
+                exp_skill_2 = getattr(uh, 'expedition_skill_2_level', 1)
+                exp_skill_3 = getattr(uh, 'expedition_skill_3_level', 1)
+                expl_skill_1 = getattr(uh, 'exploration_skill_1_level', 1)
+                expl_skill_2 = getattr(uh, 'exploration_skill_2_level', 1)
+                expl_skill_3 = getattr(uh, 'exploration_skill_3_level', 1)
+
                 hero_stats[name] = {
                     'level': getattr(uh, 'level', 1),
-                    'stars': getattr(uh, 'star_rank', getattr(uh, 'stars', 1)),
-                    'exploration_skill': getattr(uh, 'exploration_skill_level', 1),
-                    'expedition_skill': getattr(uh, 'expedition_skill_level', 1)
+                    'stars': getattr(uh, 'stars', 1),
+                    # Individual expedition skills (skill 1 is the joiner skill for Jessie/Sergey)
+                    'expedition_skill_1': exp_skill_1,
+                    'expedition_skill_2': exp_skill_2,
+                    'expedition_skill_3': exp_skill_3,
+                    # Average for general skill recommendations
+                    'expedition_skill': max(exp_skill_1, exp_skill_2, exp_skill_3),
+                    'exploration_skill': max(expl_skill_1, expl_skill_2, expl_skill_3),
+                    # Min for detecting undertrained skills
+                    'expedition_skill_min': min(exp_skill_1, exp_skill_2, exp_skill_3),
+                    'exploration_skill_min': min(expl_skill_1, expl_skill_2, expl_skill_3),
                 }
 
         # Rule 1: Check for main three heroes underlevel
@@ -148,15 +203,26 @@ class HeroAnalyzer:
             self._check_generation_heroes(owned_heroes, current_gen, priority_svs)
         )
 
-        # Rule 4: Check skill gaps
+        # Get ranked heroes for investment priority
+        ranked_heroes = self.rank_heroes_by_value(hero_stats, current_gen)
+        top_heroes = set(ranked_heroes[:max_hero_focus])
+
+        # Rule 4: Check skill gaps (spending-aware)
         recommendations.extend(
-            self._check_skill_gaps(hero_stats, priority_rally, priority_pve, current_gen)
+            self._check_skill_gaps(hero_stats, priority_rally, priority_pve, current_gen,
+                                   top_heroes, spending_profile)
         )
 
-        # Rule 5: Check star progression opportunities
+        # Rule 5: Check star progression opportunities (spending-aware)
         recommendations.extend(
-            self._check_star_progression(hero_stats, current_gen)
+            self._check_star_progression(hero_stats, current_gen, top_heroes, spending_profile)
         )
+
+        # Rule 6: Farm account specific recommendations
+        if is_farm:
+            recommendations.extend(
+                self._check_farm_account(hero_stats, ranked_heroes, priority_svs)
+            )
 
         # Sort by priority
         recommendations.sort(key=lambda x: x.priority)
@@ -223,7 +289,8 @@ class HeroAnalyzer:
                     rule_id="unlock_jessie"
                 ))
             elif "Jessie" in stats:
-                jessie_skill = stats["Jessie"]['expedition_skill']
+                # Jessie's joiner skill is expedition_skill_1 (Stand of Arms)
+                jessie_skill = stats["Jessie"]['expedition_skill_1']
                 if jessie_skill < 5:
                     current_bonus = JOINER_HEROES["attack"]["effect_per_level"][jessie_skill - 1]
                     recommendations.append(HeroRecommendation(
@@ -249,7 +316,8 @@ class HeroAnalyzer:
                     rule_id="unlock_sergey"
                 ))
             elif "Sergey" in stats:
-                sergey_skill = stats["Sergey"]['expedition_skill']
+                # Sergey's joiner skill is expedition_skill_1 (Defenders' Edge)
+                sergey_skill = stats["Sergey"]['expedition_skill_1']
                 if sergey_skill < 5:
                     current_bonus = JOINER_HEROES["defense"]["effect_per_level"][sergey_skill - 1]
                     recommendations.append(HeroRecommendation(
@@ -286,13 +354,16 @@ class HeroAnalyzer:
             gen_heroes = GEN_HEROES.get(gen, [])
             owned_from_gen = owned.intersection(gen_heroes)
 
-            if not owned_from_gen and gen <= current_gen:
+            if not owned_from_gen and gen <= current_gen and gen_heroes:
                 priority = 2 if gen == current_gen else 3
+                # Safely get hero names for recommendation
+                hero_names = ", ".join(gen_heroes[:2]) if gen_heroes else f"Gen {gen} heroes"
+                reason_heroes = " or ".join(gen_heroes[:2]) if len(gen_heroes) >= 2 else (gen_heroes[0] if gen_heroes else f"Gen {gen} hero")
                 recommendations.append(HeroRecommendation(
                     priority=priority,
                     action=f"Acquire Gen {gen} heroes",
-                    hero=", ".join(gen_heroes[:2]),
-                    reason=f"Gen {gen} heroes are significant upgrades. {gen_heroes[0]} or {gen_heroes[1]} recommended.",
+                    hero=hero_names,
+                    reason=f"Gen {gen} heroes are significant upgrades. {reason_heroes} recommended.",
                     resources="Hero shards from events, packs, or VIP shop",
                     relevance_tags=['svs', 'rally', 'progression'],
                     rule_id=f"acquire_gen{gen}"
@@ -300,8 +371,9 @@ class HeroAnalyzer:
 
         return recommendations
 
-    def _check_skill_gaps(self, stats: dict, rally_priority: int, pve_priority: int, current_gen: int) -> List[HeroRecommendation]:
-        """Check for skill upgrade opportunities."""
+    def _check_skill_gaps(self, stats: dict, rally_priority: int, pve_priority: int,
+                          current_gen: int, top_heroes: set, spending_profile: str) -> List[HeroRecommendation]:
+        """Check for skill upgrade opportunities (spending-profile-aware)."""
         recommendations = []
 
         for name, hero_stats in stats.items():
@@ -318,13 +390,25 @@ class HeroAnalyzer:
             exp_skill = hero_stats['expedition_skill']
             expl_skill = hero_stats['exploration_skill']
 
+            # For F2P/minnow: Only recommend skills for top heroes
+            is_top_hero = name in top_heroes
+            if spending_profile in ('f2p', 'minnow') and not is_top_hero:
+                continue
+
+            # Adjust priority based on whether this is a focus hero
+            priority_bonus = 0 if is_top_hero else 1
+
             # Check expedition skill gap (for rally/SvS players)
             if rally_priority >= 3 and exp_skill < 5 and level >= 30:
+                reason = f"{tier} tier hero. Expedition skills boost rally/SvS performance."
+                if not is_top_hero and spending_profile == 'dolphin':
+                    reason += " (Lower priority - focus on core heroes first.)"
+
                 recommendations.append(HeroRecommendation(
-                    priority=2,
+                    priority=2 + priority_bonus,
                     action=f"Upgrade {name}'s expedition skill to L{exp_skill + 1}",
                     hero=name,
-                    reason=f"{tier} tier hero. Expedition skills boost rally/SvS performance.",
+                    reason=reason,
                     resources="Expedition Manuals",
                     relevance_tags=['rally', 'svs'],
                     rule_id="upgrade_expedition_skill"
@@ -332,11 +416,15 @@ class HeroAnalyzer:
 
             # Check exploration skill gap (for PvE players)
             if pve_priority >= 3 and expl_skill < 5 and level >= 30:
+                reason = f"{tier} tier hero. Exploration skills help clear PvE content."
+                if not is_top_hero and spending_profile == 'dolphin':
+                    reason += " (Lower priority - focus on core heroes first.)"
+
                 recommendations.append(HeroRecommendation(
-                    priority=3,
+                    priority=3 + priority_bonus,
                     action=f"Upgrade {name}'s exploration skill to L{expl_skill + 1}",
                     hero=name,
-                    reason=f"{tier} tier hero. Exploration skills help clear PvE content.",
+                    reason=reason,
                     resources="Exploration Manuals",
                     relevance_tags=['pve', 'exploration'],
                     rule_id="upgrade_exploration_skill"
@@ -344,8 +432,9 @@ class HeroAnalyzer:
 
         return recommendations
 
-    def _check_star_progression(self, stats: dict, current_gen: int) -> List[HeroRecommendation]:
-        """Check for star/ascension opportunities."""
+    def _check_star_progression(self, stats: dict, current_gen: int,
+                                 top_heroes: set, spending_profile: str) -> List[HeroRecommendation]:
+        """Check for star/ascension opportunities (spending-profile-aware)."""
         recommendations = []
 
         for name, hero_stats in stats.items():
@@ -361,16 +450,94 @@ class HeroAnalyzer:
             stars = hero_stats['stars']
             level = hero_stats['level']
 
+            # For F2P/minnow: Only recommend stars for top heroes
+            is_top_hero = name in top_heroes
+            if spending_profile in ('f2p', 'minnow') and not is_top_hero:
+                continue
+
+            # Adjust priority based on whether this is a focus hero
+            priority_bonus = 0 if is_top_hero else 1
+
             # Check for star breakpoints
             if stars < 5 and level >= 40:
+                reason = f"{tier} tier hero at {stars} stars. Star upgrades provide significant stat boosts."
+
+                # Add spending-aware advice
+                if spending_profile == 'f2p':
+                    reason += " Save universal shards for top 3 heroes only."
+                elif spending_profile == 'minnow' and not is_top_hero:
+                    reason += " (Lower priority - focus resources on core heroes.)"
+
                 recommendations.append(HeroRecommendation(
-                    priority=3,
+                    priority=3 + priority_bonus,
                     action=f"Ascend {name} to {stars + 1} stars",
                     hero=name,
-                    reason=f"{tier} tier hero at {stars}★. Star upgrades provide significant stat boosts.",
+                    reason=reason,
                     resources=f"{name} shards or universal shards",
                     relevance_tags=['all'],
                     rule_id="ascend_stars"
                 ))
+
+        return recommendations
+
+    def _check_farm_account(self, hero_stats: dict, ranked_heroes: List[str],
+                            svs_priority: int) -> List[HeroRecommendation]:
+        """Generate farm account specific recommendations."""
+        recommendations = []
+
+        # Farm accounts should focus on minimal hero investment
+        if len(ranked_heroes) > 1:
+            # Recommend focusing on just 1-2 heroes for farms
+            recommendations.append(HeroRecommendation(
+                priority=1,
+                action="Focus on 1-2 heroes only",
+                hero="Farm Focus",
+                reason="Farm accounts should minimize hero investment. Pick 1 main hero (usually your strongest infantry) and possibly 1 joiner hero.",
+                resources="Redirect other resources to main account",
+                relevance_tags=['farm'],
+                rule_id="farm_hero_focus"
+            ))
+
+        # If SvS priority is high, recommend Jessie for joining
+        if svs_priority >= 3:
+            has_jessie = "Jessie" in hero_stats
+            if has_jessie:
+                jessie_skill = hero_stats["Jessie"].get('expedition_skill_1', 1)
+                if jessie_skill < 5:
+                    recommendations.append(HeroRecommendation(
+                        priority=2,
+                        action=f"Max Jessie's expedition skill on farm",
+                        hero="Jessie",
+                        reason=f"Farm accounts joining rallies should max Jessie's Stand of Arms (currently L{jessie_skill}). Other heroes don't matter.",
+                        resources="Expedition Manuals",
+                        relevance_tags=['farm', 'rally'],
+                        rule_id="farm_jessie_skill"
+                    ))
+            else:
+                recommendations.append(HeroRecommendation(
+                    priority=2,
+                    action="Unlock Jessie on farm account",
+                    hero="Jessie",
+                    reason="For farm accounts joining rallies, Jessie is the only hero that matters. Get her and max her expedition skill.",
+                    resources="Jessie shards from events",
+                    relevance_tags=['farm', 'rally'],
+                    rule_id="farm_unlock_jessie"
+                ))
+
+        # Recommend not investing in exploration skills on farms
+        has_expl_investment = any(
+            hero_stats[h].get('exploration_skill', 1) > 1
+            for h in hero_stats
+        )
+        if has_expl_investment:
+            recommendations.append(HeroRecommendation(
+                priority=3,
+                action="Skip exploration skills on farm",
+                hero="Farm Focus",
+                reason="Exploration skills are wasted on farm accounts. Save manuals for your main account.",
+                resources="Transfer resources to main",
+                relevance_tags=['farm'],
+                rule_id="farm_skip_exploration"
+            ))
 
         return recommendations

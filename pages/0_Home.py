@@ -15,6 +15,7 @@ from database.auth import (
 )
 from database.models import Feedback
 from utils.theme_colors import get_colors, is_light_theme
+from utils.toolbar import render_donate_message, render_feedback_form
 
 # Initialize
 init_db()
@@ -91,6 +92,12 @@ with col2:
     </div>
     """, unsafe_allow_html=True)
 
+# ============================================
+# SUPPORT SECTION - Prominent placement
+# ============================================
+st.markdown("---")
+render_donate_message()
+
 st.markdown("---")
 
 # Generation Timeline
@@ -136,48 +143,7 @@ st.markdown("### See something wrong? Make a suggestion!")
 st.markdown("Help us improve Bear's Den by reporting bugs, suggesting features, or pointing out data errors.")
 
 with st.expander("Submit Feedback", expanded=False):
-    feedback_category = st.selectbox(
-        "Category",
-        ["Data Error", "Bug Report", "Feature Request", "Other"],
-        key="feedback_category"
-    )
-
-    feedback_page = st.selectbox(
-        "Related Page (optional)",
-        ["General", "Hero Tracker", "Chief Gear", "AI Advisor", "Packs", "Lineups", "Guides", "Settings"],
-        key="feedback_page"
-    )
-
-    feedback_text = st.text_area(
-        "Describe the issue or suggestion",
-        placeholder="E.g., 'The hero Jessie shows wrong skill name' or 'Add support for tracking pet levels'",
-        max_chars=2000,
-        key="feedback_text"
-    )
-
-    if st.button("Submit Feedback", type="primary", key="submit_feedback"):
-        if feedback_text and len(feedback_text.strip()) >= 10:
-            try:
-                category_map = {
-                    "Data Error": "data_error",
-                    "Bug Report": "bug",
-                    "Feature Request": "feature",
-                    "Other": "other"
-                }
-                new_feedback = Feedback(
-                    user_id=get_current_user_id(),
-                    category=category_map.get(feedback_category, "other"),
-                    page=feedback_page if feedback_page != "General" else None,
-                    description=feedback_text.strip()
-                )
-                db.add(new_feedback)
-                db.commit()
-                st.success("Thank you for your feedback! We'll review it soon.")
-            except Exception as e:
-                st.error("Failed to submit feedback. Please try again.")
-                db.rollback()
-        else:
-            st.warning("Please provide a description (at least 10 characters)")
+    render_feedback_form(db, get_current_user_id())
 
 # Close database session
 db.close()

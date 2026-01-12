@@ -71,12 +71,37 @@
 
 - [ ] **Add CAPTCHA or login attempt protection** - Security enhancement
 
-- [ ] **Add Stripe Donate button** - Monetization option
+- [x] **Add Donate button** - Ko-fi integration in user menu and homepage. URL: `https://ko-fi.com/bearsdenwos`
+
+- [x] **Add Feedback System** - Inline feedback form in user menu, detailed form on AI Advisor with "Report Bad Recommendation" option
+
+- [x] **AI Advisor Chat History** - Messages persist within session, "New Chat" button, "Past Chats" section to load previous conversations
+
+- [ ] **Mobile Optimization** - Responsive design, touch-friendly UI, PWA "Save to Home Screen"
+
+- [ ] **Favorite/Bookmark AI Responses** - Let users save helpful answers for quick reference
+
+- [ ] **Conversation Threading** - Group follow-up questions together in Past Chats
 
 - [ ] **Consider moving off Streamlit to AWS** - Major architecture decision for scaling
 
 ## Completed
 
+### Jan 2026 - Donate, Feedback, Chat History
+- [x] Ko-fi donate button in user menu (deep orange, centered)
+- [x] Donate message on Homepage and AI Advisor
+- [x] Feedback form in user menu with AI Advisor hint
+- [x] "Report Bad Recommendation" option on AI Advisor
+- [x] AI Advisor chat history persists within session
+- [x] "New Chat" button to clear conversation
+- [x] "Past Chats" expander with last 10 conversations
+- [x] Load past conversations into current chat
+- [x] Log both rules AND AI responses to database
+- [x] Fixed popover double-background styling issue
+- [x] Fixed popover width for feedback form
+- [x] Removed sidebar dead space under logo
+
+### Earlier
 - [x] Fix Chief Charms to show 18 charms (6 gear x 3 types)
 - [x] Fix layout order: Lancer (cap/watch) top, Infantry (coat/pants) middle, Marksman (belt/weapon) bottom
 - [x] Add Random Chaos Labs branding to sidebar

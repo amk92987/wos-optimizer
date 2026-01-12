@@ -1,6 +1,6 @@
 """SQLAlchemy models for Whiteout Survival Optimizer."""
 
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, JSON
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, JSON, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -26,6 +26,7 @@ class User(Base):
     # Account status
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=False)  # For email verification (AWS SES)
+    is_test_account = Column(Boolean, default=False)  # Flag for test/demo accounts
 
     # AWS Cognito compatibility fields (for future migration)
     cognito_sub = Column(String(100), unique=True, nullable=True)  # Cognito user ID
@@ -74,6 +75,10 @@ class UserProfile(Base):
     svs_wins = Column(Integer, default=0)
     svs_losses = Column(Integer, default=0)
 
+    # Farm account settings
+    is_farm_account = Column(Boolean, default=False)  # True if this is a farm/alt account
+    linked_main_profile_id = Column(Integer, ForeignKey('user_profile.id'), nullable=True)  # Link to main account
+
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -81,6 +86,9 @@ class UserProfile(Base):
     user = relationship("User", back_populates="profiles")
     heroes = relationship("UserHero", back_populates="profile")
     inventory = relationship("UserInventory", back_populates="profile")
+
+    # Farm account relationships (self-referential)
+    linked_main_profile = relationship("UserProfile", remote_side=[id], foreign_keys=[linked_main_profile_id], backref="farm_accounts")
 
 
 class Hero(Base):
@@ -390,11 +398,16 @@ class AIConversation(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    profile_id = Column(Integer, ForeignKey('user_profile.id'), nullable=True)  # Which profile was active
 
     # The conversation
     question = Column(String(2000), nullable=False)
     answer = Column(String(5000), nullable=False)
     context_summary = Column(String(1000), nullable=True)  # Summary of user's profile/heroes for context
+
+    # Full user snapshot at time of question (JSON blob for training data context)
+    # Contains: profile, heroes (top 10), chief_gear, chief_charms, spending_profile, priorities
+    user_snapshot = Column(Text, nullable=True)
 
     # AI metadata
     provider = Column(String(20), nullable=False)  # openai, anthropic
@@ -402,6 +415,10 @@ class AIConversation(Base):
     tokens_input = Column(Integer, nullable=True)
     tokens_output = Column(Integer, nullable=True)
     response_time_ms = Column(Integer, nullable=True)  # How long the API call took
+
+    # Routing info - did this go to rules or AI?
+    routed_to = Column(String(20), nullable=True)  # 'rules', 'ai', 'hybrid'
+    rule_ids_matched = Column(String(500), nullable=True)  # Which rules were matched (comma-separated)
 
     # User feedback for training
     rating = Column(Integer, nullable=True)  # 1-5 or null if not rated
@@ -421,6 +438,7 @@ class AIConversation(Base):
 
     # Relationships
     user = relationship("User", back_populates="ai_conversations")
+    profile = relationship("UserProfile", backref="ai_conversations")
 
 
 class AISettings(Base):

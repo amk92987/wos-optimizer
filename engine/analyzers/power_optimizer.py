@@ -314,7 +314,7 @@ class PowerOptimizer:
                 name = hero.get('name', 'Unknown')
 
             level = getattr(hero, 'level', 1) if hasattr(hero, 'level') else hero.get('level', 1)
-            stars = getattr(hero, 'star_rank', 0) if hasattr(hero, 'star_rank') else hero.get('stars', 0)
+            stars = getattr(hero, 'stars', 0) if hasattr(hero, 'stars') else hero.get('stars', 0)
 
             # Level upgrade recommendation
             if level < 80:

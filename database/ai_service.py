@@ -2,11 +2,12 @@
 AI Service - Rate limiting, logging, and settings management for AI features.
 """
 
+import json
 from datetime import datetime, timedelta
-from typing import Optional, Tuple, Dict, Any
+from typing import Optional, Tuple, Dict, Any, List
 from sqlalchemy.orm import Session
 
-from database.models import User, AIConversation, AISettings
+from database.models import User, UserProfile, UserHero, UserChiefGear, UserChiefCharm, AIConversation, AISettings
 
 
 def get_ai_settings(db: Session) -> AISettings:
@@ -89,6 +90,78 @@ def record_ai_request(db: Session, user: User) -> None:
     db.commit()
 
 
+def build_user_snapshot(db: Session, profile_id: int) -> Optional[str]:
+    """
+    Build a JSON snapshot of user's state at time of question.
+    Captures profile, top heroes, gear, and charms for training data context.
+
+    Returns JSON string or None if profile not found.
+    """
+    profile = db.query(UserProfile).filter(UserProfile.id == profile_id).first()
+    if not profile:
+        return None
+
+    # Get top 10 heroes by level
+    heroes = db.query(UserHero).filter(
+        UserHero.profile_id == profile_id
+    ).order_by(UserHero.level.desc()).limit(10).all()
+
+    # Get chief gear
+    chief_gear = db.query(UserChiefGear).filter(
+        UserChiefGear.profile_id == profile_id
+    ).first()
+
+    # Get chief charms
+    chief_charms = db.query(UserChiefCharm).filter(
+        UserChiefCharm.profile_id == profile_id
+    ).first()
+
+    snapshot = {
+        'timestamp': datetime.utcnow().isoformat(),
+        'profile': {
+            'name': profile.name,
+            'furnace_level': profile.furnace_level,
+            'server_age_days': profile.server_age_days,
+            'spending_profile': profile.spending_profile,
+            'alliance_role': profile.alliance_role,
+            'state_number': profile.state_number,
+            'is_farm_account': profile.is_farm_account,
+            'priorities': {
+                'svs': profile.priority_svs,
+                'rally': profile.priority_rally,
+                'castle': profile.priority_castle_battle,
+                'exploration': profile.priority_exploration,
+                'gathering': profile.priority_gathering,
+            }
+        },
+        'heroes': [
+            {
+                'name': h.hero.name if h.hero else 'Unknown',
+                'level': h.level,
+                'stars': h.stars,
+                'exp_skills': [h.expedition_skill_1_level, h.expedition_skill_2_level, h.expedition_skill_3_level],
+                'expl_skills': [h.exploration_skill_1_level, h.exploration_skill_2_level, h.exploration_skill_3_level],
+            }
+            for h in heroes
+        ],
+        'chief_gear': {
+            'ring': chief_gear.ring_quality if chief_gear else 1,
+            'amulet': chief_gear.amulet_quality if chief_gear else 1,
+            'helmet': chief_gear.helmet_quality if chief_gear else 1,
+            'armor': chief_gear.armor_quality if chief_gear else 1,
+            'gloves': chief_gear.gloves_quality if chief_gear else 1,
+            'boots': chief_gear.boots_quality if chief_gear else 1,
+        } if chief_gear else None,
+        'chief_charms': {
+            'cap': [chief_charms.cap_protection, chief_charms.cap_keenness, chief_charms.cap_vision],
+            'watch': [chief_charms.watch_protection, chief_charms.watch_keenness, chief_charms.watch_vision],
+        } if chief_charms else None,
+        'hero_count': len(heroes),
+    }
+
+    return json.dumps(snapshot)
+
+
 def log_ai_conversation(
     db: Session,
     user_id: int,
@@ -96,7 +169,11 @@ def log_ai_conversation(
     answer: str,
     provider: str,
     model: str,
+    profile_id: int = None,
     context_summary: str = None,
+    user_snapshot: str = None,
+    routed_to: str = None,
+    rule_ids_matched: str = None,
     tokens_input: int = None,
     tokens_output: int = None,
     response_time_ms: int = None,
@@ -106,15 +183,29 @@ def log_ai_conversation(
     """
     Log an AI conversation for training data collection.
 
+    Args:
+        profile_id: Which profile was active when question was asked
+        user_snapshot: JSON blob of user's state (call build_user_snapshot)
+        routed_to: 'rules', 'ai', or 'hybrid'
+        rule_ids_matched: Comma-separated list of rule IDs that matched
+
     Returns the created AIConversation object.
     """
+    # Auto-build snapshot if profile_id provided but no snapshot
+    if profile_id and not user_snapshot:
+        user_snapshot = build_user_snapshot(db, profile_id)
+
     conversation = AIConversation(
         user_id=user_id,
+        profile_id=profile_id,
         question=question,
         answer=answer,
         provider=provider,
         model=model,
         context_summary=context_summary,
+        user_snapshot=user_snapshot,
+        routed_to=routed_to,
+        rule_ids_matched=rule_ids_matched,
         tokens_input=tokens_input,
         tokens_output=tokens_output,
         response_time_ms=response_time_ms,
@@ -224,12 +315,32 @@ def get_training_data(db: Session, good_only: bool = True) -> list:
             'question': c.question,
             'answer': c.answer,
             'context': c.context_summary,
+            'user_snapshot': json.loads(c.user_snapshot) if c.user_snapshot else None,
+            'routed_to': c.routed_to,
+            'rule_ids_matched': c.rule_ids_matched,
             'rating': c.rating,
             'is_helpful': c.is_helpful,
             'admin_notes': c.admin_notes
         }
         for c in conversations
     ]
+
+
+def get_recent_conversations(db: Session, user_id: int, limit: int = 5) -> List[AIConversation]:
+    """
+    Get recent AI conversations for a user.
+
+    Args:
+        db: Database session
+        user_id: The user's ID
+        limit: Maximum number of conversations to return
+
+    Returns:
+        List of recent AIConversation objects, most recent first.
+    """
+    return db.query(AIConversation).filter(
+        AIConversation.user_id == user_id
+    ).order_by(AIConversation.created_at.desc()).limit(limit).all()
 
 
 def get_ai_stats(db: Session) -> Dict[str, Any]:
@@ -250,6 +361,11 @@ def get_ai_stats(db: Session) -> Dict[str, Any]:
     helpful_count = db.query(AIConversation).filter(AIConversation.is_helpful == True).count()
     unhelpful_count = db.query(AIConversation).filter(AIConversation.is_helpful == False).count()
 
+    # Routing stats
+    rules_count = db.query(AIConversation).filter(AIConversation.routed_to == 'rules').count()
+    ai_count = db.query(AIConversation).filter(AIConversation.routed_to == 'ai').count()
+    hybrid_count = db.query(AIConversation).filter(AIConversation.routed_to == 'hybrid').count()
+
     return {
         'mode': settings.mode,
         'total_requests': settings.total_requests or 0,
@@ -266,5 +382,10 @@ def get_ai_stats(db: Session) -> Dict[str, Any]:
         'rated_conversations': rated_conversations,
         'average_rating': round(avg_rating, 2) if avg_rating else None,
         'helpful_count': helpful_count,
-        'unhelpful_count': unhelpful_count
+        'unhelpful_count': unhelpful_count,
+        # Routing stats
+        'routed_to_rules': rules_count,
+        'routed_to_ai': ai_count,
+        'routed_to_hybrid': hybrid_count,
+        'rules_percentage': round(rules_count / total_conversations * 100, 1) if total_conversations > 0 else 0,
     }

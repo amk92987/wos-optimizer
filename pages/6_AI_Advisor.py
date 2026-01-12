@@ -16,10 +16,12 @@ from database.models import UserHero, UserInventory, UserChiefGear, UserChiefCha
 from database.auth import get_current_user_id, is_authenticated
 from database.ai_service import (
     get_ai_mode, check_rate_limit, record_ai_request,
-    log_ai_conversation, rate_conversation, get_ai_settings
+    log_ai_conversation, rate_conversation, get_ai_settings,
+    get_recent_conversations
 )
 from engine import RecommendationEngine, AIRecommender, HeroRecommender
 from engine.ai_recommender import format_data_preview
+from utils.toolbar import render_donate_message, render_feedback_form
 import time
 
 # Load CSS
@@ -102,6 +104,9 @@ st.info("""
 For complex, contextual questions, it falls back to AI (Claude or OpenAI) with verified game mechanics.
 This gives you **instant, accurate answers** for common questions, with AI power when needed.
 """)
+
+# Donate message
+render_donate_message()
 
 st.markdown("---")
 
@@ -589,6 +594,107 @@ with tab3:
 with tab4:
     st.markdown("### Ask the Advisor")
 
+    # Initialize chat history in session state
+    if 'chat_messages' not in st.session_state:
+        st.session_state.chat_messages = []
+
+    # Top controls: New Chat + Past Chats
+    col_new, col_past = st.columns([1, 2])
+
+    with col_new:
+        if st.button("🔄 New Chat", use_container_width=True):
+            st.session_state.chat_messages = []
+            if 'last_ai_conversation_id' in st.session_state:
+                del st.session_state['last_ai_conversation_id']
+            st.rerun()
+
+    with col_past:
+        # Get past conversations from database
+        past_convos = []
+        if current_user_id:
+            past_convos = get_recent_conversations(db, current_user_id, limit=10)
+
+        if past_convos:
+            with st.expander(f"📜 Past Chats ({len(past_convos)})"):
+                for conv in past_convos:
+                    q_preview = conv.question[:40] + "..." if len(conv.question) > 40 else conv.question
+                    time_ago = ""
+                    if conv.created_at:
+                        from datetime import datetime
+                        delta = datetime.now() - conv.created_at
+                        if delta.days > 0:
+                            time_ago = f"{delta.days}d ago"
+                        elif delta.seconds > 3600:
+                            time_ago = f"{delta.seconds // 3600}h ago"
+                        else:
+                            time_ago = f"{delta.seconds // 60}m ago"
+
+                    col_q, col_load = st.columns([3, 1])
+                    with col_q:
+                        st.caption(f"{q_preview} • {time_ago}")
+                    with col_load:
+                        if st.button("Load", key=f"load_conv_{conv.id}"):
+                            # Load this conversation into chat
+                            st.session_state.chat_messages = [
+                                {"role": "user", "content": conv.question},
+                                {"role": "assistant", "content": conv.answer, "source": conv.routed_to or "unknown"}
+                            ]
+                            st.session_state['last_ai_conversation_id'] = conv.id
+                            st.rerun()
+
+    st.markdown("---")
+
+    # Display chat history
+    if st.session_state.chat_messages:
+        for msg in st.session_state.chat_messages:
+            if msg["role"] == "user":
+                st.markdown(f"""
+                <div style="
+                    background: rgba(255, 107, 53, 0.15);
+                    border-left: 3px solid #FF6B35;
+                    border-radius: 0 8px 8px 0;
+                    padding: 12px 16px;
+                    margin: 8px 0;
+                ">
+                    <div style="font-size: 11px; color: #FF6B35; margin-bottom: 4px;">You asked:</div>
+                    <div style="color: #E8F4F8;">{msg['content']}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            else:
+                source_label = "Rules" if msg.get('source') == 'rules' else "AI" if msg.get('source') == 'ai' else ""
+                source_color = "#2ECC71" if msg.get('source') == 'rules' else "#9B59B6"
+                st.markdown(f"""
+                <div style="
+                    background: rgba(74, 144, 217, 0.15);
+                    border-left: 3px solid #4A90D9;
+                    border-radius: 0 8px 8px 0;
+                    padding: 12px 16px;
+                    margin: 8px 0;
+                ">
+                    <div style="font-size: 11px; color: #4A90D9; margin-bottom: 4px;">
+                        Advisor {f'<span style="color:{source_color};">({source_label})</span>' if source_label else ''}:
+                    </div>
+                    <div style="color: #E8F4F8; line-height: 1.5;">{msg['content']}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+        # Rating buttons for the last message if it was from AI
+        if (st.session_state.chat_messages and
+            st.session_state.chat_messages[-1].get('role') == 'assistant' and
+            st.session_state.chat_messages[-1].get('source') == 'ai' and
+            'last_ai_conversation_id' in st.session_state):
+            col_rate1, col_rate2, col_rate3 = st.columns([1, 1, 4])
+            with col_rate1:
+                if st.button("👍 Helpful", key="rate_helpful"):
+                    rate_conversation(db, st.session_state['last_ai_conversation_id'], is_helpful=True)
+                    st.success("Thanks!")
+            with col_rate2:
+                if st.button("👎 Not helpful", key="rate_not_helpful"):
+                    rate_conversation(db, st.session_state['last_ai_conversation_id'], is_helpful=False)
+                    st.info("Thanks for the feedback!")
+
+        st.markdown("---")
+
     # Quick question buttons
     st.markdown("**Quick Questions:**")
     col1, col2 = st.columns(2)
@@ -603,15 +709,15 @@ with tab4:
     selected_question = None
 
     with col1:
-        if st.button(quick_questions[0][0], use_container_width=True):
+        if st.button(quick_questions[0][0], use_container_width=True, key="quick_q_0"):
             selected_question = quick_questions[0][1]
-        if st.button(quick_questions[2][0], use_container_width=True):
+        if st.button(quick_questions[2][0], use_container_width=True, key="quick_q_2"):
             selected_question = quick_questions[2][1]
 
     with col2:
-        if st.button(quick_questions[1][0], use_container_width=True):
+        if st.button(quick_questions[1][0], use_container_width=True, key="quick_q_1"):
             selected_question = quick_questions[1][1]
-        if st.button(quick_questions[3][0], use_container_width=True):
+        if st.button(quick_questions[3][0], use_container_width=True, key="quick_q_3"):
             selected_question = quick_questions[3][1]
 
     # Custom question
@@ -619,10 +725,13 @@ with tab4:
         "Or ask your own question:",
         value=selected_question or "",
         placeholder="e.g., What's my best Bear Trap lineup?",
-        height=80
+        height=80,
+        key="custom_question_input"
     )
 
-    force_ai = st.checkbox("Force AI response (skip rules)", value=False)
+    col_ask, col_force = st.columns([2, 1])
+    with col_force:
+        force_ai = st.checkbox("Force AI", value=False, help="Skip rules engine and use AI directly")
 
     # Show AI availability for forced AI
     if force_ai:
@@ -631,10 +740,16 @@ with tab4:
         elif not can_use_ai:
             st.warning(rate_message)
 
-    if st.button("Ask", type="primary"):
+    with col_ask:
+        ask_clicked = st.button("Ask", type="primary", use_container_width=True)
+
+    if ask_clicked:
         if not custom_q:
             st.warning("Chief, please enter a question!")
         else:
+            # Add user message to chat
+            st.session_state.chat_messages.append({"role": "user", "content": custom_q})
+
             # Check if forcing AI and if rate limited
             use_ai = force_ai
             if use_ai:
@@ -655,83 +770,68 @@ with tab4:
 
             response_time_ms = int((time.time() - start_time) * 1000)
 
-            # Show source
             source = result.get('source', 'unknown')
-            if source == 'rules':
-                st.success("Answered using game rules (instant)")
-            elif source == 'ai':
-                provider = ai_recommender.get_provider_name()
-                st.info(f"Answered using AI ({provider})")
+            answer_text = result.get('answer', 'Sorry, I could not process that request.')
 
-                # Record the AI request for rate limiting
-                if current_user:
-                    record_ai_request(db, current_user)
+            # Add assistant message to chat
+            st.session_state.chat_messages.append({
+                "role": "assistant",
+                "content": answer_text,
+                "source": source
+            })
 
-                    # Log the conversation for training
-                    context_summary = f"FC{profile.furnace_level}, {len(user_heroes)} heroes, {profile.spending_profile}"
-                    conversation = log_ai_conversation(
-                        db=db,
-                        user_id=current_user.id,
-                        question=custom_q,
-                        answer=result.get('answer', ''),
-                        provider=provider,
-                        model=ai_settings.openai_model if provider == 'openai' else ai_settings.anthropic_model,
-                        context_summary=context_summary,
-                        response_time_ms=response_time_ms,
-                        source_page='ai_advisor',
-                        question_type='custom' if not selected_question else 'quick'
-                    )
-                    # Store conversation ID for rating
-                    st.session_state['last_ai_conversation_id'] = conversation.id
+            # Log AI responses
+            if source == 'ai' and current_user:
+                record_ai_request(db, current_user)
 
-            elif source == 'error':
-                st.error("Could not process request")
+                context_summary = f"FC{profile.furnace_level}, {len(user_heroes)} heroes, {profile.spending_profile}"
+                conversation = log_ai_conversation(
+                    db=db,
+                    user_id=current_user.id,
+                    question=custom_q,
+                    answer=answer_text,
+                    provider=ai_recommender.get_provider_name(),
+                    model=ai_settings.openai_model if ai_recommender.get_provider_name() == 'openai' else ai_settings.anthropic_model,
+                    context_summary=context_summary,
+                    response_time_ms=response_time_ms,
+                    source_page='ai_advisor',
+                    question_type='custom' if not selected_question else 'quick',
+                    routed_to=source
+                )
+                st.session_state['last_ai_conversation_id'] = conversation.id
+            elif source == 'rules' and current_user:
+                # Also log rules-based answers
+                context_summary = f"FC{profile.furnace_level}, {len(user_heroes)} heroes, {profile.spending_profile}"
+                conversation = log_ai_conversation(
+                    db=db,
+                    user_id=current_user.id,
+                    question=custom_q,
+                    answer=answer_text,
+                    provider='rules',
+                    model='rules_engine',
+                    context_summary=context_summary,
+                    response_time_ms=response_time_ms,
+                    source_page='ai_advisor',
+                    question_type='custom' if not selected_question else 'quick',
+                    routed_to='rules'
+                )
+                st.session_state['last_ai_conversation_id'] = conversation.id
 
-            # Show answer
-            if 'answer' in result:
-                st.markdown(f"""
-                <div style="
-                    background: rgba(74, 144, 217, 0.15);
-                    border: 1px solid rgba(74, 144, 217, 0.3);
-                    border-radius: 12px;
-                    padding: 20px;
-                ">
-                    <div style="color: #E8F4F8; font-size: 15px; line-height: 1.6;">
-                        {result['answer']}
-                    </div>
-                </div>
-                """, unsafe_allow_html=True)
+            st.rerun()
 
-                # Rating buttons for AI responses
-                if source == 'ai' and 'last_ai_conversation_id' in st.session_state:
-                    st.markdown("---")
-                    st.markdown("**Was this helpful?**")
-                    col_rate1, col_rate2, col_rate3 = st.columns([1, 1, 4])
+# ============================================
+# FEEDBACK SECTION
+# ============================================
+st.markdown("---")
+st.markdown("### Report an Issue or Request a Feature")
 
-                    with col_rate1:
-                        if st.button("👍 Yes", key="rate_helpful"):
-                            rate_conversation(db, st.session_state['last_ai_conversation_id'], is_helpful=True)
-                            st.success("Thanks for the feedback, Chief!")
+with st.expander("Send Feedback", expanded=False):
+    # Get recent conversations for "bad recommendation" reporting
+    recent_convos = []
+    if current_user_id:
+        recent_convos = get_recent_conversations(db, current_user_id, limit=5)
 
-                    with col_rate2:
-                        if st.button("👎 No", key="rate_not_helpful"):
-                            rate_conversation(db, st.session_state['last_ai_conversation_id'], is_helpful=False)
-                            st.info("Thanks! We'll work on improving.")
-
-            # Show lineup if present
-            if 'lineup' in result:
-                lineup = result['lineup']
-                st.markdown(f"**Lineup for {lineup['mode']}:**")
-                for h in lineup['heroes']:
-                    st.markdown(f"- **{h['slot']}:** {h['hero']} ({h['role']})")
-
-            # Show recommendations if present
-            if result.get('recommendations'):
-                st.markdown("**Related recommendations:**")
-                for rec in result['recommendations'][:3]:
-                    action = rec.get('action', '')
-                    reason = rec.get('reason', '')
-                    st.markdown(f"- {action}: {reason}")
+    render_feedback_form(db, current_user_id, recent_conversations=recent_convos)
 
 # Close database
 db.close()
