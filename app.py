@@ -11,7 +11,8 @@ import sys
 st.set_page_config(
     page_title="Bear's Den",
     page_icon="❄️",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"  # Start collapsed, we'll control visibility
 )
 
 PROJECT_ROOT = Path(__file__).parent
@@ -20,23 +21,126 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from database.db import init_db, get_db, get_or_create_profile
 from database.auth import (
     init_session_state, is_authenticated, is_admin, login_user, logout_user,
-    authenticate_user, ensure_admin_exists, get_current_username
+    authenticate_user, ensure_admin_exists, get_current_username, is_impersonating,
+    get_current_user_id, update_user_password, get_user_theme, update_user_theme
 )
-
-# Load CSS
-css_file = PROJECT_ROOT / "styles" / "custom.css"
-if css_file.exists():
-    with open(css_file) as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 # Initialize database and auth
 init_db()
 db = get_db()
 init_session_state()
 
+# Load CSS based on user's theme preference
+def load_theme_css():
+    """Load the appropriate CSS file based on user's theme preference."""
+    # Only load theme CSS for authenticated users
+    if not is_authenticated():
+        return
+
+    user_id = get_current_user_id()
+    if user_id:
+        theme = get_user_theme(db, user_id)
+    else:
+        theme = 'dark'
+
+    # Choose CSS file based on theme
+    if theme == 'light':
+        css_file = PROJECT_ROOT / "styles" / "custom_light.css"
+    else:
+        css_file = PROJECT_ROOT / "styles" / "custom.css"
+
+    if css_file.exists():
+        with open(css_file, encoding='utf-8') as f:
+            st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+load_theme_css()
+
+# Check which page we're on based on query params
+current_page = st.query_params.get("page", "home")
+
+# Hide sidebar and Streamlit chrome for unauthenticated users
+if not is_authenticated():
+    st.markdown("""
+    <style>
+    /* Hide sidebar completely */
+    [data-testid="stSidebar"] {
+        display: none !important;
+    }
+
+    /* Hide the sidebar toggle button */
+    [data-testid="stSidebarCollapsedControl"] {
+        display: none !important;
+    }
+
+    /* Hide the hamburger menu */
+    [data-testid="stHeader"] {
+        display: none !important;
+    }
+
+    /* Hide default Streamlit header */
+    header[data-testid="stHeader"] {
+        display: none !important;
+    }
+
+    /* Remove top padding since we're hiding the header */
+    .stApp > div:first-child {
+        padding-top: 0 !important;
+    }
+
+    /* Hide the main menu button */
+    #MainMenu {
+        display: none !important;
+    }
+
+    /* Hide footer */
+    footer {
+        display: none !important;
+    }
+
+    /* Ensure full width for landing page */
+    .main .block-container {
+        max-width: 100% !important;
+        padding-left: 2rem !important;
+        padding-right: 2rem !important;
+        padding-top: 0 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Route to appropriate page for non-authenticated users
+    if current_page == "login":
+        from auth_pages.auth_login import render_login
+        render_login()
+    elif current_page == "register":
+        from auth_pages.auth_register import render_register
+        render_register()
+    else:
+        from auth_pages.landing import render_landing
+        render_landing()
+
+    db.close()
+    st.stop()
+
+# ============================================
+# AUTHENTICATED USER FLOW (has sidebar)
+# ============================================
+
 # Ensure at least one admin exists (default: admin/admin123)
 if ensure_admin_exists(db):
     st.toast("Default admin created: admin / admin123", icon="🔐")
+
+# Show impersonation banner if admin is viewing as another user
+if is_impersonating():
+    original_admin = st.session_state.get('original_admin_username', 'Admin')
+    current_user = get_current_username()
+    st.markdown(f"""
+    <div style="background: #E74C3C; color: white; padding: 10px 20px; text-align: center;
+                position: fixed; top: 0; left: 0; right: 0; z-index: 9999;">
+        👁️ <strong>Admin View:</strong> You ({original_admin}) are viewing as <strong>{current_user}</strong>
+        &nbsp;|&nbsp; Click "Logout" to return to admin view
+    </div>
+    <div style="height: 50px;"></div>
+    """, unsafe_allow_html=True)
 
 profile = get_or_create_profile(db)
 
@@ -127,31 +231,63 @@ pg = st.navigation({
     "Account": account_pages,
 }, expanded=True)
 
-# Top-right login/logout using popover
+# Top-right user menu
 login_container = st.container()
 with login_container:
     # Create columns for top-right positioning
     spacer, login_col = st.columns([6, 1])
     with login_col:
-        if is_authenticated():
-            username = get_current_username()
-            role_badge = "👑" if is_admin() else "👤"
-            with st.popover(f"{role_badge} {username}"):
-                st.caption(f"Logged in as **{username}**")
-                if st.button("Logout", key="logout_btn", use_container_width=True):
-                    logout_user()
-                    st.rerun()
-        else:
-            with st.popover("🔐 Login"):
-                login_username = st.text_input("Username", key="login_user")
-                login_password = st.text_input("Password", type="password", key="login_pass")
-                if st.button("Login", key="login_btn", use_container_width=True):
-                    user = authenticate_user(db, login_username, login_password)
-                    if user:
-                        login_user(user)
-                        st.rerun()
+        username = get_current_username()
+        role_badge = "👑" if is_admin() else "👤"
+        with st.popover(f"{role_badge} {username}"):
+            st.markdown(f"**{username}**")
+            if is_admin():
+                st.caption("Administrator")
+
+            st.markdown("---")
+
+            # Theme toggle
+            user_id = get_current_user_id()
+            current_theme = get_user_theme(db, user_id) if user_id else 'dark'
+            theme_labels = {
+                'dark': '🌙 Arctic Night (Dark)',
+                'light': '☀️ Arctic Day (Light)'
+            }
+            new_theme = st.selectbox(
+                "Theme",
+                options=['dark', 'light'],
+                index=0 if current_theme == 'dark' else 1,
+                format_func=lambda x: theme_labels[x],
+                key="theme_selector"
+            )
+            if new_theme != current_theme and user_id:
+                update_user_theme(db, user_id, new_theme)
+                st.rerun()
+
+            st.markdown("---")
+
+            # Password change section
+            with st.expander("Change Password"):
+                new_pass = st.text_input("New Password", type="password", key="new_pass_input")
+                confirm_pass = st.text_input("Confirm Password", type="password", key="confirm_pass_input")
+                if st.button("Update Password", key="update_pass_btn", use_container_width=True):
+                    if not new_pass:
+                        st.error("Enter a password")
+                    elif len(new_pass) < 6:
+                        st.error("Min 6 characters")
+                    elif new_pass != confirm_pass:
+                        st.error("Passwords don't match")
                     else:
-                        st.error("Invalid credentials")
+                        user_id = get_current_user_id()
+                        if update_user_password(db, user_id, new_pass):
+                            st.success("Password updated!")
+                        else:
+                            st.error("Update failed")
+
+            st.markdown("---")
+            if st.button("Logout", key="logout_btn", use_container_width=True):
+                logout_user()
+                st.rerun()
 
 # Render sidebar content
 with st.sidebar:
@@ -176,10 +312,27 @@ with st.sidebar:
 
     # Branding at bottom
     st.markdown("---")
-    st.markdown(
-        '<div style="text-align:center;color:#666;font-size:11px;padding:8px 0;">'
-        '🎲 <span style="font-weight:bold;">Random Chaos Labs</span>'
-        '</div>',
+    st.markdown('''
+        <div style="text-align:center;padding:12px 0;">
+            <span style="font-size:20px;">🎲</span>
+            <div style="
+                font-size:16px;
+                font-weight:bold;
+                background: linear-gradient(90deg, #FFD700, #FFA500, #FF6B35, #FFD700);
+                background-size: 200% auto;
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                animation: goldShine 3s linear infinite;
+            ">Random Chaos Labs</div>
+        </div>
+        <style>
+            @keyframes goldShine {
+                0% { background-position: 0% center; }
+                100% { background-position: 200% center; }
+            }
+        </style>
+        ''',
         unsafe_allow_html=True
     )
 
