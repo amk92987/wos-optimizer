@@ -78,11 +78,11 @@
       "name": "Crazy Joe",
       "type": "alliance",
       "frequency": "Weekly",
-      "duration": "24 hours",
+      "duration": "~40 minutes",
       "cost_category": "free",
       "priority": "A",
-      "description": "Alliance PvE boss stages. Progress through difficulty levels.",
-      "gameplay": "Crazy Joe attacks your alliance! Empty all your troops to reinforce alliance members' cities - hopefully they reinforce you too so your city doesn't burn! Joe sends waves of attacks at random members. When he targets you, your troops defend automatically. The whole alliance works together to survive waves and defeat Joe. Higher stages = better rewards but tougher fights.",
+      "description": "21 waves of bandit attacks on your alliance. Coordinate defense for maximum points.",
+      "gameplay": "Crazy Joe attacks your alliance in 21 waves! Send your troops to reinforce alliance members' cities. When their city gets attacked, your troops defend and earn points based on kills. Waves 10 and 20 target ONLY the Alliance HQ. Waves 7, 14, 17 target ONLY online players (double points!). Waves 17-19 give ~31% of total points. Coordinate with alliance to maximize kill distribution.",
       "rewards": {
         "primary": ["Speedups", "Resources", "Hero XP"],
         "quality": "medium-high",
@@ -90,21 +90,32 @@
       },
       "preparation": {
         "save_before": ["Stamina"],
-        "heroes_needed": "exploration",
-        "key_heroes": ["Philly", "Wu Ming", "Blanchette"],
+        "heroes_needed": "expedition",
+        "key_heroes": ["Sergey", "Ahmose", "Mia"],
         "tips": [
-          "Similar to Bear Trap - exploration skills matter",
-          "Coordinate with alliance for harder stages"
+          "Use EXPEDITION skills (not exploration) - this is defense combat",
+          "Don't heal troops mid-event - healed troops stay in your city and steal kills from reinforcers",
+          "Reinforce ONLINE players - they get hit more often (waves 7, 14, 17) = more points for your troops",
+          "After wave 10, recall troops from HQ and go back to reinforcing cities"
         ]
+      },
+      "wave_mechanics": {
+        "waves_1_9": "Target individual alliance member cities",
+        "wave_10": "Targets ONLY Alliance HQ - recall troops and send to HQ after wave 9",
+        "waves_11_19": "Target individual alliance member cities",
+        "wave_20": "Targets ONLY Alliance HQ - recall troops and send to HQ after wave 19",
+        "wave_21": "Final wave on cities",
+        "online_waves": "Waves 7, 14, 17 target ONLY online players - double points!",
+        "high_value_waves": "Waves 17-19 give ~31% of total points - be ready"
       },
       "troop_ratio": {
         "infantry": "90%",
         "lancer": "10%",
         "marksman": "0%",
-        "reasoning": "Infantry kills enemies quickly before Marksman in back row can engage. In fast defensive battles, back row troops may never attack."
+        "reasoning": "Infantry engage first in combat. With enough stats/numbers, they kill all bandits before Lancers or Marksman can attack. Same ratio for both city defense and HQ waves."
       },
       "f2p_friendly": true,
-      "notes": "Good consistent rewards. Always participate."
+      "notes": "High-value F2P event. Coordinate with alliance. If a city loses 2 waves, it stops generating points - prioritize defending weaker members."
     },
 
     "svs_prep": {

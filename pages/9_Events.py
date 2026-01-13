@@ -314,6 +314,42 @@ def render_event_card(event_id, event_data):
                 </div>
                 """, unsafe_allow_html=True)
 
+            # Wave mechanics (Crazy Joe)
+            wave_mechanics = event_data.get("wave_mechanics", {})
+            if wave_mechanics:
+                st.markdown("---")
+                st.markdown("### Wave Breakdown")
+
+                # Special callouts first
+                online_waves = wave_mechanics.get("online_waves", "")
+                high_value = wave_mechanics.get("high_value_waves", "")
+
+                if online_waves or high_value:
+                    st.markdown(f"""
+                    <div style="background: rgba(241, 196, 15, 0.2); border: 2px solid #F1C40F;
+                                padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                        <div style="font-weight: bold; color: #F1C40F; margin-bottom: 4px;">Key Waves</div>
+                        <div style="color: #E8F4F8; font-size: 13px;">{online_waves}</div>
+                        <div style="color: #2ECC71; font-size: 13px; margin-top: 4px;">{high_value}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+                # Wave list
+                wave_order = ["waves_1_9", "wave_10", "waves_11_19", "wave_20", "wave_21"]
+                for wave_key in wave_order:
+                    if wave_key in wave_mechanics:
+                        wave_label = wave_key.replace("_", " ").replace("waves", "Waves").replace("wave", "Wave").title()
+                        wave_desc = wave_mechanics[wave_key]
+                        is_hq = "HQ" in wave_desc
+                        border_color = "#E74C3C" if is_hq else "#3498DB"
+                        st.markdown(f"""
+                        <div style="background: rgba(74, 144, 217, 0.1); border-left: 4px solid {border_color};
+                                    padding: 8px 12px; border-radius: 4px; margin-bottom: 6px;">
+                            <span style="color: #E8F4F8; font-weight: bold;">{wave_label}:</span>
+                            <span style="color: #B8D4E8;"> {wave_desc}</span>
+                        </div>
+                        """, unsafe_allow_html=True)
+
             # SvS Prep Phase day-by-day breakdown
             phases = event_data.get("phases", {})
             if phases:
