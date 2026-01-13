@@ -53,6 +53,7 @@ class UserProfile(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=True)  # Nullable for migration
     name = Column(String(100), default="Chief")
+    is_default = Column(Boolean, default=False)  # True = auto-load this profile on login
     state_number = Column(Integer, nullable=True)  # Game state/server number (e.g., 123, 456)
     server_age_days = Column(Integer, default=0)
     furnace_level = Column(Integer, default=1)

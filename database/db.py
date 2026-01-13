@@ -59,6 +59,7 @@ def _run_sqlite_migrations():
     # List of migrations: (table, column, type, default)
     migrations = [
         ("user_profile", "state_number", "INTEGER", None),
+        ("user_profile", "is_default", "BOOLEAN", "0"),
         ("users", "ai_requests_today", "INTEGER", "0"),
         ("users", "ai_request_reset_date", "DATETIME", None),
         ("users", "last_ai_request", "DATETIME", None),
@@ -93,6 +94,7 @@ def _run_postgres_migrations():
     # List of migrations: (table, column, type, default)
     migrations = [
         ("user_profile", "state_number", "INTEGER", None),
+        ("user_profile", "is_default", "BOOLEAN", "FALSE"),
         ("users", "ai_requests_today", "INTEGER", "0"),
         ("users", "ai_request_reset_date", "TIMESTAMP", None),
         ("users", "last_ai_request", "TIMESTAMP", None),
@@ -131,14 +133,108 @@ def get_db() -> Session:
         raise
 
 
-def get_or_create_profile(db: Session):
-    """Get the user profile or create one if it doesn't exist."""
-    from .models import UserProfile
+def get_or_create_profile(db: Session, user_id: int = None):
+    """Get the user's default profile or create one if it doesn't exist.
 
-    profile = db.query(UserProfile).first()
+    Args:
+        db: Database session
+        user_id: User ID to get profile for. If None, uses session state user_id.
+
+    Returns:
+        UserProfile for the user, or None if no user_id available.
+    """
+    from .models import UserProfile
+    import streamlit as st
+
+    # Get user_id from parameter or session state
+    if user_id is None:
+        user_id = st.session_state.get('user_id')
+
+    if user_id is None:
+        return None  # No authenticated user
+
+    # First, try to get the default profile for this user
+    profile = db.query(UserProfile).filter(
+        UserProfile.user_id == user_id,
+        UserProfile.is_default == True
+    ).first()
+
+    # If no default, get any profile for this user
     if not profile:
-        profile = UserProfile()
+        profile = db.query(UserProfile).filter(
+            UserProfile.user_id == user_id
+        ).first()
+
+    # If still no profile, create one
+    if not profile:
+        profile = UserProfile(user_id=user_id, name="Chief", is_default=True)
         db.add(profile)
         db.commit()
         db.refresh(profile)
+
+    # Store active profile in session state
+    st.session_state.profile_id = profile.id
+
     return profile
+
+
+def set_default_profile(db: Session, profile_id: int, user_id: int = None):
+    """Set a profile as the user's default (only one can be default).
+
+    Args:
+        db: Database session
+        profile_id: Profile ID to set as default
+        user_id: User ID (uses session state if not provided)
+    """
+    from .models import UserProfile
+    import streamlit as st
+
+    if user_id is None:
+        user_id = st.session_state.get('user_id')
+
+    if user_id is None:
+        return False
+
+    # Clear any existing default for this user
+    db.query(UserProfile).filter(
+        UserProfile.user_id == user_id,
+        UserProfile.is_default == True
+    ).update({UserProfile.is_default: False})
+
+    # Set the new default
+    profile = db.query(UserProfile).filter(
+        UserProfile.id == profile_id,
+        UserProfile.user_id == user_id
+    ).first()
+
+    if profile:
+        profile.is_default = True
+        db.commit()
+        st.session_state.profile_id = profile.id
+        return True
+
+    return False
+
+
+def get_user_profiles(db: Session, user_id: int = None):
+    """Get all profiles for a user.
+
+    Args:
+        db: Database session
+        user_id: User ID (uses session state if not provided)
+
+    Returns:
+        List of UserProfile objects for the user
+    """
+    from .models import UserProfile
+    import streamlit as st
+
+    if user_id is None:
+        user_id = st.session_state.get('user_id')
+
+    if user_id is None:
+        return []
+
+    return db.query(UserProfile).filter(
+        UserProfile.user_id == user_id
+    ).order_by(UserProfile.is_default.desc(), UserProfile.created_at).all()

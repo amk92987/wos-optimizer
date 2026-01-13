@@ -501,7 +501,7 @@ if st.button("💾 Save All Settings", type="primary", use_container_width=True)
 st.markdown("---")
 st.markdown("## 🗃️ Data Management")
 
-st.info("💡 **Tip:** Use the **Profiles** page to save/load your data across computers!")
+st.info("💡 **Tip:** Use the **Save/Load** page to save/load your data across computers!")
 
 st.markdown("### 🔧 Reset Options")
 

@@ -20,7 +20,7 @@ PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from config import DEV_AUTO_LOGIN, ENV
-from database.db import init_db, get_db, get_or_create_profile
+from database.db import init_db, get_db, get_or_create_profile, get_user_profiles, set_default_profile
 from database.auth import (
     init_session_state, is_authenticated, is_admin, login_user, logout_user,
     authenticate_user, ensure_admin_exists, get_current_username, is_impersonating,
@@ -368,6 +368,30 @@ with login_container:
                             st.success("Updated!")
                         else:
                             st.error("Failed")
+
+            # Profile switcher
+            user_profiles = get_user_profiles(db)
+            if len(user_profiles) > 1:
+                st.markdown("---")
+                with st.expander("👤 Switch Profile"):
+                    current_profile_id = st.session_state.get('profile_id')
+                    for p in user_profiles:
+                        is_current = p.id == current_profile_id
+                        is_default = p.is_default
+                        label = f"{'✓ ' if is_current else ''}{p.name}"
+                        if is_default:
+                            label += " (default)"
+
+                        col1, col2 = st.columns([3, 1])
+                        with col1:
+                            if st.button(label, key=f"switch_profile_{p.id}", use_container_width=True, disabled=is_current):
+                                st.session_state.profile_id = p.id
+                                st.rerun()
+                        with col2:
+                            if not is_default:
+                                if st.button("★", key=f"set_default_{p.id}", help="Set as default"):
+                                    set_default_profile(db, p.id)
+                                    st.rerun()
 
             st.markdown("---")
             if is_impersonating():

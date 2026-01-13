@@ -569,6 +569,7 @@ def render_hero_editor(hero: dict, existing, hero_key: str):
 # Page content
 st.markdown("# Hero Management")
 st.markdown("Browse all heroes and check **Owned** to add them to your collection and track progress.")
+st.caption("💾 Changes are saved automatically to your profile")
 
 # Filter controls
 col1, col2, col3, col4 = st.columns(4)
