@@ -9,9 +9,9 @@ Whiteout Survival Optimizer - A comprehensive web-based tool to help Whiteout Su
 **Key Stats:**
 - 12 Streamlit pages with 5,100+ lines of application code
 - 56 hero portraits downloaded from wiki
-- 59 JSON data files covering all game systems
+- 67 JSON data files covering all game systems
 - SQLite database with 6 primary tables
-- 6 Claude Code skills for domain-specific tasks
+- 8 Claude Code skills for domain-specific tasks
 
 ## Development Environment
 
@@ -48,6 +48,10 @@ py scripts/download_hero_images.py
 py scripts/build_war_academy_edges.py
 py scripts/build_buildings_fc_edges.py
 py scripts/build_chief_gear_edges.py
+
+# Run QA and data audits
+py scripts/run_qa_check.py      # Automated QA validation
+py scripts/run_data_audit.py    # Data integrity audit
 ```
 
 ## Architecture
@@ -60,12 +64,14 @@ WoS/
 ├── wos.db                    # SQLite database (36KB)
 ├── CLAUDE.md                 # This file - developer guide
 ├── README.md                 # User-facing documentation
+├── DATA_AUDIT.md             # Data file inventory with sources and confidence
+├── QA_CHECKLIST.md           # QA process documentation
 │
 ├── database/                 # Database layer
 │   ├── models.py             # SQLAlchemy models (UserProfile, Hero, UserHero, etc.)
 │   └── db.py                 # Database connection and session management
 │
-├── data/                     # Game data (59 JSON files)
+├── data/                     # Game data (67 JSON files)
 │   ├── heroes.json           # All heroes Gen 1-14 with tiers, skills, image refs (43KB)
 │   ├── chief_gear.json       # Chief gear stats and progression
 │   ├── events.json           # Event calendar and mechanics
@@ -74,7 +80,7 @@ WoS/
 │   ├── WOS_REFERENCE.md      # Game mechanics documentation
 │   │
 │   ├── guides/               # Strategy guides (7 files)
-│   │   ├── quick_tips.json           # Cheat sheet - 13 categories of tips
+│   │   ├── quick_tips.json           # Cheat sheet - 15 categories, 79 tips
 │   │   ├── combat_optimization_audit.json  # Combat stat sources
 │   │   ├── daybreak_island_priorities.json # Tree of Life & decorations
 │   │   ├── research_priorities.json  # Research tree order
@@ -156,12 +162,14 @@ WoS/
 ├── ocr/                      # Screenshot parsing
 │   └── screenshot_parser.py  # EasyOCR integration
 │
-├── scripts/                  # Data building utilities
+├── scripts/                  # Data building and QA utilities
 │   ├── download_hero_images.py       # Fetch hero portraits from wiki
 │   ├── build_war_academy_edges.py    # War Academy progression
 │   ├── build_buildings_fc_edges.py   # FC building costs
 │   ├── build_chief_gear_edges.py     # Chief gear upgrades
-│   └── compute_gem_costs.py          # Gem shadow pricing
+│   ├── compute_gem_costs.py          # Gem shadow pricing
+│   ├── run_qa_check.py               # Automated QA validation
+│   └── run_data_audit.py             # Data integrity audit
 │
 ├── styles/
 │   └── custom.css            # Winter/frost theme styling
@@ -173,12 +181,15 @@ WoS/
 │
 └── .claude/                  # Claude Code configuration
     ├── settings.local.json   # Local settings
-    └── skills/               # 5 custom skills
+    └── skills/               # 8 custom skills
         ├── wos-joiner/       # Rally joiner hero selection
         ├── wos-lineup/       # Hero lineup optimization
         ├── wos-research/     # Research prioritization
         ├── wos-recommend/    # General recommendations
-        └── wos-upgrades/     # Upgrade path optimization
+        ├── wos-upgrades/     # Upgrade path optimization
+        ├── wos-test-ai/      # AI system testing
+        ├── wos-data-audit/   # Data validation and integrity
+        └── wos-qa-review/    # Web app QA checks
 ```
 
 ### Database Models (`database/models.py`)
@@ -451,6 +462,8 @@ Located in `.claude/skills/`:
 - `/wos-recommend` - Upgrade recommendations
 - `/wos-upgrades` - Cost data access
 - `/wos-test-ai` - Run comprehensive AI and recommendation tests
+- `/wos-data-audit` - Validate game data against sources
+- `/wos-qa-review` - Run QA checks on web application
 
 ## Important Notes
 
