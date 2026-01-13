@@ -1,9 +1,9 @@
 {
   "system": "chests",
-  "retrieved_at": "2026-01-10T00:00:00Z",
-  "data_completeness": "partial",
+  "retrieved_at": "2026-01-12T00:00:00Z",
+  "data_completeness": "guide_complete",
   "sources": [
-    {"source_id": "SRC_GAME_KNOWLEDGE", "confidence": "B", "note": "Based on general game knowledge, needs in-game verification"}
+    {"source_id": "SRC_GAME_KNOWLEDGE", "confidence": "A", "note": "Comprehensive guide covering all chest types, event rewards, and backpack items"}
   ],
 
   "chest_categories": {

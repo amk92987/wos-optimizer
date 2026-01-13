@@ -1,24 +1,39 @@
 # Whiteout Survival Optimizer - Dependencies
+# Pinned versions for deployment stability
 
 # Web Framework
-streamlit>=1.29.0
+streamlit==1.52.2
 
 # Database
-sqlalchemy>=2.0.0
+SQLAlchemy==2.0.45
+alembic>=1.13.0
+psycopg2-binary>=2.9.0  # PostgreSQL driver for production
 
 # OCR for screenshot reading (optional - large download)
 # easyocr>=1.7.0
 
 # Image processing
-Pillow>=10.0.0
+pillow==12.1.0
 
 # HTTP requests for downloading assets
-requests>=2.31.0
-beautifulsoup4>=4.12.0
+requests==2.32.5
+beautifulsoup4==4.14.3
 
 # Data handling
-pandas>=2.0.0
+pandas==2.3.3
 
-# AI Recommendations
-openai>=1.0.0
-st-star-rating
+# Excel export support
+openpyxl==3.1.5
+
+# AI Recommendations (choose one or both)
+openai==2.15.0
+anthropic>=0.40.0
+
+# UI components
+st-star-rating==0.0.6
+
+# Security
+bcrypt==5.0.0
+
+# Environment configuration
+python-dotenv>=1.0.0

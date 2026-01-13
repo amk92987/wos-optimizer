@@ -13,9 +13,13 @@
       "notes": "Starting hero. Growth hero for Iron resources.",
       "best_use": "Iron gathering only. Replace in combat with any Epic or Legendary infantry.",
       "exploration_skill_1": "Heavy Strike",
+      "exploration_skill_1_desc": "Smith swings his hammer with tremendous force, dealing Attack x 150-210% damage to a single enemy.",
       "exploration_skill_2": "Iron Will",
+      "exploration_skill_2_desc": "Smith's determination increases his Defense by 5-15% for 4 seconds.",
       "expedition_skill_1": "Burnished Iron",
+      "expedition_skill_1_desc": "Increases Iron Gathering Speed by 5-25%.",
       "expedition_skill_2": "Craftsmanship",
+      "expedition_skill_2_desc": "Skilled metalwork increases Iron Gathering Capacity by 5-25%.",
       "mythic_gear": null
     },
     {
@@ -31,9 +35,13 @@
       "notes": "Growth hero for Wood resources.",
       "best_use": "Wood gathering only. Replace in combat with Sergey or any Legendary infantry.",
       "exploration_skill_1": "Axe Whirl",
+      "exploration_skill_1_desc": "Eugene spins with his axe, dealing Attack x 100-140% damage to nearby enemies.",
       "exploration_skill_2": "Timber Slash",
+      "exploration_skill_2_desc": "A powerful downward chop deals Attack x 180-250% damage to a single target.",
       "expedition_skill_1": "Woodland Inheritor",
+      "expedition_skill_1_desc": "Increases Wood Gathering Speed by 5-25%.",
       "expedition_skill_2": "Master Woodcutter",
+      "expedition_skill_2_desc": "Expert forestry increases Wood Gathering Capacity by 5-25%.",
       "mythic_gear": null
     },
     {
@@ -49,9 +57,13 @@
       "notes": "Growth hero for Coal resources.",
       "best_use": "Coal gathering only. Replace in combat with Patrick or any Legendary lancer.",
       "exploration_skill_1": "Shrapnel Load",
+      "exploration_skill_1_desc": "Charlie fires explosive rounds dealing Attack x 120-170% damage to enemies in a small area.",
       "exploration_skill_2": "Blast Zone",
+      "exploration_skill_2_desc": "Creates an explosion dealing Attack x 150-210% AoE damage and pushing back enemies.",
       "expedition_skill_1": "Demolitions Expert",
+      "expedition_skill_1_desc": "Increases Coal Gathering Speed by 5-25%.",
       "expedition_skill_2": "Coal Extraction",
+      "expedition_skill_2_desc": "Mining expertise increases Coal Gathering Capacity by 5-25%.",
       "mythic_gear": null
     },
     {
@@ -67,9 +79,13 @@
       "notes": "Growth hero for Meat resources. Best hunter on the Icefield.",
       "best_use": "Meat gathering only. Replace in combat with Bahiti or any Legendary marksman.",
       "exploration_skill_1": "Rain of Arrows",
+      "exploration_skill_1_desc": "Cloris fires a volley of arrows, dealing Attack x 80-110% damage to multiple enemies in an area.",
       "exploration_skill_2": "Bullseye",
+      "exploration_skill_2_desc": "A precision shot deals Attack x 200-280% damage to a single target with increased critical chance.",
       "expedition_skill_1": "Top Hunter",
+      "expedition_skill_1_desc": "Increases Meat Gathering Speed by 5-25%.",
       "expedition_skill_2": "Predator",
+      "expedition_skill_2_desc": "Expert tracking increases Meat Gathering Capacity by 5-25%.",
       "mythic_gear": null
     },
     {
@@ -363,11 +379,17 @@
       "notes": "Growth hero - 15% building cost reduction and faster upgrades. Weak in combat.",
       "best_use": "City development only. Use Building Speed and Bastionist skills. Replace in combat.",
       "exploration_skill_1": "Nail Gun",
+      "exploration_skill_1_desc": "Zinman fires a barrage of nails dealing Attack x 60-85% damage per hit for 3 hits.",
       "exploration_skill_2": "Under Pressure",
+      "exploration_skill_2_desc": "When health drops below 50%, Zinman gains 10-30% Attack Speed and 5-15% Defense.",
       "exploration_skill_3": "Fortification",
+      "exploration_skill_3_desc": "Zinman's expertise grants 10-30% increased Defense to all nearby allied troops for 4s.",
       "expedition_skill_1": "Building Speed",
+      "expedition_skill_1_desc": "Increases Construction Speed by 3-15% for all buildings.",
       "expedition_skill_2": "Bastionist",
+      "expedition_skill_2_desc": "Reduces Building Upgrade Costs by 3-15%.",
       "expedition_skill_3": "Positional Batter",
+      "expedition_skill_3_desc": "Zinman's defensive tactics reduce Garrison Damage Taken by 4-20%.",
       "mythic_gear": "Nail Gun Prime"
     },
     {
@@ -461,11 +483,17 @@
       "notes": "Top defender. Essential for garrisons and defense.",
       "best_use": "BEST DEFENDER. Essential for garrison defense in SvS. Priority for defensive players. Get Fists of Steel gear.",
       "exploration_skill_1": "Fists of Destruction",
+      "exploration_skill_1_desc": "Logan unleashes devastating punches dealing Attack x 250-350% damage to nearby enemies.",
       "exploration_skill_2": "Power Suit",
+      "exploration_skill_2_desc": "Logan's powered armor increases Defense by 15-35% and Health by 10-30%.",
       "exploration_skill_3": "Blustery Strike",
+      "exploration_skill_3_desc": "A wind-powered punch deals Attack x 300-420% damage and pushes enemies back.",
       "expedition_skill_1": "Lion Strike",
+      "expedition_skill_1_desc": "Increases Lancer Damage Dealt by 10-50% with fearsome power.",
       "expedition_skill_2": "Lion Intimidation",
+      "expedition_skill_2_desc": "Reduces enemy Attack by 4-20% through sheer intimidation.",
       "expedition_skill_3": "Leader Inspiration",
+      "expedition_skill_3_desc": "Inspiring leadership increases all troops' Defense by 4-20%.",
       "mythic_gear": "Fists of Steel"
     },
     {

@@ -138,6 +138,9 @@ class RecommendationEngine:
 
         # Get gear recommendations (from rule-based GearAdvisor)
         # GearAdvisor expects dict format: {'chief_gear': {...}, 'hero_gear': {...}}
+        # Convert user_gear ORM objects to dict format if gear_dict not provided
+        if not gear_dict and user_gear:
+            gear_dict = self._convert_gear_to_dict(user_gear)
         gear_recs = self.gear_advisor.analyze(profile, gear_dict or {})
         for rec in gear_recs:
             all_recommendations.append(Recommendation(
@@ -455,14 +458,48 @@ class RecommendationEngine:
                 name = getattr(uh, 'name', '')
 
             if name:
+                # Get individual skill levels (UserHero has 3 of each type)
+                exp_skill_1 = getattr(uh, 'expedition_skill_1_level', None) or 1
+                exp_skill_2 = getattr(uh, 'expedition_skill_2_level', None) or 1
+                exp_skill_3 = getattr(uh, 'expedition_skill_3_level', None) or 1
+                expl_skill_1 = getattr(uh, 'exploration_skill_1_level', None) or 1
+                expl_skill_2 = getattr(uh, 'exploration_skill_2_level', None) or 1
+                expl_skill_3 = getattr(uh, 'exploration_skill_3_level', None) or 1
+
                 heroes_dict[name] = {
-                    'level': getattr(uh, 'level', 1),
-                    'stars': getattr(uh, 'star_rank', getattr(uh, 'stars', 1)),
-                    'exploration_skill': getattr(uh, 'exploration_skill_level', 1),
-                    'expedition_skill': getattr(uh, 'expedition_skill_level', 1)
+                    'level': getattr(uh, 'level', 1) or 1,
+                    'stars': getattr(uh, 'stars', 1) or 1,
+                    # Individual skills
+                    'expedition_skill_1': exp_skill_1,
+                    'expedition_skill_2': exp_skill_2,
+                    'expedition_skill_3': exp_skill_3,
+                    'exploration_skill_1': expl_skill_1,
+                    'exploration_skill_2': expl_skill_2,
+                    'exploration_skill_3': expl_skill_3,
+                    # Max of each type for general use
+                    'expedition_skill': max(exp_skill_1, exp_skill_2, exp_skill_3),
+                    'exploration_skill': max(expl_skill_1, expl_skill_2, expl_skill_3),
                 }
 
         return heroes_dict
+
+    def _convert_gear_to_dict(self, user_gear: list) -> dict:
+        """Convert user_gear ORM objects to dict format for GearAdvisor."""
+        gear_dict = {'chief_gear': {}, 'hero_gear': {}}
+
+        for gear in user_gear:
+            # UserChiefGear has attributes like ring_quality, amulet_quality, etc.
+            if hasattr(gear, 'ring_quality'):
+                gear_dict['chief_gear'] = {
+                    'ring': getattr(gear, 'ring_quality', None) or 1,
+                    'amulet': getattr(gear, 'amulet_quality', None) or 1,
+                    'helmet': getattr(gear, 'helmet_quality', None) or 1,
+                    'armor': getattr(gear, 'armor_quality', None) or 1,
+                    'gloves': getattr(gear, 'gloves_quality', None) or 1,
+                    'boots': getattr(gear, 'boots_quality', None) or 1,
+                }
+
+        return gear_dict
 
     def get_phase_info(self, profile) -> dict:
         """Get current progression phase information."""

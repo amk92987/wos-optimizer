@@ -19,6 +19,7 @@ st.set_page_config(
 PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from config import DEV_AUTO_LOGIN, ENV
 from database.db import init_db, get_db, get_or_create_profile
 from database.auth import (
     init_session_state, is_authenticated, is_admin, login_user, logout_user,
@@ -32,8 +33,8 @@ init_db()
 db = get_db()
 init_session_state()
 
-# DEV MODE: Auto-login for local development (remove before production!)
-DEV_AUTO_LOGIN = True  # Set to False to disable
+# DEV MODE: Auto-login for local development
+# Controlled by ENVIRONMENT and DEV_AUTO_LOGIN env vars (see config.py)
 DEV_AUTO_LOGIN_USER = "Adam"  # Which user to auto-login as
 
 if DEV_AUTO_LOGIN and not is_authenticated():

@@ -166,12 +166,13 @@ class HeroAnalyzer:
                 owned_heroes.add(name)
 
                 # Get individual skill levels (UserHero has 3 of each type)
-                exp_skill_1 = getattr(uh, 'expedition_skill_1_level', 1)
-                exp_skill_2 = getattr(uh, 'expedition_skill_2_level', 1)
-                exp_skill_3 = getattr(uh, 'expedition_skill_3_level', 1)
-                expl_skill_1 = getattr(uh, 'exploration_skill_1_level', 1)
-                expl_skill_2 = getattr(uh, 'exploration_skill_2_level', 1)
-                expl_skill_3 = getattr(uh, 'exploration_skill_3_level', 1)
+                # Use 'or 1' to handle None values from database
+                exp_skill_1 = getattr(uh, 'expedition_skill_1_level', None) or 1
+                exp_skill_2 = getattr(uh, 'expedition_skill_2_level', None) or 1
+                exp_skill_3 = getattr(uh, 'expedition_skill_3_level', None) or 1
+                expl_skill_1 = getattr(uh, 'exploration_skill_1_level', None) or 1
+                expl_skill_2 = getattr(uh, 'exploration_skill_2_level', None) or 1
+                expl_skill_3 = getattr(uh, 'exploration_skill_3_level', None) or 1
 
                 hero_stats[name] = {
                     'level': getattr(uh, 'level', 1),

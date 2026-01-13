@@ -695,6 +695,26 @@ small, .caption {
     padding-top: 1rem;
 }
 
+/* Tab styling - larger, bolder, more spacing */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    padding: 12px 20px !important;
+    letter-spacing: 0.3px !important;
+}
+
+.stTabs [data-baseweb="tab"]:hover {
+    background: rgba(74, 144, 217, 0.15) !important;
+}
+
+.stTabs [aria-selected="true"] {
+    font-weight: 700 !important;
+}
+
 /* Divider styling */
 hr {
     border: none;

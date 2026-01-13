@@ -62,10 +62,6 @@ A comprehensive web-based tool to help Whiteout Survival players track their her
 - **Data Export** - Export data to CSV, Excel, or JSON
 - **Database Browser** - Direct database inspection and management
 
-## Screenshots
-
-*Coming soon*
-
 ## Installation
 
 ### Prerequisites
@@ -101,12 +97,16 @@ pip install -r requirements.txt
 py scripts/download_hero_images.py
 ```
 
-5. (Optional) Set OpenAI API key for AI recommendations:
+5. (Optional) Set AI API key for AI recommendations (choose one):
 ```bash
-# Windows
-set OPENAI_API_KEY=your-key-here
+# Claude (preferred) - Windows
+set ANTHROPIC_API_KEY=your-key-here
+# Claude - Unix/macOS
+export ANTHROPIC_API_KEY=your-key-here
 
-# Unix/macOS
+# OpenAI (fallback) - Windows
+set OPENAI_API_KEY=your-key-here
+# OpenAI - Unix/macOS
 export OPENAI_API_KEY=your-key-here
 ```
 
@@ -175,7 +175,7 @@ Combat stats come from **Battle Enhancer Decorations**, not just Tree of Life:
 
 - **Frontend**: Streamlit
 - **Database**: SQLite with SQLAlchemy ORM
-- **AI**: OpenAI API (optional)
+- **AI**: Claude (Anthropic) or OpenAI API (optional)
 - **OCR**: EasyOCR (optional)
 - **Data**: 59 JSON files covering all game systems
 

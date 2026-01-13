@@ -25,6 +25,10 @@ build/
 # Local configuration
 .env
 .env.local
+.env.development
+.env.production
+.env.staging
+!.env.example
 
 # Claude Code (keep skills for sharing)
 .claude/*
