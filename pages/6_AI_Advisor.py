@@ -319,8 +319,16 @@ with tab1:
                         </div>
                         """, unsafe_allow_html=True)
                 else:
-                    error = ai_recs[0].get('error', 'Unknown error') if ai_recs else 'No response'
-                    st.error(f"AI error: {error}")
+                    # Sanitize error message for user display
+                    raw_error = ai_recs[0].get('error', 'Unknown error') if ai_recs else 'No response'
+                    # Hide technical details from users
+                    if 'API' in str(raw_error) or 'key' in str(raw_error).lower() or 'rate' in str(raw_error).lower():
+                        user_error = "AI service is temporarily unavailable. Please try again later."
+                    elif 'timeout' in str(raw_error).lower() or 'connection' in str(raw_error).lower():
+                        user_error = "Could not connect to AI service. Please check your internet connection."
+                    else:
+                        user_error = "Unable to get AI recommendations at this time."
+                    st.error(user_error)
         else:
             st.info("Set up an AI provider (Claude or OpenAI) for additional analysis.")
 

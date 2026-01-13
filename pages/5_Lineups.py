@@ -85,10 +85,10 @@ def get_user_heroes(db, profile_id: int) -> dict:
         hero = db.query(Hero).filter(Hero.id == uh.hero_id).first()
         if hero:
             heroes_dict[hero.name] = {
-                "level": uh.level,
-                "stars": uh.star_rank,
-                "exploration_skill": uh.exploration_skill_level,
-                "expedition_skill": uh.expedition_skill_level,
+                "level": uh.level or 1,
+                "stars": uh.stars or 0,
+                "exploration_skill": uh.exploration_skill_1_level or 1,
+                "expedition_skill": uh.expedition_skill_1_level or 1,
                 "owned": True
             }
     return heroes_dict

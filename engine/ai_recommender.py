@@ -475,6 +475,7 @@ Keep responses concise and actionable."""
         else:
             user_message = f"{user_data}\n\nWhat should I upgrade next? Give me a prioritized action plan."
 
+        content = None
         try:
             content = self._call_ai(self.SYSTEM_PROMPT, user_message, max_tokens=1000)
 
@@ -488,10 +489,19 @@ Keep responses concise and actionable."""
             recommendations = json.loads(content)
             return recommendations
 
-        except json.JSONDecodeError as e:
-            return [{"error": f"Failed to parse AI response: {str(e)}", "raw": content}]
+        except json.JSONDecodeError:
+            # Don't expose raw AI response to users
+            return [{"error": "AI returned an unexpected response format. Please try again."}]
         except Exception as e:
-            return [{"error": f"API error: {str(e)}"}]
+            # Sanitize error messages for user display
+            error_str = str(e).lower()
+            if 'api' in error_str or 'key' in error_str or 'auth' in error_str:
+                return [{"error": "AI service configuration issue. Please try again later."}]
+            elif 'timeout' in error_str or 'connection' in error_str:
+                return [{"error": "Could not reach AI service. Please check your connection."}]
+            elif 'rate' in error_str or 'limit' in error_str:
+                return [{"error": "AI request limit reached. Please try again later."}]
+            return [{"error": "AI service is temporarily unavailable."}]
 
     def ask_question(self, profile, user_heroes: list, heroes_data: dict,
                     question: str, inventory: dict = None) -> str:

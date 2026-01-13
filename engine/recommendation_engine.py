@@ -442,8 +442,18 @@ class RecommendationEngine:
                 "recommendations": []
             }
         except Exception as e:
+            # Log the actual error but show user-friendly message
+            error_str = str(e).lower()
+            if 'api' in error_str or 'key' in error_str or 'auth' in error_str:
+                user_message = "AI service configuration issue. Please contact support."
+            elif 'timeout' in error_str or 'connection' in error_str:
+                user_message = "Could not reach AI service. Please try again."
+            elif 'rate' in error_str or 'limit' in error_str:
+                user_message = "AI request limit reached. Please try again later."
+            else:
+                user_message = "AI service is temporarily unavailable."
             return {
-                "answer": f"AI unavailable: {str(e)}",
+                "answer": user_message,
                 "source": "error",
                 "recommendations": []
             }

@@ -243,8 +243,8 @@ def render_gear_slot(slot_id, slot_info, gear_data):
     level_attr = f"{db_field}_level"
 
     # Current tier is stored in quality field (1-42)
-    current_tier_id = getattr(gear_data, quality_attr, 1)
-    if current_tier_id < 1 or current_tier_id > len(GEAR_TIERS):
+    current_tier_id = getattr(gear_data, quality_attr, 1) if gear_data else 1
+    if current_tier_id is None or current_tier_id < 1 or current_tier_id > len(GEAR_TIERS):
         current_tier_id = 1
 
     tier_info = TIER_BY_ID.get(current_tier_id, GEAR_TIERS[0])

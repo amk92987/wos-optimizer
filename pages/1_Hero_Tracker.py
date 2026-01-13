@@ -337,7 +337,7 @@ def render_hero_row(hero: dict, user_hero, hero_key: str):
     with img_col:
         # Large hero image
         if hero_image_b64:
-            st.markdown(f'<img src="{hero_image_b64}" style="width:80px;height:80px;border-radius:8px;border:3px solid {border_color};opacity:{opacity};">', unsafe_allow_html=True)
+            st.markdown(f'<img src="{hero_image_b64}" style="width:80px;height:80px;border-radius:8px;border:3px solid {border_color};opacity:{opacity};" />', unsafe_allow_html=True)
         else:
             st.markdown(f'<div style="width:80px;height:80px;background:#1E2A3A;border-radius:8px;border:3px solid {border_color};display:flex;align-items:center;justify-content:center;font-size:32px;opacity:{opacity};">{get_class_symbol(hero["hero_class"])}</div>', unsafe_allow_html=True)
 
