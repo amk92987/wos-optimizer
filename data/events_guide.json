@@ -48,7 +48,7 @@
       "cost_category": "free",
       "priority": "S",
       "description": "Alliance rallies against Raging Bear. Damage-based rewards.",
-      "gameplay": "A giant bear spawns near your alliance territory. Your alliance takes turns launching 5-hero rallies against it. You select your best exploration heroes (NOT expedition) and join the rally. The bear has massive HP and fights back, so you need a healer like Philly. Your damage dealt earns points for rewards. Coordinate with alliance to maximize rally efficiency.",
+      "gameplay": "A giant bear spawns near your alliance. Your alliance launches 5-hero rallies against it. Rally LEADERS use all 3 heroes' Expedition skills. Rally JOINERS only contribute their first hero's top-right expedition skill. Damage dealt = points = rewards. Coordinate timing to maximize rallies in 30 minutes.",
       "rewards": {
         "primary": ["Bear Fragments", "Pet Materials", "Speedups"],
         "quality": "high",
@@ -56,22 +56,37 @@
       },
       "preparation": {
         "save_before": ["Stamina", "Rally attempts"],
-        "heroes_needed": "exploration",
-        "key_heroes": ["Philly", "Blanchette", "Wu Ming", "Mia"],
+        "heroes_needed": "expedition",
+        "key_heroes": ["Jeronimo", "Mia", "Bradley"],
+        "best_joiners": ["Jessie", "Jasser", "Seo-yoon"],
         "tips": [
-          "Use exploration skills team, NOT expedition",
-          "Coordinate rally timing with alliance",
-          "Healer (Philly) is critical for sustain"
+          "Rally LEADERS: Use Jeronimo, Mia, Bradley - all 9 expedition skills activate",
+          "Rally JOINERS: Only your FIRST hero's TOP-RIGHT expedition skill counts!",
+          "Best joiners: Jessie (+25% DMG at L5), Jasser, Seo-yoon, Jeronimo",
+          "Only top 4 highest-level joiner skills apply to the rally",
+          "Activate Troop Attack, Lethality, and Deployment Capacity boosts before event",
+          "Set up 3 march presets beforehand - every second counts in 30 minutes",
+          "Launch new rally every 50-60 seconds; have 5-6 marches ready per player",
+          "Position rally leaders close to Bear to minimize march time",
+          "Upgrade Explosive Arrowheads from Lighthouse Intel for +25% alliance damage"
         ]
       },
       "troop_ratio": {
-        "infantry": "0%",
-        "lancer": "10%",
-        "marksman": "90%",
-        "reasoning": "Maximum DPS focus. Bear doesn't kill troops quickly, so you want damage output. Marksman deals highest damage from back row."
+        "leader": {
+          "infantry": "10%",
+          "lancer": "10%",
+          "marksman": "80%",
+          "reasoning": "Need at least 1 of each troop type to activate all 3 hero Expedition skills. Marksmen deal most damage."
+        },
+        "joiner": {
+          "infantry": "0%",
+          "lancer": "0%",
+          "marksman": "100%",
+          "reasoning": "Personal buffs don't factor into joiner calculations. Pure Marksmen for maximum damage contribution."
+        }
       },
       "f2p_friendly": true,
-      "notes": "One of the best F2P events. Always participate."
+      "notes": "One of the best F2P events. Jeronimo's Natural Leader passive gives +15% Lethality/Health even when not used."
     },
 
     "crazy_joe": {
@@ -96,7 +111,9 @@
           "Use EXPEDITION skills (not exploration) - this is defense combat",
           "Don't heal troops mid-event - healed troops stay in your city and steal kills from reinforcers",
           "Reinforce ONLINE players - they get hit more often (waves 7, 14, 17) = more points for your troops",
-          "After wave 10, recall troops from HQ and go back to reinforcing cities"
+          "Reinforce cities with FEWER other reinforcements - less competition for kills = more points for you",
+          "After wave 10, recall troops from HQ and go back to reinforcing cities",
+          "Coordinate with alliance to spread reinforcements evenly rather than stacking on one player"
         ]
       },
       "wave_mechanics": {
@@ -604,28 +621,46 @@
       "name": "Canyon Clash",
       "type": "alliance",
       "frequency": "Weekly (Week 3)",
-      "duration": "2 hours",
+      "duration": "1 hour (4 phases)",
       "cost_category": "free",
       "priority": "A",
-      "description": "Alliance territory battle in canyon map.",
-      "gameplay": "Your alliance fights on a canyon map against other alliances. You capture buildings scattered across the map by marching troops to them. Holding buildings generates points over time. Enemy alliances attack your buildings while you attack theirs. It's 2 hours of real-time chaos - you need to be online, marching fast, and coordinating with your alliance to hold key positions. Similar to Alliance Showdown but in a canyon terrain.",
+      "description": "Three-way alliance warfare. Control structures to win.",
+      "gameplay": "Three alliances battle on island map. 4 phases: Prep (3 min), Seize & Conquer (17 min), Fortress Occupation (20 min), Citadel Onslaught (20 min). FUEL is the key resource - manage it carefully! First alliance to control key structures wins.",
       "rewards": {
         "primary": ["Alliance rewards", "Territory bonuses", "Resources"],
         "quality": "high",
         "backpack_items": ["Alliance Coins", "Speedups", "Resources"]
       },
+      "phase_strategy": {
+        "phase_1_prep": "3 minutes - organize teams, plan attack routes",
+        "phase_2_seize": "17 min - Capture all buildings on YOUR island first, then block enemy bridges",
+        "phase_3_fortress": "20 min - Defend your fortresses; send left/right teams to invade enemy fortresses",
+        "phase_4_citadel": "20 min - Concentrate forces on the Citadel - first to defeat its final guardian wins!"
+      },
+      "fuel_management": {
+        "critical_rule": "FUEL is the most important resource - NEVER run out mid-battle",
+        "tips": [
+          "Assign Guardians to increase fuel income",
+          "Use conscription to replenish troops in buildings (cheaper than revives)",
+          "Save fuel and play defensive when reserves are low",
+          "Push only when situation is good; otherwise hold chokepoints"
+        ]
+      },
       "preparation": {
-        "save_before": ["Stamina"],
+        "save_before": ["Fuel reserves"],
         "heroes_needed": "expedition",
         "key_heroes": ["Jeronimo", "Wu Ming", "Gordon"],
         "tips": [
-          "Requires online participation",
-          "Coordinate with alliance",
-          "Territory control = ongoing rewards"
+          "Split into 3 teams - 2 strong players per team, strongest player on third team",
+          "Deploy 2 squads for offense, 1 for defense on chokepoints",
+          "NEVER go solo - you will die repeatedly without team coordination",
+          "Holding 2 fortresses nearly guarantees victory",
+          "Phase 1: Secure your island buildings FIRST before attacking bridges",
+          "Phase 4: ALL focus on Citadel - first to defeat final guardian wins"
         ]
       },
       "f2p_friendly": true,
-      "notes": "Good alliance event. Requires coordination and online presence."
+      "notes": "Fuel management wins battles. Coordinate teams and hold chokepoints. Never go solo!"
     },
 
     "flame_and_fang": {
@@ -734,26 +769,48 @@
       "name": "Foundry Battle",
       "type": "alliance",
       "frequency": "Weekly",
-      "duration": "1 hour",
+      "duration": "45 minutes (3 phases x 15 min)",
       "cost_category": "free",
       "priority": "B",
-      "description": "Alliance competes for foundry control.",
-      "gameplay": "Alliances fight over control of the Foundry building on the map. You send troops to capture and hold buildings on a battlefield. Holding buildings generates points. Enemy alliances try to take them from you. The alliance controlling the Foundry at the end gets crafting bonuses. Quick 1-hour event - you need to be online and sending marches to capture/defend.",
+      "description": "Alliance battlefield - capture and hold buildings for points.",
+      "gameplay": "Three 15-minute phases. Capture buildings to earn points over time. Imperial Foundry is the key to victory - appears in Phase 2. Troops get injured (not killed) and heal after 12 minutes or with speedups. 50% of stored points scatter when a building is retaken - loot them!",
       "rewards": {
-        "primary": ["Foundry access", "Crafting bonuses"],
+        "primary": ["Foundry Keys", "Crafting Materials", "Speedups"],
         "quality": "medium",
-        "backpack_items": ["Crafting materials", "Foundry tokens"]
+        "backpack_items": ["Foundry Keys", "Crafting materials"]
+      },
+      "scoring": {
+        "combat_points": {
+          "defense": "40 points per 10,000 power",
+          "offense": "80 points per 10,000 power"
+        },
+        "building_points": {
+          "imperial_foundry": {"first_capture": 9000, "per_minute": 1800},
+          "repair_facility": {"first_capture": 3000, "per_minute": 600},
+          "mercenary_camp": {"first_capture": 1200, "per_minute": 240}
+        },
+        "loot_mechanic": "When enemy retakes a building, 50% of stored points scatter - anyone can loot them"
+      },
+      "phase_strategy": {
+        "phase_1": "Capture Boiler Room, Repair Facility, Central Transit, Prototype Sites",
+        "phase_2": "IMPERIAL FOUNDRY appears - send strongest troops here! This is the key to victory",
+        "phase_3": "Random Weapon Workshops spawn - F2P players focus here"
       },
       "preparation": {
-        "save_before": ["Stamina"],
+        "save_before": ["Healing speedups"],
         "heroes_needed": "expedition",
         "tips": [
-          "Short event - must be online",
-          "Foundry control = crafting bonuses"
+          "Imperial Foundry = key to victory - prioritize it in Phase 2",
+          "Leave garrison of 4-5 players at each key building",
+          "Use Central Transit to reduce advanced teleport cooldown by 50%",
+          "Troops only get injured, not killed - heal with speedups or wait 12 min",
+          "Offense gives 2x points vs defense (80 vs 40 per 10K power)",
+          "Loot scattered points when buildings change hands (50% of stored points)",
+          "F2P: Focus on safe buildings and Weapon Workshops in Phase 3"
         ]
       },
       "f2p_friendly": true,
-      "notes": "Quick event. Worth doing if online."
+      "notes": "Imperial Foundry control wins the event. Coordinate with alliance to hold key buildings."
     },
 
     "hero_rally": {

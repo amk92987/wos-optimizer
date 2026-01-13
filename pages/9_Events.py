@@ -286,33 +286,70 @@ def render_event_card(event_id, event_data):
             # Troop ratio if available
             troop_ratio = event_data.get("troop_ratio", {})
             if troop_ratio:
-                infantry = troop_ratio.get("infantry", "")
-                lancer = troop_ratio.get("lancer", "")
-                marksman = troop_ratio.get("marksman", "")
-                reasoning = troop_ratio.get("reasoning", "")
-
                 st.markdown("---")
                 st.markdown("### Recommended Troop Ratio")
-                st.markdown(f"""
-                <div style="background: rgba(74, 144, 217, 0.15); border-left: 4px solid #F39C12;
-                            padding: 12px 16px; border-radius: 8px; margin: 8px 0;">
-                    <div style="display: flex; gap: 24px; margin-bottom: 8px;">
-                        <div style="text-align: center;">
-                            <div style="font-size: 24px; font-weight: bold; color: #3498DB;">{infantry}</div>
-                            <div style="font-size: 12px; color: #B8D4E8;">Infantry</div>
+
+                # Check if it has leader/joiner sub-structure
+                if "leader" in troop_ratio or "joiner" in troop_ratio:
+                    # Multi-ratio format (e.g., Bear Trap)
+                    for role in ["leader", "joiner"]:
+                        if role in troop_ratio:
+                            ratio = troop_ratio[role]
+                            infantry = ratio.get("infantry", "")
+                            lancer = ratio.get("lancer", "")
+                            marksman = ratio.get("marksman", "")
+                            reasoning = ratio.get("reasoning", "")
+                            role_label = "Rally Leader" if role == "leader" else "Rally Joiner"
+                            role_color = "#FFD700" if role == "leader" else "#9B59B6"
+
+                            st.markdown(f"""
+                            <div style="background: rgba(74, 144, 217, 0.15); border-left: 4px solid {role_color};
+                                        padding: 12px 16px; border-radius: 8px; margin: 8px 0;">
+                                <div style="font-weight: bold; color: {role_color}; margin-bottom: 8px;">{role_label}</div>
+                                <div style="display: flex; gap: 24px; margin-bottom: 8px;">
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 24px; font-weight: bold; color: #3498DB;">{infantry}</div>
+                                        <div style="font-size: 12px; color: #B8D4E8;">Infantry</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 24px; font-weight: bold; color: #2ECC71;">{lancer}</div>
+                                        <div style="font-size: 12px; color: #B8D4E8;">Lancer</div>
+                                    </div>
+                                    <div style="text-align: center;">
+                                        <div style="font-size: 24px; font-weight: bold; color: #E74C3C;">{marksman}</div>
+                                        <div style="font-size: 12px; color: #B8D4E8;">Marksman</div>
+                                    </div>
+                                </div>
+                                <div style="color: #B8D4E8; font-size: 13px; font-style: italic;">{reasoning}</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                else:
+                    # Simple ratio format
+                    infantry = troop_ratio.get("infantry", "")
+                    lancer = troop_ratio.get("lancer", "")
+                    marksman = troop_ratio.get("marksman", "")
+                    reasoning = troop_ratio.get("reasoning", "")
+
+                    st.markdown(f"""
+                    <div style="background: rgba(74, 144, 217, 0.15); border-left: 4px solid #F39C12;
+                                padding: 12px 16px; border-radius: 8px; margin: 8px 0;">
+                        <div style="display: flex; gap: 24px; margin-bottom: 8px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #3498DB;">{infantry}</div>
+                                <div style="font-size: 12px; color: #B8D4E8;">Infantry</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #2ECC71;">{lancer}</div>
+                                <div style="font-size: 12px; color: #B8D4E8;">Lancer</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 24px; font-weight: bold; color: #E74C3C;">{marksman}</div>
+                                <div style="font-size: 12px; color: #B8D4E8;">Marksman</div>
+                            </div>
                         </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 24px; font-weight: bold; color: #2ECC71;">{lancer}</div>
-                            <div style="font-size: 12px; color: #B8D4E8;">Lancer</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="font-size: 24px; font-weight: bold; color: #E74C3C;">{marksman}</div>
-                            <div style="font-size: 12px; color: #B8D4E8;">Marksman</div>
-                        </div>
+                        <div style="color: #B8D4E8; font-size: 13px; font-style: italic;">{reasoning}</div>
                     </div>
-                    <div style="color: #B8D4E8; font-size: 13px; font-style: italic;">{reasoning}</div>
-                </div>
-                """, unsafe_allow_html=True)
+                    """, unsafe_allow_html=True)
 
             # Wave mechanics (Crazy Joe)
             wave_mechanics = event_data.get("wave_mechanics", {})
@@ -395,6 +432,60 @@ def render_event_card(event_id, event_data):
             if spending_priority:
                 st.markdown("---")
                 render_spending_priority(spending_priority)
+
+            # Phase strategy (Canyon Clash, Foundry Battle)
+            phase_strategy = event_data.get("phase_strategy", {})
+            if phase_strategy:
+                st.markdown("---")
+                st.markdown("### Phase Strategy")
+                for phase_key, phase_desc in phase_strategy.items():
+                    phase_label = phase_key.replace("_", " ").replace("phase", "Phase").title()
+                    is_critical = "CITADEL" in phase_desc.upper() or "FOUNDRY" in phase_desc.upper()
+                    border_color = "#FFD700" if is_critical else "#3498DB"
+                    st.markdown(f"""
+                    <div style="background: rgba(74, 144, 217, 0.1); border-left: 4px solid {border_color};
+                                padding: 8px 12px; border-radius: 4px; margin-bottom: 6px;">
+                        <span style="color: #E8F4F8; font-weight: bold;">{phase_label}:</span>
+                        <span style="color: #B8D4E8;"> {phase_desc}</span>
+                    </div>
+                    """, unsafe_allow_html=True)
+
+            # Scoring mechanics (Foundry Battle)
+            scoring = event_data.get("scoring", {})
+            if scoring:
+                st.markdown("---")
+                st.markdown("### Scoring")
+
+                combat_pts = scoring.get("combat_points", {})
+                if combat_pts:
+                    st.markdown("**Combat Points:**")
+                    for action, pts in combat_pts.items():
+                        st.markdown(f"- {action.title()}: {pts}")
+
+                building_pts = scoring.get("building_points", {})
+                if building_pts:
+                    st.markdown("**Building Points:**")
+                    for building, data in building_pts.items():
+                        building_name = building.replace("_", " ").title()
+                        first_cap = data.get("first_capture", "?")
+                        per_min = data.get("per_minute", "?")
+                        st.markdown(f"- **{building_name}**: {first_cap} (first capture) + {per_min}/min")
+
+                loot = scoring.get("loot_mechanic", "")
+                if loot:
+                    st.info(f"**Loot Mechanic:** {loot}")
+
+            # Fuel management (Canyon Clash)
+            fuel = event_data.get("fuel_management", {})
+            if fuel:
+                st.markdown("---")
+                st.markdown("### Fuel Management")
+                critical = fuel.get("critical_rule", "")
+                if critical:
+                    st.warning(f"**CRITICAL:** {critical}")
+                fuel_tips = fuel.get("tips", [])
+                for tip in fuel_tips:
+                    st.markdown(f"- {tip}")
 
             tips = event_data.get("preparation", {}).get("tips", [])
             if tips:
