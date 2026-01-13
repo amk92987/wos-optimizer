@@ -181,45 +181,96 @@ def render_common_mistakes():
         )
 
 
+def render_alliance_management():
+    """Render alliance management tips for R4/R5."""
+    categories = QUICK_TIPS.get("categories", {})
+    alliance_data = categories.get("alliance_management", {})
+
+    st.markdown("### Alliance Management (R4/R5)")
+    st.markdown("Essential knowledge for alliance officers and leaders.")
+
+    tips = alliance_data.get("tips", [])
+    if not tips:
+        st.info("No alliance management tips available.")
+        return
+
+    # Sort by priority
+    priority_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    sorted_tips = sorted(tips, key=lambda x: priority_order.get(x.get("priority", "medium"), 2))
+
+    for tip in sorted_tips:
+        priority = tip.get("priority", "medium")
+        priority_color = get_priority_color(priority)
+        priority_label = get_priority_label(priority)
+
+        render_tip_card(
+            title=tip.get('tip', ''),
+            detail=tip.get('detail', ''),
+            border_color=priority_color,
+            badge_text=priority_label,
+            badge_color=priority_color
+        )
+
+    # Show related common mistakes
+    mistakes = QUICK_TIPS.get("most_common_mistakes", [])
+    alliance_mistakes = [m for m in mistakes if m.get("category") == "alliance_management"]
+
+    if alliance_mistakes:
+        st.markdown("---")
+        st.markdown("### Common Mistakes")
+        for mistake in alliance_mistakes:
+            render_tip_card(
+                title=f"Mistake: {mistake.get('mistake', '')}",
+                detail=f"Fix: {mistake.get('correction', '')}",
+                border_color="#E74C3C",
+                badge_text="Avoid",
+                badge_color="#E74C3C"
+            )
+
+
 def render_quick_tips():
     """Render the quick tips page."""
     st.markdown("# Quick Tips & Cheat Sheet")
     st.markdown("Key game knowledge in one place. The stuff most players get wrong.")
 
     # Navigation tabs
-    tab1, tab2, tab3 = st.tabs([
+    tab1, tab2, tab3, tab4 = st.tabs([
         "Critical Tips",
-        "By Category",
-        "Common Mistakes"
+        "Alliance (R4/R5)",
+        "Common Mistakes",
+        "By Category"
     ])
 
     with tab1:
         render_critical_tips()
 
     with tab2:
+        render_alliance_management()
+
+    with tab3:
+        render_common_mistakes()
+
+    with tab4:
         st.markdown("### All Tips by Category")
         st.markdown("Browse all tips organized by topic. Expand each category to explore.")
 
         categories = QUICK_TIPS.get("categories", {})
 
-        # Define display order
+        # Define display order (alliance_management has its own tab)
         category_order = [
             "new_player", "upgrade_priorities", "svs_prep", "svs_battle", "daybreak_island", "research", "combat",
             "chief_gear", "chief_charms", "pets", "events",
-            "heroes", "alliance", "packs"
+            "heroes", "packs"
         ]
 
         for cat_id in category_order:
             if cat_id in categories:
                 render_category_tips(cat_id, categories[cat_id])
 
-        # Any remaining categories not in order
+        # Any remaining categories not in order (except alliance_management which has its own tab)
         for cat_id, cat_data in categories.items():
-            if cat_id not in category_order:
+            if cat_id not in category_order and cat_id != "alliance_management":
                 render_category_tips(cat_id, cat_data)
-
-    with tab3:
-        render_common_mistakes()
 
     # Footer with tip count
     categories = QUICK_TIPS.get("categories", {})

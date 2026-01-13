@@ -84,8 +84,8 @@
       "icon": "research",
       "tips": [
         {
-          "tip": "Tool Enhancement VII before ANYTHING else",
-          "detail": "35% faster research on everything after. Every research you do before VII takes 35% longer than it should.",
+          "tip": "Prioritize Tool Enhancement at each tier (I-VII)",
+          "detail": "Each level gives incremental research speed bonuses (0.4%-2.5% per level). Total across I-VII is ~35%. Do Tool Enhancement before other research at each tier.",
           "priority": "critical"
         },
         {
@@ -421,6 +421,16 @@
           "priority": "high"
         },
         {
+          "tip": "Keep Furnace burning at all times - set to MAX power",
+          "detail": "Never let your furnace run out of coal. Keep it on MAX power. Survivors freeze and become unhappy/sick without heat.",
+          "priority": "high"
+        },
+        {
+          "tip": "Upgrade Cookhouse to Fancy Meals immediately",
+          "detail": "Tap Cookhouse > Stove > menu icon > select Fancy Meal. Tiny meat cost increase, huge boost to survivor happiness and health.",
+          "priority": "high"
+        },
+        {
           "tip": "Don't spread resources across all heroes",
           "detail": "Focus on 5-8 core heroes. Spreading thin = weak everywhere. Concentrated investment = strong team.",
           "priority": "medium"
@@ -428,6 +438,68 @@
         {
           "tip": "Join events for participation rewards even if you can't compete",
           "detail": "Many events give rewards just for participating. Don't skip entirely - get the free stuff.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Recycle duplicate Tundra Album fragments for tokens",
+          "detail": "Extra puzzle pieces can be recycled: 60 tokens = Rare pack, 120 = Epic, 250 = Mythic. Complete 10 scenes to unlock auto-assembly.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Exchange excess Hero Shards at Tundra Trading Station",
+          "detail": "Once heroes are max stars, trade extra shards for vouchers. Get Mythic Gear, Essence Stones, Enhancement XP.",
+          "priority": "medium"
+        }
+      ]
+    },
+
+    "alliance_management": {
+      "name": "Alliance Management (R4/R5)",
+      "icon": "alliance",
+      "tips": [
+        {
+          "tip": "R5 has full control; R4s assist with most management tasks",
+          "detail": "R5 can build/relocate HQ, transfer leadership, disband alliance. R4 can kick R1-R3, start Tech research, build structures, manage Championship lanes.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Mark recommended Alliance Tech with green 'ok' icon for +20% contribution rewards",
+          "detail": "When you endorse a tech, members get bonus contribution rewards. Coordinate which tech to prioritize.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Kick inactive players aggressively in new states",
+          "detail": "Early game has high player churn. Keep roster active to maintain top alliance status. Full roster of actives > partial roster of inactives.",
+          "priority": "high"
+        },
+        {
+          "tip": "Verify rally joiner heroes BEFORE starting rally",
+          "detail": "Use rally overview screen to check every joiner's first hero and skill ratings. Boot joiners who don't meet requirements.",
+          "priority": "high"
+        },
+        {
+          "tip": "Set rally times in advance and communicate in alliance chat",
+          "detail": "Assign roles, plan reinforcements, coordinate pet buffs. Preparation wins rallies more than raw power.",
+          "priority": "high"
+        },
+        {
+          "tip": "Alliance Championship: Assign lanes strategically",
+          "detail": "R4/R5 assign players to lanes. Analyze enemy setups, position players to match against weaker opponents. Poor arrangement = facing stronger foes.",
+          "priority": "high"
+        },
+        {
+          "tip": "Territory control requires 75% of farm's 2x2 area",
+          "detail": "Only R4/R5 can place Alliance Banner blueprints. May need multiple banners around a farm to claim it fully.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Joining a rally drops your shield for 30 minutes",
+          "detail": "Starting or joining a rally = exposed to attacks. Reinforcing does NOT drop shield. Plan accordingly during SvS.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Whitelist allows movement between specific alliances",
+          "detail": "Players can be on multiple whitelists. Use this for coordinating between allied alliances without rejection delays.",
           "priority": "medium"
         }
       ]
@@ -456,8 +528,8 @@
       "category": "daybreak_island"
     },
     {
-      "mistake": "Researching Battle tree before Tool Enhancement VII",
-      "correction": "Every research takes 35% longer without VII. Do it first.",
+      "mistake": "Skipping Tool Enhancement research at each tier",
+      "correction": "Tool Enhancement I-VII gives cumulative ~35% research speed. Do Tool Enhancement before other research at each tier.",
       "category": "research"
     },
     {
@@ -504,6 +576,26 @@
       "mistake": "Chasing troop count / troop power as main goal",
       "correction": "Troop power is fake power. Once you have enough for rallies, invest in Research and Essence Stones instead - permanent quality > temporary quantity.",
       "category": "upgrade_priorities"
+    },
+    {
+      "mistake": "Leaving Cookhouse on default Healthy Gruel",
+      "correction": "Switch to Fancy Meal immediately. Small meat increase, huge happiness/health boost. Tap Cookhouse > Stove > menu icon > Fancy Meal.",
+      "category": "new_player"
+    },
+    {
+      "mistake": "Letting the Furnace run out of coal",
+      "correction": "Coal burns 24/7 even offline. Keep Furnace on MAX power at all times. Survivors freeze without heat.",
+      "category": "new_player"
+    },
+    {
+      "mistake": "R4/R5 not checking rally joiner heroes before starting",
+      "correction": "Use rally overview screen to verify every joiner's first hero and skill ratings. Boot players who don't meet requirements.",
+      "category": "alliance_management"
+    },
+    {
+      "mistake": "Poor Alliance Championship lane assignments",
+      "correction": "Analyze enemy setups before placing players. Strategic positioning against weaker foes wins more than raw power.",
+      "category": "alliance_management"
     }
   ]
 }
