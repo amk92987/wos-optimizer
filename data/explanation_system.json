@@ -110,9 +110,9 @@
     },
     "chief_gear_upgrade": {
       "id": "template_chief_gear",
-      "why_pattern": "Global multiplier, applies everywhere.",
-      "tradeoff_pattern": "Spreads resources; focus on ring/amulet first.",
-      "next_action_pattern": "Upgrade Ring -> Amulet -> Gloves/Boots.",
+      "why_pattern": "Set bonus gives Attack to ALL troops when pieces are at same tier.",
+      "tradeoff_pattern": "Keep all 6 pieces at same tier for set bonus, then push Infantry first.",
+      "next_action_pattern": "Same tier -> Infantry (Coat/Pants) -> Marksman (Belt/Weapon) -> Lancer (Cap/Watch).",
       "applicable_contexts": ["all"]
     },
     "dont_do_warning": {
@@ -277,40 +277,40 @@
     },
     "chief_gear_priority": {
       "recommendation_id": "rec_chief_gear_first",
-      "title": "Prioritize Chief Gear Ring and Amulet",
+      "title": "Keep all 6 Chief Gear pieces at same tier, Infantry first",
       "context": "all",
       "confidence": {
         "grade": "A",
         "score": 0.95,
-        "reason": "Universal multiplier with highest ROI"
+        "reason": "Set bonus provides universal Attack boost to ALL troops"
       },
-      "why_this": "Chief Gear provides global buffs that apply in ALL combat modes. Ring (Troop Attack) and Amulet (Lethality) affect every troop in every battle.",
+      "why_this": "Chief Gear 6-piece set bonus gives Attack to ALL troop types. Keep pieces at same tier for maximum benefit, then prioritize Infantry when pushing to next tier.",
       "reasons": [
         {
           "rank": 1,
           "type": "mechanic",
-          "claim": "Chief Gear provides global buffs that apply in ALL combat modes.",
-          "claim_id": "claim_chief_gear_global",
+          "claim": "6-piece set bonus provides Attack boost to ALL troop types when pieces are at same tier.",
+          "claim_id": "claim_chief_gear_set_bonus",
           "impact": "high"
         },
         {
           "rank": 2,
           "type": "economy",
-          "claim": "Ring and Amulet have highest ROI due to universal application.",
+          "claim": "Infantry engage first in battle and form frontline - their survivability protects Marksman damage dealers.",
           "impact": "high"
         }
       ],
       "tradeoffs": [
-        "Chief Gear upgrades are slow and expensive but provide permanent, universal value."
+        "Chief Gear upgrades are slow and expensive but provide permanent value."
       ],
       "assumptions": [
         "You participate in multiple game modes",
         "Resources are not unlimited"
       ],
       "next_actions": [
-        "Upgrade Ring to Mythic first",
-        "Then Amulet to Mythic",
-        "Then Gloves/Boots based on your troop composition"
+        "Get all 6 pieces to same tier first",
+        "Then upgrade Infantry (Coat/Pants) to next tier",
+        "Then Marksman (Belt/Weapon), then Lancer (Cap/Watch)"
       ]
     }
   },

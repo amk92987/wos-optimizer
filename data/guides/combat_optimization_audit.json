@@ -108,22 +108,26 @@
       "impact": "VERY HIGH",
       "often_neglected": false,
       "stats_provided": {
-        "ring": "Troop Attack (ALL troops) - HIGHEST PRIORITY",
-        "amulet": "Troop Lethality - CRITICAL for damage",
-        "gloves": "Marksman Attack",
-        "boots": "Lancer Attack",
-        "helmet": "Infantry Defense",
-        "armor": "Infantry Health"
+        "coat": "Infantry Attack/Defense",
+        "pants": "Infantry Attack/Defense",
+        "belt": "Marksman Attack/Defense",
+        "weapon": "Marksman Attack/Defense",
+        "cap": "Lancer Attack/Defense",
+        "watch": "Lancer Attack/Defense"
+      },
+      "set_bonuses": {
+        "3_piece": "Defense boost for ALL troop types",
+        "6_piece": "Attack boost for ALL troop types"
       },
       "priority_order": [
-        "1. Ring - Universal attack boost, affects everything",
-        "2. Amulet - Lethality multiplier, huge damage impact",
-        "3. Gloves/Boots - Attack for your main troop type",
-        "4. Helmet/Armor - Defensive stats"
+        "1. Keep all 6 pieces at SAME TIER for set bonuses",
+        "2. Infantry (Coat/Pants) - Frontline, engage first",
+        "3. Marksman (Belt/Weapon) - Key damage dealers",
+        "4. Lancer (Cap/Watch) - Mid-line support"
       ],
-      "quality_goal": "Mythic Ring and Amulet should be top priority",
-      "common_mistake": "Upgrading Helmet/Armor first because 'infantry tanks need defense'. Wrong - damage wins fights, not tanking.",
-      "quick_check": "Are your Ring and Amulet at Legendary or Mythic quality?"
+      "quality_goal": "All 6 pieces to same tier first, then push Infantry to Pink/Red",
+      "common_mistake": "Maxing one piece while others lag behind. Set bonuses require same tier - 6-piece Attack bonus helps ALL troops.",
+      "quick_check": "Are all 6 pieces at the same tier? Are Infantry pieces (Coat/Pants) your highest when pushing to next tier?"
     },
 
     "chief_charms": {
@@ -318,10 +322,10 @@
         "phase": "late_game"
       },
       {
-        "id": "chief_ring_amulet",
-        "question": "Are your Chief Ring and Amulet at Legendary or Mythic?",
+        "id": "chief_gear_same_tier",
+        "question": "Are all 6 Chief Gear pieces at the same tier? Is Infantry (Coat/Pants) highest?",
         "impact": "Very High",
-        "why": "Ring (Attack) and Amulet (Lethality) affect ALL troops in ALL battles.",
+        "why": "6-piece set bonus gives Attack to ALL troops. Infantry first because they're frontline.",
         "phase": "mid_game"
       },
       {
@@ -398,10 +402,10 @@
         "fix": "Upgrade all charms evenly for army-wide bonus, then focus on your main troop type."
       },
       {
-        "name": "Amulet Priority",
+        "name": "Chief Gear Set Bonus",
         "severity": "MEDIUM-HIGH",
-        "explanation": "Many players upgrade Helmet/Armor first because infantry 'needs defense'. But damage wins fights - dead enemies deal no damage.",
-        "fix": "Ring > Amulet > Gloves/Boots > Helmet/Armor. Always."
+        "explanation": "Players max one Chief Gear piece while others lag behind, missing the 6-piece set bonus that gives Attack to ALL troops.",
+        "fix": "Keep all 6 pieces at same tier. Priority: Infantry (Coat/Pants) > Marksman (Belt/Weapon) > Lancer (Cap/Watch)."
       },
       {
         "name": "Pet Buff Activation",
@@ -441,7 +445,7 @@
       "top_priorities": [
         "1. Tool Enhancement VII (CRITICAL)",
         "2. Daybreak Mythic decorations for main troop type (Attack + Defense)",
-        "3. Chief Ring + Amulet to Epic/Legendary",
+        "3. All 6 Chief Gear pieces to same tier (Gold), Infantry first",
         "4. Battle Research - your main troop type's Lethality",
         "5. Chief Charms to L5 across the board"
       ],
@@ -453,7 +457,7 @@
       "top_priorities": [
         "1. Battle Research - Max Lethality and Attack",
         "2. Max level Daybreak Mythic decorations (both Attack + Defense)",
-        "3. Chief Ring + Amulet to Mythic",
+        "3. All 6 Chief Gear pieces to Pink/Red tier, Infantry first",
         "4. Chief Charms to L11 (main troop type)",
         "5. Combat pets to L50+",
         "6. T10 troops",
@@ -484,8 +488,8 @@
       "battle_research_attack": "+15%",
       "battle_research_lethality": "+5%",
       "daybreak_decorations": "No Mythics (0% from decorations)",
-      "chief_ring": "Epic (+10% attack)",
-      "chief_amulet": "Rare (+5% lethality)",
+      "chief_gear_set": "Epic (6-piece set bonus: +10% ALL attack)",
+      "chief_gear_infantry": "Epic Infantry gear (+10% Infantry attack/defense)",
       "charms": "L3 average (+3% attack)",
       "pet_buff": "None active",
       "total_attack_bonus": "+28%",
@@ -497,8 +501,8 @@
       "battle_research_attack": "+25%",
       "battle_research_lethality": "+20%",
       "daybreak_decorations": "Floating Market (+10% Inf ATK) + Snow Castle (+10% Inf DEF) + Tree of Life L10 (+5% ATK)",
-      "chief_ring": "Mythic (+25% attack)",
-      "chief_amulet": "Legendary (+15% lethality)",
+      "chief_gear_set": "Mythic (6-piece set bonus: +25% ALL attack)",
+      "chief_gear_infantry": "Mythic Infantry gear (+25% Infantry attack/defense)",
       "charms": "L8 average (+12% attack)",
       "pet_buff": "Saber-tooth (+10% lethality)",
       "total_attack_bonus": "+77%",

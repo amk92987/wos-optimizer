@@ -48,7 +48,7 @@ ITEMS_DIR = PROJECT_ROOT / "assets" / "items"
 # Load resource hierarchy for value calculations
 HIERARCHY_PATH = PROJECT_ROOT / "data" / "conversions" / "resource_value_hierarchy.json"
 if HIERARCHY_PATH.exists():
-    with open(HIERARCHY_PATH) as f:
+    with open(HIERARCHY_PATH, encoding='utf-8') as f:
         RESOURCE_HIERARCHY = json.load(f)
 else:
     RESOURCE_HIERARCHY = {"resources": {}, "value_tiers": {}}

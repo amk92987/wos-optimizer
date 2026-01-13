@@ -20,43 +20,51 @@ class GearRecommendation:
     rule_id: str
 
 
-# Chief gear priority order (universal truth)
+# Chief gear priority order
+# CRITICAL: Keep all 6 at same tier for set bonuses. When pushing to next tier, Infantry first.
+# Set bonuses: 3-piece = Defense ALL, 6-piece = Attack ALL
 CHIEF_GEAR_ORDER = [
     {
-        "slot": "Ring",
-        "stat": "Troop Attack (All)",
+        "slot": "coat",
+        "troop_type": "Infantry",
+        "stat": "Attack/Defense",
         "priority": 1,
-        "reason": "Universal attack buff for ALL troops"
+        "reason": "Infantry frontline - engage first, need survivability"
     },
     {
-        "slot": "Amulet",
-        "stat": "Lethality/Damage",
+        "slot": "pants",
+        "troop_type": "Infantry",
+        "stat": "Attack/Defense",
         "priority": 2,
-        "reason": "PvP decisive - affects kill rates in SvS"
+        "reason": "Infantry frontline - engage first, need survivability"
     },
     {
-        "slot": "Gloves",
-        "stat": "Marksman Attack",
+        "slot": "belt",
+        "troop_type": "Marksman",
+        "stat": "Attack/Defense",
         "priority": 3,
-        "reason": "Boosts marksman heroes (Alonso, Molly)"
+        "reason": "Marksman - key damage dealers"
     },
     {
-        "slot": "Boots",
-        "stat": "Lancer Attack",
+        "slot": "weapon",
+        "troop_type": "Marksman",
+        "stat": "Attack/Defense",
         "priority": 4,
-        "reason": "Boosts lancer heroes"
+        "reason": "Marksman - key damage dealers"
     },
     {
-        "slot": "Helmet",
-        "stat": "Infantry Defense",
+        "slot": "cap",
+        "troop_type": "Lancer",
+        "stat": "Attack/Defense",
         "priority": 5,
-        "reason": "Defensive - less impactful than attack stats"
+        "reason": "Lancer - mid-line support, lowest priority"
     },
     {
-        "slot": "Armor",
-        "stat": "Infantry Health",
+        "slot": "watch",
+        "troop_type": "Lancer",
+        "stat": "Attack/Defense",
         "priority": 6,
-        "reason": "Defensive - least priority"
+        "reason": "Lancer - mid-line support, lowest priority"
     }
 ]
 
@@ -167,23 +175,23 @@ class GearAdvisor:
         if not chief_gear:
             recommendations.append(GearRecommendation(
                 priority=1,
-                action="Focus on upgrading Ring to Legendary",
+                action="Keep all 6 Chief Gear pieces at SAME TIER for set bonuses",
                 gear_type="chief",
-                piece="Ring",
-                reason="Ring affects ALL troop attack. Top priority for everyone.",
+                piece="all",
+                reason="6-piece set bonus gives Attack to ALL troops. Don't max one piece while others lag.",
                 resources="Hardened Alloy, Polishing Solution, Design Plans",
                 relevance_tags=['all', 'svs', 'rally'],
-                rule_id="ring_first"
+                rule_id="set_bonus_first"
             ))
             recommendations.append(GearRecommendation(
                 priority=2,
-                action="Upgrade Amulet to Legendary",
+                action="Upgrade Infantry gear (Coat/Pants) first when pushing to next tier",
                 gear_type="chief",
-                piece="Amulet",
-                reason="Amulet provides Lethality - crucial for PvP kill rates.",
+                piece="coat/pants",
+                reason="Infantry engage first in battle - frontline survivability is critical.",
                 resources="Hardened Alloy, Polishing Solution, Design Plans",
                 relevance_tags=['svs', 'rally', 'pvp'],
-                rule_id="amulet_second"
+                rule_id="infantry_first"
             ))
             return recommendations
 
@@ -213,33 +221,42 @@ class GearAdvisor:
                     rule_id=f"upgrade_{slot.lower()}"
                 ))
 
-        # Check for Mythic push on Ring/Amulet
-        ring_quality = normalize_quality(chief_gear.get('ring', 1))
-        amulet_quality = normalize_quality(chief_gear.get('amulet', 1))
+        # Check set bonus status and Mythic push eligibility
+        qualities = {slot["slot"]: normalize_quality(chief_gear.get(slot["slot"], 1))
+                     for slot in CHIEF_GEAR_ORDER}
+        min_quality = min(qualities.values())
+        max_quality = max(qualities.values())
 
-        if ring_quality >= 6 and amulet_quality >= 6:  # Both at Legendary or higher
-            if ring_quality < 7:  # Not Mythic yet
-                recommendations.append(GearRecommendation(
-                    priority=2,
-                    action="Push Ring to Mythic",
-                    gear_type="chief",
-                    piece="Ring",
-                    reason="Legendary Ring done. Mythic Ring is long-term goal for max attack.",
-                    resources="Lunar Amber, Mythic materials",
-                    relevance_tags=['endgame'],
-                    rule_id="mythic_ring"
-                ))
-            if amulet_quality < 7:  # Not Mythic yet
-                recommendations.append(GearRecommendation(
-                    priority=3,
-                    action="Push Amulet to Mythic",
-                    gear_type="chief",
-                    piece="Amulet",
-                    reason="Legendary Amulet done. Mythic Amulet is next priority.",
-                    resources="Lunar Amber, Mythic materials",
-                    relevance_tags=['endgame'],
-                    rule_id="mythic_amulet"
-                ))
+        # Warning if pieces are at different tiers (losing set bonus)
+        if max_quality - min_quality >= 2:
+            lagging_pieces = [slot for slot, q in qualities.items() if q < max_quality]
+            recommendations.insert(0, GearRecommendation(
+                priority=1,
+                action=f"Bring lagging pieces ({', '.join(lagging_pieces)}) up to same tier",
+                gear_type="chief",
+                piece="multiple",
+                reason="Keep all 6 pieces at SAME TIER for set bonuses. 6-piece Attack bonus helps ALL troops.",
+                resources="Hardened Alloy, Polishing Solution, Design Plans",
+                relevance_tags=['critical', 'efficiency'],
+                rule_id="set_bonus_warning"
+            ))
+
+        # If all at Legendary, recommend Mythic push (Infantry first)
+        if min_quality >= 6:  # All at Legendary or higher
+            for piece_info in CHIEF_GEAR_ORDER:  # Infantry first, then Marksman, then Lancer
+                slot = piece_info["slot"]
+                if qualities[slot] < 7:  # Not Mythic yet
+                    recommendations.append(GearRecommendation(
+                        priority=2 if piece_info["troop_type"] == "Infantry" else 3,
+                        action=f"Push {slot} to Mythic",
+                        gear_type="chief",
+                        piece=slot,
+                        reason=f"All Legendary done. {piece_info['troop_type']} ({slot}) - {piece_info['reason']}",
+                        resources="Lunar Amber, Mythic materials",
+                        relevance_tags=['endgame'],
+                        rule_id=f"mythic_{slot}"
+                    ))
+                    break  # Only recommend one piece at a time
 
         return recommendations
 
@@ -319,38 +336,54 @@ class GearAdvisor:
         chief_gear = user_gear.get('chief_gear', {})
         hero_gear = user_gear.get('hero_gear', {})
 
-        # Mistake: Hero gear before Ring/Amulet
-        ring_quality = normalize_quality(chief_gear.get('ring', 1))
-        amulet_quality = normalize_quality(chief_gear.get('amulet', 1))
+        # Get all chief gear qualities
+        qualities = {slot["slot"]: normalize_quality(chief_gear.get(slot["slot"], 1))
+                     for slot in CHIEF_GEAR_ORDER}
+        min_quality = min(qualities.values()) if qualities else 1
+        max_quality = max(qualities.values()) if qualities else 1
 
         geared_heroes = [h for h, g in hero_gear.items() if g.get('has_gear', False)]
 
-        if geared_heroes and (ring_quality < 6 or amulet_quality < 6):  # 6 = Legendary
+        # Mistake: Hero gear before Chief Gear is at Legendary
+        if geared_heroes and min_quality < 6:  # 6 = Legendary
             recommendations.append(GearRecommendation(
                 priority=1,
-                action="Prioritize Chief Gear Ring/Amulet over Hero Gear",
+                action="Prioritize Chief Gear over Hero Gear",
                 gear_type="chief",
-                piece="Ring/Amulet",
-                reason="Chief Gear multiplies ALL damage. Hero Gear only affects one hero. Ring/Amulet to Legendary first.",
+                piece="all",
+                reason="Chief Gear multiplies ALL damage. Hero Gear only affects one hero. Get 6-piece Legendary set first.",
                 resources="Hardened Alloy, Polishing Solution",
                 relevance_tags=['warning', 'efficiency'],
                 rule_id="chief_before_hero"
             ))
 
-        # Mistake: Upgrading Helmet/Armor before Ring/Amulet
-        helmet_quality = normalize_quality(chief_gear.get('helmet', 1))
-        armor_quality = normalize_quality(chief_gear.get('armor', 1))
+        # Mistake: Pieces at different tiers (losing set bonus)
+        if max_quality - min_quality >= 2:
+            recommendations.append(GearRecommendation(
+                priority=1,
+                action="Stop upgrading one piece while others lag behind",
+                gear_type="chief",
+                piece="multiple",
+                reason="You're losing set bonuses! 6-piece Attack bonus requires all pieces at same tier. Bring lagging pieces up first.",
+                resources="N/A - redirect to lagging pieces",
+                relevance_tags=['warning', 'critical'],
+                rule_id="set_bonus_mistake"
+            ))
 
-        if (helmet_quality > ring_quality or armor_quality > amulet_quality):
+        # Mistake: Upgrading Lancer before Infantry when pushing to next tier
+        infantry_min = min(qualities.get('coat', 1), qualities.get('pants', 1))
+        lancer_max = max(qualities.get('cap', 1), qualities.get('watch', 1))
+
+        if lancer_max > infantry_min and min_quality >= 4:  # Only relevant at higher tiers
             recommendations.append(GearRecommendation(
                 priority=2,
-                action="Stop upgrading Infantry defensive gear",
+                action="Prioritize Infantry gear (Coat/Pants) over Lancer (Cap/Watch)",
                 gear_type="chief",
-                piece="Helmet/Armor",
-                reason="Defensive gear is low priority. Ring/Amulet attack stats win more battles than infantry defense.",
-                resources="N/A - redirect materials to Ring/Amulet",
+                piece="coat/pants",
+                reason="Infantry engage first in battle - frontline survivability is critical. Upgrade Infantry before Lancer.",
+                resources="N/A - redirect to Infantry gear",
                 relevance_tags=['warning'],
-                rule_id="attack_before_defense"
+                rule_id="infantry_before_lancer"
             ))
 
         return recommendations
@@ -359,22 +392,37 @@ class GearAdvisor:
         """Return the recommended gear upgrade order."""
         order = []
 
-        # Chief gear always first
-        for piece in CHIEF_GEAR_ORDER[:2]:  # Ring, Amulet
+        # Set bonus priority note
+        order.append({
+            "type": "chief",
+            "piece": "ALL 6 pieces",
+            "reason": "Keep all at SAME TIER for 6-piece Attack set bonus (benefits ALL troops)",
+            "priority": "Critical"
+        })
+
+        # Chief gear in troop priority order (Infantry > Marksman > Lancer)
+        for piece in CHIEF_GEAR_ORDER[:2]:  # Infantry: Coat, Pants
             order.append({
                 "type": "chief",
                 "piece": piece["slot"],
                 "reason": piece["reason"],
-                "priority": "Critical"
+                "priority": "High (Infantry first when pushing next tier)"
             })
 
-        # Remaining chief gear
-        for piece in CHIEF_GEAR_ORDER[2:]:
+        for piece in CHIEF_GEAR_ORDER[2:4]:  # Marksman: Belt, Weapon
             order.append({
                 "type": "chief",
                 "piece": piece["slot"],
                 "reason": piece["reason"],
-                "priority": "Important"
+                "priority": "Medium (Marksman second)"
+            })
+
+        for piece in CHIEF_GEAR_ORDER[4:]:  # Lancer: Cap, Watch
+            order.append({
+                "type": "chief",
+                "piece": piece["slot"],
+                "reason": piece["reason"],
+                "priority": "Lower (Lancer last)"
             })
 
         # Hero gear based on spender

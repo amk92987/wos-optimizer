@@ -127,7 +127,7 @@ All data must be traceable to sources in `data/upgrades/sources.json`:
 When answering upgrade cost questions:
 
 ```
-## Upgrade: Chief Gear Ring (Red-0 Step 1 → Step 2)
+## Upgrade: Chief Gear Coat (Infantry) - Red-0 Step 1 → Step 2
 
 ### Cost
 | Resource | Amount |
@@ -143,6 +143,9 @@ Whiteout Survival Wiki - Chief Gear (Grade A confidence)
 ### Next Step
 Red-0 Step 2 → Step 3 will cost...
 ```
+
+**Note:** Chief Gear has 6 slots: Coat, Pants (Infantry), Belt, Weapon (Marksman), Cap, Watch (Lancer).
+Keep all 6 at SAME TIER for set bonuses. When pushing to next tier, Infantry first.
 
 ## Confidence Rules
 
@@ -162,8 +165,8 @@ When wos-recommend needs cost data:
 
 Example integration:
 ```
-### [HIGH] Upgrade Chief Gear Ring to Red-1
-**Reason**: Universal attack buff, highest ROI
+### [HIGH] Upgrade Chief Gear Coat (Infantry) to Red-1
+**Reason**: Infantry frontline first when pushing to next tier (all 6 pieces at same tier for set bonus)
 **Cost**: 12,500 Hardened Alloy, 132 Polishing Solution, 21 Design Plan, 2 Lunar Amber
-**ROI**: High (global buff, affects all content)
+**ROI**: High (6-piece set bonus gives Attack to ALL troops)
 ```

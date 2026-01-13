@@ -27,7 +27,7 @@ profile = get_or_create_profile(db)
 # Load combat optimization guide
 GUIDE_PATH = PROJECT_ROOT / "data" / "guides" / "combat_optimization_audit.json"
 if GUIDE_PATH.exists():
-    with open(GUIDE_PATH) as f:
+    with open(GUIDE_PATH, encoding='utf-8') as f:
         COMBAT_GUIDE = json.load(f)
 else:
     COMBAT_GUIDE = {}
@@ -310,8 +310,8 @@ def render_stat_stacking_example():
                 <div>Battle Research Attack: {player_a.get('battle_research_attack', '')}</div>
                 <div>Battle Research Lethality: {player_a.get('battle_research_lethality', '')}</div>
                 <div>Daybreak Decorations: {player_a.get('daybreak_decorations', player_a.get('daybreak', ''))}</div>
-                <div>Chief Ring: {player_a.get('chief_ring', '')}</div>
-                <div>Chief Amulet: {player_a.get('chief_amulet', '')}</div>
+                <div>Chief Gear Set: {player_a.get('chief_gear_set', '')}</div>
+                <div>Chief Gear Infantry: {player_a.get('chief_gear_infantry', '')}</div>
                 <div>Charms: {player_a.get('charms', '')}</div>
                 <div>Pet Buff: {player_a.get('pet_buff', '')}</div>
             </div>
@@ -335,8 +335,8 @@ def render_stat_stacking_example():
                 <div>Battle Research Attack: {player_b.get('battle_research_attack', '')}</div>
                 <div>Battle Research Lethality: {player_b.get('battle_research_lethality', '')}</div>
                 <div>Daybreak Decorations: {player_b.get('daybreak_decorations', player_b.get('daybreak', ''))}</div>
-                <div>Chief Ring: {player_b.get('chief_ring', '')}</div>
-                <div>Chief Amulet: {player_b.get('chief_amulet', '')}</div>
+                <div>Chief Gear Set: {player_b.get('chief_gear_set', '')}</div>
+                <div>Chief Gear Infantry: {player_b.get('chief_gear_infantry', '')}</div>
                 <div>Charms: {player_b.get('charms', '')}</div>
                 <div>Pet Buff: {player_b.get('pet_buff', '')}</div>
             </div>

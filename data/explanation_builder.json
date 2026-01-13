@@ -177,35 +177,35 @@
         { "rank": 1, "type": "mechanic", "claim": "Joiner contribution is limited to one top-right expedition skill (with a cap of 4 selected member skills total).", "evidence_source_ids": ["SRC_HELP_RALLY_MEMBER_SKILLS", "SRC_WIKI_RALLY_BUFF_GUIDE"], "impact": "high" }
       ],
       "tradeoffs": ["If the hero is also your main field PvP carry, gear can still be worth it—but for field performance, not rally join value."],
-      "next_actions": ["Prioritize chief Ring/Amulet upgrades first.", "Only gear a joiner hero if they are also a top field PvP hero in your roster."]
+      "next_actions": ["Keep all 6 Chief Gear pieces at same tier for set bonus.", "Only gear a joiner hero if they are also a top field PvP hero in your roster."]
     },
 
-    "5_chief_gear_ring_first": {
-      "recommendation_id": "rec_chiefgear_ring_first",
-      "title": "Upgrade Chief Gear Ring first",
+    "5_chief_gear_same_tier": {
+      "recommendation_id": "rec_chiefgear_same_tier",
+      "title": "Keep all 6 Chief Gear pieces at same tier",
       "context": "global",
-      "confidence": { "grade": "B", "score": 0.86, "basis": ["verified_data", "economy"] },
-      "summary_one_liner": "Troop Attack applies everywhere, to all troops—Ring upgrades are the most universal power gain.",
+      "confidence": { "grade": "A", "score": 0.92, "basis": ["verified_data", "economy"] },
+      "summary_one_liner": "6-piece set bonus gives Attack to ALL troops—more valuable than pushing one piece ahead.",
       "reasons": [
-        { "rank": 1, "type": "data", "claim": "Chief Gear Ring provides global Troop Attack bonus to all classes.", "evidence_source_ids": ["SRC_WIKI_CHIEF_GEAR"], "impact": "high" },
-        { "rank": 2, "type": "economy", "claim": "Universal multipliers produce higher ROI for limited-resource players.", "evidence_source_ids": ["SRC_INTERNAL_ROI_RULES"], "impact": "medium" }
+        { "rank": 1, "type": "data", "claim": "Chief Gear 6-piece set bonus provides Attack boost to ALL troop types.", "evidence_source_ids": ["SRC_WIKI_CHIEF_GEAR"], "impact": "high" },
+        { "rank": 2, "type": "economy", "claim": "Set bonuses multiply with individual piece stats for maximum efficiency.", "evidence_source_ids": ["SRC_INTERNAL_ROI_RULES"], "impact": "medium" }
       ],
-      "tradeoffs": ["If your immediate goal is defense-only events, infantry defensive pieces can be temporarily prioritized—but you lose general ROI."],
-      "next_actions": ["Upgrade Ring → Amulet before spreading resources across all pieces."]
+      "tradeoffs": ["If you have extra materials after reaching a tier milestone, push Infantry first to next tier."],
+      "next_actions": ["Get all 6 pieces to same tier, then upgrade Infantry (Coat/Pants) first."]
     },
 
-    "6_chief_gear_amulet_second": {
-      "recommendation_id": "rec_chiefgear_amulet_second",
-      "title": "Upgrade Chief Gear Amulet second",
+    "6_chief_gear_infantry_priority": {
+      "recommendation_id": "rec_chiefgear_infantry_priority",
+      "title": "Upgrade Infantry Chief Gear (Coat/Pants) first when pushing to next tier",
       "context": "global",
-      "confidence": { "grade": "B", "score": 0.84, "basis": ["verified_data", "meta_labeled"] },
-      "summary_one_liner": "Amulet stats (Lethality/Damage scaling) are highly impactful in PvP/SvS outcomes.",
+      "confidence": { "grade": "A", "score": 0.88, "basis": ["verified_data", "meta_labeled"] },
+      "summary_one_liner": "Infantry engage first in battle and form frontline—their survivability protects your damage dealers.",
       "reasons": [
-        { "rank": 1, "type": "data", "claim": "Chief Gear Amulet provides Lethality/Damage bonuses.", "evidence_source_ids": ["SRC_WIKI_CHIEF_GEAR"], "impact": "high" },
-        { "rank": 2, "type": "meta", "claim": "Competitive play commonly prioritizes lethality/damage scaling early for PvP/SvS.", "evidence_source_ids": ["SRC_COMMUNITY_GUIDE_1", "SRC_COMMUNITY_GUIDE_2"], "impact": "medium" }
+        { "rank": 1, "type": "data", "claim": "Infantry troops engage first in combat sequence and absorb initial damage.", "evidence_source_ids": ["SRC_WIKI_COMBAT"], "impact": "high" },
+        { "rank": 2, "type": "meta", "claim": "Most competitive compositions run Infantry-heavy (80-100%) for frontline strength.", "evidence_source_ids": ["SRC_COMMUNITY_GUIDE_1", "SRC_COMMUNITY_GUIDE_2"], "impact": "medium" }
       ],
-      "tradeoffs": ["If you are focused on pure PvE (non-SvS), the relative value may be lower than Troop Attack."],
-      "next_actions": ["After Ring, push Amulet before evenly upgrading defensive pieces."]
+      "tradeoffs": ["If you run a Marksman-heavy composition (rare), adjust priority accordingly."],
+      "next_actions": ["After all 6 at same tier: Infantry (Coat/Pants) > Marksman (Belt/Weapon) > Lancer (Cap/Watch)."]
     },
 
     "7_field_pvp_molly_dps": {
@@ -232,7 +232,7 @@
         { "rank": 1, "type": "economy", "claim": "Low resource velocity increases the penalty of inefficient upgrades.", "evidence_source_ids": ["SRC_INTERNAL_SPENDER_RULES"], "impact": "high" }
       ],
       "tradeoffs": ["If you lead rallies frequently (rare for strict F2P), a leader hero may compete with field carry for gearing."],
-      "next_actions": ["Pick one primary field DPS hero for hero gear.", "Prioritize chief Ring/Amulet before second hero gearing."]
+      "next_actions": ["Pick one primary field DPS hero for hero gear.", "Keep all Chief Gear at same tier before investing in hero gear."]
     },
 
     "9_troop_ratio_default_meta": {

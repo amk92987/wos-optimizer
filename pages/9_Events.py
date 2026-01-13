@@ -26,7 +26,7 @@ profile = get_or_create_profile(db)
 # Load events guide
 EVENTS_PATH = PROJECT_ROOT / "data" / "events_guide.json"
 if EVENTS_PATH.exists():
-    with open(EVENTS_PATH) as f:
+    with open(EVENTS_PATH, encoding='utf-8') as f:
         EVENTS_GUIDE = json.load(f)
 else:
     EVENTS_GUIDE = {"events": {}, "cost_categories": {}, "priority_tiers": {}}

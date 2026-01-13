@@ -27,7 +27,7 @@ profile = get_or_create_profile(db)
 # Load battle strategies
 STRATEGIES_PATH = PROJECT_ROOT / "data" / "guides" / "battle_strategies.json"
 if STRATEGIES_PATH.exists():
-    with open(STRATEGIES_PATH) as f:
+    with open(STRATEGIES_PATH, encoding='utf-8') as f:
         BATTLE_STRATEGIES = json.load(f)
 else:
     BATTLE_STRATEGIES = {}

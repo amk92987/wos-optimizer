@@ -156,19 +156,20 @@ PRIORITIES SCALE: 1=low focus, 5=critical focus
 - PvE = Exploration stages
 - Gather = Resource gathering
 
-CHIEF GEAR (Global buffs - always active):
-| Piece | Stat | Priority |
-|-------|------|----------|
-| Ring | Troop Attack (All) | 1 - Upgrade first |
-| Amulet | Lethality/Damage | 2 - PvP decisive |
-| Gloves | Marksman Attack | 3 |
-| Boots | Lancer Attack | 4 |
-| Helmet | Infantry Defense | 5 |
-| Armor | Infantry Health | 6 |
+CHIEF GEAR (6 pieces, 2 per troop type):
+| Piece | Troop Type | Stats |
+|-------|------------|-------|
+| Coat | Infantry | Attack/Defense |
+| Pants | Infantry | Attack/Defense |
+| Belt | Marksman | Attack/Defense |
+| Weapon | Marksman | Attack/Defense |
+| Cap | Lancer | Attack/Defense |
+| Watch | Lancer | Attack/Defense |
 
-Quality: Common → Uncommon → Rare → Epic → Legendary → Mythic
-Goal: Mythic on Ring & Amulet first
-Note: Ring & Amulet affect ALL troops and stack with hero buffs
+SET BONUSES: 3-piece = Defense ALL troops. 6-piece = Attack ALL troops.
+CRITICAL: Keep all 6 pieces at SAME TIER for set bonuses.
+PRIORITY: Same tier first → Infantry (Coat/Pants) → Marksman (Belt/Weapon) → Lancer (Cap/Watch)
+Quality: Green → Blue → Purple → Gold → Pink/Red
 
 SPENDER-LEVEL GEAR PATHS:
 | Spender | Chief Gear | Hero Gear | Mistake Tolerance |
@@ -178,7 +179,7 @@ SPENDER-LEVEL GEAR PATHS:
 | Medium | Foundational | 3-4 heroes (strategic) | Medium |
 | Whale | Max everything | All core heroes | High |
 
-F2P RULES: Chief Gear Ring+Amulet first. Hero gear only on Molly OR Alonso. NEVER gear rally joiners.
+F2P RULES: All 6 Chief Gear to same tier. Infantry first when pushing next tier. Hero gear only on Molly OR Alonso. NEVER gear rally joiners.
 LOW SPENDER: Chief Gear still #1. Hero gear on daily-use multi-mode heroes only.
 HERO GEAR ROI: Rally joiner = very low. Rally leader = medium. Field PvP = high.
 

@@ -217,106 +217,90 @@
       }
     ],
 
-    "chief_gear": [
-      {
-        "id": "chiefgear_ring",
-        "slot": "ring",
-        "name": "Ring",
-        "primary_stat": "troop_attack_pct",
-        "benefits": "Universal - all classes",
-        "recommended_priority_rank": 1,
-        "tier": "highest_impact",
-        "stat_profiles": [
-          { "quality": "common", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] },
-          { "quality": "uncommon", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] },
-          { "quality": "rare", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] },
-          { "quality": "epic", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] },
-          { "quality": "legendary", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] },
-          { "quality": "mythic", "stats": [{ "stat": "troop_attack_pct", "value": 0 }] }
-        ],
-        "sources": ["SOURCE_WOS_WIKI"],
-        "notes": "Upgrade FIRST. Affects all troops, stacks with hero buffs."
+    "chief_gear": {
+      "_upgrade_strategy": {
+        "critical_rule": "Keep all 6 pieces at SAME TIER for set bonuses",
+        "set_bonuses": {
+          "3_piece": "Defense boost for ALL troop types",
+          "6_piece": "Attack boost for ALL troop types"
+        },
+        "upgrade_order_when_pushing": "Infantry (Coat/Pants) > Marksman (Belt/Weapon) > Lancer (Cap/Watch)"
       },
-      {
-        "id": "chiefgear_amulet",
-        "slot": "amulet",
-        "name": "Amulet",
-        "primary_stat": "troop_lethality_pct",
-        "benefits": "Universal - PvP focused",
-        "recommended_priority_rank": 2,
-        "tier": "highest_impact",
-        "stat_profiles": [
-          { "quality": "common", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] },
-          { "quality": "uncommon", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] },
-          { "quality": "rare", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] },
-          { "quality": "epic", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] },
-          { "quality": "legendary", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] },
-          { "quality": "mythic", "stats": [{ "stat": "troop_lethality_pct", "value": 0 }] }
-        ],
-        "sources": ["SOURCE_WOS_WIKI"],
-        "notes": "Upgrade SECOND. Lethality decisive in PvP & SvS."
-      },
-      {
-        "id": "chiefgear_gloves",
-        "slot": "gloves",
-        "name": "Gloves",
-        "primary_stat": "marksman_attack_pct",
-        "benefits": "Marksman heroes (Alonso, Philly)",
-        "recommended_priority_rank": 3,
-        "tier": "offensive_class",
-        "stat_profiles": [
-          { "quality": "common", "stats": [{ "stat": "marksman_attack_pct", "value": 0 }] },
-          { "quality": "mythic", "stats": [{ "stat": "marksman_attack_pct", "value": 0 }] }
-        ],
-        "sources": ["SOURCE_WOS_WIKI"],
-        "notes": "Important for Alonso/Molly-centric marches."
-      },
-      {
-        "id": "chiefgear_boots",
-        "slot": "boots",
-        "name": "Boots",
-        "primary_stat": "lancer_attack_pct",
-        "benefits": "Lancer heroes (Molly)",
-        "recommended_priority_rank": 4,
-        "tier": "offensive_class",
-        "stat_profiles": [
-          { "quality": "common", "stats": [{ "stat": "lancer_attack_pct", "value": 0 }] },
-          { "quality": "mythic", "stats": [{ "stat": "lancer_attack_pct", "value": 0 }] }
-        ],
-        "sources": ["SOURCE_WOS_WIKI"],
-        "notes": "Lancer attack scaling."
-      },
-      {
-        "id": "chiefgear_helmet",
-        "slot": "helmet",
-        "name": "Helmet",
-        "primary_stat": "infantry_defense_pct",
-        "benefits": "Infantry heroes (Natalia, Sergey, Flint)",
-        "recommended_priority_rank": 5,
-        "tier": "defensive",
-        "stat_profiles": [
-          { "quality": "common", "stats": [{ "stat": "infantry_defense_pct", "value": 0 }] },
-          { "quality": "mythic", "stats": [{ "stat": "infantry_defense_pct", "value": 0 }] }
-        ],
-        "sources": ["SOURCE_WOS_WIKI"],
-        "notes": "Defensive. Useful for garrison, Crazy Joe."
-      },
-      {
-        "id": "chiefgear_armor",
-        "slot": "armor",
-        "name": "Armor",
-        "primary_stat": "infantry_health_pct",
-        "benefits": "Infantry heroes",
-        "recommended_priority_rank": 6,
-        "tier": "defensive",
-        "stat_profiles": [
-          { "quality": "common", "stats": [{ "stat": "infantry_health_pct", "value": 0 }] },
-          { "quality": "mythic", "stats": [{ "stat": "infantry_health_pct", "value": 0 }] }
-        ],
-        "sources": ["SOURCE_WOS_WIKI"],
-        "notes": "Lowest priority. Infantry health."
-      }
-    ],
+      "pieces": [
+        {
+          "id": "chiefgear_coat",
+          "slot": "coat",
+          "name": "Coat",
+          "troop_type": "Infantry",
+          "primary_stat": "infantry_attack_defense",
+          "benefits": "Infantry Attack/Defense",
+          "recommended_priority_rank": 1,
+          "tier": "frontline",
+          "sources": ["SOURCE_WOS_WIKI"],
+          "notes": "Infantry frontline - engage first, need survivability. Upgrade first when pushing to next tier."
+        },
+        {
+          "id": "chiefgear_pants",
+          "slot": "pants",
+          "name": "Pants",
+          "troop_type": "Infantry",
+          "primary_stat": "infantry_attack_defense",
+          "benefits": "Infantry Attack/Defense",
+          "recommended_priority_rank": 2,
+          "tier": "frontline",
+          "sources": ["SOURCE_WOS_WIKI"],
+          "notes": "Infantry frontline - engage first, need survivability."
+        },
+        {
+          "id": "chiefgear_belt",
+          "slot": "belt",
+          "name": "Belt",
+          "troop_type": "Marksman",
+          "primary_stat": "marksman_attack_defense",
+          "benefits": "Marksman Attack/Defense",
+          "recommended_priority_rank": 3,
+          "tier": "damage_dealer",
+          "sources": ["SOURCE_WOS_WIKI"],
+          "notes": "Marksman - key damage dealers."
+        },
+        {
+          "id": "chiefgear_weapon",
+          "slot": "weapon",
+          "name": "Weapon",
+          "troop_type": "Marksman",
+          "primary_stat": "marksman_attack_defense",
+          "benefits": "Marksman Attack/Defense",
+          "recommended_priority_rank": 4,
+          "tier": "damage_dealer",
+          "sources": ["SOURCE_WOS_WIKI"],
+          "notes": "Marksman - key damage dealers."
+        },
+        {
+          "id": "chiefgear_cap",
+          "slot": "cap",
+          "name": "Cap",
+          "troop_type": "Lancer",
+          "primary_stat": "lancer_attack_defense",
+          "benefits": "Lancer Attack/Defense",
+          "recommended_priority_rank": 5,
+          "tier": "support",
+          "sources": ["SOURCE_WOS_WIKI"],
+          "notes": "Lancer - mid-line support, lowest priority."
+        },
+        {
+          "id": "chiefgear_watch",
+          "slot": "watch",
+          "name": "Watch",
+          "troop_type": "Lancer",
+          "primary_stat": "lancer_attack_defense",
+          "benefits": "Lancer Attack/Defense",
+          "recommended_priority_rank": 6,
+          "tier": "support",
+          "sources": ["SOURCE_WOS_WIKI"],
+          "notes": "Lancer - mid-line support, lowest priority."
+        }
+      ]
+    },
 
     "hero_gear": [
       {
@@ -408,7 +392,7 @@
         "allows_inefficiency": false,
         "chief_gear_priority": "absolute",
         "hero_gear_targets": ["Molly OR Alonso (not both)"],
-        "notes": "Chief Gear Ring+Amulet first. Hero gear only on primary field DPS. NEVER gear rally joiners."
+        "notes": "Chief Gear 6-piece set bonus first (all pieces same tier). Hero gear only on primary field DPS. NEVER gear rally joiners."
       },
       {
         "id": "spender_low",
@@ -426,7 +410,7 @@
         "allows_inefficiency": true,
         "chief_gear_priority": "foundational",
         "hero_gear_targets": ["Jeronimo (rally leader)", "Alonso (DPS)", "Molly (PvP)", "1 situational"],
-        "notes": "Ring & Amulet to Mythic early. Strategic hero gear investment."
+        "notes": "All Chief Gear to Legendary, then Infantry to Mythic first. Strategic hero gear investment."
       },
       {
         "id": "spender_whale",

@@ -111,23 +111,23 @@
       "icon": "gear",
       "tips": [
         {
-          "tip": "Ring > Amulet > everything else",
-          "detail": "Ring = universal Attack. Amulet = Lethality (damage multiplier). These affect ALL troops in ALL battles.",
+          "tip": "Keep all 6 Chief Gear pieces at SAME TIER for set bonuses",
+          "detail": "6-piece set bonus gives Attack to ALL troops. Don't max one piece while others lag behind - keep them even, then upgrade Infantry first.",
           "priority": "critical"
         },
         {
-          "tip": "Don't upgrade Helmet/Armor first",
-          "detail": "Common mistake: 'Infantry needs defense'. Wrong - damage wins fights. Dead enemies deal no damage.",
-          "priority": "high"
+          "tip": "Chief Gear priority: Infantry (Coat/Pants) > Marksman (Belt/Weapon) > Lancer (Cap/Watch)",
+          "detail": "When upgrading to next tier, do Infantry first. They're frontline and engage first in battle. Marksman are damage dealers. Lancer last.",
+          "priority": "critical"
         },
         {
           "tip": "Chief Gear > Hero Gear for most players",
-          "detail": "Chief Gear affects ALL heroes. Hero Gear only affects one hero. Prioritize Chief Gear unless you're a whale.",
+          "detail": "Chief Gear set bonuses affect ALL troops. Hero Gear only affects one hero. Prioritize Chief Gear unless you're a whale.",
           "priority": "high"
         },
         {
-          "tip": "Target Mythic quality for Ring and Amulet",
-          "detail": "Epic/Legendary are temporary. Mythic is the real goal. Focus resources on Ring and Amulet first.",
+          "tip": "Each gear piece boosts ONE troop type only",
+          "detail": "Coat/Pants = Infantry. Belt/Weapon = Marksman. Cap/Watch = Lancer. No universal pieces exist - set bonuses are the only way to boost all troops.",
           "priority": "medium"
         }
       ]
@@ -466,8 +466,13 @@
       "category": "combat"
     },
     {
-      "mistake": "Upgrading Chief Helmet/Armor before Ring/Amulet",
-      "correction": "Damage wins fights. Ring (Attack) and Amulet (Lethality) first always.",
+      "mistake": "Upgrading one Chief Gear piece to max while others lag behind",
+      "correction": "Keep all 6 pieces at SAME TIER for set bonuses. 6-piece Attack bonus helps ALL troops.",
+      "category": "chief_gear"
+    },
+    {
+      "mistake": "Prioritizing Lancer/Marksman Chief Gear over Infantry",
+      "correction": "Infantry engage first and form frontline. Upgrade order: Infantry (Coat/Pants) > Marksman (Belt/Weapon) > Lancer (Cap/Watch).",
       "category": "chief_gear"
     },
     {

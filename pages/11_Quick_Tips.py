@@ -27,7 +27,7 @@ profile = get_or_create_profile(db)
 # Load quick tips
 TIPS_PATH = PROJECT_ROOT / "data" / "guides" / "quick_tips.json"
 if TIPS_PATH.exists():
-    with open(TIPS_PATH) as f:
+    with open(TIPS_PATH, encoding='utf-8') as f:
         QUICK_TIPS = json.load(f)
 else:
     QUICK_TIPS = {"categories": {}, "most_common_mistakes": []}
@@ -76,6 +76,33 @@ def get_category_icon(icon):
     return icons.get(icon, "📌")
 
 
+def render_tip_card(title, detail, border_color, badge_text=None, badge_color=None):
+    """Render a single tip card with consistent styling across all tabs.
+
+    Args:
+        title: Main tip text (bold)
+        detail: Supporting detail text
+        border_color: Color for left border accent
+        badge_text: Optional badge text (e.g., priority label or category)
+        badge_color: Color for badge background (uses border_color if not specified)
+    """
+    badge_bg = badge_color or border_color
+    badge_html = ""
+    if badge_text:
+        badge_html = f'<span style="background: {badge_bg}; padding: 3px 10px; border-radius: 4px; font-size: 11px; white-space: nowrap; color: #fff;">{badge_text}</span>'
+
+    html = f'''<div style="background: rgba(74, 144, 217, 0.1); border-left: 4px solid {border_color}; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+<div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;">
+<div style="flex: 1;">
+<div style="font-weight: bold; color: #E8F4F8; font-size: 15px; margin-bottom: 6px;">{title}</div>
+<div style="color: #B8D4E8; font-size: 13px; line-height: 1.5;">{detail}</div>
+</div>
+{badge_html}
+</div>
+</div>'''
+    st.markdown(html, unsafe_allow_html=True)
+
+
 def render_category_tips(category_id, category_data):
     """Render tips for a single category."""
     icon = get_category_icon(category_data.get("icon", ""))
@@ -92,23 +119,13 @@ def render_category_tips(category_id, category_data):
             priority_color = get_priority_color(priority)
             priority_label = get_priority_label(priority)
 
-            st.markdown(f"""
-            <div style="background: rgba(74, 144, 217, 0.1); border-left: 4px solid {priority_color};
-                        padding: 12px; border-radius: 4px; margin-bottom: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div style="font-weight: bold; color: #E8F4F8; font-size: 15px; flex: 1;">
-                        {tip.get('tip', '')}
-                    </div>
-                    <span style="background: {priority_color}; padding: 2px 8px; border-radius: 4px;
-                                 font-size: 10px; margin-left: 8px; white-space: nowrap;">
-                        {priority_label}
-                    </span>
-                </div>
-                <div style="color: #B8D4E8; font-size: 13px; margin-top: 8px;">
-                    {tip.get('detail', '')}
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            render_tip_card(
+                title=tip.get('tip', ''),
+                detail=tip.get('detail', ''),
+                border_color=priority_color,
+                badge_text=priority_label,
+                badge_color=priority_color
+            )
 
 
 def render_critical_tips():
@@ -128,32 +145,24 @@ def render_critical_tips():
                     "detail": tip.get("detail", "")
                 })
 
-    st.markdown("### Critical Tips (Must Know)")
-    st.markdown("These are the most impactful pieces of knowledge. Get these wrong and you'll fall behind.")
+    st.markdown("### Critical Tips")
+    st.markdown("The most impactful knowledge. Get these wrong and you'll fall behind.")
 
     for tip in critical_tips:
-        st.markdown(f"""
-        <div style="background: rgba(74, 144, 217, 0.1); border-left: 4px solid #E74C3C;
-                    padding: 16px; border-radius: 8px; margin-bottom: 12px;">
-            <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 20px; margin-right: 8px;">{tip['icon']}</span>
-                <span style="color: #B8D4E8; font-size: 12px; font-weight: bold;">{tip['category']}</span>
-            </div>
-            <div style="font-weight: bold; color: #E8F4F8; font-size: 16px; margin-bottom: 8px;">
-                {tip['tip']}
-            </div>
-            <div style="color: #B8D4E8; font-size: 14px;">
-                {tip['detail']}
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        render_tip_card(
+            title=tip['tip'],
+            detail=tip['detail'],
+            border_color="#E74C3C",
+            badge_text=f"{tip['icon']} {tip['category']}",
+            badge_color="#555"
+        )
 
 
 def render_common_mistakes():
     """Render common mistakes section."""
     mistakes = QUICK_TIPS.get("most_common_mistakes", [])
 
-    st.markdown("### Most Common Mistakes")
+    st.markdown("### Common Mistakes")
     st.markdown("Things players do wrong that cost them progress or battles.")
 
     for mistake in mistakes:
@@ -161,22 +170,15 @@ def render_common_mistakes():
         categories = QUICK_TIPS.get("categories", {})
         cat_data = categories.get(category, {})
         icon = get_category_icon(cat_data.get("icon", ""))
+        cat_name = cat_data.get("name", category)
 
-        st.markdown(f"""
-        <div style="background: rgba(74, 144, 217, 0.1); padding: 12px; border-radius: 8px; margin-bottom: 8px;">
-            <div style="display: flex; align-items: flex-start;">
-                <span style="font-size: 18px; margin-right: 12px;">{icon}</span>
-                <div style="flex: 1;">
-                    <div style="color: #E74C3C; font-weight: bold; margin-bottom: 4px;">
-                        ❌ {mistake.get('mistake', '')}
-                    </div>
-                    <div style="color: #2ECC71;">
-                        ✓ {mistake.get('correction', '')}
-                    </div>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        render_tip_card(
+            title=mistake.get('mistake', ''),
+            detail=f"Do this: {mistake.get('correction', '')}",
+            border_color="#E74C3C",
+            badge_text=f"{icon} {cat_name}",
+            badge_color="#555"
+        )
 
 
 def render_quick_tips():
@@ -195,8 +197,8 @@ def render_quick_tips():
         render_critical_tips()
 
     with tab2:
-        st.markdown("### Tips by Category")
-        st.markdown("Expand each category to see all tips.")
+        st.markdown("### All Tips by Category")
+        st.markdown("Browse all tips organized by topic. Expand each category to explore.")
 
         categories = QUICK_TIPS.get("categories", {})
 

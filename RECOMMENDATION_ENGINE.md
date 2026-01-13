@@ -149,15 +149,21 @@ JOINER_HEROES = {
 
 **Purpose:** Recommend chief gear and hero gear upgrades using spender-aware rules.
 
-**Chief Gear Priority Order:**
-| Priority | Slot | Stat | Reason |
-|----------|------|------|--------|
-| 1 | Ring | Troop Attack (All) | Universal attack buff for ALL troops |
-| 2 | Amulet | Lethality/Damage | PvP decisive - affects kill rates |
-| 3 | Gloves | Marksman Attack | Boosts marksman heroes |
-| 4 | Boots | Lancer Attack | Boosts lancer heroes |
-| 5 | Helmet | Infantry Defense | Defensive - less impactful |
-| 6 | Armor | Infantry Health | Defensive - least priority |
+**Chief Gear Priority Strategy:**
+
+**CRITICAL:** Keep all 6 pieces at SAME TIER for set bonuses!
+- 3-piece bonus: Defense boost for ALL troop types
+- 6-piece bonus: Attack boost for ALL troop types
+
+**When Pushing to Next Tier:**
+| Priority | Slot | Troop Type | Reason |
+|----------|------|------------|--------|
+| 1 | Coat | Infantry | Frontline - engage first, need survivability |
+| 2 | Pants | Infantry | Frontline support |
+| 3 | Belt | Marksman | Key damage dealers |
+| 4 | Weapon | Marksman | Damage dealers |
+| 5 | Cap | Lancer | Mid-line support |
+| 6 | Watch | Lancer | Lowest priority |
 
 **Hero Gear Limits by Spender Type:**
 ```python
@@ -183,9 +189,10 @@ HERO_GEAR_LIMITS = {
 ```
 
 **Common Mistake Detection:**
-- Hero gear before Ring/Amulet at Legendary
+- Hero gear before Chief Gear 6-piece set at Legendary
 - Gearing joiner heroes (Jessie/Sergey)
-- Upgrading defensive gear before attack gear
+- Not keeping all 6 Chief Gear pieces at same tier (losing set bonus)
+- Upgrading Lancer/Marksman before Infantry when pushing to next tier
 
 ---
 

@@ -85,48 +85,56 @@ Chief Gear provides **global combat buffs** that apply to ALL heroes and troops.
 
 ### The 6 Chief Gear Pieces
 
-| Gear Piece | Primary Stat | Benefits | Priority |
-|------------|--------------|----------|----------|
-| **Ring** | Troop Attack (All) | Universal - all classes | 1 (Highest) |
-| **Amulet** | Troop Lethality/Damage | Universal - PvP focused | 2 |
-| **Gloves** | Marksman Attack | Marksman heroes (Alonso, Molly) | 3 |
-| **Boots** | Lancer Attack | Lancer heroes | 4 |
-| **Helmet** | Infantry Defense | Infantry heroes (Natalia, Sergey, Flint) | 5 |
-| **Armor** | Infantry Health | Infantry heroes | 6 |
+| Gear Piece | Troop Type | Stats | Priority |
+|------------|------------|-------|----------|
+| **Coat** | Infantry | Attack/Defense | 1 (when pushing next tier) |
+| **Pants** | Infantry | Attack/Defense | 2 |
+| **Belt** | Marksman | Attack/Defense | 3 |
+| **Weapon** | Marksman | Attack/Defense | 4 |
+| **Cap** | Lancer | Attack/Defense | 5 |
+| **Watch** | Lancer | Attack/Defense | 6 (lowest) |
+
+### Set Bonuses (CRITICAL)
+
+- **3-piece bonus:** Defense boost for ALL troop types
+- **6-piece bonus:** Attack boost for ALL troop types
+
+**CRITICAL RULE:** Keep all 6 pieces at the SAME TIER to maintain set bonuses!
 
 ### Quality Tiers (Lowest → Highest)
 
 1. Common → 2. Uncommon → 3. Rare → 4. Epic → 5. Legendary → 6. **Mythic**
 
-**Long-term goal:** Mythic on Ring & Amulet first.
+**Long-term goal:** All 6 pieces to Legendary first (for 6-piece bonus), then push to Mythic starting with Infantry.
 
-### Upgrade Priority (Community Consensus)
+### Upgrade Priority Strategy
 
-**Tier 1 - Highest Impact (Upgrade First):**
-1. **Ring** - Troop Attack scales everywhere
-2. **Amulet** - Lethality decisive in PvP & SvS
+**Step 1 - Set Bonus First:**
+- Keep ALL 6 pieces at the SAME TIER
+- Don't max one piece while others lag behind
+- The 6-piece Attack bonus benefits ALL your troops
 
-**Tier 2 - Offensive Class Scaling:**
-3. **Gloves** - Marksman Attack
-4. **Boots** - Lancer Attack
+**Step 2 - When Pushing to Next Tier (Infantry First):**
+1. **Coat** (Infantry) - Frontline engages first, needs survivability
+2. **Pants** (Infantry) - Frontline support
+3. **Belt** (Marksman) - Key damage dealers
+4. **Weapon** (Marksman) - Damage dealers
+5. **Cap** (Lancer) - Mid-line support
+6. **Watch** (Lancer) - Lowest priority
 
-**Tier 3 - Defensive/Situational:**
-5. **Helmet** - Infantry Defense
-6. **Armor** - Infantry Health (useful for garrison, Crazy Joe, defensive SvS)
+### Why Set Bonus First?
 
-### Why Ring & Amulet First?
-
-- They affect **all troops** (not just one class)
-- They apply to rallies, field PvP, defense, SvS scoring
-- They **stack multiplicatively** with hero expedition buffs
+- 6-piece Attack bonus affects **ALL troops** (not just one class)
+- Applies to rallies, field PvP, defense, SvS scoring
+- Stacks with hero expedition buffs
 
 ### Common Mistakes
 
 | Mistake | Why It's Wrong |
 |---------|----------------|
-| Upgrading Infantry gear first "because infantry tanks" | Infantry stats matter LESS than damage multipliers in PvP/SvS |
-| Over-investing in Epic/Legendary tiers | These are temporary; Mythic is the real target |
-| Ignoring Amulet lethality | Lethality directly impacts kill count & battle outcome |
+| Maxing one piece while others lag | You lose the 6-piece set bonus that helps ALL troops |
+| Upgrading Lancer/Marksman before Infantry | Infantry engage first - frontline survivability is critical |
+| Not maintaining same tier across all 6 pieces | Missing out on Attack bonus for ALL troop types |
 
 ---
 
@@ -176,11 +184,12 @@ If ANY condition fails → ROI collapses.
 
 ### Correct Investment Hierarchy
 
-1. **Chief Gear: Ring** (Troop Attack - universal)
-2. **Chief Gear: Amulet** (Lethality - PvP decisive)
-3. **Remaining Chief Gear**
-4. **Hero Gear on long-term core heroes** (if conditions met)
-5. **Hero Gear on situational heroes**
+1. **Chief Gear: All 6 pieces to same tier** (for 6-piece Attack set bonus)
+2. **Chief Gear: Push Infantry first** (Coat/Pants when upgrading to next tier)
+3. **Chief Gear: Marksman second** (Belt/Weapon)
+4. **Chief Gear: Lancer last** (Cap/Watch)
+5. **Hero Gear on long-term core heroes** (if conditions met)
+6. **Hero Gear on situational heroes**
 
 **Only whales can safely violate this order.**
 
@@ -188,7 +197,7 @@ If ANY condition fails → ROI collapses.
 
 - [ ] Hero is used as rally LEADER (not just joiner)
 - [ ] Hero remains relevant next generation
-- [ ] Chief Ring and Amulet at target tier FIRST
+- [ ] All 6 Chief Gear pieces at target tier FIRST (for set bonus)
 
 ---
 
@@ -208,9 +217,9 @@ If ANY condition fails → ROI collapses.
 **Reality:** Very limited resources. Cannot recover from mistakes quickly.
 
 **Chief Gear:** ABSOLUTE priority
-- Focus on 2-3 pieces ahead of rest
-- Do NOT rush Mythic on everything
-- Order: Ring → Amulet → Gloves → Boots → Helmet → Armor
+- Keep all 6 pieces at SAME TIER for set bonuses
+- 6-piece Attack bonus helps ALL troops
+- When pushing to next tier: Infantry (Coat/Pants) first
 
 **Hero Gear:** Extremely limited
 - Only 1 hero (primary field damage dealer)
@@ -223,8 +232,8 @@ If ANY condition fails → ROI collapses.
 **Reality:** Steady but slow income. Still punished by major misallocations.
 
 **Chief Gear:** Still #1 priority
-- Ring + Amulet pushed ahead
-- Can begin equalizing Gloves/Boots sooner
+- Keep all 6 pieces at same tier for set bonuses
+- Push Infantry (Coat/Pants) to next tier first
 
 **Hero Gear:** Selective (2 heroes max)
 - Must be used daily across multiple modes
@@ -237,8 +246,8 @@ If ANY condition fails → ROI collapses.
 **Reality:** Can sustain upgrades. Can recover from mistakes.
 
 **Chief Gear:** Foundational
-- Ring & Amulet to Mythic early
-- Rest follows closer behind
+- All 6 pieces to Legendary (for 6-piece Attack bonus)
+- Push Infantry to Mythic first, then Marksman
 
 **Hero Gear:** Strategic (3-4 heroes)
 - Priority: Rally leader → Primary DPS → Secondary DPS → Situational
@@ -324,7 +333,7 @@ If ANY condition fails → ROI collapses.
 Warn users when they:
 - Over-invest in hero gear
 - Gear joiners
-- Ignore Ring/Amulet progression
+- Don't keep all 6 Chief Gear pieces at same tier (losing set bonus)
 
 ### Core Truths
 
@@ -660,5 +669,5 @@ Every recommendation claim is tagged with a type:
 - **Do:** Gear Molly for field/solo PvP only; don't expect rally improvement
 
 #### Chief Gear Priority
-- **Why:** Global multiplier applies everywhere
-- **Do:** Ring → Amulet → Gloves/Boots to Mythic
+- **Why:** 6-piece set bonus gives Attack to ALL troops
+- **Do:** Keep all 6 pieces at same tier; when pushing next tier: Infantry → Marksman → Lancer

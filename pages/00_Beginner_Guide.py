@@ -268,7 +268,7 @@ with tab5:
     st.markdown("### Chief Gear & Charms")
     st.markdown("""
     Equipment for your chief (separate from hero gear):
-    - **Chief Gear** - 6 pieces, affects all troops. Ring and Amulet are highest priority.
+    - **Chief Gear** - 6 pieces (2 per troop type). Keep all at SAME TIER for 6-piece Attack set bonus. Infantry first when pushing to next tier.
     - **Chief Charms** - 6 charms, boost specific troop types. Focus on your main type.
     """)
 
