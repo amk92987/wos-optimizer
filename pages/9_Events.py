@@ -283,6 +283,37 @@ def render_event_card(event_id, event_data):
                 if key_heroes:
                     st.markdown(f"**Key Heroes:** {', '.join(key_heroes)}")
 
+            # Troop ratio if available
+            troop_ratio = event_data.get("troop_ratio", {})
+            if troop_ratio:
+                infantry = troop_ratio.get("infantry", "")
+                lancer = troop_ratio.get("lancer", "")
+                marksman = troop_ratio.get("marksman", "")
+                reasoning = troop_ratio.get("reasoning", "")
+
+                st.markdown("---")
+                st.markdown("### Recommended Troop Ratio")
+                st.markdown(f"""
+                <div style="background: rgba(74, 144, 217, 0.15); border-left: 4px solid #F39C12;
+                            padding: 12px 16px; border-radius: 8px; margin: 8px 0;">
+                    <div style="display: flex; gap: 24px; margin-bottom: 8px;">
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #3498DB;">{infantry}</div>
+                            <div style="font-size: 12px; color: #B8D4E8;">Infantry</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #2ECC71;">{lancer}</div>
+                            <div style="font-size: 12px; color: #B8D4E8;">Lancer</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="font-size: 24px; font-weight: bold; color: #E74C3C;">{marksman}</div>
+                            <div style="font-size: 12px; color: #B8D4E8;">Marksman</div>
+                        </div>
+                    </div>
+                    <div style="color: #B8D4E8; font-size: 13px; font-style: italic;">{reasoning}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
             # SvS Prep Phase day-by-day breakdown
             phases = event_data.get("phases", {})
             if phases:

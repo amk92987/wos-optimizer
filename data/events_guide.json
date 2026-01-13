@@ -64,6 +64,12 @@
           "Healer (Philly) is critical for sustain"
         ]
       },
+      "troop_ratio": {
+        "infantry": "0%",
+        "lancer": "10%",
+        "marksman": "90%",
+        "reasoning": "Maximum DPS focus. Bear doesn't kill troops quickly, so you want damage output. Marksman deals highest damage from back row."
+      },
       "f2p_friendly": true,
       "notes": "One of the best F2P events. Always participate."
     },
@@ -90,6 +96,12 @@
           "Similar to Bear Trap - exploration skills matter",
           "Coordinate with alliance for harder stages"
         ]
+      },
+      "troop_ratio": {
+        "infantry": "90%",
+        "lancer": "10%",
+        "marksman": "0%",
+        "reasoning": "Infantry kills enemies quickly before Marksman in back row can engage. In fast defensive battles, back row troops may never attack."
       },
       "f2p_friendly": true,
       "notes": "Good consistent rewards. Always participate."
