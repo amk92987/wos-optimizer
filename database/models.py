@@ -2,7 +2,7 @@
 
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, JSON, Text
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from datetime import datetime
 
 Base = declarative_base()
@@ -41,9 +41,9 @@ class User(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     last_login = Column(DateTime, nullable=True)
 
-    # Relationships
-    profiles = relationship("UserProfile", back_populates="user")
-    ai_conversations = relationship("AIConversation", back_populates="user")
+    # Relationships - cascade delete all child data when user is permanently deleted
+    profiles = relationship("UserProfile", back_populates="user", cascade="all, delete-orphan")
+    ai_conversations = relationship("AIConversation", back_populates="user", cascade="all, delete-orphan")
 
 
 class UserProfile(Base):
@@ -82,10 +82,10 @@ class UserProfile(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationships
+    # Relationships - cascade delete all child data when profile is deleted
     user = relationship("User", back_populates="profiles")
-    heroes = relationship("UserHero", back_populates="profile")
-    inventory = relationship("UserInventory", back_populates="profile")
+    heroes = relationship("UserHero", back_populates="profile", cascade="all, delete-orphan")
+    inventory = relationship("UserInventory", back_populates="profile", cascade="all, delete-orphan")
 
     # Farm account relationships (self-referential)
     linked_main_profile = relationship("UserProfile", remote_side=[id], foreign_keys=[linked_main_profile_id], backref="farm_accounts")
@@ -230,8 +230,8 @@ class UserChiefGear(Base):
 
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationship
-    profile = relationship("UserProfile", backref="chief_gear")
+    # Relationship - cascade delete when profile is deleted
+    profile = relationship("UserProfile", backref=backref("chief_gear", cascade="all, delete-orphan"))
 
 
 class UserChiefCharm(Base):
@@ -273,8 +273,8 @@ class UserChiefCharm(Base):
 
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationship
-    profile = relationship("UserProfile", backref="chief_charms")
+    # Relationship - cascade delete when profile is deleted
+    profile = relationship("UserProfile", backref=backref("chief_charms", cascade="all, delete-orphan"))
 
 
 class UpgradeHistory(Base):

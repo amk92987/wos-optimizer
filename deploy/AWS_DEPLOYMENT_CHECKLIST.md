@@ -494,6 +494,40 @@ crontab -e
 - [ ] Review and clean old backups
 - [ ] Cost optimization review
 
+### 11.3 Email Setup for Password Resets
+
+**When to add:** Once you have 50+ users or get password reset requests
+
+**AWS SES Setup:**
+- [ ] Go to AWS Console → SES (Simple Email Service)
+- [ ] Verify your domain (adds DNS records)
+- [ ] Wait for DNS propagation (24-48 hours)
+- [ ] Request production access (moves out of sandbox)
+  - Submit request explaining use case: "User password reset emails"
+  - Wait for approval (24-48 hours)
+- [ ] Create SMTP credentials (SES → SMTP Settings → Create credentials)
+- [ ] Add to app environment variables:
+  ```
+  SMTP_HOST=email-smtp.<region>.amazonaws.com
+  SMTP_PORT=587
+  SMTP_USER=<ses-smtp-username>
+  SMTP_PASSWORD=<ses-smtp-password>
+  EMAIL_FROM=noreply@randomchaoslabs.com
+  ```
+
+**Code Changes Required:**
+- [ ] Add password reset request page
+- [ ] Add email sending utility function
+- [ ] Add password reset token generation
+- [ ] Add password reset confirmation page
+- [ ] Store reset tokens in database (with expiry)
+
+**Cost:** ~$0.10 per 1,000 emails (essentially free for small user base)
+
+**Until Email is Set Up:**
+- Admin can reset passwords manually via Admin → Users page
+- Users can contact support for password resets
+
 ---
 
 ## Reference Information

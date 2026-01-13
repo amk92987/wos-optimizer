@@ -705,16 +705,17 @@ with tab4:
     st.markdown("---")
 
     # Show thread indicator if there's an active conversation
-    if st.session_state.chat_messages:
-        msg_count = len([m for m in st.session_state.chat_messages if m['role'] == 'user'])
+    chat_messages = st.session_state.get('chat_messages', [])
+    if chat_messages:
+        msg_count = len([m for m in chat_messages if m['role'] == 'user'])
         if msg_count > 1:
             st.caption(f"💬 Conversation with {msg_count} messages • Follow-up questions will be added to this thread")
         elif msg_count == 1:
             st.caption("💬 New conversation • Ask follow-up questions to continue")
 
     # Display chat history
-    if st.session_state.chat_messages:
-        for msg in st.session_state.chat_messages:
+    if chat_messages:
+        for msg in chat_messages:
             if msg["role"] == "user":
                 st.markdown(f"""
                 <div style="
@@ -747,13 +748,13 @@ with tab4:
                 """, unsafe_allow_html=True)
 
         # Rating and bookmark buttons for the last message
-        if (st.session_state.chat_messages and
-            st.session_state.chat_messages[-1].get('role') == 'assistant' and
+        if (chat_messages and
+            chat_messages[-1].get('role') == 'assistant' and
             'last_ai_conversation_id' in st.session_state):
             col_rate1, col_rate2, col_bookmark, col_spacer = st.columns([1, 1, 1, 3])
 
             # Only show rating for AI responses
-            if st.session_state.chat_messages[-1].get('source') == 'ai':
+            if chat_messages[-1].get('source') == 'ai':
                 with col_rate1:
                     if st.button("👍 Helpful", key="rate_helpful"):
                         rate_conversation(db, st.session_state['last_ai_conversation_id'], is_helpful=True)

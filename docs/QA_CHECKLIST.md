@@ -84,6 +84,37 @@ Last Updated: 2026-01-12
    - Problem: Raw exception strings shown to users
    - Fix: Categorized errors with sanitized messages
 
+## Comprehensive System Review (Phase 2)
+
+### 7. Session State Management
+| Check | Files | Status | Notes |
+|-------|-------|--------|-------|
+| AI Advisor chat_messages access | 6_AI_Advisor.py | FIXED | Lines 708-757 - now uses .get() |
+| Dynamic state cleanup | Admin pages | MONITOR | Keys accumulate, low priority |
+| Auth state initialization | database/auth.py | OK | Centralized in init_session_state() |
+| Profile state access | 7_Save_Load.py | OK | Safe patterns used |
+
+### 8. Database Integrity
+| Check | Files | Status | Notes |
+|-------|-------|--------|-------|
+| Cascade deletes User→Profiles | models.py | POST-LAUNCH | Will orphan data if user deleted |
+| Cascade deletes Profile→Children | models.py | POST-LAUNCH | Same issue for profile deletion |
+| Foreign key validation | models.py | OK | Constraints in place |
+| Session management | db.py | OK | Works for expected traffic |
+| Enum validation (role, spending) | models.py | POST-LAUNCH | String columns, no constraints |
+
+### 9. System Features Verified
+| Feature | Pages | Status | Edge Cases Noted |
+|---------|-------|--------|------------------|
+| User Registration | auth_register.py | OK | No email verification (documented) |
+| User Login | auth_login.py | OK | Bcrypt works correctly |
+| Hero Tracker | 1_Hero_Tracker.py | OK | 42 heroes, all have images |
+| Chief Gear/Charms | 2_Chief_Tracker.py | OK | 42 tiers, 16 charm levels |
+| Lineups | 5_Lineups.py | OK | Generation-aware recommendations |
+| AI Advisor | 6_AI_Advisor.py | OK | Rate limiting, error handling |
+| Admin Dashboard | Admin pages (10) | OK | CRUD, impersonation working |
+| Settings | 13_Settings.py | OK | All profile fields saved |
+
 ## Known Issues (Not Blocking)
 
 ### Medium Priority
@@ -99,6 +130,14 @@ Last Updated: 2026-01-12
    - Mythic quality maps to tier 35, but data shows tier 42 max
    - Needs verification against game data
 
+4. **Missing cascade deletes** - models.py
+   - User deletion leaves orphaned profiles, heroes, inventory
+   - Recommend adding cascade='all, delete-orphan' post-launch
+
+5. **Dynamic session state accumulation** - Admin pages
+   - Keys like `editing_{id}` accumulate without cleanup
+   - Low impact, monitor for memory issues
+
 ### Low Priority
 1. **Skill description fallbacks** - 1_Hero_Tracker.py
    - Shows "Skill description coming soon" for missing data
@@ -107,6 +146,14 @@ Last Updated: 2026-01-12
 2. **Hardcoded hero names** - Multiple files
    - Works as long as heroes.json is in sync
    - Consider dynamic lookup validation
+
+3. **No password reset flow**
+   - Admin can reset via Admin → Users page
+   - Email setup planned post-launch
+
+4. **Rate limit uses UTC midnight**
+   - User sees reset at different local times
+   - Acceptable for initial launch
 
 ## Recommended Future Checks
 
@@ -133,12 +180,14 @@ Last Updated: 2026-01-12
 
 | File | Lines Changed | Type |
 |------|---------------|------|
-| pages/1_Hero_Tracker.py | 340 | Fix |
-| pages/5_Lineups.py | 88-91 | Fix |
-| pages/6_AI_Advisor.py | 322-331 | Fix |
-| pages/2_Chief_Tracker.py | 246-247 | Fix |
-| engine/recommendation_engine.py | 444-459 | Fix |
-| engine/ai_recommender.py | 478-504 | Fix |
+| pages/1_Hero_Tracker.py | 340 | Fix - self-closing img tag |
+| pages/5_Lineups.py | 88-91 | Fix - correct DB attributes |
+| pages/6_AI_Advisor.py | 322-331, 708-757 | Fix - error handling, session state |
+| pages/2_Chief_Tracker.py | 246-247 | Fix - null check |
+| engine/recommendation_engine.py | 444-459 | Fix - error sanitization |
+| engine/ai_recommender.py | 478-504 | Fix - JSON parsing safety |
+| deploy/AWS_DEPLOYMENT_CHECKLIST.md | 497-529 | Add - email setup section |
+| docs/QA_CHECKLIST.md | All | Add - comprehensive checklist |
 
 ## Testing Commands
 
