@@ -11,6 +11,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
+from engine.analyzers.lineup_builder import LineupBuilder, LINEUP_TEMPLATES, HERO_METADATA
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -222,6 +223,64 @@ def render_5hero_lineup(heroes: list, title: str = "", description: str = ""):
         render_hero_slot(hero["name"], hero_class, hero.get("role", ""), is_lead)
 
 
+def render_lineup_from_engine(lineup_rec, show_confidence: bool = True):
+    """Render a lineup from LineupRecommendation dataclass."""
+    # Show confidence indicator
+    if show_confidence:
+        confidence_colors = {"high": "#2ECC71", "medium": "#F1C40F", "low": "#E74C3C"}
+        confidence_labels = {"high": "Optimal", "medium": "Good", "low": "Limited"}
+        conf_color = confidence_colors.get(lineup_rec.confidence, "#808080")
+        conf_label = confidence_labels.get(lineup_rec.confidence, "Unknown")
+        st.markdown(f'<span style="background:{conf_color};color:white;padding:2px 8px;border-radius:4px;font-size:11px;">{conf_label} Lineup</span>', unsafe_allow_html=True)
+
+    # Render each hero slot
+    for hero_info in lineup_rec.heroes:
+        hero_name = hero_info.get("hero", "Unknown")
+        hero_class = hero_info.get("hero_class", "Unknown")
+        role = hero_info.get("role", "")
+        is_lead = hero_info.get("is_lead", False)
+        status = hero_info.get("status", "")
+
+        render_hero_slot(hero_name, hero_class, role, is_lead, status)
+
+    # Render troop ratio
+    ratio = lineup_rec.troop_ratio
+    render_troop_ratio(ratio.get("infantry", 33), ratio.get("lancer", 33), ratio.get("marksman", 34), lineup_rec.notes)
+
+
+def render_recommended_to_get(recommendations: list):
+    """Render the 'Recommended to Get' section for missing key heroes."""
+    if not recommendations:
+        return
+
+    st.markdown("### 🎯 Heroes to Get")
+    st.markdown("*Missing key heroes that would improve this lineup:*")
+
+    for rec in recommendations:
+        hero_name = rec.get("hero", "Unknown")
+        hero_class = rec.get("class", "Unknown")
+        reason = rec.get("reason", "")
+        gen = rec.get("gen", "?")
+
+        class_symbol = get_class_symbol(hero_class)
+
+        html = f'''<div style="background:rgba(255,215,0,0.15);border:1px solid #FFD700;border-radius:8px;padding:10px;margin:4px 0;display:flex;align-items:center;gap:12px;">
+            <div style="font-size:20px;">{class_symbol}</div>
+            <div style="flex:1;">
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="color:#FFD700;font-weight:bold;">{hero_name}</span>
+                    <span style="color:#808080;font-size:11px;">Gen {gen}</span>
+                </div>
+                <div style="color:#B8D4E8;font-size:12px;">{reason}</div>
+            </div>
+        </div>'''
+        st.markdown(html, unsafe_allow_html=True)
+
+
+# Initialize LineupBuilder
+LINEUP_BUILDER = LineupBuilder()
+
+
 # Page content
 st.markdown("# ⚔️ Best Lineups & Compositions")
 st.markdown("Optimal hero and troop setups for every game mode")
@@ -322,21 +381,17 @@ with tab_lineups:
         st.markdown("## 🗡️ Default World March")
         st.markdown("Standard 3-hero composition for attacks, rally joins, and general PvP")
 
-        # Get best available heroes for this mode (Jeronimo favored for damage output)
-        inf_main, inf_avail = get_best_available_hero(["Jeronimo", "Natalia", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
-        lan_main, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
-        mar_main, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
+        # Build lineup using engine
+        if USE_PERSONALIZED:
+            lineup = LINEUP_BUILDER.build_personalized_lineup("world_march", USER_HEROES, ACTIVE_GEN)
+        else:
+            lineup = LINEUP_BUILDER.build_general_lineup("world_march", ACTIVE_GEN)
 
         col1, col2 = st.columns(2)
 
         with col1:
-            st.markdown("### Main March (Recommended)")
-            render_3hero_lineup(
-                infantry={"name": inf_main, "role": "Primary tank, sustain", "lead": True, "avail": inf_avail},
-                lancer={"name": lan_main, "role": "Damage + healing support", "avail": lan_avail},
-                marksman={"name": mar_main, "role": "Main damage dealer", "avail": mar_avail}
-            )
-            render_troop_ratio(50, 20, 30, "Balanced default - community consensus")
+            st.markdown("### Your Recommended Lineup")
+            render_lineup_from_engine(lineup)
 
             with st.expander("📝 Strategy Notes"):
                 st.markdown("""
@@ -347,30 +402,12 @@ with tab_lineups:
                 """)
 
         with col2:
-            st.markdown("### Alternative Compositions")
-
-            # Get sustain/tank heroes (Natalia for when infantry dies too fast)
-            inf_sustain, inf_sustain_avail = get_best_available_hero(["Natalia", "Jeronimo"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
-
-            st.markdown("**Sustain Focus:**")
-            render_3hero_lineup(
-                infantry={"name": inf_sustain, "role": "Tank & sustain", "lead": True, "avail": inf_sustain_avail},
-                lancer={"name": lan_main, "role": "Healing", "avail": lan_avail},
-                marksman={"name": mar_main, "role": "Damage dealer", "avail": mar_avail}
-            )
-            st.caption("Use when your infantry dies before fights end")
-
-            # Get marksman heavy heroes
-            lan_alt, lan_alt_avail = get_best_available_hero(["Zinman", "Molly", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
-            mar_alt, mar_alt_avail = get_best_available_hero(["Philly", "Alonso", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
-
-            st.markdown("**Marksman Heavy:**")
-            render_3hero_lineup(
-                infantry={"name": inf_main, "role": "Tank", "lead": True, "avail": inf_avail},
-                lancer={"name": lan_alt, "role": "Lancer support", "avail": lan_alt_avail},
-                marksman={"name": mar_alt, "role": "Ranged focus", "avail": mar_alt_avail}
-            )
-            st.caption("Good against slower infantry comps")
+            if USE_PERSONALIZED and lineup.recommended_to_get:
+                render_recommended_to_get(lineup.recommended_to_get)
+            else:
+                st.markdown("### Alternative Compositions")
+                st.markdown("**Sustain Focus:** Use Natalia lead when infantry dies before fights end")
+                st.markdown("**Marksman Heavy:** Good against slower infantry comps")
 
     # =============================================================================
     # SvS CASTLE ATTACK
@@ -381,42 +418,30 @@ with tab_lineups:
 
         st.warning("Castle attacks are **attrition fights**. The side whose infantry survives longest usually wins.")
 
-        # Get heroes for this mode
-        inf_jer, inf_jer_avail = get_best_available_hero(["Jeronimo", "Natalia", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
-        inf_nat, inf_nat_avail = get_best_available_hero(["Natalia", "Jeronimo", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
-        lan_main, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
-        mar_main, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
+        # Build lineup using engine
+        if USE_PERSONALIZED:
+            lineup = LINEUP_BUILDER.build_personalized_lineup("svs_attack", USER_HEROES, ACTIVE_GEN)
+        else:
+            lineup = LINEUP_BUILDER.build_general_lineup("svs_attack", ACTIVE_GEN)
 
         col1, col2 = st.columns(2)
 
         with col1:
             st.markdown("### Rally Leader")
             st.markdown("*When YOU are leading the castle rally*")
-            render_3hero_lineup(
-                infantry={"name": inf_jer, "role": "ATK boost to entire rally", "lead": True, "avail": inf_jer_avail},
-                lancer={"name": lan_main, "role": "Healing + damage", "avail": lan_avail},
-                marksman={"name": mar_main, "role": "Main damage dealer", "avail": mar_avail}
-            )
-            render_troop_ratio(50, 20, 30, "Standard attack ratio")
-
-            st.caption("See the Natalia vs Jeronimo box above for when to swap leads!")
+            render_lineup_from_engine(lineup)
+            st.caption("See the **Natalia vs Jeronimo** tab for when to swap leads!")
 
         with col2:
-            st.markdown("### Rally Joiner")
-            st.markdown("*When joining someone else's rally*")
-            render_3hero_lineup(
-                infantry={"name": inf_nat, "role": "Survivability", "lead": True, "avail": inf_nat_avail},
-                lancer={"name": lan_main, "role": "Support", "avail": lan_avail},
-                marksman={"name": mar_main, "role": "Damage", "avail": mar_avail}
-            )
-            render_troop_ratio(60, 15, 25, "Tankier - keep troops alive")
+            if USE_PERSONALIZED and lineup.recommended_to_get:
+                render_recommended_to_get(lineup.recommended_to_get)
 
-            st.markdown("---")
-            st.markdown("**Best Joiners (Expedition Skills):**")
+            st.markdown("### Rally Joiner Tips")
             st.markdown("""
-            - **Jessie** - ATK buffs for the rally
+            - **Jessie** - Best attack joiner (+25% DMG)
             - Use your strongest geared heroes
             - Dead troops = zero contribution
+            - Send tankier ratio (60/15/25) when joining
             """)
 
     # =============================================================================
@@ -428,34 +453,29 @@ with tab_lineups:
 
         st.warning("Defense is about **surviving the rally timer**. Healing and tankiness > burst damage.")
 
+        # Build lineup using engine
+        if USE_PERSONALIZED:
+            lineup = LINEUP_BUILDER.build_personalized_lineup("garrison", USER_HEROES, ACTIVE_GEN)
+        else:
+            lineup = LINEUP_BUILDER.build_general_lineup("garrison", ACTIVE_GEN)
+
         col1, col2 = st.columns(2)
 
         with col1:
             st.markdown("### Garrison Leader")
             st.markdown("*If you are the garrison leader*")
-            render_3hero_lineup(
-                infantry={"name": "Natalia", "role": "Maximum survivability", "lead": True},
-                lancer={"name": "Molly", "role": "Healing defenders"},
-                marksman={"name": "Alonso", "role": "Counter damage"}
-            )
-            render_troop_ratio(60, 15, 25, "Heavy infantry for defense")
+            render_lineup_from_engine(lineup)
 
         with col2:
-            st.markdown("### Garrison Joiner")
-            st.markdown("*Reinforcing alliance garrison*")
-            render_3hero_lineup(
-                infantry={"name": "Natalia", "role": "Tank"},
-                lancer={"name": "Molly", "role": "Healing"},
-                marksman={"name": "Alonso", "role": "Support"}
-            )
-            render_troop_ratio(60, 20, 20, "Match garrison leader's strategy")
+            if USE_PERSONALIZED and lineup.recommended_to_get:
+                render_recommended_to_get(lineup.recommended_to_get)
 
-            st.markdown("---")
-            st.markdown("**Best Garrison Joiners:**")
+            st.markdown("### Best Garrison Joiners")
             st.markdown("""
-            - **Sergey** - Expedition skills reduce damage taken
+            - **Sergey** - Best garrison joiner (-20% DMG taken)
             - **Bahiti** - Sustain support
             - Prioritize heroes with defensive expedition skills
+            - Match garrison leader's troop ratio
             """)
 
     # =============================================================================
@@ -527,19 +547,18 @@ with tab_lineups:
         st.markdown("## 🐻 Bear Trap Rally")
         st.markdown("Alliance rally against Bear Trap boss")
 
-        if USE_PERSONALIZED:
-            st.caption(f"*Showing heroes from your profile*")
-        else:
-            st.caption(f"*Showing heroes for Generation {ACTIVE_GEN}*")
-
         st.info("""
         **📌 Rally Joiner Mechanics**
 
         Only the **top 4 highest level** expedition skills from joiners apply to the rally.
-
-        This is based on **skill level**, not player power. A level 5 Sergey skill would bump out a level 3 Jessie
-        skill - even though Jessie's +25% damage is far more valuable for attacks.
+        This is based on **skill level**, not player power.
         """)
+
+        # Build lineup using engine
+        if USE_PERSONALIZED:
+            lineup = LINEUP_BUILDER.build_personalized_lineup("bear_trap", USER_HEROES, ACTIVE_GEN)
+        else:
+            lineup = LINEUP_BUILDER.build_general_lineup("bear_trap", ACTIVE_GEN)
 
         tab_rally, tab_joins = st.tabs(["Rally Squad (Leader)", "Joining Strategy"])
 
@@ -547,17 +566,10 @@ with tab_lineups:
             st.markdown("### Rally Leader Setup")
             st.markdown("*When YOU are leading the rally - all 3 of your heroes' expedition skills apply*")
 
-            # Use mode-appropriate heroes
-            infantry_hero, inf_avail = get_best_available_hero(["Jeronimo", "Natalia", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
-            lancer_hero, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
-            marksman_hero, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
+            render_lineup_from_engine(lineup)
 
-            render_3hero_lineup(
-                infantry={"name": infantry_hero, "role": "ATK boost to rally", "lead": True, "avail": inf_avail},
-                lancer={"name": lancer_hero, "role": "Healing support", "avail": lan_avail},
-                marksman={"name": marksman_hero, "role": "Main damage dealer", "avail": mar_avail}
-            )
-            render_troop_ratio(20, 20, 60, "Heavy Marksman for maximum damage")
+            if USE_PERSONALIZED and lineup.recommended_to_get:
+                render_recommended_to_get(lineup.recommended_to_get)
 
             with st.expander("📝 Rally Leader Strategy"):
                 st.markdown("""
@@ -632,18 +644,22 @@ with tab_lineups:
 
         st.warning("Crazy Joe deals **massive AoE damage**. Healing and sustain are MORE important than Bear Trap!")
 
+        # Build lineup using engine
+        if USE_PERSONALIZED:
+            lineup = LINEUP_BUILDER.build_personalized_lineup("crazy_joe", USER_HEROES, ACTIVE_GEN)
+        else:
+            lineup = LINEUP_BUILDER.build_general_lineup("crazy_joe", ACTIVE_GEN)
+
         tab_rally, tab_joins = st.tabs(["Rally Squad (Leader)", "Your 6 Joining Marches"])
 
         with tab_rally:
             st.markdown("### Rally Squad")
             st.markdown("*Healing focus - Joe's AoE requires sustained survival*")
 
-            render_3hero_lineup(
-                infantry={"name": "Jeronimo", "role": "ATK multiplier", "lead": True},
-                lancer={"name": "Molly", "role": "CRITICAL - Team healing"},
-                marksman={"name": "Alonso", "role": "Sustained damage"}
-            )
-            render_troop_ratio(90, 10, 0, "Infantry-heavy - infantry kills before others engage")
+            render_lineup_from_engine(lineup)
+
+            if USE_PERSONALIZED and lineup.recommended_to_get:
+                render_recommended_to_get(lineup.recommended_to_get)
 
             st.markdown("""
             **Joe-specific mechanics:**
@@ -869,26 +885,23 @@ with tab_lineups:
         Check your heroes' exploration skill descriptions - they're different from expedition (PvP) skills.
         """)
 
+        # Build lineup using engine
+        if USE_PERSONALIZED:
+            lineup = LINEUP_BUILDER.build_personalized_lineup("exploration", USER_HEROES, ACTIVE_GEN)
+        else:
+            lineup = LINEUP_BUILDER.build_general_lineup("exploration", ACTIVE_GEN)
+
         col1, col2 = st.columns(2)
 
         with col1:
-            st.markdown("### Standard PvE Clear")
-            render_3hero_lineup(
-                infantry={"name": "Natalia", "role": "Tank for hard stages", "lead": True},
-                lancer={"name": "Molly", "role": "Healing sustain"},
-                marksman={"name": "Alonso", "role": "Damage dealer"}
-            )
-
-            st.markdown("Works for most exploration content")
+            st.markdown("### Your PvE Lineup")
+            render_lineup_from_engine(lineup)
 
         with col2:
-            st.markdown("### Hard Stage Push")
-            render_3hero_lineup(
-                infantry={"name": "Natalia", "role": "Survive waves", "lead": True},
-                lancer={"name": "Bahiti", "role": "Secondary healing"},
-                marksman={"name": "Alonso", "role": "Boss damage"}
-            )
+            if USE_PERSONALIZED and lineup.recommended_to_get:
+                render_recommended_to_get(lineup.recommended_to_get)
 
+            st.markdown("### Strategy Tips")
             st.markdown("""
             **For difficult stages:**
             - Double healer (Molly + Bahiti)
