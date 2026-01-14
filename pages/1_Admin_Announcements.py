@@ -31,9 +31,9 @@ db = get_db()
 
 # Ensure table exists
 from sqlalchemy import inspect
-inspector = inspect(db.bind)
+inspector = inspect(db.get_bind())
 if 'announcements' not in inspector.get_table_names():
-    Announcement.__table__.create(db.bind, checkfirst=True)
+    Announcement.__table__.create(db.get_bind(), checkfirst=True)
 
 # Tabs
 tab_active, tab_create, tab_archive = st.tabs(["📋 Active", "➕ Create New", "📦 Archive"])

@@ -226,12 +226,12 @@ def render_5hero_lineup(heroes: list, title: str = "", description: str = ""):
 st.markdown("# ⚔️ Best Lineups & Compositions")
 st.markdown("Optimal hero and troop setups for every game mode")
 
-st.markdown("---")
-
 # =============================================================================
 # MODE SELECTOR - General Guide vs Personalized
 # =============================================================================
-st.markdown("### How would you like to view lineups?")
+# Check if user has heroes to determine default mode
+preview_user_heroes = get_user_heroes(db, profile.id)
+default_mode_index = 1 if preview_user_heroes else 0  # Default to "My Setup" if heroes exist
 
 col_mode1, col_mode2 = st.columns(2)
 
@@ -239,6 +239,7 @@ with col_mode1:
     lineup_mode = st.radio(
         "Lineup Mode:",
         options=["General Guide", "My Setup (Personalized)"],
+        index=default_mode_index,
         help="General Guide shows ideal lineups by generation. Personalized uses your actual hero inventory."
     )
 
@@ -265,728 +266,707 @@ with col_mode2:
             USE_PERSONALIZED = False
             USER_HEROES = {}
 
-st.markdown("---")
-
 # =============================================================================
-# PROMINENT NATALIA VS JERONIMO EXPLANATION
+# MAIN TABS
 # =============================================================================
-with st.container():
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, rgba(255,140,0,0.2), rgba(138,43,226,0.2));
-                border: 2px solid #FF8C00; border-radius: 12px; padding: 20px; margin: 10px 0;">
-        <h3 style="color: #FFD700; margin-top: 0;">⚔️ The Natalia vs Jeronimo Debate</h3>
-        <p style="color: #E8F4F8; font-size: 14px;">
-            <strong>Legacy players often use Jeronimo as main march leader.</strong> This isn't wrong - it depends on your situation.
-        </p>
-        <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-top: 15px;">
-            <div style="flex: 1; min-width: 200px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
-                <strong style="color: #FF6B6B;">Jeronimo Lead - Better when:</strong>
-                <ul style="color: #B8D4E8; font-size: 13px; margin: 8px 0;">
-                    <li>Your infantry gear is strong enough to survive</li>
-                    <li>Rally coordination is tight</li>
-                    <li>You need maximum burst damage</li>
-                    <li>Enemy dies before your infantry</li>
-                </ul>
-            </div>
-            <div style="flex: 1; min-width: 200px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px;">
-                <strong style="color: #4ECDC4;">Natalia Lead - Better when:</strong>
-                <ul style="color: #B8D4E8; font-size: 13px; margin: 8px 0;">
-                    <li>Infantry dies before fight ends</li>
-                    <li>Enemy garrison is very strong</li>
-                    <li>You need sustained pressure over burst</li>
-                    <li>Undergeared or early game</li>
-                </ul>
-            </div>
-        </div>
-        <p style="color: #FFD700; font-size: 13px; margin-top: 15px; margin-bottom: 0;">
-            <strong>The Test:</strong> If your infantry dies before the fight ends, Natalia wins.
-            If you kill them first, Jeronimo's ATK multiplier is better. Both are valid!
-        </p>
-    </div>
-    """, unsafe_allow_html=True)
+tab_lineups, tab_debate = st.tabs(["Optimal Lineups", "Natalia vs Jeronimo"])
 
-st.markdown("---")
+with tab_debate:
+    st.markdown("### The Great Infantry Debate")
+    st.markdown("**Legacy players often use Jeronimo as main march leader.** This isn't wrong - it depends on your situation.")
 
-# Critical game mechanics
-st.info("""
-**📌 Rally Skill Mechanics**
+    col_jer, col_nat = st.columns(2)
 
-**Rally Joiner:** Only your **leftmost hero's expedition skill** contributes to the rally!
-- Up to **4 member skills** contribute total and can stack
-- This is why specific "joiner heroes" matter (Jessie, Sergey)
-- Your other 2 heroes and their skills DON'T contribute when joining
-""")
+    with col_jer:
+        st.error("**Jeronimo Lead - Better when:**")
+        st.markdown("""
+- Your infantry gear is strong enough to survive
+- Rally coordination is tight
+- You need maximum burst damage
+- Enemy dies before your infantry
+        """)
 
-st.markdown("---")
+    with col_nat:
+        st.success("**Natalia Lead - Better when:**")
+        st.markdown("""
+- Infantry dies before fight ends
+- Enemy garrison is very strong
+- You need sustained pressure over burst
+- Undergeared or early game
+        """)
 
-# Event selector
-st.markdown("## Select Game Mode")
+    st.info("**The Test:** If your infantry dies before the fight ends, Natalia wins. If you kill them first, Jeronimo's ATK multiplier is better. Both are valid!")
 
-event_categories = {
-    "PvP / SvS": ["World March (Default)", "SvS Castle Attack", "SvS Castle Defense", "SvS Field Battle"],
-    "Rallies": ["Bear Trap Rally", "Crazy Joe Rally", "Rally Joiner Setup"],
-    "Competitive": ["Arena (5 Heroes)", "Alliance Championship"],
-    "PvE": ["Exploration / Frozen Stages", "Gathering"],
-    "Alliance Events": ["Polar Terror", "Reservoir Raid"]
-}
+with tab_lineups:
+    # Critical game mechanics
+    st.info("**📌 Rally Skill Mechanics:** Only your **leftmost hero's expedition skill** contributes when joining rallies! Up to 4 member skills total can stack.")
 
-category = st.selectbox("Category:", list(event_categories.keys()))
-event_type = st.selectbox("Game Mode:", event_categories[category])
+    # Event selector
+    event_categories = {
+        "PvP / SvS": ["World March (Default)", "SvS Castle Attack", "SvS Castle Defense", "SvS Field Battle"],
+        "Rallies": ["Bear Trap Rally", "Crazy Joe Rally", "Rally Joiner Setup"],
+        "Competitive": ["Arena (5 Heroes)", "Alliance Championship"],
+        "PvE": ["Exploration / Frozen Stages", "Gathering"],
+        "Alliance Events": ["Polar Terror", "Reservoir Raid"]
+    }
 
-st.markdown("---")
+    category = st.selectbox("Category:", list(event_categories.keys()))
+    event_type = st.selectbox("Game Mode:", event_categories[category])
 
-# =============================================================================
-# WORLD MARCH (DEFAULT)
-# =============================================================================
-if event_type == "World March (Default)":
-    st.markdown("## 🗡️ Default World March")
-    st.markdown("Standard 3-hero composition for attacks, rally joins, and general PvP")
+    st.markdown("---")
 
-    # Get best available heroes for this mode
-    inf_main, inf_avail = get_best_available_hero(["Natalia", "Jeronimo", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
-    lan_main, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
-    mar_main, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
+    # =============================================================================
+    # WORLD MARCH (DEFAULT)
+    # =============================================================================
+    if event_type == "World March (Default)":
+        st.markdown("## 🗡️ Default World March")
+        st.markdown("Standard 3-hero composition for attacks, rally joins, and general PvP")
 
-    col1, col2 = st.columns(2)
+        # Get best available heroes for this mode (Jeronimo favored for damage output)
+        inf_main, inf_avail = get_best_available_hero(["Jeronimo", "Natalia", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
+        lan_main, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
+        mar_main, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
 
-    with col1:
-        st.markdown("### Main March (Recommended)")
-        render_3hero_lineup(
-            infantry={"name": inf_main, "role": "Primary tank, sustain", "lead": True, "avail": inf_avail},
-            lancer={"name": lan_main, "role": "Damage + healing support", "avail": lan_avail},
-            marksman={"name": mar_main, "role": "Main damage dealer", "avail": mar_avail}
-        )
-        render_troop_ratio(50, 20, 30, "Balanced default - community consensus")
+        col1, col2 = st.columns(2)
 
-        with st.expander("📝 Strategy Notes"):
+        with col1:
+            st.markdown("### Main March (Recommended)")
+            render_3hero_lineup(
+                infantry={"name": inf_main, "role": "Primary tank, sustain", "lead": True, "avail": inf_avail},
+                lancer={"name": lan_main, "role": "Damage + healing support", "avail": lan_avail},
+                marksman={"name": mar_main, "role": "Main damage dealer", "avail": mar_avail}
+            )
+            render_troop_ratio(50, 20, 30, "Balanced default - community consensus")
+
+            with st.expander("📝 Strategy Notes"):
+                st.markdown("""
+                - **Jeronimo lead** provides ATK multiplier for burst damage
+                - Swap to Natalia if your infantry dies before fights end
+                - Alonso scales well in longer fights
+                - Adjust troop ratio based on enemy composition
+                """)
+
+        with col2:
+            st.markdown("### Alternative Compositions")
+
+            # Get sustain/tank heroes (Natalia for when infantry dies too fast)
+            inf_sustain, inf_sustain_avail = get_best_available_hero(["Natalia", "Jeronimo"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
+
+            st.markdown("**Sustain Focus:**")
+            render_3hero_lineup(
+                infantry={"name": inf_sustain, "role": "Tank & sustain", "lead": True, "avail": inf_sustain_avail},
+                lancer={"name": lan_main, "role": "Healing", "avail": lan_avail},
+                marksman={"name": mar_main, "role": "Damage dealer", "avail": mar_avail}
+            )
+            st.caption("Use when your infantry dies before fights end")
+
+            # Get marksman heavy heroes
+            lan_alt, lan_alt_avail = get_best_available_hero(["Zinman", "Molly", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
+            mar_alt, mar_alt_avail = get_best_available_hero(["Philly", "Alonso", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
+
+            st.markdown("**Marksman Heavy:**")
+            render_3hero_lineup(
+                infantry={"name": inf_main, "role": "Tank", "lead": True, "avail": inf_avail},
+                lancer={"name": lan_alt, "role": "Lancer support", "avail": lan_alt_avail},
+                marksman={"name": mar_alt, "role": "Ranged focus", "avail": mar_alt_avail}
+            )
+            st.caption("Good against slower infantry comps")
+
+    # =============================================================================
+    # SvS CASTLE ATTACK
+    # =============================================================================
+    elif event_type == "SvS Castle Attack":
+        st.markdown("## 🏰 SvS Castle Attack")
+        st.markdown("Rally or march composition for taking enemy castles")
+
+        st.warning("Castle attacks are **attrition fights**. The side whose infantry survives longest usually wins.")
+
+        # Get heroes for this mode
+        inf_jer, inf_jer_avail = get_best_available_hero(["Jeronimo", "Natalia", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
+        inf_nat, inf_nat_avail = get_best_available_hero(["Natalia", "Jeronimo", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
+        lan_main, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
+        mar_main, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("### Rally Leader")
+            st.markdown("*When YOU are leading the castle rally*")
+            render_3hero_lineup(
+                infantry={"name": inf_jer, "role": "ATK boost to entire rally", "lead": True, "avail": inf_jer_avail},
+                lancer={"name": lan_main, "role": "Healing + damage", "avail": lan_avail},
+                marksman={"name": mar_main, "role": "Main damage dealer", "avail": mar_avail}
+            )
+            render_troop_ratio(50, 20, 30, "Standard attack ratio")
+
+            st.caption("See the Natalia vs Jeronimo box above for when to swap leads!")
+
+        with col2:
+            st.markdown("### Rally Joiner")
+            st.markdown("*When joining someone else's rally*")
+            render_3hero_lineup(
+                infantry={"name": inf_nat, "role": "Survivability", "lead": True, "avail": inf_nat_avail},
+                lancer={"name": lan_main, "role": "Support", "avail": lan_avail},
+                marksman={"name": mar_main, "role": "Damage", "avail": mar_avail}
+            )
+            render_troop_ratio(60, 15, 25, "Tankier - keep troops alive")
+
+            st.markdown("---")
+            st.markdown("**Best Joiners (Expedition Skills):**")
             st.markdown("""
-            - **Natalia lead** provides tankiness and sustain
-            - This lineup works for most content
-            - Alonso scales well in longer fights
-            - Adjust troop ratio based on enemy composition
+            - **Jessie** - ATK buffs for the rally
+            - Use your strongest geared heroes
+            - Dead troops = zero contribution
             """)
 
-    with col2:
-        st.markdown("### Alternative Compositions")
+    # =============================================================================
+    # SvS CASTLE DEFENSE
+    # =============================================================================
+    elif event_type == "SvS Castle Defense":
+        st.markdown("## 🛡️ SvS Castle Defense (Garrison)")
+        st.markdown("Defending YOUR castle from enemy rallies")
 
-        # Get burst damage heroes
-        inf_burst, inf_burst_avail = get_best_available_hero(["Jeronimo", "Natalia"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
+        st.warning("Defense is about **surviving the rally timer**. Healing and tankiness > burst damage.")
 
-        st.markdown("**Burst Damage Focus:**")
-        render_3hero_lineup(
-            infantry={"name": inf_burst, "role": "ATK multiplier", "lead": True, "avail": inf_burst_avail},
-            lancer={"name": lan_main, "role": "Damage", "avail": lan_avail},
-            marksman={"name": mar_main, "role": "Burst damage", "avail": mar_avail}
-        )
-        st.caption("Use when you need fast kills, not sustain")
+        col1, col2 = st.columns(2)
 
-        # Get marksman heavy heroes
-        lan_alt, lan_alt_avail = get_best_available_hero(["Zinman", "Molly", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
-        mar_alt, mar_alt_avail = get_best_available_hero(["Philly", "Alonso", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
+        with col1:
+            st.markdown("### Garrison Leader")
+            st.markdown("*If you are the garrison leader*")
+            render_3hero_lineup(
+                infantry={"name": "Natalia", "role": "Maximum survivability", "lead": True},
+                lancer={"name": "Molly", "role": "Healing defenders"},
+                marksman={"name": "Alonso", "role": "Counter damage"}
+            )
+            render_troop_ratio(60, 15, 25, "Heavy infantry for defense")
 
-        st.markdown("**Marksman Heavy:**")
-        render_3hero_lineup(
-            infantry={"name": inf_main, "role": "Tank", "lead": True, "avail": inf_avail},
-            lancer={"name": lan_alt, "role": "Lancer support", "avail": lan_alt_avail},
-            marksman={"name": mar_alt, "role": "Ranged focus", "avail": mar_alt_avail}
-        )
-        st.caption("Good against slower infantry comps")
+        with col2:
+            st.markdown("### Garrison Joiner")
+            st.markdown("*Reinforcing alliance garrison*")
+            render_3hero_lineup(
+                infantry={"name": "Natalia", "role": "Tank"},
+                lancer={"name": "Molly", "role": "Healing"},
+                marksman={"name": "Alonso", "role": "Support"}
+            )
+            render_troop_ratio(60, 20, 20, "Match garrison leader's strategy")
 
-# =============================================================================
-# SvS CASTLE ATTACK
-# =============================================================================
-elif event_type == "SvS Castle Attack":
-    st.markdown("## 🏰 SvS Castle Attack")
-    st.markdown("Rally or march composition for taking enemy castles")
-
-    st.warning("Castle attacks are **attrition fights**. The side whose infantry survives longest usually wins.")
-
-    # Get heroes for this mode
-    inf_jer, inf_jer_avail = get_best_available_hero(["Jeronimo", "Natalia", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
-    inf_nat, inf_nat_avail = get_best_available_hero(["Natalia", "Jeronimo", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
-    lan_main, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
-    mar_main, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("### Rally Leader")
-        st.markdown("*When YOU are leading the castle rally*")
-        render_3hero_lineup(
-            infantry={"name": inf_jer, "role": "ATK boost to entire rally", "lead": True, "avail": inf_jer_avail},
-            lancer={"name": lan_main, "role": "Healing + damage", "avail": lan_avail},
-            marksman={"name": mar_main, "role": "Main damage dealer", "avail": mar_avail}
-        )
-        render_troop_ratio(50, 20, 30, "Standard attack ratio")
-
-        st.caption("See the Natalia vs Jeronimo box above for when to swap leads!")
-
-    with col2:
-        st.markdown("### Rally Joiner")
-        st.markdown("*When joining someone else's rally*")
-        render_3hero_lineup(
-            infantry={"name": inf_nat, "role": "Survivability", "lead": True, "avail": inf_nat_avail},
-            lancer={"name": lan_main, "role": "Support", "avail": lan_avail},
-            marksman={"name": mar_main, "role": "Damage", "avail": mar_avail}
-        )
-        render_troop_ratio(60, 15, 25, "Tankier - keep troops alive")
-
-        st.markdown("---")
-        st.markdown("**Best Joiners (Expedition Skills):**")
-        st.markdown("""
-        - **Jessie** - ATK buffs for the rally
-        - Use your strongest geared heroes
-        - Dead troops = zero contribution
-        """)
-
-# =============================================================================
-# SvS CASTLE DEFENSE
-# =============================================================================
-elif event_type == "SvS Castle Defense":
-    st.markdown("## 🛡️ SvS Castle Defense (Garrison)")
-    st.markdown("Defending YOUR castle from enemy rallies")
-
-    st.warning("Defense is about **surviving the rally timer**. Healing and tankiness > burst damage.")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("### Garrison Leader")
-        st.markdown("*If you are the garrison leader*")
-        render_3hero_lineup(
-            infantry={"name": "Natalia", "role": "Maximum survivability", "lead": True},
-            lancer={"name": "Molly", "role": "Healing defenders"},
-            marksman={"name": "Alonso", "role": "Counter damage"}
-        )
-        render_troop_ratio(60, 15, 25, "Heavy infantry for defense")
-
-    with col2:
-        st.markdown("### Garrison Joiner")
-        st.markdown("*Reinforcing alliance garrison*")
-        render_3hero_lineup(
-            infantry={"name": "Natalia", "role": "Tank"},
-            lancer={"name": "Molly", "role": "Healing"},
-            marksman={"name": "Alonso", "role": "Support"}
-        )
-        render_troop_ratio(60, 20, 20, "Match garrison leader's strategy")
-
-        st.markdown("---")
-        st.markdown("**Best Garrison Joiners:**")
-        st.markdown("""
-        - **Sergey** - Expedition skills reduce damage taken
-        - **Bahiti** - Sustain support
-        - Prioritize heroes with defensive expedition skills
-        """)
-
-# =============================================================================
-# SvS FIELD BATTLE
-# =============================================================================
-elif event_type == "SvS Field Battle":
-    st.markdown("## ⚔️ SvS Field Battle")
-    st.markdown("Open field PvP during State vs State events")
-
-    st.warning("Field fights are **fast and chaotic**. Burst damage and positioning matter more than sustained fights.")
-
-    tab1, tab2, tab3 = st.tabs(["Infantry Rush", "Marksman Kite", "Balanced/Safe"])
-
-    with tab1:
-        st.markdown("### Infantry Rush")
-        st.markdown("*All-in Infantry damage for quick kills*")
-        render_3hero_lineup(
-            infantry={"name": "Jeronimo", "role": "Infantry ATK steroid", "lead": True},
-            lancer={"name": "Molly", "role": "Burst support"},
-            marksman={"name": "Alonso", "role": "Follow-up damage"}
-        )
-        render_troop_ratio(60, 15, 25, "Heavy infantry for rush")
-
-        st.markdown("""
-        **When to use:**
-        - Enemy has weak frontline
-        - You need fast eliminations
-        - Coordinated alliance pushes
-        """)
-
-    with tab2:
-        st.markdown("### Marksman Kite")
-        st.markdown("*Ranged damage composition*")
-        render_3hero_lineup(
-            infantry={"name": "Natalia", "role": "Tank while kiting", "lead": True},
-            lancer={"name": "Zinman", "role": "Lancer support"},
-            marksman={"name": "Philly", "role": "Ranged burst"}
-        )
-        render_troop_ratio(40, 15, 45, "Heavy marksman for range")
-
-        st.markdown("""
-        **When to use:**
-        - Against slower Infantry comps
-        - When you can maintain distance
-        - Hit-and-run tactics
-        """)
-
-    with tab3:
-        st.markdown("### Balanced / Safe")
-        st.markdown("*Well-rounded for unknown matchups*")
-        render_3hero_lineup(
-            infantry={"name": "Natalia", "role": "Tank", "lead": True},
-            lancer={"name": "Molly", "role": "Healing"},
-            marksman={"name": "Alonso", "role": "Damage"}
-        )
-        render_troop_ratio(50, 20, 30, "Standard balanced ratio")
-
-        st.markdown("""
-        **When to use:**
-        - Unknown enemy composition
-        - General field presence
-        - Not optimal but rarely hard-countered
-        """)
-
-# =============================================================================
-# BEAR TRAP RALLY
-# =============================================================================
-elif event_type == "Bear Trap Rally":
-    st.markdown("## 🐻 Bear Trap Rally")
-    st.markdown("Alliance rally against Bear Trap boss")
-
-    if USE_PERSONALIZED:
-        st.caption(f"*Showing heroes from your profile*")
-    else:
-        st.caption(f"*Showing heroes for Generation {ACTIVE_GEN}*")
-
-    st.info("""
-    **📌 Rally Joiner Mechanics**
-
-    Only the **top 4 highest level** expedition skills from joiners apply to the rally.
-
-    This is based on **skill level**, not player power. A level 5 Sergey skill would bump out a level 3 Jessie
-    skill - even though Jessie's +25% damage is far more valuable for attacks.
-    """)
-
-    tab_rally, tab_joins = st.tabs(["Rally Squad (Leader)", "Joining Strategy"])
-
-    with tab_rally:
-        st.markdown("### Rally Leader Setup")
-        st.markdown("*When YOU are leading the rally - all 3 of your heroes' expedition skills apply*")
-
-        # Use mode-appropriate heroes
-        infantry_hero, inf_avail = get_best_available_hero(["Jeronimo", "Natalia", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
-        lancer_hero, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
-        marksman_hero, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
-
-        render_3hero_lineup(
-            infantry={"name": infantry_hero, "role": "ATK boost to rally", "lead": True, "avail": inf_avail},
-            lancer={"name": lancer_hero, "role": "Healing support", "avail": lan_avail},
-            marksman={"name": marksman_hero, "role": "Main damage dealer", "avail": mar_avail}
-        )
-        render_troop_ratio(20, 20, 60, "Heavy Marksman for maximum damage")
-
-        with st.expander("📝 Rally Leader Strategy"):
+            st.markdown("---")
+            st.markdown("**Best Garrison Joiners:**")
             st.markdown("""
-            **Why Jeronimo lead is crucial:**
-            - His expedition skill provides massive Infantry ATK boost
-            - This buff applies to the ENTIRE rally, not just your troops
-
-            **When to use Natalia lead instead:**
-            - If infantry melts before fight ends
-            - Early game / undergeared rallies
-            - Survival > damage scenarios
-
-            **Troop ratio explanation:**
-            - 20% Infantry = just enough to survive
-            - 60% Marksman = maximum damage output
-            - This is aggressive - adjust if troops die too fast
+            - **Sergey** - Expedition skills reduce damage taken
+            - **Bahiti** - Sustain support
+            - Prioritize heroes with defensive expedition skills
             """)
 
-    with tab_joins:
-        st.markdown("### Joining Strategy")
+    # =============================================================================
+    # SvS FIELD BATTLE
+    # =============================================================================
+    elif event_type == "SvS Field Battle":
+        st.markdown("## ⚔️ SvS Field Battle")
+        st.markdown("Open field PvP during State vs State events")
 
+        st.warning("Field fights are **fast and chaotic**. Burst damage and positioning matter more than sustained fights.")
+
+        tab1, tab2, tab3 = st.tabs(["Infantry Rush", "Marksman Kite", "Balanced/Safe"])
+
+        with tab1:
+            st.markdown("### Infantry Rush")
+            st.markdown("*All-in Infantry damage for quick kills*")
+            render_3hero_lineup(
+                infantry={"name": "Jeronimo", "role": "Infantry ATK steroid", "lead": True},
+                lancer={"name": "Molly", "role": "Burst support"},
+                marksman={"name": "Alonso", "role": "Follow-up damage"}
+            )
+            render_troop_ratio(60, 15, 25, "Heavy infantry for rush")
+
+            st.markdown("""
+            **When to use:**
+            - Enemy has weak frontline
+            - You need fast eliminations
+            - Coordinated alliance pushes
+            """)
+
+        with tab2:
+            st.markdown("### Marksman Kite")
+            st.markdown("*Ranged damage composition*")
+            render_3hero_lineup(
+                infantry={"name": "Natalia", "role": "Tank while kiting", "lead": True},
+                lancer={"name": "Zinman", "role": "Lancer support"},
+                marksman={"name": "Philly", "role": "Ranged burst"}
+            )
+            render_troop_ratio(40, 15, 45, "Heavy marksman for range")
+
+            st.markdown("""
+            **When to use:**
+            - Against slower Infantry comps
+            - When you can maintain distance
+            - Hit-and-run tactics
+            """)
+
+        with tab3:
+            st.markdown("### Balanced / Safe")
+            st.markdown("*Well-rounded for unknown matchups*")
+            render_3hero_lineup(
+                infantry={"name": "Natalia", "role": "Tank", "lead": True},
+                lancer={"name": "Molly", "role": "Healing"},
+                marksman={"name": "Alonso", "role": "Damage"}
+            )
+            render_troop_ratio(50, 20, 30, "Standard balanced ratio")
+
+            st.markdown("""
+            **When to use:**
+            - Unknown enemy composition
+            - General field presence
+            - Not optimal but rarely hard-countered
+            """)
+
+    # =============================================================================
+    # BEAR TRAP RALLY
+    # =============================================================================
+    elif event_type == "Bear Trap Rally":
+        st.markdown("## 🐻 Bear Trap Rally")
+        st.markdown("Alliance rally against Bear Trap boss")
+
+        if USE_PERSONALIZED:
+            st.caption(f"*Showing heroes from your profile*")
+        else:
+            st.caption(f"*Showing heroes for Generation {ACTIVE_GEN}*")
+
+        st.info("""
+        **📌 Rally Joiner Mechanics**
+
+        Only the **top 4 highest level** expedition skills from joiners apply to the rally.
+
+        This is based on **skill level**, not player power. A level 5 Sergey skill would bump out a level 3 Jessie
+        skill - even though Jessie's +25% damage is far more valuable for attacks.
+        """)
+
+        tab_rally, tab_joins = st.tabs(["Rally Squad (Leader)", "Joining Strategy"])
+
+        with tab_rally:
+            st.markdown("### Rally Leader Setup")
+            st.markdown("*When YOU are leading the rally - all 3 of your heroes' expedition skills apply*")
+
+            # Use mode-appropriate heroes
+            infantry_hero, inf_avail = get_best_available_hero(["Jeronimo", "Natalia", "Flint"], USER_HEROES, "Infantry", USE_PERSONALIZED, ACTIVE_GEN)
+            lancer_hero, lan_avail = get_best_available_hero(["Molly", "Zinman", "Bahiti"], USER_HEROES, "Lancer", USE_PERSONALIZED, ACTIVE_GEN)
+            marksman_hero, mar_avail = get_best_available_hero(["Alonso", "Philly", "Logan"], USER_HEROES, "Marksman", USE_PERSONALIZED, ACTIVE_GEN)
+
+            render_3hero_lineup(
+                infantry={"name": infantry_hero, "role": "ATK boost to rally", "lead": True, "avail": inf_avail},
+                lancer={"name": lancer_hero, "role": "Healing support", "avail": lan_avail},
+                marksman={"name": marksman_hero, "role": "Main damage dealer", "avail": mar_avail}
+            )
+            render_troop_ratio(20, 20, 60, "Heavy Marksman for maximum damage")
+
+            with st.expander("📝 Rally Leader Strategy"):
+                st.markdown("""
+                **Why Jeronimo lead is crucial:**
+                - His expedition skill provides massive Infantry ATK boost
+                - This buff applies to the ENTIRE rally, not just your troops
+
+                **When to use Natalia lead instead:**
+                - If infantry melts before fight ends
+                - Early game / undergeared rallies
+                - Survival > damage scenarios
+
+                **Troop ratio explanation:**
+                - 20% Infantry = just enough to survive
+                - 60% Marksman = maximum damage output
+                - This is aggressive - adjust if troops die too fast
+                """)
+
+        with tab_joins:
+            st.markdown("### Joining Strategy")
+
+            st.warning("""
+            **⚠️ IMPORTANT: Should you use heroes when joining?**
+
+            Only the **top 4 highest level** expedition skills apply. If your hero has a high-level skill that's
+            not useful for attacks (like Sergey's defensive skill), it could bump out someone's lower-level
+            Jessie - which has a much better damage multiplier.
+            """)
+
+            # Show valuable joiner heroes that are available
+            st.markdown("### Heroes Worth Using as Joiner")
+            st.markdown("*Only use these heroes in your leftmost slot - they have valuable rally expedition skills:*")
+
+            valuable_joiners = [
+                ("Jeronimo", "Infantry", "Infantry ATK buff (scales with level)", 1),
+                ("Jessie", "Marksman", "+5/10/15/20/25% DMG dealt (per level)", 1),
+                ("Jasser", "Marksman", "Rally damage buff (scales with level)", 7),
+                ("Seo-yoon", "Marksman", "Rally damage buff (scales with level)", 8),
+            ]
+
+            available_joiners = []
+            for name, hero_class, skill, gen in valuable_joiners:
+                if gen <= ACTIVE_GEN:
+                    available_joiners.append((name, hero_class, skill))
+                    render_hero_slot(name, hero_class, skill, False)
+
+            if not available_joiners:
+                st.markdown("*No valuable joiner heroes available at Gen 1 - join with troops only*")
+
+            st.markdown("---")
+
+            st.markdown("### If You DON'T Have These Heroes")
+            st.success("""
+            **Join with TROOPS ONLY (no heroes)**
+
+            - Send your troops to contribute damage
+            - Don't put any heroes in the march
+            - This prevents your leveled-up but wrong skill (like Sergey) from bumping out a valuable damage multiplier
+            - Your troops still contribute to the rally damage!
+            """)
+
+            st.markdown("---")
+            st.markdown("### Troop Recommendations")
+            render_troop_ratio(20, 20, 60, "Match the rally leader's marksman-heavy strategy")
+
+    # =============================================================================
+    # CRAZY JOE RALLY
+    # =============================================================================
+    elif event_type == "Crazy Joe Rally":
+        st.markdown("## 🤪 Crazy Joe Rally")
+        st.markdown("Alliance rally against Crazy Joe boss - heavy AoE damage")
+
+        st.warning("Crazy Joe deals **massive AoE damage**. Healing and sustain are MORE important than Bear Trap!")
+
+        tab_rally, tab_joins = st.tabs(["Rally Squad (Leader)", "Your 6 Joining Marches"])
+
+        with tab_rally:
+            st.markdown("### Rally Squad")
+            st.markdown("*Healing focus - Joe's AoE requires sustained survival*")
+
+            render_3hero_lineup(
+                infantry={"name": "Jeronimo", "role": "ATK multiplier", "lead": True},
+                lancer={"name": "Molly", "role": "CRITICAL - Team healing"},
+                marksman={"name": "Alonso", "role": "Sustained damage"}
+            )
+            render_troop_ratio(90, 10, 0, "Infantry-heavy - infantry kills before others engage")
+
+            st.markdown("""
+            **Joe-specific mechanics:**
+            - Infantry engages FIRST in combat order
+            - If infantry stats are high enough, they defeat all bandits before Lancers/Marksmen attack
+            - This is why 90/10/0 works - back row never gets to fight
+            - Molly's healing still valuable for survival
+            """)
+
+        with tab_joins:
+            st.markdown("### Your 6 Joining Marches")
+            st.markdown("*Survival matters even more for joiners against Joe*")
+
+            st.markdown("Same 90/10/0 infantry-heavy approach:")
+            st.markdown("""
+            - Infantry engages and kills before other troops attack
+            - Send Infantry when reinforcing cities for max kill participation
+            - Heroes with healing/sustain still valuable for survival
+            """)
+            render_troop_ratio(90, 10, 0, "Match the infantry-heavy strategy")
+
+    # =============================================================================
+    # RALLY JOINER SETUP
+    # =============================================================================
+    elif event_type == "Rally Joiner Setup":
+        st.markdown("## 🤝 Rally Joiner Best Practices")
+        st.markdown("Optimizing your contribution when joining someone else's rally")
+
+        st.info("""
+        **⚠️ CRITICAL JOINER MECHANIC**
+
+        When joining a rally, only your **leftmost hero's expedition skill** is used!
+        - Your other 2 heroes contribute NOTHING to rally buffs
+        - Up to **4 member skills** total contribute to a rally
+        - Member skills CAN stack if they're the same effect
+        """)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("### Best Joiner Heroes")
+
+            st.markdown("**🔥 Attack/Rally Joiners:**")
+            st.markdown("""
+            Heroes whose **expedition skill** buffs damage:
+            """)
+            render_hero_slot("Jessie", "Marksman", "Stand of Arms: +5-25% DMG dealt (scales with level)", False)
+            st.caption("Best attack joiner - affects ALL damage types including skills, pets, teammates")
+
+            st.markdown("**🛡️ Garrison Joiners:**")
+            st.markdown("""
+            Heroes whose **expedition skill** reduces damage:
+            """)
+            render_hero_slot("Sergey", "Infantry", "Defenders' Edge: -4-20% DMG reduction (scales with level)", False)
+            st.caption("Best garrison joiner - universal damage reduction")
+
+        with col2:
+            st.markdown("### Joiner Priorities")
+
+            st.info("""
+            **Key Understanding:**
+
+            Only ONE skill per joiner matters (leftmost hero's expedition skill).
+
+            What matters most:
+            1. **Leftmost hero selection** - choose for their expedition skill
+            2. **Troop survival** - dead troops = zero contribution
+            3. **Troop tier** - T9/T10 significantly outperform lower tiers
+            """)
+
+            st.markdown("### Joiner Investment Priority")
+            st.markdown("""
+            Joiner heroes (Jessie, Sergey, etc.) should:
+            - ✅ Have functional gear (legendary is fine)
+            - ✅ Be leveled appropriately
+            - ❌ NOT get premium resources (Stones, Mithril)
+            - ❌ NOT be prioritized over main heroes
+
+            They are **support**, not core investments.
+            """)
+
+    # =============================================================================
+    # ARENA (5 HEROES)
+    # =============================================================================
+    elif event_type == "Arena (5 Heroes)":
+        st.markdown("## 🏟️ Arena (5-Hero Lineup)")
+        st.markdown("1v1 PvP arena battles - this is the ONLY common mode with 5 heroes")
+
+        st.info("Arena is **asynchronous** - you fight AI-controlled enemy teams. Frontline survival wins.")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("### Arena Offense")
+            st.markdown("*Attacking enemy defense teams*")
+
+            render_5hero_lineup([
+                {"name": "Natalia", "class": "Infantry", "role": "Primary tank", "lead": True},
+                {"name": "Flint", "class": "Infantry", "role": "Secondary tank / time buyer"},
+                {"name": "Alonso", "class": "Marksman", "role": "Main damage dealer"},
+                {"name": "Molly", "class": "Lancer", "role": "Healing + damage"},
+                {"name": "Philly", "class": "Marksman", "role": "Ranged burst"},
+            ])
+
+            st.markdown("""
+            **Why 2 Infantry frontline:**
+            - Arena rewards frontline durability
+            - Flint buys time for Alonso to ramp up
+            - Natalia + Flint = strongest Gen2 frontline
+            """)
+
+        with col2:
+            st.markdown("### Arena Defense")
+            st.markdown("*Team others will fight (AI controlled)*")
+
+            render_5hero_lineup([
+                {"name": "Natalia", "class": "Infantry", "role": "Hard to kill", "lead": True},
+                {"name": "Flint", "class": "Infantry", "role": "Absorb burst"},
+                {"name": "Molly", "class": "Lancer", "role": "Healing frustrates attackers"},
+                {"name": "Alonso", "class": "Marksman", "role": "Counter threat"},
+                {"name": "Bahiti", "class": "Lancer", "role": "Sustain"},
+            ])
+
+            st.markdown("""
+            **Defense philosophy:**
+            - AI controls your team
+            - Tankiness + healing = long fights
+            - Goal: timeout or discourage attacks
+            """)
+
+        st.markdown("---")
+        st.markdown("### Arena Investment Note")
         st.warning("""
-        **⚠️ IMPORTANT: Should you use heroes when joining?**
+        **Flint is NOT optional for Arena.**
 
-        Only the **top 4 highest level** expedition skills apply. If your hero has a high-level skill that's
-        not useful for attacks (like Sergey's defensive skill), it could bump out someone's lower-level
-        Jessie - which has a much better damage multiplier.
+        Many guides undervalue Flint, but at competitive levels:
+        - Flint's survivability and control scale extremely well
+        - He is a **mode specialist**, not "extra infantry"
+        - If you're serious about Arena, invest in Flint
         """)
 
-        # Show valuable joiner heroes that are available
-        st.markdown("### Heroes Worth Using as Joiner")
-        st.markdown("*Only use these heroes in your leftmost slot - they have valuable rally expedition skills:*")
+    # =============================================================================
+    # ALLIANCE CHAMPIONSHIP
+    # =============================================================================
+    elif event_type == "Alliance Championship":
+        st.markdown("## 🏆 Alliance Championship")
+        st.markdown("Alliance vs Alliance tournament - multiple rounds with hero restrictions")
 
-        valuable_joiners = [
-            ("Jeronimo", "Infantry", "Infantry ATK buff (scales with level)", 1),
-            ("Jessie", "Marksman", "+5/10/15/20/25% DMG dealt (per level)", 1),
-            ("Jasser", "Marksman", "Rally damage buff (scales with level)", 7),
-            ("Seo-yoon", "Marksman", "Rally damage buff (scales with level)", 8),
-        ]
+        st.error("""
+        **Heroes can only be used ONCE per Championship!**
 
-        available_joiners = []
-        for name, hero_class, skill, gen in valuable_joiners:
-            if gen <= ACTIVE_GEN:
-                available_joiners.append((name, hero_class, skill))
-                render_hero_slot(name, hero_class, skill, False)
-
-        if not available_joiners:
-            st.markdown("*No valuable joiner heroes available at Gen 1 - join with troops only*")
-
-        st.markdown("---")
-
-        st.markdown("### If You DON'T Have These Heroes")
-        st.success("""
-        **Join with TROOPS ONLY (no heroes)**
-
-        - Send your troops to contribute damage
-        - Don't put any heroes in the march
-        - This prevents your leveled-up but wrong skill (like Sergey) from bumping out a valuable damage multiplier
-        - Your troops still contribute to the rally damage!
+        You need **multiple developed teams** to compete effectively.
+        Plan your lineup usage across all battles.
         """)
 
-        st.markdown("---")
-        st.markdown("### Troop Recommendations")
-        render_troop_ratio(20, 20, 60, "Match the rally leader's marksman-heavy strategy")
+        tab1, tab2, tab3 = st.tabs(["Team 1 (Strongest)", "Team 2 (Secondary)", "Team 3+ (Depth)"])
 
-# =============================================================================
-# CRAZY JOE RALLY
-# =============================================================================
-elif event_type == "Crazy Joe Rally":
-    st.markdown("## 🤪 Crazy Joe Rally")
-    st.markdown("Alliance rally against Crazy Joe boss - heavy AoE damage")
+        with tab1:
+            st.markdown("### Team 1 - Main Squad")
+            st.markdown("*Use your absolute best heroes first*")
 
-    st.warning("Crazy Joe deals **massive AoE damage**. Healing and sustain are MORE important than Bear Trap!")
+            render_3hero_lineup(
+                infantry={"name": "Natalia", "role": "Best tank", "lead": True},
+                lancer={"name": "Molly", "role": "Best lancer"},
+                marksman={"name": "Alonso", "role": "Best damage"}
+            )
 
-    tab_rally, tab_joins = st.tabs(["Rally Squad (Leader)", "Your 6 Joining Marches"])
+            st.markdown("""
+            **Philosophy:**
+            - Don't save best heroes for "later"
+            - Win early rounds to build momentum
+            - Team 1 should be your most invested heroes
+            """)
 
-    with tab_rally:
-        st.markdown("### Rally Squad")
-        st.markdown("*Healing focus - Joe's AoE requires sustained survival*")
+        with tab2:
+            st.markdown("### Team 2 - Secondary")
+            st.markdown("*Second-best lineup after main heroes used*")
+
+            render_3hero_lineup(
+                infantry={"name": "Flint", "role": "Secondary infantry", "lead": True},
+                lancer={"name": "Zinman", "role": "Lancer damage"},
+                marksman={"name": "Philly", "role": "Ranged support"}
+            )
+
+            st.markdown("""
+            **Tips:**
+            - Use different class focus than Team 1
+            - Opponent may have countered your first strategy
+            - Flint often anchors Team 2 effectively
+            """)
+
+        with tab3:
+            st.markdown("### Team 3+ - Roster Depth")
+            st.markdown("*Fill with remaining developed heroes*")
+
+            render_3hero_lineup(
+                infantry={"name": "Jeronimo", "role": "Infantry option"},
+                lancer={"name": "Bahiti", "role": "Sustain"},
+                marksman={"name": "Logan", "role": "Fill"}
+            )
+
+            st.info("""
+            **Roster Depth Matters!**
+
+            For full Championship participation, you need:
+            - **9+ developed heroes** minimum (3 teams)
+            - **15+ heroes** for competitive depth
+            - Even "B-tier" heroes matter here
+
+            This is why you shouldn't over-focus on just 3 heroes.
+            """)
+
+    # =============================================================================
+    # EXPLORATION / PVE
+    # =============================================================================
+    elif event_type == "Exploration / Frozen Stages":
+        st.markdown("## 🗺️ Exploration / Frozen Stages")
+        st.markdown("PvE campaign content and frozen wasteland exploration")
+
+        st.info("""
+        **EXPLORATION Skills apply in PvE, not Expedition Skills!**
+
+        Check your heroes' exploration skill descriptions - they're different from expedition (PvP) skills.
+        """)
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("### Standard PvE Clear")
+            render_3hero_lineup(
+                infantry={"name": "Natalia", "role": "Tank for hard stages", "lead": True},
+                lancer={"name": "Molly", "role": "Healing sustain"},
+                marksman={"name": "Alonso", "role": "Damage dealer"}
+            )
+
+            st.markdown("Works for most exploration content")
+
+        with col2:
+            st.markdown("### Hard Stage Push")
+            render_3hero_lineup(
+                infantry={"name": "Natalia", "role": "Survive waves", "lead": True},
+                lancer={"name": "Bahiti", "role": "Secondary healing"},
+                marksman={"name": "Alonso", "role": "Boss damage"}
+            )
+
+            st.markdown("""
+            **For difficult stages:**
+            - Double healer (Molly + Bahiti)
+            - Prioritize survival over speed
+            - Retreat and retry with better gear
+            """)
+
+    # =============================================================================
+    # GATHERING
+    # =============================================================================
+    elif event_type == "Gathering":
+        st.markdown("## 📦 Gathering")
+        st.markdown("Resource gathering on the world map")
+
+        st.info("**Exploration skills** matter here - some heroes have gathering speed/load bonuses!")
+
+        render_3hero_lineup(
+            infantry={"name": "Sergey", "role": "Gathering support"},
+            lancer={"name": "Bahiti", "role": "Load capacity"},
+            marksman={"name": "Jessie", "role": "Gathering speed bonus", "lead": True}
+        )
+
+        st.markdown("""
+        **Gathering Tips:**
+        - **Jessie's** exploration skill boosts gathering speed
+        - Load capacity = more resources per trip
+        - Gathering heroes are **low priority** for combat upgrades
+        - Check hero exploration skills for gathering bonuses
+        """)
+
+    # =============================================================================
+    # POLAR TERROR
+    # =============================================================================
+    elif event_type == "Polar Terror":
+        st.markdown("## ❄️ Polar Terror")
+        st.markdown("Alliance boss event - all alliance members attack the same boss")
+
+        st.info("Your damage accumulates. Focus on dealing **maximum damage** before heroes die.")
 
         render_3hero_lineup(
             infantry={"name": "Jeronimo", "role": "ATK multiplier", "lead": True},
-            lancer={"name": "Molly", "role": "CRITICAL - Team healing"},
-            marksman={"name": "Alonso", "role": "Sustained damage"}
+            lancer={"name": "Molly", "role": "Some sustain"},
+            marksman={"name": "Alonso", "role": "Main damage"}
         )
-        render_troop_ratio(90, 10, 0, "Infantry-heavy - infantry kills before others engage")
+        render_troop_ratio(25, 15, 60, "Heavy damage focus")
 
         st.markdown("""
-        **Joe-specific mechanics:**
-        - Infantry engages FIRST in combat order
-        - If infantry stats are high enough, they defeat all bandits before Lancers/Marksmen attack
-        - This is why 90/10/0 works - back row never gets to fight
-        - Molly's healing still valuable for survival
+        **Polar Terror Tips:**
+        - Boss has very high DEF
+        - DEF reduction heroes are valuable
+        - Damage dealt = points for rewards
+        - Multiple attempts allowed - experiment!
         """)
 
-    with tab_joins:
-        st.markdown("### Your 6 Joining Marches")
-        st.markdown("*Survival matters even more for joiners against Joe*")
+    # =============================================================================
+    # RESERVOIR RAID
+    # =============================================================================
+    elif event_type == "Reservoir Raid":
+        st.markdown("## 💧 Reservoir Raid")
+        st.markdown("Timed challenge event - clear waves as fast as possible")
 
-        st.markdown("Same 90/10/0 infantry-heavy approach:")
-        st.markdown("""
-        - Infantry engages and kills before other troops attack
-        - Send Infantry when reinforcing cities for max kill participation
-        - Heroes with healing/sustain still valuable for survival
-        """)
-        render_troop_ratio(90, 10, 0, "Match the infantry-heavy strategy")
-
-# =============================================================================
-# RALLY JOINER SETUP
-# =============================================================================
-elif event_type == "Rally Joiner Setup":
-    st.markdown("## 🤝 Rally Joiner Best Practices")
-    st.markdown("Optimizing your contribution when joining someone else's rally")
-
-    st.info("""
-    **⚠️ CRITICAL JOINER MECHANIC**
-
-    When joining a rally, only your **leftmost hero's expedition skill** is used!
-    - Your other 2 heroes contribute NOTHING to rally buffs
-    - Up to **4 member skills** total contribute to a rally
-    - Member skills CAN stack if they're the same effect
-    """)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("### Best Joiner Heroes")
-
-        st.markdown("**🔥 Attack/Rally Joiners:**")
-        st.markdown("""
-        Heroes whose **expedition skill** buffs damage:
-        """)
-        render_hero_slot("Jessie", "Marksman", "Stand of Arms: +5-25% DMG dealt (scales with level)", False)
-        st.caption("Best attack joiner - affects ALL damage types including skills, pets, teammates")
-
-        st.markdown("**🛡️ Garrison Joiners:**")
-        st.markdown("""
-        Heroes whose **expedition skill** reduces damage:
-        """)
-        render_hero_slot("Sergey", "Infantry", "Defenders' Edge: -4-20% DMG reduction (scales with level)", False)
-        st.caption("Best garrison joiner - universal damage reduction")
-
-    with col2:
-        st.markdown("### Joiner Priorities")
-
-        st.info("""
-        **Key Understanding:**
-
-        Only ONE skill per joiner matters (leftmost hero's expedition skill).
-
-        What matters most:
-        1. **Leftmost hero selection** - choose for their expedition skill
-        2. **Troop survival** - dead troops = zero contribution
-        3. **Troop tier** - T9/T10 significantly outperform lower tiers
-        """)
-
-        st.markdown("### Joiner Investment Priority")
-        st.markdown("""
-        Joiner heroes (Jessie, Sergey, etc.) should:
-        - ✅ Have functional gear (legendary is fine)
-        - ✅ Be leveled appropriately
-        - ❌ NOT get premium resources (Stones, Mithril)
-        - ❌ NOT be prioritized over main heroes
-
-        They are **support**, not core investments.
-        """)
-
-# =============================================================================
-# ARENA (5 HEROES)
-# =============================================================================
-elif event_type == "Arena (5 Heroes)":
-    st.markdown("## 🏟️ Arena (5-Hero Lineup)")
-    st.markdown("1v1 PvP arena battles - this is the ONLY common mode with 5 heroes")
-
-    st.info("Arena is **asynchronous** - you fight AI-controlled enemy teams. Frontline survival wins.")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("### Arena Offense")
-        st.markdown("*Attacking enemy defense teams*")
-
-        render_5hero_lineup([
-            {"name": "Natalia", "class": "Infantry", "role": "Primary tank", "lead": True},
-            {"name": "Flint", "class": "Infantry", "role": "Secondary tank / time buyer"},
-            {"name": "Alonso", "class": "Marksman", "role": "Main damage dealer"},
-            {"name": "Molly", "class": "Lancer", "role": "Healing + damage"},
-            {"name": "Philly", "class": "Marksman", "role": "Ranged burst"},
-        ])
-
-        st.markdown("""
-        **Why 2 Infantry frontline:**
-        - Arena rewards frontline durability
-        - Flint buys time for Alonso to ramp up
-        - Natalia + Flint = strongest Gen2 frontline
-        """)
-
-    with col2:
-        st.markdown("### Arena Defense")
-        st.markdown("*Team others will fight (AI controlled)*")
-
-        render_5hero_lineup([
-            {"name": "Natalia", "class": "Infantry", "role": "Hard to kill", "lead": True},
-            {"name": "Flint", "class": "Infantry", "role": "Absorb burst"},
-            {"name": "Molly", "class": "Lancer", "role": "Healing frustrates attackers"},
-            {"name": "Alonso", "class": "Marksman", "role": "Counter threat"},
-            {"name": "Bahiti", "class": "Lancer", "role": "Sustain"},
-        ])
-
-        st.markdown("""
-        **Defense philosophy:**
-        - AI controls your team
-        - Tankiness + healing = long fights
-        - Goal: timeout or discourage attacks
-        """)
-
-    st.markdown("---")
-    st.markdown("### Arena Investment Note")
-    st.warning("""
-    **Flint is NOT optional for Arena.**
-
-    Many guides undervalue Flint, but at competitive levels:
-    - Flint's survivability and control scale extremely well
-    - He is a **mode specialist**, not "extra infantry"
-    - If you're serious about Arena, invest in Flint
-    """)
-
-# =============================================================================
-# ALLIANCE CHAMPIONSHIP
-# =============================================================================
-elif event_type == "Alliance Championship":
-    st.markdown("## 🏆 Alliance Championship")
-    st.markdown("Alliance vs Alliance tournament - multiple rounds with hero restrictions")
-
-    st.error("""
-    **Heroes can only be used ONCE per Championship!**
-
-    You need **multiple developed teams** to compete effectively.
-    Plan your lineup usage across all battles.
-    """)
-
-    tab1, tab2, tab3 = st.tabs(["Team 1 (Strongest)", "Team 2 (Secondary)", "Team 3+ (Depth)"])
-
-    with tab1:
-        st.markdown("### Team 1 - Main Squad")
-        st.markdown("*Use your absolute best heroes first*")
+        st.warning("**Speed is everything.** AoE damage and fast wave clear wins.")
 
         render_3hero_lineup(
-            infantry={"name": "Natalia", "role": "Best tank", "lead": True},
-            lancer={"name": "Molly", "role": "Best lancer"},
-            marksman={"name": "Alonso", "role": "Best damage"}
+            infantry={"name": "Jeronimo", "role": "AoE damage", "lead": True},
+            lancer={"name": "Molly", "role": "AoE support"},
+            marksman={"name": "Philly", "role": "Ranged AoE"}
         )
 
         st.markdown("""
-        **Philosophy:**
-        - Don't save best heroes for "later"
-        - Win early rounds to build momentum
-        - Team 1 should be your most invested heroes
+        **Speed Clear Tips:**
+        - Every second matters for leaderboard
+        - AoE > single target for wave content
+        - Overkill doesn't matter - just kill fast
+        - DEF reduction helps clear faster
         """)
 
-    with tab2:
-        st.markdown("### Team 2 - Secondary")
-        st.markdown("*Second-best lineup after main heroes used*")
-
-        render_3hero_lineup(
-            infantry={"name": "Flint", "role": "Secondary infantry", "lead": True},
-            lancer={"name": "Zinman", "role": "Lancer damage"},
-            marksman={"name": "Philly", "role": "Ranged support"}
-        )
-
-        st.markdown("""
-        **Tips:**
-        - Use different class focus than Team 1
-        - Opponent may have countered your first strategy
-        - Flint often anchors Team 2 effectively
-        """)
-
-    with tab3:
-        st.markdown("### Team 3+ - Roster Depth")
-        st.markdown("*Fill with remaining developed heroes*")
-
-        render_3hero_lineup(
-            infantry={"name": "Jeronimo", "role": "Infantry option"},
-            lancer={"name": "Bahiti", "role": "Sustain"},
-            marksman={"name": "Logan", "role": "Fill"}
-        )
-
-        st.info("""
-        **Roster Depth Matters!**
-
-        For full Championship participation, you need:
-        - **9+ developed heroes** minimum (3 teams)
-        - **15+ heroes** for competitive depth
-        - Even "B-tier" heroes matter here
-
-        This is why you shouldn't over-focus on just 3 heroes.
-        """)
-
-# =============================================================================
-# EXPLORATION / PVE
-# =============================================================================
-elif event_type == "Exploration / Frozen Stages":
-    st.markdown("## 🗺️ Exploration / Frozen Stages")
-    st.markdown("PvE campaign content and frozen wasteland exploration")
-
-    st.info("""
-    **EXPLORATION Skills apply in PvE, not Expedition Skills!**
-
-    Check your heroes' exploration skill descriptions - they're different from expedition (PvP) skills.
-    """)
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("### Standard PvE Clear")
-        render_3hero_lineup(
-            infantry={"name": "Natalia", "role": "Tank for hard stages", "lead": True},
-            lancer={"name": "Molly", "role": "Healing sustain"},
-            marksman={"name": "Alonso", "role": "Damage dealer"}
-        )
-
-        st.markdown("Works for most exploration content")
-
-    with col2:
-        st.markdown("### Hard Stage Push")
-        render_3hero_lineup(
-            infantry={"name": "Natalia", "role": "Survive waves", "lead": True},
-            lancer={"name": "Bahiti", "role": "Secondary healing"},
-            marksman={"name": "Alonso", "role": "Boss damage"}
-        )
-
-        st.markdown("""
-        **For difficult stages:**
-        - Double healer (Molly + Bahiti)
-        - Prioritize survival over speed
-        - Retreat and retry with better gear
-        """)
-
-# =============================================================================
-# GATHERING
-# =============================================================================
-elif event_type == "Gathering":
-    st.markdown("## 📦 Gathering")
-    st.markdown("Resource gathering on the world map")
-
-    st.info("**Exploration skills** matter here - some heroes have gathering speed/load bonuses!")
-
-    render_3hero_lineup(
-        infantry={"name": "Sergey", "role": "Gathering support"},
-        lancer={"name": "Bahiti", "role": "Load capacity"},
-        marksman={"name": "Jessie", "role": "Gathering speed bonus", "lead": True}
-    )
-
-    st.markdown("""
-    **Gathering Tips:**
-    - **Jessie's** exploration skill boosts gathering speed
-    - Load capacity = more resources per trip
-    - Gathering heroes are **low priority** for combat upgrades
-    - Check hero exploration skills for gathering bonuses
-    """)
-
-# =============================================================================
-# POLAR TERROR
-# =============================================================================
-elif event_type == "Polar Terror":
-    st.markdown("## ❄️ Polar Terror")
-    st.markdown("Alliance boss event - all alliance members attack the same boss")
-
-    st.info("Your damage accumulates. Focus on dealing **maximum damage** before heroes die.")
-
-    render_3hero_lineup(
-        infantry={"name": "Jeronimo", "role": "ATK multiplier", "lead": True},
-        lancer={"name": "Molly", "role": "Some sustain"},
-        marksman={"name": "Alonso", "role": "Main damage"}
-    )
-    render_troop_ratio(25, 15, 60, "Heavy damage focus")
-
-    st.markdown("""
-    **Polar Terror Tips:**
-    - Boss has very high DEF
-    - DEF reduction heroes are valuable
-    - Damage dealt = points for rewards
-    - Multiple attempts allowed - experiment!
-    """)
-
-# =============================================================================
-# RESERVOIR RAID
-# =============================================================================
-elif event_type == "Reservoir Raid":
-    st.markdown("## 💧 Reservoir Raid")
-    st.markdown("Timed challenge event - clear waves as fast as possible")
-
-    st.warning("**Speed is everything.** AoE damage and fast wave clear wins.")
-
-    render_3hero_lineup(
-        infantry={"name": "Jeronimo", "role": "AoE damage", "lead": True},
-        lancer={"name": "Molly", "role": "AoE support"},
-        marksman={"name": "Philly", "role": "Ranged AoE"}
-    )
-
-    st.markdown("""
-    **Speed Clear Tips:**
-    - Every second matters for leaderboard
-    - AoE > single target for wave content
-    - Overkill doesn't matter - just kill fast
-    - DEF reduction helps clear faster
-    """)
-
-# =============================================================================
+    # =============================================================================
 # FOOTER - REFERENCE SECTIONS
 # =============================================================================
 st.markdown("---")

@@ -452,6 +452,25 @@ Key point values:
 | 25 | Chief Charms |
 | 30 | FC, War Academy, Hero Gear Mastery |
 
+### Chief Charms System
+
+Unlocks at Furnace 25. Each gear piece has **3 charm slots of the SAME type**:
+
+| Gear Type | Pieces | Charm Type | Troop Buff |
+|-----------|--------|------------|------------|
+| Lancer | Cap, Watch | Keenness | Lancer stats |
+| Infantry | Coat, Pants | Protection | Infantry stats |
+| Marksman | Belt, Weapon | Vision | Marksman stats |
+
+**Level Progression:**
+- Levels 1-3: Simple progression
+- Levels 4-16: Sub-levels like FC construction (4-1 → 4-2 → 4-3 → 5)
+- Level 16 requires Gen 7
+
+**Database Model:** `UserChiefCharm` with fields like `cap_slot_1`, `cap_slot_2`, `cap_slot_3` (strings for sub-level support)
+
+**UI Layout:** Triangular arrangement per gear piece - 1 charm on top, 2 below
+
 ## Claude Skills
 
 Located in `.claude/skills/`:
@@ -500,7 +519,7 @@ py scripts/download_hero_images.py
 - Donate message on Homepage (under Quick Start) and AI Advisor page
 - Inline feedback form in user menu with hint to use AI Advisor for bad recommendations
 - Full feedback form on AI Advisor with "Report Bad Recommendation" option
-- Ko-fi URL: `https://ko-fi.com/bearsdenwos` (update in `app.py` line ~291 and `utils/toolbar.py`)
+- Ko-fi URL: `https://ko-fi.com/randomchaoslabs` (in `app.py` line ~291 and `utils/toolbar.py`)
 
 **AI Advisor Chat System (Jan 2026):**
 - **Chat History**: Messages persist within session, displayed in chat bubble format
@@ -558,6 +577,39 @@ py scripts/download_hero_images.py
 - Recommendations: Working - spending-aware, farm-aware
 - Lineups: Correct heroes and troop ratios
 - AI routing: 92.3% rules, 7.7% AI
+
+## Next Steps - Farm Account System
+
+**Farm Account Features (Priority Order):**
+
+1. **Test Account Generation** - Add farm profiles to test users in `scripts/test_ai_comprehensive.py`
+   - Farm profiles are F2P accounts used only for resource gathering
+   - No combat upgrades, minimal hero investment
+
+2. **Save/Load Page Enhancements:**
+   - Add "Mark as Farm Account" button next to Load/Preview/Delete buttons
+   - Button changes to "Farm Account" with different styling (color) when marked
+   - "This is a farm account" checkbox should sync with button state
+   - Add "State #" field to Save/Load (should tie to Settings screen)
+   - Fix vertical alignment - profile text (name, date, hero count) should be vertically centered with buttons
+
+3. **Cross-Account Linking:**
+   - Farm accounts must be in the same state as main account to link
+   - When user has a farm account, auto-check "I'm a resource farmer" on Packs page
+
+4. **Lineup Engine (IN PROGRESS):**
+   - Enhanced `LineupBuilder` with `build_personalized_lineup()` and `build_general_lineup()` methods
+   - Considers hero levels, stars, gear when ranking
+   - Generation-aware filtering
+   - "Recommended to Get" section for missing key heroes
+   - LINEUP_TEMPLATES define ideal heroes by event type
+
+## Lineups Page Restructure (Completed)
+
+- Added tabs: "Optimal Lineups" | "Natalia vs Jeronimo"
+- Debate content moved to separate tab using native Streamlit components
+- Main lineup content is now higher up on the page
+- Fixed cloudy text issue by removing text-shadow from CSS
 
 **Troop Ratio Reference (Infantry/Lancer/Marksman):**
 | Mode | Ratio | Reasoning |

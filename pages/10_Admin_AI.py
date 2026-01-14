@@ -269,17 +269,26 @@ with tab2:
             st.markdown(conv.answer)
 
             # Metadata
-            col1, col2, col3, col4 = st.columns(4)
+            col1, col2, col3, col4, col5 = st.columns(5)
             with col1:
-                st.caption(f"Provider: {conv.provider}")
+                # Source indicator (AI vs Engine)
+                source = conv.routed_to or conv.provider
+                if source == 'ai':
+                    st.caption("Source: 🤖 AI")
+                elif source == 'rules':
+                    st.caption("Source: ⚙️ Engine")
+                else:
+                    st.caption(f"Source: {source}")
             with col2:
-                st.caption(f"Model: {conv.model}")
+                st.caption(f"Provider: {conv.provider}")
             with col3:
+                st.caption(f"Model: {conv.model}")
+            with col4:
                 if conv.rating:
                     st.caption(f"Rating: {'⭐' * conv.rating}")
                 else:
                     st.caption("Rating: -")
-            with col4:
+            with col5:
                 if conv.is_helpful is True:
                     st.caption("Helpful: 👍")
                 elif conv.is_helpful is False:

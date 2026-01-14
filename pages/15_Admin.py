@@ -81,7 +81,7 @@ st.markdown("""
 
 /* Reduce text margins */
 p, .stMarkdown p {
-    margin-bottom: 0.15rem !important;
+    margin-bottom: 0 !important;
     line-height: 1.3 !important;
 }
 
@@ -92,11 +92,26 @@ p, .stMarkdown p {
     font-size: 12px !important;
 }
 
-/* Align items vertically in columns */
+/* Vertical alignment for all column content */
 [data-testid="column"] > div {
-    display: flex;
-    align-items: center;
-    min-height: 28px;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    min-height: 32px !important;
+}
+
+/* Button columns - align button to vertical center */
+[data-testid="column"] > div > div[data-testid="stVerticalBlock"] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100% !important;
+}
+
+/* Remove extra padding from button containers */
+.stButton {
+    margin: 0 !important;
+    padding: 0 !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -289,28 +304,31 @@ with tab_users:
         # User row with inline actions (11 columns)
         row_cols = st.columns([0.3, 1.2, 1.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.6, 0.5])
 
+        # Consistent cell style for vertical alignment with buttons
+        cell_style = "display:flex;align-items:center;height:32px;margin:0;"
+
         with row_cols[0]:
-            st.markdown(role_icon)
+            st.markdown(f"<div style='{cell_style}'>{role_icon}</div>", unsafe_allow_html=True)
 
         with row_cols[1]:
-            test_badge = " `TEST`" if getattr(user, 'is_test_account', False) else ""
-            label = f"**{user.username}**{test_badge}" + (" _(you)_" if is_self else "")
-            st.markdown(label)
+            test_badge = " <code>TEST</code>" if getattr(user, 'is_test_account', False) else ""
+            you_badge = " <em>(you)</em>" if is_self else ""
+            st.markdown(f"<div style='{cell_style}'><strong>{user.username}</strong>{test_badge}{you_badge}</div>", unsafe_allow_html=True)
 
         with row_cols[2]:
-            st.caption(user.email or "—")
+            st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{user.email or '—'}</div>", unsafe_allow_html=True)
 
         with row_cols[3]:
-            st.caption(user_state)
+            st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{user_state}</div>", unsafe_allow_html=True)
 
         with row_cols[4]:
-            st.markdown(f"<span class='{status_css}'>{status_label}</span>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_style}' class='{status_css}'>{status_label}</div>", unsafe_allow_html=True)
 
         with row_cols[5]:
-            st.markdown(f"<span class='{usage_css}'>{usage_label}</span>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_style}' class='{usage_css}'>{usage_label}</div>", unsafe_allow_html=True)
 
         with row_cols[6]:
-            st.caption(last_login)
+            st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{last_login}</div>", unsafe_allow_html=True)
 
         # Action buttons inline (no help param, no emoji issues)
         with row_cols[7]:

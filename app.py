@@ -24,7 +24,7 @@ from database.db import init_db, get_db, get_or_create_profile, get_user_profile
 from database.auth import (
     init_session_state, is_authenticated, is_admin, login_user, logout_user,
     authenticate_user, ensure_admin_exists, get_current_username, is_impersonating,
-    get_current_user_id, update_user_password
+    get_current_user_id, update_user_password, get_user_email, update_user_email
 )
 from database.models import Feedback
 
@@ -33,9 +33,12 @@ init_db()
 db = get_db()
 init_session_state()
 
+# Ensure admin exists before auto-login attempt
+ensure_admin_exists(db)
+
 # DEV MODE: Auto-login for local development
 # Controlled by ENVIRONMENT and DEV_AUTO_LOGIN env vars (see config.py)
-DEV_AUTO_LOGIN_USER = "Adam"  # Which user to auto-login as
+DEV_AUTO_LOGIN_USER = "admin"  # Which user to auto-login as
 
 if DEV_AUTO_LOGIN and not is_authenticated():
     from database.auth import get_user_by_username
@@ -128,10 +131,6 @@ if not is_authenticated():
 # ============================================
 # AUTHENTICATED USER FLOW (has sidebar)
 # ============================================
-
-# Ensure at least one admin exists (default: admin/admin123)
-if ensure_admin_exists(db):
-    st.toast("Default admin created: admin / admin123", icon="🔐")
 
 # Show impersonation banner if admin is viewing as another user
 if is_impersonating():
@@ -228,7 +227,7 @@ if is_admin_view:
 else:
     # Regular user navigation - game focused
     home_page = st.Page("pages/0_Home.py", title="Home", icon="🏠", default=True)
-    beginners_page = st.Page("pages/00_Beginner_Guide.py", title="Beginner Guide", icon="📖")
+    beginners_page = st.Page("pages/00_Beginner_Guide.py", title="Beginner Guide", icon="🔥")
 
     # Tracker section - tracking current status
     heroes_page = st.Page("pages/1_Hero_Tracker.py", title="Hero Tracker", icon="🦸")
@@ -237,7 +236,7 @@ else:
     # Analysis section
     lineups_page = st.Page("pages/5_Lineups.py", title="Lineups", icon="⚔️")
     packs_page = st.Page("pages/8_Packs.py", title="Packs", icon="📦")
-    ai_advisor_page = st.Page("pages/6_AI_Advisor.py", title="AI Advisor", icon="🤖")
+    ai_advisor_page = st.Page("pages/6_AI_Advisor.py", title="AI Advisor", icon="🧠")
 
     # Guides section
     items_page = st.Page("pages/3_Backpack.py", title="Backpack", icon="🎒")
@@ -268,6 +267,8 @@ with login_container:
     spacer, login_col = st.columns([6, 1])
     with login_col:
         username = get_current_username()
+        # Truncate long usernames for button display (full name shown inside popover)
+        display_name = username[:12] + "..." if len(username) > 15 else username
         # Crown for admin, helmet/shield for chief (user)
         if is_admin() and not is_impersonating():
             role_badge = "👑"
@@ -276,7 +277,7 @@ with login_container:
             role_badge = "🛡️"  # Shield for Chief
             role_title = "Chief"
 
-        with st.popover(f"{role_badge} {username}"):
+        with st.popover(f"{role_badge} {display_name}"):
             # Header with role
             st.markdown(f"""
             <div style="text-align: center; padding-bottom: 8px;">
@@ -290,7 +291,7 @@ with login_container:
 
             # Donate link - deeper orange for contrast, centered text
             st.markdown("""
-            <a href="https://ko-fi.com/bearsdenwos" target="_blank" style="
+            <a href="https://ko-fi.com/randomchaoslabs" target="_blank" style="
                 display: flex;
                 align-items: center;
                 justify-content: center;
@@ -368,6 +369,22 @@ with login_container:
                             st.success("Updated!")
                         else:
                             st.error("Failed")
+
+            # Email change section
+            with st.expander("📧 Change Email"):
+                current_email = get_user_email(db, get_current_user_id())
+                if current_email:
+                    st.caption(f"Current: {current_email}")
+                else:
+                    st.caption("No email set")
+                new_email = st.text_input("New Email", key="new_email_input", label_visibility="collapsed", placeholder="new@email.com")
+                if st.button("Update", key="update_email_btn", use_container_width=True):
+                    user_id = get_current_user_id()
+                    success, message = update_user_email(db, user_id, new_email)
+                    if success:
+                        st.success(message)
+                    else:
+                        st.error(message)
 
             # Profile switcher
             user_profiles = get_user_profiles(db)

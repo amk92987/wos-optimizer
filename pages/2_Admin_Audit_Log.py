@@ -31,9 +31,9 @@ db = get_db()
 
 # Ensure table exists
 from sqlalchemy import inspect
-inspector = inspect(db.bind)
+inspector = inspect(db.get_bind())
 if 'audit_log' not in inspector.get_table_names():
-    AuditLog.__table__.create(db.bind, checkfirst=True)
+    AuditLog.__table__.create(db.get_bind(), checkfirst=True)
 
 # Filters
 col1, col2, col3 = st.columns(3)

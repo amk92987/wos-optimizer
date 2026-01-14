@@ -487,6 +487,143 @@ def render_event_card(event_id, event_data):
                 for tip in fuel_tips:
                     st.markdown(f"- {tip}")
 
+            # Daily stages (Hall of Chiefs, King of Icefield)
+            daily_stages = event_data.get("daily_stages", {})
+            if daily_stages:
+                st.markdown("---")
+                st.markdown("### Daily Stages")
+
+                # Check if it's Hall of Chiefs format with gen_1/gen_2 sections
+                if "gen_1_season_1" in daily_stages or "gen_2_season_2_plus" in daily_stages:
+                    for season_key, season_data in daily_stages.items():
+                        if season_key.startswith("gen_"):
+                            duration = season_data.get("duration", "")
+                            hero = season_data.get("featured_hero", "")
+                            with st.expander(f"{hero} Season ({duration})", expanded=season_key == "gen_2_season_2_plus"):
+                                stages = season_data.get("stages", [])
+                                for stage in stages:
+                                    day = stage.get("day", "")
+                                    focus = stage.get("focus", "")
+                                    activities = stage.get("activities", "")
+                                    st.markdown(f"""
+                                    <div style="background: rgba(74, 144, 217, 0.1); border-left: 4px solid #4A90D9;
+                                                padding: 8px 12px; border-radius: 4px; margin-bottom: 6px;">
+                                        <span style="color: #FFD700; font-weight: bold;">Day {day}:</span>
+                                        <span style="color: #E8F4F8; font-weight: bold;"> {focus}</span>
+                                        <div style="color: #B8D4E8; font-size: 13px; margin-top: 4px;">{activities}</div>
+                                    </div>
+                                    """, unsafe_allow_html=True)
+                else:
+                    # King of Icefield format with stages array
+                    desc = daily_stages.get("description", "")
+                    if desc:
+                        st.caption(desc)
+                    stages = daily_stages.get("stages", [])
+                    for stage in stages:
+                        day = stage.get("day", "")
+                        focus = stage.get("focus", "")
+                        reward = stage.get("reward", "")
+                        activities = stage.get("activities", "")
+                        reward_color = "#FFD700" if "Shards" in reward else "#4A90D9"
+                        st.markdown(f"""
+                        <div style="background: rgba(74, 144, 217, 0.1); border-left: 4px solid {reward_color};
+                                    padding: 8px 12px; border-radius: 4px; margin-bottom: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span style="color: #FFD700; font-weight: bold;">Day {day}: {focus}</span>
+                                <span style="color: {reward_color}; font-size: 12px;">Reward: {reward}</span>
+                            </div>
+                            <div style="color: #B8D4E8; font-size: 13px; margin-top: 4px;">{activities}</div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+            # Victory Points (Alliance Showdown)
+            victory_points = event_data.get("victory_points", {})
+            if victory_points:
+                st.markdown("---")
+                st.markdown("### Victory Points")
+                desc = victory_points.get("description", "")
+                if desc:
+                    st.info(desc)
+
+                breakdown = victory_points.get("breakdown", [])
+                if breakdown:
+                    cols = st.columns(len(breakdown))
+                    for col, day_data in zip(cols, breakdown):
+                        day = day_data.get("day", "")
+                        points = day_data.get("points", 0)
+                        note = day_data.get("note", "")
+                        is_critical = points >= 4
+                        bg_color = "rgba(231, 76, 60, 0.2)" if is_critical else "rgba(74, 144, 217, 0.1)"
+                        border_color = "#E74C3C" if is_critical else "#4A90D9"
+                        with col:
+                            st.markdown(f"""
+                            <div style="background: {bg_color}; border: 2px solid {border_color};
+                                        padding: 10px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 12px; color: #B8D4E8;">Day {day}</div>
+                                <div style="font-size: 28px; font-weight: bold; color: {border_color};">{points}</div>
+                                <div style="font-size: 10px; color: #B8D4E8;">VP</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                strategy = victory_points.get("strategy", "")
+                if strategy:
+                    st.success(f"**Strategy:** {strategy}")
+
+            # Star System (Alliance Showdown)
+            star_system = event_data.get("star_system", {})
+            if star_system:
+                st.markdown("---")
+                st.markdown("### Star Rating System")
+                desc = star_system.get("description", "")
+                if desc:
+                    st.caption(desc)
+                win_effect = star_system.get("win_effect", "")
+                loss_effect = star_system.get("loss_effect", "")
+                star_rewards = star_system.get("star_rewards", "")
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown(f"**Win:** {win_effect}")
+                    st.markdown(f"**Lose:** {loss_effect}")
+                with col2:
+                    st.markdown(f"**Rewards:** {star_rewards}")
+
+            # Tundra Trade Route (Alliance Showdown companion event)
+            tundra = event_data.get("tundra_trade_route", {})
+            if tundra:
+                st.markdown("---")
+                st.markdown("### Tundra Trade Route (Concurrent Event)")
+                desc = tundra.get("description", "")
+                if desc:
+                    st.caption(desc)
+                tundra_tips = tundra.get("tips", [])
+                for tip in tundra_tips:
+                    st.markdown(f"- {tip}")
+
+            # Medal System (King of Icefield)
+            medal_system = event_data.get("medal_system", {})
+            if medal_system:
+                st.markdown("---")
+                st.markdown("### Medal System")
+                desc = medal_system.get("description", "")
+                if desc:
+                    st.caption(desc)
+                medals_per_day = medal_system.get("medals_per_day", 0)
+                medal_shop = medal_system.get("medal_shop", "")
+                st.markdown(f"**Medals per day:** {medals_per_day}")
+                st.markdown(f"**Medal Shop:** {medal_shop}")
+
+            # F2P Strategy section
+            f2p_strategy = event_data.get("f2p_strategy", {})
+            if f2p_strategy:
+                st.markdown("---")
+                st.markdown("### F2P Strategy")
+                focus_stages = f2p_strategy.get("focus_stages", [])
+                if focus_stages:
+                    st.markdown(f"**Focus on:** {', '.join(focus_stages)}")
+                f2p_tips = f2p_strategy.get("tips", [])
+                for tip in f2p_tips:
+                    st.markdown(f"- {tip}")
+
             tips = event_data.get("preparation", {}).get("tips", [])
             if tips:
                 st.markdown("**Tips:**")

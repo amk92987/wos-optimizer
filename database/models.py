@@ -236,41 +236,51 @@ class UserChiefGear(Base):
 
 
 class UserChiefCharm(Base):
-    """User's Chief Charm levels - 18 charms total (6 gear pieces × 3 charm types)."""
+    """User's Chief Charm levels - 18 charm slots (6 gear pieces × 3 slots per gear).
+
+    Each gear piece has 3 charms of the SAME type based on troop category:
+    - Cap/Watch (Lancer gear) → 3 Keenness charms each
+    - Coat/Pants (Infantry gear) → 3 Protection charms each
+    - Belt/Weapon (Marksman gear) → 3 Vision charms each
+
+    Levels 1-3 are simple, but 4+ have sub-levels like FC construction (e.g., "4-1", "4-2", "4-3").
+    Stored as strings to support sub-level format.
+    """
     __tablename__ = 'user_chief_charms'
 
     id = Column(Integer, primary_key=True)
     profile_id = Column(Integer, ForeignKey('user_profile.id'), nullable=False)
 
-    # Cap charms (3 types) - levels 1-16
-    cap_protection = Column(Integer, default=1)  # Infantry
-    cap_keenness = Column(Integer, default=1)    # Lancer
-    cap_vision = Column(Integer, default=1)      # Marksman
+    # Cap charms - 3 Keenness slots (Lancer gear)
+    # Levels: "1" through "16", with sub-levels at 4+: "4-1", "4-2", "4-3", "5", etc.
+    cap_slot_1 = Column(String(10), default="1")
+    cap_slot_2 = Column(String(10), default="1")
+    cap_slot_3 = Column(String(10), default="1")
 
-    # Watch charms (3 types)
-    watch_protection = Column(Integer, default=1)
-    watch_keenness = Column(Integer, default=1)
-    watch_vision = Column(Integer, default=1)
+    # Watch charms - 3 Keenness slots (Lancer gear)
+    watch_slot_1 = Column(String(10), default="1")
+    watch_slot_2 = Column(String(10), default="1")
+    watch_slot_3 = Column(String(10), default="1")
 
-    # Coat charms (3 types)
-    coat_protection = Column(Integer, default=1)
-    coat_keenness = Column(Integer, default=1)
-    coat_vision = Column(Integer, default=1)
+    # Coat charms - 3 Protection slots (Infantry gear)
+    coat_slot_1 = Column(String(10), default="1")
+    coat_slot_2 = Column(String(10), default="1")
+    coat_slot_3 = Column(String(10), default="1")
 
-    # Pants charms (3 types)
-    pants_protection = Column(Integer, default=1)
-    pants_keenness = Column(Integer, default=1)
-    pants_vision = Column(Integer, default=1)
+    # Pants charms - 3 Protection slots (Infantry gear)
+    pants_slot_1 = Column(String(10), default="1")
+    pants_slot_2 = Column(String(10), default="1")
+    pants_slot_3 = Column(String(10), default="1")
 
-    # Belt charms (3 types)
-    belt_protection = Column(Integer, default=1)
-    belt_keenness = Column(Integer, default=1)
-    belt_vision = Column(Integer, default=1)
+    # Belt charms - 3 Vision slots (Marksman gear)
+    belt_slot_1 = Column(String(10), default="1")
+    belt_slot_2 = Column(String(10), default="1")
+    belt_slot_3 = Column(String(10), default="1")
 
-    # Weapon charms (3 types)
-    weapon_protection = Column(Integer, default=1)
-    weapon_keenness = Column(Integer, default=1)
-    weapon_vision = Column(Integer, default=1)
+    # Weapon charms - 3 Vision slots (Marksman gear)
+    weapon_slot_1 = Column(String(10), default="1")
+    weapon_slot_2 = Column(String(10), default="1")
+    weapon_slot_3 = Column(String(10), default="1")
 
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
@@ -459,7 +469,7 @@ class AISettings(Base):
     mode = Column(String(20), default='off', nullable=False)
 
     # Rate limits (when mode='on')
-    daily_limit_free = Column(Integer, default=10)  # Requests per day for free users
+    daily_limit_free = Column(Integer, default=20)  # Requests per day for free users
     daily_limit_admin = Column(Integer, default=1000)  # Requests per day for admins (effectively unlimited)
     cooldown_seconds = Column(Integer, default=30)  # Seconds between requests
 

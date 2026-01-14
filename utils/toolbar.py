@@ -106,7 +106,7 @@ def render_toolbar(show_donate: bool = True, show_feedback: bool = True):
     if show_donate:
         # Ko-fi link - placeholder URL, user will update
         buttons_html += '''
-        <a href="https://ko-fi.com/bearsdenwos" target="_blank" class="toolbar-btn toolbar-btn-donate" title="Support Bear's Den">
+        <a href="https://ko-fi.com/randomchaoslabs" target="_blank" class="toolbar-btn toolbar-btn-donate" title="Support Bear's Den">
             <span>☕</span>
             <span class="btn-text">Donate</span>
         </a>
@@ -329,7 +329,18 @@ def render_donate_message():
     Render a donate message for the AI Advisor page.
     WoS-themed message encouraging support.
     """
-    st.markdown("""
+    import base64
+
+    # Load frost star image
+    frost_star_path = PROJECT_ROOT / "assets" / "items" / "frost_star.png"
+    frost_star_b64 = ""
+    if frost_star_path.exists():
+        with open(frost_star_path, "rb") as f:
+            frost_star_b64 = base64.b64encode(f.read()).decode()
+
+    frost_star_img = f'<img src="data:image/png;base64,{frost_star_b64}" style="width:32px;height:32px;">' if frost_star_b64 else "⭐"
+
+    st.markdown(f"""
     <div style="
         background: linear-gradient(135deg, rgba(211, 84, 0, 0.15), rgba(230, 126, 34, 0.1));
         border: 1px solid rgba(211, 84, 0, 0.3);
@@ -340,17 +351,17 @@ def render_donate_message():
         align-items: center;
         gap: 16px;
     ">
-        <div style="font-size: 32px;">☕</div>
+        <div style="font-size: 32px;">{frost_star_img}</div>
         <div style="flex: 1;">
             <div style="color: #E8F4F8; font-size: 14px; font-weight: 500; margin-bottom: 4px;">
                 Chief, running this Settlement costs resources!
             </div>
             <div style="color: #B8D4E8; font-size: 13px;">
-                If Bear's Den has helped your journey, consider fueling us with a coffee.
+                If Bear's Den has helped your journey, consider fueling us with some Frost Stars.
                 Every donation keeps the fires burning and features coming!
             </div>
         </div>
-        <a href="https://ko-fi.com/bearsdenwos" target="_blank" style="
+        <a href="https://ko-fi.com/randomchaoslabs" target="_blank" style="
             background: linear-gradient(135deg, #D35400, #E67E22);
             color: white;
             padding: 10px 20px;

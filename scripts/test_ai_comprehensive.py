@@ -115,88 +115,351 @@ def create_profile(user, name, state_number, server_age_days, furnace_level,
 
 def add_hero_to_profile(profile, hero_name, level, stars,
                         exploration_skills=(1, 1, 1), expedition_skills=(1, 1, 1),
-                        gear_levels=(0, 0, 0, 0)):
-    """Add a hero to a profile with specified progression."""
+                        gear_levels=(0, 0, 0, 0), ascension=0,
+                        account_type='main', server_age=0):
+    """Add a hero to a profile with specified progression.
+
+    Args:
+        profile: UserProfile to add hero to
+        hero_name: Name of hero to add
+        level: Hero level (1-80)
+        stars: Star count (0-5)
+        exploration_skills: Tuple of 3 exploration skill levels (1-5)
+        expedition_skills: Tuple of 3 expedition skill levels (1-5)
+        gear_levels: Tuple of 4 gear quality values (0=None, 3=Blue, 4=Purple, 5=Gold, 6=Legendary)
+        ascension: Ascension tier (0-5), only relevant when stars < 5
+        account_type: 'whale', 'main', 'dolphin', 'f2p', 'farm' - affects gear/mastery scaling
+        server_age: Server age in days - affects progression scaling
+    """
+    import random
+
     hero = db.query(Hero).filter(Hero.name == hero_name).first()
     if not hero:
         print(f"  Warning: Hero '{hero_name}' not found in database!")
         return None
+
+    # Account type multipliers for gear progression
+    type_multipliers = {
+        'whale': 1.3,
+        'main': 1.0,
+        'dolphin': 0.9,
+        'f2p': 0.6,
+        'farm': 0.4,
+    }
+    multiplier = type_multipliers.get(account_type, 1.0)
+
+    # Server age factor (older = more progression)
+    age_factor = min(server_age / 600, 1.5)  # Caps at 1.5x at 600+ days
+
+    def calc_gear_level(quality):
+        """Calculate gear level with randomization based on quality and account type."""
+        if quality == 0:
+            return 0
+
+        # Base level ranges by quality
+        base_ranges = {
+            1: (5, 20),    # Gray
+            2: (15, 40),   # Green
+            3: (30, 60),   # Blue
+            4: (40, 80),   # Purple
+            5: (60, 100),  # Gold
+            6: (80, 100),  # Legendary
+        }
+        min_lvl, max_lvl = base_ranges.get(quality, (1, 20))
+
+        # Apply multipliers
+        adjusted_max = int(max_lvl * multiplier * age_factor)
+        adjusted_min = int(min_lvl * multiplier * age_factor * 0.7)
+
+        # Clamp to valid range
+        adjusted_min = max(1, min(adjusted_min, 100))
+        adjusted_max = max(adjusted_min, min(adjusted_max, 100))
+
+        return random.randint(adjusted_min, adjusted_max)
+
+    def calc_mastery(quality, gear_level):
+        """Calculate mastery level - only Gold+ gear at level 20+ can have mastery."""
+        if quality < 5 or gear_level < 20:
+            return 0
+
+        # Mastery scales with account type and server age
+        base_mastery = min(int((gear_level - 20) / 4), 20)  # 0-20 based on level
+        adjusted = int(base_mastery * multiplier * age_factor)
+
+        # Add some randomness
+        variance = random.randint(-2, 3)
+        return max(0, min(adjusted + variance, 20))
+
+    # Calculate gear levels and mastery for each slot
+    gear_data = []
+    for quality in gear_levels:
+        lvl = calc_gear_level(quality)
+        mastery = calc_mastery(quality, lvl)
+        gear_data.append((quality, lvl, mastery))
+
+    # Check if hero is legendary (for exclusive gear)
+    is_legendary = hero.rarity == 'Legendary' if hero.rarity else False
+
+    # Calculate exclusive gear for legendary heroes
+    mythic_unlocked = False
+    mythic_quality = 0
+    mythic_level = 0
+    mythic_mastery = 0
+
+    if is_legendary and stars >= 3:
+        # Legendary heroes with 3+ stars may have exclusive gear
+        unlock_chance = 0.3 + (stars * 0.15) + (multiplier * 0.2)  # Higher chance for whales/high stars
+        if random.random() < unlock_chance:
+            mythic_unlocked = True
+            # Quality scales with stars and account type
+            if account_type == 'whale':
+                mythic_quality = min(3 + stars, 6)  # Up to legendary
+            elif account_type in ('main', 'dolphin'):
+                mythic_quality = min(2 + stars, 5)  # Up to gold
+            else:
+                mythic_quality = min(1 + stars, 4)  # Up to purple
+
+            mythic_level = calc_gear_level(mythic_quality)
+            mythic_mastery = calc_mastery(mythic_quality, mythic_level)
 
     user_hero = UserHero(
         profile_id=profile.id,
         hero_id=hero.id,
         level=level,
         stars=stars,
+        ascension_tier=ascension if stars < 5 else 0,
         exploration_skill_1_level=exploration_skills[0],
         exploration_skill_2_level=exploration_skills[1],
         exploration_skill_3_level=exploration_skills[2] if len(exploration_skills) > 2 else 1,
         expedition_skill_1_level=expedition_skills[0],
         expedition_skill_2_level=expedition_skills[1],
         expedition_skill_3_level=expedition_skills[2] if len(expedition_skills) > 2 else 1,
-        gear_slot1_quality=gear_levels[0],
-        gear_slot1_level=gear_levels[0] * 10 if gear_levels[0] else 0,
-        gear_slot2_quality=gear_levels[1],
-        gear_slot2_level=gear_levels[1] * 10 if gear_levels[1] else 0,
-        gear_slot3_quality=gear_levels[2],
-        gear_slot3_level=gear_levels[2] * 10 if gear_levels[2] else 0,
-        gear_slot4_quality=gear_levels[3],
-        gear_slot4_level=gear_levels[3] * 10 if gear_levels[3] else 0,
+        # Gear slot 1
+        gear_slot1_quality=gear_data[0][0],
+        gear_slot1_level=gear_data[0][1],
+        gear_slot1_mastery=gear_data[0][2],
+        # Gear slot 2
+        gear_slot2_quality=gear_data[1][0],
+        gear_slot2_level=gear_data[1][1],
+        gear_slot2_mastery=gear_data[1][2],
+        # Gear slot 3
+        gear_slot3_quality=gear_data[2][0],
+        gear_slot3_level=gear_data[2][1],
+        gear_slot3_mastery=gear_data[2][2],
+        # Gear slot 4
+        gear_slot4_quality=gear_data[3][0],
+        gear_slot4_level=gear_data[3][1],
+        gear_slot4_mastery=gear_data[3][2],
+        # Exclusive/Mythic gear
+        mythic_gear_unlocked=mythic_unlocked,
+        mythic_gear_quality=mythic_quality,
+        mythic_gear_level=mythic_level,
+        mythic_gear_mastery=mythic_mastery,
     )
     db.add(user_hero)
     db.commit()
     return user_hero
 
 
-def add_chief_gear(profile, gear_levels):
-    """Add chief gear to profile."""
-    # gear_levels = {'ring': (quality, level), 'amulet': (quality, level), ...}
+def add_prior_gen_heroes(profile, max_gen, added_heroes=None, account_type='main', server_age=0):
+    """Auto-add all heroes from generations prior to max_gen that aren't already added.
+
+    When a state reaches Gen N, players typically have all prior gen heroes unlocked.
+    This adds them with baseline progression appropriate for their generation.
+
+    Args:
+        profile: UserProfile to add heroes to
+        max_gen: Current generation of the state (will add heroes from Gen 1 to max_gen-1)
+        added_heroes: Set of hero names already added (to avoid duplicates)
+        account_type: 'whale', 'main', 'dolphin', 'f2p', 'farm' - affects gear scaling
+        server_age: Server age in days - affects progression scaling
+
+    Returns:
+        Count of heroes added
+    """
+    import random
+
+    if added_heroes is None:
+        added_heroes = set()
+
+    # Account type affects base gear quality
+    gear_bonus = {'whale': 2, 'main': 1, 'dolphin': 1, 'f2p': 0, 'farm': -1}.get(account_type, 0)
+
+    count = 0
+    for hero_data in HERO_DATA['heroes']:
+        hero_name = hero_data['name']
+        hero_gen = hero_data['generation']
+
+        # Skip if already added or if gen is >= max_gen
+        if hero_name in added_heroes or hero_gen >= max_gen:
+            continue
+
+        # Calculate baseline progression based on how old the hero generation is
+        gen_age = max_gen - hero_gen  # How many gens ago this hero was released
+
+        # Older heroes = more time to level up
+        if gen_age >= 4:
+            # Very old heroes - should be well developed
+            level = min(60 + (gen_age * 3) + random.randint(-5, 10), 80)
+            stars = min(3 + (gen_age // 2), 5)
+            skills = tuple(min(3 + gen_age // 2 + random.randint(-1, 1), 5) for _ in range(3))
+            base_gear = 3 + gear_bonus  # Blue+ gear
+            gear = tuple(max(0, min(base_gear + random.randint(-1, 1), 6)) for _ in range(4))
+            ascension = 3 if stars < 5 else 0
+        elif gen_age >= 2:
+            # Medium age heroes
+            level = 45 + (gen_age * 5) + random.randint(-5, 10)
+            stars = 2 + gen_age // 2
+            skills = tuple(min(2 + gen_age // 2 + random.randint(0, 1), 5) for _ in range(3))
+            base_gear = 2 + gear_bonus  # Green+ gear
+            gear = tuple(max(0, min(base_gear + random.randint(-1, 1), 5)) for _ in range(4))
+            ascension = 2 if stars < 5 else 0
+        else:
+            # Recent heroes - just started
+            level = 30 + (gen_age * 10) + random.randint(0, 10)
+            stars = 1 + gen_age
+            skills = tuple(min(1 + gen_age + random.randint(0, 1), 5) for _ in range(3))
+            base_gear = max(0, gear_bonus)  # Maybe no gear for f2p/farm
+            gear = tuple(max(0, min(base_gear + random.randint(0, 1), 3)) for _ in range(4))
+            ascension = 1 if stars < 5 else 0
+
+        add_hero_to_profile(
+            profile, hero_name, level, stars,
+            skills, skills, gear, ascension,
+            account_type=account_type, server_age=server_age
+        )
+        added_heroes.add(hero_name)
+        count += 1
+
+    return count
+
+
+def add_chief_gear(profile, account_type='main', server_age=0):
+    """Add chief gear to profile with randomized values based on account type.
+
+    Chief gear tiers: 1-42 (stored in quality field)
+    - 1-2: Green (0-1★)
+    - 3-6: Blue (0-3★)
+    - 7-14: Purple (0-3★, T1 0-3★)
+    - 15-26: Gold (0-3★, T1 0-3★, T2 0-3★)
+    - 27-42: Pink (0-3★, T1 0-3★, T2 0-3★, T3 0-3★)
+    """
+    import random
+
+    # Base tier by account type
+    base_tiers = {
+        'whale': 35,    # Pink T2+
+        'main': 22,     # Gold T1-T2
+        'dolphin': 18,  # Gold base
+        'f2p': 10,      # Purple
+        'farm': 5,      # Blue
+    }
+    base = base_tiers.get(account_type, 15)
+
+    # Adjust by server age (older = more progression)
+    age_bonus = int(server_age / 100)  # +1 tier per 100 days
+
+    def calc_tier():
+        tier = base + age_bonus + random.randint(-3, 5)
+        return max(1, min(tier, 42))
+
+    # Generate 6 gear pieces with slight variation
+    tiers = {slot: calc_tier() for slot in ['ring', 'amulet', 'helmet', 'armor', 'gloves', 'boots']}
+
     gear = UserChiefGear(
         profile_id=profile.id,
-        ring_quality=gear_levels.get('ring', (1, 1))[0],
-        ring_level=gear_levels.get('ring', (1, 1))[1],
-        amulet_quality=gear_levels.get('amulet', (1, 1))[0],
-        amulet_level=gear_levels.get('amulet', (1, 1))[1],
-        helmet_quality=gear_levels.get('helmet', (1, 1))[0],
-        helmet_level=gear_levels.get('helmet', (1, 1))[1],
-        armor_quality=gear_levels.get('armor', (1, 1))[0],
-        armor_level=gear_levels.get('armor', (1, 1))[1],
-        gloves_quality=gear_levels.get('gloves', (1, 1))[0],
-        gloves_level=gear_levels.get('gloves', (1, 1))[1],
-        boots_quality=gear_levels.get('boots', (1, 1))[0],
-        boots_level=gear_levels.get('boots', (1, 1))[1],
+        ring_quality=tiers['ring'],
+        ring_level=tiers['ring'],
+        amulet_quality=tiers['amulet'],
+        amulet_level=tiers['amulet'],
+        helmet_quality=tiers['helmet'],
+        helmet_level=tiers['helmet'],
+        armor_quality=tiers['armor'],
+        armor_level=tiers['armor'],
+        gloves_quality=tiers['gloves'],
+        gloves_level=tiers['gloves'],
+        boots_quality=tiers['boots'],
+        boots_level=tiers['boots'],
     )
     db.add(gear)
     db.commit()
     return gear
 
 
-def add_chief_charms(profile, charm_levels):
-    """Add chief charms to profile.
+def add_chief_charms(profile, account_type='main', server_age=0):
+    """Add chief charms to profile with randomized values based on account type.
 
-    charm_levels format: {'cap': (prot, keen, vis), 'watch': (prot, keen, vis), ...}
-    where each value is a tuple of (protection, keenness, vision) levels.
+    Each gear has 3 charm slots of the SAME type:
+    - Cap/Watch: Keenness (Lancer)
+    - Coat/Pants: Protection (Infantry)
+    - Belt/Weapon: Vision (Marksman)
+
+    Charm levels: 1-3 are simple, 4-16 have sub-levels (e.g., "4-1", "4-2", "4-3")
     """
-    defaults = (1, 1, 1)
+    import random
+
+    # Base charm level by account type
+    base_levels = {
+        'whale': 12,
+        'main': 8,
+        'dolphin': 6,
+        'f2p': 4,
+        'farm': 2,
+    }
+    base = base_levels.get(account_type, 5)
+
+    # Adjust by server age
+    age_bonus = int(server_age / 150)  # +1 level per 150 days
+
+    def calc_charm_level():
+        """Generate a charm level with sub-level for 4+."""
+        level = base + age_bonus + random.randint(-2, 3)
+        level = max(1, min(level, 16))
+
+        if level < 4:
+            return str(level)
+        else:
+            # For levels 4+, add sub-level
+            sub = random.randint(1, 3)
+            return f"{level}-{sub}"
+
+    def calc_gear_charms():
+        """Generate 3 charm levels for a gear piece."""
+        return (calc_charm_level(), calc_charm_level(), calc_charm_level())
+
+    cap = calc_gear_charms()
+    watch = calc_gear_charms()
+    coat = calc_gear_charms()
+    pants = calc_gear_charms()
+    belt = calc_gear_charms()
+    weapon = calc_gear_charms()
+
     charms = UserChiefCharm(
         profile_id=profile.id,
-        cap_protection=charm_levels.get('cap', defaults)[0],
-        cap_keenness=charm_levels.get('cap', defaults)[1],
-        cap_vision=charm_levels.get('cap', defaults)[2],
-        watch_protection=charm_levels.get('watch', defaults)[0],
-        watch_keenness=charm_levels.get('watch', defaults)[1],
-        watch_vision=charm_levels.get('watch', defaults)[2],
-        coat_protection=charm_levels.get('coat', defaults)[0],
-        coat_keenness=charm_levels.get('coat', defaults)[1],
-        coat_vision=charm_levels.get('coat', defaults)[2],
-        pants_protection=charm_levels.get('pants', defaults)[0],
-        pants_keenness=charm_levels.get('pants', defaults)[1],
-        pants_vision=charm_levels.get('pants', defaults)[2],
-        belt_protection=charm_levels.get('belt', defaults)[0],
-        belt_keenness=charm_levels.get('belt', defaults)[1],
-        belt_vision=charm_levels.get('belt', defaults)[2],
-        weapon_protection=charm_levels.get('weapon', defaults)[0],
-        weapon_keenness=charm_levels.get('weapon', defaults)[1],
-        weapon_vision=charm_levels.get('weapon', defaults)[2],
+        # Cap - Keenness slots
+        cap_slot_1=cap[0],
+        cap_slot_2=cap[1],
+        cap_slot_3=cap[2],
+        # Watch - Keenness slots
+        watch_slot_1=watch[0],
+        watch_slot_2=watch[1],
+        watch_slot_3=watch[2],
+        # Coat - Protection slots
+        coat_slot_1=coat[0],
+        coat_slot_2=coat[1],
+        coat_slot_3=coat[2],
+        # Pants - Protection slots
+        pants_slot_1=pants[0],
+        pants_slot_2=pants[1],
+        pants_slot_3=pants[2],
+        # Belt - Vision slots
+        belt_slot_1=belt[0],
+        belt_slot_2=belt[1],
+        belt_slot_3=belt[2],
+        # Weapon - Vision slots
+        weapon_slot_1=weapon[0],
+        weapon_slot_2=weapon[1],
+        weapon_slot_3=weapon[2],
     )
     db.add(charms)
     db.commit()
@@ -222,77 +485,72 @@ def setup_gen10_dolphin():
         user=user,
         name="FrostKnight_560",
         state_number=456,
-        server_age_days=560,
+        server_age_days=700,
         furnace_level=30,  # FC level
         spending_profile="dolphin",
         alliance_role="filler",
         priorities={'svs': 5, 'rally': 5, 'castle': 4, 'exploration': 2, 'gathering': 1}
     )
 
+    # Track added heroes for auto-fill
+    added_heroes = set()
+
     # Add heroes - Gen 1-10 progression for a dolphin
+    # Format: (name, level, stars, exp_skills, exped_skills, gear, ascension)
     heroes_to_add = [
-        # Gen 1 - All maxed
-        ("Jeronimo", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5)),  # S+ tier, maxed
-        ("Natalia", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5)),
-        ("Molly", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5)),
-        ("Sergey", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4)),  # Best garrison joiner
-        ("Jessie", 70, 5, (4, 4, 4), (5, 5, 5), (3, 3, 3, 3)),  # Best attack joiner
-        ("Bahiti", 60, 4, (3, 3, 3), (3, 3, 3), (0, 0, 0, 0)),
-        ("Patrick", 60, 4, (3, 3, 3), (3, 3, 3), (0, 0, 0, 0)),
+        # Gen 1 - All maxed (5 stars = no ascension needed)
+        ("Jeronimo", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),  # S+ tier, maxed
+        ("Natalia", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Molly", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Sergey", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4), 0),  # Best garrison joiner
+        ("Jessie", 70, 5, (4, 4, 4), (5, 5, 5), (4, 4, 4, 4), 0),  # Best attack joiner
+        ("Bahiti", 60, 4, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 3),
+        ("Patrick", 60, 4, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 3),
 
         # Gen 2-4 - High stars
-        ("Flint", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5)),
-        ("Philly", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5)),
-        ("Alonso", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5)),
-        ("Logan", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4)),
-        ("Mia", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4)),
-        ("Greg", 75, 4, (4, 4, 4), (4, 4, 4), (3, 3, 3, 3)),
-        ("Ahmose", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4)),
-        ("Reina", 75, 4, (4, 4, 4), (4, 4, 4), (3, 3, 3, 3)),
-        ("Lynn", 70, 4, (4, 4, 4), (4, 4, 4), (3, 3, 3, 3)),
+        ("Flint", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Philly", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Alonso", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Logan", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4), 0),
+        ("Mia", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4), 0),
+        ("Greg", 75, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 4),
+        ("Ahmose", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4), 0),
+        ("Reina", 75, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 4),
+        ("Lynn", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 3),
 
         # Gen 5-6 - Good progress
-        ("Hector", 75, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4)),
-        ("Norah", 70, 4, (4, 4, 4), (4, 4, 4), (3, 3, 3, 3)),
-        ("Gwen", 70, 4, (4, 4, 4), (4, 4, 4), (3, 3, 3, 3)),
-        ("Wu Ming", 75, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4)),  # S+ tier
-        ("Renee", 65, 3, (3, 3, 3), (3, 3, 3), (2, 2, 2, 2)),
+        ("Hector", 75, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 4),
+        ("Norah", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 3),
+        ("Gwen", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 3),
+        ("Wu Ming", 75, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 4),  # S+ tier
+        ("Renee", 65, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 2),
 
         # Gen 7-8 - Medium progress
-        ("Gordon", 60, 3, (3, 3, 3), (3, 3, 3), (2, 2, 2, 2)),
-        ("Edith", 60, 3, (3, 3, 3), (3, 3, 3), (2, 2, 2, 2)),
-        ("Bradley", 55, 2, (2, 2, 2), (2, 2, 2), (0, 0, 0, 0)),
-        ("Gatot", 55, 2, (2, 2, 2), (2, 2, 2), (0, 0, 0, 0)),
-        ("Hendrik", 50, 2, (2, 2, 2), (2, 2, 2), (0, 0, 0, 0)),
+        ("Gordon", 60, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 2),
+        ("Edith", 60, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 2),
+        ("Bradley", 55, 2, (2, 2, 2), (2, 2, 2), (2, 2, 2, 2), 1),
+        ("Gatot", 55, 2, (2, 2, 2), (2, 2, 2), (2, 2, 2, 2), 1),
+        ("Hendrik", 50, 2, (2, 2, 2), (2, 2, 2), (2, 2, 2, 2), 1),
 
         # Gen 9-10 - Just started
-        ("Magnus", 45, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),  # S+ tier, new
-        ("Blanchette", 40, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),  # S+ tier, new
+        ("Magnus", 45, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0), 0),  # S+ tier, new
+        ("Blanchette", 40, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0), 0),  # S+ tier, new
     ]
 
     for hero_data in heroes_to_add:
-        name, level, stars, exp_skills, exped_skills, gear = hero_data
-        add_hero_to_profile(main_profile, name, level, stars, exp_skills, exped_skills, gear)
+        name, level, stars, exp_skills, exped_skills, gear, ascension = hero_data
+        add_hero_to_profile(main_profile, name, level, stars, exp_skills, exped_skills, gear, ascension,
+                           account_type='dolphin', server_age=700)
+        added_heroes.add(name)
 
-    # Chief gear - Mythic ring/amulet, Legendary on others
-    add_chief_gear(main_profile, {
-        'ring': (7, 50),      # Mythic
-        'amulet': (7, 50),    # Mythic
-        'helmet': (6, 40),    # Legendary
-        'armor': (6, 40),     # Legendary
-        'gloves': (6, 35),    # Legendary
-        'boots': (6, 35),     # Legendary
-    })
+    # Auto-add remaining prior gen heroes (Gen 1-9) that weren't explicitly listed
+    prior_count = add_prior_gen_heroes(main_profile, max_gen=10, added_heroes=added_heroes,
+                                        account_type='dolphin', server_age=700)
+    print(f"  Auto-added {prior_count} prior gen heroes")
 
-    # Chief charms - Gen 10 dolphin has good charm progression
-    add_chief_charms(main_profile, {
-        'cap': (10, 8, 8),      # Protection focus (infantry defense)
-        'watch': (10, 8, 8),
-        'coat': (10, 8, 8),
-        'pants': (10, 8, 8),
-        'belt': (8, 8, 10),     # Vision focus (marksman attack)
-        'weapon': (8, 8, 10),
-    })
+    # Chief gear and charms - scaled by account type and server age
+    add_chief_gear(main_profile, account_type='dolphin', server_age=700)
+    add_chief_charms(main_profile, account_type='dolphin', server_age=700)
 
     print(f"  Created main profile: {main_profile.name} (ID: {main_profile.id})")
     print(f"  Heroes added: {len(heroes_to_add)}")
@@ -302,7 +560,7 @@ def setup_gen10_dolphin():
         user=user,
         name="FrostKnight_Farm",
         state_number=456,  # Same state
-        server_age_days=560,
+        server_age_days=700,
         furnace_level=25,  # Lower furnace
         spending_profile="f2p",
         alliance_role="farmer",
@@ -321,7 +579,8 @@ def setup_gen10_dolphin():
 
     for hero_data in farm_heroes:
         name, level, stars, exp_skills, exped_skills, gear = hero_data
-        add_hero_to_profile(farm_profile, name, level, stars, exp_skills, exped_skills, gear)
+        add_hero_to_profile(farm_profile, name, level, stars, exp_skills, exped_skills, gear,
+                           account_type='farm', server_age=700)
 
     print(f"  Created farm profile: {farm_profile.name} (ID: {farm_profile.id})")
 
@@ -332,7 +591,7 @@ def setup_gen4_f2p():
     """
     Gen 4 F2P Player - Day 240
     - Furnace 26-28
-    - Gen 1-3 heroes, starting Gen 4
+    - Gen 1-3 heroes fully unlocked, starting Gen 4
     - Limited resources, careful upgrades
     """
     print("\n" + "="*60)
@@ -352,56 +611,52 @@ def setup_gen4_f2p():
         priorities={'svs': 5, 'rally': 4, 'castle': 3, 'exploration': 3, 'gathering': 3}
     )
 
-    # F2P Gen 4 heroes - limited resources, focused upgrades
+    # Track added heroes to avoid duplicates when adding prior gen heroes
+    added_heroes = set()
+
+    # F2P Gen 4 heroes - limited resources, focused upgrades on key heroes
+    # Format: (name, level, stars, exp_skills, exped_skills, gear, ascension)
     heroes_to_add = [
-        # Gen 1 - Core heroes upgraded
-        ("Jeronimo", 60, 4, (4, 4, 3), (4, 4, 3), (4, 4, 3, 3)),  # Main infantry
-        ("Natalia", 55, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3)),
-        ("Molly", 55, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3)),
-        ("Sergey", 50, 3, (3, 3, 3), (4, 3, 3), (0, 0, 0, 0)),  # Garrison joiner
-        ("Jessie", 45, 3, (2, 2, 2), (4, 3, 3), (0, 0, 0, 0)),  # Attack joiner
-        ("Bahiti", 45, 3, (3, 3, 3), (3, 3, 3), (0, 0, 0, 0)),  # Best Epic marksman
+        # Gen 1 - Core heroes upgraded (3 gens old = well developed)
+        ("Jeronimo", 60, 4, (4, 4, 3), (4, 4, 3), (4, 4, 3, 3), 3),  # Main infantry
+        ("Natalia", 55, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 2),
+        ("Molly", 55, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 2),
+        ("Sergey", 50, 3, (3, 3, 3), (4, 3, 3), (3, 3, 3, 3), 2),  # Garrison joiner
+        ("Jessie", 45, 3, (2, 2, 2), (4, 3, 3), (3, 3, 3, 3), 1),  # Attack joiner
+        ("Bahiti", 45, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 1),  # Best Epic marksman
 
-        # Gen 2 - Progressing
-        ("Flint", 50, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3)),
-        ("Philly", 50, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3)),
-        ("Alonso", 55, 3, (4, 4, 3), (4, 4, 3), (4, 4, 4, 4)),  # F2P focus hero
+        # Gen 2 - Progressing (2 gens old)
+        ("Flint", 50, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 2),
+        ("Philly", 50, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 2),
+        ("Alonso", 55, 3, (4, 4, 3), (4, 4, 3), (4, 4, 4, 4), 3),  # F2P focus hero
 
-        # Gen 3 - Starting
-        ("Logan", 40, 2, (2, 2, 2), (2, 2, 2), (0, 0, 0, 0)),
-        ("Mia", 40, 2, (2, 2, 2), (2, 2, 2), (0, 0, 0, 0)),
+        # Gen 3 - Starting (1 gen old)
+        ("Logan", 40, 2, (2, 2, 2), (2, 2, 2), (2, 2, 2, 2), 1),
+        ("Mia", 40, 2, (2, 2, 2), (2, 2, 2), (2, 2, 2, 2), 1),
 
-        # Gen 4 - Just unlocked
-        ("Ahmose", 35, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
-        ("Reina", 30, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
+        # Gen 4 - Just unlocked (current gen)
+        ("Ahmose", 35, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0), 0),
+        ("Reina", 30, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0), 0),
     ]
 
     for hero_data in heroes_to_add:
-        name, level, stars, exp_skills, exped_skills, gear = hero_data
-        add_hero_to_profile(profile, name, level, stars, exp_skills, exped_skills, gear)
+        name, level, stars, exp_skills, exped_skills, gear, ascension = hero_data
+        add_hero_to_profile(profile, name, level, stars, exp_skills, exped_skills, gear, ascension,
+                           account_type='f2p', server_age=240)
+        added_heroes.add(name)
 
-    # Chief gear - Epic on ring/amulet, Rare on others (F2P progression)
-    add_chief_gear(profile, {
-        'ring': (4, 30),      # Epic
-        'amulet': (4, 25),    # Epic
-        'helmet': (3, 20),    # Rare
-        'armor': (3, 20),     # Rare
-        'gloves': (3, 15),    # Rare
-        'boots': (3, 15),     # Rare
-    })
+    # Auto-add remaining prior gen heroes (Gen 1-3) that weren't explicitly listed
+    prior_count = add_prior_gen_heroes(profile, max_gen=4, added_heroes=added_heroes,
+                                        account_type='f2p', server_age=240)
+    print(f"  Auto-added {prior_count} prior gen heroes")
 
-    # Chief charms - F2P Gen 4 has lower charm levels
-    add_chief_charms(profile, {
-        'cap': (4, 3, 3),
-        'watch': (4, 3, 3),
-        'coat': (4, 3, 3),
-        'pants': (4, 3, 3),
-        'belt': (3, 3, 4),
-        'weapon': (3, 3, 4),
-    })
+    # Chief gear and charms - scaled by account type and server age
+    add_chief_gear(profile, account_type='f2p', server_age=240)
+    add_chief_charms(profile, account_type='f2p', server_age=240)
 
+    total_heroes = len(heroes_to_add) + prior_count
     print(f"  Created profile: {profile.name} (ID: {profile.id})")
-    print(f"  Heroes added: {len(heroes_to_add)}")
+    print(f"  Total heroes: {total_heroes}")
 
     return user, profile
 
@@ -457,27 +712,12 @@ def setup_gen2_whale():
 
     for hero_data in heroes_to_add:
         name, level, stars, exp_skills, exped_skills, gear = hero_data
-        add_hero_to_profile(main_profile, name, level, stars, exp_skills, exped_skills, gear)
+        add_hero_to_profile(main_profile, name, level, stars, exp_skills, exped_skills, gear,
+                           account_type='whale', server_age=80)
 
-    # Chief gear - Legendary everything (whale spending)
-    add_chief_gear(main_profile, {
-        'ring': (6, 45),      # Legendary
-        'amulet': (6, 45),    # Legendary
-        'helmet': (6, 40),    # Legendary
-        'armor': (6, 40),     # Legendary
-        'gloves': (5, 35),    # Gold
-        'boots': (5, 35),     # Gold
-    })
-
-    # Chief charms - Whale Gen 2 has high investment despite being early
-    add_chief_charms(main_profile, {
-        'cap': (8, 6, 6),
-        'watch': (8, 6, 6),
-        'coat': (8, 6, 6),
-        'pants': (8, 6, 6),
-        'belt': (6, 6, 8),
-        'weapon': (6, 6, 8),
-    })
+    # Chief gear and charms - scaled by account type and server age
+    add_chief_gear(main_profile, account_type='whale', server_age=80)
+    add_chief_charms(main_profile, account_type='whale', server_age=80)
 
     print(f"  Created main profile: {main_profile.name} (ID: {main_profile.id})")
     print(f"  Heroes added: {len(heroes_to_add)}")
@@ -506,7 +746,8 @@ def setup_gen2_whale():
 
     for hero_data in farm_heroes:
         name, level, stars, exp_skills, exped_skills, gear = hero_data
-        add_hero_to_profile(farm_profile, name, level, stars, exp_skills, exped_skills, gear)
+        add_hero_to_profile(farm_profile, name, level, stars, exp_skills, exped_skills, gear,
+                           account_type='farm', server_age=80)
 
     print(f"  Created farm profile: {farm_profile.name} (ID: {farm_profile.id})")
 
@@ -554,17 +795,11 @@ def setup_multi_state_player():
 
     for hero_data in main_heroes:
         name, level, stars, exp_skills, exped_skills, gear = hero_data
-        add_hero_to_profile(main_profile, name, level, stars, exp_skills, exped_skills, gear)
+        add_hero_to_profile(main_profile, name, level, stars, exp_skills, exped_skills, gear,
+                           account_type='main', server_age=400)
 
-    add_chief_gear(main_profile, {
-        'ring': (5, 35), 'amulet': (5, 30), 'helmet': (4, 25),
-        'armor': (4, 25), 'gloves': (4, 20), 'boots': (4, 20),
-    })
-
-    add_chief_charms(main_profile, {
-        'cap': (6, 5, 5), 'watch': (6, 5, 5), 'coat': (6, 5, 5),
-        'pants': (6, 5, 5), 'belt': (5, 5, 6), 'weapon': (5, 5, 6),
-    })
+    add_chief_gear(main_profile, account_type='main', server_age=400)
+    add_chief_charms(main_profile, account_type='main', server_age=400)
 
     print(f"  Created main profile: {main_profile.name} (State {main_profile.state_number}, ID: {main_profile.id})")
     print(f"  Heroes added: {len(main_heroes)}")
@@ -592,17 +827,11 @@ def setup_multi_state_player():
 
     for hero_data in new_state_heroes:
         name, level, stars, exp_skills, exped_skills, gear = hero_data
-        add_hero_to_profile(new_state_profile, name, level, stars, exp_skills, exped_skills, gear)
+        add_hero_to_profile(new_state_profile, name, level, stars, exp_skills, exped_skills, gear,
+                           account_type='f2p', server_age=60)
 
-    add_chief_gear(new_state_profile, {
-        'ring': (3, 15), 'amulet': (3, 10), 'helmet': (2, 10),
-        'armor': (2, 10), 'gloves': (2, 5), 'boots': (2, 5),
-    })
-
-    add_chief_charms(new_state_profile, {
-        'cap': (2, 1, 1), 'watch': (2, 1, 1), 'coat': (2, 1, 1),
-        'pants': (2, 1, 1), 'belt': (1, 1, 2), 'weapon': (1, 1, 2),
-    })
+    add_chief_gear(new_state_profile, account_type='f2p', server_age=60)
+    add_chief_charms(new_state_profile, account_type='f2p', server_age=60)
 
     print(f"  Created new state profile: {new_state_profile.name} (State {new_state_profile.state_number}, ID: {new_state_profile.id})")
     print(f"  Heroes added: {len(new_state_heroes)}")
@@ -643,13 +872,11 @@ def setup_brand_new_player():
 
     for hero_data in heroes_to_add:
         name, level, stars, exp_skills, exped_skills, gear = hero_data
-        add_hero_to_profile(profile, name, level, stars, exp_skills, exped_skills, gear)
+        add_hero_to_profile(profile, name, level, stars, exp_skills, exped_skills, gear,
+                           account_type='f2p', server_age=7)
 
-    # Minimal chief gear
-    add_chief_gear(profile, {
-        'ring': (2, 5), 'amulet': (1, 1), 'helmet': (1, 1),
-        'armor': (1, 1), 'gloves': (1, 1), 'boots': (1, 1),
-    })
+    # Minimal chief gear - scaled for new player
+    add_chief_gear(profile, account_type='f2p', server_age=7)
 
     # No charms yet (unlocks at F25)
     # Skip add_chief_charms
@@ -706,17 +933,12 @@ def setup_rally_leader():
 
     for hero_data in heroes_to_add:
         name, level, stars, exp_skills, exped_skills, gear = hero_data
-        add_hero_to_profile(profile, name, level, stars, exp_skills, exped_skills, gear)
+        add_hero_to_profile(profile, name, level, stars, exp_skills, exped_skills, gear,
+                           account_type='whale', server_age=380)
 
-    add_chief_gear(profile, {
-        'ring': (7, 60), 'amulet': (7, 55), 'helmet': (6, 45),
-        'armor': (6, 45), 'gloves': (6, 40), 'boots': (6, 40),
-    })
-
-    add_chief_charms(profile, {
-        'cap': (12, 10, 10), 'watch': (12, 10, 10), 'coat': (12, 10, 10),
-        'pants': (12, 10, 10), 'belt': (10, 10, 12), 'weapon': (10, 10, 12),
-    })
+    # Chief gear and charms - orca/whale level
+    add_chief_gear(profile, account_type='whale', server_age=380)
+    add_chief_charms(profile, account_type='whale', server_age=380)
 
     print(f"  Created profile: {profile.name} (ID: {profile.id})")
     print(f"  Heroes added: {len(heroes_to_add)}")

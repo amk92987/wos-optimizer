@@ -17,6 +17,7 @@ from database.models import (
     User, UserProfile, UserHero, UserInventory, Hero, Item,
     AdminMetrics, AuditLog, Announcement, Feedback
 )
+from sqlalchemy import text
 
 init_db()
 
@@ -62,14 +63,14 @@ with tab_tables:
 
     # Get counts for all tables
     from sqlalchemy import inspect
-    inspector = inspect(db.bind)
+    inspector = inspect(db.get_bind())
     tables = inspector.get_table_names()
 
     table_data = []
     for table in tables:
         try:
             # Try to get count
-            count = db.execute(f"SELECT COUNT(*) FROM {table}").scalar()
+            count = db.execute(text(f"SELECT COUNT(*) FROM {table}")).scalar()
             table_data.append({"Table": table, "Rows": count})
         except Exception:
             table_data.append({"Table": table, "Rows": "Error"})
@@ -92,20 +93,67 @@ with tab_tables:
     st.markdown("---")
 
     # Table browser
-    st.markdown("### Browse Table")
-    selected_table = st.selectbox("Select Table", tables)
+    st.markdown("### Browse Table Data")
+    st.caption("View raw database records (read-only). Use this to inspect data or debug issues.")
+
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        selected_table = st.selectbox("Select a table to view its records", tables)
+    with col2:
+        rows_per_page = st.selectbox("Rows", [10, 25, 50], index=1, key="rows_per_page")
 
     if selected_table:
         try:
-            result = db.execute(f"SELECT * FROM {selected_table} LIMIT 50").fetchall()
-            if result:
+            # Get total count
+            total_count = db.execute(text(f"SELECT COUNT(*) FROM {selected_table}")).scalar()
+
+            if total_count > 0:
+                # Pagination
+                total_pages = (total_count + rows_per_page - 1) // rows_per_page
+
+                # Initialize page in session state
+                page_key = f"page_{selected_table}"
+                if page_key not in st.session_state:
+                    st.session_state[page_key] = 1
+
+                # Page navigation
+                col1, col2, col3, col4, col5 = st.columns([1, 1, 2, 1, 1])
+                with col1:
+                    if st.button("⏮️", key="first_page", disabled=st.session_state[page_key] == 1):
+                        st.session_state[page_key] = 1
+                        st.rerun()
+                with col2:
+                    if st.button("◀️", key="prev_page", disabled=st.session_state[page_key] == 1):
+                        st.session_state[page_key] -= 1
+                        st.rerun()
+                with col3:
+                    st.markdown(f"<div style='text-align:center;padding-top:8px;'>Page {st.session_state[page_key]} of {total_pages}</div>", unsafe_allow_html=True)
+                with col4:
+                    if st.button("▶️", key="next_page", disabled=st.session_state[page_key] == total_pages):
+                        st.session_state[page_key] += 1
+                        st.rerun()
+                with col5:
+                    if st.button("⏭️", key="last_page", disabled=st.session_state[page_key] == total_pages):
+                        st.session_state[page_key] = total_pages
+                        st.rerun()
+
+                # Calculate offset
+                offset = (st.session_state[page_key] - 1) * rows_per_page
+
+                # Get paginated results
+                result = db.execute(text(f"SELECT * FROM {selected_table} LIMIT {rows_per_page} OFFSET {offset}")).fetchall()
+
                 # Get column names
-                columns = db.execute(f"PRAGMA table_info({selected_table})").fetchall()
+                columns = db.execute(text(f"PRAGMA table_info({selected_table})")).fetchall()
                 col_names = [col[1] for col in columns]
 
                 import pandas as pd
                 df = pd.DataFrame(result, columns=col_names)
-                st.dataframe(df, use_container_width=True)
+                st.dataframe(df, use_container_width=True, hide_index=True, height=400)
+
+                start_row = offset + 1
+                end_row = min(offset + rows_per_page, total_count)
+                st.caption(f"Showing rows {start_row}-{end_row} of {total_count} in {selected_table}")
             else:
                 st.info("Table is empty")
         except Exception as e:
@@ -145,8 +193,8 @@ with tab_backup:
         export_table = st.selectbox("Table to Export", tables, key="export_select")
         if st.button("📥 Export as CSV", use_container_width=True):
             try:
-                result = db.execute(f"SELECT * FROM {export_table}").fetchall()
-                columns = db.execute(f"PRAGMA table_info({export_table})").fetchall()
+                result = db.execute(text(f"SELECT * FROM {export_table}")).fetchall()
+                columns = db.execute(text(f"PRAGMA table_info({export_table})")).fetchall()
                 col_names = [col[1] for col in columns]
 
                 import pandas as pd
@@ -229,7 +277,7 @@ with tab_cleanup:
         st.markdown("")
         if st.button("🧹 Vacuum Database", help="Reclaim unused space"):
             try:
-                db.execute("VACUUM")
+                db.execute(text("VACUUM"))
                 st.success("Database vacuumed successfully")
             except Exception as e:
                 st.error(f"Error: {e}")
@@ -250,12 +298,12 @@ with tab_query:
                         st.session_state["confirm_dangerous_query"] = True
                         st.warning("This is a potentially destructive query. Click Execute again to confirm.")
                     else:
-                        result = db.execute(query)
+                        result = db.execute(text(query))
                         db.commit()
                         st.success(f"Query executed. Rows affected: {result.rowcount}")
                         st.session_state["confirm_dangerous_query"] = False
                 else:
-                    result = db.execute(query).fetchall()
+                    result = db.execute(text(query)).fetchall()
                     if result:
                         import pandas as pd
                         df = pd.DataFrame(result)

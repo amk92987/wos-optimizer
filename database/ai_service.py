@@ -14,7 +14,7 @@ def get_ai_settings(db: Session) -> AISettings:
     """Get or create the global AI settings (singleton)."""
     settings = db.query(AISettings).first()
     if not settings:
-        settings = AISettings(mode='off')
+        settings = AISettings(mode='unlimited')  # Default to unlimited for development
         db.add(settings)
         db.commit()
         db.refresh(settings)

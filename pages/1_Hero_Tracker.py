@@ -542,27 +542,35 @@ def render_hero_editor(hero: dict, existing, hero_key: str):
             mythic_data['unlocked'] = has_mythic
         if has_mythic:
             with col_m2:
+                st.markdown('<div style="font-size:11px;color:#888;">Quality</div>', unsafe_allow_html=True)
                 mythic_quality_options = ["Gray", "Green", "Blue", "Purple", "Gold", "Legendary"]
                 m_q_idx = st.selectbox("Quality", range(len(mythic_quality_options)),
                                        index=max(0, (existing.mythic_gear_quality if existing else 1) - 1),
                                        format_func=lambda x: mythic_quality_options[x], key=f"mythic_q_{hero_key}", label_visibility="collapsed")
                 mythic_data['quality'] = m_q_idx + 1  # Offset since we don't have "None"
             with col_m3:
-                m_level = st.number_input("Level", 0, 100, existing.mythic_gear_level if existing else 0, key=f"mythic_l_{hero_key}")
+                st.markdown('<div style="font-size:11px;color:#888;">Level</div>', unsafe_allow_html=True)
+                m_level = st.number_input("Level", 0, 100, existing.mythic_gear_level if existing else 0, key=f"mythic_l_{hero_key}", label_visibility="collapsed")
                 mythic_data['level'] = m_level
             with col_m4:
                 # Mastery for Gold+ exclusive gear
                 if m_q_idx >= 4 and m_level >= 20:
+                    st.markdown('<div style="font-size:11px;color:#888;">Mastery</div>', unsafe_allow_html=True)
                     current_mythic_mastery = existing.mythic_gear_mastery if existing else 0
-                    m_mastery = st.number_input("Mastery", 0, 20, min(current_mythic_mastery, 20), key=f"mythic_m_{hero_key}")
+                    m_mastery = st.number_input("Mastery", 0, 20, min(current_mythic_mastery, 20), key=f"mythic_m_{hero_key}", label_visibility="collapsed")
                     mythic_data['mastery'] = m_mastery
+
+    # Show saved message if this hero was just saved
+    if st.session_state.get('saved_hero') == hero_key:
+        st.success(f"✅ {hero['name']} saved!")
+        st.session_state.saved_hero = None  # Clear after showing
 
     # Save button - right aligned
     col_space, col_save = st.columns([3, 1])
     with col_save:
         if st.button("💾 Save", key=f"save_{hero_key}", type="primary"):
             save_user_hero(hero, level, stars, ascension, exp1, exp2, exp3, exped1, exped2, exped3, gear_data, mythic_data if mythic_gear_name else None)
-            st.toast(f"✅ {hero['name']} saved!", icon="✅")
+            st.session_state.saved_hero = hero_key
             st.rerun()
 
 
@@ -613,6 +621,18 @@ for hero in HERO_DATA['heroes']:
         heroes_by_gen[gen] = []
     heroes_by_gen[gen].append(hero)
 
+# Sorting helpers
+rarity_order = {"Rare": 0, "Epic": 1, "Legendary": 2}
+tier_order = {"S+": 0, "S": 1, "A": 2, "B": 3, "C": 4, "D": 5}
+
+def sort_heroes(hero_list):
+    """Sort heroes by rarity (Rare > Epic > Legendary), then tier, then name."""
+    return sorted(hero_list, key=lambda h: (
+        rarity_order.get(h.get('rarity', 'Rare'), 99),
+        tier_order.get(h.get('tier_overall', 'D'), 99),
+        h.get('name', '')
+    ))
+
 # Display heroes
 for gen in sorted(heroes_by_gen.keys()):
     if filter_gen != "All" and filter_gen != f"Gen {gen}":
@@ -636,6 +656,9 @@ for gen in sorted(heroes_by_gen.keys()):
             elif filter_unlocked == "Not Owned" and not user_hero:
                 filtered_heroes.append(h)
         heroes = filtered_heroes
+
+    # Sort heroes within generation
+    heroes = sort_heroes(heroes)
 
     if not heroes:
         continue

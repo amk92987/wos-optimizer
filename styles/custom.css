@@ -300,13 +300,9 @@ header[data-testid="stHeader"],
 /* Headers */
 h1, h2, h3 {
     color: var(--frost-white) !important;
-    text-shadow: 0 0 10px rgba(74, 144, 217, 0.5);
 }
 
-/* Text shadow for readability on light backgrounds */
-.stMarkdown p, .stMarkdown li, .stMarkdown span {
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-}
+/* Removed text-shadow - was causing cloudy text in dark theme */
 
 /* Hide anchor link icons on headers */
 h1 a, h2 a, h3 a, h4 a,

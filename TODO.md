@@ -71,7 +71,7 @@
 
 - [ ] **Add CAPTCHA or login attempt protection** - Security enhancement
 
-- [x] **Add Donate button** - Ko-fi integration in user menu and homepage. URL: `https://ko-fi.com/bearsdenwos`
+- [x] **Add Donate button** - Ko-fi integration in user menu and homepage. URL: `https://ko-fi.com/randomchaoslabs`
 
 - [x] **Add Feedback System** - Inline feedback form in user menu, detailed form on AI Advisor with "Report Bad Recommendation" option
 

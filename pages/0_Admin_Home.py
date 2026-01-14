@@ -31,14 +31,14 @@ db = get_db()
 
 # Create new tables if they don't exist
 from sqlalchemy import inspect
-inspector = inspect(db.bind)
+inspector = inspect(db.get_bind())
 existing_tables = inspector.get_table_names()
 if 'admin_metrics' not in existing_tables:
-    AdminMetrics.__table__.create(db.bind, checkfirst=True)
+    AdminMetrics.__table__.create(db.get_bind(), checkfirst=True)
 if 'audit_log' not in existing_tables:
-    AuditLog.__table__.create(db.bind, checkfirst=True)
+    AuditLog.__table__.create(db.get_bind(), checkfirst=True)
 if 'announcements' not in existing_tables:
-    Announcement.__table__.create(db.bind, checkfirst=True)
+    Announcement.__table__.create(db.get_bind(), checkfirst=True)
 
 
 def record_daily_metrics():
@@ -203,19 +203,74 @@ st.markdown("---")
 
 st.markdown("### Trends")
 
+# Time period filter
+time_options = {
+    "1 Week": 7,
+    "1 Month": 30,
+    "3 Months": 90,
+    "Custom": -1
+}
+
+col_filter1, col_filter2, col_filter3 = st.columns([2, 2, 4])
+with col_filter1:
+    time_selection = st.selectbox("Time Period", list(time_options.keys()), index=1, key="chart_time_period")
+
+# Handle custom date range
+if time_selection == "Custom":
+    with col_filter2:
+        start_date = st.date_input("Start", value=date.today() - timedelta(days=30), key="chart_start")
+    with col_filter3:
+        end_date = st.date_input("End", value=date.today(), key="chart_end")
+    days_to_show = (end_date - start_date).days
+else:
+    days_to_show = time_options[time_selection]
+
 # Get historical data
-historical_df = get_historical_metrics(30)
+historical_df = get_historical_metrics(days_to_show)
 
 if not historical_df.empty and len(historical_df) > 1:
+    import altair as alt
+
     chart_col1, chart_col2 = st.columns(2)
 
     with chart_col1:
         st.markdown("##### User Growth")
-        st.line_chart(historical_df.set_index('Date')[['Users']], color=["#3498DB"])
+        # Create Altair line chart
+        user_chart = alt.Chart(historical_df).mark_line(
+            strokeWidth=3,
+            color='#3498DB'
+        ).encode(
+            x=alt.X('Date:N', axis=alt.Axis(labelAngle=-45, title=None)),
+            y=alt.Y('Users:Q', axis=alt.Axis(title='Total Users')),
+            tooltip=['Date', 'Users']
+        ).properties(height=250)
+
+        # Add points
+        points = alt.Chart(historical_df).mark_circle(
+            size=60,
+            color='#3498DB'
+        ).encode(
+            x='Date:N',
+            y='Users:Q',
+            tooltip=['Date', 'Users']
+        )
+
+        st.altair_chart(user_chart + points, use_container_width=True)
 
     with chart_col2:
         st.markdown("##### Daily Active Users")
-        st.bar_chart(historical_df.set_index('Date')[['Active']], color=["#2ECC71"])
+        # Create Altair bar chart
+        active_chart = alt.Chart(historical_df).mark_bar(
+            color='#2ECC71',
+            cornerRadiusTopLeft=4,
+            cornerRadiusTopRight=4
+        ).encode(
+            x=alt.X('Date:N', axis=alt.Axis(labelAngle=-45, title=None)),
+            y=alt.Y('Active:Q', axis=alt.Axis(title='Active Users')),
+            tooltip=['Date', 'Active']
+        ).properties(height=250)
+
+        st.altair_chart(active_chart, use_container_width=True)
 
 else:
     st.info("📈 Charts will appear after a few days of data collection. Check back soon!")

@@ -748,13 +748,15 @@ st.markdown("Cut through inflated % values. See what you're *actually* paying fo
 if "pack_quantities" not in st.session_state:
     st.session_state.pack_quantities = {}  # Accumulated pack contents
 if "farmer_mode" not in st.session_state:
-    st.session_state.farmer_mode = False
+    # Auto-check farmer mode if profile is marked as a farm account
+    is_farm_profile = getattr(profile, 'is_farm_account', False) if profile else False
+    st.session_state.farmer_mode = is_farm_profile
 
 # Valuation Settings (always visible)
 st.session_state.farmer_mode = st.checkbox(
     "I'm a resource farmer (set resources to $0)",
     value=st.session_state.farmer_mode,
-    help="If you actively gather, mine, and farm resources, they're essentially free for you"
+    help="If you actively gather, mine, and farm resources, they're essentially free for you. Auto-enabled for farm profiles."
 )
 if st.session_state.farmer_mode:
     st.info("**Farmer Mode ON:** Resources (Meat, Wood, Coal, Iron, Steel) valued at $0. Only counting items you can't farm.")

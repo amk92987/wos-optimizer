@@ -317,85 +317,214 @@
     "alliance_showdown": {
       "name": "Alliance Showdown",
       "type": "competitive",
-      "frequency": "Weekly (Week 1)",
-      "duration": "2 hours",
+      "frequency": "Every 4 weeks",
+      "duration": "6.5 days (ends Sunday noon)",
       "cost_category": "free",
       "priority": "A",
-      "description": "Real-time alliance vs alliance battle.",
-      "gameplay": "Your alliance is matched against another alliance for a 2-hour battle. You're teleported to a special battlefield map. Capture buildings and flags to earn points, and attack enemy players who get in your way. It's real-time chaos - you need to be online and coordinating with your alliance. March speed and quick reactions matter. The alliance with more points at the end wins.",
+      "description": "6-day alliance vs alliance competition. 13 Victory Points available - first to 7 wins!",
+      "gameplay": "A 6-day 1v1 alliance battle against a similarly-powered alliance from another state. Each day has different point-earning tasks. The alliance with more points at day's end wins that day's Victory Points. Day 1 is worth 1 VP, Days 2-5 are worth 2 VP each, and Day 6 is worth 4 VP (13 total - need 7 to win). Runs parallel with Tundra Trade Route event.",
       "rewards": {
-        "primary": ["Alliance Coins", "Speedups", "Resources"],
-        "quality": "medium-high",
-        "backpack_items": ["Alliance Coins", "General Speedups"]
+        "primary": ["Giant Horn Decoration (+1% Troop Attack)", "Alliance Coins", "Speedups", "Truck Vouchers"],
+        "quality": "high",
+        "backpack_items": ["Alliance Coins", "Speedups", "Truck Vouchers", "Resources"]
+      },
+      "victory_points": {
+        "description": "13 Victory Points total - need 7 to win",
+        "breakdown": [
+          {"day": 1, "points": 1, "note": "Don't overspend - smallest reward"},
+          {"day": 2, "points": 2, "note": ""},
+          {"day": 3, "points": 2, "note": ""},
+          {"day": 4, "points": 2, "note": ""},
+          {"day": 5, "points": 2, "note": "Invest heavily here"},
+          {"day": 6, "points": 4, "note": "CRITICAL - Day 6 decides most events!"}
+        ],
+        "strategy": "Win Day 6 (4 VP) + any 2 other days = victory. If you lose Day 6, you need to win 4 other days."
+      },
+      "eligibility": {
+        "alliance_requirement": "Only top 20 alliances by power can participate",
+        "joining_rule": "Must be in alliance BEFORE event starts - cannot join mid-event",
+        "points_threshold": "300,000+ Personal Points required for ranking rewards"
+      },
+      "star_system": {
+        "description": "Win/loss affects your alliance's star rating",
+        "win_effect": "+1 star",
+        "loss_effect": "-1 star",
+        "star_rewards": "Higher stars = better Tundra Truck decoration rewards (+1% Troop Defense)",
+        "max_stars": "10+ stars for maximum rewards"
+      },
+      "tundra_trade_route": {
+        "description": "Concurrent companion event - truck escorting and raiding",
+        "tips": [
+          "Hide YOUR OWN state's trucks to avoid accidentally raiding allies",
+          "Prioritize raiding trucks from other states",
+          "Daily Chests give Truck Vouchers - always claim them",
+          "Truck Vouchers help during Tundra Trade Route"
+        ]
       },
       "preparation": {
-        "save_before": ["Stamina"],
+        "save_before": ["Resources for daily tasks", "Stamina"],
         "heroes_needed": "expedition",
         "key_heroes": ["Jeronimo", "Jessie", "Wu Ming", "Sergey"],
         "tips": [
-          "Must be online during the event window",
-          "Coordinate with alliance leadership",
-          "Defense is as important as offense"
+          "Day 1 = 1 VP only. If already winning, SAVE resources for later days!",
+          "Day 6 = 4 VP. Invest HEAVILY on Day 6 - it often decides the winner",
+          "Win Day 6 + 2 others = guaranteed victory (7 VP)",
+          "If you lose Day 6, you need to win 4 of the other 5 days",
+          "300K+ Personal Points required for ranking rewards - always hit this threshold",
+          "Always claim Daily Chests for Truck Vouchers (helps Tundra Trade Route)",
+          "Must join alliance BEFORE event starts - no mid-event switches",
+          "Coordinate with alliance leadership on which days to push hard"
         ]
       },
       "f2p_friendly": true,
-      "notes": "Good rewards but requires being online at specific time."
+      "notes": "Strategic event where picking your battles matters. Don't overspend on Day 1 (1 VP). Push hard on Day 6 (4 VP). Star ratings carry over to future events. Runs alongside Tundra Trade Route for bonus rewards."
     },
 
     "hall_of_chiefs": {
       "name": "Hall of Chiefs",
       "type": "competitive",
-      "frequency": "Monthly",
-      "duration": "7 days",
+      "frequency": "Bi-weekly",
+      "duration": "6-7 days",
       "cost_category": "light_spend",
       "priority": "S",
-      "description": "Month-long power competition. Points from upgrades, training, research.",
-      "gameplay": "A week-long competition where everything you upgrade earns points. Complete buildings, finish research, train troops, level heroes - all of it counts. You're ranked against other players in your state and across states. The key is SAVING all your speedups and materials beforehand, then dumping everything during this event. Top rankers get massive rewards including legendary hero shards.",
+      "description": "Week-long power competition. 7 daily stages with different point activities. Top rewards include seasonal hero shards.",
+      "gameplay": "A week-long competition where everything you upgrade earns points. Complete buildings, finish research, train troops, level heroes - all of it counts. You're ranked against other players in your state. The key is SAVING all your speedups and materials beforehand, then dumping everything during this event. Top rankers get massive rewards including legendary hero shards. Season 1 features Jeronimo (6 days), Season 2+ features Philly (7 days).",
       "rewards": {
-        "primary": ["Legendary Hero Shards", "Exclusive Titles", "Massive Resources"],
+        "primary": ["Seasonal Hero Shards (Jeronimo/Philly)", "Gems (up to 20K)", "Mythic Skill Manuals", "Resources"],
         "quality": "very_high",
         "backpack_items": ["Legendary Hero Shards", "General Speedups", "Resources", "VIP Points"]
       },
+      "daily_stages": {
+        "gen_1_season_1": {
+          "duration": "6 days",
+          "featured_hero": "Jeronimo",
+          "stages": [
+            {"day": 1, "focus": "Power Boost", "activities": "Construction, Research, Troop Training"},
+            {"day": 2, "focus": "Hero Development", "activities": "Lucky Wheel, Hero Ascension, Pet Refinement"},
+            {"day": 3, "focus": "Train Troops", "activities": "Troop Training (T7+ gives more points)"},
+            {"day": 4, "focus": "Resource Gathering", "activities": "Gather meat, wood, iron, coal"},
+            {"day": 5, "focus": "Power Boost", "activities": "Essence Stones, Gear Widgets, Construction"},
+            {"day": 6, "focus": "Chief Gear Upgrade", "activities": "Chief Gear crafting and upgrades"}
+          ]
+        },
+        "gen_2_season_2_plus": {
+          "duration": "7 days",
+          "featured_hero": "Philly",
+          "stages": [
+            {"day": 1, "focus": "City Construction", "activities": "Building upgrades, Fire Crystals"},
+            {"day": 2, "focus": "Hero Development", "activities": "Lucky Wheel (8K pts/spin!), Hero Ascension"},
+            {"day": 3, "focus": "Basic Skills Up", "activities": "Research, Skill upgrades"},
+            {"day": 4, "focus": "Combat Training", "activities": "Troop Training and Promotion"},
+            {"day": 5, "focus": "Basic Skills Up", "activities": "Research, Skill upgrades"},
+            {"day": 6, "focus": "Combat Training", "activities": "Troop Training and Promotion"},
+            {"day": 7, "focus": "Hero Development", "activities": "Lucky Wheel, Hero Ascension, Pet Refinement"}
+          ]
+        }
+      },
+      "scoring": {
+        "lucky_wheel": "8,000 points per spin (Hero Development days)",
+        "fire_crystal": "2,000 points per FC",
+        "refined_fc": "6,000 points per RFC",
+        "construction_speedup": "30 points per minute",
+        "research_speedup": "30 points per minute",
+        "troop_training": "Points scale with troop tier - T7+ gives significantly more"
+      },
       "preparation": {
-        "save_before": ["ALL speedups", "Resources", "Building upgrades ready", "Research queued"],
+        "save_before": ["ALL speedups", "Fire Crystals", "Lucky Wheel Tickets", "Hero Shards", "Essence Stones", "Gear Widgets", "Chief Gear Materials"],
         "heroes_needed": "none",
         "tips": [
-          "SAVE ALL SPEEDUPS for this event",
-          "Queue expensive upgrades beforehand",
-          "Coordinate with alliance for territory bonuses",
-          "Points come from completing upgrades during event"
+          "HOARD RESOURCES for months before this event - patience wins",
+          "Lucky Wheel on Hero Development days = 8,000 points per spin!",
+          "Start big research/construction projects 1 day BEFORE their stage - complete after reset for instant points",
+          "Train T7+ troops on Combat Training days for maximum points",
+          "Day 1 only gives 1 Victory Point - don't overspend early",
+          "Wait until many players have spent their resources, then use yours for better rankings",
+          "F2P players: Focus on Beast Slay and Troop Training stages - these don't require spending",
+          "Always hit milestone rewards every day even if not competing for leaderboard"
+        ]
+      },
+      "f2p_strategy": {
+        "focus_stages": ["Train Troops", "Resource Gathering", "Beast Slay"],
+        "tips": [
+          "These stages favor activity over spending",
+          "Pre-load training queues before daily reset",
+          "Save gathering speed boosts for Resource Gathering day",
+          "Fill stamina before hunting days for fast beast kills"
         ]
       },
       "f2p_friendly": "partially",
-      "notes": "Best rewards in game but competitive. F2P can rank well by saving speedups."
+      "notes": "Best rewards in game but competitive. F2P can rank well by saving speedups for months. Top 10 finishers get hero shards. Always get milestone rewards even if not competing."
     },
 
     "king_of_icefield": {
       "name": "King of Icefield",
       "type": "competitive",
-      "frequency": "Bi-weekly (Week 2)",
-      "duration": "48 hours",
+      "frequency": "Monthly (replaces Hall of Chiefs after State of Power)",
+      "duration": "7 days (Monday to Sunday)",
       "cost_category": "free",
       "priority": "A",
-      "description": "Cross-state territory control event.",
-      "gameplay": "Your state battles another for control of territory tiles on a shared map. You march your troops to capture empty tiles or attack enemy-held tiles. Holding tiles generates points over time. Alliances coordinate to hold clusters of tiles. It's a 48-hour tug-of-war where being online and quick to respond to attacks matters. Think of it as a slower, strategic SvS focused on map control rather than city burning.",
+      "description": "Cross-state 7-day competition. Better rewards than Hall of Chiefs. Compete against 6 other states!",
+      "gameplay": "A month-long cross-state competition with 7 daily stages. Unlike Hall of Chiefs, you compete against players from SIX different states, not just your own. Each day has a specific focus (construction, hero dev, training, etc.) and rewards. Save resources for their matching days. Earn medals daily (2 per day) to unlock hero shards. Better rewards than Hall of Chiefs but requires broader strategy since you're competing cross-state.",
       "rewards": {
-        "primary": ["Hero Shards", "Titles", "Resources"],
-        "quality": "high",
-        "backpack_items": ["Legendary Hero Shards", "Speedups", "Resources"]
+        "primary": ["Medals of Honor", "Mythical Hero Shards", "Fire Crystals", "Essence Stones", "Charm Materials"],
+        "quality": "very_high",
+        "backpack_items": ["Legendary Hero Shards", "Speedups", "Island Scrolls", "Resources"]
       },
-      "preparation": {
-        "save_before": ["Stamina", "Teleports"],
-        "heroes_needed": "expedition",
-        "key_heroes": ["Jeronimo", "Wu Ming", "Gordon", "Blanchette"],
-        "tips": [
-          "March speed matters",
-          "Coordinate timing with alliance",
-          "Control points = sustained rewards"
+      "daily_stages": {
+        "description": "7 days with specific focus and rewards each day",
+        "stages": [
+          {"day": 1, "focus": "City Construction", "reward": "Fire Crystals", "activities": "Building upgrades, Fire Crystals (2K pts each)"},
+          {"day": 2, "focus": "Hero Development", "reward": "Essence Stones", "activities": "Lucky Wheel (8K pts/spin), Hero Ascension"},
+          {"day": 3, "focus": "Basic Skills Up", "reward": "Charm Projects", "activities": "Research, Skill upgrades"},
+          {"day": 4, "focus": "Combat Training", "reward": "Charm Guides", "activities": "Troop Training (T7+ for max points)"},
+          {"day": 5, "focus": "Basic Skills Up", "reward": "Fire Crystals", "activities": "Research, Skill upgrades"},
+          {"day": 6, "focus": "Combat Training", "reward": "Chief Projects", "activities": "Troop Training and Promotion"},
+          {"day": 7, "focus": "Hero Development", "reward": "Mythical Shards", "activities": "Lucky Wheel, Pet Refinement, Hero Ascension"}
         ]
       },
+      "scoring": {
+        "fire_crystal": "2,000 points per FC",
+        "refined_fc": "Requires Furnace 6-8, higher points",
+        "lucky_wheel": "8,000 points per spin (Hero Development days)",
+        "medals": "2 medals per day from hitting daily point requirements",
+        "state_rank_threshold": "250,000+ total points for State Rank rewards"
+      },
+      "medal_system": {
+        "description": "Earn medals daily to unlock additional rewards",
+        "medals_per_day": 2,
+        "medal_shop": "Trade medals for Mythic Hero Shards and rare items"
+      },
+      "preparation": {
+        "save_before": ["ALL speedups", "Fire Crystals", "Hero Shards", "Essence Stones", "Mithril", "Wild Marks", "Lucky Wheel Tickets"],
+        "heroes_needed": "none",
+        "tips": [
+          "You compete against 6 OTHER STATES - broader strategy needed",
+          "Fire Crystals give 2,000 points each on Day 1 and 5",
+          "Lucky Wheel gives 8,000 points per spin on Hero Development days (Day 2 and 7)",
+          "Pre-load troop training queues before Days 4 and 6, complete after reset",
+          "Troop PROMOTION points = difference between tier levels (promotes are efficient)",
+          "Crystal Dust only available after War Academy unlocks",
+          "F2P: Prioritize speedups early, save expensive resources (FC, Shards, Mithril) for later days",
+          "Always hit daily point requirements for 2 medals per day",
+          "250K+ total points required for State Rank rewards"
+        ]
+      },
+      "f2p_strategy": {
+        "tips": [
+          "Focus on speedups for City Construction day",
+          "Train T7+ troops on Combat Training days for maximum points",
+          "Pre-load training queues before daily reset",
+          "Save expensive resources (FC, Shards) for later when you can calculate if you'll hit thresholds",
+          "Always get milestone rewards even if not competing for top ranks"
+        ]
+      },
+      "ranking_tiers": {
+        "state_rankings": "Compete against your own state",
+        "cross_state_rankings": "Compete against 6 other states",
+        "note": "Cross-state rankings offer additional rewards"
+      },
       "f2p_friendly": true,
-      "notes": "Good alternative to SvS weeks. Territory control rewards active alliances."
+      "notes": "Replaces Hall of Chiefs after your state completes State of Power. Better rewards but cross-state competition. Day 7 (Hero Development) gives Mythical Shards as daily reward - save best resources for then!"
     },
 
     "snowbusters": {

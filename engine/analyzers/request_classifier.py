@@ -52,6 +52,10 @@ RULE_PATTERNS = [
     (r"jessie|sergey", "joiner_heroes", "hero_analyzer", 0.9),
     (r"(expedition|exploration) skill", "skills", "hero_analyzer", 0.85),
     (r"(hero|heroes) to invest", "invest", "hero_analyzer", 0.8),
+    (r"what is .* good (for|at)", "hero_info", "hero_analyzer", 0.85),
+    (r"(is|are) .* (good|worth|viable)", "hero_info", "hero_analyzer", 0.8),
+    (r"tell me about", "hero_info", "hero_analyzer", 0.75),
+    (r"how (good|useful) is", "hero_info", "hero_analyzer", 0.8),
 
     # Shop/spending questions (often need AI for complex decisions)
     (r"what to buy", "shop", "rules", 0.7),
@@ -69,9 +73,16 @@ AI_PATTERNS = [
     (r"explain|why", "explanation", 0.8),
     (r"is it worth", "value_judgment", 0.85),
     (r"better|worse", "comparison", 0.8),
+    (r"more important", "comparison", 0.9),
+    (r"which (is|should|do) .* (more|first|better)", "comparison", 0.85),
+    (r"(hero power|chief gear|troop).* or .*(hero power|chief gear|troop)", "comparison", 0.85),
     (r"mistake|wrong", "advice", 0.75),
     (r"(your|what do you) (think|recommend)", "opinion", 0.7),
     (r"strategy|plan|approach", "strategic", 0.7),
+    # Alliance and R4/R5 specific topics
+    (r"alliance (tech|research|gift)", "alliance", 0.9),
+    (r"r4|r5|rally lead", "alliance_role", 0.85),
+    (r"alliance", "alliance", 0.75),
 ]
 
 

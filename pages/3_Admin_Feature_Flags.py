@@ -55,9 +55,9 @@ db = get_db()
 
 # Ensure table exists
 from sqlalchemy import inspect
-inspector = inspect(db.bind)
+inspector = inspect(db.get_bind())
 if 'feature_flags' not in inspector.get_table_names():
-    FeatureFlag.__table__.create(db.bind, checkfirst=True)
+    FeatureFlag.__table__.create(db.get_bind(), checkfirst=True)
 
 # Feature flag metadata - display names and detailed descriptions
 FLAG_METADATA = {

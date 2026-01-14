@@ -127,6 +127,45 @@ def update_user_theme(db: Session, user_id: int, theme: str) -> bool:
     return True
 
 
+def get_user_email(db: Session, user_id: int) -> Optional[str]:
+    """Get user's email address."""
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return None
+    return user.email
+
+
+def update_user_email(db: Session, user_id: int, new_email: Optional[str]) -> tuple[bool, str]:
+    """
+    Update a user's email address.
+    Returns (success, message) tuple.
+    """
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return False, "User not found"
+
+    # If clearing email (setting to None/empty)
+    if not new_email or not new_email.strip():
+        user.email = None
+        db.commit()
+        return True, "Email cleared"
+
+    new_email = new_email.strip().lower()
+
+    # Basic email validation
+    if '@' not in new_email or '.' not in new_email:
+        return False, "Invalid email format"
+
+    # Check if email is already in use by another user
+    existing = db.query(User).filter(User.email == new_email, User.id != user_id).first()
+    if existing:
+        return False, "Email already in use"
+
+    user.email = new_email
+    db.commit()
+    return True, "Email updated"
+
+
 def delete_user(db: Session, user_id: int) -> bool:
     """Delete a user account."""
     user = get_user_by_id(db, user_id)

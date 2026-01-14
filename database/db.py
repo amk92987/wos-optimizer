@@ -66,6 +66,12 @@ def _run_sqlite_migrations():
         ("ai_conversations", "is_favorite", "BOOLEAN", "0"),
         ("ai_conversations", "thread_id", "VARCHAR(36)", None),
         ("ai_conversations", "thread_title", "VARCHAR(100)", None),
+        # Feature flags new columns
+        ("feature_flags", "value", "VARCHAR(50)", None),
+        ("feature_flags", "enabled_for_roles", "JSON", None),
+        ("feature_flags", "enabled_for_users", "JSON", None),
+        ("feature_flags", "created_at", "DATETIME", None),
+        ("feature_flags", "updated_at", "DATETIME", None),
     ]
 
     for table, column, col_type, default in migrations:

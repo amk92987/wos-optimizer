@@ -574,6 +574,14 @@ def render_frostfire():
         with st.expander("📋 Minute-by-Minute Play-by-Play", expanded=True):
             st.caption(minute_by_minute.get("description", ""))
 
+            # Column headers
+            st.markdown("""
+            <div style="display:flex;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);">
+                <div style="width:120px;font-weight:bold;color:#4A90D9;font-size:14px;">Event Time</div>
+                <div style="flex:1;font-weight:bold;color:#4A90D9;font-size:14px;">Strategy</div>
+            </div>
+            """, unsafe_allow_html=True)
+
             phases = minute_by_minute.get("phases", [])
             for phase_data in phases:
                 time = phase_data.get("time", "")
@@ -595,13 +603,16 @@ def render_frostfire():
                     bg_color = "rgba(74,144,217,0.1)"
                     border_color = "#3498DB"
 
+                # Two-column layout: timestamp outside, strategy inside box
                 st.markdown(f"""
-                <div style="background:{bg_color};border-left:4px solid {border_color};padding:12px;border-radius:6px;margin-bottom:8px;">
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                        <span style="font-weight:bold;color:{border_color};font-size:16px;">{time}</span>
-                        <span style="font-weight:bold;color:#E8F4F8;">{phase}</span>
+                <div style="display:flex;margin-bottom:10px;align-items:flex-start;">
+                    <div style="width:120px;flex-shrink:0;padding-top:12px;">
+                        <span style="font-weight:bold;color:{border_color};font-size:15px;">{time}</span>
                     </div>
-                    {"".join([f'<div style="color:#B8D4E8;font-size:13px;margin-left:8px;">• {action}</div>' for action in actions])}
+                    <div style="flex:1;background:{bg_color};border-left:4px solid {border_color};padding:12px;border-radius:6px;">
+                        <div style="font-weight:bold;color:#E8F4F8;margin-bottom:8px;">{phase}</div>
+                        {"".join([f'<div style="color:#B8D4E8;font-size:13px;">• {action}</div>' for action in actions])}
+                    </div>
                 </div>
                 """, unsafe_allow_html=True)
 

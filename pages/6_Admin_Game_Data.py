@@ -191,6 +191,8 @@ with tab_heroes:
                     st.rerun()
 
 with tab_items:
+    st.info("Items are used for backpack/inventory tracking (OCR feature). Add items here to enable inventory scanning.")
+
     # Search
     search = st.text_input("🔍 Search Items", placeholder="Name or category...", key="item_search")
 

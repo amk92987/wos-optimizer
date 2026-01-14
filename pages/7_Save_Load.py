@@ -11,8 +11,8 @@ from datetime import datetime
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from database.db import init_db, get_db, get_or_create_profile
-from database.models import UserHero, Hero, UserInventory
+from database.db import init_db, get_db, get_or_create_profile, get_user_profiles
+from database.models import UserHero, Hero, UserInventory, UserProfile
 
 
 # Load CSS
@@ -266,9 +266,28 @@ def rename_profile_file(new_name: str):
 
 # Page content
 st.markdown("# 👤 Profiles")
-st.markdown("Save and load profiles to sync your data across computers via git.")
+st.markdown("Manage your profile data and sync across computers via git.")
+
+st.info("""
+**How saving works:**
+- Your profile data is **automatically saved** to the database as you play
+- Use **Save As New** to export a JSON backup file for git sync
+- Profile files are stored in `data/profiles/` and can be committed to git
+""")
 
 st.markdown("---")
+
+# Auto-save profile if user has data but no file
+# This ensures users always see their profile in the list
+if profile.name and not st.session_state.get("loaded_profile_filename"):
+    existing_profiles = get_saved_profiles()
+    # Check if a profile with the same name already exists
+    profile_names = [p.get("name", "").lower() for p in existing_profiles]
+    if profile.name.lower() not in profile_names:
+        # Auto-save the profile
+        filepath = save_profile_to_file(profile.name)
+        st.session_state["loaded_profile_path"] = str(filepath)
+        st.session_state["loaded_profile_filename"] = filepath.name
 
 # Current profile summary
 st.markdown("## 📊 Current Profile")
@@ -290,6 +309,64 @@ with col3:
     st.metric("Heroes Saved", hero_count)
 with col4:
     st.metric("Furnace Level", profile.furnace_level)
+
+# Farm account settings
+st.markdown("### 🌾 Farm Account Settings")
+st.caption("Mark this profile as a farm/alt account to get specialized recommendations")
+
+farm_col1, farm_col2 = st.columns([1, 2])
+
+with farm_col1:
+    is_farm = st.checkbox(
+        "This is a farm account",
+        value=profile.is_farm_account if hasattr(profile, 'is_farm_account') else False,
+        key="is_farm_checkbox",
+        help="Farm accounts get gathering-focused recommendations instead of combat advice"
+    )
+
+with farm_col2:
+    # Show link to main profile if farm account is checked
+    if is_farm:
+        # Get all profiles for this user to link
+        user_id = st.session_state.get('user_id')
+        if user_id:
+            all_profiles = get_user_profiles(db, user_id)
+            # Filter out current profile and other farms
+            main_profiles = [p for p in all_profiles if p.id != profile.id and not p.is_farm_account]
+
+            if main_profiles:
+                profile_options = {p.id: f"{p.name} (FC{p.furnace_level})" for p in main_profiles}
+                profile_options[0] = "-- Not linked --"
+
+                current_linked = profile.linked_main_profile_id if hasattr(profile, 'linked_main_profile_id') else None
+                current_idx = list(profile_options.keys()).index(current_linked) if current_linked in profile_options else 0
+
+                linked_id = st.selectbox(
+                    "Link to main account",
+                    options=list(profile_options.keys()),
+                    format_func=lambda x: profile_options[x],
+                    index=current_idx,
+                    key="linked_main_select",
+                    help="Link this farm to your main account for coordinated recommendations"
+                )
+            else:
+                linked_id = None
+                st.caption("No other profiles to link to")
+        else:
+            linked_id = None
+    else:
+        linked_id = None
+
+# Save farm settings if changed
+current_is_farm = profile.is_farm_account if hasattr(profile, 'is_farm_account') else False
+current_linked = profile.linked_main_profile_id if hasattr(profile, 'linked_main_profile_id') else None
+
+if is_farm != current_is_farm or (is_farm and linked_id is not None and linked_id != current_linked):
+    profile.is_farm_account = is_farm
+    profile.linked_main_profile_id = linked_id if linked_id and linked_id != 0 else None
+    db.commit()
+    st.success("Farm settings saved!")
+    st.rerun()
 
 # Edit profile name and update loaded profile
 if loaded_file:
@@ -372,7 +449,7 @@ st.markdown("## 📁 Saved Profiles")
 saved_profiles = get_saved_profiles()
 
 if not saved_profiles:
-    st.info("No saved profiles yet. Save your current profile above!")
+    st.info("No profile files yet. Your data is automatically saved to the database. Use 'Save As New' above to create a file backup for git sync across computers.")
 else:
     st.markdown(f"*Found {len(saved_profiles)} saved profile(s)*")
 

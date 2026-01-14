@@ -81,6 +81,78 @@ class RecommendationEngine:
                 return json.load(f)
         return {}
 
+    def _get_hero_info_from_question(self, question: str) -> Optional[Dict[str, Any]]:
+        """Extract hero name from question and return hero info in conversational WoS style."""
+        question_lower = question.lower()
+
+        # Search for hero names in the question
+        heroes = self.heroes_data.get('heroes', [])
+        matched_hero = None
+
+        for hero in heroes:
+            hero_name = hero.get('name', '').lower()
+            if hero_name and hero_name in question_lower:
+                matched_hero = hero
+                break
+
+        if not matched_hero:
+            return None
+
+        # Build a conversational summary using WoS terminology
+        name = matched_hero.get('name', 'Unknown')
+        hero_class = matched_hero.get('hero_class', 'Unknown')
+        generation = matched_hero.get('generation', '?')
+        tier = matched_hero.get('tier_overall', '?')
+        rarity = matched_hero.get('rarity', 'Unknown')
+
+        # Get the top expedition skill (most important for rallies)
+        top_exped_skill = matched_hero.get('expedition_skill_1', '')
+        top_exped_desc = matched_hero.get('expedition_skill_1_desc', '')
+
+        # Build conversational response
+        summary_parts = []
+
+        # Opening line with tier assessment
+        if tier in ['S+', 'S']:
+            summary_parts.append(f"Chief, {name} is a high-value {hero_class} from Gen {generation}. Rated {tier} tier - definitely worth committing resources to.")
+        elif tier == 'A':
+            summary_parts.append(f"{name} is a solid Gen {generation} {hero_class}, rated {tier} tier. Good efficiency for most content.")
+        elif tier == 'B':
+            summary_parts.append(f"{name} is a Gen {generation} {hero_class}, rated {tier} tier. Decent early-mid game but you'll want to transition to higher gen heroes eventually.")
+        else:
+            summary_parts.append(f"{name} is a Gen {generation} {hero_class}, rated {tier} tier. Low-return investment at this point - hold your resources for better options.")
+
+        # Class-specific value
+        summary_parts.append("")
+        if hero_class == "Infantry":
+            summary_parts.append(f"As Infantry, {name} buffs your frontline troops. Your Coat and Pants chief gear directly boost {name}'s effectiveness.")
+        elif hero_class == "Marksman":
+            summary_parts.append(f"As Marksman, {name} deals ranged damage from the back line. Belt and Shortstaff chief gear are your efficiency multipliers here.")
+        elif hero_class == "Lancer":
+            summary_parts.append(f"As Lancer, {name} is a balanced fighter with good survivability. Hat and Watch chief gear boost this class.")
+
+        # Key skill callout
+        if top_exped_skill:
+            summary_parts.append("")
+            if top_exped_desc:
+                summary_parts.append(f"Key expedition skill: **{top_exped_skill}** - {top_exped_desc}")
+            else:
+                summary_parts.append(f"Key expedition skill: **{top_exped_skill}**")
+
+        # Practical advice based on tier
+        summary_parts.append("")
+        if tier in ['S+', 'S']:
+            summary_parts.append(f"Bottom line: Promote {name} when you can. This is almost always a good investment for your settlement's power.")
+        elif tier == 'A':
+            summary_parts.append(f"Bottom line: {name} is worth promoting if you don't have higher-tier alternatives. Check your roster first.")
+        else:
+            summary_parts.append(f"Bottom line: Unless {name} is one of your only options, you're better off holding those manuals for a higher-value hero.")
+
+        return {
+            "hero": matched_hero,
+            "summary": "\n".join(summary_parts)
+        }
+
     @property
     def ai_recommender(self):
         """Lazy load AI recommender only when needed."""
@@ -340,9 +412,25 @@ class RecommendationEngine:
 
         # Use AI
         ai_result = self._handle_with_ai(profile, user_heroes, question)
-        return ai_result or {
-            "answer": "Unable to process request. Please try rephrasing your question.",
-            "source": "error",
+        if ai_result:
+            return ai_result
+
+        # AI not available - give helpful fallback based on category
+        fallback_responses = {
+            "alliance": "Chief, alliance tech research is a great question! For R4s, I'd generally prioritize: 1) Troop stats that benefit rallies (ATK/DEF bonuses), 2) March speed for faster reinforcements, 3) Resource production last. But it really depends on your alliance's focus - ask your R5 what the alliance needs most right now.",
+            "alliance_role": "Chief, as an R4 your main job is supporting rallies and helping coordinate. Focus on keeping your march slots free for reinforcing, and make sure your rally-joining heroes are leveled up. Communication with your R5 about alliance goals is key.",
+            "hypothetical": "That's a complex question that depends on your specific situation. Try asking about something specific like 'What hero should I level next?' or 'What's my best Bear Trap lineup?'",
+            "spending_decision": "Chief, spending decisions are personal - it depends on your goals and budget. Generally, spend during events for maximum value, and focus on packs that give heroes or exclusive items you can't get otherwise.",
+            "comparison": "Chief, for hero power vs chief gear: **Chief gear is generally the better investment** early-mid game because it multiplies your entire troop type's effectiveness, not just one hero. One tier jump on chief gear boosts all Infantry (or Marksman/Lancer) permanently.\n\nHero power matters more for specific roles - like if you're rally joining, you need strong expedition skills on your first hero. But for raw combat power growth, chief gear tier jumps give more bang for your resources.\n\nTL;DR: Get chief gear to Purple/Gold tier first, then focus hero levels.",
+            "strategic": "Chief, strategy depends heavily on your current situation. Tell me your furnace level, what heroes you have, or what event you're preparing for and I can give more specific advice.",
+        }
+
+        category = classified.category if classified else "unknown"
+        fallback = fallback_responses.get(category, "Hey Chief! I can help with things like hero lineups, upgrade priorities, SvS strategy, gear recommendations, and rally compositions. What specifically would you like to know?")
+
+        return {
+            "answer": fallback,
+            "source": "rules",
             "recommendations": []
         }
 
@@ -376,7 +464,14 @@ class RecommendationEngine:
                     "notes": lineup_rec.notes,
                     "confidence": lineup_rec.confidence
                 }
-                result["answer"] = f"For {lineup_rec.game_mode}, here's your recommended lineup."
+                # Build a conversational answer with the lineup details
+                hero_list = ", ".join([f"{h['hero']} ({h['role']})" for h in lineup_rec.heroes])
+                troop_parts = [f"{v}% {k}" for k, v in lineup_rec.troop_ratio.items() if v > 0]
+                troop_str = " / ".join(troop_parts)
+                result["answer"] = f"Chief, for {lineup_rec.game_mode}:\n\nRun **{hero_list}** in that order.\n\nTroop composition: {troop_str}\n\n{lineup_rec.notes}"
+            else:
+                # Fallback answer if no specific lineup matched
+                result["answer"] = "Chief, I'm not sure which lineup you're asking about. Try asking about Bear Trap, Crazy Joe, Garrison defense, SvS marches, or rally joining - I can give you specific hero and troop recommendations for each."
 
             # Also check joiner recommendation if relevant
             if "join" in question.lower():
@@ -384,15 +479,28 @@ class RecommendationEngine:
                 joiner_rec = self.lineup_builder.get_joiner_recommendation(heroes_dict, attack)
                 result["joiner_recommendation"] = joiner_rec
 
+        elif classified.category == "hero_info":
+            # Extract hero name from question and look up info
+            hero_info = self._get_hero_info_from_question(question)
+            if hero_info:
+                result["hero_info"] = hero_info
+                result["answer"] = hero_info["summary"]
+            else:
+                result["answer"] = "Chief, I couldn't identify which hero you're asking about. Try asking something like 'What is Jessie good for?' or 'Tell me about Sergey' - I can give you tier ratings, skill breakdowns, and investment advice."
+
         elif classified.category in ["upgrade", "skills", "invest"]:
             hero_recs = self.hero_analyzer.analyze(profile, user_heroes)
             result["recommendations"] = [asdict(r) for r in hero_recs[:5]]
-            result["answer"] = f"Based on your heroes and priorities, here are your top upgrade recommendations."
+            if hero_recs:
+                top_hero = hero_recs[0].hero if hasattr(hero_recs[0], 'hero') else "your top hero"
+                result["answer"] = f"Chief, based on your roster and priorities, I'd focus on promoting {top_hero} first. That's your highest efficiency play right now."
+            else:
+                result["answer"] = "Chief, I need more info about your heroes to give specific upgrade advice. Add some heroes to your tracker first."
 
         elif classified.category == "gear":
             gear_recs = self.gear_advisor.analyze(profile, user_gear or {})
             result["recommendations"] = [asdict(r) for r in gear_recs[:5]]
-            result["answer"] = "Here's your gear upgrade priority order."
+            result["answer"] = "Chief, for gear upgrades, focus on your main class first. Each tier jump is a significant power boost to your settlement."
 
         elif classified.category in ["phase", "progression"]:
             phase_id = self.progression_tracker.detect_phase(profile)
@@ -407,19 +515,19 @@ class RecommendationEngine:
                 "next_milestone": next_milestone
             }
             result["recommendations"] = [asdict(t) for t in phase_tips[:5]]
-            result["answer"] = f"You're in {phase_info.get('name', 'Unknown')} phase."
+            phase_name = phase_info.get('name', 'Unknown')
+            next_name = next_milestone.get('name', 'your next goal') if next_milestone else 'endgame'
+            result["answer"] = f"Chief, you're in {phase_name}. Your route to {next_name} should be your main focus - don't get distracted by side upgrades."
 
         elif classified.category == "priority":
             # Combined recommendations
             all_recs = self.get_recommendations(profile, user_heroes, user_gear, limit=5)
             result["recommendations"] = [asdict(r) for r in all_recs]
-            result["answer"] = "Here are your top priorities right now."
+            result["answer"] = "Chief, here's where to commit your resources for maximum efficiency right now."
 
         else:
-            # Default to combined recommendations
-            all_recs = self.get_recommendations(profile, user_heroes, user_gear, limit=5)
-            result["recommendations"] = [asdict(r) for r in all_recs]
-            result["answer"] = "Here's what I recommend based on your current status."
+            # Default - friendly open-ended response
+            result["answer"] = "Hey Chief! I can help with things like hero lineups, upgrade priorities, SvS strategy, gear recommendations, rally compositions, and pretty much anything else about Whiteout Survival. What's on your mind?"
 
         return result
 

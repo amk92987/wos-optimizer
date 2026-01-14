@@ -1,129 +1,477 @@
 """
 Lineup Builder - Recommends optimal lineups based on owned heroes.
-Considers game mode, hero levels, skills, and user priorities.
+Considers game mode, hero levels, skills, gear, and user priorities.
 """
 
 from typing import List, Dict, Any, Optional, Tuple
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
 @dataclass
 class LineupRecommendation:
     """A complete lineup recommendation."""
     game_mode: str
-    heroes: List[Dict[str, Any]]  # List of {hero, slot, role, your_status}
+    heroes: List[Dict[str, Any]]  # List of {hero, slot, role, your_status, hero_class}
     troop_ratio: Dict[str, int]  # e.g., {"infantry": 50, "lancer": 20, "marksman": 30}
     notes: str
     confidence: str  # "high", "medium", "low" based on hero availability
+    recommended_to_get: List[Dict[str, Any]] = field(default_factory=list)  # Heroes user should get
 
 
-# Ideal lineups by game mode
-IDEAL_LINEUPS = {
-    "rally_leader_infantry": {
-        "mode": "Rally Leader (Infantry Focus)",
+# Hero tier values for ranking (S+ = 6, S = 5, ... D = 1)
+TIER_VALUES = {"S+": 6, "S": 5, "A": 4, "B": 3, "C": 2, "D": 1}
+
+
+def calculate_hero_power(hero_stats: dict, hero_data: dict = None) -> int:
+    """
+    Calculate a hero's effective power based on level, stars, gear, and tier.
+
+    Args:
+        hero_stats: User's hero stats {level, stars, gear_slot1_quality, etc.}
+        hero_data: Static hero data from heroes.json (for tier info)
+
+    Returns:
+        Power score (higher = better)
+    """
+    score = 0
+
+    # Level contributes most (0-80 range)
+    level = hero_stats.get('level', 1)
+    score += level * 10  # 0-800 points
+
+    # Stars (0-5)
+    stars = hero_stats.get('stars', 0)
+    score += stars * 50  # 0-250 points
+
+    # Ascension tier (0-5)
+    ascension = hero_stats.get('ascension_tier', 0)
+    score += ascension * 30  # 0-150 points
+
+    # Gear quality (4 slots, quality 0-6)
+    for slot in range(1, 5):
+        quality = hero_stats.get(f'gear_slot{slot}_quality', 0)
+        gear_level = hero_stats.get(f'gear_slot{slot}_level', 0)
+        score += quality * 15 + gear_level // 10  # 0-100 per slot
+
+    # Expedition skills (for PvP modes)
+    exp_skill = hero_stats.get('expedition_skill_1_level', 1)
+    score += exp_skill * 20  # 0-100 points
+
+    # Base tier bonus from hero data
+    if hero_data:
+        tier = hero_data.get('tier_expedition', 'C')
+        score += TIER_VALUES.get(tier, 2) * 25  # 25-150 points
+
+    return score
+
+
+# Hero metadata: class and generation
+HERO_METADATA = {
+    # Gen 1
+    "Jeronimo": {"class": "Infantry", "gen": 1, "tier": "S", "role": "ATK buffer"},
+    "Natalia": {"class": "Infantry", "gen": 2, "tier": "S+", "role": "Tank/Sustain"},
+    "Flint": {"class": "Infantry", "gen": 2, "tier": "A", "role": "Control/Tank"},
+    "Sergey": {"class": "Infantry", "gen": 1, "tier": "B", "role": "Garrison joiner"},
+    "Jessie": {"class": "Marksman", "gen": 1, "tier": "B", "role": "Attack joiner"},
+    "Bahiti": {"class": "Lancer", "gen": 1, "tier": "B", "role": "Healer/Support"},
+    "Patrick": {"class": "Lancer", "gen": 1, "tier": "C", "role": "Early lancer"},
+    "Logan": {"class": "Marksman", "gen": 1, "tier": "C", "role": "Backup marksman"},
+    # Gen 2
+    "Molly": {"class": "Lancer", "gen": 2, "tier": "S", "role": "Healer/DPS"},
+    "Alonso": {"class": "Marksman", "gen": 2, "tier": "S+", "role": "Main DPS"},
+    "Philly": {"class": "Marksman", "gen": 2, "tier": "A", "role": "Burst DPS"},
+    # Gen 3
+    "Zinman": {"class": "Lancer", "gen": 3, "tier": "S", "role": "Tank/Control"},
+    "Gina": {"class": "Marksman", "gen": 3, "tier": "A", "role": "Healer"},
+    # Gen 4
+    "Mia": {"class": "Marksman", "gen": 4, "tier": "A", "role": "Support DPS"},
+    "Lynn": {"class": "Lancer", "gen": 4, "tier": "A", "role": "DPS Lancer"},
+    # Gen 5
+    "Greg": {"class": "Infantry", "gen": 5, "tier": "S", "role": "Tank"},
+    "Reina": {"class": "Lancer", "gen": 5, "tier": "A", "role": "Support"},
+    # Gen 6+
+    "Ahmose": {"class": "Infantry", "gen": 6, "tier": "S", "role": "Tank/Control"},
+    "Norah": {"class": "Marksman", "gen": 6, "tier": "S", "role": "DPS"},
+    "Wayne": {"class": "Lancer", "gen": 7, "tier": "S", "role": "Support"},
+    "Jasser": {"class": "Marksman", "gen": 7, "tier": "S", "role": "Rally joiner"},
+    "Seo-yoon": {"class": "Marksman", "gen": 8, "tier": "S+", "role": "Rally DPS"},
+}
+
+# Standard 3-hero lineup templates by event type
+# Each template has required_class for each slot to ensure proper composition
+LINEUP_TEMPLATES = {
+    "world_march": {
+        "name": "World March",
         "slots": [
-            {"position": "Lead", "heroes": ["Jeronimo", "Natalia", "Flint"], "role": "Tank/Buffer"},
-            {"position": "Slot 2", "heroes": ["Natalia", "Flint", "Bahiti"], "role": "Support"},
-            {"position": "Slot 3", "heroes": ["Flint", "Bahiti", "Sergey"], "role": "Infantry DPS"}
+            {"class": "Infantry", "role": "Lead/Tank", "preferred": ["Jeronimo", "Natalia", "Flint", "Greg", "Ahmose"], "is_lead": True},
+            {"class": "Lancer", "role": "Support/Heal", "preferred": ["Molly", "Zinman", "Bahiti", "Lynn", "Wayne"]},
+            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Philly", "Norah", "Seo-yoon", "Gina"]},
         ],
-        "troop_ratio": {"infantry": 60, "lancer": 20, "marksman": 20},
-        "notes": "Infantry-heavy for balanced push. Lead hero buffs determine rally effectiveness."
-    },
-    "rally_leader_marksman": {
-        "mode": "Rally Leader (Marksman Focus)",
-        "slots": [
-            {"position": "Lead", "heroes": ["Alonso", "Philly", "Logan"], "role": "Marksman DPS"},
-            {"position": "Slot 2", "heroes": ["Molly", "Philly", "Mia"], "role": "AOE/DPS"},
-            {"position": "Slot 3", "heroes": ["Logan", "Mia", "Cloris"], "role": "Support"}
-        ],
-        "troop_ratio": {"infantry": 20, "lancer": 20, "marksman": 60},
-        "notes": "Marksman-heavy for max DPS. Good for Bear Trap and Crazy Joe."
-    },
-    "rally_joiner_attack": {
-        "mode": "Rally Joiner (Attack)",
-        "slots": [
-            {"position": "Slot 1 (Critical)", "heroes": ["Jessie", "Jeronimo"], "role": "Attack Joiner - ONLY this hero's top-right skill matters!"},
-            {"position": "Slot 2", "heroes": ["any"], "role": "Filler (doesn't matter for joining)"},
-            {"position": "Slot 3", "heroes": ["any"], "role": "Filler (doesn't matter for joining)"}
-        ],
-        "troop_ratio": {"infantry": 30, "lancer": 20, "marksman": 50},
-        "notes": "ONLY slot 1 hero matters! If no good attack joiner, remove all heroes and send troops only."
-    },
-    "rally_joiner_defense": {
-        "mode": "Rally Joiner (Garrison/Defense)",
-        "slots": [
-            {"position": "Slot 1 (Critical)", "heroes": ["Sergey", "Natalia"], "role": "Defense Joiner - ONLY this hero's top-right skill matters!"},
-            {"position": "Slot 2", "heroes": ["any"], "role": "Filler"},
-            {"position": "Slot 3", "heroes": ["any"], "role": "Filler"}
-        ],
-        "troop_ratio": {"infantry": 50, "lancer": 30, "marksman": 20},
-        "notes": "ONLY slot 1 hero matters! Sergey's Defenders' Edge provides -20% damage taken."
+        "troop_ratio": {"infantry": 50, "lancer": 20, "marksman": 30},
+        "notes": "Standard balanced march. Jeronimo for burst, Natalia for sustain.",
+        "key_heroes": ["Jeronimo", "Natalia", "Molly", "Alonso"],
     },
     "bear_trap": {
-        "mode": "Bear Trap Rally",
+        "name": "Bear Trap Rally",
         "slots": [
-            {"position": "Lead", "heroes": ["Jeronimo", "Alonso", "Philly"], "role": "DPS Lead"},
-            {"position": "Slot 2", "heroes": ["Molly", "Alonso", "Logan"], "role": "AOE DPS"},
-            {"position": "Slot 3", "heroes": ["Philly", "Logan", "Mia"], "role": "DPS Support"}
+            {"class": "Infantry", "role": "ATK Buffer", "preferred": ["Jeronimo", "Natalia", "Greg"], "is_lead": True},
+            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Zinman", "Bahiti"]},
+            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Philly", "Seo-yoon", "Norah"]},
         ],
-        "troop_ratio": {"infantry": 0, "lancer": 10, "marksman": 90},
-        "notes": "Bear is slow. Maximize marksman DPS. Infantry not needed."
+        "troop_ratio": {"infantry": 20, "lancer": 20, "marksman": 60},
+        "notes": "Heavy Marksman for max damage. Bear is slow, DPS matters most.",
+        "key_heroes": ["Jeronimo", "Molly", "Alonso"],
     },
     "crazy_joe": {
-        "mode": "Crazy Joe Rally",
+        "name": "Crazy Joe Rally",
         "slots": [
-            {"position": "Lead", "heroes": ["Jeronimo", "Natalia", "Flint"], "role": "Infantry Lead"},
-            {"position": "Slot 2", "heroes": ["Natalia", "Flint", "Bahiti"], "role": "Tank/Support"},
-            {"position": "Slot 3", "heroes": ["Flint", "Bahiti", "Sergey"], "role": "Infantry DPS"}
+            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Natalia", "Greg"], "is_lead": True},
+            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Bahiti", "Zinman"]},
+            {"class": "Marksman", "role": "Support", "preferred": ["Alonso", "Philly", "Logan"]},
         ],
         "troop_ratio": {"infantry": 90, "lancer": 10, "marksman": 0},
-        "notes": "Infantry kills before Joe's backline attacks. Minimize marksmen."
+        "notes": "Infantry kills before back row attacks. 90/10/0 ratio is key.",
+        "key_heroes": ["Jeronimo", "Molly"],
+    },
+    "svs_attack": {
+        "name": "SvS Castle Attack",
+        "slots": [
+            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Natalia", "Greg", "Ahmose"], "is_lead": True},
+            {"class": "Lancer", "role": "Support", "preferred": ["Molly", "Zinman", "Wayne"]},
+            {"class": "Marksman", "role": "DPS", "preferred": ["Alonso", "Seo-yoon", "Norah", "Philly"]},
+        ],
+        "troop_ratio": {"infantry": 50, "lancer": 20, "marksman": 30},
+        "notes": "Rally leader setup. See Natalia vs Jeronimo tab for when to swap.",
+        "key_heroes": ["Jeronimo", "Natalia", "Molly", "Alonso"],
     },
     "garrison": {
-        "mode": "Castle Garrison",
+        "name": "Castle Garrison",
         "slots": [
-            {"position": "Lead", "heroes": ["Sergey", "Natalia", "Jeronimo"], "role": "Defensive Lead"},
-            {"position": "Slot 2", "heroes": ["Natalia", "Bahiti", "Flint"], "role": "Tank/Healer"},
-            {"position": "Slot 3", "heroes": ["Bahiti", "Flint", "Zinman"], "role": "Support"}
+            {"class": "Infantry", "role": "Tank Lead", "preferred": ["Natalia", "Greg", "Ahmose", "Flint"], "is_lead": True},
+            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Zinman", "Bahiti"]},
+            {"class": "Marksman", "role": "Counter DPS", "preferred": ["Alonso", "Philly", "Norah"]},
         ],
-        "troop_ratio": {"infantry": 60, "lancer": 25, "marksman": 15},
-        "notes": "Defense-focused. Infantry absorb damage. Sergey's skill provides damage reduction."
+        "troop_ratio": {"infantry": 60, "lancer": 15, "marksman": 25},
+        "notes": "Defense = survival. Natalia's sustain is key.",
+        "key_heroes": ["Natalia", "Molly", "Alonso"],
+    },
+    "rally_joiner_attack": {
+        "name": "Rally Joiner (Attack)",
+        "slots": [
+            {"class": "Marksman", "role": "JOINER (Only this matters!)", "preferred": ["Jessie", "Jasser", "Seo-yoon"], "is_lead": True, "is_joiner": True},
+            {"class": "Infantry", "role": "Filler", "preferred": ["any"]},
+            {"class": "Lancer", "role": "Filler", "preferred": ["any"]},
+        ],
+        "troop_ratio": {"infantry": 30, "lancer": 20, "marksman": 50},
+        "notes": "ONLY first hero's expedition skill matters! Jessie gives +25% DMG.",
+        "key_heroes": ["Jessie"],
+        "joiner_warning": "If you don't have Jessie, send troops WITHOUT heroes!",
+    },
+    "rally_joiner_defense": {
+        "name": "Rally Joiner (Garrison)",
+        "slots": [
+            {"class": "Infantry", "role": "JOINER (Only this matters!)", "preferred": ["Sergey"], "is_lead": True, "is_joiner": True},
+            {"class": "Lancer", "role": "Filler", "preferred": ["any"]},
+            {"class": "Marksman", "role": "Filler", "preferred": ["any"]},
+        ],
+        "troop_ratio": {"infantry": 60, "lancer": 20, "marksman": 20},
+        "notes": "ONLY first hero's expedition skill matters! Sergey gives -20% DMG taken.",
+        "key_heroes": ["Sergey"],
+        "joiner_warning": "If you don't have Sergey, send troops WITHOUT heroes!",
+    },
+    "arena": {
+        "name": "Arena (5 Heroes)",
+        "slots": [
+            {"class": "Infantry", "role": "Primary Tank", "preferred": ["Natalia", "Greg", "Ahmose"], "is_lead": True},
+            {"class": "Infantry", "role": "Secondary Tank", "preferred": ["Flint", "Natalia", "Sergey"]},
+            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Seo-yoon", "Norah"]},
+            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Zinman", "Wayne"]},
+            {"class": "Marksman", "role": "Secondary DPS", "preferred": ["Philly", "Gina", "Mia"]},
+        ],
+        "troop_ratio": {"infantry": 45, "lancer": 25, "marksman": 30},
+        "notes": "5-hero mode. Double infantry frontline is meta.",
+        "key_heroes": ["Natalia", "Flint", "Alonso", "Molly"],
     },
     "exploration": {
-        "mode": "Exploration/PvE",
+        "name": "Exploration / PvE",
         "slots": [
-            {"position": "Tank", "heroes": ["Zinman", "Natalia", "Sergey"], "role": "Tank"},
-            {"position": "Healer", "heroes": ["Natalia", "Gina", "Bahiti"], "role": "Healer/Support"},
-            {"position": "DPS", "heroes": ["Molly", "Alonso", "Jeronimo"], "role": "Damage Dealer"}
+            {"class": "Infantry", "role": "Tank", "preferred": ["Natalia", "Zinman", "Sergey", "Greg"], "is_lead": True},
+            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Bahiti", "Gina"]},
+            {"class": "Marksman", "role": "DPS", "preferred": ["Alonso", "Philly", "Logan"]},
         ],
         "troop_ratio": {"infantry": 40, "lancer": 30, "marksman": 30},
-        "notes": "Uses EXPLORATION skills (left side). Tank + Healer + DPS composition."
+        "notes": "Uses EXPLORATION skills (left side). Survival > speed.",
+        "key_heroes": ["Natalia", "Molly", "Alonso"],
     },
-    "svs_march": {
-        "mode": "SvS Field March",
-        "slots": [
-            {"position": "Lead", "heroes": ["Jeronimo", "Alonso", "Molly"], "role": "Primary DPS"},
-            {"position": "Slot 2", "heroes": ["Alonso", "Molly", "Philly"], "role": "Secondary DPS"},
-            {"position": "Slot 3", "heroes": ["Natalia", "Philly", "Logan"], "role": "Support/DPS"}
-        ],
-        "troop_ratio": {"infantry": 40, "lancer": 20, "marksman": 40},
-        "notes": "Balanced for field combat. Match hero class to your strongest troop type."
-    }
+}
+
+# Legacy IDEAL_LINEUPS for backward compatibility
+IDEAL_LINEUPS = {
+    "rally_leader_infantry": LINEUP_TEMPLATES["svs_attack"],
+    "rally_leader_marksman": LINEUP_TEMPLATES["bear_trap"],
+    "rally_joiner_attack": LINEUP_TEMPLATES["rally_joiner_attack"],
+    "rally_joiner_defense": LINEUP_TEMPLATES["rally_joiner_defense"],
+    "bear_trap": LINEUP_TEMPLATES["bear_trap"],
+    "crazy_joe": LINEUP_TEMPLATES["crazy_joe"],
+    "garrison": LINEUP_TEMPLATES["garrison"],
+    "exploration": LINEUP_TEMPLATES["exploration"],
+    "svs_march": LINEUP_TEMPLATES["world_march"],
 }
 
 
 class LineupBuilder:
     """Build optimal lineups from user's available heroes."""
 
-    def __init__(self, heroes_data: dict):
+    def __init__(self, heroes_data: dict = None):
         """
         Initialize with static hero data.
 
         Args:
-            heroes_data: Hero data from heroes.json
+            heroes_data: Hero data from heroes.json (optional, uses HERO_METADATA if not provided)
         """
-        self.heroes_data = heroes_data
-        self.hero_lookup = {h['name']: h for h in heroes_data.get('heroes', [])}
+        self.heroes_data = heroes_data or {}
+        self.hero_lookup = {h['name']: h for h in self.heroes_data.get('heroes', [])}
+
+    def build_personalized_lineup(
+        self,
+        event_type: str,
+        user_heroes: dict,
+        max_generation: int = 99
+    ) -> LineupRecommendation:
+        """
+        Build lineup using ONLY the user's owned heroes, ranked by power.
+
+        Args:
+            event_type: Key from LINEUP_TEMPLATES
+            user_heroes: Dict of {hero_name: {level, stars, gear...}}
+            max_generation: Only consider heroes up to this generation
+
+        Returns:
+            LineupRecommendation with user's best available heroes
+        """
+        template = LINEUP_TEMPLATES.get(event_type)
+        if not template:
+            return LineupRecommendation(
+                game_mode=event_type,
+                heroes=[],
+                troop_ratio={"infantry": 33, "lancer": 33, "marksman": 34},
+                notes=f"Unknown event type: {event_type}",
+                confidence="low",
+                recommended_to_get=[]
+            )
+
+        lineup_heroes = []
+        used_heroes = set()
+        missing_key_heroes = []
+        slots_filled = 0
+
+        for slot in template["slots"]:
+            slot_class = slot["class"]
+            role = slot["role"]
+            is_lead = slot.get("is_lead", False)
+            preferred = slot.get("preferred", [])
+
+            # Skip filler slots
+            if preferred == ["any"]:
+                lineup_heroes.append({
+                    "hero": "Any hero",
+                    "hero_class": slot_class,
+                    "slot": role,
+                    "role": "Filler",
+                    "is_lead": False,
+                    "power": 0,
+                    "status": "Filler slot"
+                })
+                continue
+
+            # Find best available hero for this slot from user's collection
+            best_hero = None
+            best_power = -1
+
+            # First try preferred heroes in order
+            for hero_name in preferred:
+                if hero_name in user_heroes and hero_name not in used_heroes:
+                    hero_meta = HERO_METADATA.get(hero_name, {})
+                    if hero_meta.get("gen", 99) <= max_generation:
+                        hero_stats = user_heroes[hero_name]
+                        hero_data = self.hero_lookup.get(hero_name)
+                        power = calculate_hero_power(hero_stats, hero_data)
+                        if power > best_power:
+                            best_power = power
+                            best_hero = hero_name
+
+            # If no preferred hero found, find any hero of the right class
+            if not best_hero:
+                for hero_name, hero_stats in user_heroes.items():
+                    if hero_name in used_heroes:
+                        continue
+                    hero_meta = HERO_METADATA.get(hero_name, {})
+                    if hero_meta.get("class") == slot_class and hero_meta.get("gen", 99) <= max_generation:
+                        hero_data = self.hero_lookup.get(hero_name)
+                        power = calculate_hero_power(hero_stats, hero_data)
+                        if power > best_power:
+                            best_power = power
+                            best_hero = hero_name
+
+            if best_hero:
+                used_heroes.add(best_hero)
+                hero_stats = user_heroes[best_hero]
+                level = hero_stats.get('level', 1)
+                hero_meta = HERO_METADATA.get(best_hero, {})
+                lineup_heroes.append({
+                    "hero": best_hero,
+                    "hero_class": hero_meta.get("class", slot_class),
+                    "slot": role,
+                    "role": hero_meta.get("role", role),
+                    "is_lead": is_lead,
+                    "power": best_power,
+                    "status": f"Lv{level}"
+                })
+                slots_filled += 1
+            else:
+                # No hero available for this slot
+                lineup_heroes.append({
+                    "hero": f"Need {slot_class}",
+                    "hero_class": slot_class,
+                    "slot": role,
+                    "role": role,
+                    "is_lead": is_lead,
+                    "power": 0,
+                    "status": "Not owned"
+                })
+                # Track missing key heroes
+                for hero in preferred[:2]:  # First 2 preferred are most important
+                    if hero not in user_heroes:
+                        hero_meta = HERO_METADATA.get(hero, {})
+                        if hero_meta.get("gen", 99) <= max_generation:
+                            missing_key_heroes.append({
+                                "hero": hero,
+                                "class": hero_meta.get("class", slot_class),
+                                "reason": f"Best {role} for {template['name']}",
+                                "gen": hero_meta.get("gen", 1)
+                            })
+
+        # Build recommended_to_get from key_heroes user doesn't own
+        recommended_to_get = []
+        for key_hero in template.get("key_heroes", []):
+            if key_hero not in user_heroes:
+                hero_meta = HERO_METADATA.get(key_hero, {})
+                if hero_meta.get("gen", 99) <= max_generation:
+                    recommended_to_get.append({
+                        "hero": key_hero,
+                        "class": hero_meta.get("class", "Unknown"),
+                        "reason": f"Key hero for {template['name']}",
+                        "gen": hero_meta.get("gen", 1)
+                    })
+
+        # Add missing slot heroes
+        for missing in missing_key_heroes:
+            if not any(r["hero"] == missing["hero"] for r in recommended_to_get):
+                recommended_to_get.append(missing)
+
+        # Calculate confidence
+        total_critical_slots = len([s for s in template["slots"] if s.get("preferred", ["any"]) != ["any"]])
+        if slots_filled == total_critical_slots:
+            confidence = "high"
+        elif slots_filled >= total_critical_slots * 0.5:
+            confidence = "medium"
+        else:
+            confidence = "low"
+
+        notes = template.get("notes", "")
+        if template.get("joiner_warning") and confidence != "high":
+            notes += f"\n⚠️ {template['joiner_warning']}"
+
+        return LineupRecommendation(
+            game_mode=template["name"],
+            heroes=lineup_heroes,
+            troop_ratio=template["troop_ratio"],
+            notes=notes,
+            confidence=confidence,
+            recommended_to_get=recommended_to_get[:4]  # Limit to 4 suggestions
+        )
+
+    def build_general_lineup(self, event_type: str, max_generation: int = 8) -> LineupRecommendation:
+        """
+        Build lineup showing ideal heroes up to a generation (for General Guide mode).
+
+        Args:
+            event_type: Key from LINEUP_TEMPLATES
+            max_generation: Only show heroes available at this generation
+
+        Returns:
+            LineupRecommendation with best available heroes for that gen
+        """
+        template = LINEUP_TEMPLATES.get(event_type)
+        if not template:
+            return LineupRecommendation(
+                game_mode=event_type,
+                heroes=[],
+                troop_ratio={"infantry": 33, "lancer": 33, "marksman": 34},
+                notes=f"Unknown event type: {event_type}",
+                confidence="high",
+                recommended_to_get=[]
+            )
+
+        lineup_heroes = []
+        used_heroes = set()
+
+        for slot in template["slots"]:
+            slot_class = slot["class"]
+            role = slot["role"]
+            is_lead = slot.get("is_lead", False)
+            preferred = slot.get("preferred", [])
+
+            if preferred == ["any"]:
+                lineup_heroes.append({
+                    "hero": "Any hero",
+                    "hero_class": slot_class,
+                    "slot": role,
+                    "role": "Filler",
+                    "is_lead": False,
+                    "status": "Filler slot"
+                })
+                continue
+
+            # Find first preferred hero available at this generation
+            selected_hero = None
+            for hero_name in preferred:
+                if hero_name in used_heroes:
+                    continue
+                hero_meta = HERO_METADATA.get(hero_name, {})
+                if hero_meta.get("gen", 99) <= max_generation:
+                    selected_hero = hero_name
+                    break
+
+            if selected_hero:
+                used_heroes.add(selected_hero)
+                hero_meta = HERO_METADATA.get(selected_hero, {})
+                lineup_heroes.append({
+                    "hero": selected_hero,
+                    "hero_class": hero_meta.get("class", slot_class),
+                    "slot": role,
+                    "role": hero_meta.get("role", role),
+                    "is_lead": is_lead,
+                    "status": f"Gen {hero_meta.get('gen', '?')}"
+                })
+            else:
+                lineup_heroes.append({
+                    "hero": f"No {slot_class} available",
+                    "hero_class": slot_class,
+                    "slot": role,
+                    "role": role,
+                    "is_lead": is_lead,
+                    "status": f"Unlocks later"
+                })
+
+        return LineupRecommendation(
+            game_mode=template["name"],
+            heroes=lineup_heroes,
+            troop_ratio=template["troop_ratio"],
+            notes=template.get("notes", ""),
+            confidence="high",
+            recommended_to_get=[]
+        )
 
     def build_lineup(self, game_mode: str, user_heroes: dict, profile=None) -> LineupRecommendation:
         """
