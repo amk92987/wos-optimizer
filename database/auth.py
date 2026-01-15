@@ -9,7 +9,23 @@ from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
 
-from database.models import User
+from database.models import User, UserProfile
+
+
+import re
+
+def is_valid_email(email: str) -> bool:
+    """Validate email format."""
+    if not email:
+        return False
+    # Basic email regex pattern
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return bool(re.match(pattern, email.strip()))
+
+
+def normalize_email(email: str) -> str:
+    """Normalize email to lowercase."""
+    return email.strip().lower() if email else ""
 
 
 def hash_password(password: str) -> str:
@@ -26,15 +42,31 @@ def verify_password(password: str, password_hash: str) -> bool:
         return False
 
 
-def create_user(db: Session, username: str, password: str, email: Optional[str] = None,
-                role: str = 'user') -> Optional[User]:
-    """Create a new user account."""
-    # Check if username exists
-    if db.query(User).filter(User.username == username).first():
+def create_user(db: Session, email: str, password: str,
+                role: str = 'user', username: Optional[str] = None,
+                skip_default_profile: bool = False) -> Optional[User]:
+    """
+    Create a new user account. Email is the primary identifier.
+    Username is optional and defaults to email if not provided.
+    Creates a default profile with {email_prefix}_city1 naming unless skip_default_profile=True.
+    """
+    # Normalize email
+    email = normalize_email(email)
+
+    # Email is required and must be valid
+    if not is_valid_email(email):
         return None
 
-    # Check if email exists (if provided)
-    if email and db.query(User).filter(User.email == email).first():
+    # Check if email already exists
+    if db.query(User).filter(User.email == email).first():
+        return None
+
+    # Username defaults to email if not provided
+    if not username:
+        username = email
+
+    # Check if username exists (for backwards compatibility)
+    if db.query(User).filter(User.username == username).first():
         return None
 
     user = User(
@@ -47,12 +79,41 @@ def create_user(db: Session, username: str, password: str, email: Optional[str] 
     db.add(user)
     db.commit()
     db.refresh(user)
+
+    # Create default profile for new users
+    if not skip_default_profile:
+        # Extract email prefix (part before @)
+        email_prefix = email.split('@')[0]
+        profile_name = f"{email_prefix}_city1"
+
+        default_profile = UserProfile(
+            user_id=user.id,
+            name=profile_name,
+            furnace_level=1,
+            server_age_days=0,
+            spending_profile="f2p",
+            alliance_role="filler"
+        )
+        db.add(default_profile)
+        db.commit()
+
     return user
 
 
-def authenticate_user(db: Session, username: str, password: str) -> Optional[User]:
-    """Authenticate a user by username and password."""
-    user = db.query(User).filter(User.username == username).first()
+def authenticate_user(db: Session, email_or_username: str, password: str) -> Optional[User]:
+    """
+    Authenticate a user by email (primary) or username (legacy fallback).
+    Email lookup is case-insensitive.
+    """
+    # Normalize input for email lookup
+    normalized = normalize_email(email_or_username)
+
+    # Try email first (primary method)
+    user = db.query(User).filter(User.email == normalized).first()
+
+    # Fall back to username for legacy accounts
+    if not user:
+        user = db.query(User).filter(User.username == email_or_username).first()
 
     if not user:
         return None
@@ -135,9 +196,155 @@ def get_user_email(db: Session, user_id: int) -> Optional[str]:
     return user.email
 
 
+def request_email_change(db: Session, user_id: int, new_email: str, password: str) -> tuple[bool, str]:
+    """
+    Request an email change. Sends verification code to new email.
+    Requires current password for security.
+
+    Returns (success, message) tuple.
+    """
+    import random
+    from datetime import timedelta
+    from database.models import PendingEmailChange
+    from utils.email import send_verification_code
+
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return False, "User not found"
+
+    # Verify current password
+    if not verify_password(password, user.password_hash):
+        return False, "Incorrect password"
+
+    # Validate new email
+    new_email = normalize_email(new_email)
+    if not is_valid_email(new_email):
+        return False, "Invalid email format"
+
+    # Check if same as current
+    if user.email and user.email.lower() == new_email:
+        return False, "This is already your email"
+
+    # Check if email is already in use
+    existing = db.query(User).filter(User.email == new_email, User.id != user_id).first()
+    if existing:
+        return False, "Email already in use"
+
+    # Generate 6-digit code
+    code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+
+    # Delete any existing pending change for this user
+    db.query(PendingEmailChange).filter(PendingEmailChange.user_id == user_id).delete()
+
+    # Create new pending change (expires in 15 minutes)
+    pending = PendingEmailChange(
+        user_id=user_id,
+        new_email=new_email,
+        verification_code=code,
+        expires_at=datetime.utcnow() + timedelta(minutes=15)
+    )
+    db.add(pending)
+    db.commit()
+
+    # Send verification email
+    success, msg = send_verification_code(new_email, code)
+    if not success:
+        # Rollback pending change if email failed
+        db.delete(pending)
+        db.commit()
+        return False, f"Failed to send verification email: {msg}"
+
+    return True, "Verification code sent to your new email"
+
+
+def verify_email_change(db: Session, user_id: int, code: str) -> tuple[bool, str]:
+    """
+    Verify email change code and complete the email update.
+
+    Returns (success, message) tuple.
+    """
+    from database.models import PendingEmailChange
+
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return False, "User not found"
+
+    # Get pending change
+    pending = db.query(PendingEmailChange).filter(
+        PendingEmailChange.user_id == user_id
+    ).first()
+
+    if not pending:
+        return False, "No pending email change found"
+
+    # Check expiration
+    if datetime.utcnow() > pending.expires_at:
+        db.delete(pending)
+        db.commit()
+        return False, "Verification code expired. Please request a new one."
+
+    # Check attempts (max 3)
+    if pending.attempts >= 3:
+        db.delete(pending)
+        db.commit()
+        return False, "Too many failed attempts. Please request a new code."
+
+    # Verify code
+    if pending.verification_code != code.strip():
+        pending.attempts += 1
+        db.commit()
+        remaining = 3 - pending.attempts
+        if remaining > 0:
+            return False, f"Incorrect code. {remaining} attempts remaining."
+        else:
+            db.delete(pending)
+            db.commit()
+            return False, "Too many failed attempts. Please request a new code."
+
+    # Code is correct - update email and username
+    new_email = pending.new_email
+    user.email = new_email
+    user.username = new_email  # Email = username
+
+    # Delete pending change
+    db.delete(pending)
+    db.commit()
+
+    return True, "Email updated successfully! Please use your new email to log in."
+
+
+def get_pending_email_change(db: Session, user_id: int) -> Optional[str]:
+    """
+    Check if user has a pending email change.
+    Returns the pending new email or None.
+    """
+    from database.models import PendingEmailChange
+
+    pending = db.query(PendingEmailChange).filter(
+        PendingEmailChange.user_id == user_id
+    ).first()
+
+    if pending and datetime.utcnow() <= pending.expires_at:
+        return pending.new_email
+
+    return None
+
+
+def cancel_email_change(db: Session, user_id: int) -> bool:
+    """Cancel a pending email change."""
+    from database.models import PendingEmailChange
+
+    deleted = db.query(PendingEmailChange).filter(
+        PendingEmailChange.user_id == user_id
+    ).delete()
+    db.commit()
+    return deleted > 0
+
+
+# Legacy function - now just for admin use
 def update_user_email(db: Session, user_id: int, new_email: Optional[str]) -> tuple[bool, str]:
     """
-    Update a user's email address.
+    Directly update a user's email (admin only, bypasses verification).
     Returns (success, message) tuple.
     """
     user = get_user_by_id(db, user_id)
@@ -146,14 +353,12 @@ def update_user_email(db: Session, user_id: int, new_email: Optional[str]) -> tu
 
     # If clearing email (setting to None/empty)
     if not new_email or not new_email.strip():
-        user.email = None
-        db.commit()
-        return True, "Email cleared"
+        return False, "Email is required"
 
-    new_email = new_email.strip().lower()
+    new_email = normalize_email(new_email)
 
-    # Basic email validation
-    if '@' not in new_email or '.' not in new_email:
+    # Validate email
+    if not is_valid_email(new_email):
         return False, "Invalid email format"
 
     # Check if email is already in use by another user
@@ -161,7 +366,9 @@ def update_user_email(db: Session, user_id: int, new_email: Optional[str]) -> tu
     if existing:
         return False, "Email already in use"
 
+    # Update both email and username
     user.email = new_email
+    user.username = new_email
     db.commit()
     return True, "Email updated"
 
@@ -301,6 +508,7 @@ def ensure_admin_exists(db: Session, default_password: str = "admin123"):
     """Ensure at least one admin user exists. Creates default admin if none."""
     admin = db.query(User).filter(User.role == 'admin').first()
     if not admin:
-        create_user(db, username='admin', password=default_password, role='admin')
+        # Create admin with email (email = username)
+        create_user(db, email='admin@bearsden.app', password=default_password, role='admin')
         return True
     return False

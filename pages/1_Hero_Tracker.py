@@ -204,6 +204,25 @@ def get_hero_image_base64(image_filename: str) -> str:
     return None
 
 
+def get_current_generation(server_age_days: int) -> int:
+    """Calculate current hero generation based on server age."""
+    gen_thresholds = [40, 120, 200, 280, 360, 440, 520, 600, 680, 760, 840, 920, 1000]
+    for i, threshold in enumerate(gen_thresholds):
+        if server_age_days < threshold:
+            return i + 1
+    return 14
+
+
+def get_min_days_for_generation(gen: int) -> int:
+    """Get minimum server age days for a generation to be available."""
+    gen_start_days = [0, 40, 120, 200, 280, 360, 440, 520, 600, 680, 760, 840, 920, 1000]
+    if gen < 1:
+        return 0
+    if gen > 14:
+        return 1000 + (gen - 14) * 80
+    return gen_start_days[gen - 1]
+
+
 def get_user_hero(hero_name: str):
     hero_ref = db.query(Hero).filter(Hero.name == hero_name).first()
     if not hero_ref:
@@ -282,6 +301,13 @@ def save_user_hero(hero_data: dict, level: int = 1, stars: int = 0, ascension: i
             expedition_skill_3_level=exped_skill3
         )
         db.add(user_hero)
+
+    # Auto-update generation if hero is from a newer generation than profile shows
+    hero_gen = hero_data.get('generation', 1)
+    current_gen = get_current_generation(profile.server_age_days)
+    if hero_gen > current_gen:
+        # Update server_age_days to minimum for that generation
+        profile.server_age_days = get_min_days_for_generation(hero_gen)
 
     db.commit()
     return True
@@ -560,24 +586,45 @@ def render_hero_editor(hero: dict, existing, hero_key: str):
                     m_mastery = st.number_input("Mastery", 0, 20, min(current_mythic_mastery, 20), key=f"mythic_m_{hero_key}", label_visibility="collapsed")
                     mythic_data['mastery'] = m_mastery
 
-    # Show saved message if this hero was just saved
-    if st.session_state.get('saved_hero') == hero_key:
-        st.success(f"✅ {hero['name']} saved!")
-        st.session_state.saved_hero = None  # Clear after showing
+    # Auto-save: detect if any value changed from existing
+    has_changes = False
+    if existing:
+        # Check basic stats
+        if (level != existing.level or stars != existing.stars or ascension != existing.ascension_tier):
+            has_changes = True
+        # Check skills
+        if (exp1 != existing.exploration_skill_1_level or exp2 != existing.exploration_skill_2_level or
+            exp3 != existing.exploration_skill_3_level or exped1 != existing.expedition_skill_1_level or
+            exped2 != existing.expedition_skill_2_level or exped3 != existing.expedition_skill_3_level):
+            has_changes = True
+        # Check gear
+        for i in range(1, 5):
+            if gear_data.get(f'slot{i}_quality', 0) != getattr(existing, f'gear_slot{i}_quality', 0):
+                has_changes = True
+            if gear_data.get(f'slot{i}_level', 0) != getattr(existing, f'gear_slot{i}_level', 0):
+                has_changes = True
+            if gear_data.get(f'slot{i}_mastery', 0) != getattr(existing, f'gear_slot{i}_mastery', 0):
+                has_changes = True
+        # Check mythic gear
+        if mythic_gear_name:
+            if mythic_data.get('unlocked', False) != existing.mythic_gear_unlocked:
+                has_changes = True
+            if mythic_data.get('quality', 0) != existing.mythic_gear_quality:
+                has_changes = True
+            if mythic_data.get('level', 0) != existing.mythic_gear_level:
+                has_changes = True
+            if mythic_data.get('mastery', 0) != getattr(existing, 'mythic_gear_mastery', 0):
+                has_changes = True
 
-    # Save button - right aligned
-    col_space, col_save = st.columns([3, 1])
-    with col_save:
-        if st.button("💾 Save", key=f"save_{hero_key}", type="primary"):
-            save_user_hero(hero, level, stars, ascension, exp1, exp2, exp3, exped1, exped2, exped3, gear_data, mythic_data if mythic_gear_name else None)
-            st.session_state.saved_hero = hero_key
-            st.rerun()
+    if has_changes:
+        save_user_hero(hero, level, stars, ascension, exp1, exp2, exp3, exped1, exped2, exped3, gear_data, mythic_data if mythic_gear_name else None)
+        st.toast(f"Saved {hero['name']}")
 
 
 # Page content
 st.markdown("# Hero Management")
 st.markdown("Browse all heroes and check **Owned** to add them to your collection and track progress.")
-st.caption("💾 Changes are saved automatically to your profile")
+st.caption("💾 Changes auto-save when you select options or press Enter")
 
 # Filter controls
 col1, col2, col3, col4 = st.columns(4)

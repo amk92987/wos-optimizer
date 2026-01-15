@@ -24,7 +24,8 @@ from database.db import init_db, get_db, get_or_create_profile, get_user_profile
 from database.auth import (
     init_session_state, is_authenticated, is_admin, login_user, logout_user,
     authenticate_user, ensure_admin_exists, get_current_username, is_impersonating,
-    get_current_user_id, update_user_password, get_user_email, update_user_email
+    get_current_user_id, update_user_password, get_user_email,
+    request_email_change, verify_email_change, get_pending_email_change, cancel_email_change
 )
 from database.models import Feedback
 
@@ -33,16 +34,26 @@ init_db()
 db = get_db()
 init_session_state()
 
+# Validate session - logout if user no longer exists (e.g., after DB recreation)
+if st.session_state.get('authenticated') and st.session_state.get('user_id'):
+    from database.auth import get_user_by_id
+    session_user = get_user_by_id(db, st.session_state.user_id)
+    if not session_user:
+        # User no longer exists - force logout and rerun
+        st.session_state.clear()
+        init_session_state()
+        st.rerun()
+
 # Ensure admin exists before auto-login attempt
 ensure_admin_exists(db)
 
 # DEV MODE: Auto-login for local development
 # Controlled by ENVIRONMENT and DEV_AUTO_LOGIN env vars (see config.py)
-DEV_AUTO_LOGIN_USER = "admin"  # Which user to auto-login as
+DEV_AUTO_LOGIN_EMAIL = "admin@bearsden.app"  # Which user to auto-login as
 
 if DEV_AUTO_LOGIN and not is_authenticated():
-    from database.auth import get_user_by_username
-    dev_user = get_user_by_username(db, DEV_AUTO_LOGIN_USER)
+    from database.models import User
+    dev_user = db.query(User).filter(User.email == DEV_AUTO_LOGIN_EMAIL).first()
     if dev_user:
         st.session_state.authenticated = True
         st.session_state.user_id = dev_user.id
@@ -267,8 +278,9 @@ with login_container:
     spacer, login_col = st.columns([6, 1])
     with login_col:
         username = get_current_username()
-        # Truncate long usernames for button display (full name shown inside popover)
-        display_name = username[:12] + "..." if len(username) > 15 else username
+        # Show email prefix only (part before @) and truncate for button display
+        email_prefix = username.split('@')[0] if '@' in username else username
+        display_name = email_prefix[:8] + "..." if len(email_prefix) > 10 else email_prefix
         # Crown for admin, helmet/shield for chief (user)
         if is_admin() and not is_impersonating():
             role_badge = "👑"
@@ -278,11 +290,12 @@ with login_container:
             role_title = "Chief"
 
         with st.popover(f"{role_badge} {display_name}"):
-            # Header with role
+            # Header with role - show email prefix as name, full email below
             st.markdown(f"""
             <div style="text-align: center; padding-bottom: 8px;">
                 <div style="font-size: 24px;">{role_badge}</div>
-                <div style="font-size: 16px; font-weight: bold; color: #E8F4F8;">{username}</div>
+                <div style="font-size: 16px; font-weight: bold; color: #E8F4F8;">{email_prefix}</div>
+                <div style="font-size: 10px; color: #6B7A8F;">{username}</div>
                 <div style="font-size: 11px; color: #8F9DB4;">{role_title}</div>
             </div>
             """, unsafe_allow_html=True)
@@ -310,45 +323,48 @@ with login_container:
             </a>
             """, unsafe_allow_html=True)
 
-            # Feedback section - inline form
+            # Feedback section - wrapped in form to allow Enter for line breaks
             with st.expander("💬 Send Feedback"):
-                feedback_type = st.selectbox(
-                    "Type",
-                    ["Feature Request", "Bug Report", "Data Error", "Other"],
-                    key="menu_feedback_type",
-                    label_visibility="collapsed"
-                )
-                feedback_text = st.text_area(
-                    "Description",
-                    placeholder="What's on your mind?",
-                    max_chars=500,
-                    key="menu_feedback_text",
-                    label_visibility="collapsed",
-                    height=80
-                )
-                st.caption("To report a bad AI recommendation, use the feedback form on the AI Advisor page.")
-                if st.button("Submit", key="menu_submit_feedback", use_container_width=True):
-                    if feedback_text and len(feedback_text.strip()) >= 10:
-                        category_map = {
-                            "Feature Request": "feature",
-                            "Bug Report": "bug",
-                            "Data Error": "data_error",
-                            "Other": "other"
-                        }
-                        try:
-                            new_feedback = Feedback(
-                                user_id=get_current_user_id(),
-                                category=category_map.get(feedback_type, "other"),
-                                description=feedback_text.strip()
-                            )
-                            db.add(new_feedback)
-                            db.commit()
-                            st.success("Thanks, Chief!")
-                        except Exception:
-                            st.error("Failed to submit")
-                            db.rollback()
-                    else:
-                        st.warning("Please add more detail")
+                with st.form(key="menu_feedback_form", clear_on_submit=True):
+                    feedback_type = st.selectbox(
+                        "Type",
+                        ["Feature Request", "Bug Report", "Data Error", "Other"],
+                        key="form_feedback_type",
+                        label_visibility="collapsed"
+                    )
+                    feedback_text = st.text_area(
+                        "Description",
+                        placeholder="What's on your mind?",
+                        max_chars=500,
+                        key="form_feedback_text",
+                        label_visibility="collapsed",
+                        height=80
+                    )
+                    st.caption("To report a bad AI recommendation, use the feedback form on the AI Advisor page.")
+                    submitted = st.form_submit_button("Submit", use_container_width=True, type="primary")
+
+                    if submitted:
+                        if feedback_text and len(feedback_text.strip()) >= 10:
+                            category_map = {
+                                "Feature Request": "feature",
+                                "Bug Report": "bug",
+                                "Data Error": "data_error",
+                                "Other": "other"
+                            }
+                            try:
+                                new_feedback = Feedback(
+                                    user_id=get_current_user_id(),
+                                    category=category_map.get(feedback_type, "other"),
+                                    description=feedback_text.strip()
+                                )
+                                db.add(new_feedback)
+                                db.commit()
+                                st.toast("Thanks, Chief!")
+                            except Exception:
+                                st.error("Failed to submit")
+                                db.rollback()
+                        else:
+                            st.warning("Please add more detail (10+ chars)")
 
             st.markdown("---")
 
@@ -370,21 +386,67 @@ with login_container:
                         else:
                             st.error("Failed")
 
-            # Email change section
+            # Email change section with verification
             with st.expander("📧 Change Email"):
-                current_email = get_user_email(db, get_current_user_id())
+                user_id = get_current_user_id()
+                current_email = get_user_email(db, user_id)
+                pending_email = get_pending_email_change(db, user_id)
+
                 if current_email:
                     st.caption(f"Current: {current_email}")
+
+                # Check if there's a pending verification
+                if pending_email:
+                    st.info(f"Verification code sent to: {pending_email}")
+                    verification_code = st.text_input(
+                        "Enter 6-digit code",
+                        key="email_verify_code",
+                        max_chars=6,
+                        placeholder="123456"
+                    )
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("Verify", key="verify_email_btn", use_container_width=True):
+                            if verification_code:
+                                success, message = verify_email_change(db, user_id, verification_code)
+                                if success:
+                                    st.success(message)
+                                    st.info("You will need to log in again with your new email.")
+                                else:
+                                    st.error(message)
+                            else:
+                                st.error("Please enter the verification code")
+                    with col2:
+                        if st.button("Cancel", key="cancel_email_btn", use_container_width=True):
+                            cancel_email_change(db, user_id)
+                            st.rerun()
                 else:
-                    st.caption("No email set")
-                new_email = st.text_input("New Email", key="new_email_input", label_visibility="collapsed", placeholder="new@email.com")
-                if st.button("Update", key="update_email_btn", use_container_width=True):
-                    user_id = get_current_user_id()
-                    success, message = update_user_email(db, user_id, new_email)
-                    if success:
-                        st.success(message)
-                    else:
-                        st.error(message)
+                    # Request new email change
+                    new_email = st.text_input(
+                        "New Email",
+                        key="new_email_input",
+                        label_visibility="collapsed",
+                        placeholder="new@email.com"
+                    )
+                    current_password = st.text_input(
+                        "Current Password",
+                        type="password",
+                        key="email_change_pwd",
+                        label_visibility="collapsed",
+                        placeholder="Enter current password"
+                    )
+                    if st.button("Send Verification Code", key="request_email_btn", use_container_width=True):
+                        if not new_email:
+                            st.error("Please enter a new email address")
+                        elif not current_password:
+                            st.error("Please enter your current password")
+                        else:
+                            success, message = request_email_change(db, user_id, new_email, current_password)
+                            if success:
+                                st.success(message)
+                                st.rerun()
+                            else:
+                                st.error(message)
 
             # Profile switcher
             user_profiles = get_user_profiles(db)

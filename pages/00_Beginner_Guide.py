@@ -296,6 +296,30 @@ with tab5:
     - Always research something - dead time is wasted time
     """)
 
+    st.markdown("---")
+
+    st.markdown("### Farm Accounts (Advanced Strategy)")
+    st.markdown("""
+    Once your main account is established, consider creating farm accounts to accelerate resource income.
+
+    **What are farm accounts?**
+    - Separate accounts dedicated to gathering resources
+    - Resources are transferred to your main account via alliance
+    - Essential for F2P and dolphin players to keep pace
+
+    **Farm account rules:**
+    - **Must be in the SAME STATE** as your main (resources can't cross states)
+    - Only level Furnace and resource buildings (F18-F20 sweet spot)
+    - No investment in heroes, research, or combat
+    - Keep shielded 24/7 (farms are easy targets)
+    - Use basic gathering heroes: Smith, Eugene, Charlie, Cloris
+
+    **Setting up in Bear's Den:**
+    - Go to Profiles page and create a separate profile
+    - Check "This is a farm account" to get specialized recommendations
+    - Link it to your main account for coordinated advice
+    """)
+
 # =============================================================================
 # TAB 6: TIPS & CHECKLIST
 # =============================================================================
@@ -313,6 +337,7 @@ with tab6:
     - **Clearing red dots immediately** - Those notification dots trick you into wasting resources outside events.
     - **Ignoring research** - Always have something researching. The time adds up significantly.
     - **Staying in a weak alliance out of loyalty** - Your alliance determines your growth speed. If your alliance is inactive, thank them and move up.
+    - **Leaving Cookhouse on default Healthy Gruel** - Switch to Fancy Meal immediately. Small meat increase, huge happiness/health boost. Tap Cookhouse > Stove > menu icon > Fancy Meal.
     """)
 
     st.markdown("---")

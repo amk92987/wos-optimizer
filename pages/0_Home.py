@@ -38,10 +38,11 @@ def get_current_generation(server_age_days: int) -> int:
 
 # This page is only shown to authenticated users (app.py handles routing)
 profile = get_or_create_profile(db)
-username = get_current_username()
 colors = get_colors()
 
-st.markdown(f"# Welcome back, {username}!")
+# Use profile name (Chief name), fallback to username, then "Chief"
+display_name = profile.name or get_current_username() or "Chief"
+st.markdown(f"# Welcome back, {display_name}!")
 
 # Welcome section
 col1, col2 = st.columns([2, 1])
@@ -56,9 +57,10 @@ with col1:
     - **Packs** - Analyze pack values before buying
 
     ### Tips
-    1. Go to **Settings** to set your server age and spending profile
+    1. Go to **Settings** to set your hero generation, server age, spending profile, and Furnace Level
     2. Add your heroes in **Hero Tracker** to get personalized advice
-    3. Check **AI Advisor** for your next upgrade priorities
+    3. Set your chief gear and charms in **Chief Tracker** for better advice
+    4. Check **AI Advisor** for your next upgrade priorities
     """)
 
 with col2:

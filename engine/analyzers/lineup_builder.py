@@ -498,13 +498,13 @@ class LineupBuilder:
         lineup_heroes = []
         confidence_score = 0
         # Only count slots that have specific hero requirements (not "any") for confidence
-        critical_slots = [s for s in ideal["slots"] if s["heroes"] != ["any"]]
+        critical_slots = [s for s in ideal["slots"] if s.get("preferred", s.get("heroes", [])) != ["any"]]
         max_confidence = len(critical_slots) if critical_slots else 1
 
         for slot_info in ideal["slots"]:
-            position = slot_info["position"]
-            preferred_heroes = slot_info["heroes"]
-            role = slot_info["role"]
+            position = slot_info.get("position", slot_info.get("class", "Unknown"))
+            preferred_heroes = slot_info.get("preferred", slot_info.get("heroes", []))
+            role = slot_info.get("role", "Unknown")
 
             # Find best available hero from preferred list
             best_hero, status = self._get_best_available(preferred_heroes, user_heroes)
@@ -538,10 +538,10 @@ class LineupBuilder:
             confidence = "low"
 
         return LineupRecommendation(
-            game_mode=ideal["mode"],
+            game_mode=ideal.get("mode", ideal.get("name", game_mode)),
             heroes=lineup_heroes,
-            troop_ratio=ideal["troop_ratio"],
-            notes=ideal["notes"],
+            troop_ratio=ideal.get("troop_ratio", {"infantry": 33, "lancer": 33, "marksman": 34}),
+            notes=ideal.get("notes", ""),
             confidence=confidence
         )
 

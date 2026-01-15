@@ -1,19 +1,16 @@
 """
-Profiles Page - Save and load profiles for use across computers.
+Profiles Page - Manage your game profiles.
 """
 
 import streamlit as st
 from pathlib import Path
 import sys
-import json
-from datetime import datetime
 
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile, get_user_profiles
-from database.models import UserHero, Hero, UserInventory, UserProfile
-
+from database.models import UserHero, Hero, UserProfile
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -21,534 +18,537 @@ if css_file.exists():
     with open(css_file, encoding='utf-8') as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# Profiles directory
-PROFILES_DIR = PROJECT_ROOT / "data" / "profiles"
-PROFILES_DIR.mkdir(parents=True, exist_ok=True)
-
 # Initialize
 init_db()
 db = get_db()
 profile = get_or_create_profile(db)
 
-
-def get_saved_profiles():
-    """Get list of saved profile files."""
-    profiles = []
-    for f in PROFILES_DIR.glob("*.json"):
-        try:
-            with open(f, encoding='utf-8') as file:
-                data = json.load(file)
-                profiles.append({
-                    "filename": f.name,
-                    "path": f,
-                    "name": data.get("profile", {}).get("name", "Unknown"),
-                    "hero_count": len(data.get("heroes", [])),
-                    "export_date": data.get("export_date", "Unknown"),
-                    "server_age": data.get("profile", {}).get("server_age_days", 0),
-                })
-        except:
-            pass
-    return sorted(profiles, key=lambda x: x.get("export_date", ""), reverse=True)
+from database.auth import get_current_user_id
+user_id = get_current_user_id()
 
 
-def export_current_profile():
-    """Export current profile to JSON dict."""
-    user_heroes = db.query(UserHero).filter(UserHero.profile_id == profile.id).all()
-
-    heroes_data = []
-    for uh in user_heroes:
-        hero_ref = db.query(Hero).filter(Hero.id == uh.hero_id).first()
-        if hero_ref:
-            heroes_data.append({
-                "hero_name": hero_ref.name,
-                "level": uh.level,
-                "stars": uh.stars,
-                "ascension_tier": uh.ascension_tier,
-                "exploration_skill_1_level": uh.exploration_skill_1_level,
-                "exploration_skill_2_level": uh.exploration_skill_2_level,
-                "expedition_skill_1_level": uh.expedition_skill_1_level,
-                "expedition_skill_2_level": uh.expedition_skill_2_level,
-                "gear_slot1_quality": uh.gear_slot1_quality,
-                "gear_slot1_level": uh.gear_slot1_level,
-                "gear_slot2_quality": uh.gear_slot2_quality,
-                "gear_slot2_level": uh.gear_slot2_level,
-                "gear_slot3_quality": uh.gear_slot3_quality,
-                "gear_slot3_level": uh.gear_slot3_level,
-                "gear_slot4_quality": uh.gear_slot4_quality,
-                "gear_slot4_level": uh.gear_slot4_level,
-                "mythic_gear_unlocked": uh.mythic_gear_unlocked,
-                "mythic_gear_quality": uh.mythic_gear_quality,
-                "mythic_gear_level": uh.mythic_gear_level,
-            })
-
-    return {
-        "export_version": "1.0",
-        "export_date": datetime.now().isoformat(),
-        "profile": {
-            "name": profile.name,
-            "server_age_days": profile.server_age_days,
-            "furnace_level": profile.furnace_level,
-            "priority_svs": profile.priority_svs,
-            "priority_rally": profile.priority_rally,
-            "priority_castle_battle": profile.priority_castle_battle,
-            "priority_exploration": profile.priority_exploration,
-            "priority_gathering": profile.priority_gathering,
-            "svs_wins": profile.svs_wins,
-            "svs_losses": profile.svs_losses,
-            "last_svs_date": profile.last_svs_date.isoformat() if profile.last_svs_date else None,
-        },
-        "heroes": heroes_data
-    }
+def switch_to_profile(profile_id: int):
+    """Switch to a different profile."""
+    st.session_state.profile_id = profile_id
+    st.rerun()
 
 
-def save_profile_to_file(profile_name: str):
-    """Save current profile to a file."""
-    data = export_current_profile()
-
-    # Create safe filename
-    safe_name = "".join(c if c.isalnum() or c in "._- " else "_" for c in profile_name)
-    filename = f"{safe_name}.json"
-    filepath = PROFILES_DIR / filename
-
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=2)
-
-    return filepath
-
-
-def load_profile_from_file(filepath: Path):
-    """Load profile from a file."""
+def delete_profile(profile_id: int, hard_delete: bool = False) -> tuple[bool, str]:
+    """Delete a profile. Soft delete by default (30 day recovery), or hard delete for test accounts."""
+    from datetime import datetime
+    from database.models import User
     try:
-        with open(filepath, encoding='utf-8') as f:
-            data = json.load(f)
+        p = db.query(UserProfile).filter(UserProfile.id == profile_id).first()
+        if not p:
+            return False, "Profile not found"
 
-        # Track loaded profile file
-        st.session_state["loaded_profile_path"] = str(filepath)
-        st.session_state["loaded_profile_filename"] = filepath.name
+        # Check if this is a test account - hard delete those
+        user = db.query(User).filter(User.id == p.user_id).first()
+        is_test = user and user.is_test_account
 
-        # Import profile settings
-        if "profile" in data:
-            p = data["profile"]
-            profile.name = p.get("name", profile.name)
-            profile.server_age_days = p.get("server_age_days", profile.server_age_days)
-            profile.furnace_level = p.get("furnace_level", profile.furnace_level)
-            profile.priority_svs = p.get("priority_svs", profile.priority_svs)
-            profile.priority_rally = p.get("priority_rally", profile.priority_rally)
-            profile.priority_castle_battle = p.get("priority_castle_battle", profile.priority_castle_battle)
-            profile.priority_exploration = p.get("priority_exploration", profile.priority_exploration)
-            profile.priority_gathering = p.get("priority_gathering", profile.priority_gathering)
-            profile.svs_wins = p.get("svs_wins", profile.svs_wins)
-            profile.svs_losses = p.get("svs_losses", profile.svs_losses)
-            if p.get("last_svs_date"):
-                profile.last_svs_date = datetime.fromisoformat(p["last_svs_date"])
-
-        # Clear existing heroes first
-        db.query(UserHero).filter(UserHero.profile_id == profile.id).delete()
-        db.commit()
-
-        # Import heroes
-        if "heroes" in data:
-            heroes_file = PROJECT_ROOT / "data" / "heroes.json"
-            with open(heroes_file, encoding='utf-8') as f:
-                hero_data = json.load(f)
-
-            heroes_by_name = {h["name"]: h for h in hero_data.get("heroes", [])}
-
-            imported_count = 0
-            for hero_import in data["heroes"]:
-                hero_name = hero_import.get("hero_name")
-                if not hero_name or hero_name not in heroes_by_name:
-                    continue
-
-                # Get or create hero reference
-                hero_ref = db.query(Hero).filter(Hero.name == hero_name).first()
-                if not hero_ref:
-                    h = heroes_by_name[hero_name]
-                    hero_ref = Hero(
-                        name=h["name"],
-                        generation=h["generation"],
-                        hero_class=h["hero_class"],
-                        rarity=h["rarity"],
-                        tier_overall=h["tier_overall"],
-                        tier_expedition=h["tier_expedition"],
-                        tier_exploration=h["tier_exploration"],
-                        image_filename=h.get("image_filename", "")
-                    )
-                    db.add(hero_ref)
-                    db.commit()
-                    db.refresh(hero_ref)
-
-                # Create user hero
-                user_hero = UserHero(
-                    profile_id=profile.id,
-                    hero_id=hero_ref.id,
-                    level=hero_import.get("level", 1),
-                    stars=hero_import.get("stars", 0),
-                    ascension_tier=hero_import.get("ascension_tier", 0),
-                    exploration_skill_1_level=hero_import.get("exploration_skill_1_level", 1),
-                    exploration_skill_2_level=hero_import.get("exploration_skill_2_level", 1),
-                    expedition_skill_1_level=hero_import.get("expedition_skill_1_level", 1),
-                    expedition_skill_2_level=hero_import.get("expedition_skill_2_level", 1),
-                    gear_slot1_quality=hero_import.get("gear_slot1_quality", 0),
-                    gear_slot1_level=hero_import.get("gear_slot1_level", 0),
-                    gear_slot2_quality=hero_import.get("gear_slot2_quality", 0),
-                    gear_slot2_level=hero_import.get("gear_slot2_level", 0),
-                    gear_slot3_quality=hero_import.get("gear_slot3_quality", 0),
-                    gear_slot3_level=hero_import.get("gear_slot3_level", 0),
-                    gear_slot4_quality=hero_import.get("gear_slot4_quality", 0),
-                    gear_slot4_level=hero_import.get("gear_slot4_level", 0),
-                    mythic_gear_unlocked=hero_import.get("mythic_gear_unlocked", False),
-                    mythic_gear_quality=hero_import.get("mythic_gear_quality", 0),
-                    mythic_gear_level=hero_import.get("mythic_gear_level", 0),
-                )
-                db.add(user_hero)
-                imported_count += 1
-
+        if hard_delete or is_test:
+            # Permanent delete
+            db.query(UserHero).filter(UserHero.profile_id == profile_id).delete()
+            db.query(UserProfile).filter(UserProfile.id == profile_id).delete()
             db.commit()
-            return True, f"Loaded profile with {imported_count} heroes!"
+            return True, "Profile permanently deleted"
+        else:
+            # Soft delete
+            p.deleted_at = datetime.utcnow()
+            db.commit()
+            return True, "Profile deleted"
+    except Exception as e:
+        return False, f"Error: {str(e)}"
+
+
+def get_deleted_profiles(uid: int):
+    """Get soft-deleted profiles for a user."""
+    return db.query(UserProfile).filter(
+        UserProfile.user_id == uid,
+        UserProfile.deleted_at.isnot(None)
+    ).order_by(UserProfile.deleted_at.desc()).all()
+
+
+def restore_profile(profile_id: int) -> tuple[bool, str]:
+    """Restore a soft-deleted profile."""
+    try:
+        p = db.query(UserProfile).filter(
+            UserProfile.id == profile_id,
+            UserProfile.deleted_at.isnot(None)
+        ).first()
+        if p:
+            p.deleted_at = None
+            db.commit()
+            return True, "Profile restored"
+        return False, "Profile not found or not deleted"
+    except Exception as e:
+        return False, f"Error: {str(e)}"
+
+
+def update_profile(profile_id: int, new_name: str, state_number: int = None) -> tuple[bool, str]:
+    """Update a profile's name and state number."""
+    try:
+        p = db.query(UserProfile).filter(UserProfile.id == profile_id).first()
+        if p:
+            p.name = new_name
+            p.state_number = state_number
+            db.commit()
+            return True, "Profile updated"
+        return False, "Profile not found"
+    except Exception as e:
+        return False, f"Error: {str(e)}"
+
+
+def duplicate_profile(profile_id: int, new_name: str) -> tuple[bool, str, int]:
+    """Duplicate a profile with all its heroes."""
+    try:
+        original = db.query(UserProfile).filter(UserProfile.id == profile_id).first()
+        if not original:
+            return False, "Profile not found", None
+
+        # Create new profile with same settings
+        new_profile = UserProfile(
+            user_id=original.user_id,
+            name=new_name,
+            state_number=original.state_number,
+            server_age_days=original.server_age_days,
+            furnace_level=original.furnace_level,
+            furnace_fc_level=original.furnace_fc_level,
+            spending_profile=original.spending_profile,
+            priority_focus=original.priority_focus,
+            alliance_role=original.alliance_role,
+            is_farm_account=False,  # Don't copy farm status
+            priority_svs=original.priority_svs,
+            priority_rally=original.priority_rally,
+            priority_castle_battle=original.priority_castle_battle,
+            priority_exploration=original.priority_exploration,
+            priority_gathering=original.priority_gathering,
+        )
+        db.add(new_profile)
+        db.commit()
+        db.refresh(new_profile)
+
+        # Copy all heroes
+        original_heroes = db.query(UserHero).filter(UserHero.profile_id == profile_id).all()
+        for hero in original_heroes:
+            new_hero = UserHero(
+                profile_id=new_profile.id,
+                hero_id=hero.hero_id,
+                level=hero.level,
+                stars=hero.stars,
+                ascension_tier=hero.ascension_tier,
+                exploration_skill_1_level=hero.exploration_skill_1_level,
+                exploration_skill_2_level=hero.exploration_skill_2_level,
+                exploration_skill_3_level=hero.exploration_skill_3_level,
+                expedition_skill_1_level=hero.expedition_skill_1_level,
+                expedition_skill_2_level=hero.expedition_skill_2_level,
+                expedition_skill_3_level=hero.expedition_skill_3_level,
+                gear_slot1_quality=hero.gear_slot1_quality,
+                gear_slot1_level=hero.gear_slot1_level,
+                gear_slot1_mastery=hero.gear_slot1_mastery,
+                gear_slot2_quality=hero.gear_slot2_quality,
+                gear_slot2_level=hero.gear_slot2_level,
+                gear_slot2_mastery=hero.gear_slot2_mastery,
+                gear_slot3_quality=hero.gear_slot3_quality,
+                gear_slot3_level=hero.gear_slot3_level,
+                gear_slot3_mastery=hero.gear_slot3_mastery,
+                gear_slot4_quality=hero.gear_slot4_quality,
+                gear_slot4_level=hero.gear_slot4_level,
+                gear_slot4_mastery=hero.gear_slot4_mastery,
+                mythic_gear_unlocked=hero.mythic_gear_unlocked,
+                mythic_gear_quality=hero.mythic_gear_quality,
+                mythic_gear_level=hero.mythic_gear_level,
+                mythic_gear_mastery=hero.mythic_gear_mastery,
+            )
+            db.add(new_hero)
 
         db.commit()
-        return True, "Profile settings loaded!"
-
+        return True, f"Duplicated with {len(original_heroes)} heroes", new_profile.id
     except Exception as e:
-        return False, f"Error loading profile: {str(e)}"
-
-
-def delete_profile_file(filepath: Path):
-    """Delete a profile file."""
-    try:
-        filepath.unlink()
-        return True
-    except:
-        return False
-
-
-def update_loaded_profile():
-    """Update the currently loaded profile file with current data."""
-    if "loaded_profile_path" not in st.session_state:
-        return False, "No profile loaded to update"
-
-    filepath = Path(st.session_state["loaded_profile_path"])
-    if not filepath.exists():
-        return False, "Profile file no longer exists"
-
-    data = export_current_profile()
-
-    with open(filepath, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=2)
-
-    return True, f"Updated profile: {filepath.name}"
-
-
-def rename_profile_file(new_name: str):
-    """Rename the currently loaded profile file."""
-    if "loaded_profile_path" not in st.session_state:
-        return False, "No profile loaded to rename"
-
-    old_path = Path(st.session_state["loaded_profile_path"])
-    if not old_path.exists():
-        return False, "Profile file no longer exists"
-
-    # Create safe filename
-    safe_name = "".join(c if c.isalnum() or c in "._- " else "_" for c in new_name)
-    new_filename = f"{safe_name}.json"
-    new_path = PROFILES_DIR / new_filename
-
-    # Rename file
-    old_path.rename(new_path)
-
-    # Update session state
-    st.session_state["loaded_profile_path"] = str(new_path)
-    st.session_state["loaded_profile_filename"] = new_filename
-
-    return True, f"Renamed to: {new_filename}"
+        return False, f"Error: {str(e)}", None
 
 
 # Page content
 st.markdown("# 👤 Profiles")
-st.markdown("Manage your profile data and sync across computers via git.")
 
-st.info("""
-**How saving works:**
-- Your profile data is **automatically saved** to the database as you play
-- Use **Save As New** to export a JSON backup file for git sync
-- Profile files are stored in `data/profiles/` and can be committed to git
-""")
+st.info("Your profile data is **automatically saved** as you make changes. Use this page to manage multiple profiles (main account, farms, etc).")
 
 st.markdown("---")
-
-# Auto-save profile if user has data but no file
-# This ensures users always see their profile in the list
-if profile.name and not st.session_state.get("loaded_profile_filename"):
-    existing_profiles = get_saved_profiles()
-    # Check if a profile with the same name already exists
-    profile_names = [p.get("name", "").lower() for p in existing_profiles]
-    if profile.name.lower() not in profile_names:
-        # Auto-save the profile
-        filepath = save_profile_to_file(profile.name)
-        st.session_state["loaded_profile_path"] = str(filepath)
-        st.session_state["loaded_profile_filename"] = filepath.name
 
 # Current profile summary
 st.markdown("## 📊 Current Profile")
 
-# Show loaded profile status
-loaded_file = st.session_state.get("loaded_profile_filename")
-if loaded_file:
-    st.success(f"📂 **Loaded from:** `{loaded_file}`")
-else:
-    st.info("💡 No profile file loaded. Load a saved profile or save a new one below.")
-
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 with col1:
     st.metric("Chief Name", profile.name or "Chief")
 with col2:
-    st.metric("Server Age", f"Day {profile.server_age_days}")
+    state_num = profile.state_number if hasattr(profile, 'state_number') and profile.state_number else "N/A"
+    st.metric("State #", state_num)
 with col3:
+    st.metric("Server Age", f"Day {profile.server_age_days}")
+with col4:
     hero_count = db.query(UserHero).filter(UserHero.profile_id == profile.id).count()
     st.metric("Heroes Saved", hero_count)
-with col4:
-    st.metric("Furnace Level", profile.furnace_level)
-
-# Farm account settings
-st.markdown("### 🌾 Farm Account Settings")
-st.caption("Mark this profile as a farm/alt account to get specialized recommendations")
-
-farm_col1, farm_col2 = st.columns([1, 2])
-
-with farm_col1:
-    is_farm = st.checkbox(
-        "This is a farm account",
-        value=profile.is_farm_account if hasattr(profile, 'is_farm_account') else False,
-        key="is_farm_checkbox",
-        help="Farm accounts get gathering-focused recommendations instead of combat advice"
-    )
-
-with farm_col2:
-    # Show link to main profile if farm account is checked
-    if is_farm:
-        # Get all profiles for this user to link
-        user_id = st.session_state.get('user_id')
-        if user_id:
-            all_profiles = get_user_profiles(db, user_id)
-            # Filter out current profile and other farms
-            main_profiles = [p for p in all_profiles if p.id != profile.id and not p.is_farm_account]
-
-            if main_profiles:
-                profile_options = {p.id: f"{p.name} (FC{p.furnace_level})" for p in main_profiles}
-                profile_options[0] = "-- Not linked --"
-
-                current_linked = profile.linked_main_profile_id if hasattr(profile, 'linked_main_profile_id') else None
-                current_idx = list(profile_options.keys()).index(current_linked) if current_linked in profile_options else 0
-
-                linked_id = st.selectbox(
-                    "Link to main account",
-                    options=list(profile_options.keys()),
-                    format_func=lambda x: profile_options[x],
-                    index=current_idx,
-                    key="linked_main_select",
-                    help="Link this farm to your main account for coordinated recommendations"
-                )
-            else:
-                linked_id = None
-                st.caption("No other profiles to link to")
-        else:
-            linked_id = None
-    else:
-        linked_id = None
-
-# Save farm settings if changed
-current_is_farm = profile.is_farm_account if hasattr(profile, 'is_farm_account') else False
-current_linked = profile.linked_main_profile_id if hasattr(profile, 'linked_main_profile_id') else None
-
-if is_farm != current_is_farm or (is_farm and linked_id is not None and linked_id != current_linked):
-    profile.is_farm_account = is_farm
-    profile.linked_main_profile_id = linked_id if linked_id and linked_id != 0 else None
-    db.commit()
-    st.success("Farm settings saved!")
-    st.rerun()
-
-# Edit profile name and update loaded profile
-if loaded_file:
-    st.markdown("### ✏️ Edit Loaded Profile")
-
-    edit_col1, edit_col2, edit_col3 = st.columns([3, 1, 1])
-
-    with edit_col1:
-        new_name = st.text_input(
-            "Chief Name",
-            value=profile.name or "Chief",
-            key="edit_profile_name",
-            help="Update your chief name"
-        )
-
-    with edit_col2:
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("✏️ Rename File", use_container_width=True):
-            if new_name and new_name != profile.name:
-                profile.name = new_name
-                db.commit()
-            success, message = rename_profile_file(new_name)
-            if success:
-                st.success(message)
-                st.rerun()
-            else:
-                st.error(message)
-
-    with edit_col3:
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("💾 Update Profile", type="primary", use_container_width=True):
-            # Save name change first
-            if new_name and new_name != profile.name:
-                profile.name = new_name
-                db.commit()
-            success, message = update_loaded_profile()
-            if success:
-                st.success(message)
-            else:
-                st.error(message)
+with col5:
+    fc_display = profile.furnace_fc_level if profile.furnace_fc_level else f"Lv.{profile.furnace_level}"
+    st.metric("Furnace", fc_display)
 
 st.markdown("---")
 
-# Save as new profile
-st.markdown("## 💾 Save As New Profile")
+# Your Profiles section
+st.markdown("## 👥 Your Profiles")
 
-save_col1, save_col2 = st.columns([3, 1])
+if user_id:
+    all_user_profiles = get_user_profiles(db, user_id)
 
-with save_col1:
-    save_name = st.text_input(
-        "New Profile Name",
-        value=profile.name or "My Profile",
-        key="save_new_profile_name",
-        help="Name for the new saved profile"
-    )
+    if len(all_user_profiles) == 0:
+        st.info("No profiles found. Create one below.")
+    else:
+        st.caption(f"You have {len(all_user_profiles)} profile(s).")
 
-with save_col2:
-    st.markdown("<br>", unsafe_allow_html=True)
-    if st.button("💾 Save As New", type="primary", use_container_width=True):
-        if save_name:
-            # Update profile name if different
-            if save_name != profile.name:
-                profile.name = save_name
-                db.commit()
-            filepath = save_profile_to_file(save_name)
-            # Track the newly saved file as loaded
-            st.session_state["loaded_profile_path"] = str(filepath)
-            st.session_state["loaded_profile_filename"] = filepath.name
-            st.success(f"Profile saved to: `data/profiles/{filepath.name}`")
-            st.info("Commit and push to git to sync across computers!")
+        for p in all_user_profiles:
+            is_current = p.id == profile.id
+            farm_badge = " 🌾" if p.is_farm_account else ""
+            fc_text = p.furnace_fc_level if p.furnace_fc_level else f"Lv.{p.furnace_level}"
+            hero_count_p = db.query(UserHero).filter(UserHero.profile_id == p.id).count()
+
+            # Profile row with buttons
+            with st.container():
+                # Check for pending actions on this profile
+                edit_key = f"editing_{p.id}"
+                delete_key = f"confirm_delete_{p.id}"
+                preview_key = f"show_preview_{p.id}"
+                duplicate_key = f"duplicating_{p.id}"
+
+                # Main row
+                prof_col1, prof_col2, prof_col3, prof_col4, prof_col5, prof_col6, prof_col7 = st.columns([2.5, 1, 1, 1.2, 1, 1.3, 0.5])
+
+                with prof_col1:
+                    if is_current:
+                        st.markdown(f"**✓ {p.name}**{farm_badge}")
+                    else:
+                        st.markdown(f"{p.name}{farm_badge}")
+                    st.caption(f"State {p.state_number or 'N/A'} | {fc_text} | {hero_count_p} heroes")
+
+                with prof_col2:
+                    if not is_current:
+                        if st.button("Switch", key=f"switch_{p.id}", use_container_width=True):
+                            switch_to_profile(p.id)
+                    else:
+                        st.caption("(current)")
+
+                with prof_col3:
+                    if st.button("Preview", key=f"preview_btn_{p.id}", use_container_width=True):
+                        st.session_state[preview_key] = not st.session_state.get(preview_key, False)
+
+                with prof_col4:
+                    if p.is_farm_account:
+                        # Show as selected/active farm
+                        if st.button("🌾 Farm", key=f"farm_{p.id}", use_container_width=True, type="primary"):
+                            p.is_farm_account = False
+                            db.commit()
+                            st.rerun()
+                    else:
+                        if st.button("Mark Farm", key=f"farm_{p.id}", use_container_width=True):
+                            p.is_farm_account = True
+                            db.commit()
+                            st.rerun()
+
+                with prof_col5:
+                    # Edit button (name + state)
+                    if st.button("Edit", key=f"edit_btn_{p.id}", use_container_width=True):
+                        st.session_state[edit_key] = not st.session_state.get(edit_key, False)
+                        # Close other dialogs
+                        st.session_state[delete_key] = False
+                        st.session_state[duplicate_key] = False
+
+                with prof_col6:
+                    # Duplicate button
+                    if st.button("Duplicate", key=f"dup_btn_{p.id}", use_container_width=True):
+                        st.session_state[duplicate_key] = not st.session_state.get(duplicate_key, False)
+                        # Close other dialogs
+                        st.session_state[edit_key] = False
+                        st.session_state[delete_key] = False
+
+                with prof_col7:
+                    # Delete button (trash icon)
+                    if st.button("🗑️", key=f"delete_btn_{p.id}", use_container_width=True):
+                        st.session_state[delete_key] = not st.session_state.get(delete_key, False)
+                        # Close other dialogs
+                        st.session_state[edit_key] = False
+                        st.session_state[duplicate_key] = False
+
+                # Edit dialog (using form so Enter key works)
+                if st.session_state.get(edit_key, False):
+                    with st.form(key=f"edit_form_{p.id}"):
+                        edit_col1, edit_col2, edit_col3, edit_col4 = st.columns([2, 1, 1, 1])
+                        with edit_col1:
+                            new_name = st.text_input(
+                                "Profile Name",
+                                value=p.name,
+                                key=f"edit_name_{p.id}",
+                                placeholder="Profile name"
+                            )
+                        with edit_col2:
+                            new_state = st.number_input(
+                                "State #",
+                                min_value=1,
+                                max_value=9999,
+                                value=p.state_number if p.state_number else 1,
+                                key=f"edit_state_{p.id}"
+                            )
+                        with edit_col3:
+                            st.markdown("<br>", unsafe_allow_html=True)
+                            save_clicked = st.form_submit_button("Save", type="primary", use_container_width=True)
+                        with edit_col4:
+                            st.markdown("<br>", unsafe_allow_html=True)
+                            cancel_clicked = st.form_submit_button("Cancel", use_container_width=True)
+
+                    if save_clicked:
+                        if new_name and new_name.strip():
+                            success, msg = update_profile(p.id, new_name.strip(), new_state)
+                            if success:
+                                st.session_state[edit_key] = False
+                                st.toast("Profile updated")
+                                st.rerun()
+                            else:
+                                st.error(msg)
+                    if cancel_clicked:
+                        st.session_state[edit_key] = False
+                        st.rerun()
+
+                # Duplicate dialog
+                if st.session_state.get(duplicate_key, False):
+                    with st.form(key=f"dup_form_{p.id}"):
+                        dup_col1, dup_col2, dup_col3 = st.columns([3, 1, 1])
+                        with dup_col1:
+                            dup_name = st.text_input(
+                                "New profile name",
+                                value=f"{p.name}_copy",
+                                key=f"dup_name_{p.id}",
+                                placeholder="Name for the copy"
+                            )
+                        with dup_col2:
+                            st.markdown("<br>", unsafe_allow_html=True)
+                            dup_clicked = st.form_submit_button("Duplicate", type="primary", use_container_width=True)
+                        with dup_col3:
+                            st.markdown("<br>", unsafe_allow_html=True)
+                            dup_cancel = st.form_submit_button("Cancel", use_container_width=True)
+
+                    if dup_clicked:
+                        if dup_name and dup_name.strip():
+                            success, msg, new_id = duplicate_profile(p.id, dup_name.strip())
+                            if success:
+                                st.session_state[duplicate_key] = False
+                                st.toast(msg)
+                                st.rerun()
+                            else:
+                                st.error(msg)
+                    if dup_cancel:
+                        st.session_state[duplicate_key] = False
+                        st.rerun()
+
+                # Delete confirmation dialog
+                if st.session_state.get(delete_key, False):
+                    if is_current:
+                        st.warning("Cannot delete your current profile. Switch to another profile first.")
+                        if st.button("OK", key=f"delete_ok_{p.id}"):
+                            st.session_state[delete_key] = False
+                            st.rerun()
+                    else:
+                        st.warning(f"Are you sure you want to delete **{p.name}**? This cannot be undone.")
+                        del_col1, del_col2, del_col3 = st.columns([2, 1, 1])
+                        with del_col2:
+                            if st.button("Yes, Delete", key=f"delete_confirm_{p.id}", type="primary", use_container_width=True):
+                                success, msg = delete_profile(p.id)
+                                if success:
+                                    st.session_state[delete_key] = False
+                                    st.success("Profile deleted!")
+                                    st.rerun()
+                                else:
+                                    st.error(msg)
+                        with del_col3:
+                            if st.button("Cancel", key=f"delete_cancel_{p.id}", use_container_width=True):
+                                st.session_state[delete_key] = False
+                                st.rerun()
+
+                # Preview panel
+                if st.session_state.get(preview_key, False):
+                    with st.expander("Profile Details", expanded=True):
+                        prev_col1, prev_col2 = st.columns(2)
+
+                        with prev_col1:
+                            st.markdown("**Profile Settings:**")
+                            farm_status = "Yes" if p.is_farm_account else "No"
+                            st.markdown(f"""
+                            - Name: {p.name}
+                            - State: {p.state_number or 'N/A'}
+                            - Server Age: Day {p.server_age_days}
+                            - Furnace: {fc_text}
+                            - Farm Account: {farm_status}
+                            - Spending: {p.spending_profile}
+                            - Alliance Role: {p.alliance_role}
+                            """)
+
+                        with prev_col2:
+                            st.markdown("**Heroes:**")
+                            heroes = db.query(UserHero).filter(UserHero.profile_id == p.id).all()
+                            if heroes:
+                                for uh in heroes[:5]:
+                                    hero_ref = db.query(Hero).filter(Hero.id == uh.hero_id).first()
+                                    if hero_ref:
+                                        st.markdown(f"- {hero_ref.name} (Lv.{uh.level}, ★{uh.stars})")
+                                if len(heroes) > 5:
+                                    st.markdown(f"*...and {len(heroes) - 5} more*")
+                            else:
+                                st.markdown("*No heroes saved*")
+
+                st.markdown("---")
+
+    # Create New Profile section
+    st.markdown("### ➕ Create New Profile")
+    with st.form(key="create_profile_form"):
+        create_col1, create_col2, create_col3 = st.columns([2, 1, 1])
+        with create_col1:
+            new_profile_name = st.text_input(
+                "Profile Name",
+                placeholder="e.g., MyFarm_city2",
+                key="create_new_profile_name"
+            )
+        with create_col2:
+            new_profile_state = st.number_input(
+                "State #",
+                min_value=1,
+                max_value=9999,
+                value=profile.state_number if profile.state_number else 1,
+                key="create_new_profile_state",
+                help="Your state/server number"
+            )
+        with create_col3:
+            st.markdown("<br>", unsafe_allow_html=True)
+            create_clicked = st.form_submit_button("Create", use_container_width=True)
+
+    if create_clicked:
+        if new_profile_name and new_profile_name.strip():
+            # Create a new blank profile
+            new_profile = UserProfile(
+                user_id=user_id,
+                name=new_profile_name.strip(),
+                state_number=new_profile_state,
+                furnace_level=1,
+                server_age_days=0,
+                spending_profile="f2p",
+                alliance_role="filler"
+            )
+            db.add(new_profile)
+            db.commit()
+            db.refresh(new_profile)
+            # Switch to the new profile
+            st.session_state.profile_id = new_profile.id
+            st.toast(f"Created {new_profile_name}")
             st.rerun()
         else:
             st.error("Please enter a profile name")
 
-st.markdown("---")
+    st.markdown("---")
 
-# Saved profiles
-st.markdown("## 📁 Saved Profiles")
+    # Farm account linking (for current profile)
+    if profile.is_farm_account:
+        st.markdown("### 🔗 Link Farm to Main Account")
+        st.caption("Link this farm to your main account for coordinated recommendations")
 
-saved_profiles = get_saved_profiles()
+        # Get main profiles to link
+        main_profiles = [p for p in all_user_profiles if p.id != profile.id and not p.is_farm_account]
 
-if not saved_profiles:
-    st.info("No profile files yet. Your data is automatically saved to the database. Use 'Save As New' above to create a file backup for git sync across computers.")
+        if main_profiles:
+            profile_options = {0: "-- Not linked --"}
+            profile_options.update({p.id: f"{p.name} (State {p.state_number or '?'})" for p in main_profiles})
+
+            current_linked = profile.linked_main_profile_id if hasattr(profile, 'linked_main_profile_id') else None
+            default_idx = 0
+            if current_linked and current_linked in profile_options:
+                default_idx = list(profile_options.keys()).index(current_linked)
+
+            linked_id = st.selectbox(
+                "Link to main account",
+                options=list(profile_options.keys()),
+                format_func=lambda x: profile_options[x],
+                index=default_idx,
+                key="linked_main_select",
+            )
+
+            if linked_id != (current_linked or 0):
+                profile.linked_main_profile_id = linked_id if linked_id != 0 else None
+                db.commit()
+                st.success("Link updated!")
+                st.rerun()
+        else:
+            st.caption("No main accounts available to link to. Create a non-farm profile first.")
+
+    # Recently Deleted Profiles section
+    deleted_profiles = get_deleted_profiles(user_id)
+    if deleted_profiles:
+        st.markdown("### 🗑️ Recently Deleted")
+        st.caption("Deleted profiles can be restored within 30 days.")
+
+        from datetime import datetime, timedelta
+
+        for dp in deleted_profiles:
+            # Calculate days remaining
+            delete_date = dp.deleted_at
+            expiry_date = delete_date + timedelta(days=30)
+            days_left = (expiry_date - datetime.utcnow()).days
+
+            if days_left < 0:
+                days_left = 0
+
+            with st.container():
+                del_col1, del_col2, del_col3 = st.columns([3, 1, 1])
+
+                with del_col1:
+                    st.markdown(f"~~{dp.name}~~")
+                    if days_left > 0:
+                        st.caption(f"⏱️ {days_left} days left to restore")
+                    else:
+                        st.caption("⚠️ Will be permanently deleted soon")
+
+                with del_col2:
+                    if st.button("Restore", key=f"restore_{dp.id}", use_container_width=True):
+                        success, msg = restore_profile(dp.id)
+                        if success:
+                            st.success("Profile restored!")
+                            st.rerun()
+                        else:
+                            st.error(msg)
+
+                with del_col3:
+                    if st.button("🗑️ Delete Now", key=f"perm_delete_{dp.id}", use_container_width=True):
+                        st.session_state[f"confirm_perm_delete_{dp.id}"] = True
+
+                # Permanent delete confirmation
+                if st.session_state.get(f"confirm_perm_delete_{dp.id}", False):
+                    st.warning(f"Permanently delete **{dp.name}**? This cannot be undone.")
+                    conf_col1, conf_col2, conf_col3 = st.columns([2, 1, 1])
+                    with conf_col2:
+                        if st.button("Yes, Delete Forever", key=f"perm_confirm_{dp.id}", use_container_width=True):
+                            success, msg = delete_profile(dp.id, hard_delete=True)
+                            if success:
+                                st.session_state[f"confirm_perm_delete_{dp.id}"] = False
+                                st.rerun()
+                            else:
+                                st.error(msg)
+                    with conf_col3:
+                        if st.button("Cancel", key=f"perm_cancel_{dp.id}", use_container_width=True):
+                            st.session_state[f"confirm_perm_delete_{dp.id}"] = False
+                            st.rerun()
+
+        st.markdown("---")
+
+    # Farm profile disclaimer
+    st.caption("🌾 **Farm Profiles:** Mark your farm account to receive specialized recommendations focused on resource gathering and support heroes rather than combat upgrades.")
+
 else:
-    st.markdown(f"*Found {len(saved_profiles)} saved profile(s)*")
-
-    for prof in saved_profiles:
-        with st.container():
-            col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
-
-            with col1:
-                # Parse date for display
-                try:
-                    export_dt = datetime.fromisoformat(prof["export_date"])
-                    date_str = export_dt.strftime("%Y-%m-%d %H:%M")
-                except:
-                    date_str = "Unknown date"
-
-                st.markdown(f"""
-                **{prof['name']}**
-                📅 {date_str} | 🦸 {prof['hero_count']} heroes | 📍 Day {prof['server_age']}
-                """)
-
-            with col2:
-                if st.button("📂 Load", key=f"load_{prof['filename']}", use_container_width=True):
-                    success, message = load_profile_from_file(prof["path"])
-                    if success:
-                        st.success(message)
-                        st.rerun()
-                    else:
-                        st.error(message)
-
-            with col3:
-                # Preview button
-                if st.button("👁️ Preview", key=f"preview_{prof['filename']}", use_container_width=True):
-                    st.session_state[f"show_preview_{prof['filename']}"] = not st.session_state.get(f"show_preview_{prof['filename']}", False)
-
-            with col4:
-                if st.button("🗑️ Delete", key=f"delete_{prof['filename']}", use_container_width=True):
-                    if delete_profile_file(prof["path"]):
-                        st.success("Profile deleted!")
-                        st.rerun()
-                    else:
-                        st.error("Failed to delete")
-
-            # Show preview if expanded
-            if st.session_state.get(f"show_preview_{prof['filename']}", False):
-                with open(prof["path"], encoding='utf-8') as f:
-                    data = json.load(f)
-
-                preview_col1, preview_col2 = st.columns(2)
-
-                with preview_col1:
-                    st.markdown("**Profile Settings:**")
-                    p = data.get("profile", {})
-                    st.markdown(f"""
-                    - Name: {p.get('name', 'N/A')}
-                    - Server Age: Day {p.get('server_age_days', 0)}
-                    - Furnace: Lv.{p.get('furnace_level', 1)}
-                    - SvS Priority: {p.get('priority_svs', 5)}/5
-                    """)
-
-                with preview_col2:
-                    st.markdown("**Heroes:**")
-                    heroes = data.get("heroes", [])
-                    if heroes:
-                        for h in heroes[:5]:  # Show first 5
-                            st.markdown(f"- {h['hero_name']} (Lv.{h['level']}, ★{h['stars']})")
-                        if len(heroes) > 5:
-                            st.markdown(f"*...and {len(heroes) - 5} more*")
-                    else:
-                        st.markdown("*No heroes saved*")
-
-            st.markdown("---")
-
-st.markdown("---")
-
-# Git instructions
-with st.expander("📖 How to sync profiles across computers"):
-    st.markdown("""
-    ### Syncing Profiles via Git
-
-    **On this computer (after saving a profile):**
-    ```bash
-    cd WoS
-    git add data/profiles/
-    git commit -m "Save profile: YourProfileName"
-    git push
-    ```
-
-    **On another computer:**
-    ```bash
-    cd WoS
-    git pull
-    ```
-    Then open the Profiles page and click "Load" on your saved profile.
-
-    ### Tips:
-    - Save your profile before switching computers
-    - Always `git pull` before loading on a new machine
-    - Profile files are small JSON files in `data/profiles/`
-    """)
+    st.warning("Please log in to manage your profiles.")
 
 # Close database
 db.close()

@@ -18,35 +18,33 @@ def render_register():
 
     # Check if form was submitted
     if st.session_state.get("register_submitted"):
-        username = st.session_state.get("reg_username", "")
         email = st.session_state.get("reg_email", "")
         password = st.session_state.get("reg_password", "")
         password2 = st.session_state.get("reg_password2", "")
 
         error = None
-        if not username or not password:
-            error = "Username and password are required"
-        elif len(username) < 3:
-            error = "Username must be at least 3 characters"
+        if not email or not password:
+            error = "Email and password are required"
+        elif '@' not in email or '.' not in email:
+            error = "Please enter a valid email address"
         elif len(password) < 6:
             error = "Password must be at least 6 characters"
         elif password != password2:
             error = "Passwords don't match"
         else:
             db = get_db()
-            email_val = email if email else None
-            user = create_user(db, username, password, email=email_val)
+            user = create_user(db, email, password)
 
             if user:
                 login_user(user)
                 db.close()
                 # Clear form state
-                for key in ["register_submitted", "reg_username", "reg_email", "reg_password", "reg_password2", "register_error"]:
+                for key in ["register_submitted", "reg_email", "reg_password", "reg_password2", "register_error"]:
                     st.session_state.pop(key, None)
                 st.rerun()
             else:
                 db.close()
-                error = "Username or email already exists"
+                error = "Email already registered"
 
         if error:
             st.session_state["register_error"] = error
@@ -206,8 +204,7 @@ def render_register():
             st.session_state.pop("register_error", None)
 
         # Form
-        username = st.text_input("Username", placeholder="Min 3 characters", key="reg_username")
-        email = st.text_input("Email (optional)", placeholder="For account recovery", key="reg_email")
+        email = st.text_input("Email", placeholder="your@email.com", key="reg_email")
         password = st.text_input("Password", type="password", placeholder="Min 6 characters", key="reg_password")
         password2 = st.text_input("Confirm Password", type="password", placeholder="Re-enter password", key="reg_password2")
 

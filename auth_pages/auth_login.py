@@ -18,25 +18,25 @@ def render_login():
 
     # Check if form was submitted
     if st.session_state.get("login_submitted"):
-        username = st.session_state.get("login_username", "")
+        email = st.session_state.get("login_email", "")
         password = st.session_state.get("login_password", "")
 
-        if username and password:
+        if email and password:
             db = get_db()
-            user = authenticate_user(db, username, password)
+            user = authenticate_user(db, email, password)
 
             if user:
                 login_user(user)
                 db.close()
                 # Clear form state
                 st.session_state.pop("login_submitted", None)
-                st.session_state.pop("login_username", None)
+                st.session_state.pop("login_email", None)
                 st.session_state.pop("login_password", None)
                 st.session_state.pop("login_error", None)
                 st.rerun()
             else:
                 db.close()
-                st.session_state["login_error"] = "Invalid username or password"
+                st.session_state["login_error"] = "Invalid email or password"
 
         st.session_state.pop("login_submitted", None)
 
@@ -182,7 +182,7 @@ def render_login():
             st.session_state.pop("login_error", None)
 
         # Form
-        username = st.text_input("Username", placeholder="Enter your username", key="login_username")
+        email = st.text_input("Email", placeholder="Enter your email", key="login_email")
         password = st.text_input("Password", type="password", placeholder="Enter your password", key="login_password")
 
         if st.button("Sign In", key="login_btn", use_container_width=True):

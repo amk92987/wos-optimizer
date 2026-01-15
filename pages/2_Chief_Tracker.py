@@ -389,6 +389,7 @@ def render_gear_slot(slot_id, slot_info, gear_data):
         setattr(gear_data, quality_attr, new_tier_id)
         setattr(gear_data, level_attr, new_tier_id)  # Keep in sync
         db.commit()
+        st.toast(f"Saved {slot_info['name']}")
         st.rerun()
 
 
@@ -560,6 +561,7 @@ def render_gear_charms(gear_id, gear_name, gear_data, charm_data, key_prefix):
         if charm_data and new_level != current_levels[0]:
             setattr(charm_data, slot_fields[0], new_level)
             db.commit()
+            st.toast(f"Saved {charm_name}")
             st.rerun()
 
     # Bottom two charms (slots 2 and 3)
@@ -587,6 +589,7 @@ def render_gear_charms(gear_id, gear_name, gear_data, charm_data, key_prefix):
             if charm_data and new_level != current_levels[slot_idx]:
                 setattr(charm_data, slot_fields[slot_idx], new_level)
                 db.commit()
+                st.toast(f"Saved {charm_name}")
                 st.rerun()
 
 

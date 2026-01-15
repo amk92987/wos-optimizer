@@ -140,7 +140,9 @@ def get_db() -> Session:
 
 
 def get_or_create_profile(db: Session, user_id: int = None):
-    """Get the user's default profile or create one if it doesn't exist.
+    """Get the user's active profile or create one if it doesn't exist.
+
+    Respects session_state.profile_id if set (for profile switching).
 
     Args:
         db: Database session
@@ -159,16 +161,31 @@ def get_or_create_profile(db: Session, user_id: int = None):
     if user_id is None:
         return None  # No authenticated user
 
-    # First, try to get the default profile for this user
+    # Check if a specific profile is selected in session state (from Switch button)
+    selected_profile_id = st.session_state.get('profile_id')
+    if selected_profile_id:
+        profile = db.query(UserProfile).filter(
+            UserProfile.id == selected_profile_id,
+            UserProfile.user_id == user_id,
+            UserProfile.deleted_at.is_(None)
+        ).first()
+        if profile:
+            return profile
+        # Invalid profile_id in session - clear it and fall through to default
+        st.session_state.pop('profile_id', None)
+
+    # Try to get the default profile for this user
     profile = db.query(UserProfile).filter(
         UserProfile.user_id == user_id,
-        UserProfile.is_default == True
+        UserProfile.is_default == True,
+        UserProfile.deleted_at.is_(None)
     ).first()
 
-    # If no default, get any profile for this user
+    # If no default, get any non-deleted profile for this user
     if not profile:
         profile = db.query(UserProfile).filter(
-            UserProfile.user_id == user_id
+            UserProfile.user_id == user_id,
+            UserProfile.deleted_at.is_(None)
         ).first()
 
     # If still no profile, create one
@@ -242,5 +259,62 @@ def get_user_profiles(db: Session, user_id: int = None):
         return []
 
     return db.query(UserProfile).filter(
-        UserProfile.user_id == user_id
+        UserProfile.user_id == user_id,
+        UserProfile.deleted_at.is_(None)  # Exclude soft-deleted profiles
     ).order_by(UserProfile.is_default.desc(), UserProfile.created_at).all()
+
+
+def purge_deleted_profiles(db: Session, days_old: int = 30) -> int:
+    """Permanently delete profiles that were soft-deleted more than X days ago.
+
+    Args:
+        db: Database session
+        days_old: Number of days after which to permanently delete (default 30)
+
+    Returns:
+        Number of profiles permanently deleted
+    """
+    from .models import UserProfile, UserHero
+    from datetime import datetime, timedelta
+
+    cutoff = datetime.utcnow() - timedelta(days=days_old)
+
+    # Find profiles to purge
+    profiles_to_purge = db.query(UserProfile).filter(
+        UserProfile.deleted_at.isnot(None),
+        UserProfile.deleted_at < cutoff
+    ).all()
+
+    count = 0
+    for profile in profiles_to_purge:
+        # Delete associated data
+        db.query(UserHero).filter(UserHero.profile_id == profile.id).delete()
+        db.delete(profile)
+        count += 1
+
+    db.commit()
+    return count
+
+
+def restore_deleted_profile(db: Session, profile_id: int) -> bool:
+    """Restore a soft-deleted profile (admin use only).
+
+    Args:
+        db: Database session
+        profile_id: ID of profile to restore
+
+    Returns:
+        True if restored, False if not found or not deleted
+    """
+    from .models import UserProfile
+
+    profile = db.query(UserProfile).filter(
+        UserProfile.id == profile_id,
+        UserProfile.deleted_at.isnot(None)
+    ).first()
+
+    if profile:
+        profile.deleted_at = None
+        db.commit()
+        return True
+    return False

@@ -41,284 +41,251 @@ def get_current_generation(server_age_days: int) -> int:
         return 6
     elif server_age_days < 520:
         return 7
+    elif server_age_days < 600:
+        return 8
+    elif server_age_days < 680:
+        return 9
+    elif server_age_days < 760:
+        return 10
+    elif server_age_days < 840:
+        return 11
+    elif server_age_days < 920:
+        return 12
+    elif server_age_days < 1000:
+        return 13
     else:
-        return 8 + ((server_age_days - 520) // 80)
+        return 14
 
 
-def save_profile():
-    """Save profile changes to database."""
-    db.commit()
-    st.success("Settings saved!")
+def get_game_phase(furnace_level, fc_level):
+    """Determine game phase based on furnace progression."""
+    if furnace_level < 19:
+        return ("early_game", "Early Game", "Rush to F19 for Daybreak Island")
+    elif furnace_level < 30:
+        return ("mid_game", "Mid Game", "Rush to F30 for Fire Crystal era")
+    elif fc_level and any(fc_level.startswith(f"FC{i}") for i in range(5, 11)):
+        return ("endgame", "Endgame", "FC10 completion, max everything")
+    else:
+        return ("late_game", "Late Game", "FC progression, War Academy, Mastery")
 
 
 # Page content
 st.markdown("# ⚙️ Settings")
-st.markdown("Configure your game profile and optimization priorities.")
+
+# Current profile summary
+state_display = f"State {profile.state_number}" if profile.state_number else "State N/A"
+fc_display = profile.furnace_fc_level if profile.furnace_fc_level else f"Lv.{profile.furnace_level}"
+st.info(f"**{profile.name or 'Chief'}** · {state_display} · {fc_display} · Day {profile.server_age_days}")
+st.caption("Edit profile name and state on the **Profiles** page")
 
 st.markdown("---")
 
-# Two column layout
+# =============================================================================
+# SERVER & PROGRESSION
+# =============================================================================
+st.markdown("## 📅 Server & Progression")
+
 col1, col2 = st.columns(2)
 
 with col1:
-    st.markdown("## 🏰 Game Profile")
+    st.markdown("#### Server Age")
 
-    # Chief name - use key to prevent overwriting on rerender
-    chief_name = st.text_input("Chief Name", value=profile.name or "Chief", key="chief_name_input")
+    # Generation options - Gen 1 through Gen 14
+    gen_options = [
+        ("Gen 1", 1, 20, "Jeronimo, Natalia, Molly, Zinman, Jessie"),
+        ("Gen 2", 2, 80, "Flint, Philly, Alonso"),
+        ("Gen 3", 3, 160, "Logan, Mia, Greg"),
+        ("Gen 4", 4, 240, "Ahmose, Reina, Lynn"),
+        ("Gen 5", 5, 320, "Wu Ming, Hector"),
+        ("Gen 6", 6, 400, "Norah, Wayne"),
+        ("Gen 7", 7, 480, "Gordon, Renee"),
+        ("Gen 8", 8, 560, "Edith, Gatot"),
+        ("Gen 9", 9, 640, "Henrik, Gwen"),
+        ("Gen 10", 10, 720, "Tristan, Ling"),
+        ("Gen 11", 11, 800, "Kazuki, Sofia"),
+        ("Gen 12", 12, 880, "Bjorn, Yuki"),
+        ("Gen 13", 13, 960, "Magnus, Chen"),
+        ("Gen 14", 14, 1040, "Latest heroes"),
+    ]
 
-    # State Number
-    st.markdown("### State Number")
-    state_number = st.number_input(
-        "Your State/Server Number",
-        min_value=1,
-        max_value=9999,
-        value=profile.state_number if profile.state_number else 1,
-        help="Enter your state number (e.g., 123, 456). Find this in-game next to your state name."
+    # Find current gen based on server age
+    current_gen = get_current_generation(profile.server_age_days)
+    current_gen_idx = min(current_gen - 1, len(gen_options) - 1)
+
+    selected_gen = st.selectbox(
+        "Newest hero generation on your server",
+        options=range(len(gen_options)),
+        index=current_gen_idx,
+        format_func=lambda i: f"{gen_options[i][0]} ({gen_options[i][3][:30]}...)" if len(gen_options[i][3]) > 30 else f"{gen_options[i][0]} ({gen_options[i][3]})",
+        help="Select based on which heroes are available in your state"
     )
 
-    st.markdown("---")
+    # Calculate estimated days from selection
+    estimated_days = gen_options[selected_gen][2]
 
-    # Server age estimation
-    st.markdown("### Server Age")
-    st.markdown("*Estimate based on what you see in-game:*")
-
-    estimate_method = st.radio(
-        "How do you want to set server age?",
-        ["Estimate from milestones", "Enter manually"],
-        horizontal=True
-    )
-
-    if estimate_method == "Estimate from milestones":
-        st.markdown("**Answer these questions:**")
-
-        # Question 1: What heroes are available?
-        available_gen = st.selectbox(
-            "What's the newest hero generation available on your server?",
-            [
-                "Gen 1 (Jeronimo, Natalia, Molly, Zinman, Jessie, Sergey)",
-                "Gen 2 (Flint, Philly, Alonso)",
-                "Gen 3 (Logan, Mia, Greg)",
-                "Gen 4 (Ahmose, Reina, Lynn)",
-                "Gen 5 (Wu Ming, Hector)",
-                "Gen 6 (Patrick, Charlie, Cloris)",
-                "Gen 7 (Gordon, Renee, Eugene)",
-                "Gen 8+",
-            ],
-            index=min(max(0, (profile.server_age_days // 80)), 7)
-        )
-
-        # Question 2: SvS history
-        svs_status = st.selectbox(
-            "Have you had State vs State (SvS) yet?",
-            [
-                "No SvS yet (server < 84 days)",
-                "Had first SvS recently",
-                "Had 2-3 SvS events",
-                "Had 4+ SvS events",
-            ]
-        )
-
-        # Calculate estimate
-        gen_num = int(available_gen.split()[1]) if "Gen" in available_gen else 8
-        gen_base_days = {1: 20, 2: 80, 3: 160, 4: 240, 5: 320, 6: 400, 7: 480, 8: 560}
-
-        svs_adjustment = {
-            "No SvS yet (server < 84 days)": -20,
-            "Had first SvS recently": 0,
-            "Had 2-3 SvS events": 30,
-            "Had 4+ SvS events": 60,
-        }
-
-        estimated_days = gen_base_days.get(gen_num, 560) + svs_adjustment.get(svs_status, 0)
-        estimated_days = max(0, estimated_days)
-
-        st.markdown(f"**Estimated server age: ~{estimated_days} days**")
-
-        if st.button("Use this estimate"):
-            profile.server_age_days = estimated_days
-            db.commit()
-            st.session_state.estimate_updated = True
-            st.rerun()
-        if st.session_state.get('estimate_updated'):
-            st.markdown('<span style="color: #4CAF50; font-size: 14px;">✓ Updated</span>', unsafe_allow_html=True)
-            st.session_state.estimate_updated = False
-
-    else:
-        profile.server_age_days = st.number_input(
+    # Manual override option
+    use_manual = st.checkbox("Enter exact day count", value=False)
+    if use_manual:
+        server_days = st.number_input(
             "Days since server started",
             min_value=0,
             max_value=2000,
             value=profile.server_age_days,
-            help="If you know the exact number"
         )
-
-    gen = get_current_generation(profile.server_age_days)
-    st.info(f"📅 Current setting: **Generation {gen}** (Day {profile.server_age_days})")
-
-    # Generation timeline preview
-    gen_ranges = [
-        (1, 0, 40), (2, 40, 120), (3, 120, 200), (4, 200, 280),
-        (5, 280, 360), (6, 360, 440), (7, 440, 520), (8, 520, 600)
-    ]
-
-    for g, start, end in gen_ranges:
-        if g == gen:
-            days_in_gen = profile.server_age_days - start
-            days_total = end - start
-            progress = min(days_in_gen / days_total, 1.0)
-            st.progress(progress, text=f"Gen {g}: Day {days_in_gen}/{days_total}")
-            if g < 8:
-                days_to_next = end - profile.server_age_days
-                st.caption(f"⏳ {days_to_next} days until Gen {g+1}")
-            break
-
-    st.markdown("---")
-
-    # Furnace level
-    st.markdown("### Furnace Level")
-
-    # Build furnace level options: 1-30, then FC levels (each FC has 5 sub-steps: 0-4)
-    furnace_options = [str(i) for i in range(1, 31)] + ["30-1", "30-2", "30-3", "30-4"]
-    for fc in range(1, 11):
-        for sub in range(5):  # 0, 1, 2, 3, 4
-            furnace_options.append(f"FC{fc}-{sub}")
-
-    # Determine current display value
-    if profile.furnace_level < 30:
-        current_display = str(profile.furnace_level)
-    elif profile.furnace_fc_level:
-        current_display = profile.furnace_fc_level
     else:
-        current_display = "30"
+        server_days = estimated_days
 
-    # Find index of current value
-    try:
-        current_index = furnace_options.index(current_display)
-    except ValueError:
-        current_index = 0
+    # Show current generation info
+    gen = get_current_generation(server_days)
+    if server_days != profile.server_age_days:
+        if st.button("Update Server Age", type="primary"):
+            profile.server_age_days = server_days
+            db.commit()
+            st.toast("Saved")
+            st.rerun()
 
-    selected_furnace = st.selectbox(
+    # Calculate days until next gen
+    gen_day_thresholds = [0, 40, 120, 200, 280, 360, 440, 520, 600, 680, 760, 840, 920, 1000, 9999]
+    current_gen = get_current_generation(profile.server_age_days)
+    if current_gen < 14:
+        next_gen_day = gen_day_thresholds[current_gen]  # Threshold for next gen
+        days_until_next = next_gen_day - profile.server_age_days
+        st.caption(f"Current: **Gen {current_gen}** (Day {profile.server_age_days}) · {days_until_next} days until Gen {current_gen + 1}")
+    else:
+        st.caption(f"Current: **Gen {current_gen}** (Day {profile.server_age_days}) · Latest generation")
+
+with col2:
+    st.markdown("#### Furnace Level")
+
+    # Build furnace level options: (display_label, furnace_level, fc_level_stored)
+    furnace_options = []
+    for i in range(1, 31):
+        furnace_options.append((str(i), i, None))
+    # FC sub-levels - store as "FC5-0" format consistently
+    for fc in range(1, 11):
+        for sub in range(5):
+            display = f"FC{fc}" if sub == 0 else f"FC{fc}-{sub}"
+            stored = f"FC{fc}-{sub}"
+            furnace_options.append((display, 30, stored))
+
+    # Find current index - handle both "FC5" and "FC5-0" formats
+    current_furnace_idx = 29  # Default to level 30
+    if profile.furnace_level < 30:
+        current_furnace_idx = profile.furnace_level - 1
+    elif profile.furnace_fc_level:
+        fc_to_find = profile.furnace_fc_level
+        # Normalize: "FC5" -> "FC5-0"
+        if fc_to_find and not "-" in fc_to_find:
+            fc_to_find = fc_to_find + "-0"
+        for i, (label, lvl, fc) in enumerate(furnace_options):
+            if fc == fc_to_find:
+                current_furnace_idx = i
+                break
+
+    selected_furnace_idx = st.selectbox(
         "Current Furnace Level",
-        furnace_options,
-        index=current_index,
+        options=range(len(furnace_options)),
+        index=current_furnace_idx,
+        format_func=lambda i: furnace_options[i][0],
         help="Your main building level (1-30, then FC progression)"
     )
 
-    # Store selection
-    if selected_furnace.startswith("FC") or selected_furnace.startswith("30-"):
-        profile.furnace_level = 30
-        profile.furnace_fc_level = selected_furnace
-    else:
-        profile.furnace_level = int(selected_furnace)
-        profile.furnace_fc_level = None
+    selected_furnace = furnace_options[selected_furnace_idx]
+    new_furnace_level = selected_furnace[1]
+    new_fc_level = selected_furnace[2]
 
-    # Milestone indicators
-    milestones = [
-        (15, "Hero Gear unlocks"),
-        (16, "SvS eligible"),
-        (18, "Pets unlock"),
-        (22, "Chief Gear unlocks"),
-        (25, "Chief Charms unlock"),
-        (30, "Fire Crystal era begins"),
-    ]
+    # Normalize stored FC level for comparison
+    current_fc_normalized = profile.furnace_fc_level
+    if current_fc_normalized and "-" not in current_fc_normalized:
+        current_fc_normalized = current_fc_normalized + "-0"
 
-    st.markdown("#### Furnace Milestones")
-    for level, desc in milestones:
-        if profile.furnace_level >= level:
-            st.markdown(f"✅ **Lv.{level}**: {desc}")
-        else:
-            st.markdown(f"⬜ **Lv.{level}**: {desc}")
+    # Only save if user actually changed something (not on initial load)
+    if new_furnace_level != profile.furnace_level or new_fc_level != current_fc_normalized:
+        profile.furnace_level = new_furnace_level
+        profile.furnace_fc_level = new_fc_level
+        db.commit()
+        st.toast("Saved")
+        st.rerun()
 
     # Game phase indicator
-    st.markdown("---")
-    st.markdown("#### Current Game Phase")
-
-    def get_game_phase(furnace_level, fc_level):
-        if furnace_level < 19:
-            return ("early_game", "Early Game", "Rush to F19 for Daybreak Island, unlock Research")
-        elif furnace_level < 30:
-            return ("mid_game", "Mid Game", "Rush to F30 for FC, max Tool Enhancement VII")
-        elif fc_level and (fc_level.startswith("FC5") or fc_level.startswith("FC6") or
-                          fc_level.startswith("FC7") or fc_level.startswith("FC8") or
-                          fc_level.startswith("FC9") or fc_level.startswith("FC10")):
-            return ("endgame", "Endgame", "FC10 completion, max Mastery, Charms L12-16")
-        else:
-            return ("late_game", "Late Game (FC Era)", "FC progression, War Academy, Hero Gear Mastery")
-
     phase_id, phase_name, phase_focus = get_game_phase(profile.furnace_level, profile.furnace_fc_level)
-
     phase_colors = {
         "early_game": "#4CAF50",
         "mid_game": "#2196F3",
         "late_game": "#FF9800",
         "endgame": "#E91E63"
     }
-    phase_color = phase_colors.get(phase_id, "#808080")
-
     st.markdown(f"""
-    <div style="background: {phase_color}22; border-left: 4px solid {phase_color};
-                padding: 10px; border-radius: 4px; margin: 10px 0;">
-        <strong style="color: {phase_color};">{phase_name}</strong><br>
-        <small>{phase_focus}</small>
+    <div style="background: {phase_colors.get(phase_id, '#808080')}22;
+                border-left: 4px solid {phase_colors.get(phase_id, '#808080')};
+                padding: 8px 12px; border-radius: 4px; margin-top: 8px;">
+        <strong>{phase_name}</strong><br>
+        <small style="opacity: 0.8;">{phase_focus}</small>
     </div>
     """, unsafe_allow_html=True)
 
-with col2:
-    st.markdown("## 🤖 Optimizer Settings")
-    st.markdown("Configure how the optimizer makes recommendations for you.")
+    # Key milestones
+    st.caption("Key unlocks: F18 Pets · F19 Daybreak · F25 Charms · F30 FC")
 
-    # Spending Profile
+st.markdown("---")
+
+# =============================================================================
+# PLAYSTYLE
+# =============================================================================
+st.markdown("## 🎮 Playstyle")
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
     spending_options = {
-        "f2p": "Free to Play - No spending",
-        "minnow": "Minnow - $5-30/month (monthly pass)",
-        "dolphin": "Dolphin - $30-100/month (regular packs)",
-        "orca": "Orca - $100-500/month (heavy spender)",
-        "whale": "Whale - $500+/month (unlimited)"
+        "f2p": "Free to Play",
+        "minnow": "Minnow ($5-30/mo)",
+        "dolphin": "Dolphin ($30-100/mo)",
+        "orca": "Orca ($100-500/mo)",
+        "whale": "Whale ($500+/mo)"
     }
     spending_keys = list(spending_options.keys())
     current_spending_idx = spending_keys.index(profile.spending_profile) if profile.spending_profile in spending_keys else 0
 
     selected_spending = st.selectbox(
-        "💰 Spending Profile",
+        "💰 Spending",
         spending_keys,
         index=current_spending_idx,
         format_func=lambda x: spending_options[x],
-        help="Affects which upgrades are recommended (F2P skips whale-only content)"
+        help="Affects which upgrades are recommended"
     )
-    profile.spending_profile = selected_spending
+    if selected_spending != profile.spending_profile:
+        profile.spending_profile = selected_spending
+        db.commit()
+        st.toast("Saved")
 
-    # Show efficiency threshold info
-    efficiency_thresholds = {"f2p": 0.8, "minnow": 0.7, "dolphin": 0.5, "orca": 0.3, "whale": 0.0}
-    threshold = efficiency_thresholds.get(selected_spending, 0.5)
-    if threshold > 0:
-        st.caption(f"Efficiency threshold: {threshold:.0%} (lower-value upgrades filtered)")
-    else:
-        st.caption("No efficiency filter (all upgrades shown)")
-
-    # Priority Focus
+with col2:
     focus_options = {
-        "svs_combat": "SvS Combat - Maximize troop power and combat stats",
-        "balanced_growth": "Balanced Growth - Steady progression across all systems",
-        "economy_focus": "Economy Focus - Resource generation and efficiency"
+        "svs_combat": "SvS Combat",
+        "balanced_growth": "Balanced Growth",
+        "economy_focus": "Economy Focus"
     }
     focus_keys = list(focus_options.keys())
     current_focus_idx = focus_keys.index(profile.priority_focus) if profile.priority_focus in focus_keys else 1
 
     selected_focus = st.selectbox(
-        "🎯 Priority Focus",
+        "🎯 Focus",
         focus_keys,
         index=current_focus_idx,
         format_func=lambda x: focus_options[x],
-        help="Determines which systems get priority in recommendations"
+        help="Determines recommendation priorities"
     )
-    profile.priority_focus = selected_focus
+    if selected_focus != profile.priority_focus:
+        profile.priority_focus = selected_focus
+        db.commit()
+        st.toast("Saved")
 
-    # Alliance Role
+with col3:
     role_options = {
-        "rally_lead": "Rally Lead - Leads rallies in SvS and events",
-        "filler": "Filler - Joins rallies and reinforces",
-        "farmer": "Farmer - Resource generation focus",
-        "casual": "Casual - Plays for fun, no specific role"
+        "rally_lead": "Rally Lead",
+        "filler": "Rally Filler",
+        "farmer": "Farmer",
+        "casual": "Casual"
     }
     role_keys = list(role_options.keys())
     current_role_idx = role_keys.index(profile.alliance_role) if profile.alliance_role in role_keys else 1
@@ -330,207 +297,80 @@ with col2:
         format_func=lambda x: role_options[x],
         help="Rally leads get troop priority boosts"
     )
-    profile.alliance_role = selected_role
-
-    st.markdown("---")
-
-    st.markdown("## 🎯 Detailed Priorities")
-    st.markdown("Fine-tune your gameplay focus. Higher = more important for recommendations.")
-
-    # Priority sliders
-    st.markdown("### Combat Priorities")
-
-    profile.priority_svs = st.slider(
-        "⚔️ SvS / State vs State",
-        min_value=1, max_value=5,
-        value=profile.priority_svs,
-        help="Priority for State of Power events"
-    )
-
-    profile.priority_rally = st.slider(
-        "🎯 Rally Attacks",
-        min_value=1, max_value=5,
-        value=profile.priority_rally,
-        help="Priority for rally attacks (Bear Hunt, Crazy Joe, etc.)"
-    )
-
-    profile.priority_castle_battle = st.slider(
-        "🏰 Castle Battles",
-        min_value=1, max_value=5,
-        value=profile.priority_castle_battle,
-        help="Priority for castle siege and defense"
-    )
-
-    st.markdown("### Other Priorities")
-
-    profile.priority_exploration = st.slider(
-        "🗺️ Exploration / PvE",
-        min_value=1, max_value=5,
-        value=profile.priority_exploration,
-        help="Priority for Frozen Stages, exploration content"
-    )
-
-    profile.priority_gathering = st.slider(
-        "📦 Resource Gathering",
-        min_value=1, max_value=5,
-        value=profile.priority_gathering,
-        help="Priority for gathering and economy"
-    )
-
-    # Priority visualization
-    st.markdown("### Priority Distribution")
-    priorities = {
-        "SvS": profile.priority_svs,
-        "Rally": profile.priority_rally,
-        "Castle": profile.priority_castle_battle,
-        "PvE": profile.priority_exploration,
-        "Gather": profile.priority_gathering,
-    }
-
-    # Simple bar chart
-    for name, value in priorities.items():
-        bar = "█" * value + "░" * (5 - value)
-        color = "#FF6B35" if value >= 4 else "#4A90D9" if value >= 2 else "#808080"
-        st.markdown(f"**{name}**: {bar} ({value}/5)")
-
-st.markdown("---")
-
-# Save button
-if st.button("💾 Save All Settings", type="primary", use_container_width=True):
-    # Save chief name and state number from the inputs
-    profile.name = chief_name
-    profile.state_number = state_number
-    db.commit()
-    st.success("Settings saved!")
-
-    # Lightning strike effect - forking from top-left to bottom-right
-    st.markdown("""
-    <style>
-    @keyframes lightning-flash {
-        0% { opacity: 0; }
-        5% { opacity: 1; }
-        10% { opacity: 0.3; }
-        15% { opacity: 1; }
-        20% { opacity: 0; }
-        25% { opacity: 0.7; }
-        30% { opacity: 0; }
-        100% { opacity: 0; }
-    }
-    @keyframes bolt-draw {
-        0% { stroke-dashoffset: 2000; opacity: 0; }
-        10% { opacity: 1; }
-        50% { stroke-dashoffset: 0; opacity: 1; }
-        70% { stroke-dashoffset: 0; opacity: 0.6; }
-        100% { stroke-dashoffset: 0; opacity: 0; }
-    }
-    @keyframes glow-pulse {
-        0% { filter: drop-shadow(0 0 5px #4A90D9); }
-        50% { filter: drop-shadow(0 0 30px #E8F4F8) drop-shadow(0 0 60px #4A90D9); }
-        100% { filter: drop-shadow(0 0 5px #4A90D9); }
-    }
-    .lightning-container {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        pointer-events: none;
-        z-index: 9999;
-        overflow: hidden;
-    }
-    .lightning-overlay {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: radial-gradient(ellipse at 20% 10%, rgba(74, 144, 217, 0.5) 0%, transparent 50%),
-                    radial-gradient(ellipse at 60% 40%, rgba(232, 244, 248, 0.3) 0%, transparent 40%);
-        animation: lightning-flash 0.8s ease-out forwards;
-    }
-    .lightning-svg {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-    }
-    .lightning-svg path {
-        fill: none;
-        stroke: url(#lightning-gradient);
-        stroke-width: 3;
-        stroke-linecap: round;
-        stroke-dasharray: 2000;
-        stroke-dashoffset: 2000;
-        animation: bolt-draw 0.9s ease-out forwards, glow-pulse 0.3s ease-in-out 3;
-    }
-    .lightning-svg .main-bolt { stroke-width: 4; animation-delay: 0s; }
-    .lightning-svg .fork-1 { stroke-width: 3; animation-delay: 0.05s; }
-    .lightning-svg .fork-2 { stroke-width: 2.5; animation-delay: 0.1s; }
-    .lightning-svg .fork-3 { stroke-width: 2; animation-delay: 0.08s; }
-    .lightning-svg .fork-4 { stroke-width: 2; animation-delay: 0.12s; }
-    .lightning-svg .fork-5 { stroke-width: 1.5; animation-delay: 0.15s; }
-    </style>
-    <div class="lightning-container">
-        <div class="lightning-overlay"></div>
-        <svg class="lightning-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <defs>
-                <linearGradient id="lightning-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style="stop-color:#E8F4F8;stop-opacity:1" />
-                    <stop offset="50%" style="stop-color:#4A90D9;stop-opacity:1" />
-                    <stop offset="100%" style="stop-color:#E8F4F8;stop-opacity:1" />
-                </linearGradient>
-            </defs>
-            <!-- Main bolt: top-left to bottom-right with jagged path -->
-            <path class="main-bolt" d="M5,2 L12,15 L8,16 L18,32 L14,33 L28,52 L22,53 L38,72 L32,73 L50,95" />
-            <!-- Fork 1: branches right-up from 20% -->
-            <path class="fork-1" d="M12,15 L22,12 L28,22 L38,18" />
-            <!-- Fork 2: branches right from 35% -->
-            <path class="fork-2" d="M18,32 L32,28 L38,38 L52,35 L58,45" />
-            <!-- Fork 3: branches down-right from 50% -->
-            <path class="fork-3" d="M28,52 L45,48 L52,58 L68,55 L75,68" />
-            <!-- Fork 4: small branch -->
-            <path class="fork-4" d="M38,72 L55,68 L62,78 L78,75" />
-            <!-- Fork 5: thin tendril -->
-            <path class="fork-5" d="M22,53 L35,58 L42,52" />
-        </svg>
-    </div>
-    """, unsafe_allow_html=True)
-
-# Data management
-st.markdown("---")
-st.markdown("## 🗃️ Data Management")
-
-st.info("💡 **Tip:** Use the **Save/Load** page to save/load your data across computers!")
-
-st.markdown("### 🔧 Reset Options")
-
-col6, col7 = st.columns(2)
-
-with col6:
-    if st.button("🔄 Reset Priorities to Default", use_container_width=True):
-        profile.priority_svs = 5
-        profile.priority_rally = 4
-        profile.priority_castle_battle = 4
-        profile.priority_exploration = 3
-        profile.priority_gathering = 2
-        profile.spending_profile = "f2p"
-        profile.priority_focus = "balanced_growth"
-        profile.alliance_role = "filler"
+    if selected_role != profile.alliance_role:
+        profile.alliance_role = selected_role
         db.commit()
-        st.success("Priorities and optimizer settings reset to defaults!")
-        st.rerun()
+        st.toast("Saved")
 
-with col7:
-    if st.button("⚠️ Reset All Data", type="secondary", use_container_width=True):
-        st.warning("This will clear all your saved heroes and inventory!")
-        if st.button("Confirm Reset", type="secondary"):
-            # Clear user heroes and inventory
-            db.query(UserHero).filter(UserHero.profile_id == profile.id).delete()
-            db.query(UserInventory).filter(UserInventory.profile_id == profile.id).delete()
+st.markdown("---")
+
+# =============================================================================
+# COMBAT PRIORITIES
+# =============================================================================
+st.markdown("## ⚔️ Combat Priorities")
+st.caption("Higher values = more weight in recommendations")
+
+col1, col2 = st.columns(2)
+
+with col1:
+    new_svs = st.slider("SvS / State vs State", 1, 5, profile.priority_svs, key="pri_svs")
+    new_rally = st.slider("Rally Attacks", 1, 5, profile.priority_rally, key="pri_rally")
+    new_castle = st.slider("Castle Battles", 1, 5, profile.priority_castle_battle, key="pri_castle")
+
+with col2:
+    new_exploration = st.slider("Exploration / PvE", 1, 5, profile.priority_exploration, key="pri_explore")
+    new_gathering = st.slider("Resource Gathering", 1, 5, profile.priority_gathering, key="pri_gather")
+
+# Auto-save priority changes
+if (new_svs != profile.priority_svs or new_rally != profile.priority_rally or
+    new_castle != profile.priority_castle_battle or new_exploration != profile.priority_exploration or
+    new_gathering != profile.priority_gathering):
+    profile.priority_svs = new_svs
+    profile.priority_rally = new_rally
+    profile.priority_castle_battle = new_castle
+    profile.priority_exploration = new_exploration
+    profile.priority_gathering = new_gathering
+    db.commit()
+    st.toast("Saved")
+
+st.markdown("---")
+
+# =============================================================================
+# DATA MANAGEMENT (Collapsed)
+# =============================================================================
+with st.expander("🔧 Reset Options"):
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Reset Priorities to Default", use_container_width=True):
+            profile.priority_svs = 5
+            profile.priority_rally = 4
+            profile.priority_castle_battle = 4
+            profile.priority_exploration = 3
+            profile.priority_gathering = 2
+            profile.spending_profile = "f2p"
+            profile.priority_focus = "balanced_growth"
+            profile.alliance_role = "filler"
             db.commit()
-            st.success("All data has been reset.")
+            st.toast("Priorities reset")
             st.rerun()
+
+    with col2:
+        if st.button("⚠️ Clear All Hero Data", type="secondary", use_container_width=True):
+            st.session_state.confirm_reset = True
+
+        if st.session_state.get('confirm_reset'):
+            st.warning("This will delete all your saved heroes!")
+            if st.button("Yes, Clear Everything", type="primary"):
+                db.query(UserHero).filter(UserHero.profile_id == profile.id).delete()
+                db.query(UserInventory).filter(UserInventory.profile_id == profile.id).delete()
+                db.commit()
+                st.session_state.confirm_reset = False
+                st.success("Data cleared")
+                st.rerun()
+            if st.button("Cancel"):
+                st.session_state.confirm_reset = False
+                st.rerun()
 
 # Close database
 db.close()

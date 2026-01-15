@@ -129,13 +129,16 @@ all_users = get_all_users(db)
 regular_users = [u for u in all_users if u.role != 'admin']
 admin_users = [u for u in all_users if u.role == 'admin']
 
-# Get user's state number from their profile
-def get_user_state(user_id: int) -> str:
-    """Get the user's state number from their profile."""
-    profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
-    if profile and profile.state_number:
-        return str(profile.state_number)
-    return "—"
+# Get user's profile info (count and states)
+def get_user_profile_info(user_id: int) -> tuple:
+    """Get the user's profile count and state numbers."""
+    profiles = db.query(UserProfile).filter(UserProfile.user_id == user_id).all()
+    if not profiles:
+        return (0, "—")
+
+    states = sorted(set(str(p.state_number) for p in profiles if p.state_number))
+    state_str = ", ".join(states) if states else "—"
+    return (len(profiles), state_str)
 
 # Calculate usage stats (days active in last 7 days)
 def get_usage_stat(user) -> tuple:
@@ -243,8 +246,8 @@ with tab_users:
 
     st.caption(f"Showing {len(filtered_users)} users")
 
-    # Header row (matches data row: 11 columns)
-    header_cols = st.columns([0.3, 1.2, 1.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.6, 0.5])
+    # Header row (matches data row: 12 columns)
+    header_cols = st.columns([0.3, 1.2, 1.4, 0.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.6, 0.5])
     with header_cols[0]:
         st.caption("Role")
     with header_cols[1]:
@@ -252,14 +255,16 @@ with tab_users:
     with header_cols[2]:
         st.caption("Email")
     with header_cols[3]:
-        st.caption("State")
+        st.caption("Profiles")
     with header_cols[4]:
-        st.caption("Status")
+        st.caption("State(s)")
     with header_cols[5]:
-        st.caption("Usage")
+        st.caption("Status")
     with header_cols[6]:
-        st.caption("Last")
+        st.caption("Usage")
     with header_cols[7]:
+        st.caption("Last")
+    with header_cols[8]:
         st.caption("Actions")
 
     st.markdown("<hr style='margin: 2px 0 8px 0; border-color: rgba(74, 144, 217, 0.4);'>", unsafe_allow_html=True)
@@ -298,11 +303,11 @@ with tab_users:
         role_icon = "👑" if user.role == 'admin' else "🛡️"
         is_self = user.id == current_user_id
 
-        # Get user's state
-        user_state = get_user_state(user.id)
+        # Get user's profile info (count and states)
+        profile_count, user_states = get_user_profile_info(user.id)
 
-        # User row with inline actions (11 columns)
-        row_cols = st.columns([0.3, 1.2, 1.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.6, 0.5])
+        # User row with inline actions (12 columns)
+        row_cols = st.columns([0.3, 1.2, 1.4, 0.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.6, 0.5])
 
         # Consistent cell style for vertical alignment with buttons
         cell_style = "display:flex;align-items:center;height:32px;margin:0;"
@@ -319,30 +324,33 @@ with tab_users:
             st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{user.email or '—'}</div>", unsafe_allow_html=True)
 
         with row_cols[3]:
-            st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{user_state}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{profile_count}</div>", unsafe_allow_html=True)
 
         with row_cols[4]:
-            st.markdown(f"<div style='{cell_style}' class='{status_css}'>{status_label}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{user_states}</div>", unsafe_allow_html=True)
 
         with row_cols[5]:
-            st.markdown(f"<div style='{cell_style}' class='{usage_css}'>{usage_label}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_style}' class='{status_css}'>{status_label}</div>", unsafe_allow_html=True)
 
         with row_cols[6]:
+            st.markdown(f"<div style='{cell_style}' class='{usage_css}'>{usage_label}</div>", unsafe_allow_html=True)
+
+        with row_cols[7]:
             st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{last_login}</div>", unsafe_allow_html=True)
 
         # Action buttons inline (no help param, no emoji issues)
-        with row_cols[7]:
+        with row_cols[8]:
             if st.button("Edit", key=f"edit_{user.id}"):
                 st.session_state[f"editing_{user.id}"] = True
                 st.rerun()
 
-        with row_cols[8]:
+        with row_cols[9]:
             if not is_self:
                 if st.button("Login", key=f"impersonate_{user.id}"):
                     login_as_user(user)
                     st.rerun()
 
-        with row_cols[9]:
+        with row_cols[10]:
             if not is_self:
                 if user.is_active:
                     if st.button("Suspend", key=f"suspend_{user.id}"):
@@ -355,7 +363,7 @@ with tab_users:
                         db.commit()
                         st.rerun()
 
-        with row_cols[10]:
+        with row_cols[11]:
             if not is_self:
                 if st.button("Delete", key=f"del_{user.id}", type="primary"):
                     st.session_state[f"confirm_del_{user.id}"] = True
@@ -416,34 +424,34 @@ with tab_create:
         form_cols = st.columns(2)
 
         with form_cols[0]:
-            new_username = st.text_input("Username *")
+            new_email = st.text_input("Email *", placeholder="user@example.com")
             new_password = st.text_input("Password *", type="password")
             new_is_test = st.checkbox("Test Account", help="Mark as test account for easy filtering")
 
         with form_cols[1]:
-            new_email = st.text_input("Email")
             new_role = st.selectbox("Role", ["user", "admin"])
+            st.caption("Email is used as login credential")
 
         submitted = st.form_submit_button("➕ Create User", use_container_width=True)
 
         if submitted:
-            if not new_username:
-                st.error("Username required")
+            if not new_email:
+                st.error("Email required")
+            elif '@' not in new_email or '.' not in new_email:
+                st.error("Invalid email format")
             elif not new_password:
                 st.error("Password required")
             elif len(new_password) < 6:
                 st.error("Password must be 6+ characters")
             else:
-                user = create_user(db, new_username, new_password,
-                                  email=new_email if new_email else None,
-                                  role=new_role)
+                user = create_user(db, new_email, new_password, role=new_role)
                 if user:
                     # Set test account flag if checked
                     if new_is_test:
                         user.is_test_account = True
                         db.commit()
-                    st.success(f"✅ Created user: {new_username}" + (" (test account)" if new_is_test else ""))
+                    st.success(f"✅ Created user: {new_email}" + (" (test account)" if new_is_test else ""))
                 else:
-                    st.error("Username or email already exists")
+                    st.error("Email already registered")
 
 db.close()

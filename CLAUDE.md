@@ -11,7 +11,7 @@ Whiteout Survival Optimizer - A comprehensive web-based tool to help Whiteout Su
 - 56 hero portraits downloaded from wiki
 - 67 JSON data files covering all game systems
 - SQLite database with 6 primary tables
-- 8 Claude Code skills for domain-specific tasks
+- 9 Claude Code skills for domain-specific tasks
 
 ## Development Environment
 
@@ -189,7 +189,8 @@ WoS/
         ├── wos-upgrades/     # Upgrade path optimization
         ├── wos-test-ai/      # AI system testing
         ├── wos-data-audit/   # Data validation and integrity
-        └── wos-qa-review/    # Web app QA checks
+        ├── wos-qa-review/    # Web app QA checks
+        └── wos-feedback/     # Review pending feedback for development
 ```
 
 ### Database Models (`database/models.py`)
@@ -483,6 +484,28 @@ Located in `.claude/skills/`:
 - `/wos-test-ai` - Run comprehensive AI and recommendation tests
 - `/wos-data-audit` - Validate game data against sources
 - `/wos-qa-review` - Run QA checks on web application
+- `/wos-feedback` - Review pending feedback for development
+
+## Feedback Workflow
+
+User feedback flows through these statuses:
+1. **New** - Freshly submitted feedback
+2. **Pending Fix** - Bugs marked for development
+3. **Pending Update** - Features marked for development
+4. **Completed** - Fixed/implemented items
+5. **Archive** - Dismissed or no longer needed
+
+**Admin Feedback Page** (Admin → Feedback):
+- Tabs: Bugs | Features | All Active | Completed | Archive
+- Smart routing: bugs go to "Pending Fix", features go to "Pending Update"
+- Bulk actions: Archive all completed, Empty archive
+
+**Development Workflow:**
+1. Users submit feedback via menu or AI Advisor page
+2. Admin triages in Feedback Inbox (mark for fix/update or archive)
+3. Run `/wos-feedback` to get Claude's analysis of pending items
+4. Implement fixes/features
+5. Mark as Completed in Admin
 
 ## Important Notes
 
@@ -542,6 +565,15 @@ py scripts/download_hero_images.py
 - Provider: OpenAI (gpt-4o-mini)
 - 92.3% of questions handled by rules engine (saves API costs)
 
+**Authentication System (Email = Username):**
+- Users log in with email address (not separate username)
+- Registration requires only email + password
+- Legacy usernames still work for backwards compatibility
+- Email change requires verification code sent to new email
+- `PendingEmailChange` model stores verification codes (15 min expiry, 3 attempts max)
+- Email sending via `utils/email.py` (debug mode logs to console, set `EMAIL_MODE=smtp` for real emails)
+- Test accounts use `{username}@test.com` format
+
 **Test Account System:**
 - User model has `is_test_account` flag for easy filtering
 - Admin → Users shows "Test Accts" count, `TEST` badge, and "Test Only" filter
@@ -550,16 +582,17 @@ py scripts/download_hero_images.py
 
 **Comprehensive Test Suite (`/wos-test-ai`):**
 - Script: `scripts/test_ai_comprehensive.py`
-- 6 test users, 9 profiles total (password: test123):
+- 6 test users, 9 profiles total
+- Login with `{username}@test.com` and password `test123`
 
-| User | Profiles | State | Notes |
-|------|----------|-------|-------|
-| test_gen10_dolphin | Main + Farm | 456 | Dolphin, FC30, 28 heroes |
-| test_gen4_f2p | Single | 789 | F2P, FC27, 13 heroes |
-| test_gen2_whale | Main + Farm | 999 | Whale, FC25, 15 heroes |
-| test_multi_state | 2 profiles | 200, 850 | Different states |
-| test_new_player | Single | 900 | Day 7, F18, 3 heroes |
-| test_rally_leader | Single | 350 | Orca, rally_lead role |
+| Email (login) | Profiles | State | Notes |
+|---------------|----------|-------|-------|
+| test_gen10_dolphin@test.com | Main + Farm | 456 | Dolphin, FC30, 28 heroes |
+| test_gen4_f2p@test.com | Single | 789 | F2P, FC27, 13 heroes |
+| test_gen2_whale@test.com | Main + Farm | 999 | Whale, FC25, 15 heroes |
+| test_multi_state@test.com | 2 profiles | 200, 850 | Different states |
+| test_new_player@test.com | Single | 900 | Day 7, F18, 3 heroes |
+| test_rally_leader@test.com | Single | 350 | Orca, rally_lead role |
 
 **Spending-Profile-Aware Recommendations:**
 - F2P/minnow: Only recommends upgrades for top 3-4 heroes
@@ -636,6 +669,7 @@ Login as test user or admin, go to AI Advisor page
 ## Future Enhancements
 
 **Planned (Next Sprint):**
+- Configure email sending (Gmail SMTP or AWS SES) for email verification
 - Mobile optimization (responsive design, touch-friendly)
 - PWA "Save to Home Screen" support for mobile users
 - Favorite/bookmark AI responses

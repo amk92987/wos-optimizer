@@ -453,6 +453,53 @@
       ]
     },
 
+    "farm_accounts": {
+      "name": "Farm Accounts",
+      "icon": "farm",
+      "tips": [
+        {
+          "tip": "Farm accounts = extra resource income for your main",
+          "detail": "A farm account gathers resources 24/7 that you transfer to your main account. Essential for F2P/Dolphins to keep pace with spenders.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Start farm accounts in the SAME STATE as your main",
+          "detail": "Resources can only be sent within your state. A farm in State 500 can't help your main in State 200.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Farm accounts don't need heroes, research, or gear",
+          "detail": "Only level Furnace and resource buildings. No combat investment needed - farms are just resource generators.",
+          "priority": "high"
+        },
+        {
+          "tip": "Farm accounts should stay under a shield 24/7",
+          "detail": "Farms are weak targets. Keep them shielded always. Send resources to main when shield is about to drop, then re-shield.",
+          "priority": "high"
+        },
+        {
+          "tip": "Aim for F18-F20 on farms, then stop",
+          "detail": "Higher furnace = better resource buildings, but diminishing returns. F18-F20 is the sweet spot for effort vs output.",
+          "priority": "high"
+        },
+        {
+          "tip": "Use VIP time on farms to boost gathering speed",
+          "detail": "Short VIP bursts (8h-24h) on farms greatly increase gather rates during active sessions.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Farm heroes: just use Smith, Eugene, Charlie, Cloris",
+          "detail": "Basic Epic heroes with gathering skills. Don't waste shards leveling farm heroes - keep investment minimal.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Transfer resources via Alliance Help feature",
+          "detail": "Both accounts must be in same alliance. Farm sends resource packages to main via alliance gift system.",
+          "priority": "medium"
+        }
+      ]
+    },
+
     "alliance_management": {
       "name": "Alliance Management (R4/R5)",
       "icon": "alliance",
@@ -596,6 +643,16 @@
       "mistake": "Poor Alliance Championship lane assignments",
       "correction": "Analyze enemy setups before placing players. Strategic positioning against weaker foes wins more than raw power.",
       "category": "alliance_management"
+    },
+    {
+      "mistake": "Starting a farm account in a different state than your main",
+      "correction": "Resources can only be transferred within the same state. Farms must be in the same state as your main account to be useful.",
+      "category": "farm_accounts"
+    },
+    {
+      "mistake": "Investing in heroes/research/gear on farm accounts",
+      "correction": "Farms are just resource generators. Only level Furnace and resource buildings. All other investment is wasted.",
+      "category": "farm_accounts"
     }
   ]
 }

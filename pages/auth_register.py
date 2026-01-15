@@ -183,6 +183,11 @@ def render_register():
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
     if st.button("Create Account", type="primary", use_container_width=True, key="register_btn"):
+        # Email is now required (email = username)
+        email = reg_email if reg_email else reg_username
+        if '@' not in email:
+            email = f"{email}@placeholder.com"  # Legacy fallback
+
         if not reg_username or not reg_password:
             st.warning("Username and password are required")
         elif len(reg_username) < 3:
@@ -192,8 +197,7 @@ def render_register():
         elif reg_password != reg_password2:
             st.error("Passwords don't match")
         else:
-            email = reg_email if reg_email else None
-            user = create_user(db, reg_username, reg_password, email=email)
+            user = create_user(db, email=email, password=reg_password)
             if user:
                 login_user(user)
                 st.success("Account created! Redirecting...")
@@ -201,7 +205,7 @@ def render_register():
                 st.query_params.clear()
                 st.rerun()
             else:
-                st.error("Username or email already exists")
+                st.error("Email already registered")
 
     # Login link
     st.markdown("""

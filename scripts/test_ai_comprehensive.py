@@ -65,17 +65,20 @@ def ensure_heroes_in_db():
 
 def create_test_user(username, password="test123"):
     """Get or create a test user. Reuses existing test accounts."""
-    user = db.query(User).filter(User.username == username).first()
+    # Email = username convention
+    email = f"{username}@test.com"
+
+    # Look up by email (which is also the username)
+    user = db.query(User).filter(User.email == email).first()
     if user:
         # Ensure test flag is set on existing users
         if not user.is_test_account:
             user.is_test_account = True
             db.commit()
         return user
-
     user = User(
-        username=username,
-        email=f"{username}@test.com",
+        username=email,
+        email=email,
         password_hash=hash_password(password),
         role='user',
         is_active=True,
@@ -89,7 +92,7 @@ def create_test_user(username, password="test123"):
 
 def create_profile(user, name, state_number, server_age_days, furnace_level,
                    spending_profile, alliance_role, priorities, is_farm=False,
-                   linked_main_id=None):
+                   linked_main_id=None, furnace_fc_level=None):
     """Create a profile for a user."""
     profile = UserProfile(
         user_id=user.id,
@@ -97,6 +100,7 @@ def create_profile(user, name, state_number, server_age_days, furnace_level,
         state_number=state_number,
         server_age_days=server_age_days,
         furnace_level=furnace_level,
+        furnace_fc_level=furnace_fc_level,
         spending_profile=spending_profile,
         alliance_role=alliance_role,
         priority_svs=priorities.get('svs', 5),
@@ -480,13 +484,14 @@ def setup_gen10_dolphin():
 
     user = create_test_user("test_gen10_dolphin")
 
-    # Main profile
+    # Main profile - Gen 10 dolphin would be at FC5+
     main_profile = create_profile(
         user=user,
         name="FrostKnight_560",
         state_number=456,
         server_age_days=700,
-        furnace_level=30,  # FC level
+        furnace_level=30,
+        furnace_fc_level="FC5-0",
         spending_profile="dolphin",
         alliance_role="filler",
         priorities={'svs': 5, 'rally': 5, 'castle': 4, 'exploration': 2, 'gathering': 1}
@@ -569,12 +574,28 @@ def setup_gen10_dolphin():
         linked_main_id=main_profile.id
     )
 
-    # Farm heroes - minimal, just for gathering
+    # Farm heroes - all Gen 1 except Jeronimo (free over time)
+    # Moderate levels based on 700 day server age
     farm_heroes = [
-        ("Smith", 50, 3, (3, 3, 3), (3, 3, 3), (0, 0, 0, 0)),
-        ("Eugene", 50, 3, (3, 3, 3), (3, 3, 3), (0, 0, 0, 0)),
-        ("Charlie", 50, 3, (3, 3, 3), (3, 3, 3), (0, 0, 0, 0)),
-        ("Cloris", 50, 3, (3, 3, 3), (3, 3, 3), (0, 0, 0, 0)),
+        # Gatherers (Rare) - higher stars since they're easy to get
+        ("Smith", 50, 4, (4, 4, 1), (4, 4, 1), (0, 0, 0, 0)),
+        ("Eugene", 50, 4, (4, 4, 1), (4, 4, 1), (0, 0, 0, 0)),
+        ("Charlie", 50, 4, (4, 4, 1), (4, 4, 1), (0, 0, 0, 0)),
+        ("Cloris", 50, 4, (4, 4, 1), (4, 4, 1), (0, 0, 0, 0)),
+        # Epic Gen 1 - moderate progression
+        ("Sergey", 45, 3, (3, 3, 1), (3, 3, 1), (0, 0, 0, 0)),
+        ("Gina", 40, 2, (2, 2, 1), (2, 2, 1), (0, 0, 0, 0)),
+        ("Bahiti", 40, 2, (2, 2, 1), (2, 2, 1), (0, 0, 0, 0)),
+        ("Seo-yoon", 40, 2, (2, 2, 1), (2, 2, 1), (0, 0, 0, 0)),
+        ("Jasser", 35, 2, (2, 2, 1), (2, 2, 1), (0, 0, 0, 0)),
+        ("Patrick", 40, 2, (2, 2, 1), (2, 2, 1), (0, 0, 0, 0)),
+        ("Ling Xue", 35, 2, (2, 2, 1), (2, 2, 1), (0, 0, 0, 0)),
+        ("Lumak Bokan", 35, 2, (2, 2, 1), (2, 2, 1), (0, 0, 0, 0)),
+        # Legendary Gen 1 (excluding Jeronimo)
+        ("Natalia", 40, 2, (2, 2, 1), (2, 2, 1), (0, 0, 0, 0)),
+        ("Molly", 35, 1, (2, 2, 1), (2, 2, 1), (0, 0, 0, 0)),
+        ("Zinman", 35, 1, (2, 2, 1), (2, 2, 1), (0, 0, 0, 0)),
+        ("Jessie", 40, 2, (2, 2, 1), (3, 3, 1), (0, 0, 0, 0)),  # Jessie good for joining rallies
     ]
 
     for hero_data in farm_heroes:
@@ -736,12 +757,28 @@ def setup_gen2_whale():
         linked_main_id=main_profile.id
     )
 
-    # Farm heroes - minimal
+    # Farm heroes - all Gen 1 except Jeronimo (free over time)
+    # Lower levels since this is only 80 day old server
     farm_heroes = [
-        ("Smith", 40, 2, (2, 2, 2), (2, 2, 2), (0, 0, 0, 0)),
-        ("Eugene", 40, 2, (2, 2, 2), (2, 2, 2), (0, 0, 0, 0)),
-        ("Charlie", 40, 2, (2, 2, 2), (2, 2, 2), (0, 0, 0, 0)),
-        ("Cloris", 40, 2, (2, 2, 2), (2, 2, 2), (0, 0, 0, 0)),
+        # Gatherers (Rare) - focus on these first
+        ("Smith", 40, 3, (3, 3, 1), (3, 3, 1), (0, 0, 0, 0)),
+        ("Eugene", 40, 3, (3, 3, 1), (3, 3, 1), (0, 0, 0, 0)),
+        ("Charlie", 40, 3, (3, 3, 1), (3, 3, 1), (0, 0, 0, 0)),
+        ("Cloris", 40, 3, (3, 3, 1), (3, 3, 1), (0, 0, 0, 0)),
+        # Epic Gen 1 - early progression
+        ("Sergey", 30, 2, (2, 2, 1), (2, 2, 1), (0, 0, 0, 0)),
+        ("Gina", 25, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
+        ("Bahiti", 25, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
+        ("Seo-yoon", 25, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
+        ("Jasser", 20, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
+        ("Patrick", 25, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
+        ("Ling Xue", 20, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
+        ("Lumak Bokan", 20, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
+        # Legendary Gen 1 (excluding Jeronimo) - just unlocked
+        ("Natalia", 20, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
+        ("Molly", 15, 0, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
+        ("Zinman", 15, 0, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0)),
+        ("Jessie", 20, 1, (1, 1, 1), (2, 2, 1), (0, 0, 0, 0)),  # Jessie good for joining rallies
     ]
 
     for hero_data in farm_heroes:
@@ -905,6 +942,7 @@ def setup_rally_leader():
         state_number=350,
         server_age_days=380,
         furnace_level=30,
+        furnace_fc_level="FC3-0",
         spending_profile="orca",
         alliance_role="rally_lead",  # Key difference - rally leader role
         priorities={'svs': 5, 'rally': 5, 'castle': 4, 'exploration': 1, 'gathering': 1}
@@ -1121,7 +1159,9 @@ def cleanup_test_users():
     ]
 
     for username in test_usernames:
-        user = db.query(User).filter(User.username == username).first()
+        # Look up by email (email = username@test.com now)
+        email = f"{username}@test.com"
+        user = db.query(User).filter(User.email == email).first()
         if user:
             # Delete profiles and related data (but keep the user!)
             for profile in user.profiles:
@@ -1134,6 +1174,7 @@ def cleanup_test_users():
 
             # Delete profiles (but NOT the user - we reuse them)
             db.query(UserProfile).filter(UserProfile.user_id == user.id).delete()
+            print(f"  Cleaned up {username}")
 
     db.commit()
     print("Cleanup complete.")

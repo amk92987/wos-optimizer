@@ -82,6 +82,7 @@ class UserProfile(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    deleted_at = Column(DateTime, nullable=True)  # Soft delete - profile hidden but recoverable for 30 days
 
     # Relationships - cascade delete all child data when profile is deleted
     user = relationship("User", back_populates="profiles")
@@ -315,7 +316,12 @@ class Feedback(Base):
     description = Column(String(2000), nullable=False)
 
     # Status for admin review
-    status = Column(String(20), default='new')  # new, reviewed, implemented, wont_fix
+    # new = freshly submitted
+    # pending_fix = bug marked for development
+    # pending_update = feature marked for development
+    # completed = fixed/implemented
+    # archive = dismissed/not needed
+    status = Column(String(20), default='new')
 
     created_at = Column(DateTime, default=datetime.utcnow)
 
@@ -487,3 +493,28 @@ class AISettings(Base):
 
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     updated_by = Column(Integer, ForeignKey('users.id'), nullable=True)
+
+
+class PendingEmailChange(Base):
+    """Pending email change requests awaiting verification."""
+    __tablename__ = 'pending_email_changes'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, unique=True)
+
+    # New email to change to
+    new_email = Column(String(255), nullable=False)
+
+    # 6-digit verification code
+    verification_code = Column(String(6), nullable=False)
+
+    # Expiration (15 minutes from creation)
+    expires_at = Column(DateTime, nullable=False)
+
+    # Attempts tracking (max 3 attempts)
+    attempts = Column(Integer, default=0)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationship
+    user = relationship("User", backref=backref("pending_email_change", uselist=False, cascade="all, delete-orphan"))
