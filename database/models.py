@@ -518,3 +518,130 @@ class PendingEmailChange(Base):
 
     # Relationship
     user = relationship("User", backref=backref("pending_email_change", uselist=False, cascade="all, delete-orphan"))
+
+
+class LineupTestRun(Base):
+    """Groups results from a single lineup test execution."""
+    __tablename__ = 'lineup_test_runs'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100))  # "Gen Coverage Run 1", "Gear Impact Test"
+    description = Column(String(500), nullable=True)
+
+    # Test configuration
+    total_profiles = Column(Integer, default=0)
+    total_scenarios = Column(Integer, default=0)
+    test_groups = Column(Text, nullable=True)  # JSON: which test groups were included
+
+    # Status
+    status = Column(String(20), default='pending')  # pending, running, completed, failed
+
+    # Cost tracking
+    openai_tokens_input = Column(Integer, default=0)
+    openai_tokens_output = Column(Integer, default=0)
+    openai_cost_usd = Column(Float, default=0.0)
+
+    # Summary stats (populated after completion)
+    avg_engine_vs_openai = Column(Float, nullable=True)
+    avg_engine_vs_claude = Column(Float, nullable=True)
+    avg_openai_vs_claude = Column(Float, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    completed_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    results = relationship("LineupTestResult", back_populates="test_run", cascade="all, delete-orphan")
+
+
+class LineupTestResult(Base):
+    """Individual lineup test result for one profile + scenario."""
+    __tablename__ = 'lineup_test_results'
+
+    id = Column(Integer, primary_key=True)
+    test_run_id = Column(Integer, ForeignKey('lineup_test_runs.id'), nullable=False)
+
+    # Profile context
+    profile_name = Column(String(100))  # e.g., "Gen10_Developed_A"
+    profile_snapshot = Column(Text, nullable=False)  # Full JSON snapshot sent to AI
+    generation = Column(Integer)
+    test_group = Column(String(50))  # "generation", "level_impact", "gear_impact", etc.
+
+    # Scenario
+    scenario = Column(String(50), nullable=False)  # bear_trap, rally_lead, etc.
+
+    # TRAINING DATA: Store exact prompt sent to AI
+    prompt_sent = Column(Text, nullable=True)  # Full prompt for reproducibility and training
+
+    # Our engine results
+    engine_lineup = Column(Text)  # JSON: [{"slot": 1, "hero": "Natalia", "reason": "..."}]
+    engine_troop_ratio = Column(String(50))  # "30/20/50" (infantry/lancer/marksman)
+    engine_reasoning = Column(Text)
+    engine_time_ms = Column(Integer, nullable=True)
+
+    # OpenAI results
+    openai_model = Column(String(50))
+    openai_lineup = Column(Text)  # JSON
+    openai_troop_ratio = Column(String(50))
+    openai_reasoning = Column(Text)
+    openai_tokens_input = Column(Integer, nullable=True)
+    openai_tokens_output = Column(Integer, nullable=True)
+    openai_time_ms = Column(Integer, nullable=True)
+    openai_raw_response = Column(Text, nullable=True)  # Full API response for debugging
+
+    # Claude results
+    claude_model = Column(String(50))
+    claude_lineup = Column(Text)  # JSON
+    claude_troop_ratio = Column(String(50))
+    claude_reasoning = Column(Text)
+    claude_time_ms = Column(Integer, nullable=True)
+    claude_raw_response = Column(Text, nullable=True)
+
+    # Comparison metrics
+    engine_vs_openai_score = Column(Float, nullable=True)  # 0.0-1.0
+    engine_vs_claude_score = Column(Float, nullable=True)
+    openai_vs_claude_score = Column(Float, nullable=True)
+
+    # Detailed comparison
+    hero_overlap_openai = Column(Integer, nullable=True)  # 0-5 heroes matching
+    hero_overlap_claude = Column(Integer, nullable=True)
+    slot1_match_openai = Column(Boolean, nullable=True)  # For rally scenarios - leftmost hero matches?
+    slot1_match_claude = Column(Boolean, nullable=True)
+
+    # Flags for review
+    needs_review = Column(Boolean, default=False)  # True if big discrepancy
+    review_notes = Column(Text, nullable=True)  # Manual notes after review
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    test_run = relationship("LineupTestRun", back_populates="results")
+
+
+class LineupEngineImprovement(Base):
+    """Track suggested improvements to the lineup engine based on test results."""
+    __tablename__ = 'lineup_engine_improvements'
+
+    id = Column(Integer, primary_key=True)
+    test_run_id = Column(Integer, ForeignKey('lineup_test_runs.id'), nullable=True)
+
+    # What scenario/pattern this addresses
+    scenario = Column(String(50), nullable=True)  # bear_trap, rally_lead, or None for general
+    pattern_description = Column(Text)  # "AI consistently picks Sergey for garrison defense"
+
+    # The suggested change
+    suggestion_source = Column(String(20))  # openai, claude, manual
+    suggestion = Column(Text, nullable=False)  # Detailed suggestion
+    affected_code = Column(Text, nullable=True)  # Which file/function to change
+    code_diff = Column(Text, nullable=True)  # Suggested code changes
+
+    # Status
+    status = Column(String(20), default='pending')  # pending, approved, implemented, rejected
+    priority = Column(String(20), default='medium')  # low, medium, high, critical
+
+    # Implementation tracking
+    implemented_at = Column(DateTime, nullable=True)
+    implemented_by = Column(String(50), nullable=True)
+    verification_result = Column(Text, nullable=True)  # Did re-test show improvement?
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
