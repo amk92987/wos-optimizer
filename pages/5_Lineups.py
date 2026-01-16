@@ -390,23 +390,19 @@ with tab_labyrinth:
     # Zone overview table
     st.markdown("### Zone Summary")
     st.markdown("""
-    | Zone | Days | Format | Stats That Matter | Ratio |
-    |------|------|--------|-------------------|-------|
-    | **Land of the Brave** | Mon-Tue | 3v3 | Heroes, Hero Gear, Exclusive Gear | 50/20/30 |
-    | **Cave of Monsters** | Wed-Thu | 2v2 | Pets, Pet Skills | 52/13/35 |
-    | **Glowstone Mine** | Wed-Thu | 2v2 | Chief Charms (FC25+) | 52/13/35 |
-    | **Earthlab** | Fri-Sat | 2v2 | Research, War Academy | 52/13/35 |
-    | **Dark Forge** | Fri-Sat | 2v2 | Chief Gear (FC22+) | 52/13/35 |
-    | **Gaia Heart** | Sunday | 3v3 | ALL stats + YOUR troops | 50/20/30 |
+    | Zone | Days | Format | Stats That Matter | Floor 1-9 Ratio | Floor 10 Ratio |
+    |------|------|--------|-------------------|-----------------|----------------|
+    | **Land of the Brave** | Mon-Tue | 3v3 | Heroes, Hero Gear, Exclusive Gear | 50/20/30 | 40/15/45 |
+    | **Cave of Monsters** | Wed-Thu | 2v2 | Pets, Pet Skills | 52/13/35 | 40/15/45 |
+    | **Glowstone Mine** | Wed-Thu | 2v2 | Chief Charms (FC25+) | 52/13/35 | 40/15/45 |
+    | **Earthlab** | Fri-Sat | 2v2 | Research, War Academy | 52/13/35 | 40/15/45 |
+    | **Dark Forge** | Fri-Sat | 2v2 | Chief Gear (FC22+) | 52/13/35 | 40/15/45 |
+    | **Gaia Heart** | Sunday | 3v3 | ALL stats + YOUR troops | 50/20/30 | 40/15/45 |
     """)
 
-    st.markdown("### Floor 10 Strategy")
-    st.warning("""
-    **AI changes on Floor 10!**
-    - Floors 1-9: AI uses 33/33/33 (balanced)
-    - Floor 10: AI uses **53/27/20** (Infantry-heavy)
-
-    Counter with **40/15/45** (more Marksmen) to exploit their Infantry focus.
+    st.markdown("""
+    **Floor 10 Strategy:** AI switches from 33/33/33 to **53/27/20** (Infantry-heavy) on Floor 10.
+    Counter with more Marksmen (40/15/45) to exploit their Infantry focus.
     """)
 
     # Detailed zone tabs
