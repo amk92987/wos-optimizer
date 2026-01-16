@@ -1,5 +1,5 @@
 """
-Lineups Page - Best hero lineups and troop compositions for different events.
+Lineups Page - Simplified hero lineups and troop compositions.
 """
 
 import streamlit as st
@@ -24,12 +24,18 @@ init_db()
 db = get_db()
 profile = get_or_create_profile(db)
 
-# Load hero data for reference
+# Load hero data
 heroes_file = PROJECT_ROOT / "data" / "heroes.json"
 with open(heroes_file, encoding='utf-8') as f:
     HERO_DATA = json.load(f)
 
 HEROES_BY_NAME = {h["name"]: h for h in HERO_DATA.get("heroes", [])}
+HEROES_BY_GEN = {}
+for h in HERO_DATA.get("heroes", []):
+    gen = h.get("generation", 1)
+    if gen not in HEROES_BY_GEN:
+        HEROES_BY_GEN[gen] = []
+    HEROES_BY_GEN[gen].append(h)
 
 
 def get_current_generation(server_age_days: int) -> int:
@@ -49,36 +55,11 @@ def get_current_generation(server_age_days: int) -> int:
     elif server_age_days < 520:
         return 7
     else:
-        return 8 + ((server_age_days - 520) // 80)
-
-
-def hero_available(hero_name: str, max_gen: int) -> bool:
-    """Check if a hero is available based on current generation."""
-    hero = HEROES_BY_NAME.get(hero_name)
-    if not hero:
-        return False
-    return hero.get("generation", 1) <= max_gen
-
-
-def get_available_hero(preferred: str, fallback: str, hero_class: str, max_gen: int) -> str:
-    """Get the best available hero, falling back if preferred isn't unlocked."""
-    if hero_available(preferred, max_gen):
-        return preferred
-    if hero_available(fallback, max_gen):
-        return fallback
-    # Find any available hero of this class
-    for hero in HERO_DATA.get("heroes", []):
-        if hero.get("hero_class") == hero_class and hero.get("generation", 1) <= max_gen:
-            return hero["name"]
-    return preferred  # Return preferred anyway as placeholder
-
-
-# Get user's current generation (default)
-USER_GEN = get_current_generation(profile.server_age_days)
+        return min(8 + ((server_age_days - 520) // 80), 14)
 
 
 def get_user_heroes(db, profile_id: int) -> dict:
-    """Get user's owned heroes with their levels."""
+    """Get user's owned heroes with their stats."""
     from database.models import UserHero, Hero
     user_heroes = db.query(UserHero).filter(UserHero.profile_id == profile_id).all()
     heroes_dict = {}
@@ -88,1213 +69,519 @@ def get_user_heroes(db, profile_id: int) -> dict:
             heroes_dict[hero.name] = {
                 "level": uh.level or 1,
                 "stars": uh.stars or 0,
-                "exploration_skill": uh.exploration_skill_1_level or 1,
-                "expedition_skill": uh.expedition_skill_1_level or 1,
+                "gear_avg": (
+                    (uh.gear_slot1_quality or 0) + (uh.gear_slot2_quality or 0) +
+                    (uh.gear_slot3_quality or 0) + (uh.gear_slot4_quality or 0)
+                ) / 4,
                 "owned": True
             }
     return heroes_dict
 
 
-def get_best_available_hero(preferred_heroes: list, user_heroes: dict, hero_class: str, use_personalized: bool, max_gen: int) -> tuple:
-    """
-    Get the best available hero from a preference list.
-    Returns (hero_name, availability_note)
-    """
-    if not use_personalized:
-        # General mode - just check generation
-        for hero_name in preferred_heroes:
-            if hero_available(hero_name, max_gen):
-                return (hero_name, None)
-        return (preferred_heroes[0], "Not yet available")
-
-    # Personalized mode - check ownership and level
-    for hero_name in preferred_heroes:
-        if hero_name in user_heroes:
-            hero_data = user_heroes[hero_name]
-            level_note = f"Lv.{hero_data['level']}" if hero_data['level'] else "Owned"
-            return (hero_name, level_note)
-
-    # None owned - return first preferred with note
-    return (preferred_heroes[0], "⚠️ Not owned")
-
-
-def get_class_symbol(hero_class: str) -> str:
-    """Get symbol for class."""
-    symbols = {
-        "Infantry": "🛡️",
-        "Marksman": "🏹",
-        "Lancer": "⚔️"
+def get_best_hero_by_class(user_heroes: dict, hero_class: str, prefer_sustain: bool = False) -> tuple:
+    """Get user's best hero of a given class based on level and gear."""
+    # Sustain heroes for defense
+    sustain_heroes = {
+        "Infantry": ["Natalia", "Logan", "Flint"],
+        "Lancer": ["Philly", "Molly", "Norah"],
+        "Marksman": ["Alonso", "Zinman", "Greg"]
     }
-    return symbols.get(hero_class, "?")
+
+    candidates = []
+    for hero_name, stats in user_heroes.items():
+        hero_data = HEROES_BY_NAME.get(hero_name, {})
+        if hero_data.get("hero_class") == hero_class:
+            # Calculate a power score
+            power = stats["level"] * 10 + stats["stars"] * 5 + stats["gear_avg"] * 3
+            # Boost sustain heroes for defense
+            if prefer_sustain and hero_name in sustain_heroes.get(hero_class, []):
+                power *= 1.2
+            candidates.append((hero_name, power, stats))
+
+    if candidates:
+        candidates.sort(key=lambda x: x[1], reverse=True)
+        best = candidates[0]
+        return (best[0], f"Lv.{best[2]['level']}, {best[2]['stars']}★")
+    return (None, None)
 
 
-def get_tier_color(tier: str) -> str:
-    """Get color for tier badge."""
-    colors = {
-        "S+": "#FF4444",
-        "S": "#FF8C00",
-        "A": "#9932CC",
-        "B": "#4169E1",
-        "C": "#32CD32",
-        "D": "#808080"
-    }
-    return colors.get(tier, "#808080")
+def get_class_icon(hero_class: str) -> str:
+    """Get icon for class."""
+    return {"Infantry": "🛡️", "Lancer": "⚔️", "Marksman": "🏹"}.get(hero_class, "?")
 
 
-def render_hero_slot(hero_name: str, hero_class: str, role: str = "", is_lead: bool = False, availability_note: str = None):
-    """Render a single hero slot in the lineup."""
+def render_hero_card(hero_name: str, note: str = "", is_critical: bool = False):
+    """Render a hero card."""
     hero = HEROES_BY_NAME.get(hero_name, {})
+    hero_class = hero.get("hero_class", "Unknown")
+    gen = hero.get("generation", "?")
+    tier = hero.get("tier_overall", "?")
+    icon = get_class_icon(hero_class)
 
-    if hero:
-        tier = hero.get("tier_overall", "?")
-        tier_color = get_tier_color(tier)
-        generation = hero.get("generation", 1)
-        actual_class = hero.get("hero_class", hero_class)
-    else:
-        tier = "?"
-        tier_color = "#808080"
-        generation = "?"
-        actual_class = hero_class
+    border_color = "#FFD700" if is_critical else "#2E5A8C"
+    bg_color = "rgba(255,215,0,0.1)" if is_critical else "rgba(46,90,140,0.3)"
 
-    class_symbol = get_class_symbol(actual_class)
+    note_html = f'<span style="color:#2ECC71;font-size:11px;margin-left:8px;">✓ {note}</span>' if note else ""
+    critical_badge = '<span style="background:#FFD700;color:black;padding:1px 6px;border-radius:3px;font-size:10px;margin-left:8px;">CRITICAL</span>' if is_critical else ""
 
-    # Position styling
-    if is_lead:
-        pos_label = "👑 LEAD"
-        pos_color = "#FFD700"
-    else:
-        pos_label = actual_class
-        pos_color = "#B8D4E8"
-
-    role_text = f" - {role}" if role else ""
-
-    # Availability note styling
-    if availability_note:
-        if "Not owned" in availability_note:
-            avail_html = f'<span style="color:#E74C3C;font-size:11px;margin-left:8px;">{availability_note}</span>'
-        elif "Lv." in availability_note:
-            avail_html = f'<span style="color:#2ECC71;font-size:11px;margin-left:8px;">✓ {availability_note}</span>'
-        else:
-            avail_html = f'<span style="color:#F1C40F;font-size:11px;margin-left:8px;">{availability_note}</span>'
-    else:
-        avail_html = ""
-
-    html = f'''<div style="background:rgba(46,90,140,0.3);border-radius:8px;padding:10px;margin:4px 0;display:flex;align-items:center;gap:12px;"><div style="font-size:24px;">{class_symbol}</div><div style="flex:1;"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;"><span style="color:{pos_color};font-weight:bold;font-size:12px;">{pos_label}</span><span style="background:{tier_color};color:white;padding:1px 6px;border-radius:3px;font-size:11px;">{tier}</span><span style="color:#E8F4F8;font-weight:bold;">{hero_name}</span><span style="color:#808080;font-size:11px;">Gen {generation}</span>{avail_html}</div><div style="color:#B8D4E8;font-size:12px;">{role_text}</div></div></div>'''
-    st.markdown(html, unsafe_allow_html=True)
+    st.markdown(f'''
+    <div style="background:{bg_color};border:1px solid {border_color};border-radius:8px;padding:12px;margin:6px 0;">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:24px;">{icon}</span>
+            <div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <span style="color:#E8F4F8;font-weight:bold;font-size:16px;">{hero_name}</span>
+                    <span style="color:#808080;font-size:11px;">Gen {gen} • {tier}-tier • {hero_class}</span>
+                    {note_html}{critical_badge}
+                </div>
+            </div>
+        </div>
+    </div>
+    ''', unsafe_allow_html=True)
 
 
 def render_troop_ratio(infantry: int, lancer: int, marksman: int, note: str = ""):
     """Render troop ratio display."""
     st.markdown(f"""
-    <div style="background:rgba(255,107,53,0.2);border:1px solid #FF6B35;border-radius:8px;padding:12px;margin:8px 0;">
-        <div style="font-weight:bold;color:#FF6B35;margin-bottom:8px;">⚔️ Troop Ratio</div>
-        <div style="display:flex;gap:20px;flex-wrap:wrap;">
-            <div><span style="color:#E74C3C;font-weight:bold;">{infantry}%</span> Infantry</div>
-            <div><span style="color:#2ECC71;font-weight:bold;">{lancer}%</span> Lancer</div>
-            <div><span style="color:#3498DB;font-weight:bold;">{marksman}%</span> Marksman</div>
+    <div style="background:rgba(255,107,53,0.15);border:1px solid #FF6B35;border-radius:8px;padding:12px;margin:12px 0;">
+        <div style="font-weight:bold;color:#FF6B35;margin-bottom:8px;">Troop Ratio</div>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;">
+            <div><span style="color:#E74C3C;font-weight:bold;font-size:18px;">{infantry}%</span> Infantry</div>
+            <div><span style="color:#2ECC71;font-weight:bold;font-size:18px;">{lancer}%</span> Lancer</div>
+            <div><span style="color:#3498DB;font-weight:bold;font-size:18px;">{marksman}%</span> Marksman</div>
         </div>
         {f'<div style="color:#B8D4E8;font-size:12px;margin-top:8px;">{note}</div>' if note else ''}
     </div>
     """, unsafe_allow_html=True)
 
 
-def render_3hero_lineup(infantry: dict, lancer: dict, marksman: dict, title: str = "", description: str = ""):
-    """Render a standard 3-hero world march lineup."""
-    if title:
-        st.markdown(f"**{title}**")
-    if description:
-        st.markdown(f"*{description}*")
+def get_generation_advice(current_gen: int) -> dict:
+    """Get dynamic advice based on current generation."""
+    next_gen = current_gen + 1 if current_gen < 14 else None
 
-    render_hero_slot(infantry["name"], "Infantry", infantry.get("role", ""), infantry.get("lead", False), infantry.get("avail"))
-    render_hero_slot(lancer["name"], "Lancer", lancer.get("role", ""), lancer.get("lead", False), lancer.get("avail"))
-    render_hero_slot(marksman["name"], "Marksman", marksman.get("role", ""), marksman.get("lead", False), marksman.get("avail"))
+    # Key heroes that stay relevant
+    evergreen_heroes = {
+        "Infantry": ["Natalia"],  # Always good tank
+        "Lancer": ["Molly"],      # Always good healer
+        "Marksman": []            # Marksmen get replaced more often
+    }
 
+    # Notable heroes by generation
+    notable_heroes = {
+        2: {"highlight": "Flint", "reason": "Strong garrison defender, stays relevant for Arena"},
+        3: {"highlight": "Logan", "reason": "Best defensive tank, essential for garrison"},
+        4: {"highlight": "Ahmose", "reason": "Solid Infantry option"},
+        5: {"highlight": "Hector", "reason": "F2P rally leader, replaces Flint for Bear Trap"},
+        6: {"highlight": "Wu Ming", "reason": "Sustain Infantry, great for extended fights"},
+        7: {"highlight": "Gordon", "reason": "Strong Lancer with poison abilities"},
+        8: {"highlight": "Hendrik", "reason": "Top Marksman for rallies"},
+        9: {"highlight": "Xura", "reason": "Excellent burst Marksman"},
+        10: {"highlight": "Blanchette", "reason": "Best F2P Marksman damage dealer"},
+        11: {"highlight": "Eleonora", "reason": "Strong Infantry option"},
+        12: {"highlight": "Hervor", "reason": "Top-tier Infantry"},
+        13: {"highlight": "Gisela", "reason": "Latest Infantry powerhouse"},
+        14: {"highlight": "Elif", "reason": "Newest Infantry hero"},
+    }
 
-def render_5hero_lineup(heroes: list, title: str = "", description: str = ""):
-    """Render a 5-hero Arena/Championship lineup."""
-    if title:
-        st.markdown(f"**{title}**")
-    if description:
-        st.markdown(f"*{description}*")
+    advice = {
+        "current_gen": current_gen,
+        "next_gen": next_gen,
+        "next_heroes": [],
+        "save_for": None,
+        "still_strong": ["Natalia", "Molly"],
+    }
 
-    for i, hero in enumerate(heroes):
-        is_lead = (i == 0) or hero.get("lead", False)
-        hero_class = hero.get("class", "Unknown")
-        render_hero_slot(hero["name"], hero_class, hero.get("role", ""), is_lead)
+    if next_gen and next_gen in HEROES_BY_GEN:
+        next_heroes = HEROES_BY_GEN[next_gen]
+        legendary = [h for h in next_heroes if h.get("rarity") == "Legendary"]
+        advice["next_heroes"] = legendary
 
+        if next_gen in notable_heroes:
+            advice["save_for"] = notable_heroes[next_gen]
 
-def render_lineup_from_engine(lineup_rec, show_confidence: bool = True):
-    """Render a lineup from LineupRecommendation dataclass."""
-    # Show confidence indicator
-    if show_confidence:
-        confidence_colors = {"high": "#2ECC71", "medium": "#F1C40F", "low": "#E74C3C"}
-        confidence_labels = {"high": "Optimal", "medium": "Good", "low": "Limited"}
-        conf_color = confidence_colors.get(lineup_rec.confidence, "#808080")
-        conf_label = confidence_labels.get(lineup_rec.confidence, "Unknown")
-        st.markdown(f'<span style="background:{conf_color};color:white;padding:2px 8px;border-radius:4px;font-size:11px;">{conf_label} Lineup</span>', unsafe_allow_html=True)
-
-    # Render each hero slot
-    for hero_info in lineup_rec.heroes:
-        hero_name = hero_info.get("hero", "Unknown")
-        hero_class = hero_info.get("hero_class", "Unknown")
-        role = hero_info.get("role", "")
-        is_lead = hero_info.get("is_lead", False)
-        status = hero_info.get("status", "")
-
-        render_hero_slot(hero_name, hero_class, role, is_lead, status)
-
-    # Render troop ratio
-    ratio = lineup_rec.troop_ratio
-    render_troop_ratio(ratio.get("infantry", 33), ratio.get("lancer", 33), ratio.get("marksman", 34), lineup_rec.notes)
+    return advice
 
 
-def render_why_this_lineup(event_type: str, lineup_heroes: list = None):
-    """Render the 'Why This Lineup' explanation section using template data."""
-    template = LINEUP_TEMPLATES.get(event_type)
-    if not template:
-        return
-
-    hero_explanations = template.get("hero_explanations", {})
-    ratio_explanation = template.get("ratio_explanation", "")
-
-    if not hero_explanations and not ratio_explanation:
-        return
-
-    with st.expander("💡 Why This Lineup?"):
-        # Show hero explanations
-        if hero_explanations:
-            st.markdown("**Hero Selection:**")
-            # If we have lineup_heroes, show explanations for those first
-            shown_heroes = set()
-            if lineup_heroes:
-                for hero_info in lineup_heroes:
-                    hero_name = hero_info.get("hero", "")
-                    if hero_name in hero_explanations:
-                        st.markdown(f"- **{hero_name}**: {hero_explanations[hero_name]}")
-                        shown_heroes.add(hero_name)
-
-            # Show remaining explanations for alternative heroes
-            remaining = {k: v for k, v in hero_explanations.items() if k not in shown_heroes}
-            if remaining and shown_heroes:
-                st.markdown("")
-                st.markdown("*Alternatives:*")
-                for hero_name, explanation in remaining.items():
-                    st.markdown(f"- **{hero_name}**: {explanation}")
-            elif remaining and not shown_heroes:
-                # No lineup provided, show all
-                for hero_name, explanation in hero_explanations.items():
-                    st.markdown(f"- **{hero_name}**: {explanation}")
-
-        # Show troop ratio explanation
-        if ratio_explanation:
-            st.markdown("")
-            st.markdown("**Troop Ratio:**")
-            st.markdown(ratio_explanation)
-
-
-def render_recommended_to_get(recommendations: list):
-    """Render the 'Recommended to Get' section for missing key heroes."""
-    if not recommendations:
-        return
-
-    st.markdown("### 🎯 Heroes to Get")
-    st.markdown("*Missing key heroes that would improve this lineup:*")
-
-    for rec in recommendations:
-        hero_name = rec.get("hero", "Unknown")
-        hero_class = rec.get("class", "Unknown")
-        reason = rec.get("reason", "")
-        gen = rec.get("gen", "?")
-
-        class_symbol = get_class_symbol(hero_class)
-
-        html = f'''<div style="background:rgba(255,215,0,0.15);border:1px solid #FFD700;border-radius:8px;padding:10px;margin:4px 0;display:flex;align-items:center;gap:12px;">
-            <div style="font-size:20px;">{class_symbol}</div>
-            <div style="flex:1;">
-                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <span style="color:#FFD700;font-weight:bold;">{hero_name}</span>
-                    <span style="color:#808080;font-size:11px;">Gen {gen}</span>
-                </div>
-                <div style="color:#B8D4E8;font-size:12px;">{reason}</div>
-            </div>
-        </div>'''
-        st.markdown(html, unsafe_allow_html=True)
-
-
-# Initialize LineupBuilder
-LINEUP_BUILDER = LineupBuilder()
-
-
-# Page content
-st.markdown("# ⚔️ Best Lineups & Compositions")
-st.markdown("Optimal hero and troop setups for every game mode")
+# Get user's current generation
+USER_GEN = get_current_generation(profile.server_age_days)
+USER_HEROES = get_user_heroes(db, profile.id)
 
 # =============================================================================
-# MODE SELECTOR - General Guide vs Personalized
+# PAGE HEADER
 # =============================================================================
-# Check if user has heroes to determine default mode
-preview_user_heroes = get_user_heroes(db, profile.id)
-default_mode_index = 1 if preview_user_heroes else 0  # Default to "My Setup" if heroes exist
+st.markdown("# ⚔️ Hero Lineups")
 
-col_mode1, col_mode2 = st.columns(2)
-
-with col_mode1:
-    lineup_mode = st.radio(
-        "Lineup Mode:",
-        options=["General Guide", "My Setup (Personalized)"],
-        index=default_mode_index,
-        help="General Guide shows ideal lineups by generation. Personalized uses your actual hero inventory."
-    )
-
-with col_mode2:
-    if lineup_mode == "General Guide":
-        selected_gen = st.selectbox(
-            "Select your hero generation:",
-            options=[1, 2, 3, 4, 5, 6, 7, 8],
-            index=min(USER_GEN - 1, 7),
-            help="Choose what generation of heroes you have access to"
-        )
-        USE_PERSONALIZED = False
-        ACTIVE_GEN = selected_gen
-        USER_HEROES = {}
-        st.caption(f"Showing recommendations for Gen {selected_gen} heroes")
-    else:
-        USE_PERSONALIZED = True
-        ACTIVE_GEN = USER_GEN
-        USER_HEROES = get_user_heroes(db, profile.id)
-        if USER_HEROES:
-            st.success(f"Found {len(USER_HEROES)} heroes in your profile")
-        else:
-            st.warning("No heroes in profile yet. Add heroes in the Heroes page for personalized recommendations.")
-            USE_PERSONALIZED = False
-            USER_HEROES = {}
+# Generation selector
+col1, col2 = st.columns([2, 1])
+with col1:
+    st.markdown("Optimal hero and troop setups for every game mode")
+with col2:
+    selected_gen = st.selectbox("Your Generation:", options=list(range(1, 15)), index=min(USER_GEN - 1, 13))
 
 # =============================================================================
 # MAIN TABS
 # =============================================================================
-tab_lineups, tab_debate = st.tabs(["Optimal Lineups", "Natalia vs Jeronimo"])
+tab_rally_lead, tab_rally_join, tab_labyrinth, tab_exploration, tab_reference = st.tabs([
+    "🏰 Rally Leader", "🤝 Rally Joiner", "🏛️ Labyrinth", "🗺️ Exploration", "📚 Reference"
+])
 
-with tab_debate:
-    st.markdown("### The Great Infantry Debate")
-    st.markdown("**Legacy players often use Jeronimo as main march leader.** This isn't wrong - it depends on your situation.")
+# =============================================================================
+# RALLY LEADER TAB
+# =============================================================================
+with tab_rally_lead:
+    st.markdown("## Rally Leader Setup")
+    st.markdown("When **you lead** a rally, all 3 of your heroes contribute their expedition skills.")
 
-    col_jer, col_nat = st.columns(2)
+    st.info("""
+    **The Simple Rule:** Use your **3 strongest heroes** - one Infantry, one Lancer, one Marksman.
 
-    with col_jer:
-        st.error("**Jeronimo Lead - Better when:**")
+    Hero slot position doesn't matter for rally leaders - all 3 contribute equally.
+    """)
+
+    # Attack vs Defense sub-tabs
+    attack_tab, defense_tab = st.tabs(["⚔️ Attack (Rallies, Bear Trap, Crazy Joe)", "🛡️ Defense (Garrison)"])
+
+    with attack_tab:
+        st.markdown("### Attack Rally Leader")
+        st.markdown("*For Bear Trap, Crazy Joe, Castle Attacks - prioritize damage output*")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("**Your Best Heroes:**")
+            if USER_HEROES:
+                for hero_class in ["Infantry", "Lancer", "Marksman"]:
+                    best, note = get_best_hero_by_class(USER_HEROES, hero_class, prefer_sustain=False)
+                    if best:
+                        render_hero_card(best, note)
+                    else:
+                        st.warning(f"No {hero_class} hero found - add heroes in Hero Tracker!")
+            else:
+                st.warning("Add your heroes in the Hero Tracker page to see personalized recommendations.")
+                st.markdown("**General recommendation:** Jeronimo (I) + Molly (L) + Alonso (M)")
+
+        with col2:
+            st.markdown("**Troop Ratios by Event:**")
+
+            event_ratios = st.selectbox("Select event:",
+                ["Bear Trap", "Crazy Joe", "Castle Attack", "General Rally"],
+                key="attack_event")
+
+            if event_ratios == "Bear Trap":
+                render_troop_ratio(0, 10, 90, "Bear is slow - maximize Marksman DPS window")
+            elif event_ratios == "Crazy Joe":
+                render_troop_ratio(90, 10, 0, "Infantry kills before Joe's backline attacks hit")
+            elif event_ratios == "Castle Attack":
+                render_troop_ratio(50, 20, 30, "Balanced for sustained castle fights")
+            else:
+                render_troop_ratio(50, 20, 30, "Standard balanced ratio")
+
+    with defense_tab:
+        st.markdown("### Garrison Leader")
+        st.markdown("*For defending your castle - prioritize sustain and damage reduction*")
+
+        st.success("**Defense priorities:** Natalia/Logan/Flint (sustain Infantry), Philly/Molly (healing Lancer)")
+
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.markdown("**Your Best Defensive Heroes:**")
+            if USER_HEROES:
+                for hero_class in ["Infantry", "Lancer", "Marksman"]:
+                    best, note = get_best_hero_by_class(USER_HEROES, hero_class, prefer_sustain=True)
+                    if best:
+                        render_hero_card(best, note)
+                    else:
+                        st.warning(f"No {hero_class} hero found")
+            else:
+                st.warning("Add your heroes in the Hero Tracker page.")
+                st.markdown("**General recommendation:** Natalia (I) + Philly (L) + Alonso (M)")
+
+        with col2:
+            st.markdown("**Why Sustain Matters:**")
+            st.markdown("""
+            - Garrison fights are **attrition battles**
+            - The side whose Infantry survives longest wins
+            - Healing and damage reduction > burst damage
+
+            **Key Sustain Heroes:**
+            - **Natalia** - Shields and self-healing
+            - **Logan** - 25% troop health boost, damage reduction
+            - **Flint** - +15% defender attack (with Dragonbane gear)
+            - **Philly** - Team healing, garrison troop health boost
+            """)
+
+            render_troop_ratio(50, 30, 20, "Infantry-heavy for survival")
+
+# =============================================================================
+# RALLY JOINER TAB
+# =============================================================================
+with tab_rally_join:
+    st.markdown("## Rally Joiner Setup")
+
+    st.error("""
+    **CRITICAL:** When joining a rally, **ONLY your leftmost hero's expedition skill matters!**
+
+    Your 2nd and 3rd heroes contribute NOTHING except troop capacity. Choose slot 1 wisely.
+    """)
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("### ⚔️ Attack Joiner")
+        st.markdown("*For Bear Trap, Crazy Joe, Castle Attacks*")
+
+        render_hero_card("Jessie", "Stand of Arms: +25% DMG dealt at max level", is_critical=True)
+
         st.markdown("""
-- Your infantry gear is strong enough to survive
-- Rally coordination is tight
-- You need maximum burst damage
-- Enemy dies before your infantry
+        **Why Jessie:**
+        - Her expedition skill boosts ALL damage (attacks, skills, pets)
+        - Affects the ENTIRE rally, not just your troops
+        - Skill level matters more than her stats/gear
+
+        **If you don't have Jessie:** Send troops WITHOUT heroes rather than using a hero with an unhelpful skill.
         """)
 
-    with col_nat:
-        st.success("**Natalia Lead - Better when:**")
+        render_troop_ratio(30, 20, 50, "Match rally leader's damage-focused composition")
+
+    with col2:
+        st.markdown("### 🛡️ Defense Joiner")
+        st.markdown("*For garrison reinforcement*")
+
+        render_hero_card("Sergey", "Defenders' Edge: -20% DMG taken at max level", is_critical=True)
+
         st.markdown("""
-- Infantry dies before fight ends
-- Enemy garrison is very strong
-- You need sustained pressure over burst
-- Undergeared or early game
+        **Why Sergey:**
+        - His expedition skill reduces damage for ENTIRE garrison
+        - Universal damage reduction (all sources)
+        - Skill level matters more than his stats/gear
+
+        **If you don't have Sergey:** Send troops WITHOUT heroes.
         """)
 
-    st.info("**The Test:** If your infantry dies before the fight ends, Natalia wins. If you kill them first, Jeronimo's ATK multiplier is better. Both are valid!")
-
-with tab_lineups:
-    # Critical game mechanics
-    st.info("**📌 Rally Skill Mechanics:** Only your **leftmost hero's expedition skill** contributes when joining rallies! Up to 4 member skills total can stack.")
-
-    # Event selector
-    event_categories = {
-        "PvP / SvS": ["World March (Default)", "SvS Castle Attack", "SvS Castle Defense", "SvS Field Battle"],
-        "Rallies": ["Bear Trap Rally", "Crazy Joe Rally", "Rally Joiner Setup"],
-        "Competitive": ["Arena (5 Heroes)", "Alliance Championship", "Labyrinth"],
-        "PvE": ["Exploration / Frozen Stages", "Gathering"],
-        "Alliance Events": ["Polar Terror", "Reservoir Raid"]
-    }
-
-    category = st.selectbox("Category:", list(event_categories.keys()))
-    event_type = st.selectbox("Game Mode:", event_categories[category])
+        render_troop_ratio(50, 30, 20, "Match garrison's defensive composition")
 
     st.markdown("---")
-
-    # =============================================================================
-    # WORLD MARCH (DEFAULT)
-    # =============================================================================
-    if event_type == "World March (Default)":
-        st.markdown("## 🗡️ Default World March")
-        st.markdown("Standard 3-hero composition for attacks, rally joins, and general PvP")
-
-        # Build lineup using engine
-        if USE_PERSONALIZED:
-            lineup = LINEUP_BUILDER.build_personalized_lineup("world_march", USER_HEROES, ACTIVE_GEN)
-        else:
-            lineup = LINEUP_BUILDER.build_general_lineup("world_march", ACTIVE_GEN)
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("### Your Recommended Lineup")
-            render_lineup_from_engine(lineup)
-
-            # Why this lineup explanation
-            render_why_this_lineup("world_march", lineup.heroes)
-
-            with st.expander("📝 Strategy Notes"):
-                st.markdown("""
-                - **Jeronimo lead** provides ATK multiplier for burst damage
-                - Swap to Natalia if your infantry dies before fights end
-                - Alonso scales well in longer fights
-                - Adjust troop ratio based on enemy composition
-                """)
-
-        with col2:
-            if USE_PERSONALIZED and lineup.recommended_to_get:
-                render_recommended_to_get(lineup.recommended_to_get)
-            else:
-                st.markdown("### Alternative Compositions")
-                st.markdown("**Sustain Focus:** Use Natalia lead when infantry dies before fights end")
-                st.markdown("**Marksman Heavy:** Good against slower infantry comps")
-
-    # =============================================================================
-    # SvS CASTLE ATTACK
-    # =============================================================================
-    elif event_type == "SvS Castle Attack":
-        st.markdown("## 🏰 SvS Castle Attack")
-        st.markdown("Rally or march composition for taking enemy castles")
-
-        st.warning("Castle attacks are **attrition fights**. The side whose infantry survives longest usually wins.")
-
-        # Build lineup using engine
-        if USE_PERSONALIZED:
-            lineup = LINEUP_BUILDER.build_personalized_lineup("svs_attack", USER_HEROES, ACTIVE_GEN)
-        else:
-            lineup = LINEUP_BUILDER.build_general_lineup("svs_attack", ACTIVE_GEN)
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("### Rally Leader")
-            st.markdown("*When YOU are leading the castle rally*")
-            render_lineup_from_engine(lineup)
-
-            # Why this lineup explanation
-            render_why_this_lineup("svs_attack", lineup.heroes)
-            st.caption("See the **Natalia vs Jeronimo** tab for when to swap leads!")
-
-        with col2:
-            if USE_PERSONALIZED and lineup.recommended_to_get:
-                render_recommended_to_get(lineup.recommended_to_get)
-
-            st.markdown("### Rally Joiner Tips")
-            st.markdown("""
-            - **Jessie** - Best attack joiner (+25% DMG)
-            - Use your strongest geared heroes
-            - Dead troops = zero contribution
-            - Send tankier ratio (60/15/25) when joining
-            """)
-
-    # =============================================================================
-    # SvS CASTLE DEFENSE
-    # =============================================================================
-    elif event_type == "SvS Castle Defense":
-        st.markdown("## 🛡️ SvS Castle Defense (Garrison)")
-        st.markdown("Defending YOUR castle from enemy rallies")
-
-        st.warning("Defense is about **surviving the rally timer**. Healing and tankiness > burst damage.")
-
-        # Build lineup using engine
-        if USE_PERSONALIZED:
-            lineup = LINEUP_BUILDER.build_personalized_lineup("garrison", USER_HEROES, ACTIVE_GEN)
-        else:
-            lineup = LINEUP_BUILDER.build_general_lineup("garrison", ACTIVE_GEN)
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("### Garrison Leader")
-            st.markdown("*If you are the garrison leader*")
-            render_lineup_from_engine(lineup)
-
-            # Why this lineup explanation
-            render_why_this_lineup("garrison", lineup.heroes)
-
-        with col2:
-            if USE_PERSONALIZED and lineup.recommended_to_get:
-                render_recommended_to_get(lineup.recommended_to_get)
-
-            st.markdown("### Best Garrison Joiners")
-            st.markdown("""
-            - **Sergey** - Best garrison joiner (-20% DMG taken)
-            - **Bahiti** - Sustain support
-            - Prioritize heroes with defensive expedition skills
-            - Match garrison leader's troop ratio
-            """)
-
-    # =============================================================================
-    # SvS FIELD BATTLE
-    # =============================================================================
-    elif event_type == "SvS Field Battle":
-        st.markdown("## ⚔️ SvS Field Battle")
-        st.markdown("Open field PvP during State vs State events")
-
-        st.warning("Field fights are **fast and chaotic**. Burst damage and positioning matter more than sustained fights.")
-
-        tab1, tab2, tab3 = st.tabs(["Infantry Rush", "Marksman Kite", "Balanced/Safe"])
-
-        with tab1:
-            st.markdown("### Infantry Rush")
-            st.markdown("*All-in Infantry damage for quick kills*")
-            render_3hero_lineup(
-                infantry={"name": "Jeronimo", "role": "Infantry ATK steroid", "lead": True},
-                lancer={"name": "Molly", "role": "Burst support"},
-                marksman={"name": "Alonso", "role": "Follow-up damage"}
-            )
-            render_troop_ratio(60, 15, 25, "Heavy infantry for rush")
-
-            st.markdown("""
-            **When to use:**
-            - Enemy has weak frontline
-            - You need fast eliminations
-            - Coordinated alliance pushes
-            """)
-
-        with tab2:
-            st.markdown("### Marksman Kite")
-            st.markdown("*Ranged damage composition*")
-            render_3hero_lineup(
-                infantry={"name": "Natalia", "role": "Tank while kiting", "lead": True},
-                lancer={"name": "Zinman", "role": "Lancer support"},
-                marksman={"name": "Philly", "role": "Ranged burst"}
-            )
-            render_troop_ratio(40, 15, 45, "Heavy marksman for range")
-
-            st.markdown("""
-            **When to use:**
-            - Against slower Infantry comps
-            - When you can maintain distance
-            - Hit-and-run tactics
-            """)
-
-        with tab3:
-            st.markdown("### Balanced / Safe")
-            st.markdown("*Well-rounded for unknown matchups*")
-            render_3hero_lineup(
-                infantry={"name": "Natalia", "role": "Tank", "lead": True},
-                lancer={"name": "Molly", "role": "Healing"},
-                marksman={"name": "Alonso", "role": "Damage"}
-            )
-            render_troop_ratio(50, 20, 30, "Standard balanced ratio")
-
-            st.markdown("""
-            **When to use:**
-            - Unknown enemy composition
-            - General field presence
-            - Not optimal but rarely hard-countered
-            """)
-
-    # =============================================================================
-    # BEAR TRAP RALLY
-    # =============================================================================
-    elif event_type == "Bear Trap Rally":
-        st.markdown("## 🐻 Bear Trap Rally")
-        st.markdown("Alliance rally against Bear Trap boss")
-
-        st.info("""
-        **📌 Rally Joiner Mechanics**
-
-        Only the **top 4 highest level** expedition skills from joiners apply to the rally.
-        This is based on **skill level**, not player power.
-        """)
-
-        # Build lineup using engine
-        if USE_PERSONALIZED:
-            lineup = LINEUP_BUILDER.build_personalized_lineup("bear_trap", USER_HEROES, ACTIVE_GEN)
-        else:
-            lineup = LINEUP_BUILDER.build_general_lineup("bear_trap", ACTIVE_GEN)
-
-        tab_rally, tab_joins = st.tabs(["Rally Squad (Leader)", "Joining Strategy"])
-
-        with tab_rally:
-            st.markdown("### Rally Leader Setup")
-            st.markdown("*When YOU are leading the rally - all 3 of your heroes' expedition skills apply*")
-
-            render_lineup_from_engine(lineup)
-
-            # Why this lineup explanation
-            render_why_this_lineup("bear_trap", lineup.heroes)
-
-            if USE_PERSONALIZED and lineup.recommended_to_get:
-                render_recommended_to_get(lineup.recommended_to_get)
-
-            with st.expander("📝 Rally Leader Strategy"):
-                st.markdown("""
-                **Why Jeronimo lead is crucial:**
-                - His expedition skill provides massive Infantry ATK boost
-                - This buff applies to the ENTIRE rally, not just your troops
-
-                **When to use Natalia lead instead:**
-                - If infantry melts before fight ends
-                - Early game / undergeared rallies
-                - Survival > damage scenarios
-
-                **Troop ratio explanation:**
-                - 20% Infantry = just enough to survive
-                - 60% Marksman = maximum damage output
-                - This is aggressive - adjust if troops die too fast
-                """)
-
-        with tab_joins:
-            st.markdown("### Joining Strategy")
-
-            st.warning("""
-            **⚠️ IMPORTANT: Should you use heroes when joining?**
-
-            Only the **top 4 highest level** expedition skills apply. If your hero has a high-level skill that's
-            not useful for attacks (like Sergey's defensive skill), it could bump out someone's lower-level
-            Jessie - which has a much better damage multiplier.
-            """)
-
-            # Show valuable joiner heroes that are available
-            st.markdown("### Heroes Worth Using as Joiner")
-            st.markdown("*Only use these heroes in your leftmost slot - they have valuable rally expedition skills:*")
-
-            valuable_joiners = [
-                ("Jeronimo", "Infantry", "Infantry ATK buff (scales with level)", 1),
-                ("Jessie", "Marksman", "+5/10/15/20/25% DMG dealt (per level)", 1),
-                ("Jasser", "Marksman", "Rally damage buff (scales with level)", 7),
-                ("Seo-yoon", "Marksman", "Rally damage buff (scales with level)", 8),
-            ]
-
-            available_joiners = []
-            for name, hero_class, skill, gen in valuable_joiners:
-                if gen <= ACTIVE_GEN:
-                    available_joiners.append((name, hero_class, skill))
-                    render_hero_slot(name, hero_class, skill, False)
-
-            if not available_joiners:
-                st.markdown("*No valuable joiner heroes available at Gen 1 - join with troops only*")
-
-            st.markdown("---")
-
-            st.markdown("### If You DON'T Have These Heroes")
-            st.success("""
-            **Join with TROOPS ONLY (no heroes)**
-
-            - Send your troops to contribute damage
-            - Don't put any heroes in the march
-            - This prevents your leveled-up but wrong skill (like Sergey) from bumping out a valuable damage multiplier
-            - Your troops still contribute to the rally damage!
-            """)
-
-            st.markdown("---")
-            st.markdown("### Troop Recommendations")
-            render_troop_ratio(20, 20, 60, "Match the rally leader's marksman-heavy strategy")
-
-    # =============================================================================
-    # CRAZY JOE RALLY
-    # =============================================================================
-    elif event_type == "Crazy Joe Rally":
-        st.markdown("## 🤪 Crazy Joe Rally")
-        st.markdown("Alliance rally against Crazy Joe boss - heavy AoE damage")
-
-        st.warning("Crazy Joe deals **massive AoE damage**. Healing and sustain are MORE important than Bear Trap!")
-
-        # Build lineup using engine
-        if USE_PERSONALIZED:
-            lineup = LINEUP_BUILDER.build_personalized_lineup("crazy_joe", USER_HEROES, ACTIVE_GEN)
-        else:
-            lineup = LINEUP_BUILDER.build_general_lineup("crazy_joe", ACTIVE_GEN)
-
-        tab_rally, tab_joins = st.tabs(["Rally Squad (Leader)", "Your 6 Joining Marches"])
-
-        with tab_rally:
-            st.markdown("### Rally Squad")
-            st.markdown("*Healing focus - Joe's AoE requires sustained survival*")
-
-            render_lineup_from_engine(lineup)
-
-            # Why this lineup explanation
-            render_why_this_lineup("crazy_joe", lineup.heroes)
-
-            if USE_PERSONALIZED and lineup.recommended_to_get:
-                render_recommended_to_get(lineup.recommended_to_get)
-
-            st.markdown("""
-            **Joe-specific mechanics:**
-            - Infantry engages FIRST in combat order
-            - If infantry stats are high enough, they defeat all bandits before Lancers/Marksmen attack
-            - This is why 90/10/0 works - back row never gets to fight
-            - Molly's healing still valuable for survival
-            """)
-
-        with tab_joins:
-            st.markdown("### Your 6 Joining Marches")
-            st.markdown("*Survival matters even more for joiners against Joe*")
-
-            st.markdown("Same 90/10/0 infantry-heavy approach:")
-            st.markdown("""
-            - Infantry engages and kills before other troops attack
-            - Send Infantry when reinforcing cities for max kill participation
-            - Heroes with healing/sustain still valuable for survival
-            """)
-            render_troop_ratio(90, 10, 0, "Match the infantry-heavy strategy")
-
-    # =============================================================================
-    # RALLY JOINER SETUP
-    # =============================================================================
-    elif event_type == "Rally Joiner Setup":
-        st.markdown("## 🤝 Rally Joiner Best Practices")
-        st.markdown("Optimizing your contribution when joining someone else's rally")
-
-        st.info("""
-        **⚠️ CRITICAL JOINER MECHANIC**
-
-        When joining a rally, only your **leftmost hero's expedition skill** is used!
-        - Your other 2 heroes contribute NOTHING to rally buffs
-        - Up to **4 member skills** total contribute to a rally
-        - Member skills CAN stack if they're the same effect
-        """)
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("### Best Joiner Heroes")
-
-            st.markdown("**🔥 Attack/Rally Joiners:**")
-            st.markdown("""
-            Heroes whose **expedition skill** buffs damage:
-            """)
-            render_hero_slot("Jessie", "Marksman", "Stand of Arms: +5-25% DMG dealt (scales with level)", False)
-            st.caption("Best attack joiner - affects ALL damage types including skills, pets, teammates")
-
-            # Why Jessie explanation
-            render_why_this_lineup("rally_joiner_attack", None)
-
-            st.markdown("**🛡️ Garrison Joiners:**")
-            st.markdown("""
-            Heroes whose **expedition skill** reduces damage:
-            """)
-            render_hero_slot("Sergey", "Infantry", "Defenders' Edge: -4-20% DMG reduction (scales with level)", False)
-            st.caption("Best garrison joiner - universal damage reduction")
-
-            # Why Sergey explanation
-            render_why_this_lineup("rally_joiner_defense", None)
-
-        with col2:
-            st.markdown("### Joiner Priorities")
-
-            st.info("""
-            **Key Understanding:**
-
-            Only ONE skill per joiner matters (leftmost hero's expedition skill).
-
-            What matters most:
-            1. **Leftmost hero selection** - choose for their expedition skill
-            2. **Troop survival** - dead troops = zero contribution
-            3. **Troop tier** - T9/T10 significantly outperform lower tiers
-            """)
-
-            st.markdown("### Joiner Investment Priority")
-            st.markdown("""
-            Joiner heroes (Jessie, Sergey, etc.) should:
-            - ✅ Have functional gear (legendary is fine)
-            - ✅ Be leveled appropriately
-            - ❌ NOT get premium resources (Stones, Mithril)
-            - ❌ NOT be prioritized over main heroes
-
-            They are **support**, not core investments.
-            """)
-
-    # =============================================================================
-    # ARENA (5 HEROES)
-    # =============================================================================
-    elif event_type == "Arena (5 Heroes)":
-        st.markdown("## 🏟️ Arena (5-Hero Lineup)")
-        st.markdown("1v1 PvP arena battles - this is the ONLY common mode with 5 heroes")
-
-        st.info("Arena is **asynchronous** - you fight AI-controlled enemy teams. Frontline survival wins.")
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("### Arena Offense")
-            st.markdown("*Attacking enemy defense teams*")
-
-            render_5hero_lineup([
-                {"name": "Natalia", "class": "Infantry", "role": "Primary tank", "lead": True},
-                {"name": "Flint", "class": "Infantry", "role": "Secondary tank / time buyer"},
-                {"name": "Alonso", "class": "Marksman", "role": "Main damage dealer"},
-                {"name": "Molly", "class": "Lancer", "role": "Healing + damage"},
-                {"name": "Philly", "class": "Marksman", "role": "Ranged burst"},
-            ])
-
-            # Why this lineup explanation
-            render_why_this_lineup("arena", None)
-
-            st.markdown("""
-            **Why 2 Infantry frontline:**
-            - Arena rewards frontline durability
-            - Flint buys time for Alonso to ramp up
-            - Natalia + Flint = strongest Gen2 frontline
-            """)
-
-        with col2:
-            st.markdown("### Arena Defense")
-            st.markdown("*Team others will fight (AI controlled)*")
-
-            render_5hero_lineup([
-                {"name": "Natalia", "class": "Infantry", "role": "Hard to kill", "lead": True},
-                {"name": "Flint", "class": "Infantry", "role": "Absorb burst"},
-                {"name": "Molly", "class": "Lancer", "role": "Healing frustrates attackers"},
-                {"name": "Alonso", "class": "Marksman", "role": "Counter threat"},
-                {"name": "Bahiti", "class": "Lancer", "role": "Sustain"},
-            ])
-
-            st.markdown("""
-            **Defense philosophy:**
-            - AI controls your team
-            - Tankiness + healing = long fights
-            - Goal: timeout or discourage attacks
-            """)
-
-        st.markdown("---")
-        st.markdown("### Arena Investment Note")
-        st.warning("""
-        **Flint is NOT optional for Arena.**
-
-        Many guides undervalue Flint, but at competitive levels:
-        - Flint's survivability and control scale extremely well
-        - He is a **mode specialist**, not "extra infantry"
-        - If you're serious about Arena, invest in Flint
-        """)
-
-    # =============================================================================
-    # ALLIANCE CHAMPIONSHIP
-    # =============================================================================
-    elif event_type == "Alliance Championship":
-        st.markdown("## 🏆 Alliance Championship")
-        st.markdown("Alliance vs Alliance tournament - multiple rounds with hero restrictions")
-
-        st.error("""
-        **Heroes can only be used ONCE per Championship!**
-
-        You need **multiple developed teams** to compete effectively.
-        Plan your lineup usage across all battles.
-        """)
-
-        tab1, tab2, tab3 = st.tabs(["Team 1 (Strongest)", "Team 2 (Secondary)", "Team 3+ (Depth)"])
-
-        with tab1:
-            st.markdown("### Team 1 - Main Squad")
-            st.markdown("*Use your absolute best heroes first*")
-
-            render_3hero_lineup(
-                infantry={"name": "Natalia", "role": "Best tank", "lead": True},
-                lancer={"name": "Molly", "role": "Best lancer"},
-                marksman={"name": "Alonso", "role": "Best damage"}
-            )
-
-            st.markdown("""
-            **Philosophy:**
-            - Don't save best heroes for "later"
-            - Win early rounds to build momentum
-            - Team 1 should be your most invested heroes
-            """)
-
-        with tab2:
-            st.markdown("### Team 2 - Secondary")
-            st.markdown("*Second-best lineup after main heroes used*")
-
-            render_3hero_lineup(
-                infantry={"name": "Flint", "role": "Secondary infantry", "lead": True},
-                lancer={"name": "Zinman", "role": "Lancer damage"},
-                marksman={"name": "Philly", "role": "Ranged support"}
-            )
-
-            st.markdown("""
-            **Tips:**
-            - Use different class focus than Team 1
-            - Opponent may have countered your first strategy
-            - Flint often anchors Team 2 effectively
-            """)
-
-        with tab3:
-            st.markdown("### Team 3+ - Roster Depth")
-            st.markdown("*Fill with remaining developed heroes*")
-
-            render_3hero_lineup(
-                infantry={"name": "Jeronimo", "role": "Infantry option"},
-                lancer={"name": "Bahiti", "role": "Sustain"},
-                marksman={"name": "Logan", "role": "Fill"}
-            )
-
-            st.info("""
-            **Roster Depth Matters!**
-
-            For full Championship participation, you need:
-            - **9+ developed heroes** minimum (3 teams)
-            - **15+ heroes** for competitive depth
-            - Even "B-tier" heroes matter here
-
-            This is why you shouldn't over-focus on just 3 heroes.
-            """)
-
-    # =============================================================================
-    # LABYRINTH
-    # =============================================================================
-    elif event_type == "Labyrinth":
-        st.markdown("## 🏛️ The Labyrinth")
-        st.markdown("Weekly competitive PvP event with 6 unique zones - each zone uses different stat sources!")
-
-        st.info("""
-        **Key Mechanics:**
-        - Most zones provide **Lv.10 troops** (your own troop tier doesn't matter)
-        - **Gaia Heart** (Sunday) uses YOUR actual troops - higher tier = advantage
-        - Each zone tests different parts of your account progression
-        - 5 daily attempts per zone
-        """)
-
-        # Zone tabs
-        zone_tabs = st.tabs(["📊 Zone Overview", "⚔️ Land of Brave", "🐉 Cave of Monsters",
-                            "💎 Glowstone Mine", "🔬 Earthlab", "🔥 Dark Forge", "🌍 Gaia Heart"])
+    st.markdown("### Joiner Investment Priority")
+    st.markdown("""
+    | Priority | What to Do |
+    |----------|-----------|
+    | ✅ HIGH | Level up Jessie/Sergey's **expedition skill** (right side) |
+    | ✅ Medium | Get them to functional gear (Legendary is fine) |
+    | ❌ LOW | Don't waste premium resources (Mithril, Stones) on joiners |
+
+    **Only the skill level determines their contribution.** Their hero level, stars, and gear don't affect the rally buff.
+    """)
+
+# =============================================================================
+# LABYRINTH TAB
+# =============================================================================
+with tab_labyrinth:
+    st.markdown("## The Labyrinth")
+    st.markdown("Weekly competitive PvP with 6 zones - each tests different parts of your account!")
+
+    st.info("""
+    **Key Mechanics:**
+    - Most zones provide **Lv.10 troops** (your troop tier doesn't matter)
+    - **Gaia Heart** (Sunday) uses YOUR actual troops
+    - 5 daily attempts per zone
+    """)
+
+    # Zone overview table
+    st.markdown("### Zone Summary")
+    st.markdown("""
+    | Zone | Days | Format | Stats That Matter | Ratio |
+    |------|------|--------|-------------------|-------|
+    | **Land of the Brave** | Mon-Tue | 3v3 | Heroes, Hero Gear, Exclusive Gear | 50/20/30 |
+    | **Cave of Monsters** | Wed-Thu | 2v2 | Pets, Pet Skills | 52/13/35 |
+    | **Glowstone Mine** | Wed-Thu | 2v2 | Chief Charms (FC25+) | 52/13/35 |
+    | **Earthlab** | Fri-Sat | 2v2 | Research, War Academy | 52/13/35 |
+    | **Dark Forge** | Fri-Sat | 2v2 | Chief Gear (FC22+) | 52/13/35 |
+    | **Gaia Heart** | Sunday | 3v3 | ALL stats + YOUR troops | 50/20/30 |
+    """)
+
+    st.markdown("### Floor 10 Strategy")
+    st.warning("""
+    **AI changes on Floor 10!**
+    - Floors 1-9: AI uses 33/33/33 (balanced)
+    - Floor 10: AI uses **53/27/20** (Infantry-heavy)
+
+    Counter with **40/15/45** (more Marksmen) to exploit their Infantry focus.
+    """)
+
+    # Detailed zone tabs
+    with st.expander("📋 Detailed Zone Strategies"):
+        zone_tabs = st.tabs(["Land of Brave", "Cave of Monsters", "Glowstone Mine", "Earthlab", "Dark Forge", "Gaia Heart"])
 
         with zone_tabs[0]:
-            st.markdown("### Labyrinth Zone Summary")
-            st.markdown("""
-            | Zone | Days | Format | Stats That Matter | Recommended Ratio |
-            |------|------|--------|-------------------|-------------------|
-            | **Land of the Brave** | Mon-Tue | 3v3 (9 heroes) | Heroes, Hero Gear, Exclusive Gear | 50/20/30 |
-            | **Cave of Monsters** | Wed-Thu | 2v2 | Pets, Pet Skills | 52/13/35 |
-            | **Glowstone Mine** | Wed-Thu | 2v2 | Chief Charms (unlocks FC25) | 52/13/35 |
-            | **Earthlab** | Fri-Sat | 2v2 | Research Center, War Academy | 52/13/35 |
-            | **Dark Forge** | Fri-Sat | 2v2 | Chief Gear (unlocks FC22) | 52/13/35 |
-            | **Gaia Heart** | Sunday | 3v3 | ALL stats + YOUR troops | 50/20/30 |
-            """)
-
-            st.markdown("### AI Troop Ratios by Floor")
-            st.markdown("""
-            - **Floors 1-9:** AI uses **33/33/33** (balanced)
-            - **Floor 10:** AI switches to **53/27/20** (Infantry-heavy)
-
-            Counter Floor 10 with more Marksmen to exploit the Infantry-heavy AI.
-            """)
+            st.markdown("**Land of the Brave** (Mon-Tue)")
+            st.markdown("Format: 3v3 with up to 9 heroes")
+            st.success("Stats: Heroes, Hero Gear, Hero Exclusive Gear")
+            st.markdown("Strategy: Focus on exclusive gear upgrades, pick heroes with AoE/CC")
 
         with zone_tabs[1]:
-            st.markdown("### ⚔️ Land of the Brave")
-            st.markdown("**Available:** Monday - Tuesday")
-            st.markdown("**Format:** 3v3 (up to 9 heroes across 3 armies)")
-
-            st.success("**Stats that matter:** Heroes, Hero Gear, Hero Exclusive Gear")
-
-            render_troop_ratio(50, 20, 30, "Standard 3v3 ratio")
-
-            st.markdown("""
-            **Strategy:**
-            - Focus on upgrading hero exclusive gear
-            - Select heroes with crowd control or AoE damage
-            - All 3 armies fight - plan your hero distribution
-            """)
+            st.markdown("**Cave of Monsters** (Wed-Thu)")
+            st.markdown("Format: 2v2 squad battles")
+            st.success("Stats: Pets, Pet Skills only")
+            st.markdown("Strategy: Pair tank heroes with healing pets. Turn order is random.")
 
         with zone_tabs[2]:
-            st.markdown("### 🐉 Cave of Monsters")
-            st.markdown("**Available:** Wednesday - Thursday")
-            st.markdown("**Format:** 2v2 squad battles")
-
-            st.success("**Stats that matter:** Pets, Pet Skills")
-
-            render_troop_ratio(52, 13, 35, "Lower Lancer for multi-round survival")
-
-            st.markdown("""
-            **Strategy:**
-            - Prioritize pet training and upgrades
-            - Pair tank heroes with healing pets
-            - Turn order is random - same army might fight twice
-            """)
+            st.markdown("**Glowstone Mine** (Wed-Thu)")
+            st.markdown("Format: 2v2 squad battles | Unlocks: FC25")
+            st.success("Stats: Chief Charms only")
+            st.markdown("Strategy: Balance offensive and defensive charms")
 
         with zone_tabs[3]:
-            st.markdown("### 💎 Glowstone Mine")
-            st.markdown("**Available:** Wednesday - Thursday")
-            st.markdown("**Format:** 2v2 squad battles")
-            st.markdown("**Unlocks:** Furnace Level 25")
-
-            st.success("**Stats that matter:** Chief Charms only")
-
-            render_troop_ratio(52, 13, 35, "Lower Lancer for multi-round survival")
-
-            st.markdown("""
-            **Strategy:**
-            - Balance offensive and defensive charms
-            - Charm levels matter more than hero levels here
-            - Focus on your weakest charm slots to improve
-            """)
+            st.markdown("**Earthlab** (Fri-Sat)")
+            st.markdown("Format: 2v2 squad battles")
+            st.success("Stats: Research Center Tech, War Academy Tech")
+            st.markdown("Strategy: Max your tech levels - long-term investment")
 
         with zone_tabs[4]:
-            st.markdown("### 🔬 Earthlab")
-            st.markdown("**Available:** Friday - Saturday")
-            st.markdown("**Format:** 2v2 squad battles")
-
-            st.success("**Stats that matter:** Research Center Tech, War Academy Tech")
-
-            render_troop_ratio(52, 13, 35, "Lower Lancer for multi-round survival")
-
-            st.markdown("""
-            **Strategy:**
-            - Maximize Research Center and War Academy levels
-            - Tech bonuses compound - every level helps
-            - Long-term investment zone
-            """)
+            st.markdown("**Dark Forge** (Fri-Sat)")
+            st.markdown("Format: 2v2 squad battles | Unlocks: FC22")
+            st.success("Stats: Chief Gear only")
+            st.markdown("Strategy: Balance all gear slots, don't neglect any piece")
 
         with zone_tabs[5]:
-            st.markdown("### 🔥 Dark Forge")
-            st.markdown("**Available:** Friday - Saturday")
-            st.markdown("**Format:** 2v2 squad battles")
-            st.markdown("**Unlocks:** Furnace Level 22")
+            st.markdown("**Gaia Heart** (Sunday)")
+            st.markdown("Format: 3v3 with YOUR troops")
+            st.warning("This is the ONLY zone where your troop tier matters!")
+            st.success("Stats: ALL stats combined")
+            st.markdown("Strategy: Use your best Fire Crystal/Helios troops")
 
-            st.success("**Stats that matter:** Chief Gear only")
-
-            render_troop_ratio(52, 13, 35, "Lower Lancer for multi-round survival")
-
-            st.markdown("""
-            **Strategy:**
-            - Balance upgrades across ALL chief gear slots
-            - Don't neglect any single piece
-            - Gear quality and level both matter
-            """)
-
-        with zone_tabs[6]:
-            st.markdown("### 🌍 Gaia Heart")
-            st.markdown("**Available:** Sunday only")
-            st.markdown("**Format:** 3v3 with YOUR actual troops")
-
-            st.warning("**This is the ONLY zone where your troop tier matters!**")
-            st.success("**Stats that matter:** ALL stats combined (heroes, pets, charms, tech, gear)")
-
-            render_troop_ratio(50, 20, 30, "Standard 3v3 - but higher tier troops = advantage")
-
-            st.markdown("""
-            **Strategy:**
-            - Use your best Fire Crystal or Helios troops
-            - This zone tests your ENTIRE account progression
-            - VIP bonuses, skins, and facilities also apply
-            - Game provides supplementary troops if capacity is low
-
-            **NOT counted:** Castle battle positions, alliance tech/territory, gem buffs
-            """)
-
-    # =============================================================================
-    # EXPLORATION / PVE
-    # =============================================================================
-    elif event_type == "Exploration / Frozen Stages":
-        st.markdown("## 🗺️ Exploration / Frozen Stages")
-        st.markdown("PvE campaign content and frozen wasteland exploration")
-
-        st.info("""
-        **EXPLORATION Skills apply in PvE, not Expedition Skills!**
-
-        Check your heroes' exploration skill descriptions - they're different from expedition (PvP) skills.
-        """)
-
-        # Build lineup using engine
-        if USE_PERSONALIZED:
-            lineup = LINEUP_BUILDER.build_personalized_lineup("exploration", USER_HEROES, ACTIVE_GEN)
-        else:
-            lineup = LINEUP_BUILDER.build_general_lineup("exploration", ACTIVE_GEN)
-
-        col1, col2 = st.columns(2)
-
-        with col1:
-            st.markdown("### Your PvE Lineup")
-            render_lineup_from_engine(lineup)
-
-            # Why this lineup explanation
-            render_why_this_lineup("exploration", lineup.heroes)
-
-        with col2:
-            if USE_PERSONALIZED and lineup.recommended_to_get:
-                render_recommended_to_get(lineup.recommended_to_get)
-
-            st.markdown("### Strategy Tips")
-            st.markdown("""
-            **For difficult stages:**
-            - Double healer (Molly + Bahiti)
-            - Prioritize survival over speed
-            - Retreat and retry with better gear
-            """)
-
-    # =============================================================================
-    # GATHERING
-    # =============================================================================
-    elif event_type == "Gathering":
-        st.markdown("## 📦 Gathering")
-        st.markdown("Resource gathering on the world map")
-
-        st.info("**Exploration skills** matter here - some heroes have gathering speed/load bonuses!")
-
-        render_3hero_lineup(
-            infantry={"name": "Sergey", "role": "Gathering support"},
-            lancer={"name": "Bahiti", "role": "Load capacity"},
-            marksman={"name": "Jessie", "role": "Gathering speed bonus", "lead": True}
-        )
-
-        st.markdown("""
-        **Gathering Tips:**
-        - **Jessie's** exploration skill boosts gathering speed
-        - Load capacity = more resources per trip
-        - Gathering heroes are **low priority** for combat upgrades
-        - Check hero exploration skills for gathering bonuses
-        """)
-
-    # =============================================================================
-    # POLAR TERROR
-    # =============================================================================
-    elif event_type == "Polar Terror":
-        st.markdown("## ❄️ Polar Terror")
-        st.markdown("Alliance boss event - all alliance members attack the same boss")
-
-        st.info("Your damage accumulates. Focus on dealing **maximum damage** before heroes die.")
-
-        render_3hero_lineup(
-            infantry={"name": "Jeronimo", "role": "ATK multiplier", "lead": True},
-            lancer={"name": "Molly", "role": "Some sustain"},
-            marksman={"name": "Alonso", "role": "Main damage"}
-        )
-        render_troop_ratio(25, 15, 60, "Heavy damage focus")
-
-        st.markdown("""
-        **Polar Terror Tips:**
-        - Boss has very high DEF
-        - DEF reduction heroes are valuable
-        - Damage dealt = points for rewards
-        - Multiple attempts allowed - experiment!
-        """)
-
-    # =============================================================================
-    # RESERVOIR RAID
-    # =============================================================================
-    elif event_type == "Reservoir Raid":
-        st.markdown("## 💧 Reservoir Raid")
-        st.markdown("Timed challenge event - clear waves as fast as possible")
-
-        st.warning("**Speed is everything.** AoE damage and fast wave clear wins.")
-
-        render_3hero_lineup(
-            infantry={"name": "Jeronimo", "role": "AoE damage", "lead": True},
-            lancer={"name": "Molly", "role": "AoE support"},
-            marksman={"name": "Philly", "role": "Ranged AoE"}
-        )
-
-        st.markdown("""
-        **Speed Clear Tips:**
-        - Every second matters for leaderboard
-        - AoE > single target for wave content
-        - Overkill doesn't matter - just kill fast
-        - DEF reduction helps clear faster
-        """)
-
-    # =============================================================================
-# FOOTER - REFERENCE SECTIONS
 # =============================================================================
-st.markdown("---")
+# EXPLORATION TAB
+# =============================================================================
+with tab_exploration:
+    st.markdown("## Exploration (5-Hero Lineup)")
+    st.markdown("This is the **only common mode** that uses 5 heroes.")
 
-with st.expander("📊 Troop Ratio Quick Reference"):
+    st.info("**EXPLORATION skills** (left side) apply in PvE, not Expedition skills!")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.markdown("### Recommended Lineup")
+        st.markdown("""
+        | Slot | Class | Role |
+        |------|-------|------|
+        | 1 | Infantry | Primary Tank |
+        | 2 | Infantry | Secondary Tank |
+        | 3 | Lancer | Healer |
+        | 4 | Marksman | Main DPS |
+        | 5 | Marksman/Lancer | Support |
+        """)
+
+        st.markdown("**Why 2 Infantry:** Double frontline survives longer in multi-wave PvE content.")
+
+    with col2:
+        st.markdown("### Key Heroes for PvE")
+        st.markdown("""
+        - **Natalia** - Essential tank with self-sustain
+        - **Flint** - Good secondary tank
+        - **Molly** - Primary healer
+        - **Alonso** - Strong sustained DPS
+
+        **For difficult stages:** Use double healer (Molly + Philly)
+        """)
+
+        render_troop_ratio(40, 30, 30, "Balanced for multi-wave survival")
+
+# =============================================================================
+# REFERENCE TAB
+# =============================================================================
+with tab_reference:
+    st.markdown("## Quick Reference")
+
+    # Dynamic generation advice
+    advice = get_generation_advice(selected_gen)
+
+    st.markdown("### 📈 Generation Advice")
+    st.markdown(f"**Your current generation:** Gen {selected_gen}")
+
+    if advice["next_gen"]:
+        st.markdown(f"**Next generation (Gen {advice['next_gen']}) brings:**")
+        if advice["next_heroes"]:
+            for hero in advice["next_heroes"]:
+                st.markdown(f"- **{hero['name']}** ({hero['hero_class']}) - {hero.get('tier_overall', '?')}-tier")
+
+        if advice["save_for"]:
+            st.success(f"**Worth saving for:** {advice['save_for']['highlight']} - {advice['save_for']['reason']}")
+    else:
+        st.markdown("You're at the latest generation!")
+
+    st.markdown(f"**Heroes that stay strong:** {', '.join(advice['still_strong'])}")
+
+    # Troop ratio reference
+    st.markdown("---")
+    st.markdown("### 📊 Troop Ratio Quick Reference")
     st.markdown("""
     | Situation | Infantry | Lancer | Marksman | Notes |
     |-----------|----------|--------|----------|-------|
-    | **Default Formation** | 50% | 20% | 30% | Balanced default |
-    | **Castle Battle** | 50% | 20% | 30% | Standard PvP |
-    | **Bear Hunt** | 0% | 10% | 90% | Maximum DPS |
-    | **Crazy Joe** | 90% | 10% | 0% | Infantry kills first |
-    | **Alliance Championship** | 50% | 20% | 30% | Sustained damage focus |
-    | **Labyrinth 3v3** | 50% | 20% | 30% | Land of Brave, Gaia Heart |
+    | **Default / Balanced** | 50% | 20% | 30% | Safe for unknown matchups |
+    | **Bear Trap** | 0% | 10% | 90% | Maximize ranged DPS |
+    | **Crazy Joe** | 90% | 10% | 0% | Infantry kills before backline attacks |
+    | **Garrison Defense** | 50% | 30% | 20% | Survival focus |
+    | **Labyrinth 3v3** | 50% | 20% | 30% | Standard |
     | **Labyrinth 2v2** | 52% | 13% | 35% | Multi-round survival |
-    | **Labyrinth Floor 10** | 40% | 15% | 45% | Counter AI's Infantry-heavy |
-
-    **Combat Order:** Infantry → Lancers → Marksmen
-    **Class Counters:** Infantry > Lancer > Marksman > Infantry
+    | **Labyrinth Floor 10** | 40% | 15% | 45% | Counter Infantry-heavy AI |
     """)
 
-with st.expander("🦸 Joiner Role Quick Reference"):
+    # Joiner mechanics
+    st.markdown("---")
+    st.markdown("### 🤝 Joiner Mechanics")
     st.markdown("""
-    ### CRITICAL: Only leftmost hero's TOP-RIGHT expedition skill matters!
+    **When joining rallies/garrisons:**
+    - Only **slot 1 hero's expedition skill** matters
+    - Up to **4 joiner skills** can stack on a rally
+    - Skills ranked by **level**, not player power
 
-    - **Leftmost hero**: First hero in your march lineup (slot 1)
-    - **Top-right skill**: The expedition skill in top-right position on hero skill screen
-    - Skills scale with level using expedition books
+    | Role | Best Hero | Skill Effect |
+    |------|-----------|--------------|
+    | Attack Joiner | **Jessie** | +5/10/15/20/25% DMG dealt |
+    | Defense Joiner | **Sergey** | -4/8/12/16/20% DMG taken |
 
-    ### Best Attack/Rally Joiners
-    | Hero | Top-Right Skill | Effect per Level (1-5) |
-    |------|-----------------|------------------------|
-    | **Jessie** | Stand of Arms | +5/10/15/20/25% DMG dealt |
-
-    Jessie's buff affects ALL damage types: normal attacks, hero skills, pet abilities, teammate buffs.
-
-    ### Best Garrison Joiners
-    | Hero | Top-Right Skill | Effect per Level (1-5) |
-    |------|-----------------|------------------------|
-    | **Sergey** | Defenders' Edge | -4/8/12/16/20% DMG taken |
-
-    ### Investment Rule
-    Joiners should have:
-    - ✅ HIGH skill level (determines both usage AND strength!)
-    - ✅ Functional gear (legendary okay)
-    - ✅ Appropriate hero levels
-    - ❌ NOT premium resources (Stones/Mithril)
-    - ❌ NOT priority over core heroes
-
-    Only 1 skill per joiner contributes. Other heroes/skills don't matter.
+    **No Jessie/Sergey?** Send troops WITHOUT heroes - wrong skills can hurt the rally!
     """)
 
-with st.expander("💰 Spender-Specific Advice"):
-    st.markdown("""
-    ### Heavy Spender (Top 10-50 in state)
-    - **Flint becomes core** for Arena & Championship
-    - Full mythic on Natalia → Alonso → Flint → Molly → Jeronimo
-    - Roster depth matters - develop 15+ heroes
-    - SvS prep timing is crucial (save upgrades for scoring)
+    # Spending advice
+    st.markdown("---")
+    st.markdown("### 💰 Investment Priority by Spending Level")
 
-    ### Medium Spender
-    - Focus on **Natalia + Alonso + Molly** first
-    - Jeronimo for rallies only
-    - Flint if Arena matters to you
-    - 9-12 developed heroes is target
+    spend_tab1, spend_tab2, spend_tab3 = st.tabs(["F2P / Low Spender", "Medium Spender", "Heavy Spender"])
 
-    ### Low Spender / F2P
-    - **Natalia is everything** - max her first
-    - One strong hero per class
-    - Join rallies, don't lead them
-    - Focus on ONE game mode strength
+    with spend_tab1:
+        st.markdown("""
+        **Focus on 3-4 heroes maximum:**
+        - **Natalia** - Your everything hero, max first
+        - **Alonso** - Primary damage dealer
+        - **Molly** - Essential healer
+        - **Jessie** - Expedition skill only (minimal investment)
 
-    ### Universal Rules
-    1. Natalia is safe investment at any spend level
-    2. Jeronimo is situational, not core
-    3. Joiners (Jessie/Sergey) don't need premium resources
-    4. Save Stone spending for SvS prep phases
-    """)
+        **Strategy:** Join rallies, don't lead them. One strong lineup beats multiple weak ones.
+        """)
 
-with st.expander("⏰ S3 Transition Notes"):
-    st.markdown("""
-    ### What carries into S3?
-    - **Natalia** - Remains top-tier tank
-    - **Alonso** - Holds value better than most damage dealers
-    - **Flint** - Still strong for Arena
+    with spend_tab2:
+        st.markdown("""
+        **Develop 6-9 heroes:**
+        - Core 3: Natalia, Alonso, Molly
+        - Add: Flint (Arena), Jeronimo (rallies), Philly (healing)
+        - Joiners: Jessie, Sergey (skill level only)
 
-    ### What gets power-crept?
-    - **Jeronimo** - Most affected, becomes niche
-    - **Pure damage heroes** - Burst heroes lose relative value
-    - Some S2 marksmen depending on S3 meta
+        **Strategy:** Can lead rallies occasionally. Build roster depth for Alliance Championship.
+        """)
 
-    ### Investment Strategy
-    - **Safe to max:** Natalia
-    - **Finish strong, then pause:** Alonso, Flint
-    - **Hold where they are:** Jeronimo, Molly
-    - **Wait for S3:** New hero investments
+    with spend_tab3:
+        st.markdown("""
+        **Develop 12+ heroes:**
+        - Full mythic gear on top 6
+        - Flint becomes core for Arena
+        - Roster depth for Championship
+        - Latest gen heroes for competitive edge
 
-    ### Timeline
-    - S3 is typically ~4-6 weeks after S2 stabilizes
-    - First SvS → Multiple SvS cycles → S3 signals
-    - Don't panic-freeze, but don't over-invest
-    """)
+        **Strategy:** Lead rallies, compete in all modes. Hero diversity wins Championships.
+        """)
 
 # Close database connection
 db.close()
