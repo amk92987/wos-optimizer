@@ -81,12 +81,171 @@ QUALITY_NAMES = {0: 'None', 1: 'Gray', 2: 'Green', 3: 'Blue', 4: 'Purple', 5: 'G
 # TEST PROFILE DEFINITIONS
 # =============================================================================
 
+def load_heroes_by_generation() -> dict:
+    """
+    Load all heroes from heroes.json grouped by generation.
+
+    Returns dict like: {1: [hero1, hero2...], 2: [hero3, hero4...], ...}
+    Each hero has: name, generation, hero_class, tier_overall, rarity
+    """
+    heroes_file = PROJECT_ROOT / "data" / "heroes.json"
+    with open(heroes_file, encoding='utf-8') as f:
+        data = json.load(f)
+
+    by_gen = {}
+    for hero in data.get('heroes', []):
+        gen = hero.get('generation', 1)
+        if gen not in by_gen:
+            by_gen[gen] = []
+        by_gen[gen].append({
+            'name': hero['name'],
+            'generation': gen,
+            'hero_class': hero.get('hero_class', 'Unknown'),
+            'tier_overall': hero.get('tier_overall', 'C'),
+            'rarity': hero.get('rarity', 'Rare'),
+        })
+
+    return by_gen
+
+
+def get_heroes_up_to_gen(max_gen: int, heroes_by_gen: dict) -> list:
+    """
+    Get ALL heroes from generation 1 through max_gen.
+
+    This is the key function - a Gen 6 player has access to ALL Gen 1-6 heroes.
+    """
+    all_heroes = []
+    for gen in range(1, max_gen + 1):
+        if gen in heroes_by_gen:
+            all_heroes.extend(heroes_by_gen[gen])
+    return all_heroes
+
+
+def build_hero_roster(max_gen: int, heroes_by_gen: dict, stage: str = 'early') -> list:
+    """
+    Build a realistic hero roster for a player at a given generation.
+
+    Args:
+        max_gen: The generation the player is currently in
+        heroes_by_gen: Dict of heroes grouped by generation
+        stage: 'early' = just entered this gen, 'developed' = well-invested
+
+    Returns:
+        List of hero configs with level, stars, gear_quality
+    """
+    all_heroes = get_heroes_up_to_gen(max_gen, heroes_by_gen)
+
+    # Priority heroes that players focus on (meta heroes)
+    meta_heroes = {
+        'Jeronimo', 'Natalia', 'Jessie', 'Sergey',  # Gen 1 essentials
+        'Flint', 'Philly', 'Alonso',  # Gen 2
+        'Logan', 'Mia',  # Gen 3
+        'Ahmose', 'Reina',  # Gen 4
+        'Wu Ming', 'Hector', 'Norah', 'Wayne',  # Gen 5-6
+        'Gordon', 'Renee', 'Edith', 'Gatot',  # Gen 7-8
+        'Hendrik', 'Gwen', 'Xura', 'Ling',  # Gen 9-10
+    }
+
+    roster = []
+    for hero in all_heroes:
+        hero_name = hero['name']
+        hero_gen = hero['generation']
+        tier = hero['tier_overall']
+        rarity = hero['rarity']
+
+        # Skip Rare heroes (gathering heroes) - most players don't invest in these
+        if rarity == 'Rare':
+            continue
+
+        # Calculate stats based on generation gap and stage
+        gen_diff = max_gen - hero_gen  # How many gens since this hero was released
+
+        if stage == 'early':
+            # Early stage: newer heroes less developed, older heroes moderately developed
+            if gen_diff == 0:  # Current gen
+                base_level = 25
+                base_stars = 0
+                base_gear = 2
+            elif gen_diff == 1:  # Previous gen
+                base_level = 40
+                base_stars = 2
+                base_gear = 3
+            elif gen_diff <= 3:  # 2-3 gens ago
+                base_level = 50
+                base_stars = 3
+                base_gear = 4
+            else:  # Old gen (4+)
+                base_level = 55
+                base_stars = 3
+                base_gear = 4
+
+            # Boost for meta heroes
+            if hero_name in meta_heroes:
+                base_level = min(70, base_level + 10)
+                base_stars = min(5, base_stars + 1)
+                base_gear = min(5, base_gear + 1)
+
+        else:  # developed
+            # Developed stage: more investment overall
+            if gen_diff == 0:  # Current gen
+                base_level = 45
+                base_stars = 2
+                base_gear = 3
+            elif gen_diff == 1:  # Previous gen
+                base_level = 60
+                base_stars = 4
+                base_gear = 5
+            elif gen_diff <= 3:  # 2-3 gens ago
+                base_level = 70
+                base_stars = 5
+                base_gear = 5
+            else:  # Old gen (4+)
+                base_level = 75
+                base_stars = 5
+                base_gear = 5
+
+            # Boost for meta heroes
+            if hero_name in meta_heroes:
+                base_level = min(80, base_level + 5)
+                base_stars = 5
+                base_gear = min(6, base_gear + 1)
+
+        # S+ and S tier heroes get extra investment
+        if tier in ['S+', 'S']:
+            base_level = min(80, base_level + 5)
+            base_stars = min(5, base_stars + 1)
+
+        hero_config = {
+            'name': hero_name,
+            'level': base_level,
+            'stars': base_stars,
+            'gear_quality': base_gear,
+        }
+
+        # Add mythic gear for top heroes in developed stage at high gens
+        if stage == 'developed' and max_gen >= 8 and tier in ['S+', 'S', 'A']:
+            if hero_name in ['Natalia', 'Jeronimo'] and gen_diff >= 3:
+                hero_config['mythic'] = True
+                hero_config['gear_quality'] = min(7, hero_config['gear_quality'] + 1)
+
+        roster.append(hero_config)
+
+    # Sort by level descending so most invested heroes are first
+    roster.sort(key=lambda h: (-h['level'], -h['stars']))
+
+    return roster
+
+
 def get_test_profiles():
     """
     Generate test profile configurations.
 
     Returns a list of profile configs that will be used to create
     synthetic test data for lineup testing.
+
+    IMPORTANT: Each profile automatically includes ALL heroes from
+    generation 1 through the profile's generation. A Gen 6 player
+    has access to all Gen 1-6 heroes.
 
     Groups:
     - A: Generation baseline (2 per gen)
@@ -98,278 +257,55 @@ def get_test_profiles():
     """
     profiles = []
 
+    # Load heroes from the source of truth
+    heroes_by_gen = load_heroes_by_generation()
+
     # =========================================================================
     # GROUP A: Generation Baseline (14 profiles)
+    # Auto-generates roster with ALL heroes up to that generation
     # =========================================================================
-    generation_profiles = [
-        # Gen 2 - Very early game
-        {'name': 'Gen2_Early', 'group': 'generation', 'gen': 2,
-         'heroes': [
-             {'name': 'Jessie', 'level': 30, 'stars': 1, 'gear_quality': 2},
-             {'name': 'Molly', 'level': 25, 'stars': 0, 'gear_quality': 2},
-             {'name': 'Natalia', 'level': 35, 'stars': 1, 'gear_quality': 3},
-             {'name': 'Jeronimo', 'level': 30, 'stars': 1, 'gear_quality': 2},
-             {'name': 'Zinman', 'level': 20, 'stars': 0, 'gear_quality': 1},
-             {'name': 'Sergey', 'level': 25, 'stars': 0, 'gear_quality': 2},
-             {'name': 'Flint', 'level': 20, 'stars': 0, 'gear_quality': 1},
-             {'name': 'Philly', 'level': 15, 'stars': 0, 'gear_quality': 1},
-         ],
-         'chief_gear_quality': 2, 'charm_level': 0},
-
-        {'name': 'Gen2_Developed', 'group': 'generation', 'gen': 2,
-         'heroes': [
-             {'name': 'Jessie', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Molly', 'level': 45, 'stars': 2, 'gear_quality': 4},
-             {'name': 'Natalia', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Jeronimo', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Zinman', 'level': 45, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Sergey', 'level': 40, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Flint', 'level': 40, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Philly', 'level': 35, 'stars': 1, 'gear_quality': 3},
-             {'name': 'Alonso', 'level': 30, 'stars': 1, 'gear_quality': 2},
-         ],
-         'chief_gear_quality': 3, 'charm_level': 3},
-
-        # Gen 4
-        {'name': 'Gen4_Early', 'group': 'generation', 'gen': 4,
-         'heroes': [
-             {'name': 'Jessie', 'level': 45, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Natalia', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Jeronimo', 'level': 45, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Zinman', 'level': 40, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Sergey', 'level': 35, 'stars': 1, 'gear_quality': 3},
-             {'name': 'Flint', 'level': 40, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Logan', 'level': 35, 'stars': 1, 'gear_quality': 3},
-             {'name': 'Mia', 'level': 30, 'stars': 1, 'gear_quality': 2},
-             {'name': 'Ahmose', 'level': 25, 'stars': 0, 'gear_quality': 2},
-             {'name': 'Reina', 'level': 20, 'stars': 0, 'gear_quality': 1},
-         ],
-         'chief_gear_quality': 3, 'charm_level': 3},
-
-        {'name': 'Gen4_Developed', 'group': 'generation', 'gen': 4,
-         'heroes': [
-             {'name': 'Jessie', 'level': 60, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Natalia', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Jeronimo', 'level': 60, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Zinman', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Sergey', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Flint', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Logan', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Mia', 'level': 45, 'stars': 2, 'gear_quality': 4},
-             {'name': 'Ahmose', 'level': 45, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Reina', 'level': 40, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Lynn', 'level': 35, 'stars': 1, 'gear_quality': 3},
-         ],
-         'chief_gear_quality': 4, 'charm_level': 6},
-
-        # Gen 6
-        {'name': 'Gen6_Early', 'group': 'generation', 'gen': 6,
-         'heroes': [
-             {'name': 'Jessie', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Natalia', 'level': 60, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Jeronimo', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Zinman', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Sergey', 'level': 45, 'stars': 2, 'gear_quality': 4},
-             {'name': 'Logan', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Ahmose', 'level': 45, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Reina', 'level': 40, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Wu Ming', 'level': 35, 'stars': 1, 'gear_quality': 3},
-             {'name': 'Hector', 'level': 30, 'stars': 1, 'gear_quality': 2},
-             {'name': 'Norah', 'level': 25, 'stars': 0, 'gear_quality': 2},
-             {'name': 'Wayne', 'level': 20, 'stars': 0, 'gear_quality': 1},
-         ],
-         'chief_gear_quality': 4, 'charm_level': 5},
-
-        {'name': 'Gen6_Developed', 'group': 'generation', 'gen': 6,
-         'heroes': [
-             {'name': 'Jessie', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Natalia', 'level': 75, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Jeronimo', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Zinman', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Sergey', 'level': 60, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Logan', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Ahmose', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Reina', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Wu Ming', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Hector', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Norah', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Wayne', 'level': 45, 'stars': 2, 'gear_quality': 3},
-         ],
-         'chief_gear_quality': 5, 'charm_level': 10},
-
-        # Gen 8
-        {'name': 'Gen8_Early', 'group': 'generation', 'gen': 8,
-         'heroes': [
-             {'name': 'Natalia', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Jeronimo', 'level': 60, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Jessie', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Zinman', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Sergey', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Logan', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Ahmose', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Wu Ming', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Hector', 'level': 45, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Norah', 'level': 45, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Gordon', 'level': 40, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Renee', 'level': 35, 'stars': 1, 'gear_quality': 3},
-             {'name': 'Edith', 'level': 30, 'stars': 1, 'gear_quality': 2},
-             {'name': 'Gatot', 'level': 25, 'stars': 0, 'gear_quality': 2},
-         ],
-         'chief_gear_quality': 4, 'charm_level': 6},
-
-        {'name': 'Gen8_Developed', 'group': 'generation', 'gen': 8,
-         'heroes': [
-             {'name': 'Natalia', 'level': 80, 'stars': 5, 'gear_quality': 6, 'mythic': True},
-             {'name': 'Jeronimo', 'level': 75, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Jessie', 'level': 75, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Zinman', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Sergey', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Logan', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Ahmose', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Wu Ming', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Hector', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Norah', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Gordon', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Renee', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Edith', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Gatot', 'level': 50, 'stars': 3, 'gear_quality': 4},
-         ],
-         'chief_gear_quality': 5, 'charm_level': 12},
-
-        # Gen 10
-        {'name': 'Gen10_Early', 'group': 'generation', 'gen': 10,
-         'heroes': [
-             {'name': 'Natalia', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Jeronimo', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Jessie', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Zinman', 'level': 60, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Sergey', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Logan', 'level': 60, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Ahmose', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Wu Ming', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Hector', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Gordon', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Edith', 'level': 45, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Gatot', 'level': 45, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Hendrik', 'level': 40, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Gwen', 'level': 35, 'stars': 1, 'gear_quality': 3},
-             {'name': 'Xura', 'level': 30, 'stars': 1, 'gear_quality': 2},
-             {'name': 'Ling', 'level': 25, 'stars': 0, 'gear_quality': 2},
-         ],
-         'chief_gear_quality': 5, 'charm_level': 8},
-
-        {'name': 'Gen10_Developed', 'group': 'generation', 'gen': 10,
-         'heroes': [
-             {'name': 'Natalia', 'level': 80, 'stars': 5, 'gear_quality': 6, 'mythic': True},
-             {'name': 'Jeronimo', 'level': 80, 'stars': 5, 'gear_quality': 6, 'mythic': True},
-             {'name': 'Jessie', 'level': 80, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Zinman', 'level': 75, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Sergey', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Logan', 'level': 75, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Ahmose', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Wu Ming', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Hector', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Gordon', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Edith', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Gatot', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Hendrik', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Gwen', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Xura', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Ling', 'level': 50, 'stars': 3, 'gear_quality': 4},
-         ],
-         'chief_gear_quality': 6, 'charm_level': 14},
-
-        # Gen 12
-        {'name': 'Gen12_Early', 'group': 'generation', 'gen': 12,
-         'heroes': [
-             {'name': 'Natalia', 'level': 75, 'stars': 5, 'gear_quality': 6, 'mythic': True},
-             {'name': 'Jeronimo', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Jessie', 'level': 75, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Zinman', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Logan', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Ahmose', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Wu Ming', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Hector', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Gordon', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Hendrik', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Xura', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Ling', 'level': 45, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Kazuki', 'level': 40, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Sofia', 'level': 35, 'stars': 1, 'gear_quality': 3},
-             {'name': 'Bjorn', 'level': 30, 'stars': 1, 'gear_quality': 2},
-             {'name': 'Yuki', 'level': 25, 'stars': 0, 'gear_quality': 2},
-         ],
-         'chief_gear_quality': 5, 'charm_level': 10},
-
-        {'name': 'Gen12_Developed', 'group': 'generation', 'gen': 12,
-         'heroes': [
-             {'name': 'Natalia', 'level': 80, 'stars': 5, 'gear_quality': 7, 'mythic': True},
-             {'name': 'Jeronimo', 'level': 80, 'stars': 5, 'gear_quality': 7, 'mythic': True},
-             {'name': 'Jessie', 'level': 80, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Zinman', 'level': 80, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Logan', 'level': 75, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Ahmose', 'level': 75, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Wu Ming', 'level': 75, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Hector', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Gordon', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Hendrik', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Xura', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Ling', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Kazuki', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Sofia', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Bjorn', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Yuki', 'level': 55, 'stars': 3, 'gear_quality': 4},
-         ],
-         'chief_gear_quality': 6, 'charm_level': 16},
-
-        # Gen 14
-        {'name': 'Gen14_Early', 'group': 'generation', 'gen': 14,
-         'heroes': [
-             {'name': 'Natalia', 'level': 80, 'stars': 5, 'gear_quality': 6, 'mythic': True},
-             {'name': 'Jeronimo', 'level': 75, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Jessie', 'level': 80, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Zinman', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Logan', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Wu Ming', 'level': 65, 'stars': 4, 'gear_quality': 5},
-             {'name': 'Hector', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Gordon', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Hendrik', 'level': 60, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Xura', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Kazuki', 'level': 55, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Bjorn', 'level': 50, 'stars': 3, 'gear_quality': 4},
-             {'name': 'Magnus', 'level': 40, 'stars': 2, 'gear_quality': 3},
-             {'name': 'Chen', 'level': 35, 'stars': 1, 'gear_quality': 2},
-         ],
-         'chief_gear_quality': 6, 'charm_level': 12},
-
-        {'name': 'Gen14_Developed', 'group': 'generation', 'gen': 14,
-         'heroes': [
-             {'name': 'Natalia', 'level': 80, 'stars': 5, 'gear_quality': 7, 'mythic': True},
-             {'name': 'Jeronimo', 'level': 80, 'stars': 5, 'gear_quality': 7, 'mythic': True},
-             {'name': 'Jessie', 'level': 80, 'stars': 5, 'gear_quality': 7},
-             {'name': 'Zinman', 'level': 80, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Logan', 'level': 80, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Wu Ming', 'level': 80, 'stars': 5, 'gear_quality': 6},
-             {'name': 'Hector', 'level': 75, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Gordon', 'level': 75, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Hendrik', 'level': 75, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Xura', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Kazuki', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Bjorn', 'level': 70, 'stars': 5, 'gear_quality': 5},
-             {'name': 'Magnus', 'level': 65, 'stars': 4, 'gear_quality': 4},
-             {'name': 'Chen', 'level': 60, 'stars': 4, 'gear_quality': 4},
-         ],
-         'chief_gear_quality': 7, 'charm_level': 16},
+    generation_configs = [
+        # (gen, early_charm, early_chief_gear, dev_charm, dev_chief_gear)
+        (2, 0, 2, 3, 3),
+        (4, 3, 3, 6, 4),
+        (6, 5, 4, 10, 5),
+        (8, 6, 4, 12, 5),
+        (10, 8, 5, 14, 6),
+        (12, 10, 5, 16, 6),
+        (14, 12, 6, 16, 7),
     ]
+
+    generation_profiles = []
+    for gen, early_charm, early_chief, dev_charm, dev_chief in generation_configs:
+        # Early stage profile
+        generation_profiles.append({
+            'name': f'Gen{gen}_Early',
+            'group': 'generation',
+            'gen': gen,
+            'heroes': build_hero_roster(gen, heroes_by_gen, 'early'),
+            'chief_gear_quality': early_chief,
+            'charm_level': early_charm,
+        })
+
+        # Developed stage profile
+        generation_profiles.append({
+            'name': f'Gen{gen}_Developed',
+            'group': 'generation',
+            'gen': gen,
+            'heroes': build_hero_roster(gen, heroes_by_gen, 'developed'),
+            'chief_gear_quality': dev_chief,
+            'charm_level': dev_charm,
+        })
+
     profiles.extend(generation_profiles)
 
     # =========================================================================
     # GROUP B: Level Impact (6 profiles)
     # Same Gen 10 roster with different level distributions
     # =========================================================================
-    base_roster = ['Natalia', 'Jeronimo', 'Jessie', 'Zinman', 'Sergey',
-                   'Logan', 'Ahmose', 'Wu Ming', 'Hector', 'Gordon',
-                   'Hendrik', 'Xura']
+    # Get all Epic/Legendary heroes up to Gen 10 for base roster
+    all_gen10_heroes = get_heroes_up_to_gen(10, heroes_by_gen)
+    base_roster = [h['name'] for h in all_gen10_heroes if h['rarity'] != 'Rare']
 
     level_profiles = [
         {'name': 'Levels_AllLow', 'group': 'level_impact', 'gen': 10,
@@ -514,6 +450,7 @@ def get_test_profiles():
              {'name': 'Zinman', 'level': 75, 'stars': 5, 'gear_quality': 5},
              {'name': 'Ahmose', 'level': 75, 'stars': 5, 'gear_quality': 5},
              {'name': 'Hector', 'level': 70, 'stars': 5, 'gear_quality': 5},
+             {'name': 'Sergey', 'level': 50, 'stars': 3, 'gear_quality': 4},  # For garrison joiner
              {'name': 'Natalia', 'level': 40, 'stars': 2, 'gear_quality': 3},
              {'name': 'Jessie', 'level': 40, 'stars': 2, 'gear_quality': 3},
          ],
@@ -526,6 +463,7 @@ def get_test_profiles():
              {'name': 'Jessie', 'level': 80, 'stars': 5, 'gear_quality': 6},
              {'name': 'Logan', 'level': 75, 'stars': 5, 'gear_quality': 5},
              {'name': 'Gordon', 'level': 70, 'stars': 5, 'gear_quality': 5},
+             {'name': 'Sergey', 'level': 35, 'stars': 1, 'gear_quality': 3},  # For garrison joiner (low investment)
              {'name': 'Jeronimo', 'level': 40, 'stars': 2, 'gear_quality': 3},
              {'name': 'Zinman', 'level': 40, 'stars': 2, 'gear_quality': 3},
          ],
@@ -681,30 +619,47 @@ def get_game_context_prompt() -> str:
 **Lancer**: {lancer_list}
 **Marksman**: {marksman_list}
 
-## Key Mechanics
+## CRITICAL JOINER RULES - READ THIS FIRST
 
-### Rally/Garrison Joining (LEFTMOST hero matters!)
-When joining, only the LEFTMOST hero's top-right expedition skill applies to the battle.
-- For ATTACK joining: Put hero with damage buff skill in slot 1
-- For DEFENSE joining: Put hero with damage reduction skill in slot 1
+### Best Joiner Heroes (MANDATORY for joiner scenarios)
+When joining rallies or garrison, ONLY the LEFTMOST hero's top-right expedition skill matters!
 
-### Event Strategies
+**For ATTACK/RALLY JOINER - ALWAYS put JESSIE in slot 1:**
+- Jessie has "Stand of Arms" expedition skill: +25% damage dealt
+- This is THE BEST attack joining skill in the game
+- Her level/gear/stars don't matter - only her skill level matters
+- Even a low-level Jessie is better than a maxed other hero for attack joining
+
+**For GARRISON/DEFENSE JOINER - ALWAYS put SERGEY in slot 1:**
+- Sergey has "Defenders' Edge" expedition skill: -20% damage taken
+- This is THE BEST defense joining skill in the game
+- His level/gear/stars don't matter - only his skill level matters
+- Even a low-level Sergey is better than a maxed other hero for garrison joining
+
+### Why Jessie and Sergey Are Non-Negotiable:
+- Joiner hero's STATS, LEVEL, and GEAR are 100% IRRELEVANT for rally/garrison contribution
+- Only the expedition SKILL applies to the battle
+- No other hero has a better joining skill than Jessie (attack) or Sergey (defense)
+- If the profile has Jessie/Sergey, they MUST be in slot 1 for joining scenarios
+
+## Event Strategies
 
 **Bear Trap**: Bear is SLOW. Use Marksman heroes + 0/10/90 troop ratio.
 **Crazy Joe**: Joe attacks BACKLINE first. Use Infantry heroes + 90/10/0 ratio.
 **Garrison Defense**: Infantry-heavy for survival. 60/25/15 ratio.
-**Garrison Joiner**: Defense skill in slot 1. 50/30/20 ratio.
-**Rally Joiner (Attack)**: Attack buff skill in slot 1. 30/20/50 ratio.
+**Garrison Joiner**: SERGEY in slot 1 (Defenders' Edge -20% DMG). 50/30/20 ratio.
+**Rally Joiner (Attack)**: JESSIE in slot 1 (Stand of Arms +25% DMG). 30/20/50 ratio.
+**Rally Lead**: All 9 skills from your 3 heroes apply. Use highest tier heroes.
 **SvS March**: Balanced composition. 40/20/40 ratio.
 **Alliance Championship**: Need 3 separate 5-hero lineups.
 **Polar Terror**: Single target DPS, Marksman-focused.
 **Capital Clash**: Balanced like SvS. 40/20/40 ratio.
 
 ## Selection Priority
-1. Match hero CLASS to event needs (Marksman for Bear Trap, Infantry for Crazy Joe)
-2. Higher TIER heroes are generally better (S+ > S > A > B > C > D)
-3. Higher LEVEL/GEAR heroes outperform lower ones of same tier
-4. For joining scenarios, slot 1 hero's expedition skill is critical
+1. **For joining scenarios**: Jessie (attack) or Sergey (defense) MUST be slot 1
+2. Match hero CLASS to event needs (Marksman for Bear Trap, Infantry for Crazy Joe)
+3. Higher TIER heroes are generally better (S+ > S > A > B > C > D)
+4. Higher LEVEL/GEAR heroes outperform lower ones of same tier
 
 ## IMPORTANT
 Use the hero CLASS listed in the profile data. Each hero shows: Name (Class, Gen, Tier)
@@ -728,8 +683,14 @@ def get_scenario_prompt(scenario: str) -> str:
     return prompts.get(scenario, f"Build the optimal lineup for {scenario}.")
 
 
-def build_ai_prompt(snapshot: dict, scenario: str) -> str:
-    """Build the complete prompt for AI."""
+def build_ai_prompt(snapshot: dict, scenario: str, enhanced: bool = False) -> str:
+    """Build the complete prompt for AI.
+
+    Args:
+        snapshot: Player profile data
+        scenario: Game scenario (bear_trap, rally_joiner, etc.)
+        enhanced: If True, use enhanced format for deeper game insights
+    """
     heroes_text = "\n".join([
         f"- {h['name']} ({h['class']}, Gen {h['generation']}, Tier {h['tier_overall']}): "
         f"Level {h['level']}, {h['stars']} stars, {h['gear_quality']} gear"
@@ -737,7 +698,61 @@ def build_ai_prompt(snapshot: dict, scenario: str) -> str:
         for h in snapshot['heroes']
     ])
 
-    return f"""
+    if enhanced:
+        return f"""
+{get_game_context_prompt()}
+
+---
+
+## Player Profile: {snapshot['profile_name']}
+
+**Available Heroes:**
+{heroes_text}
+
+**Chief Gear:** All slots {snapshot['chief_gear']['helmet']['quality']} quality
+**Charm Level:** {snapshot['charm_level']}
+
+---
+
+## Task: {get_scenario_prompt(scenario)}
+
+Provide your recommendation with COMPREHENSIVE ANALYSIS in this EXACT format:
+
+LINEUP:
+1. [Hero Name] - [Why this hero in slot 1? What makes them essential for this slot?]
+2. [Hero Name] - [Why slot 2? What alternative did you consider?]
+3. [Hero Name] - [Why slot 3? What does this hero contribute?]
+4. [Hero Name] - [Why slot 4?]
+5. [Hero Name] - [Why slot 5?]
+
+TROOP_RATIO: [Infantry%]/[Lancer%]/[Marksman%]
+
+TROOP_REASONING:
+[Why this specific troop ratio? What game mechanic does it optimize for? How does the enemy behavior influence this?]
+
+KEY_GAME_MECHANIC:
+[What is THE most important game mechanic that drives this lineup choice? Explain how it works.]
+
+HERO_SYNERGIES:
+[Do any of these heroes have synergies or skills that complement each other? Explain.]
+
+COMMON_MISTAKES:
+[What mistakes do players commonly make in this scenario? What should they avoid?]
+
+MISSING_HERO_IMPACT:
+[What hero NOT in this roster would most improve this lineup if acquired? Why?]
+
+GEAR_PRIORITY:
+[Which hero in this lineup benefits MOST from gear investment for this scenario? Why?]
+
+ALTERNATIVE_LINEUP:
+[If the slot 1 hero wasn't available, what would be the next best option? How much worse would it be?]
+
+CONFIDENCE_LEVEL:
+[How confident are you in this recommendation? HIGH/MEDIUM/LOW and why?]
+"""
+    else:
+        return f"""
 {get_game_context_prompt()}
 
 ---

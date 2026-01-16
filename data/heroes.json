@@ -369,7 +369,7 @@
     {
       "name": "Zinman",
       "generation": 1,
-      "hero_class": "Infantry",
+      "hero_class": "Marksman",
       "rarity": "Legendary",
       "tier_overall": "C",
       "tier_expedition": "C",
@@ -395,7 +395,7 @@
     {
       "name": "Flint",
       "generation": 2,
-      "hero_class": "Lancer",
+      "hero_class": "Infantry",
       "rarity": "Legendary",
       "tier_overall": "A",
       "tier_expedition": "A",
@@ -421,7 +421,7 @@
     {
       "name": "Philly",
       "generation": 2,
-      "hero_class": "Marksman",
+      "hero_class": "Lancer",
       "rarity": "Legendary",
       "tier_overall": "A",
       "tier_expedition": "B",
@@ -447,7 +447,7 @@
     {
       "name": "Alonso",
       "generation": 2,
-      "hero_class": "Infantry",
+      "hero_class": "Marksman",
       "rarity": "Legendary",
       "tier_overall": "A",
       "tier_expedition": "A",
@@ -473,7 +473,7 @@
     {
       "name": "Logan",
       "generation": 3,
-      "hero_class": "Lancer",
+      "hero_class": "Infantry",
       "rarity": "Legendary",
       "tier_overall": "A",
       "tier_expedition": "S",
@@ -499,7 +499,7 @@
     {
       "name": "Mia",
       "generation": 3,
-      "hero_class": "Marksman",
+      "hero_class": "Lancer",
       "rarity": "Legendary",
       "tier_overall": "A",
       "tier_expedition": "A",

@@ -3,8 +3,69 @@ Lineup Builder - Recommends optimal lineups based on owned heroes.
 Considers game mode, hero levels, skills, gear, and user priorities.
 """
 
+import json
+from pathlib import Path
 from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, field
+
+
+# Cache for hero metadata loaded from heroes.json
+_HERO_METADATA_CACHE = None
+
+
+def load_hero_metadata() -> Dict[str, Dict[str, Any]]:
+    """
+    Load hero metadata from heroes.json.
+
+    This is the single source of truth for hero data.
+    Returns dict mapping hero_name -> {class, gen, tier, role}
+    """
+    global _HERO_METADATA_CACHE
+
+    if _HERO_METADATA_CACHE is not None:
+        return _HERO_METADATA_CACHE
+
+    # Find heroes.json relative to this file
+    current_file = Path(__file__)
+    project_root = current_file.parent.parent.parent
+    heroes_file = project_root / "data" / "heroes.json"
+
+    metadata = {}
+
+    try:
+        with open(heroes_file, encoding='utf-8') as f:
+            data = json.load(f)
+
+        for hero in data.get('heroes', []):
+            name = hero.get('name', '')
+            if name:
+                metadata[name] = {
+                    'class': hero.get('hero_class', 'Unknown'),
+                    'gen': hero.get('generation', 1),
+                    'tier': hero.get('tier_overall', 'C'),
+                    'tier_expedition': hero.get('tier_expedition', 'C'),
+                    'role': hero.get('best_use', 'Unknown')[:30] if hero.get('best_use') else 'Unknown',
+                    'rarity': hero.get('rarity', 'Rare'),
+                }
+    except FileNotFoundError:
+        # Fallback to empty dict - will use defaults
+        pass
+
+    _HERO_METADATA_CACHE = metadata
+    return metadata
+
+
+def get_hero_metadata(hero_name: str) -> Dict[str, Any]:
+    """Get metadata for a specific hero."""
+    metadata = load_hero_metadata()
+    return metadata.get(hero_name, {
+        'class': 'Unknown',
+        'gen': 99,
+        'tier': 'C',
+        'tier_expedition': 'C',
+        'role': 'Unknown',
+        'rarity': 'Rare',
+    })
 
 
 @dataclass
@@ -65,37 +126,8 @@ def calculate_hero_power(hero_stats: dict, hero_data: dict = None) -> int:
     return score
 
 
-# Hero metadata: class and generation
-HERO_METADATA = {
-    # Gen 1
-    "Jeronimo": {"class": "Infantry", "gen": 1, "tier": "S", "role": "ATK buffer"},
-    "Natalia": {"class": "Infantry", "gen": 2, "tier": "S+", "role": "Tank/Sustain"},
-    "Flint": {"class": "Infantry", "gen": 2, "tier": "A", "role": "Control/Tank"},
-    "Sergey": {"class": "Infantry", "gen": 1, "tier": "B", "role": "Garrison joiner"},
-    "Jessie": {"class": "Marksman", "gen": 1, "tier": "B", "role": "Attack joiner"},
-    "Bahiti": {"class": "Lancer", "gen": 1, "tier": "B", "role": "Healer/Support"},
-    "Patrick": {"class": "Lancer", "gen": 1, "tier": "C", "role": "Early lancer"},
-    "Logan": {"class": "Marksman", "gen": 1, "tier": "C", "role": "Backup marksman"},
-    # Gen 2
-    "Molly": {"class": "Lancer", "gen": 2, "tier": "S", "role": "Healer/DPS"},
-    "Alonso": {"class": "Marksman", "gen": 2, "tier": "S+", "role": "Main DPS"},
-    "Philly": {"class": "Marksman", "gen": 2, "tier": "A", "role": "Burst DPS"},
-    # Gen 3
-    "Zinman": {"class": "Lancer", "gen": 3, "tier": "S", "role": "Tank/Control"},
-    "Gina": {"class": "Marksman", "gen": 3, "tier": "A", "role": "Healer"},
-    # Gen 4
-    "Mia": {"class": "Marksman", "gen": 4, "tier": "A", "role": "Support DPS"},
-    "Lynn": {"class": "Lancer", "gen": 4, "tier": "A", "role": "DPS Lancer"},
-    # Gen 5
-    "Greg": {"class": "Infantry", "gen": 5, "tier": "S", "role": "Tank"},
-    "Reina": {"class": "Lancer", "gen": 5, "tier": "A", "role": "Support"},
-    # Gen 6+
-    "Ahmose": {"class": "Infantry", "gen": 6, "tier": "S", "role": "Tank/Control"},
-    "Norah": {"class": "Marksman", "gen": 6, "tier": "S", "role": "DPS"},
-    "Wayne": {"class": "Lancer", "gen": 7, "tier": "S", "role": "Support"},
-    "Jasser": {"class": "Marksman", "gen": 7, "tier": "S", "role": "Rally joiner"},
-    "Seo-yoon": {"class": "Marksman", "gen": 8, "tier": "S+", "role": "Rally DPS"},
-}
+# HERO_METADATA is now loaded dynamically from heroes.json via load_hero_metadata()
+# This ensures we always use the source of truth for hero data
 
 # Standard 3-hero lineup templates by event type
 # Each template has required_class for each slot to ensure proper composition
@@ -103,105 +135,198 @@ LINEUP_TEMPLATES = {
     "world_march": {
         "name": "World March",
         "slots": [
-            {"class": "Infantry", "role": "Lead/Tank", "preferred": ["Jeronimo", "Natalia", "Flint", "Greg", "Ahmose"], "is_lead": True},
-            {"class": "Lancer", "role": "Support/Heal", "preferred": ["Molly", "Zinman", "Bahiti", "Lynn", "Wayne"]},
-            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Philly", "Norah", "Seo-yoon", "Gina"]},
+            # Infantry: Jeronimo (S+ Infantry), Wu Ming (S+ Infantry), Natalia (A Infantry), Flint (A Infantry)
+            {"class": "Infantry", "role": "Lead/Tank", "preferred": ["Jeronimo", "Wu Ming", "Natalia", "Flint", "Ahmose", "Logan"], "is_lead": True},
+            # Lancer: Molly (B Lancer), Philly (A Lancer), Mia (A Lancer)
+            {"class": "Lancer", "role": "Support/Heal", "preferred": ["Molly", "Philly", "Mia", "Norah"]},
+            # Marksman: Alonso (A Marksman), Zinman (C Marksman), Bahiti (B Marksman)
+            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Zinman", "Bahiti", "Seo-yoon", "Gina"]},
         ],
         "troop_ratio": {"infantry": 50, "lancer": 20, "marksman": 30},
-        "notes": "Standard balanced march. Jeronimo for burst, Natalia for sustain.",
-        "key_heroes": ["Jeronimo", "Natalia", "Molly", "Alonso"],
+        "notes": "Standard balanced march. Jeronimo for burst, Wu Ming/Natalia for sustain.",
+        "key_heroes": ["Jeronimo", "Wu Ming", "Natalia", "Molly", "Alonso"],
+        "hero_explanations": {
+            "Jeronimo": "S+ Infantry lead with +50% offense buffs. Best for quick wins.",
+            "Wu Ming": "S+ Infantry with -25% damage taken. Better for extended field fights.",
+            "Natalia": "A-tier Infantry with sustain and healing. Alternative for longer fights.",
+            "Molly": "B-tier Lancer healer. Keeps your team alive in extended combat.",
+            "Philly": "A-tier Lancer healer. Good alternative support option.",
+            "Alonso": "A-tier Marksman DPS. High damage output."
+        },
+        "ratio_explanation": "Balanced 50/20/30 ratio works for general field combat. Infantry tanks damage, Marksman deals DPS, Lancer provides healing and utility."
     },
     "bear_trap": {
         "name": "Bear Trap Rally",
         "slots": [
-            {"class": "Infantry", "role": "ATK Buffer", "preferred": ["Jeronimo", "Natalia", "Greg"], "is_lead": True},
-            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Zinman", "Bahiti"]},
-            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Philly", "Seo-yoon", "Norah"]},
+            # Marksman: Hendrik (S), Xura (S), Wayne (A), Alonso (A), Zinman (C), Bahiti (B)
+            {"class": "Marksman", "role": "Main DPS Lead", "preferred": ["Hendrik", "Xura", "Wayne", "Alonso", "Zinman", "Bahiti"], "is_lead": True},
+            {"class": "Marksman", "role": "Secondary DPS", "preferred": ["Xura", "Wayne", "Alonso", "Zinman", "Seo-yoon", "Bahiti"]},
+            # Infantry: Jeronimo (S+), Natalia (A), Flint (A)
+            {"class": "Infantry", "role": "Frontline Buffer", "preferred": ["Jeronimo", "Natalia", "Flint"]},
         ],
-        "troop_ratio": {"infantry": 20, "lancer": 20, "marksman": 60},
-        "notes": "Heavy Marksman for max damage. Bear is slow, DPS matters most.",
-        "key_heroes": ["Jeronimo", "Molly", "Alonso"],
+        "troop_ratio": {"infantry": 0, "lancer": 10, "marksman": 90},
+        "notes": "Bear moves SLOWLY - maximize ranged damage window. 90% Marksman troops deal massive DPS before melee begins.",
+        "key_heroes": ["Hendrik", "Alonso", "Jeronimo"],
+        "hero_explanations": {
+            "Hendrik": "Gen 8 S-tier Marksman with highest single-target DPS. Best lead when available.",
+            "Xura": "Gen 9 S-tier Marksman with excellent damage output.",
+            "Wayne": "Gen 6 A-tier Marksman with strong sustained DPS.",
+            "Alonso": "Gen 2 A-tier Marksman with good damage. Best early/mid-game pick.",
+            "Zinman": "Gen 1 C-tier Marksman. Budget option available from start.",
+            "Bahiti": "Gen 1 B-tier Marksman backup. Budget option if lacking others.",
+            "Jeronimo": "S+ Infantry for ATK buffs. Buffs apply to all troops including Marksman."
+        },
+        "ratio_explanation": "Bear Trap's slow movement creates an extended ranged damage window. 90% Marksman troops exploit this by dealing maximum DPS before the bear reaches melee range. 10% Lancer provides minimal frontline."
     },
     "crazy_joe": {
         "name": "Crazy Joe Rally",
         "slots": [
-            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Natalia", "Greg"], "is_lead": True},
-            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Bahiti", "Zinman"]},
-            {"class": "Marksman", "role": "Support", "preferred": ["Alonso", "Philly", "Logan"]},
+            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Wu Ming", "Natalia", "Greg"], "is_lead": True},
+            {"class": "Infantry", "role": "Tank Support", "preferred": ["Wu Ming", "Natalia", "Sergey", "Ahmose"]},
+            {"class": "Infantry", "role": "Infantry DPS", "preferred": ["Natalia", "Greg", "Hector"]},
         ],
         "troop_ratio": {"infantry": 90, "lancer": 10, "marksman": 0},
-        "notes": "Infantry kills before back row attacks. 90/10/0 ratio is key.",
-        "key_heroes": ["Jeronimo", "Molly"],
+        "notes": "Infantry kills before back row attacks. 90/10/0 ratio is key. Joe targets backline first - 0% Marksman is MANDATORY.",
+        "key_heroes": ["Jeronimo", "Wu Ming"],
+        "hero_explanations": {
+            "Jeronimo": "S+ Infantry with +50% offense buffs (ATK + DMG). Best for short fights where burst damage matters.",
+            "Wu Ming": "S+ Infantry with -25% damage taken. Better for sustained fights where survival = more cumulative damage.",
+            "Natalia": "A-tier Infantry backup. Feral Protection adds survivability against Joe's attacks.",
+            "Greg": "Infantry tank option when others unavailable."
+        },
+        "ratio_explanation": "Crazy Joe's AI targets BACKLINE FIRST. With 0% Marksman troops, Joe finds no backline and is forced into unfavorable frontline combat against your 90% Infantry."
     },
     "svs_attack": {
         "name": "SvS Castle Attack",
         "slots": [
-            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Natalia", "Greg", "Ahmose"], "is_lead": True},
-            {"class": "Lancer", "role": "Support", "preferred": ["Molly", "Zinman", "Wayne"]},
-            {"class": "Marksman", "role": "DPS", "preferred": ["Alonso", "Seo-yoon", "Norah", "Philly"]},
+            # Infantry: Jeronimo (S+), Natalia (A), Flint (A), Ahmose (A)
+            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Natalia", "Flint", "Ahmose", "Logan"], "is_lead": True},
+            # Lancer: Molly (B), Philly (A), Mia (A)
+            {"class": "Lancer", "role": "Support", "preferred": ["Molly", "Philly", "Mia", "Norah"]},
+            # Marksman: Alonso (A), Zinman (C), Bahiti (B), Seo-yoon (C)
+            {"class": "Marksman", "role": "DPS", "preferred": ["Alonso", "Zinman", "Bahiti", "Seo-yoon"]},
         ],
         "troop_ratio": {"infantry": 50, "lancer": 20, "marksman": 30},
         "notes": "Rally leader setup. See Natalia vs Jeronimo tab for when to swap.",
         "key_heroes": ["Jeronimo", "Natalia", "Molly", "Alonso"],
+        "hero_explanations": {
+            "Jeronimo": "S+ Infantry for burst offense. Use when you expect quick kills (enemy has weak garrison).",
+            "Natalia": "A-tier Infantry for sustained fights. Use against strong garrisons.",
+            "Molly": "B-tier Lancer healer. Essential for keeping your army alive during prolonged sieges.",
+            "Alonso": "A-tier Marksman DPS. Maximizes kill speed once you break through defenses."
+        },
+        "ratio_explanation": "SvS castle attacks use balanced 50/20/30 to handle varied garrison compositions. Infantry leads and absorbs damage, Marksman provides kill power."
     },
     "garrison": {
         "name": "Castle Garrison",
         "slots": [
-            {"class": "Infantry", "role": "Tank Lead", "preferred": ["Natalia", "Greg", "Ahmose", "Flint"], "is_lead": True},
-            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Zinman", "Bahiti"]},
-            {"class": "Marksman", "role": "Counter DPS", "preferred": ["Alonso", "Philly", "Norah"]},
+            # Infantry: Natalia (A), Flint (A), Ahmose (A)
+            {"class": "Infantry", "role": "Tank Lead", "preferred": ["Natalia", "Flint", "Ahmose"], "is_lead": True},
+            # Lancer: Molly (B), Philly (A), Mia (A)
+            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Philly", "Mia"]},
+            # Marksman: Alonso (A), Zinman (C), Bahiti (B)
+            {"class": "Marksman", "role": "Counter DPS", "preferred": ["Alonso", "Zinman", "Bahiti"]},
         ],
         "troop_ratio": {"infantry": 60, "lancer": 15, "marksman": 25},
         "notes": "Defense = survival. Natalia's sustain is key.",
         "key_heroes": ["Natalia", "Molly", "Alonso"],
+        "hero_explanations": {
+            "Natalia": "A-tier Infantry with healing and sustain. THE garrison queen - her survival abilities counter rally damage.",
+            "Flint": "A-tier Infantry tank. Solid backup with control abilities.",
+            "Molly": "B-tier Lancer healer. Keeps garrison troops alive through multiple rally waves.",
+            "Alonso": "A-tier Marksman for counterattack DPS. Kills attackers while you defend."
+        },
+        "ratio_explanation": "Garrison defense prioritizes survival with 60% Infantry. Lower Marksman (25%) because they die fast under rallies - Infantry survives longer."
     },
     "rally_joiner_attack": {
         "name": "Rally Joiner (Attack)",
         "slots": [
-            {"class": "Marksman", "role": "JOINER (Only this matters!)", "preferred": ["Jessie", "Jasser", "Seo-yoon"], "is_lead": True, "is_joiner": True},
+            {"class": "Marksman", "role": "JOINER (Only this matters!)", "preferred": ["Jessie"], "is_lead": True, "is_joiner": True},
             {"class": "Infantry", "role": "Filler", "preferred": ["any"]},
             {"class": "Lancer", "role": "Filler", "preferred": ["any"]},
         ],
         "troop_ratio": {"infantry": 30, "lancer": 20, "marksman": 50},
-        "notes": "ONLY first hero's expedition skill matters! Jessie gives +25% DMG.",
+        "notes": "ONLY slot 1 hero's TOP-RIGHT expedition skill matters! Jessie's Stand of Arms gives +25% DMG to ALL your troops.",
         "key_heroes": ["Jessie"],
-        "joiner_warning": "If you don't have Jessie, send troops WITHOUT heroes!",
+        "joiner_warning": "If you don't have Jessie, send troops WITHOUT heroes - other heroes' skills won't help!",
+        "hero_explanations": {
+            "Jessie": "CRITICAL: Stand of Arms expedition skill gives +25% damage dealt to ALL your troops in the rally. Her stats/level/gear are IRRELEVANT - only skill level matters."
+        },
+        "ratio_explanation": "When joining rallies, your troop composition supports the rally leader. 50% Marksman for damage, 30% Infantry for survival, 20% Lancer for balance."
     },
     "rally_joiner_defense": {
-        "name": "Rally Joiner (Garrison)",
+        "name": "Garrison Joiner (Defense)",
         "slots": [
             {"class": "Infantry", "role": "JOINER (Only this matters!)", "preferred": ["Sergey"], "is_lead": True, "is_joiner": True},
+            {"class": "Infantry", "role": "Filler", "preferred": ["any"]},
             {"class": "Lancer", "role": "Filler", "preferred": ["any"]},
-            {"class": "Marksman", "role": "Filler", "preferred": ["any"]},
         ],
-        "troop_ratio": {"infantry": 60, "lancer": 20, "marksman": 20},
-        "notes": "ONLY first hero's expedition skill matters! Sergey gives -20% DMG taken.",
+        "troop_ratio": {"infantry": 50, "lancer": 30, "marksman": 20},
+        "notes": "ONLY slot 1 hero's TOP-RIGHT expedition skill matters! Sergey's Defenders' Edge gives -20% DMG taken for ENTIRE garrison.",
         "key_heroes": ["Sergey"],
+        "hero_explanations": {
+            "Sergey": "CRITICAL: Defenders' Edge expedition skill reduces damage taken by 20% for the ENTIRE garrison. His stats/level/gear are IRRELEVANT - only skill level matters."
+        },
+        "ratio_explanation": "Garrison defense prioritizes survival. 50% Infantry absorbs damage, 30% Lancer provides balanced support, 20% Marksman adds counterattack without overexposure.",
         "joiner_warning": "If you don't have Sergey, send troops WITHOUT heroes!",
     },
     "arena": {
         "name": "Arena (5 Heroes)",
         "slots": [
-            {"class": "Infantry", "role": "Primary Tank", "preferred": ["Natalia", "Greg", "Ahmose"], "is_lead": True},
-            {"class": "Infantry", "role": "Secondary Tank", "preferred": ["Flint", "Natalia", "Sergey"]},
-            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Seo-yoon", "Norah"]},
-            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Zinman", "Wayne"]},
-            {"class": "Marksman", "role": "Secondary DPS", "preferred": ["Philly", "Gina", "Mia"]},
+            {"class": "Infantry", "role": "Primary Tank", "preferred": ["Natalia", "Jeronimo", "Ahmose"], "is_lead": True},
+            {"class": "Infantry", "role": "Secondary Tank", "preferred": ["Flint", "Wu Ming", "Sergey"]},
+            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Seo-yoon", "Zinman", "Greg"]},
+            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Norah", "Philly", "Mia"]},
+            {"class": "Marksman", "role": "Secondary DPS", "preferred": ["Wayne", "Gina", "Bahiti"]},
         ],
         "troop_ratio": {"infantry": 45, "lancer": 25, "marksman": 30},
         "notes": "5-hero mode. Double infantry frontline is meta.",
         "key_heroes": ["Natalia", "Flint", "Alonso", "Molly"],
+        "hero_explanations": {
+            "Natalia": "S+ Infantry primary tank with sustain. Core arena hero.",
+            "Flint": "A-tier Infantry with control abilities. Pairs well with Natalia for double frontline.",
+            "Alonso": "S+ Marksman main DPS. Kills enemies fast while your tanks hold.",
+            "Molly": "S-tier Lancer healer. Keeps both frontline tanks alive.",
+            "Norah": "S-tier Lancer with support abilities. Good healer alternative."
+        },
+        "ratio_explanation": "Arena's 5-hero format benefits from double Infantry (45%) to create a stronger frontline. Marksman (30%) provides kill power while Lancer (25%) heals."
     },
     "exploration": {
         "name": "Exploration / PvE",
         "slots": [
-            {"class": "Infantry", "role": "Tank", "preferred": ["Natalia", "Zinman", "Sergey", "Greg"], "is_lead": True},
-            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Bahiti", "Gina"]},
-            {"class": "Marksman", "role": "DPS", "preferred": ["Alonso", "Philly", "Logan"]},
+            {"class": "Infantry", "role": "Tank", "preferred": ["Natalia", "Flint", "Sergey", "Jeronimo", "Logan"], "is_lead": True},
+            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Norah", "Philly", "Mia"]},
+            {"class": "Marksman", "role": "DPS", "preferred": ["Alonso", "Zinman", "Greg", "Gina", "Bahiti"]},
         ],
         "troop_ratio": {"infantry": 40, "lancer": 30, "marksman": 30},
         "notes": "Uses EXPLORATION skills (left side). Survival > speed.",
         "key_heroes": ["Natalia", "Molly", "Alonso"],
+        "hero_explanations": {
+            "Natalia": "S+ Infantry with exploration heal. Sustain keeps you going through multiple waves.",
+            "Flint": "A-tier Infantry with good exploration skills. Solid tank option.",
+            "Molly": "S-tier Lancer healer. Essential for long exploration sessions.",
+            "Alonso": "S+ Marksman DPS. Clears enemies efficiently in PvE content."
+        },
+        "ratio_explanation": "Exploration uses EXPLORATION skills (left side of hero skill panel), not expedition skills. Balanced 40/30/30 maximizes sustainability for multi-wave PvE content."
+    },
+    "svs_march": {
+        "name": "SvS Field March",
+        "slots": [
+            {"class": "Infantry", "role": "Lead/Tank", "preferred": ["Jeronimo", "Wu Ming", "Natalia", "Flint", "Ahmose", "Logan"], "is_lead": True},
+            {"class": "Lancer", "role": "Support/Heal", "preferred": ["Molly", "Norah", "Philly", "Mia"]},
+            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Seo-yoon", "Zinman", "Wayne", "Greg"]},
+        ],
+        "troop_ratio": {"infantry": 40, "lancer": 20, "marksman": 40},
+        "notes": "Balanced for unpredictable SvS field combat. Jeronimo for burst, Wu Ming for sustain.",
+        "key_heroes": ["Jeronimo", "Wu Ming", "Molly", "Alonso"],
+        "hero_explanations": {
+            "Jeronimo": "S+ Infantry lead with +50% offense buffs. Best for burst kills in field.",
+            "Wu Ming": "S+ Infantry with -25% damage taken. Better for extended field engagements.",
+            "Natalia": "S+ Infantry with sustain. Good when expecting multiple skirmishes.",
+            "Molly": "S-tier Lancer healer. Keeps you alive between fights.",
+            "Alonso": "S+ Marksman DPS. High kill potential in field combat."
+        },
+        "ratio_explanation": "SvS field combat is unpredictable. 40/20/40 balanced ratio handles varied enemy compositions - enough Infantry to tank, enough Marksman to kill, Lancer for utility."
     },
 }
 
@@ -214,8 +339,11 @@ IDEAL_LINEUPS = {
     "bear_trap": LINEUP_TEMPLATES["bear_trap"],
     "crazy_joe": LINEUP_TEMPLATES["crazy_joe"],
     "garrison": LINEUP_TEMPLATES["garrison"],
+    "garrison_joiner": LINEUP_TEMPLATES["rally_joiner_defense"],  # Same as rally defense joiner
+    "rally_joiner": LINEUP_TEMPLATES["rally_joiner_attack"],  # Alias for attack joiner
     "exploration": LINEUP_TEMPLATES["exploration"],
-    "svs_march": LINEUP_TEMPLATES["world_march"],
+    "svs_march": LINEUP_TEMPLATES["svs_march"],  # Now uses dedicated 40/20/40 template
+    "world_march": LINEUP_TEMPLATES["world_march"],
 }
 
 
@@ -227,7 +355,7 @@ class LineupBuilder:
         Initialize with static hero data.
 
         Args:
-            heroes_data: Hero data from heroes.json (optional, uses HERO_METADATA if not provided)
+            heroes_data: Hero data from heroes.json (optional, loaded automatically if not provided)
         """
         self.heroes_data = heroes_data or {}
         self.hero_lookup = {h['name']: h for h in self.heroes_data.get('heroes', [])}
@@ -288,24 +416,36 @@ class LineupBuilder:
             best_hero = None
             best_power = -1
 
+            # For lead slots, follow preferred order strictly (first available wins)
+            # For non-lead slots, pick highest power among preferred
+            use_strict_order = is_lead
+
             # First try preferred heroes in order
             for hero_name in preferred:
                 if hero_name in user_heroes and hero_name not in used_heroes:
-                    hero_meta = HERO_METADATA.get(hero_name, {})
+                    hero_meta = get_hero_metadata(hero_name)
                     if hero_meta.get("gen", 99) <= max_generation:
                         hero_stats = user_heroes[hero_name]
                         hero_data = self.hero_lookup.get(hero_name)
                         power = calculate_hero_power(hero_stats, hero_data)
-                        if power > best_power:
-                            best_power = power
+
+                        if use_strict_order:
+                            # Lead slot: take FIRST available preferred hero
                             best_hero = hero_name
+                            best_power = power
+                            break
+                        else:
+                            # Non-lead slot: take highest power preferred hero
+                            if power > best_power:
+                                best_power = power
+                                best_hero = hero_name
 
             # If no preferred hero found, find any hero of the right class
             if not best_hero:
                 for hero_name, hero_stats in user_heroes.items():
                     if hero_name in used_heroes:
                         continue
-                    hero_meta = HERO_METADATA.get(hero_name, {})
+                    hero_meta = get_hero_metadata(hero_name)
                     if hero_meta.get("class") == slot_class and hero_meta.get("gen", 99) <= max_generation:
                         hero_data = self.hero_lookup.get(hero_name)
                         power = calculate_hero_power(hero_stats, hero_data)
@@ -317,7 +457,7 @@ class LineupBuilder:
                 used_heroes.add(best_hero)
                 hero_stats = user_heroes[best_hero]
                 level = hero_stats.get('level', 1)
-                hero_meta = HERO_METADATA.get(best_hero, {})
+                hero_meta = get_hero_metadata(best_hero)
                 lineup_heroes.append({
                     "hero": best_hero,
                     "hero_class": hero_meta.get("class", slot_class),
@@ -342,7 +482,7 @@ class LineupBuilder:
                 # Track missing key heroes
                 for hero in preferred[:2]:  # First 2 preferred are most important
                     if hero not in user_heroes:
-                        hero_meta = HERO_METADATA.get(hero, {})
+                        hero_meta = get_hero_metadata(hero)
                         if hero_meta.get("gen", 99) <= max_generation:
                             missing_key_heroes.append({
                                 "hero": hero,
@@ -355,7 +495,7 @@ class LineupBuilder:
         recommended_to_get = []
         for key_hero in template.get("key_heroes", []):
             if key_hero not in user_heroes:
-                hero_meta = HERO_METADATA.get(key_hero, {})
+                hero_meta = get_hero_metadata(key_hero)
                 if hero_meta.get("gen", 99) <= max_generation:
                     recommended_to_get.append({
                         "hero": key_hero,
@@ -381,6 +521,20 @@ class LineupBuilder:
         notes = template.get("notes", "")
         if template.get("joiner_warning") and confidence != "high":
             notes += f"\n⚠️ {template['joiner_warning']}"
+
+        # Add specific warnings for missing critical joiner heroes
+        hero_names_in_lineup = [h.get('hero', '') for h in lineup_heroes]
+        if event_type in ['rally_joiner_defense', 'garrison_joiner']:
+            if 'Sergey' not in user_heroes:
+                notes += "\n⚠️ Sergey not available - garrison joining loses his Defenders' Edge skill (-20% damage taken for entire garrison)."
+            elif 'Sergey' not in hero_names_in_lineup:
+                notes += "\n💡 Tip: Put Sergey in slot 1 for garrison joining - his Defenders' Edge skill applies to the entire garrison."
+
+        if event_type in ['rally_joiner_attack', 'rally_joiner']:
+            if 'Jessie' not in user_heroes:
+                notes += "\n⚠️ Jessie not available - rally joining loses her Stand of Arms skill (+25% damage dealt for your troops)."
+            elif 'Jessie' not in hero_names_in_lineup:
+                notes += "\n💡 Tip: Put Jessie in slot 1 for rally joining - her Stand of Arms skill gives +25% damage to all your troops."
 
         return LineupRecommendation(
             game_mode=template["name"],
@@ -438,14 +592,14 @@ class LineupBuilder:
             for hero_name in preferred:
                 if hero_name in used_heroes:
                     continue
-                hero_meta = HERO_METADATA.get(hero_name, {})
+                hero_meta = get_hero_metadata(hero_name)
                 if hero_meta.get("gen", 99) <= max_generation:
                     selected_hero = hero_name
                     break
 
             if selected_hero:
                 used_heroes.add(selected_hero)
-                hero_meta = HERO_METADATA.get(selected_hero, {})
+                hero_meta = get_hero_metadata(selected_hero)
                 lineup_heroes.append({
                     "hero": selected_hero,
                     "hero_class": hero_meta.get("class", slot_class),

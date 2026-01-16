@@ -11,7 +11,7 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
-from engine.analyzers.lineup_builder import LineupBuilder, LINEUP_TEMPLATES, HERO_METADATA
+from engine.analyzers.lineup_builder import LineupBuilder, LINEUP_TEMPLATES
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -248,6 +248,50 @@ def render_lineup_from_engine(lineup_rec, show_confidence: bool = True):
     render_troop_ratio(ratio.get("infantry", 33), ratio.get("lancer", 33), ratio.get("marksman", 34), lineup_rec.notes)
 
 
+def render_why_this_lineup(event_type: str, lineup_heroes: list = None):
+    """Render the 'Why This Lineup' explanation section using template data."""
+    template = LINEUP_TEMPLATES.get(event_type)
+    if not template:
+        return
+
+    hero_explanations = template.get("hero_explanations", {})
+    ratio_explanation = template.get("ratio_explanation", "")
+
+    if not hero_explanations and not ratio_explanation:
+        return
+
+    with st.expander("💡 Why This Lineup?"):
+        # Show hero explanations
+        if hero_explanations:
+            st.markdown("**Hero Selection:**")
+            # If we have lineup_heroes, show explanations for those first
+            shown_heroes = set()
+            if lineup_heroes:
+                for hero_info in lineup_heroes:
+                    hero_name = hero_info.get("hero", "")
+                    if hero_name in hero_explanations:
+                        st.markdown(f"- **{hero_name}**: {hero_explanations[hero_name]}")
+                        shown_heroes.add(hero_name)
+
+            # Show remaining explanations for alternative heroes
+            remaining = {k: v for k, v in hero_explanations.items() if k not in shown_heroes}
+            if remaining and shown_heroes:
+                st.markdown("")
+                st.markdown("*Alternatives:*")
+                for hero_name, explanation in remaining.items():
+                    st.markdown(f"- **{hero_name}**: {explanation}")
+            elif remaining and not shown_heroes:
+                # No lineup provided, show all
+                for hero_name, explanation in hero_explanations.items():
+                    st.markdown(f"- **{hero_name}**: {explanation}")
+
+        # Show troop ratio explanation
+        if ratio_explanation:
+            st.markdown("")
+            st.markdown("**Troop Ratio:**")
+            st.markdown(ratio_explanation)
+
+
 def render_recommended_to_get(recommendations: list):
     """Render the 'Recommended to Get' section for missing key heroes."""
     if not recommendations:
@@ -364,7 +408,7 @@ with tab_lineups:
     event_categories = {
         "PvP / SvS": ["World March (Default)", "SvS Castle Attack", "SvS Castle Defense", "SvS Field Battle"],
         "Rallies": ["Bear Trap Rally", "Crazy Joe Rally", "Rally Joiner Setup"],
-        "Competitive": ["Arena (5 Heroes)", "Alliance Championship"],
+        "Competitive": ["Arena (5 Heroes)", "Alliance Championship", "Labyrinth"],
         "PvE": ["Exploration / Frozen Stages", "Gathering"],
         "Alliance Events": ["Polar Terror", "Reservoir Raid"]
     }
@@ -392,6 +436,9 @@ with tab_lineups:
         with col1:
             st.markdown("### Your Recommended Lineup")
             render_lineup_from_engine(lineup)
+
+            # Why this lineup explanation
+            render_why_this_lineup("world_march", lineup.heroes)
 
             with st.expander("📝 Strategy Notes"):
                 st.markdown("""
@@ -430,6 +477,9 @@ with tab_lineups:
             st.markdown("### Rally Leader")
             st.markdown("*When YOU are leading the castle rally*")
             render_lineup_from_engine(lineup)
+
+            # Why this lineup explanation
+            render_why_this_lineup("svs_attack", lineup.heroes)
             st.caption("See the **Natalia vs Jeronimo** tab for when to swap leads!")
 
         with col2:
@@ -465,6 +515,9 @@ with tab_lineups:
             st.markdown("### Garrison Leader")
             st.markdown("*If you are the garrison leader*")
             render_lineup_from_engine(lineup)
+
+            # Why this lineup explanation
+            render_why_this_lineup("garrison", lineup.heroes)
 
         with col2:
             if USE_PERSONALIZED and lineup.recommended_to_get:
@@ -568,6 +621,9 @@ with tab_lineups:
 
             render_lineup_from_engine(lineup)
 
+            # Why this lineup explanation
+            render_why_this_lineup("bear_trap", lineup.heroes)
+
             if USE_PERSONALIZED and lineup.recommended_to_get:
                 render_recommended_to_get(lineup.recommended_to_get)
 
@@ -658,6 +714,9 @@ with tab_lineups:
 
             render_lineup_from_engine(lineup)
 
+            # Why this lineup explanation
+            render_why_this_lineup("crazy_joe", lineup.heroes)
+
             if USE_PERSONALIZED and lineup.recommended_to_get:
                 render_recommended_to_get(lineup.recommended_to_get)
 
@@ -709,12 +768,18 @@ with tab_lineups:
             render_hero_slot("Jessie", "Marksman", "Stand of Arms: +5-25% DMG dealt (scales with level)", False)
             st.caption("Best attack joiner - affects ALL damage types including skills, pets, teammates")
 
+            # Why Jessie explanation
+            render_why_this_lineup("rally_joiner_attack", None)
+
             st.markdown("**🛡️ Garrison Joiners:**")
             st.markdown("""
             Heroes whose **expedition skill** reduces damage:
             """)
             render_hero_slot("Sergey", "Infantry", "Defenders' Edge: -4-20% DMG reduction (scales with level)", False)
             st.caption("Best garrison joiner - universal damage reduction")
+
+            # Why Sergey explanation
+            render_why_this_lineup("rally_joiner_defense", None)
 
         with col2:
             st.markdown("### Joiner Priorities")
@@ -763,6 +828,9 @@ with tab_lineups:
                 {"name": "Molly", "class": "Lancer", "role": "Healing + damage"},
                 {"name": "Philly", "class": "Marksman", "role": "Ranged burst"},
             ])
+
+            # Why this lineup explanation
+            render_why_this_lineup("arena", None)
 
             st.markdown("""
             **Why 2 Infantry frontline:**
@@ -873,6 +941,148 @@ with tab_lineups:
             """)
 
     # =============================================================================
+    # LABYRINTH
+    # =============================================================================
+    elif event_type == "Labyrinth":
+        st.markdown("## 🏛️ The Labyrinth")
+        st.markdown("Weekly competitive PvP event with 6 unique zones - each zone uses different stat sources!")
+
+        st.info("""
+        **Key Mechanics:**
+        - Most zones provide **Lv.10 troops** (your own troop tier doesn't matter)
+        - **Gaia Heart** (Sunday) uses YOUR actual troops - higher tier = advantage
+        - Each zone tests different parts of your account progression
+        - 5 daily attempts per zone
+        """)
+
+        # Zone tabs
+        zone_tabs = st.tabs(["📊 Zone Overview", "⚔️ Land of Brave", "🐉 Cave of Monsters",
+                            "💎 Glowstone Mine", "🔬 Earthlab", "🔥 Dark Forge", "🌍 Gaia Heart"])
+
+        with zone_tabs[0]:
+            st.markdown("### Labyrinth Zone Summary")
+            st.markdown("""
+            | Zone | Days | Format | Stats That Matter | Recommended Ratio |
+            |------|------|--------|-------------------|-------------------|
+            | **Land of the Brave** | Mon-Tue | 3v3 (9 heroes) | Heroes, Hero Gear, Exclusive Gear | 50/20/30 |
+            | **Cave of Monsters** | Wed-Thu | 2v2 | Pets, Pet Skills | 52/13/35 |
+            | **Glowstone Mine** | Wed-Thu | 2v2 | Chief Charms (unlocks FC25) | 52/13/35 |
+            | **Earthlab** | Fri-Sat | 2v2 | Research Center, War Academy | 52/13/35 |
+            | **Dark Forge** | Fri-Sat | 2v2 | Chief Gear (unlocks FC22) | 52/13/35 |
+            | **Gaia Heart** | Sunday | 3v3 | ALL stats + YOUR troops | 50/20/30 |
+            """)
+
+            st.markdown("### AI Troop Ratios by Floor")
+            st.markdown("""
+            - **Floors 1-9:** AI uses **33/33/33** (balanced)
+            - **Floor 10:** AI switches to **53/27/20** (Infantry-heavy)
+
+            Counter Floor 10 with more Marksmen to exploit the Infantry-heavy AI.
+            """)
+
+        with zone_tabs[1]:
+            st.markdown("### ⚔️ Land of the Brave")
+            st.markdown("**Available:** Monday - Tuesday")
+            st.markdown("**Format:** 3v3 (up to 9 heroes across 3 armies)")
+
+            st.success("**Stats that matter:** Heroes, Hero Gear, Hero Exclusive Gear")
+
+            render_troop_ratio(50, 20, 30, "Standard 3v3 ratio")
+
+            st.markdown("""
+            **Strategy:**
+            - Focus on upgrading hero exclusive gear
+            - Select heroes with crowd control or AoE damage
+            - All 3 armies fight - plan your hero distribution
+            """)
+
+        with zone_tabs[2]:
+            st.markdown("### 🐉 Cave of Monsters")
+            st.markdown("**Available:** Wednesday - Thursday")
+            st.markdown("**Format:** 2v2 squad battles")
+
+            st.success("**Stats that matter:** Pets, Pet Skills")
+
+            render_troop_ratio(52, 13, 35, "Lower Lancer for multi-round survival")
+
+            st.markdown("""
+            **Strategy:**
+            - Prioritize pet training and upgrades
+            - Pair tank heroes with healing pets
+            - Turn order is random - same army might fight twice
+            """)
+
+        with zone_tabs[3]:
+            st.markdown("### 💎 Glowstone Mine")
+            st.markdown("**Available:** Wednesday - Thursday")
+            st.markdown("**Format:** 2v2 squad battles")
+            st.markdown("**Unlocks:** Furnace Level 25")
+
+            st.success("**Stats that matter:** Chief Charms only")
+
+            render_troop_ratio(52, 13, 35, "Lower Lancer for multi-round survival")
+
+            st.markdown("""
+            **Strategy:**
+            - Balance offensive and defensive charms
+            - Charm levels matter more than hero levels here
+            - Focus on your weakest charm slots to improve
+            """)
+
+        with zone_tabs[4]:
+            st.markdown("### 🔬 Earthlab")
+            st.markdown("**Available:** Friday - Saturday")
+            st.markdown("**Format:** 2v2 squad battles")
+
+            st.success("**Stats that matter:** Research Center Tech, War Academy Tech")
+
+            render_troop_ratio(52, 13, 35, "Lower Lancer for multi-round survival")
+
+            st.markdown("""
+            **Strategy:**
+            - Maximize Research Center and War Academy levels
+            - Tech bonuses compound - every level helps
+            - Long-term investment zone
+            """)
+
+        with zone_tabs[5]:
+            st.markdown("### 🔥 Dark Forge")
+            st.markdown("**Available:** Friday - Saturday")
+            st.markdown("**Format:** 2v2 squad battles")
+            st.markdown("**Unlocks:** Furnace Level 22")
+
+            st.success("**Stats that matter:** Chief Gear only")
+
+            render_troop_ratio(52, 13, 35, "Lower Lancer for multi-round survival")
+
+            st.markdown("""
+            **Strategy:**
+            - Balance upgrades across ALL chief gear slots
+            - Don't neglect any single piece
+            - Gear quality and level both matter
+            """)
+
+        with zone_tabs[6]:
+            st.markdown("### 🌍 Gaia Heart")
+            st.markdown("**Available:** Sunday only")
+            st.markdown("**Format:** 3v3 with YOUR actual troops")
+
+            st.warning("**This is the ONLY zone where your troop tier matters!**")
+            st.success("**Stats that matter:** ALL stats combined (heroes, pets, charms, tech, gear)")
+
+            render_troop_ratio(50, 20, 30, "Standard 3v3 - but higher tier troops = advantage")
+
+            st.markdown("""
+            **Strategy:**
+            - Use your best Fire Crystal or Helios troops
+            - This zone tests your ENTIRE account progression
+            - VIP bonuses, skins, and facilities also apply
+            - Game provides supplementary troops if capacity is low
+
+            **NOT counted:** Castle battle positions, alliance tech/territory, gem buffs
+            """)
+
+    # =============================================================================
     # EXPLORATION / PVE
     # =============================================================================
     elif event_type == "Exploration / Frozen Stages":
@@ -896,6 +1106,9 @@ with tab_lineups:
         with col1:
             st.markdown("### Your PvE Lineup")
             render_lineup_from_engine(lineup)
+
+            # Why this lineup explanation
+            render_why_this_lineup("exploration", lineup.heroes)
 
         with col2:
             if USE_PERSONALIZED and lineup.recommended_to_get:
@@ -990,10 +1203,12 @@ with st.expander("📊 Troop Ratio Quick Reference"):
     |-----------|----------|--------|----------|-------|
     | **Default Formation** | 50% | 20% | 30% | Balanced default |
     | **Castle Battle** | 50% | 20% | 30% | Standard PvP |
-    | **Labyrinth** | 60% | 15% | 25% | Tanky for PvE |
     | **Bear Hunt** | 0% | 10% | 90% | Maximum DPS |
     | **Crazy Joe** | 90% | 10% | 0% | Infantry kills first |
-    | **Alliance Championship** | 45% | 25% | 35% | Balanced competitive |
+    | **Alliance Championship** | 50% | 20% | 30% | Sustained damage focus |
+    | **Labyrinth 3v3** | 50% | 20% | 30% | Land of Brave, Gaia Heart |
+    | **Labyrinth 2v2** | 52% | 13% | 35% | Multi-round survival |
+    | **Labyrinth Floor 10** | 40% | 15% | 45% | Counter AI's Infantry-heavy |
 
     **Combat Order:** Infantry → Lancers → Marksmen
     **Class Counters:** Infantry > Lancer > Marksman > Infantry
