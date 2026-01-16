@@ -611,6 +611,10 @@ class LineupTestResult(Base):
     needs_review = Column(Boolean, default=False)  # True if big discrepancy
     review_notes = Column(Text, nullable=True)  # Manual notes after review
 
+    # Quality annotations for training data
+    quality_flag = Column(String(50), nullable=True)  # gold_standard, valid_alternative, claude_correct, parser_false_positive, needs_review
+    quality_notes = Column(Text, nullable=True)  # Human-readable explanation of quality flag
+
     created_at = Column(DateTime, default=datetime.utcnow)
 
     # Relationships

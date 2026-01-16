@@ -500,46 +500,50 @@ def setup_gen10_dolphin():
     # Track added heroes for auto-fill
     added_heroes = set()
 
-    # Add heroes - Gen 1-10 progression for a dolphin
+    # Add heroes - Gen 1-10 progression for a dolphin at day 700
+    # Dolphins invest steadily - current gen heroes should be usable, not just unlocked
     # Format: (name, level, stars, exp_skills, exped_skills, gear, ascension)
     heroes_to_add = [
         # Gen 1 - All maxed (5 stars = no ascension needed)
         ("Jeronimo", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),  # S+ tier, maxed
         ("Natalia", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
         ("Molly", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
-        ("Sergey", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4), 0),  # Best garrison joiner
-        ("Jessie", 70, 5, (4, 4, 4), (5, 5, 5), (4, 4, 4, 4), 0),  # Best attack joiner
-        ("Bahiti", 60, 4, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 3),
-        ("Patrick", 60, 4, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 3),
+        ("Sergey", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),  # Best garrison joiner
+        ("Jessie", 75, 5, (4, 4, 4), (5, 5, 5), (5, 5, 5, 5), 0),  # Best attack joiner
+        ("Bahiti", 70, 5, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 0),
+        ("Patrick", 70, 5, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 0),
 
-        # Gen 2-4 - High stars
+        # Gen 2-4 - All maxed for dolphin at this stage
         ("Flint", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
         ("Philly", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
         ("Alonso", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
-        ("Logan", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4), 0),
-        ("Mia", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4), 0),
-        ("Greg", 75, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 4),
-        ("Ahmose", 80, 5, (5, 5, 5), (5, 5, 5), (4, 4, 4, 4), 0),
-        ("Reina", 75, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 4),
-        ("Lynn", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 3),
+        ("Logan", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Mia", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Greg", 75, 5, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 0),
+        ("Ahmose", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Reina", 75, 5, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 0),
+        ("Lynn", 75, 5, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 0),
 
-        # Gen 5-6 - Good progress
-        ("Hector", 75, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 4),
-        ("Norah", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 3),
-        ("Gwen", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 3),
-        ("Wu Ming", 75, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 4),  # S+ tier
-        ("Renee", 65, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 2),
+        # Gen 5-6 - Very strong (4-5 gens old for a Gen 10 account)
+        ("Hector", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Norah", 75, 5, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 0),
+        ("Gwen", 75, 5, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 0),
+        ("Wu Ming", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),  # S+ tier
+        ("Renee", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 4),
 
-        # Gen 7-8 - Medium progress
-        ("Gordon", 60, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 2),
-        ("Edith", 60, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 2),
-        ("Bradley", 55, 2, (2, 2, 2), (2, 2, 2), (2, 2, 2, 2), 1),
-        ("Gatot", 55, 2, (2, 2, 2), (2, 2, 2), (2, 2, 2, 2), 1),
-        ("Hendrik", 50, 2, (2, 2, 2), (2, 2, 2), (2, 2, 2, 2), 1),
+        # Gen 7-8 - Good progress (2-3 gens old)
+        ("Gordon", 75, 4, (4, 4, 4), (4, 4, 4), (5, 5, 5, 5), 4),  # S tier lancer
+        ("Edith", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 3),
+        ("Bradley", 65, 3, (3, 3, 3), (3, 3, 3), (4, 4, 4, 4), 2),
+        ("Gatot", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 3),  # S+ infantry
+        ("Hendrik", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 3),  # Top marksman
 
-        # Gen 9-10 - Just started
-        ("Magnus", 45, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0), 0),  # S+ tier, new
-        ("Blanchette", 40, 1, (1, 1, 1), (1, 1, 1), (0, 0, 0, 0), 0),  # S+ tier, new
+        # Gen 9-10 - Active investment (current gen, dolphins still develop these)
+        ("Magnus", 65, 3, (3, 3, 3), (3, 3, 3), (4, 4, 4, 4), 2),  # S+ tier Infantry, investing
+        ("Xura", 60, 3, (3, 3, 3), (3, 3, 3), (3, 3, 3, 3), 2),    # S tier Marksman
+        ("Blanchette", 65, 3, (3, 3, 3), (3, 3, 3), (4, 4, 4, 4), 2),  # S+ Marksman
+        ("Gregory", 55, 2, (2, 2, 2), (2, 2, 2), (3, 3, 3, 3), 1),  # Gen 10 Infantry
+        ("Freya", 55, 2, (2, 2, 2), (2, 2, 2), (3, 3, 3, 3), 1),    # Gen 10 Lancer
     ]
 
     for hero_data in heroes_to_add:
@@ -984,6 +988,113 @@ def setup_rally_leader():
     return user, profile
 
 
+def setup_gen12_whale():
+    """
+    Gen 12 Whale - Day 960 (very mature state)
+    - FC8-FC10 level
+    - All heroes through Gen 12 well developed
+    - Tests late-game recommendations with Hervor/Karol as joiner alternatives
+    - Whale spending means current-gen heroes are highly developed
+    """
+    print("\n" + "="*60)
+    print("Setting up Gen 12 Whale Account")
+    print("="*60)
+
+    user = create_test_user("test_gen12_whale")
+
+    # Main profile - Gen 12 whale at FC8+
+    main_profile = create_profile(
+        user=user,
+        name="FrostTitan_880",
+        state_number=123,
+        server_age_days=880,  # Gen 12 range: 840-920
+        furnace_level=30,
+        furnace_fc_level="FC8-0",
+        spending_profile="whale",
+        alliance_role="rally_lead",
+        priorities={'svs': 5, 'rally': 5, 'castle': 5, 'exploration': 2, 'gathering': 1}
+    )
+
+    # Track added heroes for auto-fill
+    added_heroes = set()
+
+    # Gen 12 whale heroes - whales max current gen heroes quickly
+    # Format: (name, level, stars, exp_skills, exped_skills, gear, ascension)
+    heroes_to_add = [
+        # Gen 1 - All maxed with mythic gear
+        ("Jeronimo", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Natalia", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Molly", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Sergey", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),  # Gen 1 defense joiner
+        ("Jessie", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),  # Gen 1 attack joiner
+        ("Bahiti", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Patrick", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Zinman", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+
+        # Gen 2-4 - All maxed
+        ("Flint", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Philly", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Alonso", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Logan", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Mia", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Greg", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Ahmose", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Reina", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Lynn", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+
+        # Gen 5-6 - All maxed
+        ("Hector", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Norah", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Gwen", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Wu Ming", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Renee", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+
+        # Gen 7-8 - Maxed (4-5 gens old for whale)
+        ("Gordon", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Edith", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Bradley", 75, 5, (4, 4, 4), (4, 4, 4), (5, 5, 5, 5), 0),
+        ("Gatot", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Hendrik", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+
+        # Gen 9-10 - Very strong (2-3 gens old for whale)
+        ("Magnus", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Xura", 80, 5, (5, 5, 5), (5, 5, 5), (5, 5, 5, 5), 0),
+        ("Blanchette", 80, 5, (5, 5, 5), (5, 5, 5), (6, 6, 6, 6), 0),
+        ("Gregory", 75, 5, (4, 4, 4), (4, 4, 4), (5, 5, 5, 5), 0),
+        ("Freya", 75, 5, (4, 4, 4), (4, 4, 4), (5, 5, 5, 5), 0),
+
+        # Gen 11 - Strong (1 gen old)
+        ("Eleonora", 75, 4, (4, 4, 4), (4, 4, 4), (5, 5, 5, 5), 4),
+        ("Lloyd", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 3),
+        ("Rufus", 70, 4, (4, 4, 4), (4, 4, 4), (4, 4, 4, 4), 3),
+
+        # Gen 12 - Current gen, whale invests heavily
+        ("Hervor", 70, 4, (4, 4, 4), (5, 5, 5), (5, 5, 5, 5), 3),  # Gen 12 attack joiner alt (+25% DMG)
+        ("Karol", 70, 4, (4, 4, 4), (5, 5, 5), (5, 5, 5, 5), 3),   # Gen 12 defense joiner alt (-20% DMG)
+        ("Ligeia", 65, 3, (3, 3, 3), (3, 3, 3), (4, 4, 4, 4), 2),
+    ]
+
+    for hero_data in heroes_to_add:
+        name, level, stars, exp_skills, exped_skills, gear, ascension = hero_data
+        add_hero_to_profile(main_profile, name, level, stars, exp_skills, exped_skills, gear, ascension,
+                           account_type='whale', server_age=880)
+        added_heroes.add(name)
+
+    # Auto-add remaining prior gen heroes (Gen 1-11) that weren't explicitly listed
+    prior_count = add_prior_gen_heroes(main_profile, max_gen=12, added_heroes=added_heroes,
+                                        account_type='whale', server_age=880)
+    print(f"  Auto-added {prior_count} prior gen heroes")
+
+    # Chief gear and charms - whale level
+    add_chief_gear(main_profile, account_type='whale', server_age=880)
+    add_chief_charms(main_profile, account_type='whale', server_age=880)
+
+    print(f"  Created main profile: {main_profile.name} (ID: {main_profile.id})")
+    print(f"  Heroes added: {len(heroes_to_add)}")
+
+    return user, main_profile
+
+
 def run_recommendation_tests(profile, description):
     """Test recommendation engine for a profile."""
     print(f"\n{'='*60}")
@@ -1155,7 +1266,8 @@ def cleanup_test_users():
 
     test_usernames = [
         "test_gen10_dolphin", "test_gen4_f2p", "test_gen2_whale",
-        "test_multi_state", "test_new_player", "test_rally_leader"
+        "test_multi_state", "test_new_player", "test_rally_leader",
+        "test_gen12_whale"
     ]
 
     for username in test_usernames:
@@ -1199,6 +1311,7 @@ def main():
     multi_user, multi_main, multi_new_state = setup_multi_state_player()
     new_user, new_profile = setup_brand_new_player()
     rally_user, rally_profile = setup_rally_leader()
+    gen12_user, gen12_main = setup_gen12_whale()
 
     # Run tests on each profile
     all_results = {
@@ -1219,6 +1332,7 @@ def main():
         (multi_new_state, "Multi-State (New State)"),
         (new_profile, "Brand New Player"),
         (rally_profile, "Rally Leader"),
+        (gen12_main, "Gen 12 Whale"),
     ]
 
     for profile, desc in test_profiles:
@@ -1231,6 +1345,7 @@ def main():
         (gen4_profile, "Gen 4 F2P"),
         (gen2_main, "Gen 2 Whale"),
         (rally_profile, "Rally Leader"),
+        (gen12_main, "Gen 12 Whale"),
     ]
 
     for profile, desc in ai_test_profiles:

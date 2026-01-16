@@ -28,6 +28,10 @@ init_db()
 db = get_db()
 profile = get_or_create_profile(db)
 
+# Track page renders to avoid false auto-saves on initial load
+if 'hero_tracker_initialized' not in st.session_state:
+    st.session_state.hero_tracker_initialized = False
+
 # Load hero data
 heroes_file = PROJECT_ROOT / "data" / "heroes.json"
 with open(heroes_file, encoding='utf-8') as f:
@@ -616,7 +620,8 @@ def render_hero_editor(hero: dict, existing, hero_key: str):
             if mythic_data.get('mastery', 0) != getattr(existing, 'mythic_gear_mastery', 0):
                 has_changes = True
 
-    if has_changes:
+    # Only auto-save after initial page render (prevents false saves on page load)
+    if has_changes and st.session_state.hero_tracker_initialized:
         save_user_hero(hero, level, stars, ascension, exp1, exp2, exp3, exped1, exped2, exped3, gear_data, mythic_data if mythic_gear_name else None)
         st.toast(f"Saved {hero['name']}")
 
@@ -741,6 +746,9 @@ with col3:
         st.metric("Total Stars", total_stars)
     else:
         st.metric("Total Stars", "-")
+
+# Mark page as initialized (enables auto-save for subsequent interactions)
+st.session_state.hero_tracker_initialized = True
 
 # Close database
 db.close()

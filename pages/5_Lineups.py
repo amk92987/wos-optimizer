@@ -79,7 +79,7 @@ def get_user_heroes(db, profile_id: int) -> dict:
 
 
 def get_best_hero_by_class(user_heroes: dict, hero_class: str, prefer_sustain: bool = False) -> tuple:
-    """Get user's best hero of a given class based on level and gear."""
+    """Get user's best hero of a given class based on level, gear, and generation."""
     # Sustain heroes for defense
     sustain_heroes = {
         "Infantry": ["Natalia", "Logan", "Flint"],
@@ -96,12 +96,15 @@ def get_best_hero_by_class(user_heroes: dict, hero_class: str, prefer_sustain: b
             # Boost sustain heroes for defense
             if prefer_sustain and hero_name in sustain_heroes.get(hero_class, []):
                 power *= 1.2
-            candidates.append((hero_name, power, stats))
+            # Get generation for tiebreaker (newer = higher priority when power is equal)
+            generation = hero_data.get("generation", 1)
+            candidates.append((hero_name, power, generation, stats))
 
     if candidates:
-        candidates.sort(key=lambda x: x[1], reverse=True)
+        # Sort by power (desc), then by generation (desc) as tiebreaker
+        candidates.sort(key=lambda x: (x[1], x[2]), reverse=True)
         best = candidates[0]
-        return (best[0], f"Lv.{best[2]['level']}, {best[2]['stars']}★")
+        return (best[0], f"Lv.{best[3]['level']}, {best[3]['stars']}★")
     return (None, None)
 
 
@@ -143,7 +146,7 @@ def render_hero_card(hero_name: str, note: str = "", is_critical: bool = False):
 def render_troop_ratio(infantry: int, lancer: int, marksman: int, note: str = ""):
     """Render troop ratio display."""
     st.markdown(f"""
-    <div style="background:rgba(255,107,53,0.15);border:1px solid #FF6B35;border-radius:8px;padding:12px;margin:12px 0;">
+    <div style="background:rgba(255,107,53,0.15);border:1px solid #FF6B35;border-radius:8px;padding:12px;margin:12px 0;min-height:120px;">
         <div style="font-weight:bold;color:#FF6B35;margin-bottom:8px;">Troop Ratio</div>
         <div style="display:flex;gap:24px;flex-wrap:wrap;">
             <div><span style="color:#E74C3C;font-weight:bold;font-size:18px;">{infantry}%</span> Infantry</div>
@@ -153,6 +156,15 @@ def render_troop_ratio(infantry: int, lancer: int, marksman: int, note: str = ""
         {f'<div style="color:#B8D4E8;font-size:12px;margin-top:8px;">{note}</div>' if note else ''}
     </div>
     """, unsafe_allow_html=True)
+
+
+def render_troop_ratio_multi(title: str, ratios: list):
+    """Render multiple troop ratios in one box. ratios = [(label, inf, lan, mark), ...]"""
+    rows = []
+    for label, inf, lan, mark in ratios:
+        rows.append(f'<div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;"><div style="width:80px;color:#B8D4E8;font-size:13px;">{label}:</div><div><span style="color:#E74C3C;font-weight:bold;">{inf}%</span> I</div><div><span style="color:#2ECC71;font-weight:bold;">{lan}%</span> L</div><div><span style="color:#3498DB;font-weight:bold;">{mark}%</span> M</div></div>')
+    rows_html = "".join(rows)
+    st.markdown(f'<div style="background:rgba(255,107,53,0.15);border:1px solid #FF6B35;border-radius:8px;padding:12px;margin:12px 0;min-height:120px;"><div style="font-weight:bold;color:#FF6B35;margin-bottom:8px;">{title}</div>{rows_html}</div>', unsafe_allow_html=True)
 
 
 def get_generation_advice(current_gen: int) -> dict:
@@ -239,11 +251,11 @@ with tab_rally_lead:
     """)
 
     # Attack vs Defense sub-tabs
-    attack_tab, defense_tab = st.tabs(["⚔️ Attack (Rallies, Bear Trap, Crazy Joe)", "🛡️ Defense (Garrison)"])
+    attack_tab, defense_tab = st.tabs(["⚔️ Attack", "🛡️ Defense"])
 
     with attack_tab:
         st.markdown("### Attack Rally Leader")
-        st.markdown("*For Bear Trap, Crazy Joe, Castle Attacks - prioritize damage output*")
+        st.markdown("*Bear Trap, Crazy Joe, SvS Rallies, Castle Attacks*")
 
         col1, col2 = st.columns(2)
 
@@ -256,6 +268,7 @@ with tab_rally_lead:
                         render_hero_card(best, note)
                     else:
                         st.warning(f"No {hero_class} hero found - add heroes in Hero Tracker!")
+                st.caption("*Shows your strongest heroes by power (level, stars, gear). When equal, newer generation heroes are preferred.*")
             else:
                 st.warning("Add your heroes in the Hero Tracker page to see personalized recommendations.")
                 st.markdown("**General recommendation:** Jeronimo (I) + Molly (L) + Alonso (M)")
@@ -264,17 +277,17 @@ with tab_rally_lead:
             st.markdown("**Troop Ratios by Event:**")
 
             event_ratios = st.selectbox("Select event:",
-                ["Bear Trap", "Crazy Joe", "Castle Attack", "General Rally"],
+                ["Bear Trap", "Crazy Joe", "SvS Rally", "Castle Attack"],
                 key="attack_event")
 
             if event_ratios == "Bear Trap":
                 render_troop_ratio(0, 10, 90, "Bear is slow - maximize Marksman DPS window")
             elif event_ratios == "Crazy Joe":
                 render_troop_ratio(90, 10, 0, "Infantry kills before Joe's backline attacks hit")
-            elif event_ratios == "Castle Attack":
+            elif event_ratios == "SvS Rally":
+                render_troop_ratio(40, 20, 40, "Balanced for SvS combat")
+            else:  # Castle Attack
                 render_troop_ratio(50, 20, 30, "Balanced for sustained castle fights")
-            else:
-                render_troop_ratio(50, 20, 30, "Standard balanced ratio")
 
     with defense_tab:
         st.markdown("### Garrison Leader")
@@ -311,7 +324,7 @@ with tab_rally_lead:
             - **Philly** - Team healing, garrison troop health boost
             """)
 
-            render_troop_ratio(50, 30, 20, "Infantry-heavy for survival")
+            render_troop_ratio(60, 20, 20, "Heavy Infantry wall for attrition defense")
 
 # =============================================================================
 # RALLY JOINER TAB
@@ -334,15 +347,21 @@ with tab_rally_join:
         render_hero_card("Jessie", "Stand of Arms: +25% DMG dealt at max level", is_critical=True)
 
         st.markdown("""
-        **Why Jessie:**
+        **Why Jessie (Gen 1):**
         - Her expedition skill boosts ALL damage (attacks, skills, pets)
         - Affects the ENTIRE rally, not just your troops
-        - Skill level matters more than her stats/gear
-
-        **If you don't have Jessie:** Send troops WITHOUT heroes rather than using a hero with an unhelpful skill.
+        - **Skill level matters more than her stats/gear**
         """)
 
-        render_troop_ratio(30, 20, 50, "Match rally leader's damage-focused composition")
+        with st.expander("Gen 12+ Alternative"):
+            st.markdown("""
+            **Hervor (Gen 12)** - "Call For Blood"
+            - Same effect: +25% DMG dealt for all troops
+            - Equivalent to Jessie at same skill level
+            - Use whichever has higher expedition skill level
+            """)
+
+        st.markdown("**If you don't have Jessie:** Send troops WITHOUT heroes rather than using a hero with an unhelpful skill.")
 
     with col2:
         st.markdown("### 🛡️ Defense Joiner")
@@ -351,15 +370,33 @@ with tab_rally_join:
         render_hero_card("Sergey", "Defenders' Edge: -20% DMG taken at max level", is_critical=True)
 
         st.markdown("""
-        **Why Sergey:**
+        **Why Sergey (Gen 1):**
         - His expedition skill reduces damage for ENTIRE garrison
         - Universal damage reduction (all sources)
-        - Skill level matters more than his stats/gear
-
-        **If you don't have Sergey:** Send troops WITHOUT heroes.
+        - **Skill level matters more than his stats/gear**
         """)
 
-        render_troop_ratio(50, 30, 20, "Match garrison's defensive composition")
+        with st.expander("Gen 12+ Alternative"):
+            st.markdown("""
+            **Karol (Gen 12)** - "In the Wings"
+            - Same effect: -20% DMG taken for all troops
+            - Equivalent to Sergey at same skill level
+            - Use whichever has higher expedition skill level
+            """)
+
+        st.markdown("**If you don't have Sergey:** Send troops WITHOUT heroes.")
+
+    # Troop ratios in aligned row
+    st.markdown("### Troop Ratios")
+    ratio_col1, ratio_col2 = st.columns(2)
+    with ratio_col1:
+        render_troop_ratio_multi("Attack Joiner - Match Event", [
+            ("Bear Trap", 0, 10, 90),
+            ("Crazy Joe", 90, 10, 0),
+            ("Castle/SvS", 50, 20, 30),
+        ])
+    with ratio_col2:
+        render_troop_ratio(60, 20, 20, "Defense Joiner - Match garrison")
 
     st.markdown("---")
     st.markdown("### Joiner Investment Priority")
@@ -371,6 +408,8 @@ with tab_rally_join:
     | ❌ LOW | Don't waste premium resources (Mithril, Stones) on joiners |
 
     **Only the skill level determines their contribution.** Their hero level, stars, and gear don't affect the rally buff.
+
+    *At Gen 12+, Hervor and Karol have equivalent skills. Choose based on which has higher skill level.*
     """)
 
 # =============================================================================
@@ -518,7 +557,7 @@ with tab_reference:
     | **Default / Balanced** | 50% | 20% | 30% | Safe for unknown matchups |
     | **Bear Trap** | 0% | 10% | 90% | Maximize ranged DPS |
     | **Crazy Joe** | 90% | 10% | 0% | Infantry kills before backline attacks |
-    | **Garrison Defense** | 50% | 30% | 20% | Survival focus |
+    | **Garrison Defense** | 60% | 20% | 20% | Heavy Infantry wall |
     | **Labyrinth 3v3** | 50% | 20% | 30% | Standard |
     | **Labyrinth 2v2** | 52% | 13% | 35% | Multi-round survival |
     | **Labyrinth Floor 10** | 40% | 15% | 45% | Counter Infantry-heavy AI |
@@ -533,12 +572,14 @@ with tab_reference:
     - Up to **4 joiner skills** can stack on a rally
     - Skills ranked by **level**, not player power
 
-    | Role | Best Hero | Skill Effect |
-    |------|-----------|--------------|
-    | Attack Joiner | **Jessie** | +5/10/15/20/25% DMG dealt |
-    | Defense Joiner | **Sergey** | -4/8/12/16/20% DMG taken |
+    | Role | Best Hero | Gen 12+ Alt | Skill Effect |
+    |------|-----------|-------------|--------------|
+    | Attack Joiner | **Jessie** (Gen 1) | **Hervor** | +5/10/15/20/25% DMG dealt |
+    | Defense Joiner | **Sergey** (Gen 1) | **Karol** | -4/8/12/16/20% DMG taken |
 
     **No Jessie/Sergey?** Send troops WITHOUT heroes - wrong skills can hurt the rally!
+
+    *Hervor and Karol have identical skill effects to Jessie/Sergey. Use whichever has higher skill level.*
     """)
 
     # Spending advice
