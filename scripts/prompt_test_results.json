@@ -1,0 +1,66 @@
+[
+  {
+    "template": "COMPREHENSIVE",
+    "question": "I'm a whale, should I gear all my heroes?",
+    "response": "Chief, as a whale, you can gear all your core heroes, but prioritize based on their roles. \n\n1. Focus on gearing Jeronimo (Inf DPS) and Jessie (Rally joiner) first.\n2. Gear Sergey (Garrison joiner) only if you want to optimize for defense.\n3. Consider Gordon next for field DPS, but ensure you have the necessary chief gear first for universal benefits.\n\nRemember, chief gear always comes first, and gear for rally joiners is less critical. Prioritize your strongest field DPS heroes!",
+    "input_tokens": 1004,
+    "output_tokens": 111,
+    "response_time": 3.6471734046936035
+  },
+  {
+    "template": "COMPREHENSIVE",
+    "question": "As a dolphin spender, how many heroes should I focus on?",
+    "response": "Chief, as a dolphin spender, you should focus on 3-4 heroes. Prioritize gearing Jeronimo, Natalia, and Jessie for their roles in rallying and field DPS. You can also consider gearing Gordon as your fourth hero. This will optimize your resources effectively.",
+    "input_tokens": 1006,
+    "output_tokens": 56,
+    "response_time": 4.707600355148315
+  },
+  {
+    "template": "COMPREHENSIVE",
+    "question": "This is my farm account, what heroes should I invest in?",
+    "response": "Chief, for your farm account, prioritize the following heroes for optimal investment:\n\n1. **Jeronimo (S+)** - Maximize his gear and skills for strong infantry presence.\n2. **Jessie (A)** - Invest in her for rally joining; her expedition skill boosts damage significantly.\n3. **Natalia (A)** - Upgrade her for additional infantry support and field DPS.\n4. **Sergey (B)** - Use him for garrison; his skill reduces damage taken effectively.\n\nFocus on leveling Jeronimo and Jessie first, then Natalia. Gear them according to the Chief Gear priority.",
+    "input_tokens": 1006,
+    "output_tokens": 123,
+    "response_time": 3.2367546558380127
+  },
+  {
+    "template": "COMPREHENSIVE",
+    "question": "Should I upgrade my farm account's chief gear?",
+    "response": "Chief, upgrade your farm account's chief gear if you haven't already reached the same quality tier for all 6 pieces. This will maximize the benefits across all heroes. Focus on getting the gear to at least a unified tier for the set bonuses. Prioritize upgrading the Infantry pieces first, as they provide the highest benefit.",
+    "input_tokens": 1003,
+    "output_tokens": 64,
+    "response_time": 1.5943269729614258
+  },
+  {
+    "template": "COMPREHENSIVE",
+    "question": "What's the difference between exploration and expedition skills?",
+    "response": "Chief, exploration skills enhance your hero's performance in PvE scenarios, such as gathering resources and defeating enemy bases. Expedition skills improve your hero's effectiveness in rallying and garrisoning, affecting troop damage dealt or damage taken during battles.\n\nFor your heroes:\n- Jeronimo, Natalia, and Sergey have exploration skills that aid in PvE.\n- Jessie and Gordon have expedition skills that boost their effectiveness in rallies and garrisons.\n\nFocus on maximizing expedition skills for rallying and garrisoning to excel in your SvS priorities.",
+    "input_tokens": 1002,
+    "output_tokens": 108,
+    "response_time": 2.4397976398468018
+  },
+  {
+    "template": "COMPREHENSIVE",
+    "question": "Why does slot 1 matter for rally joining?",
+    "response": "Slot 1 matters for rally joining because only the top-right expedition skill of the hero in slot 1 is activated during rallies. This means that if you want to maximize damage dealt in a rally, you should prioritize heroes like Jessie, who provides a +25% damage boost. The skills of joiner heroes in other slots are irrelevant for rally effectiveness.",
+    "input_tokens": 1003,
+    "output_tokens": 71,
+    "response_time": 2.140444278717041
+  },
+  {
+    "template": "COMPREHENSIVE",
+    "question": "Should I spread my resources across all heroes?",
+    "response": "No, Chief. Focus your resources on your top heroes for optimal performance. Prioritize leveling Jeronimo, Natalia, and Jessie since they are your strongest heroes. Avoid spreading resources too thin; concentrate on enhancing their skills and gear for maximum effectiveness in SvS and rallying.",
+    "input_tokens": 1002,
+    "output_tokens": 56,
+    "response_time": 1.4963948726654053
+  },
+  {
+    "template": "COMPREHENSIVE",
+    "question": "Is Molly good for rally joining?",
+    "response": "No, Chief. Molly is not optimal for rally joining. Use Jessie instead, as she provides a +25% DMG dealt bonus, which is the best for rally joins.",
+    "input_tokens": 1000,
+    "output_tokens": 36,
+    "response_time": 1.2349488735198975
+  }
+]

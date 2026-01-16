@@ -104,110 +104,143 @@ VERIFIED_MECHANICS = """
 === VERIFIED GAME MECHANICS (USE ONLY THESE - DO NOT MAKE UP DATA) ===
 
 HERO SKILL SYSTEM:
-- Each hero has 2 skill types on their skill screen:
-  - LEFT SIDE: Exploration Skills (upgraded with Exploration Manuals) - for PvE
-  - RIGHT SIDE: Expedition Skills (upgraded with Expedition Manuals) - for PvP/rallies
-- All skills scale levels 1-5 with EQUAL % increments per level
-- Example: If max is 25%, then levels give +5%, +10%, +15%, +20%, +25%
+- LEFT SIDE: Exploration Skills (Exploration Manuals) - for PvE content
+- RIGHT SIDE: Expedition Skills (Expedition Manuals) - for PvP/rallies
+- All skills scale levels 1-5 with equal % increments per level
 
-RALLY MECHANICS:
-- Rally LEADER: Your 3 heroes provide 9 expedition skills (3 right-side skills × 3 heroes)
-- Rally JOINER: Only your LEFTMOST hero's TOP-RIGHT expedition skill contributes!
-  - "Leftmost hero" = First hero in march lineup (slot 1)
-  - "Top-right skill" = Expedition skill in top-right position on skill screen
-- Top 4 highest SKILL LEVEL expedition skills from all joiners apply
-- Higher skill level = more likely to be selected AND stronger effect
+=== RALLY MECHANICS (CRITICAL) ===
+- Rally LEADER: All 9 expedition skills from 3 heroes apply
+- Rally JOINER: ONLY slot 1 hero's TOP-RIGHT expedition skill matters!
+- Top 4 highest SKILL LEVELS from all joiners contribute
+- Joiner hero STATS and GEAR are IRRELEVANT - only the skill matters!
 
 BEST JOINER HEROES:
-| Role | Hero | Skill | Effect per Level (1-5) |
-|------|------|-------|------------------------|
-| Attack Joiner | Jessie (Gen 1) | Stand of Arms | +5/10/15/20/25% DMG dealt |
-| Garrison Joiner | Sergey (Gen 1) | Defenders' Edge | -4/8/12/16/20% DMG taken |
+| Role | Hero | Skill | Effect (Lv1-5) |
+|------|------|-------|----------------|
+| Attack Joiner | Jessie | Stand of Arms | +5/10/15/20/25% DMG dealt |
+| Garrison Joiner | Sergey | Defenders' Edge | -4/8/12/16/20% DMG taken |
 
-If player doesn't have Jessie/Sergey, recommend joining rallies with TROOPS ONLY (no heroes).
+=== CHIEF GEAR (6 pieces) ===
+| Piece | Troop Type | Priority |
+|-------|------------|----------|
+| Coat | Infantry | 1st (highest) |
+| Pants | Infantry | 2nd |
+| Belt | Marksman | 3rd |
+| Weapon | Marksman | 4th |
+| Cap | Lancer | 5th |
+| Watch | Lancer | 6th (lowest) |
 
-TROOP RATIOS BY EVENT:
-| Event | Infantry | Lancer | Marksman | Why |
-|-------|----------|--------|----------|-----|
-| Default/Castle | 50% | 20% | 30% | Balanced |
-| Bear Trap/Hunt | 0% | 10% | 90% | Max DPS, bear is slow |
-| Crazy Joe | 90% | 10% | 0% | Infantry kills before backline attacks |
+RULES:
+- Keep ALL 6 pieces at SAME quality tier for set bonuses
+- 3-piece bonus = Defense all troops
+- 6-piece bonus = Attack all troops
+- Quality order: Green < Blue < Purple < Gold < Orange
 
-COMBAT ORDER: Infantry fights first → Lancers → Marksmen
-CLASS COUNTERS: Infantry > Lancer > Marksman > Infantry
+=== HERO GEAR vs CHIEF GEAR ===
+ABSOLUTE RULE: Chief gear ALWAYS comes first!
+- Chief gear benefits ALL heroes universally
+- Hero gear only benefits ONE hero in specific situations
+
+HERO GEAR PRIORITY:
+- NEVER put gear on rally joiners (Jessie, Sergey) - their stats DON'T matter!
+- Only gear field DPS heroes who fight directly in battles
+- F2P: Max 1-2 heroes with gear (Molly, Alonso are typical choices)
+- Dolphins: 3-4 heroes
+- Whales: All core field DPS heroes
+
+=== TROOP RATIOS ===
+| Event | Inf/Lan/Mar | Why |
+|-------|-------------|-----|
+| Bear Trap | 0/10/90 | Bear is slow, max marksman DPS |
+| Crazy Joe | 90/5/5 | Infantry kills before backline dies |
+| Garrison | 60/25/15 | Infantry survives longer |
+| SvS March | 40/20/40 | Balanced field combat |
+| Default | 50/20/30 | Balanced |
+
+=== SVS PREP PHASE ===
+- Speedups give points on Day 1, 2, 5 ONLY
+- Fire Crystals: 2,000 pts each (Day 1)
+- Lucky Wheel: 8,000 pts per spin (Day 2/3)
+- Mithril: 40,000 pts each (Day 4)
+- Day 4: Troop promotion > speedups
+
+=== FARM ACCOUNT RULES ===
+- Farm accounts need MINIMAL investment
+- Only invest in 1-2 heroes max
+- Jessie for rally joining is the only priority
+- Don't waste resources on chief gear beyond basic levels
+- Farm exists to be harvested, not protected
+
+=== SPENDING PROFILE GUIDANCE ===
+| Profile | Hero Focus | Gear Strategy |
+|---------|------------|---------------|
+| F2P | Top 3-4 heroes only | Chief gear priority, 1 hero gear max |
+| Minnow | Top 5-6 heroes | Chief gear first, then 2 hero gear |
+| Dolphin | Core team of 8 | Balanced approach, 3-4 hero gear |
+| Whale | All good heroes | Max everything strategically |
 
 HERO TIERS: S+ (best) > S > A > B > C > D
 CLASSES: Infantry (tank), Marksman (ranged DPS), Lancer (balanced)
 
-GENERATION TIMELINE:
-- Gen 1: Days 0-40 (Jeronimo, Natalia, Molly, Zinman, Sergey, Gina, Bahiti, Jessie)
-- Gen 2: Days 40-120 (Flint, Philly, Alonso)
-- Gen 3: Days 120-200 (Logan, Mia, Greg)
-- Gen 4: Days 200-280 (Ahmose, Reina, Lynn)
-- Gen 5: Days 280-360 (Hector, Wu Ming)
-- Gen 6: Days 360-440 (Patrick, Charlie, Cloris)
-- Gen 7: Days 440-520 (Gordon, Renee, Eugene)
-- Gen 8+: Days 520+
-
-PRIORITIES SCALE: 1=low focus, 5=critical focus
-- SvS = State vs State (main competitive event)
-- Rally = Group attacks (Bear Trap, Crazy Joe, castle attacks)
-- Castle = Castle defense/garrison
-- PvE = Exploration stages
-- Gather = Resource gathering
-
-CHIEF GEAR (6 pieces, 2 per troop type):
-| Piece | Troop Type | Stats |
-|-------|------------|-------|
-| Coat | Infantry | Attack/Defense |
-| Pants | Infantry | Attack/Defense |
-| Belt | Marksman | Attack/Defense |
-| Weapon | Marksman | Attack/Defense |
-| Cap | Lancer | Attack/Defense |
-| Watch | Lancer | Attack/Defense |
-
-SET BONUSES: 3-piece = Defense ALL troops. 6-piece = Attack ALL troops.
-CRITICAL: Keep all 6 pieces at SAME TIER for set bonuses.
-PRIORITY: Same tier first → Infantry (Coat/Pants) → Marksman (Belt/Weapon) → Lancer (Cap/Watch)
-Quality: Green → Blue → Purple → Gold → Pink/Red
-
-SPENDER-LEVEL GEAR PATHS:
-| Spender | Chief Gear | Hero Gear | Mistake Tolerance |
-|---------|------------|-----------|-------------------|
-| F2P | Mandatory priority | 1 hero max (field DPS only) | None |
-| Low | Dominant priority | 2 heroes max | Low |
-| Medium | Foundational | 3-4 heroes (strategic) | Medium |
-| Whale | Max everything | All core heroes | High |
-
-F2P RULES: All 6 Chief Gear to same tier. Infantry first when pushing next tier. Hero gear only on Molly OR Alonso. NEVER gear rally joiners.
-LOW SPENDER: Chief Gear still #1. Hero gear on daily-use multi-mode heroes only.
-HERO GEAR ROI: Rally joiner = very low. Rally leader = medium. Field PvP = high.
-
-COMBAT SYNERGY MODEL (what matters in each context):
-Rally Leader: Chief Gear ★★★★★, Hero Selection ★★★★★, Hero Gear ★★★, Joiner Gear ☆
-Rally Joiner: Chief Gear ★★★★★, First Hero Skill ★★★★, Hero Gear ★
-Field PvP: Hero Gear ★★★★★, Hero DPS ★★★★★, Chief Gear ★★★
-Garrison: Damage Reduction ★★★★★, Chief Gear (def) ★★★★, Hero Gear ★★
-
-HERO ROLES:
-- Jeronimo: rally_leader, attack_buffer
-- Jessie: attack_joiner (BEST for rally joining)
-- Sergey: defense_joiner, garrison (BEST for garrison joining)
-- Molly: field_dps, solo (poor joiner despite DPS)
-- Alonso: field_dps, hybrid
-
-NEVER RECOMMEND: DPS heroes as joiners, Defensive heroes as rally leaders, Gearing joiner-only heroes
-
-POWER ILLUSION: Hero gear increases visible damage. Chief gear increases battle outcomes.
-
-CORE TRUTHS:
-1. Rallies are won by BUFFS, not DPS
-2. Joiners carry SKILLS, not damage
-3. Chief Gear = universal power
-4. Hero Gear = situational power
+=== CORE TRUTHS ===
+1. Rallies are won by BUFFS (skills), not raw DPS
+2. Joiners carry SKILLS, not damage - their stats don't matter
+3. Chief Gear = universal power for ALL heroes
+4. Hero Gear = situational power for ONE hero
+5. NEVER recommend gearing Jessie or Sergey (joiners)
 
 === END VERIFIED MECHANICS ===
 """
+
+
+def build_hero_context(heroes_data: dict, owned_hero_names: List[str], user_gen: int) -> str:
+    """
+    Build dynamic hero context showing owned vs recommended heroes.
+
+    Args:
+        heroes_data: Full heroes.json data
+        owned_hero_names: List of hero names the user owns
+        user_gen: User's current generation (based on server age)
+
+    Returns:
+        Formatted string with hero context
+    """
+    owned_set = set(owned_hero_names)
+    lines = []
+
+    # Filter heroes by generation
+    available_heroes = [h for h in heroes_data.get('heroes', [])
+                       if h.get('generation', 99) <= user_gen]
+
+    # Group owned heroes by tier
+    owned_by_tier = {}
+    for h in available_heroes:
+        if h['name'] in owned_set:
+            tier = h.get('tier_overall', '?')
+            cls = h.get('hero_class', '?')[:3]
+            owned_by_tier.setdefault(tier, []).append(f"{h['name']}({cls})")
+
+    if owned_by_tier:
+        lines.append("YOUR HEROES:")
+        for tier in ['S+', 'S', 'A', 'B', 'C', 'D']:
+            if tier in owned_by_tier:
+                lines.append(f"  {tier}: {', '.join(owned_by_tier[tier])}")
+
+    # Recommended heroes to get
+    not_owned = {}
+    for h in available_heroes:
+        if h['name'] not in owned_set and h.get('tier_overall') in ['S+', 'S', 'A']:
+            tier = h.get('tier_overall')
+            cls = h.get('hero_class', '?')[:3]
+            not_owned.setdefault(tier, []).append(f"{h['name']}({cls})")
+
+    if not_owned:
+        lines.append("\nHEROES TO CONSIDER GETTING:")
+        for tier in ['S+', 'S', 'A']:
+            if tier in not_owned:
+                lines.append(f"  {tier}: {', '.join(not_owned[tier][:5])}")
+
+    return "\n".join(lines)
 
 
 class AIRecommender:
@@ -367,22 +400,16 @@ Keep responses concise and actionable."""
         """
         Format user data into compact, clear prompt format.
 
-        Returns a structured string like:
-
-        PROFILE: Gen2 (Day 85), Furnace 18
-        PRIORITIES: SvS=5, Rally=4, Castle=4, PvE=2, Gather=1
-
-        MY HEROES:
-        - Jeronimo [S+|Infantry|Gen1] Lv45 ★★★ Skills: Exp 3/2 Exped 4/3
-        - Natalia [A|Infantry|Gen1] Lv30 ★★ Skills: Exp 2/2 Exped 2/2
-
-        INVENTORY: 50 Epic Shards, 20 Leg Shards, 500 Combat Manuals
+        Returns a structured string with profile info, spending context,
+        owned heroes, and recommended heroes to get.
         """
         lines = []
 
         # Profile section
         server_age = getattr(profile, 'server_age_days', 0)
         furnace = getattr(profile, 'furnace_level', 1)
+        spending_profile = getattr(profile, 'spending_profile', 'f2p')
+        is_farm = getattr(profile, 'is_farm_account', False)
 
         # Calculate generation
         if server_age < 40: gen = 1
@@ -394,7 +421,13 @@ Keep responses concise and actionable."""
         elif server_age < 520: gen = 7
         else: gen = 8
 
-        lines.append(f"PROFILE: Gen{gen} (Day {server_age}), Furnace {furnace}")
+        # Basic profile info
+        profile_line = f"PROFILE: Gen{gen} (Day {server_age}), Furnace {furnace}"
+        if spending_profile != 'f2p':
+            profile_line += f", {spending_profile.upper()} spender"
+        if is_farm:
+            profile_line += " [FARM ACCOUNT]"
+        lines.append(profile_line)
 
         # Priorities - compact format
         p_svs = getattr(profile, 'priority_svs', 5)
@@ -408,6 +441,7 @@ Keep responses concise and actionable."""
 
         # Heroes section
         hero_lookup = {h['name']: h for h in heroes_data.get('heroes', [])}
+        owned_hero_names = []
 
         lines.append("MY HEROES:")
         if not user_heroes:
@@ -415,6 +449,7 @@ Keep responses concise and actionable."""
         else:
             for uh in user_heroes:
                 hero_name = uh.hero.name if hasattr(uh, 'hero') else uh.get('name', 'Unknown')
+                owned_hero_names.append(hero_name)
                 hero_data = hero_lookup.get(hero_name, {})
 
                 tier = hero_data.get('tier_overall', '?')
@@ -432,6 +467,17 @@ Keep responses concise and actionable."""
                 exped2 = getattr(uh, 'expedition_skill_2_level', 1)
 
                 lines.append(f"- {hero_name} [{tier}|{h_class}|Gen{h_gen}] Lv{level} {star_str} Skills: Expl {exp1}/{exp2} Exped {exped1}/{exped2}")
+
+        # Add dynamic hero context (heroes to get)
+        if owned_hero_names:
+            hero_context = build_hero_context(heroes_data, owned_hero_names, gen)
+            # Extract just the "HEROES TO CONSIDER GETTING" part
+            if "HEROES TO CONSIDER GETTING:" in hero_context:
+                getting_section = hero_context.split("HEROES TO CONSIDER GETTING:")[1].strip()
+                if getting_section:
+                    lines.append("")
+                    lines.append("HEROES TO CONSIDER GETTING:")
+                    lines.append(getting_section)
 
         # Inventory section (if provided)
         if inventory:
