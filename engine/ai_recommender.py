@@ -112,13 +112,19 @@ HERO SKILL SYSTEM:
 - Rally LEADER: All 9 expedition skills from 3 heroes apply
 - Rally JOINER: ONLY slot 1 hero's TOP-RIGHT expedition skill matters!
 - Top 4 highest SKILL LEVELS from all joiners contribute
-- Joiner hero STATS and GEAR are IRRELEVANT - only the skill matters!
+
+CRITICAL JOINER RULE:
+Joiner hero STATS, LEVEL, and GEAR are 100% IRRELEVANT for rally damage!
+Only the expedition SKILL matters. A level 1 Jessie with maxed skill = level 80 Jessie with maxed skill.
+DO NOT recommend gearing or leveling joiners beyond their skill.
 
 BEST JOINER HEROES:
 | Role | Hero | Skill | Effect (Lv1-5) |
 |------|------|-------|----------------|
 | Attack Joiner | Jessie | Stand of Arms | +5/10/15/20/25% DMG dealt |
 | Garrison Joiner | Sergey | Defenders' Edge | -4/8/12/16/20% DMG taken |
+
+WARNING: Jessie and Sergey are JOINERS ONLY. Their gear/stats don't help rallies!
 
 === CHIEF GEAR (6 pieces) ===
 | Piece | Troop Type | Priority |
@@ -187,7 +193,20 @@ CLASSES: Infantry (tank), Marksman (ranged DPS), Lancer (balanced)
 2. Joiners carry SKILLS, not damage - their stats don't matter
 3. Chief Gear = universal power for ALL heroes
 4. Hero Gear = situational power for ONE hero
-5. NEVER recommend gearing Jessie or Sergey (joiners)
+
+=== COMMON MISTAKES TO AVOID ===
+NEVER RECOMMEND THESE (even for whales):
+- Gearing Jessie - she's a joiner, her stats don't affect rallies
+- Gearing Sergey - he's a joiner, his stats don't affect garrison defense
+- Hero gear before chief gear - chief gear helps ALL heroes
+- Spreading resources across many heroes (F2P should focus on 3-4 max)
+- Leveling joiner heroes beyond expedition skill needs
+
+ALWAYS RECOMMEND THESE:
+- Chief gear to same tier before any hero gear
+- Jessie in slot 1 for attack rallies (skill only matters)
+- Sergey in slot 1 for garrison defense (skill only matters)
+- Field DPS heroes (Molly, Alonso, Jeronimo) for hero gear investment
 
 === END VERIFIED MECHANICS ===
 """

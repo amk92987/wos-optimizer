@@ -321,7 +321,10 @@ def build_comprehensive_template(owned_heroes: List[str], user_gen: int) -> str:
 - JOINER: Only slot 1 hero's TOP-RIGHT expedition skill matters!
 - BEST ATTACK JOINER: Jessie (+25% DMG dealt)
 - BEST GARRISON JOINER: Sergey (-20% DMG taken)
-- Joiner hero stats/gear DON'T matter - only the skill!
+
+CRITICAL: Joiner hero STATS, LEVEL, and GEAR are 100% IRRELEVANT!
+A level 1 Jessie with max skill = level 80 Jessie for rally damage.
+NEVER gear or over-level Jessie/Sergey - waste of resources!
 
 === CHIEF GEAR (6 pieces) ===
 | Piece | Troop Type | Priority |
@@ -373,6 +376,18 @@ HERO GEAR PRIORITY:
 3. Jessie expedition skill for rally joining
 4. Sergey expedition skill for garrison
 5. Hero gear on 1 field DPS hero max
+
+=== COMMON MISTAKES TO AVOID ===
+NEVER RECOMMEND (even for whales):
+- Gearing Jessie - she's a joiner, stats don't affect rallies
+- Gearing Sergey - he's a joiner, stats don't affect defense
+- Hero gear before chief gear
+- Spreading resources across many heroes
+
+ALWAYS RECOMMEND:
+- Chief gear to same tier FIRST
+- Field DPS heroes (Molly, Alonso, Jeronimo) for hero gear
+- Jessie/Sergey for skills only, not gear
 """)
 
     return "\n".join(lines)
