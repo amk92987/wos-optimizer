@@ -379,7 +379,7 @@ Each hero has two types of skills (up to 3 each):
 **Best Attack Joiners** (Bear Trap, Castle Attacks):
 | Hero | Gen | Top-Right Skill | Effect |
 |------|-----|-----------------|--------|
-| Jessie | 5 | Stand of Arms | +5-25% DMG dealt |
+| Jessie | 1 | Stand of Arms | +5-25% DMG dealt |
 | Jeronimo | 1 | Infantry ATK buff | Scales with level |
 
 **Best Garrison Joiners** (Defense):
@@ -526,6 +526,65 @@ To re-download images:
 ```bash
 py scripts/download_hero_images.py
 ```
+
+### Verified Hero Data - CRITICAL
+
+**NEVER GUESS HERO GENERATIONS. ALWAYS use `data/heroes.json` as the source of truth.**
+
+#### Complete Hero Generation Reference (AUTHORITATIVE)
+
+| Gen | Server Days | Heroes |
+|-----|-------------|--------|
+| 1 | 0-40 | Bahiti, Charlie, Cloris, Eugene, Gina, Jasser, **Jeronimo**, **JESSIE**, Ling Xue, Lumak Bokan, **Molly**, **Natalia**, Patrick, Seo-yoon, **SERGEY**, Smith, Zinman |
+| 2 | 40-120 | **Alonso**, Flint, Philly |
+| 3 | 120-200 | Greg, Logan, Mia |
+| 4 | 200-280 | Ahmose, Lynn, Reina |
+| 5 | 280-360 | Gwen, Hector, Norah |
+| 6 | 360-440 | Renee, Wayne, **Wu Ming** |
+| 7 | 440-520 | Bradley, Edith, Gordon |
+| 8 | 520-600 | **Gatot**, Hendrik, Sonya |
+| 9 | 600-680 | Fred, Magnus, Xura |
+| 10 | 680-760 | Blanchette, Freya, Gregory |
+| 11 | 760-840 | Eleonora, Lloyd, Rufus |
+| 12 | 840-920 | Hervor, Karol, Ligeia |
+| 13 | 920-1000 | Flora, Gisela, Vulcanus |
+| 14 | 1000+ | Cara, Dominic, Elif |
+
+**KEY HEROES EMPHASIZED:**
+- **JESSIE = Gen 1** (NOT Gen 5!) - Best attack joiner, Stand of Arms skill
+- **SERGEY = Gen 1** - Best garrison joiner, Defenders' Edge skill
+- **Jeronimo = Gen 1** - Top infantry hero
+- **Molly = Gen 1** - Top marksman hero
+- **Wu Ming = Gen 6** - Strong infantry alternative
+- **Hector = Gen 5** - Strong infantry option
+- **Gatot = Gen 8** - Top infantry hero
+
+When working with heroes, verify:
+- **Generation**: Each hero's `generation` field (1-14) - DO NOT guess generations
+- **Hero class**: `hero_class` field (Infantry, Lancer, Marksman)
+- **Tier ratings**: `tier_overall`, `tier_expedition`, `tier_exploration` (S+, S, A, B, C, D)
+- **Skills**: `exploration_skill_1/2/3`, `expedition_skill_1/2/3` with `_desc` suffixes for descriptions
+
+**Common mistakes to avoid:**
+- Jessie is Gen 1 (NOT Gen 5)
+- Gwen is Gen 5 (not Gen 4)
+- Gen 3 is Logan, Mia, Greg (not Bahiti, Patrick)
+- Sergey is B-tier overall but S-tier expedition
+- Hector is Gen 5 (not Gen 4 or Gen 6)
+
+**To verify hero data**, run:
+```bash
+.venv/Scripts/python.exe -c "
+import json
+with open('data/heroes.json', encoding='utf-8') as f:
+    data = json.load(f)
+for h in data['heroes']:
+    if h['name'] == 'HERO_NAME':
+        print(h)
+"
+```
+
+When generating AI recommendations or lineup suggestions, always load and reference the actual hero data from `data/heroes.json` rather than relying on memory which may be outdated or incorrect.
 
 ## Data Sources
 

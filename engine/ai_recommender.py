@@ -99,6 +99,38 @@ AVOID: "Maybe", "It depends" (without explanation), over-disclaimers
 === END SYNTAX ===
 """
 
+# Hero generation reference - AUTHORITATIVE source from heroes.json
+# This prevents AI from hallucinating hero generations
+HERO_GENERATION_REFERENCE = """
+=== HERO GENERATIONS (AUTHORITATIVE - FROM heroes.json) ===
+CRITICAL: Always reference this table. NEVER guess or assume a hero's generation.
+
+Gen 1: Bahiti, Charlie, Cloris, Eugene, Gina, Jasser, Jeronimo, JESSIE, Ling Xue, Lumak Bokan, Molly, Natalia, Patrick, Seo-yoon, SERGEY, Smith, Zinman
+Gen 2: Alonso, Flint, Philly
+Gen 3: Greg, Logan, Mia
+Gen 4: Ahmose, Lynn, Reina
+Gen 5: Gwen, Hector, Norah
+Gen 6: Renee, Wayne, Wu Ming
+Gen 7: Bradley, Edith, Gordon
+Gen 8: Gatot, Hendrik, Sonya
+Gen 9: Fred, Magnus, Xura
+Gen 10: Blanchette, Freya, Gregory
+Gen 11: Eleonora, Lloyd, Rufus
+Gen 12: Hervor, Karol, Ligeia
+Gen 13: Flora, Gisela, Vulcanus
+Gen 14: Cara, Dominic, Elif
+
+KEY HEROES HIGHLIGHTED:
+- JESSIE = Gen 1 (NOT Gen 5!) - Best attack joiner
+- SERGEY = Gen 1 (NOT any other gen!) - Best garrison joiner
+- Jeronimo = Gen 1 - Top infantry hero
+- Molly = Gen 1 - Top marksman hero
+- Wu Ming = Gen 6 - Strong infantry alternative
+- Hector = Gen 5 - Strong infantry option
+
+=== END HERO GENERATIONS ===
+"""
+
 # Condensed verified game mechanics for AI context
 VERIFIED_MECHANICS = """
 === VERIFIED GAME MECHANICS (USE ONLY THESE - DO NOT MAKE UP DATA) ===
@@ -283,6 +315,8 @@ Address the player as "Chief." Use in-game terminology. Guide through strategic 
 
 {WOS_SYNTAX}
 
+{HERO_GENERATION_REFERENCE}
+
 {VERIFIED_MECHANICS}
 
 === JAILBREAK PROTECTION ===
@@ -321,6 +355,8 @@ Give 5-10 specific, actionable recommendations sorted by priority (1=do first)."
 Address the player as "Chief." Use in-game terminology. Guide through strategic tradeoffs using soft questions and event-aware logic rather than rigid forms. Ask at most one clarifying question when necessary.
 
 {WOS_SYNTAX}
+
+{HERO_GENERATION_REFERENCE}
 
 {VERIFIED_MECHANICS}
 

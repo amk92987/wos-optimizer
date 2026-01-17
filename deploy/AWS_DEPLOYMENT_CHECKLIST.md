@@ -220,19 +220,62 @@ cd WoS
 - [ ] Repository cloned successfully
 
 ### 5.2 Create Environment File
+
+**Required Environment Variables:**
+
 ```bash
 cat > .env << 'EOF'
+# Core Settings
 ENVIRONMENT=production
 DEV_AUTO_LOGIN=false
 SECRET_KEY=<generate-random-string>
-ANTHROPIC_API_KEY=<your-key>
+
+# Database (PostgreSQL on RDS)
 DATABASE_URL=postgresql://wos_admin:<password>@<rds-endpoint>:5432/wos_production
+
+# AI Provider (choose one or both - system tries Anthropic first, falls back to OpenAI)
+ANTHROPIC_API_KEY=sk-ant-...
+OPENAI_API_KEY=sk-...
+
+# Email Settings (optional - leave blank to use debug mode)
+EMAIL_MODE=debug
+# For production email via SES:
+# EMAIL_MODE=smtp
+# SMTP_HOST=email-smtp.us-east-1.amazonaws.com
+# SMTP_PORT=587
+# SMTP_USER=<ses-smtp-username>
+# SMTP_PASSWORD=<ses-smtp-password>
+# EMAIL_FROM=noreply@randomchaoslabs.com
 EOF
 ```
+
+**Environment Variable Reference:**
+
+| Variable | Required | Description | Example |
+|----------|----------|-------------|---------|
+| `ENVIRONMENT` | Yes | Set to `production` for live site | `production` |
+| `DEV_AUTO_LOGIN` | Yes | Disable auto-login in production | `false` |
+| `SECRET_KEY` | Yes | Session encryption key | `openssl rand -hex 32` |
+| `DATABASE_URL` | Yes | PostgreSQL connection string | `postgresql://user:pass@host:5432/db` |
+| `ANTHROPIC_API_KEY` | Recommended | Claude API key for AI features | `sk-ant-...` |
+| `OPENAI_API_KEY` | Fallback | OpenAI API key (used if Anthropic unavailable) | `sk-...` |
+| `EMAIL_MODE` | No | `debug` (logs to console) or `smtp` (real emails) | `debug` |
+| `SMTP_HOST` | If smtp | SMTP server hostname | `email-smtp.us-east-1.amazonaws.com` |
+| `SMTP_PORT` | If smtp | SMTP port (usually 587 for TLS) | `587` |
+| `SMTP_USER` | If smtp | SMTP username (from SES) | AWS SES credentials |
+| `SMTP_PASSWORD` | If smtp | SMTP password (from SES) | AWS SES credentials |
+| `EMAIL_FROM` | If smtp | Sender email address (must be verified) | `noreply@randomchaoslabs.com` |
+
+**Notes:**
+- AI API Keys: System tries Anthropic (Claude) first, falls back to OpenAI
+- Email: Start with `EMAIL_MODE=debug` - emails are logged to console instead of sent
+- See `utils/email.py` for email implementation details
+
 - [ ] .env file created
 - [ ] SECRET_KEY set (use: `openssl rand -hex 32`)
-- [ ] API key added
+- [ ] At least one AI API key added (Anthropic recommended)
 - [ ] DATABASE_URL configured with RDS endpoint
+- [ ] EMAIL_MODE set to `debug` initially
 
 ### 5.3 Build and Start
 ```bash

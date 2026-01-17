@@ -269,15 +269,633 @@
         },
         {
           "tip": "Jessie is the best rally joiner in the game",
-          "detail": "+25% DMG dealt to all troops. Even at low investment, her expedition skill is top tier.",
-          "priority": "high"
+          "detail": "+25% DMG dealt to all troops at max expedition skill. Even at low investment, her expedition skill is top tier. MAX HER EXPEDITION SKILL FIRST.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Sergey is the best garrison joiner",
+          "detail": "-20% damage taken for ENTIRE garrison at max expedition skill. Critical for defense. MAX HIS EXPEDITION SKILL.",
+          "priority": "critical"
         },
         {
           "tip": "Philly is essential for PvE content",
-          "detail": "Healer is critical for Bear Trap, Crazy Joe, exploration. Max her exploration skills.",
-          "priority": "medium"
+          "detail": "Best healer until Gen 13 Flora. Healer critical for exploration, Bear Trap. Max her EXPLORATION skills.",
+          "priority": "high"
+        },
+        {
+          "tip": "F2P: Focus resources on 3-4 core heroes maximum",
+          "detail": "Spread resources = weak everywhere. Pick Jeronimo + Wu Ming + 1 Lancer + 1 Marksman. Max them before touching others.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Expedition skills for PvP, Exploration skills for PvE",
+          "detail": "Rallies, SvS, garrison = expedition skills (right side). Bear Trap, Crazy Joe, exploration = exploration skills (left side).",
+          "priority": "high"
         }
       ]
+    },
+
+    "hero_investment_by_gen": {
+      "name": "Hero Investment by Generation",
+      "icon": "upgrade",
+      "generations": {
+        "1": {
+          "summary": "Foundation heroes - Jeronimo & Jessie stay meta forever",
+          "heroes": [
+            {
+              "name": "Jeronimo",
+              "class": "Infantry",
+              "tier": "S+",
+              "mythic": true,
+              "investment": "MAX",
+              "why": "Best rally leader in the game. His expedition skills boost all Infantry damage and stay relevant at every level of play.",
+              "skills": "MAX all 3 expedition skills - Infantry Offense, Infantry Defense, and Infantry Health buffs all stack with your troops.",
+              "longevity": "Forever meta. Still #1 rally leader even against Gen 14 heroes."
+            },
+            {
+              "name": "Natalia",
+              "class": "Infantry",
+              "tier": "A",
+              "mythic": true,
+              "investment": "MEDIUM",
+              "why": "Solid frontline tank with good sustain. Feral Protection provides damage reduction. Has mythic gear for late-game scaling.",
+              "skills": "Expedition skills if you need another Infantry. Gets replaced by Gen 6+ Infantry but mythic gear keeps her relevant.",
+              "longevity": "Useful until Gen 6 Wu Ming. Mythic gear gives her late-game niche."
+            },
+            {
+              "name": "Molly",
+              "class": "Lancer",
+              "tier": "B",
+              "mythic": true,
+              "investment": "LOW-MEDIUM",
+              "why": "B-tier Lancer but has mythic gear. Worth keeping for late-game mythic investment if you lack better Lancers.",
+              "skills": "Only invest if you're building her mythic gear. Otherwise skip for Norah/Gordon.",
+              "longevity": "Mythic gear gives late-game potential. Otherwise outclassed by S-tier Lancers."
+            },
+            {
+              "name": "Zinman",
+              "class": "Marksman",
+              "tier": "C",
+              "mythic": true,
+              "investment": "LOW",
+              "why": "C-tier Marksman but has mythic gear. Only invest if you're a whale building all mythic heroes.",
+              "skills": "Skip unless going for mythic gear completion.",
+              "longevity": "Weak hero but mythic gear exists. Whales only."
+            },
+            {
+              "name": "Jessie",
+              "class": "Lancer",
+              "tier": "A",
+              "tier_expedition": "S+",
+              "investment": "MAX EXPEDITION",
+              "why": "Best rally JOINER in the game. Her top-right expedition skill 'Stand of Arms' gives +25% damage dealt to the entire rally.",
+              "skills": "MAX 'Stand of Arms' (top-right expedition skill) to level 5 for +25% damage. Other skills are lower priority.",
+              "longevity": "Forever meta as a joiner. You'll use her in slot 1 for every attack rally you join."
+            },
+            {
+              "name": "Sergey",
+              "class": "Infantry",
+              "tier": "B",
+              "tier_expedition": "S",
+              "investment": "HIGH (Expedition only)",
+              "why": "Best GARRISON joiner. His 'Defenders Edge' expedition skill reduces damage taken by the entire garrison by up to 20%.",
+              "skills": "MAX 'Defenders Edge' (top-right expedition skill). Skip exploration skills entirely.",
+              "longevity": "Forever meta as garrison joiner. Put in slot 1 when defending."
+            },
+            {
+              "name": "Bahiti",
+              "class": "Marksman",
+              "tier": "B",
+              "tier_expedition": "A",
+              "investment": "LOW",
+              "why": "Decent early Marksman but outclassed quickly. A-tier expedition gives some value.",
+              "skills": "Only invest if no better Marksman available.",
+              "longevity": "Replace with Gen 5 Gwen or any S-tier Marksman."
+            },
+            {
+              "name": "Jasser",
+              "class": "Marksman",
+              "tier": "B",
+              "tier_expedition": "A",
+              "investment": "LOW",
+              "why": "Similar to Bahiti - early Marksman option with A-tier expedition.",
+              "skills": "Skip. Save resources for S-tier Marksmen.",
+              "longevity": "Replace with Gwen (Gen 5) or Bradley (Gen 7)."
+            },
+            {
+              "name": "Patrick",
+              "class": "Lancer",
+              "tier": "B",
+              "tier_expedition": "A",
+              "investment": "LOW",
+              "why": "Early Lancer option with A-tier expedition. Nothing special.",
+              "skills": "Skip. Better Lancers come in Gen 5+.",
+              "longevity": "Replace with Norah (Gen 5) or Gordon (Gen 7)."
+            },
+            {
+              "name": "Ling Xue",
+              "class": "Lancer",
+              "tier": "B",
+              "investment": "SKIP",
+              "why": "B-tier Lancer without standout skills. Better options available.",
+              "skills": "Skip entirely.",
+              "longevity": "Outclassed by Patrick and all S-tier Lancers."
+            },
+            {
+              "name": "Lumak Bokan",
+              "class": "Infantry",
+              "tier": "B",
+              "investment": "SKIP",
+              "why": "B-tier Infantry without the expedition value of Sergey.",
+              "skills": "Skip. Sergey is better for joining, Jeronimo/Natalia for leading.",
+              "longevity": "No niche. Skip."
+            },
+            {
+              "name": "Gina",
+              "class": "Marksman",
+              "tier": "C",
+              "tier_expedition": "B",
+              "investment": "SKIP",
+              "why": "C-tier Marksman. Bahiti and Jasser are better early options.",
+              "skills": "Skip entirely.",
+              "longevity": "No use case. Skip."
+            },
+            {
+              "name": "Seo-yoon",
+              "class": "Marksman",
+              "tier": "C",
+              "tier_expedition": "B",
+              "investment": "SKIP",
+              "why": "C-tier Marksman. Same as Gina - no reason to invest.",
+              "skills": "Skip entirely.",
+              "longevity": "No use case. Skip."
+            },
+            {
+              "name": "Smith",
+              "class": "Infantry",
+              "tier": "D",
+              "investment": "SKIP",
+              "why": "Gathering hero only - Iron. Zero combat value.",
+              "skills": "Don't waste ANY resources.",
+              "longevity": "Never use in combat. Only for resource gathering on farm accounts."
+            },
+            {
+              "name": "Eugene",
+              "class": "Infantry",
+              "tier": "D",
+              "investment": "SKIP",
+              "why": "Gathering hero only - Wood. Zero combat value.",
+              "skills": "Don't waste ANY resources.",
+              "longevity": "Never use in combat. Only for resource gathering on farm accounts."
+            },
+            {
+              "name": "Charlie",
+              "class": "Lancer",
+              "tier": "D",
+              "investment": "SKIP",
+              "why": "Gathering hero only - Coal. Zero combat value.",
+              "skills": "Don't waste ANY resources.",
+              "longevity": "Never use in combat. Only for resource gathering on farm accounts."
+            },
+            {
+              "name": "Cloris",
+              "class": "Marksman",
+              "tier": "D",
+              "investment": "SKIP",
+              "why": "Gathering hero only - Meat. Zero combat value.",
+              "skills": "Don't waste ANY resources.",
+              "longevity": "Never use in combat. Only for resource gathering on farm accounts."
+            }
+          ]
+        },
+        "2": {
+          "summary": "Philly is the best healer until Gen 13 - invest heavily in exploration skills",
+          "heroes": [
+            {
+              "name": "Philly",
+              "class": "Lancer",
+              "tier": "A",
+              "investment": "HIGH (Exploration)",
+              "why": "Best healer in the game until Flora (Gen 13). Her exploration skills provide massive healing in PvE content.",
+              "skills": "MAX all EXPLORATION skills. Her expedition skills are mediocre - focus on exploration for healing.",
+              "longevity": "Meta healer until Gen 13 Flora. Even then, still usable as backup."
+            },
+            {
+              "name": "Alonso",
+              "class": "Marksman",
+              "tier": "A",
+              "investment": "MEDIUM",
+              "why": "Solid Marksman DPS. Good bridge hero until Gen 5+ Marksmen.",
+              "skills": "Expedition skills for PvP. Replaced by Gwen (Gen 5) or Bradley (Gen 7).",
+              "longevity": "Usable until Gen 7-8. Then becomes backup."
+            },
+            {
+              "name": "Flint",
+              "class": "Infantry",
+              "tier": "A",
+              "investment": "LOW-MEDIUM",
+              "why": "Backup Infantry tank. Not bad, but not essential.",
+              "skills": "Only invest if you need Infantry depth.",
+              "longevity": "Replaced by Wu Ming (Gen 6). Skip if resources are tight."
+            }
+          ]
+        },
+        "3": {
+          "summary": "All A-tier heroes - use as bridges but don't over-invest",
+          "heroes": [
+            {
+              "name": "Logan",
+              "class": "Infantry",
+              "tier": "A",
+              "tier_expedition": "S",
+              "investment": "MEDIUM",
+              "why": "Good Infantry with S-tier expedition rating. Provides solid troop buffs.",
+              "skills": "Expedition skills have value. But Gen 6 Wu Ming is much better.",
+              "longevity": "Bridge hero. Usable until Gen 6."
+            },
+            {
+              "name": "Mia",
+              "class": "Lancer",
+              "tier": "A",
+              "investment": "LOW-MEDIUM",
+              "why": "Decent Lancer but not special.",
+              "skills": "Only invest if you need Lancer depth.",
+              "longevity": "Replaced by Norah (Gen 5) or Gordon (Gen 7)."
+            },
+            {
+              "name": "Greg",
+              "class": "Marksman",
+              "tier": "A",
+              "investment": "LOW-MEDIUM",
+              "why": "Serviceable Marksman. Nothing wrong with him.",
+              "skills": "Expedition skills if needed.",
+              "longevity": "Replaced by Gwen (Gen 5) or better."
+            }
+          ]
+        },
+        "4": {
+          "summary": "Skip generation - Gen 5 has much better options",
+          "heroes": [
+            {
+              "name": "Ahmose",
+              "class": "Infantry",
+              "tier": "A",
+              "investment": "SKIP",
+              "why": "Passively collect shards but don't invest. Wu Ming (Gen 6) is far superior.",
+              "skills": "Save your resources.",
+              "longevity": "Outclassed by Gen 5-6. Skip."
+            },
+            {
+              "name": "Reina",
+              "class": "Lancer",
+              "tier": "A",
+              "investment": "SKIP",
+              "why": "Norah (Gen 5) comes right after and is S-tier.",
+              "skills": "Save your resources.",
+              "longevity": "Skip for Norah."
+            },
+            {
+              "name": "Lynn",
+              "class": "Marksman",
+              "tier": "A",
+              "investment": "SKIP",
+              "why": "Gwen (Gen 5) is coming and is S-tier.",
+              "skills": "Save your resources.",
+              "longevity": "Skip for Gwen."
+            }
+          ]
+        },
+        "5": {
+          "summary": "First S-tier generation! Norah and Gwen are excellent investments",
+          "heroes": [
+            {
+              "name": "Norah",
+              "class": "Lancer",
+              "tier": "S",
+              "tier_expedition": "S+",
+              "investment": "HIGH",
+              "why": "Balanced offensive AND defensive buffs. -15% damage taken AND +15% damage dealt makes her versatile.",
+              "skills": "MAX expedition skills. Her top-right skill is excellent for joining.",
+              "longevity": "Long-term value. S+ expedition tier means she stays relevant."
+            },
+            {
+              "name": "Gwen",
+              "class": "Marksman",
+              "tier": "S",
+              "investment": "HIGH",
+              "why": "First S-tier Marksman. Solid DPS upgrade over all previous Marksmen.",
+              "skills": "Expedition skills for PvP damage.",
+              "longevity": "Usable until Gen 8+ Marksmen. Good value."
+            },
+            {
+              "name": "Hector",
+              "class": "Infantry",
+              "tier": "A",
+              "tier_expedition": "S",
+              "investment": "MEDIUM",
+              "why": "A-tier overall but S-tier expedition. Good Infantry if you need depth.",
+              "skills": "Expedition skills have value.",
+              "longevity": "Backup to Wu Ming (Gen 6). Don't over-invest."
+            }
+          ]
+        },
+        "6": {
+          "summary": "Wu Ming is TOP 3 hero in the game - MAX EVERYTHING",
+          "heroes": [
+            {
+              "name": "Wu Ming",
+              "class": "Infantry",
+              "tier": "S+",
+              "investment": "MAX",
+              "why": "Top 3 hero in the entire game. -25% ALL damage taken is unmatched sustain. Best defensive Infantry ever.",
+              "skills": "MAX ALL skills. Every expedition skill is valuable. He's worth every resource.",
+              "longevity": "Forever meta. Even Gen 14 doesn't replace him for pure defense."
+            },
+            {
+              "name": "Renee",
+              "class": "Lancer",
+              "tier": "S",
+              "investment": "HIGH",
+              "why": "Infantry ATK boost benefits your Infantry troops. Good synergy with Wu Ming and Jeronimo.",
+              "skills": "Expedition skills for Infantry buff.",
+              "longevity": "Long-term value with Infantry-focused builds."
+            },
+            {
+              "name": "Wayne",
+              "class": "Marksman",
+              "tier": "A",
+              "investment": "LOW",
+              "why": "Only A-tier in a generation with an S+ hero. Skip unless you desperately need Marksman depth.",
+              "skills": "Save resources for better Marksmen.",
+              "longevity": "Outclassed by Gen 7-8 Marksmen."
+            }
+          ]
+        },
+        "7": {
+          "summary": "All three heroes are S-tier - solid generation",
+          "heroes": [
+            {
+              "name": "Gordon",
+              "class": "Lancer",
+              "tier": "S",
+              "investment": "HIGH",
+              "why": "Poison damage is devastating in rallies. Best Lancer for sustained damage over time.",
+              "skills": "MAX expedition skills. Poison stacks make him excellent for long fights.",
+              "longevity": "Rally specialist. Long-term value."
+            },
+            {
+              "name": "Edith",
+              "class": "Infantry",
+              "tier": "S",
+              "investment": "HIGH",
+              "why": "3/3 sustain skills make her incredibly tanky. Great complement to Wu Ming.",
+              "skills": "All expedition skills provide sustain buffs.",
+              "longevity": "Solid Infantry depth. Long-term backup to Wu Ming."
+            },
+            {
+              "name": "Bradley",
+              "class": "Marksman",
+              "tier": "S",
+              "investment": "HIGH",
+              "why": "First S-tier Marksman with well-rounded skills. Solid ranged DPS.",
+              "skills": "Expedition skills for PvP damage.",
+              "longevity": "Usable until Gen 10 Blanchette. Good investment."
+            }
+          ]
+        },
+        "8": {
+          "summary": "Hendrik has S+ expedition rating - best single-target DPS",
+          "heroes": [
+            {
+              "name": "Gatot",
+              "class": "Infantry",
+              "tier": "S",
+              "investment": "HIGH",
+              "why": "Pure defense specialist. 3/3 sustain skills stack for maximum tankiness.",
+              "skills": "All skills are defensive. Great for garrison and long fights.",
+              "longevity": "Defensive specialist. Long-term Infantry depth."
+            },
+            {
+              "name": "Hendrik",
+              "class": "Marksman",
+              "tier": "S",
+              "tier_expedition": "S+",
+              "investment": "HIGH",
+              "why": "S+ expedition tier - best single-target DPS Marksman until Blanchette (Gen 10).",
+              "skills": "MAX expedition skills. His single-target damage is unmatched.",
+              "longevity": "Long-term value. S+ expedition means relevance even late game."
+            },
+            {
+              "name": "Sonya",
+              "class": "Lancer",
+              "tier": "S",
+              "investment": "MEDIUM-HIGH",
+              "why": "Offense-focused Lancer. Good damage but less utility than Gordon.",
+              "skills": "Expedition skills for attack buffs.",
+              "longevity": "Good Lancer option. Complements Gordon's poison."
+            }
+          ]
+        },
+        "9": {
+          "summary": "Magnus is S+ Infantry - another must-have hero",
+          "heroes": [
+            {
+              "name": "Magnus",
+              "class": "Infantry",
+              "tier": "S+",
+              "investment": "MAX",
+              "why": "S+ Infantry with excellent all-around skills. Top-tier frontline hero.",
+              "skills": "MAX all expedition skills. Every skill provides value.",
+              "longevity": "Forever meta. S+ tier doesn't get replaced easily."
+            },
+            {
+              "name": "Xura",
+              "class": "Marksman",
+              "tier": "S",
+              "investment": "HIGH",
+              "why": "Solid S-tier Marksman. Good damage and utility.",
+              "skills": "Expedition skills for PvP.",
+              "longevity": "Usable until Blanchette (Gen 10). Good bridge."
+            },
+            {
+              "name": "Fred",
+              "class": "Lancer",
+              "tier": "A",
+              "investment": "LOW",
+              "why": "Only A-tier in a generation with an S+ hero. Skip unless you need Lancer depth.",
+              "skills": "Save resources.",
+              "longevity": "Outclassed by S-tier Lancers."
+            }
+          ]
+        },
+        "10": {
+          "summary": "Blanchette is THE best Marksman in the game - MAX EVERYTHING",
+          "heroes": [
+            {
+              "name": "Blanchette",
+              "class": "Marksman",
+              "tier": "S+",
+              "investment": "MAX",
+              "why": "Best Marksman in the entire game. S+ expedition tier. Highest DPS output possible.",
+              "skills": "MAX ALL skills. She's the Marksman equivalent of Jeronimo and Wu Ming.",
+              "longevity": "Forever meta. Best Marksman even against Gen 14."
+            },
+            {
+              "name": "Freya",
+              "class": "Lancer",
+              "tier": "S",
+              "investment": "HIGH",
+              "why": "Strong S-tier Lancer. Good offensive capabilities.",
+              "skills": "Expedition skills for damage.",
+              "longevity": "Long-term Lancer value."
+            },
+            {
+              "name": "Gregory",
+              "class": "Infantry",
+              "tier": "A",
+              "investment": "LOW",
+              "why": "A-tier Infantry in a generation with an S+ Marksman. You have Wu Ming and Magnus already.",
+              "skills": "Skip unless you need Infantry depth.",
+              "longevity": "Outclassed by S+ Infantry."
+            }
+          ]
+        },
+        "11": {
+          "summary": "Rufus is solid S-tier Marksman, Lloyd has S expedition",
+          "heroes": [
+            {
+              "name": "Rufus",
+              "class": "Marksman",
+              "tier": "S",
+              "investment": "MEDIUM-HIGH",
+              "why": "Good S-tier Marksman but you likely have Blanchette already.",
+              "skills": "Expedition skills if you need Marksman depth.",
+              "longevity": "Good backup to Blanchette."
+            },
+            {
+              "name": "Lloyd",
+              "class": "Lancer",
+              "tier": "A",
+              "tier_expedition": "S",
+              "investment": "MEDIUM",
+              "why": "A-tier overall but S expedition. Good joiner potential.",
+              "skills": "Expedition skills for joining rallies.",
+              "longevity": "Niche use as joiner. Not essential."
+            },
+            {
+              "name": "Eleonora",
+              "class": "Infantry",
+              "tier": "A",
+              "investment": "LOW",
+              "why": "A-tier Infantry when you have Wu Ming and Magnus.",
+              "skills": "Skip unless you need depth.",
+              "longevity": "Backup only."
+            }
+          ]
+        },
+        "12": {
+          "summary": "Hervor is S+ Infantry - another max investment hero",
+          "heroes": [
+            {
+              "name": "Hervor",
+              "class": "Infantry",
+              "tier": "S+",
+              "investment": "MAX",
+              "why": "S+ Infantry. Excellent skills that rival Wu Ming and Magnus.",
+              "skills": "MAX all expedition skills. S+ heroes are always worth maxing.",
+              "longevity": "Forever meta. Third S+ Infantry in your lineup."
+            },
+            {
+              "name": "Karol",
+              "class": "Lancer",
+              "tier": "S",
+              "investment": "HIGH",
+              "why": "Strong S-tier Lancer. Good all-around skills.",
+              "skills": "Expedition skills for PvP.",
+              "longevity": "Long-term Lancer value."
+            },
+            {
+              "name": "Ligeia",
+              "class": "Marksman",
+              "tier": "S",
+              "investment": "MEDIUM-HIGH",
+              "why": "S-tier Marksman. Good backup to Blanchette.",
+              "skills": "Expedition skills if you need Marksman depth.",
+              "longevity": "Solid Marksman depth."
+            }
+          ]
+        },
+        "13": {
+          "summary": "Vulcanus is S+ Marksman, Flora is the new best healer",
+          "heroes": [
+            {
+              "name": "Vulcanus",
+              "class": "Marksman",
+              "tier": "S+",
+              "investment": "MAX",
+              "why": "S+ Marksman. Rivals Blanchette for damage output.",
+              "skills": "MAX all expedition skills. Two S+ Marksmen means devastating DPS.",
+              "longevity": "Forever meta alongside Blanchette."
+            },
+            {
+              "name": "Flora",
+              "class": "Lancer",
+              "tier": "S",
+              "investment": "HIGH (Exploration)",
+              "why": "NEW BEST HEALER. Replaces Philly for PvE content. Massive healing output.",
+              "skills": "MAX EXPLORATION skills for healing. Her expedition skills are secondary.",
+              "longevity": "New meta healer. Philly becomes backup."
+            },
+            {
+              "name": "Gisela",
+              "class": "Infantry",
+              "tier": "A",
+              "investment": "LOW",
+              "why": "A-tier Infantry when you have three S+ Infantry already.",
+              "skills": "Skip unless you need depth.",
+              "longevity": "Backup only."
+            }
+          ]
+        },
+        "14": {
+          "summary": "Elif is S+ Infantry - latest and one of the best",
+          "heroes": [
+            {
+              "name": "Elif",
+              "class": "Infantry",
+              "tier": "S+",
+              "investment": "MAX",
+              "why": "Latest S+ Infantry. Fourth S+ Infantry option. Excellent skills.",
+              "skills": "MAX all expedition skills. S+ Infantry are always meta.",
+              "longevity": "Current meta. Future-proof investment."
+            },
+            {
+              "name": "Dominic",
+              "class": "Lancer",
+              "tier": "S",
+              "investment": "HIGH",
+              "why": "Strong S-tier Lancer. Good all-around performance.",
+              "skills": "Expedition skills for PvP.",
+              "longevity": "Long-term Lancer value."
+            },
+            {
+              "name": "Cara",
+              "class": "Marksman",
+              "tier": "S",
+              "investment": "MEDIUM-HIGH",
+              "why": "S-tier Marksman. Good but you have Blanchette and Vulcanus.",
+              "skills": "Expedition skills if you need Marksman depth.",
+              "longevity": "Third Marksman option."
+            }
+          ]
+        }
+      },
+      "spending_advice": {
+        "f2p": "Focus on 1-2 heroes per generation MAX. Prioritize S+ heroes: Jeronimo, Jessie (expedition only), Wu Ming, Magnus, Blanchette. Skip entire generations (Gen 4) to save resources.",
+        "minnow": "Invest in all S+ heroes and 1 S-tier per generation. Skip A-tier heroes unless desperate for class depth.",
+        "dolphin": "Invest in all S+ and S-tier heroes. A-tier heroes only as bridges while waiting for better options.",
+        "whale": "MAX all S+ heroes. HIGH investment in all S-tier. Use A-tier as needed for depth and variety."
+      }
     },
 
     "alliance": {

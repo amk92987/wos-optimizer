@@ -11,6 +11,8 @@ PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
+from database.models import UserHero, Hero
+from engine.analyzers.lineup_builder import LineupBuilder, LINEUP_TEMPLATES
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -30,6 +32,102 @@ if EVENTS_PATH.exists():
         EVENTS_GUIDE = json.load(f)
 else:
     EVENTS_GUIDE = {"events": {}, "cost_categories": {}, "priority_tiers": {}}
+
+# Load heroes data for lineup builder
+HEROES_PATH = PROJECT_ROOT / "data" / "heroes.json"
+if HEROES_PATH.exists():
+    with open(HEROES_PATH, encoding='utf-8') as f:
+        HEROES_DATA = json.load(f)
+else:
+    HEROES_DATA = {"heroes": []}
+
+# Map event IDs to lineup template types (only for combat events)
+EVENT_TO_LINEUP = {
+    "bear_trap": "bear_trap",           # Rally combat
+    "crazy_joe": "crazy_joe",           # Defense combat
+    "svs_battle": "svs_attack",         # PvP combat
+    "alliance_showdown": "svs_attack",  # Alliance PvP
+    "canyon_clash": "svs_attack",       # PvP combat
+    "foundry_battle": "svs_attack",     # PvP combat
+    "exploration": "exploration",       # PvE exploration
+    "frozen_passage": "exploration",    # PvE exploration
+}
+
+
+def get_user_heroes_dict(db, profile) -> dict:
+    """Get user's owned heroes as a dict for lineup builder."""
+    if not profile:
+        return {}
+
+    user_heroes = db.query(UserHero, Hero).join(Hero).filter(
+        UserHero.profile_id == profile.id,
+        UserHero.owned == True
+    ).all()
+
+    heroes_dict = {}
+    for uh, h in user_heroes:
+        heroes_dict[h.name] = {
+            'level': uh.level or 1,
+            'stars': uh.stars or 0,
+            'ascension_tier': uh.ascension_tier or 0,
+            'gear_slot1_quality': uh.gear_slot1_quality or 0,
+            'gear_slot2_quality': uh.gear_slot2_quality or 0,
+            'gear_slot3_quality': uh.gear_slot3_quality or 0,
+            'gear_slot4_quality': uh.gear_slot4_quality or 0,
+            'expedition_skill_1_level': uh.expedition_skill_1_level or 1,
+        }
+    return heroes_dict
+
+
+def get_recommended_heroes_for_event(event_id: str, db, profile) -> list:
+    """
+    Get recommended heroes for an event using the lineup engine.
+    Returns list of hero names appropriate for user's roster.
+    Falls back to static list filtered by generation if no profile.
+    """
+    lineup_type = EVENT_TO_LINEUP.get(event_id)
+    if not lineup_type:
+        return []
+
+    # Get user's owned heroes
+    user_heroes = get_user_heroes_dict(db, profile)
+
+    # Determine max generation from profile
+    max_gen = 14  # Default
+    if profile and profile.furnace_level:
+        # Rough mapping: Gen unlocks around furnace level progression
+        # Gen 1-4 at F1-F18, Gen 5-8 at F19-F25, Gen 9+ at F26+
+        fl = profile.furnace_level
+        if fl < 19:
+            max_gen = min(4, (fl // 5) + 1)
+        elif fl < 26:
+            max_gen = min(8, 4 + ((fl - 18) // 2))
+        else:
+            max_gen = 14
+
+    if user_heroes:
+        # Use lineup engine with user's heroes
+        builder = LineupBuilder(HEROES_DATA)
+        lineup = builder.build_personalized_lineup(lineup_type, user_heroes, max_generation=max_gen)
+
+        # Extract hero names from lineup (exclude "Need X" and "Any hero")
+        heroes = []
+        for h in lineup.heroes:
+            hero_name = h.get('hero', '')
+            if hero_name and not hero_name.startswith('Need ') and hero_name != 'Any hero':
+                heroes.append(hero_name)
+        return heroes
+    else:
+        # No user heroes - show general recommendation filtered by generation
+        builder = LineupBuilder(HEROES_DATA)
+        lineup = builder.build_general_lineup(lineup_type, max_generation=max_gen)
+
+        heroes = []
+        for h in lineup.heroes:
+            hero_name = h.get('hero', '')
+            if hero_name and 'available' not in hero_name.lower() and hero_name != 'Any hero':
+                heroes.append(hero_name)
+        return heroes
 
 
 def get_priority_color(priority):
@@ -279,9 +377,18 @@ def render_event_card(event_id, event_data):
                 if heroes_needed and heroes_needed != "none":
                     st.markdown(f"**Heroes:** {heroes_needed.title()} skills")
 
-                key_heroes = prep.get("key_heroes", [])
-                if key_heroes:
-                    st.markdown(f"**Key Heroes:** {', '.join(key_heroes)}")
+                # Use lineup engine for recommended heroes if this is a combat event
+                recommended_heroes = get_recommended_heroes_for_event(event_id, db, profile)
+                if recommended_heroes:
+                    # Show personalized recommendation
+                    st.markdown(f"**Recommended Heroes:** {', '.join(recommended_heroes)}")
+                    if profile and get_user_heroes_dict(db, profile):
+                        st.caption("*Based on your owned heroes*")
+                else:
+                    # Fall back to static key_heroes for non-combat events
+                    key_heroes = prep.get("key_heroes", [])
+                    if key_heroes:
+                        st.markdown(f"**Key Heroes:** {', '.join(key_heroes)}")
 
             # Troop ratio if available
             troop_ratio = event_data.get("troop_ratio", {})

@@ -57,12 +57,10 @@
       "preparation": {
         "save_before": ["Stamina", "Rally attempts"],
         "heroes_needed": "expedition",
-        "key_heroes": ["Jeronimo", "Mia", "Bradley"],
-        "best_joiners": ["Jessie", "Jasser", "Seo-yoon"],
         "tips": [
-          "Rally LEADERS: Use Jeronimo, Mia, Bradley - all 9 expedition skills activate",
+          "Rally LEADERS: Use your best 2 Marksman + 1 Infantry (see Recommended Heroes above)",
           "Rally JOINERS: Only your FIRST hero's TOP-RIGHT expedition skill counts!",
-          "Best joiners: Jessie (+25% DMG at L5), Jasser, Seo-yoon, Jeronimo",
+          "Best joiners: Jessie (+25% DMG at L5) - put her in slot 1 even at low level",
           "Only top 4 highest-level joiner skills apply to the rally",
           "Activate Troop Attack, Lethality, and Deployment Capacity boosts before event",
           "Set up 3 march presets beforehand - every second counts in 30 minutes",
@@ -106,8 +104,8 @@
       "preparation": {
         "save_before": ["Stamina"],
         "heroes_needed": "expedition",
-        "key_heroes": ["Sergey", "Ahmose", "Mia"],
         "tips": [
+          "Use your best 3 Infantry heroes (see Recommended Heroes above)",
           "Use EXPEDITION skills (not exploration) - this is defense combat",
           "Don't heal troops mid-event - healed troops stay in your city and steal kills from reinforcers",
           "Reinforce ONLINE players - they get hit more often (waves 7, 14, 17) = more points for your troops",
@@ -298,11 +296,11 @@
       "preparation": {
         "save_before": ["Stamina (MAX)", "Shields", "Cross-State Teleports", "Healing Speedups", "Rebirth Tomes"],
         "heroes_needed": "expedition",
-        "key_heroes": ["Jeronimo", "Jessie", "Wu Ming", "Sergey", "Blanchette"],
         "tips": [
+          "Use your best expedition heroes (see Recommended Heroes above)",
           "EXPEDITION skills matter, not exploration",
-          "Jessie or Jeronimo in leftmost slot for attack rallies",
-          "Sergey in leftmost slot for garrison defense",
+          "Attack rallies: Use Jessie in slot 1 for +25% damage joiner skill",
+          "Garrison defense: Use Sergey in slot 1 for -20% damage taken",
           "Bookmark weak targets before battle starts",
           "Keep shield up when not actively fighting",
           "Defense is as important as offense",
@@ -364,8 +362,8 @@
       "preparation": {
         "save_before": ["Resources for daily tasks", "Stamina"],
         "heroes_needed": "expedition",
-        "key_heroes": ["Jeronimo", "Jessie", "Wu Ming", "Sergey"],
         "tips": [
+          "Use your best expedition heroes for PvP (see Recommended Heroes above)",
           "Day 1 = 1 VP only. If already winning, SAVE resources for later days!",
           "Day 6 = 4 VP. Invest HEAVILY on Day 6 - it often decides the winner",
           "Win Day 6 + 2 others = guaranteed victory (7 VP)",
@@ -778,8 +776,8 @@
       "preparation": {
         "save_before": ["Fuel reserves"],
         "heroes_needed": "expedition",
-        "key_heroes": ["Jeronimo", "Wu Ming", "Gordon"],
         "tips": [
+          "Use your best expedition heroes for combat (see Recommended Heroes above)",
           "Split into 3 teams - 2 strong players per team, strongest player on third team",
           "Deploy 2 squads for offense, 1 for defense on chokepoints",
           "NEVER go solo - you will die repeatedly without team coordination",

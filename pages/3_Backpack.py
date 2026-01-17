@@ -17,10 +17,27 @@ if css_file.exists():
     with open(css_file) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+# Equal-width tabs CSS
+st.markdown("""
+<style>
+/* Make tabs equal width across the page */
+div[data-testid="stTabs"] > div[role="tablist"] {
+    display: flex !important;
+    width: 100% !important;
+}
+div[data-testid="stTabs"] > div[role="tablist"] > button {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    padding: 8px 4px !important;
+    font-size: 13px !important;
+}
+</style>
+""", unsafe_allow_html=True)
+
 # Item images directory
 ITEMS_DIR = PROJECT_ROOT / "assets" / "items"
 
-# Item data organized by category
+# Item data organized by category (consolidated for fewer tabs)
 ITEM_DATA = {
     "Resources": [
         {"id": "gems", "name": "Gems", "image": "gems.png", "description": "Premium currency for purchases and speedups", "sources": "Daily rewards, Events, Packs, Achievements", "uses": "Lucky Wheel, Instant finish, VIP shop, Refreshes"},
@@ -34,24 +51,31 @@ ITEM_DATA = {
         {"id": "refined_fire_crystal", "name": "Refined Fire Crystal", "image": "refined_fire_crystal.png", "description": "Purified FC for higher Furnace levels (FC6+)", "sources": "Crystal Lab Super Refinement, Events, Packs", "uses": "High-level Furnace upgrades (FC6-FC10)"},
         {"id": "stamina", "name": "Chief Stamina", "image": "stamina.png", "description": "Energy for beasts and exploration", "sources": "Natural regen (1/6min), VIP shop, Events", "uses": "Beast attacks, Exploration battles"},
     ],
-    "Hero Shards": [
+    "Hero Items": [
+        # Shards
         {"id": "legendary_hero_shard", "name": "Legendary Shard", "image": "mythic_hero_shard.png", "description": "Universal shard for any legendary hero", "sources": "Lucky Wheel, Events, Packs, Hero Hall", "uses": "Unlock/upgrade any legendary hero"},
         {"id": "epic_hero_shard", "name": "Epic Shard", "image": "epic_hero_shard.png", "description": "Universal shard for epic heroes", "sources": "Hero Hall, Events, Exploration", "uses": "Unlock/upgrade any epic hero"},
         {"id": "rare_hero_shard", "name": "Rare Shard", "image": "rare_hero_shard.png", "description": "Universal shard for rare heroes", "sources": "Exploration, Daily rewards, Events", "uses": "Unlock/upgrade any rare hero"},
         {"id": "hero_xp", "name": "Hero XP", "image": "hero_xp.png", "description": "Experience points to level up heroes", "sources": "Exploration, Combat Manuals, Events", "uses": "Leveling up heroes"},
+        # Skill manuals
         {"id": "mythic_exploration_manual", "name": "Mythic Exploration Manual", "image": "mythic_exploration_manual.png", "description": "Upgrades exploration skills for Mythic heroes", "sources": "Lighthouse Intel, Exploration bosses, VIP Shop", "uses": "Mythic hero exploration skills"},
         {"id": "epic_exploration_manual", "name": "Epic Exploration Manual", "image": "epic_exploration_manual.png", "description": "Upgrades exploration skills for Epic heroes", "sources": "Lighthouse Intel, Exploration stages, VIP Shop", "uses": "Epic hero exploration skills"},
         {"id": "rare_exploration_manual", "name": "Rare Exploration Manual", "image": "rare_exploration_manual.png", "description": "Upgrades exploration skills for Rare heroes", "sources": "Exploration stages, Daily play, Events", "uses": "Rare hero exploration skills"},
         {"id": "mythic_expedition_manual", "name": "Mythic Expedition Manual", "image": "mythic_expedition_manual.png", "description": "Upgrades expedition skills for Mythic heroes", "sources": "Lighthouse Intel, VIP Shop, Events (rare)", "uses": "Mythic hero expedition skills"},
         {"id": "epic_expedition_manual", "name": "Epic Expedition Manual", "image": "epic_expedition_manual.png", "description": "Upgrades expedition skills for Epic heroes", "sources": "Lighthouse Intel, Exploration, VIP Shop", "uses": "Epic hero expedition skills"},
         {"id": "rare_expedition_manual", "name": "Rare Expedition Manual", "image": "rare_expedition_manual.png", "description": "Upgrades expedition skills for Rare heroes", "sources": "Exploration stages, Events", "uses": "Rare hero expedition skills"},
-    ],
-    "Hero Gear Materials": [
+        # Hero gear materials
         {"id": "essence_stone", "name": "Essence Stone", "image": "essence_stone.png", "description": "Critical for Mythic gear mastery. Very valuable", "sources": "Mystery Shop, Arena Shop, Hero gear recycling", "uses": "Mythic Hero Gear Mastery (FC20+)"},
         {"id": "mithril", "name": "Mithril", "image": "mithril.png", "description": "Rare material for Legendary gear empowerment", "sources": "Arena Shop (3/season), Frostdragon event, Packs", "uses": "Empower Legendary Hero Gear at 20/40/60/80/100"},
         {"id": "xp_component", "name": "Enhancement XP Component", "image": "xp_component.png", "description": "Primary material for enhancing hero gear stats", "sources": "Events, Tundra Trading, Daily/Intel missions", "uses": "Leveling up Hero Gear (FC15+)"},
+        {"id": "exclusive_gear_chest", "name": "Exclusive Gear Chest", "image": "mythic_hero_gear_chest.png", "description": "Unlocks Exclusive Gear for Mythic heroes (Jeronimo, Natalia, etc.)", "sources": "Mythic Exclusive Gear event, Lucky Wheel, Packs, Hall of Heroes", "uses": "Unlock Exclusive Gear slot for Legendary heroes"},
+        {"id": "exclusive_upgrade_chest", "name": "Exclusive Upgrade Chest", "image": "mythic_hero_gear_chest.png", "description": "Upgrades Exclusive Gear (Dawnbreak Skill, etc.)", "sources": "Mythic Exclusive Gear event, Lucky Wheel, Packs", "uses": "Level up Exclusive Gear from L1 to L5"},
+        {"id": "hero_widget", "name": "Hero Widget", "image": "hero_widget.webp", "description": "Passive stat boost for specific hero. Huge power gain", "sources": "Lucky Wheel, Hall of Heroes, Events, Packs", "uses": "Equip to hero for permanent stat boost (+ATK/DEF/HP)"},
+        {"id": "custom_widget_chest", "name": "Custom Widget Chest", "image": "hero_widget.webp", "description": "Choose which hero widget to receive", "sources": "Tundra Trading, Frosty Fortune, Premium events", "uses": "Select widget for your priority heroes"},
+        {"id": "hero_gear_chest", "name": "Hero Gear Chest", "image": "hero_gear_chest.png", "description": "Contains random hero gear pieces", "sources": "Events, Lucky chests, Frosty Fortune", "uses": "Building hero gear collection"},
+        {"id": "hero_lucky_box", "name": "Hero Lucky Box", "image": "hero_lucky_box.png", "description": "Random hero-related rewards", "sources": "Events, Special promotions", "uses": "Hero shards and materials"},
     ],
-    "Chief Gear Materials": [
+    "Chief Gear": [
         {"id": "hardened_alloy", "name": "Hardened Alloy", "image": "hardened_alloy.png", "description": "Primary material for chief gear upgrades", "sources": "Polar Terror rallies (Lv.3+), Beast hunts (22+), Crazy Joe", "uses": "Chief gear crafting/upgrades"},
         {"id": "polishing_solution", "name": "Polishing Solution", "image": "polishing_solution.png", "description": "Secondary material for chief gear refinement", "sources": "Crazy Joe, Frostfire Mine, Championship Shop", "uses": "Chief gear refinement"},
         {"id": "design_plans", "name": "Design Plans", "image": "design_plans.png", "description": "Blueprints for Blue+ quality chief gear", "sources": "Alliance Championship, Foundry, Power Region", "uses": "Upgrading chief gear (Blue+)"},
@@ -60,22 +84,23 @@ ITEM_DATA = {
         {"id": "charm_design", "name": "Charm Design", "image": "charm_design.png", "description": "Primary material for Chief Charm upgrades", "sources": "Events, Giant Elk pet, Packs, Tundra Trading", "uses": "Chief Charm upgrades (all levels)"},
         {"id": "charm_guide", "name": "Charm Guide", "image": "charm_guide.png", "description": "Secondary material for Chief Charm upgrades", "sources": "Alliance Shop, Events, Foundry, Giant Elk pet", "uses": "Chief Charm upgrades (all levels)"},
     ],
-    "Pet Materials": [
+    "Pets": [
         {"id": "pet_food", "name": "Pet Food", "image": "pet_food.png", "description": "Nutrient substance for leveling up pets", "sources": "Pet adventures (10 stamina), Beast Cage activities", "uses": "Feeding pets to gain XP"},
         {"id": "taming_manual", "name": "Taming Manual", "image": "taming_manual.png", "description": "Core material for pet potential advancement", "sources": "Pet adventures, Lighthouse Intel missions", "uses": "Pet advancement (all levels)"},
         {"id": "energizing_potion", "name": "Energizing Potion", "image": "energizing_potion.png", "description": "Extra advancement material for pets (Lv.30+)", "sources": "Pet adventures, Events", "uses": "Pet advancement from level 30+"},
         {"id": "strengthening_serum", "name": "Strengthening Serum", "image": "strengthening_serum.png", "description": "Advanced advancement material (Lv.50+)", "sources": "Pet adventures, High-level beast hunts", "uses": "Pet advancement from level 50+"},
         {"id": "common_wild_mark", "name": "Common Wild Mark", "image": "common_wild_mark.png", "description": "Material for basic pet refinement", "sources": "Pet adventures, Various events", "uses": "Pet refinement processes"},
         {"id": "advanced_wild_mark", "name": "Advanced Wild Mark", "image": "advanced_wild_mark.png", "description": "Material for advanced pet refinement", "sources": "Pet adventures, Higher-tier beast hunts", "uses": "Advanced pet refinement"},
+        {"id": "pet_materials_chest", "name": "Pet Materials Chest", "image": "pet_materials_chest.png", "description": "Contains pet advancement materials", "sources": "Events, Shops, Quest rewards", "uses": "Pet advancement"},
     ],
     "Speedups": [
-        {"id": "speedup_general", "name": "General Speedup", "image": None, "emoji": "⏱️", "description": "Reduces any timer. Most versatile", "sources": "Events, Chests, Packs, Alliance help", "uses": "Any: construction, research, training, healing", "durations": "1min, 5min, 1hr, 3hr, 8hr, 24hr"},
-        {"id": "speedup_construction", "name": "Construction Speedup", "image": None, "emoji": "🏗️", "description": "Reduces building timers only", "sources": "Events, Chests, Construction milestones", "uses": "Building construction and upgrades", "durations": "1min, 5min, 1hr, 3hr, 8hr"},
-        {"id": "speedup_research", "name": "Research Speedup", "image": None, "emoji": "🔬", "description": "Reduces research timers only", "sources": "Events, Chests, Research milestones", "uses": "Research projects only", "durations": "1min, 5min, 1hr, 3hr, 8hr"},
-        {"id": "speedup_training", "name": "Training Speedup", "image": None, "emoji": "⚔️", "description": "Reduces troop training timers only", "sources": "Events, Chests, Training milestones", "uses": "Troop training only", "durations": "1min, 5min, 1hr, 3hr, 8hr"},
-        {"id": "speedup_healing", "name": "Healing Speedup", "image": None, "emoji": "💚", "description": "Reduces hospital healing timers only", "sources": "Events, Chests, Combat rewards", "uses": "Healing wounded troops only", "durations": "1min, 5min, 1hr, 3hr, 8hr"},
+        {"id": "speedup_general", "name": "General Speedup", "image": "speedup_general.png", "description": "Reduces any timer. Most versatile", "sources": "Events, Chests, Packs, Alliance help", "uses": "Any: construction, research, training, healing", "durations": "1min, 5min, 1hr, 3hr, 8hr, 24hr"},
+        {"id": "speedup_construction", "name": "Construction Speedup", "image": "speedup_construction.png", "description": "Reduces building timers only", "sources": "Events, Chests, Construction milestones", "uses": "Building construction and upgrades", "durations": "1min, 5min, 1hr, 3hr, 8hr"},
+        {"id": "speedup_research", "name": "Research Speedup", "image": "speedup_research.png", "description": "Reduces research timers only", "sources": "Events, Chests, Research milestones", "uses": "Research projects only", "durations": "1min, 5min, 1hr, 3hr, 8hr"},
+        {"id": "speedup_training", "name": "Training Speedup", "image": "speedup_training.png", "description": "Reduces troop training timers only", "sources": "Events, Chests, Training milestones", "uses": "Troop training only", "durations": "1min, 5min, 1hr, 3hr, 8hr"},
+        {"id": "speedup_healing", "name": "Healing Speedup", "image": "speedup_healing.png", "description": "Reduces hospital healing timers only", "sources": "Events, Chests, Combat rewards", "uses": "Healing wounded troops only", "durations": "1min, 5min, 1hr, 3hr, 8hr"},
     ],
-    "Boosts & Buffs": [
+    "Boosts": [
         {"id": "shield", "name": "Peace Shield", "image": "shield.png", "description": "Protects city from attacks", "sources": "Events, Packs, Gem shop, Rewards", "uses": "Protecting city when offline", "durations": "2hr, 8hr, 24hr, 3 day, 7 day"},
         {"id": "counter_recon", "name": "Counter Recon", "image": "counter_recon.png", "description": "Hides troop/resource info from scouts", "sources": "Events, Packs, Gem shop", "uses": "Hide army before SvS/battles", "durations": "2hr, 24hr"},
         {"id": "vip_time", "name": "VIP Time", "image": "vip_time.png", "description": "Grants temporary VIP benefits", "sources": "Events, Packs, Daily rewards", "uses": "Activating VIP buffs/discounts", "durations": "24hr, 7 day, 30 day"},
@@ -92,10 +117,12 @@ ITEM_DATA = {
         {"id": "training_capacity_boost", "name": "Training Capacity Boost", "image": "training_capacity_boost.png", "description": "Increases troop training capacity", "sources": "Events, Packs, Rewards", "uses": "Train more troops at once"},
         {"id": "deployment_capacity_boost", "name": "Deployment Capacity Boost", "image": "deployment_capacity_boost.png", "description": "Increases troops per march", "sources": "Events, Packs, Rewards", "uses": "Larger army deployments"},
     ],
-    "Keys & Tokens": [
+    "Currencies": [
+        # Keys and tickets
         {"id": "platinum_key", "name": "Platinum Key", "image": "platinum_key.png", "description": "Opens platinum chests for rare rewards", "sources": "Events, Packs, Milestones", "uses": "Opening platinum reward chests"},
         {"id": "gold_key", "name": "Gold Key", "image": "gold_key.png", "description": "Opens gold chests for good rewards", "sources": "Events, Packs, Daily alliance ranking", "uses": "Opening gold reward chests"},
         {"id": "lucky_wheel_ticket", "name": "Wheel Ticket", "image": "lucky_wheel_ticket.png", "description": "Free spin on the Lucky Wheel", "sources": "Events, Daily login, Packs", "uses": "Lucky Wheel for shards/items"},
+        # Shop currencies
         {"id": "alliance_token", "name": "Alliance Token", "image": "alliance_token.png", "description": "Alliance currency (resets daily/weekly)", "sources": "Tech donations, Crazy Joe, Alliance activities", "uses": "Alliance Shop (teleports, speedups, VIP)"},
         {"id": "arena_token", "name": "Arena Token", "image": "arena_token.png", "description": "Currency from Arena battles", "sources": "Arena battles, Arena rankings", "uses": "Arena Shop (gear, stamina, essence stones)"},
         {"id": "mystery_badge", "name": "Mystery Badge", "image": "mystery_badge.png", "description": "Daily currency for Mystery Shop (cap 80/day)", "sources": "Daily missions (80 free), Mystery Badge Packs", "uses": "Mystery Shop (Custom Mythic gear)"},
@@ -108,44 +135,39 @@ ITEM_DATA = {
         {"id": "loyalty", "name": "Loyalty", "image": "loyalty.png", "description": "Alliance loyalty currency", "sources": "Alliance events, Consistent participation", "uses": "Alliance rewards"},
         {"id": "prestige_badge", "name": "Prestige Badge", "image": "prestige_badge.png", "description": "Badge from prestige achievements", "sources": "High-level achievements, Events", "uses": "Prestige shop purchases"},
         {"id": "glowstones", "name": "Glowstones", "image": "glowstone.png", "description": "Labyrinth currency for premium items", "sources": "Labyrinth Raiding, Glowstone Mine (F25+)", "uses": "Labyrinth Shop (Mythic Shards, Hero Gear, Mithril)"},
-    ],
-    "Deal Event Currencies": [
+        # Event-specific currencies
         {"id": "fortune_token", "name": "Fortune Token", "image": "fortune_token.png", "description": "Mia's Fortune Hut - reveal orbs (costs 1/2/3/4/5/8/12/15/20/25)", "sources": "Daily missions (22), Free bonus (1/day), Packs", "uses": "Reveal orbs for Wish Reward, stack multipliers"},
         {"id": "trade_voucher", "name": "Trade Voucher", "image": "trade_voucher.png", "description": "Tundra Trading Station - exchange maxed hero items", "sources": "Exchange 5-star hero shards, manuals, widgets", "uses": "Expert Sigils, Custom Widget Chest, Essence Stones, Mythic Shards"},
         {"id": "pocket_watch", "name": "Pocket Watch", "image": "pocket_watch.png", "description": "Journey of Light - reduces 8hr expedition by 1hr each", "sources": "Journey of Light event, Packs", "uses": "Speed up expeditions for milestone rewards"},
-        {"id": "gem_of_enigma", "name": "Gem of Enigma", "image": None, "emoji": "💎", "description": "Frosty Fortune - 60 gems per chest, gives Thorns", "sources": "Treasure Hunt Drill daily missions, Packs", "uses": "Open chests for Thorns (carries over between events)"},
-        {"id": "thorns_of_enigma", "name": "Thorns of Enigma", "image": None, "emoji": "🌹", "description": "Frosty Fortune secondary currency - EXPIRES when event ends!", "sources": "Opening chests with Gems of Enigma", "uses": "Emporium shop: Widgets, Essence Stones, Pet Chests"},
+        {"id": "gem_of_enigma", "name": "Gem of Enigma", "image": "gem_of_enigma.png", "description": "Frosty Fortune - 60 gems per chest, gives Thorns", "sources": "Treasure Hunt Drill daily missions, Packs", "uses": "Open chests for Thorns (carries over between events)"},
+        {"id": "thorns_of_enigma", "name": "Thorns of Enigma", "image": "thorns_of_enigma.png", "description": "Frosty Fortune secondary currency - EXPIRES when event ends!", "sources": "Opening chests with Gems of Enigma", "uses": "Emporium shop: Widgets, Essence Stones, Pet Chests"},
         {"id": "marks_of_valor", "name": "Marks of Valor", "image": "mark_of_valor.png", "description": "Hall of Heroes - redeem for Mythic Hero Shards", "sources": "Purchase with gems, Hall of Heroes packs", "uses": "Mythic Hero Shards (varies by your server generation)"},
-        {"id": "rocket_v2", "name": "Rocket V2", "image": None, "emoji": "🚀", "description": "Snowbusters - clears remaining snow at 95%", "sources": "Snowbusters event, Packs", "uses": "Save fuel by clearing last 5% instantly (carries over)"},
-        {"id": "fuel_supply_chest", "name": "Fuel Supply Chest", "image": None, "emoji": "⛽", "description": "Snowbusters fuel (unopened chests carry over)", "sources": "Snowbusters event, Packs", "uses": "Open for Fuel (200 starting, 12 regen/5min)"},
+        {"id": "rocket_v2", "name": "Rocket V2", "image": "rocket_v2.png", "description": "Snowbusters - clears remaining snow at 95%", "sources": "Snowbusters event, Packs", "uses": "Save fuel by clearing last 5% instantly (carries over)"},
+        {"id": "fuel_supply_chest", "name": "Fuel Supply Chest", "image": "fuel_supply_chest.png", "description": "Snowbusters fuel (unopened chests carry over)", "sources": "Snowbusters event, Packs", "uses": "Open for Fuel (200 starting, 12 regen/5min)"},
         {"id": "explosive_arrowheads", "name": "Explosive Arrowheads", "image": "explosive_arrowhead.png", "description": "Bear Trap upgrade (+5%/level, max +25% at L5)", "sources": "Intel missions", "uses": "Enhance Bear Trap (2500 total), earn 200 Alliance Tokens per donation"},
+        {"id": "vip_points", "name": "VIP Points", "image": "vip_points.png", "description": "Points for permanent VIP bonuses (12 levels)", "sources": "Daily login, Packs, Events, Gem shop", "uses": "Increasing VIP level"},
+        {"id": "life_essence", "name": "Life Essence", "image": "life_essence.png", "description": "Daybreak Island currency", "sources": "Daybreak Island activities, Events", "uses": "Daybreak Island shop"},
+        {"id": "lucky_chip", "name": "Lucky Chip", "image": "lucky_chip.png", "description": "Gambling/chance event currency", "sources": "Lucky events, Special promotions", "uses": "Lucky event participation"},
     ],
-    "Teleporters": [
+    "Misc": [
+        # Teleporters
         {"id": "random_teleporter", "name": "Random Teleport", "image": "random_teleporter.png", "description": "Moves city to random location", "sources": "Events, Gem shop (cheap), Rewards", "uses": "Escaping attacks, Relocating"},
         {"id": "advanced_teleporter", "name": "Advanced Teleport", "image": "advanced_teleporter.png", "description": "Moves city to chosen location", "sources": "Events, Packs, Gem shop, Arena Shop", "uses": "Strategic positioning"},
         {"id": "alliance_teleporter", "name": "Alliance Teleport", "image": "alliance_teleporter.png", "description": "Moves city near alliance territory", "sources": "Events, Alliance shop, Packs", "uses": "Joining alliance hive"},
         {"id": "territory_teleporter", "name": "Territory Teleport", "image": "territory_teleporter.png", "description": "Moves city to different region", "sources": "Migration events, Special packs", "uses": "Region/territory migration"},
         {"id": "transfer_pass", "name": "Transfer Pass", "image": "transfer_pass.png", "description": "Relocate entire city to different state", "sources": "Alliance Shop (priority), Events", "uses": "Server/state migration"},
-    ],
-    "Chests & Boxes": [
+        # Chests
         {"id": "resource_chest", "name": "Resource Chest", "image": "resource_chest.png", "description": "Contains choice of basic resources", "sources": "Events, Daily missions, Tundra Trading", "uses": "Choose meat, wood, coal, or iron"},
         {"id": "warriors_chest", "name": "Warrior's Chest", "image": "warriors_chest.png", "description": "Combat-focused rewards chest", "sources": "Combat events, SvS rewards", "uses": "Combat items and resources"},
         {"id": "allys_chest", "name": "Ally's Chest", "image": "allys_chest.png", "description": "Alliance reward chest", "sources": "Alliance events, Helping allies", "uses": "Alliance-related rewards"},
         {"id": "rulers_chest", "name": "Ruler's Chest", "image": "rulers_chest.png", "description": "High-tier reward chest", "sources": "Leadership events, High rankings", "uses": "Premium rewards"},
-        {"id": "hero_gear_chest", "name": "Hero Gear Chest", "image": "hero_gear_chest.png", "description": "Contains random hero gear pieces", "sources": "Events, Lucky chests, Frosty Fortune", "uses": "Building hero gear collection"},
         {"id": "chief_gear_chest", "name": "Chief Gear Chest", "image": "chief_gear_chest.png", "description": "Contains chief gear materials", "sources": "Events, Foundry rewards", "uses": "Chief gear crafting materials"},
         {"id": "fire_crystal_chest", "name": "Fire Crystal Chest", "image": "fire_crystal_chest.png", "description": "Contains Fire Crystals or Shards", "sources": "Crystal Reactivation, Daily missions (last 2)", "uses": "Post-FC30 upgrades"},
-        {"id": "pet_materials_chest", "name": "Pet Materials Chest", "image": "pet_materials_chest.png", "description": "Contains pet advancement materials", "sources": "Events, Shops, Quest rewards", "uses": "Pet advancement"},
-        {"id": "hero_lucky_box", "name": "Hero Lucky Box", "image": "hero_lucky_box.png", "description": "Random hero-related rewards", "sources": "Events, Special promotions", "uses": "Hero shards and materials"},
-    ],
-    "Other Items": [
-        {"id": "vip_points", "name": "VIP Points", "image": "vip_points.png", "description": "Points for permanent VIP bonuses (12 levels)", "sources": "Daily login, Packs, Events, Gem shop", "uses": "Increasing VIP level"},
-        {"id": "life_essence", "name": "Life Essence", "image": "life_essence.png", "description": "Daybreak Island currency", "sources": "Daybreak Island activities, Events", "uses": "Daybreak Island shop"},
+        # Other
         {"id": "chief_rename_card", "name": "Chief Rename Card", "image": "chief_rename_card.png", "description": "Allows changing your Chief's name", "sources": "Special events, Packs, Rare drops", "uses": "Cosmetic identity change"},
         {"id": "book_of_knowledge", "name": "Book of Knowledge", "image": "book_of_knowledge.png", "description": "Provides research benefits", "sources": "Events, Special rewards", "uses": "Research boosts"},
         {"id": "common_expert_sigil", "name": "Expert Sigil", "image": "common_expert_sigil.png", "description": "Material for hero expertise trees", "sources": "Events, Expert missions, Shops", "uses": "Hero expertise abilities"},
         {"id": "compass", "name": "Compass", "image": "compass.png", "description": "Navigation/exploration item", "sources": "Exploration events, Rewards", "uses": "Exploration activities"},
-        {"id": "lucky_chip", "name": "Lucky Chip", "image": "lucky_chip.png", "description": "Gambling/chance event currency", "sources": "Lucky events, Special promotions", "uses": "Lucky event participation"},
         {"id": "frontier_supply", "name": "Frontier Supply", "image": "frontier_supply.png", "description": "Supply from frontier events", "sources": "Frontier/border skirmish events", "uses": "Event-specific rewards"},
         {"id": "trek_supplies", "name": "Trek Supplies", "image": "trek_supplies.png", "description": "Supplies for trek/journey events", "sources": "Trek events, Journey rewards", "uses": "Trek event progression"},
     ],
@@ -163,6 +185,21 @@ def get_image_base64(image_name):
     return None
 
 
+def get_image_mime_type(image_name):
+    """Get MIME type for image file."""
+    if not image_name:
+        return "image/png"
+    ext = image_name.lower().split('.')[-1]
+    mime_types = {
+        'png': 'image/png',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'webp': 'image/webp',
+        'gif': 'image/gif'
+    }
+    return mime_types.get(ext, 'image/png')
+
+
 def render_item_table(items):
     """Render items as a clean table."""
     # Build table HTML
@@ -173,7 +210,8 @@ def render_item_table(items):
         if item.get("image"):
             img_b64 = get_image_base64(item["image"])
             if img_b64:
-                img_html = f'<img src="data:image/png;base64,{img_b64}" width="32" height="32" style="border-radius:4px;vertical-align:middle;">'
+                mime_type = get_image_mime_type(item["image"])
+                img_html = f'<img src="data:{mime_type};base64,{img_b64}" width="32" height="32" style="border-radius:4px;vertical-align:middle;">'
 
         if not img_html and item.get("emoji"):
             img_html = f'<span style="font-size:24px;">{item["emoji"]}</span>'
