@@ -167,6 +167,34 @@ def render_troop_ratio_multi(title: str, ratios: list):
     st.markdown(f'<div style="background:rgba(255,107,53,0.15);border:1px solid #FF6B35;border-radius:8px;padding:12px;margin:12px 0;min-height:120px;"><div style="font-weight:bold;color:#FF6B35;margin-bottom:8px;">{title}</div>{rows_html}</div>', unsafe_allow_html=True)
 
 
+def render_why_this_lineup(template_key: str, expander_key: str = None):
+    """Render a 'Why This Lineup' expander using native Streamlit components.
+
+    Args:
+        template_key: Key from LINEUP_TEMPLATES (e.g., 'bear_trap', 'crazy_joe')
+        expander_key: Optional unique key for the expander widget
+    """
+    template = LINEUP_TEMPLATES.get(template_key)
+    if not template:
+        return
+
+    hero_explanations = template.get("hero_explanations", {})
+    ratio_explanation = template.get("ratio_explanation", "")
+
+    if not hero_explanations and not ratio_explanation:
+        return
+
+    with st.expander("💡 Why This Lineup?", expanded=False):
+        if hero_explanations:
+            st.markdown("**Hero Selection:**")
+            for hero_name, explanation in hero_explanations.items():
+                st.markdown(f"- **{hero_name}:** {explanation}")
+
+        if ratio_explanation:
+            st.markdown("**Troop Ratio:**")
+            st.caption(ratio_explanation)
+
+
 def get_generation_advice(current_gen: int) -> dict:
     """Get dynamic advice based on current generation."""
     next_gen = current_gen + 1 if current_gen < 14 else None
@@ -282,12 +310,16 @@ with tab_rally_lead:
 
             if event_ratios == "Bear Trap":
                 render_troop_ratio(0, 10, 90, "Bear is slow - maximize Marksman DPS window")
+                render_why_this_lineup("bear_trap")
             elif event_ratios == "Crazy Joe":
                 render_troop_ratio(90, 10, 0, "Infantry kills before Joe's backline attacks hit")
+                render_why_this_lineup("crazy_joe")
             elif event_ratios == "SvS Rally":
                 render_troop_ratio(40, 20, 40, "Balanced for SvS combat")
+                render_why_this_lineup("svs_march")
             else:  # Castle Attack
                 render_troop_ratio(50, 20, 30, "Balanced for sustained castle fights")
+                render_why_this_lineup("svs_attack")
 
     with defense_tab:
         st.markdown("### Garrison Leader")
@@ -325,6 +357,7 @@ with tab_rally_lead:
             """)
 
             render_troop_ratio(60, 20, 20, "Heavy Infantry wall for attrition defense")
+            render_why_this_lineup("garrison")
 
 # =============================================================================
 # RALLY JOINER TAB
@@ -395,8 +428,10 @@ with tab_rally_join:
             ("Crazy Joe", 90, 10, 0),
             ("Castle/SvS", 50, 20, 30),
         ])
+        render_why_this_lineup("rally_joiner_attack")
     with ratio_col2:
         render_troop_ratio(60, 20, 20, "Defense Joiner - Match garrison")
+        render_why_this_lineup("rally_joiner_defense")
 
     st.markdown("---")
     st.markdown("### Joiner Investment Priority")
