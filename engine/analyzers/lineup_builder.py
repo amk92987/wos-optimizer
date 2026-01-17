@@ -221,16 +221,22 @@ LINEUP_TEMPLATES = {
     "garrison": {
         "name": "Castle Garrison",
         "slots": [
-            # Infantry: For defense, sustain matters - Natalia still good, but S+ tiers offer raw stats
-            {"class": "Infantry", "role": "Tank Lead", "preferred": ["Elif", "Hervor", "Magnus", "Wu Ming", "Gatot", "Edith", "Natalia", "Flint", "Ahmose"], "is_lead": True},
-            # Lancer: S first for healing (Gordon, Sonya have heal abilities), then others
+            # Infantry: S+ first by power, sustain tip shown separately
+            {"class": "Infantry", "role": "Tank Lead", "preferred": ["Elif", "Hervor", "Magnus", "Wu Ming", "Jeronimo", "Gatot", "Edith", "Natalia", "Flint", "Ahmose"], "is_lead": True},
+            # Lancer: S first by power
             {"class": "Lancer", "role": "Healer", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly"]},
-            # Marksman: S+ first for counterattack DPS
+            # Marksman: S+ first by power
             {"class": "Marksman", "role": "Counter DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
         ],
         "troop_ratio": {"infantry": 60, "lancer": 15, "marksman": 25},
-        "notes": "Defense = survival. Natalia's sustain is key.",
-        "key_heroes": ["Natalia", "Molly", "Alonso"],
+        "notes": "Defense = survival.",
+        "key_heroes": ["Natalia", "Gatot", "Edith", "Wu Ming"],
+        "sustain_heroes": {
+            "Natalia": "Feral Protection reduces damage taken by up to 50%. Great for sustained defense.",
+            "Gatot": "3/3 sustain skills: Defense+, Shield, enemy ATK reduction. Built for pure defense.",
+            "Edith": "3/3 sustain skills: DMG reduction, Health+. Extremely tanky.",
+            "Wu Ming": "Shadow's Evasion reduces ALL damage taken by 25%. Top sustain among S+ tier."
+        },
         "hero_explanations": {
             "Natalia": "A-tier Infantry with healing and sustain. THE garrison queen - her survival abilities counter rally damage.",
             "Flint": "A-tier Infantry tank. Solid backup with control abilities.",
@@ -545,6 +551,24 @@ class LineupBuilder:
                 notes += "\n⚠️ Jessie not available - rally joining loses her Stand of Arms skill (+25% damage dealt for your troops)."
             elif 'Jessie' not in hero_names_in_lineup:
                 notes += "\n💡 Tip: Put Jessie in slot 1 for rally joining - her Stand of Arms skill gives +25% damage to all your troops."
+
+        # For garrison, check if a sustain hero is close in power to the selected lead
+        if event_type == 'garrison':
+            sustain_heroes = template.get("sustain_heroes", {})
+            lead_hero = next((h for h in lineup_heroes if h.get("is_lead")), None)
+            if lead_hero and lead_hero.get("hero") not in sustain_heroes:
+                lead_power = lead_hero.get("power", 0)
+                # Check if any sustain hero is within 20% power of the lead
+                for sustain_name, sustain_desc in sustain_heroes.items():
+                    if sustain_name in user_heroes and sustain_name not in hero_names_in_lineup:
+                        sustain_stats = user_heroes[sustain_name]
+                        sustain_data = self.hero_lookup.get(sustain_name)
+                        sustain_power = calculate_hero_power(sustain_stats, sustain_data)
+                        if sustain_power > 0 and lead_power > 0:
+                            power_ratio = sustain_power / lead_power
+                            if power_ratio >= 0.8:  # Within 20% power
+                                notes += f"\n💡 *{sustain_name} might be better for garrison - {sustain_desc}"
+                                break  # Only show one suggestion
 
         return LineupRecommendation(
             game_mode=template["name"],
