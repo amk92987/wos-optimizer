@@ -427,7 +427,7 @@ with tab_create:
             new_role = st.selectbox("Role", ["user", "admin"])
             st.caption("Email is used as login credential")
 
-        submitted = st.form_submit_button("➕ Create User", use_container_width=True)
+        submitted = st.form_submit_button("➕ Create User", width="stretch")
 
         if submitted:
             if not new_email:

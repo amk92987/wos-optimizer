@@ -803,9 +803,9 @@ with st.form("pack_entry_form", clear_on_submit=True):
     with col_header:
         st.markdown('<div style="font-size:24px;font-weight:600;color:#E8F4F8;padding-top:4px;">Enter Pack Contents</div>', unsafe_allow_html=True)
     with col_add:
-        submitted = st.form_submit_button("Add to Pack", type="primary", use_container_width=True)
+        submitted = st.form_submit_button("Add to Pack", type="primary", width="stretch")
     with col_clear:
-        clear_clicked = st.form_submit_button("Clear Pack", use_container_width=True)
+        clear_clicked = st.form_submit_button("Clear Pack", width="stretch")
 
     st.markdown('<hr style="margin:8px 0 16px 0;border-color:#4A90D9;">', unsafe_allow_html=True)
 

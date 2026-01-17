@@ -255,7 +255,7 @@ if not historical_df.empty and len(historical_df) > 1:
             tooltip=['Date', 'Users']
         )
 
-        st.altair_chart(user_chart + points, use_container_width=True)
+        st.altair_chart(user_chart + points, width="stretch")
 
     with chart_col2:
         st.markdown("##### Daily Active Users")
@@ -270,7 +270,7 @@ if not historical_df.empty and len(historical_df) > 1:
             tooltip=['Date', 'Active']
         ).properties(height=250)
 
-        st.altair_chart(active_chart, use_container_width=True)
+        st.altair_chart(active_chart, width="stretch")
 
 else:
     st.info("📈 Charts will appear after a few days of data collection. Check back soon!")

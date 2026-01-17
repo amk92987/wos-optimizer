@@ -107,17 +107,17 @@ def render_feedback_item(item, show_category=True, key_prefix=""):
             cols = st.columns([1, 1, 1, 1, 4])
             with cols[0]:
                 if item.category == 'bug':
-                    if st.button("🔧 To Fix", key=f"tofix_{k}", use_container_width=True):
+                    if st.button("🔧 To Fix", key=f"tofix_{k}", width="stretch"):
                         item.status = 'pending_fix'
                         db.commit()
                         st.rerun()
                 else:
-                    if st.button("📝 To Update", key=f"toupdate_{k}", use_container_width=True):
+                    if st.button("📝 To Update", key=f"toupdate_{k}", width="stretch"):
                         item.status = 'pending_update'
                         db.commit()
                         st.rerun()
             with cols[1]:
-                if st.button("📦 Archive", key=f"archive_{k}", use_container_width=True):
+                if st.button("📦 Archive", key=f"archive_{k}", width="stretch"):
                     item.status = 'archive'
                     db.commit()
                     st.rerun()
@@ -129,7 +129,7 @@ def render_feedback_item(item, show_category=True, key_prefix=""):
             # No Complete button - Claude marks as completed via /wos-feedback skill
             cols = st.columns([1, 1, 6])
             with cols[0]:
-                if st.button("📦 Archive", key=f"archive_{k}", use_container_width=True):
+                if st.button("📦 Archive", key=f"archive_{k}", width="stretch"):
                     item.status = 'archive'
                     db.commit()
                     st.rerun()
@@ -140,7 +140,7 @@ def render_feedback_item(item, show_category=True, key_prefix=""):
         elif item.status == 'completed':
             cols = st.columns([1, 1, 6])
             with cols[0]:
-                if st.button("📦 Archive", key=f"archive_{k}", use_container_width=True):
+                if st.button("📦 Archive", key=f"archive_{k}", width="stretch"):
                     item.status = 'archive'
                     db.commit()
                     st.rerun()
@@ -151,7 +151,7 @@ def render_feedback_item(item, show_category=True, key_prefix=""):
         elif item.status == 'archive':
             cols = st.columns([1, 1, 6])
             with cols[0]:
-                if st.button("🔄 Restore", key=f"restore_{k}", use_container_width=True):
+                if st.button("🔄 Restore", key=f"restore_{k}", width="stretch"):
                     item.status = 'new'
                     db.commit()
                     st.rerun()
@@ -242,7 +242,7 @@ with tab_completed:
     if not completed_items:
         st.info("No completed items.")
     else:
-        if st.button("📦 Archive All Completed", use_container_width=False):
+        if st.button("📦 Archive All Completed", width="content"):
             db.query(Feedback).filter(Feedback.status == 'completed').update({'status': 'archive'})
             db.commit()
             st.rerun()

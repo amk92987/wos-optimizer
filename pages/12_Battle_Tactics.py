@@ -225,7 +225,7 @@ def render_foundry():
             st.image(
                 "https://cdn-www.bluestacks.com/bs-images/WhiteoutSurvival_Guide_FoundryBattleGuide_EN2.jpg",
                 caption="Foundry Battle Map (Source: BlueStacks)",
-                use_container_width=True
+                width="stretch"
             )
         except Exception:
             st.warning("Could not load map image. View it at: [BlueStacks Foundry Guide](https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-foundry-battle-event-guide-en.html)")

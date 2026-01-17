@@ -143,7 +143,7 @@ with tab_create:
             preview_types = {"info": "ℹ️ Info", "warning": "⚠️ Warning", "success": "✅ Success", "error": "🚨 Error"}
             st.caption(f"Preview: {preview_types[ann_type]}")
 
-        submitted = st.form_submit_button("📢 Publish Announcement", use_container_width=True)
+        submitted = st.form_submit_button("📢 Publish Announcement", width="stretch")
 
         if submitted:
             if not title:

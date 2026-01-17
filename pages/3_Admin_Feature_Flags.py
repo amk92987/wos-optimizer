@@ -336,7 +336,7 @@ with st.expander("➕ Create New Flag"):
 
     new_enabled = st.checkbox("Enable immediately", key="new_flag_enabled")
 
-    if st.button("🚩 Create Flag", use_container_width=True):
+    if st.button("🚩 Create Flag", width="stretch"):
         if not new_name:
             st.error("Name is required")
         elif not new_name.replace("_", "").replace(" ", "").isalnum():
@@ -361,21 +361,21 @@ st.markdown("### Quick Actions")
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button("✅ Enable All", use_container_width=True):
+    if st.button("✅ Enable All", width="stretch"):
         for flag in flags:
             flag.is_enabled = True
         db.commit()
         st.rerun()
 
 with col2:
-    if st.button("❌ Disable All", use_container_width=True):
+    if st.button("❌ Disable All", width="stretch"):
         for flag in flags:
             flag.is_enabled = False
         db.commit()
         st.rerun()
 
 with col3:
-    if st.button("🔄 Reset Defaults", use_container_width=True):
+    if st.button("🔄 Reset Defaults", width="stretch"):
         db.query(FeatureFlag).delete()
         for flag_data in DEFAULT_FLAGS:
             flag = FeatureFlag(**flag_data)

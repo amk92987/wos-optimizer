@@ -232,31 +232,31 @@ if user_id:
 
                 with prof_col2:
                     if not is_current:
-                        if st.button("Switch", key=f"switch_{p.id}", use_container_width=True):
+                        if st.button("Switch", key=f"switch_{p.id}", width="stretch"):
                             switch_to_profile(p.id)
                     else:
                         st.caption("(current)")
 
                 with prof_col3:
-                    if st.button("Preview", key=f"preview_btn_{p.id}", use_container_width=True):
+                    if st.button("Preview", key=f"preview_btn_{p.id}", width="stretch"):
                         st.session_state[preview_key] = not st.session_state.get(preview_key, False)
 
                 with prof_col4:
                     if p.is_farm_account:
                         # Show as selected/active farm
-                        if st.button("🌾 Farm", key=f"farm_{p.id}", use_container_width=True, type="primary"):
+                        if st.button("🌾 Farm", key=f"farm_{p.id}", width="stretch", type="primary"):
                             p.is_farm_account = False
                             db.commit()
                             st.rerun()
                     else:
-                        if st.button("Mark Farm", key=f"farm_{p.id}", use_container_width=True):
+                        if st.button("Mark Farm", key=f"farm_{p.id}", width="stretch"):
                             p.is_farm_account = True
                             db.commit()
                             st.rerun()
 
                 with prof_col5:
                     # Edit button (name + state)
-                    if st.button("Edit", key=f"edit_btn_{p.id}", use_container_width=True):
+                    if st.button("Edit", key=f"edit_btn_{p.id}", width="stretch"):
                         st.session_state[edit_key] = not st.session_state.get(edit_key, False)
                         # Close other dialogs
                         st.session_state[delete_key] = False
@@ -264,7 +264,7 @@ if user_id:
 
                 with prof_col6:
                     # Duplicate button
-                    if st.button("Duplicate", key=f"dup_btn_{p.id}", use_container_width=True):
+                    if st.button("Duplicate", key=f"dup_btn_{p.id}", width="stretch"):
                         st.session_state[duplicate_key] = not st.session_state.get(duplicate_key, False)
                         # Close other dialogs
                         st.session_state[edit_key] = False
@@ -272,7 +272,7 @@ if user_id:
 
                 with prof_col7:
                     # Delete button (trash icon)
-                    if st.button("🗑️", key=f"delete_btn_{p.id}", use_container_width=True):
+                    if st.button("🗑️", key=f"delete_btn_{p.id}", width="stretch"):
                         st.session_state[delete_key] = not st.session_state.get(delete_key, False)
                         # Close other dialogs
                         st.session_state[edit_key] = False
@@ -299,10 +299,10 @@ if user_id:
                             )
                         with edit_col3:
                             st.markdown("<br>", unsafe_allow_html=True)
-                            save_clicked = st.form_submit_button("Save", type="primary", use_container_width=True)
+                            save_clicked = st.form_submit_button("Save", type="primary", width="stretch")
                         with edit_col4:
                             st.markdown("<br>", unsafe_allow_html=True)
-                            cancel_clicked = st.form_submit_button("Cancel", use_container_width=True)
+                            cancel_clicked = st.form_submit_button("Cancel", width="stretch")
 
                     if save_clicked:
                         if new_name and new_name.strip():
@@ -330,10 +330,10 @@ if user_id:
                             )
                         with dup_col2:
                             st.markdown("<br>", unsafe_allow_html=True)
-                            dup_clicked = st.form_submit_button("Duplicate", type="primary", use_container_width=True)
+                            dup_clicked = st.form_submit_button("Duplicate", type="primary", width="stretch")
                         with dup_col3:
                             st.markdown("<br>", unsafe_allow_html=True)
-                            dup_cancel = st.form_submit_button("Cancel", use_container_width=True)
+                            dup_cancel = st.form_submit_button("Cancel", width="stretch")
 
                     if dup_clicked:
                         if dup_name and dup_name.strip():
@@ -359,7 +359,7 @@ if user_id:
                         st.warning(f"Are you sure you want to delete **{p.name}**? This cannot be undone.")
                         del_col1, del_col2, del_col3 = st.columns([2, 1, 1])
                         with del_col2:
-                            if st.button("Yes, Delete", key=f"delete_confirm_{p.id}", type="primary", use_container_width=True):
+                            if st.button("Yes, Delete", key=f"delete_confirm_{p.id}", type="primary", width="stretch"):
                                 success, msg = delete_profile(p.id)
                                 if success:
                                     st.session_state[delete_key] = False
@@ -368,7 +368,7 @@ if user_id:
                                 else:
                                     st.error(msg)
                         with del_col3:
-                            if st.button("Cancel", key=f"delete_cancel_{p.id}", use_container_width=True):
+                            if st.button("Cancel", key=f"delete_cancel_{p.id}", width="stretch"):
                                 st.session_state[delete_key] = False
                                 st.rerun()
 
@@ -426,7 +426,7 @@ if user_id:
             )
         with create_col3:
             st.markdown("<br>", unsafe_allow_html=True)
-            create_clicked = st.form_submit_button("Create", use_container_width=True)
+            create_clicked = st.form_submit_button("Create", width="stretch")
 
     if create_clicked:
         if new_profile_name and new_profile_name.strip():
@@ -513,7 +513,7 @@ if user_id:
                         st.caption("⚠️ Will be permanently deleted soon")
 
                 with del_col2:
-                    if st.button("Restore", key=f"restore_{dp.id}", use_container_width=True):
+                    if st.button("Restore", key=f"restore_{dp.id}", width="stretch"):
                         success, msg = restore_profile(dp.id)
                         if success:
                             st.success("Profile restored!")
@@ -522,7 +522,7 @@ if user_id:
                             st.error(msg)
 
                 with del_col3:
-                    if st.button("🗑️ Delete Now", key=f"perm_delete_{dp.id}", use_container_width=True):
+                    if st.button("🗑️ Delete Now", key=f"perm_delete_{dp.id}", width="stretch"):
                         st.session_state[f"confirm_perm_delete_{dp.id}"] = True
 
                 # Permanent delete confirmation
@@ -530,7 +530,7 @@ if user_id:
                     st.warning(f"Permanently delete **{dp.name}**? This cannot be undone.")
                     conf_col1, conf_col2, conf_col3 = st.columns([2, 1, 1])
                     with conf_col2:
-                        if st.button("Yes, Delete Forever", key=f"perm_confirm_{dp.id}", use_container_width=True):
+                        if st.button("Yes, Delete Forever", key=f"perm_confirm_{dp.id}", width="stretch"):
                             success, msg = delete_profile(dp.id, hard_delete=True)
                             if success:
                                 st.session_state[f"confirm_perm_delete_{dp.id}"] = False
@@ -538,7 +538,7 @@ if user_id:
                             else:
                                 st.error(msg)
                     with conf_col3:
-                        if st.button("Cancel", key=f"perm_cancel_{dp.id}", use_container_width=True):
+                        if st.button("Cancel", key=f"perm_cancel_{dp.id}", width="stretch"):
                             st.session_state[f"confirm_perm_delete_{dp.id}"] = False
                             st.rerun()
 

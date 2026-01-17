@@ -182,7 +182,7 @@ def render_register():
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
-    if st.button("Create Account", type="primary", use_container_width=True, key="register_btn"):
+    if st.button("Create Account", type="primary", width="stretch", key="register_btn"):
         # Email is now required (email = username)
         email = reg_email if reg_email else reg_username
         if '@' not in email:

@@ -70,21 +70,21 @@ st.markdown(f"""
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button("🔴 Turn OFF", use_container_width=True,
+    if st.button("🔴 Turn OFF", width="stretch",
                  disabled=(current_mode == 'off'),
                  help="Disable AI for all users"):
         set_ai_mode(db, 'off', get_current_user_id())
         st.rerun()
 
 with col2:
-    if st.button("🟢 Turn ON (Limited)", use_container_width=True,
+    if st.button("🟢 Turn ON (Limited)", width="stretch",
                  disabled=(current_mode == 'on'),
                  help="Enable AI with rate limits"):
         set_ai_mode(db, 'on', get_current_user_id())
         st.rerun()
 
 with col3:
-    if st.button("🟣 UNLIMITED", use_container_width=True,
+    if st.button("🟣 UNLIMITED", width="stretch",
                  disabled=(current_mode == 'unlimited'),
                  help="Enable AI with no rate limits"):
         set_ai_mode(db, 'unlimited', get_current_user_id())
@@ -182,7 +182,7 @@ with tab1:
                 help="e.g., claude-sonnet-4-20250514, claude-3-haiku-20240307"
             )
 
-        if st.form_submit_button("Save Settings", use_container_width=True):
+        if st.form_submit_button("Save Settings", width="stretch"):
             settings.daily_limit_free = new_daily_limit
             settings.daily_limit_admin = new_admin_limit
             settings.cooldown_seconds = new_cooldown
@@ -385,7 +385,7 @@ with tab4:
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("Export as JSONL", use_container_width=True):
+        if st.button("Export as JSONL", width="stretch"):
             if not training_data:
                 st.warning("No training data to export. Mark some conversations as good examples first.")
             else:
@@ -411,7 +411,7 @@ with tab4:
                 st.success(f"Prepared {len(training_data)} training examples")
 
     with col2:
-        if st.button("Export as CSV", use_container_width=True):
+        if st.button("Export as CSV", width="stretch"):
             if not training_data:
                 st.warning("No training data to export. Mark some conversations as good examples first.")
             else:

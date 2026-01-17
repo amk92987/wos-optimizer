@@ -149,7 +149,7 @@ with tab_tables:
 
                 import pandas as pd
                 df = pd.DataFrame(result, columns=col_names)
-                st.dataframe(df, use_container_width=True, hide_index=True, height=400)
+                st.dataframe(df, width="stretch", hide_index=True, height=400)
 
                 start_row = offset + 1
                 end_row = min(offset + rows_per_page, total_count)
@@ -179,7 +179,7 @@ with tab_backup:
                     data=f.read(),
                     file_name=f"wos_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db",
                     mime="application/x-sqlite3",
-                    use_container_width=True
+                    width="stretch"
                 )
 
     with col2:
@@ -191,7 +191,7 @@ with tab_backup:
         """, unsafe_allow_html=True)
 
         export_table = st.selectbox("Table to Export", tables, key="export_select")
-        if st.button("📥 Export as CSV", use_container_width=True):
+        if st.button("📥 Export as CSV", width="stretch"):
             try:
                 result = db.execute(text(f"SELECT * FROM {export_table}")).fetchall()
                 columns = db.execute(text(f"PRAGMA table_info({export_table})")).fetchall()
@@ -307,7 +307,7 @@ with tab_query:
                     if result:
                         import pandas as pd
                         df = pd.DataFrame(result)
-                        st.dataframe(df, use_container_width=True)
+                        st.dataframe(df, width="stretch")
                         st.caption(f"{len(result)} rows returned")
                     else:
                         st.info("Query returned no results")

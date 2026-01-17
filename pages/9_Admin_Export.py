@@ -59,7 +59,7 @@ with tab_reports:
     with col2:
         end_date = st.date_input("End Date", value=datetime.now())
 
-    if st.button("📊 Generate Report", use_container_width=True):
+    if st.button("📊 Generate Report", width="stretch"):
         report_data = None
         report_name = ""
 
@@ -185,7 +185,7 @@ with tab_reports:
             st.success(f"Report generated with {len(report_data)} rows")
 
             # Preview
-            st.dataframe(report_data, use_container_width=True)
+            st.dataframe(report_data, width="stretch")
 
             # Download options
             col1, col2 = st.columns(2)
@@ -197,7 +197,7 @@ with tab_reports:
                     data=csv,
                     file_name=f"{report_name}_{datetime.now().strftime('%Y%m%d')}.csv",
                     mime="text/csv",
-                    use_container_width=True
+                    width="stretch"
                 )
 
             with col2:
@@ -210,7 +210,7 @@ with tab_reports:
                     data=buffer,
                     file_name=f"{report_name}_{datetime.now().strftime('%Y%m%d')}.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                    use_container_width=True
+                    width="stretch"
                 )
         else:
             st.warning("No data found for this report")
@@ -244,7 +244,7 @@ with tab_data:
         col1, col2 = st.columns(2)
 
         with col1:
-            if st.button("📥 Export as CSV", use_container_width=True):
+            if st.button("📥 Export as CSV", width="stretch"):
                 import pandas as pd
 
                 records = db.query(model).all()
@@ -269,7 +269,7 @@ with tab_data:
                 )
 
         with col2:
-            if st.button("📥 Export as JSON", use_container_width=True):
+            if st.button("📥 Export as JSON", width="stretch"):
                 records = db.query(model).all()
                 data = []
                 for record in records:
@@ -312,7 +312,7 @@ with tab_backup:
                 data=f.read(),
                 file_name=f"wos_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db",
                 mime="application/x-sqlite3",
-                use_container_width=True
+                width="stretch"
             )
 
     st.markdown("---")
@@ -324,7 +324,7 @@ with tab_backup:
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("📦 Generate Full Export", use_container_width=True):
+    if st.button("📦 Generate Full Export", width="stretch"):
         import zipfile
 
         # Create zip in memory
@@ -360,7 +360,7 @@ with tab_backup:
             data=zip_buffer.getvalue(),
             file_name=f"wos_full_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.zip",
             mime="application/zip",
-            use_container_width=True
+            width="stretch"
         )
 
         st.success("Export package ready!")

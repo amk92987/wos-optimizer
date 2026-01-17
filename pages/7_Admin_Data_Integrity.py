@@ -172,7 +172,7 @@ def run_integrity_checks():
 
 
 # Run checks
-if st.button("🔄 Run Integrity Checks", use_container_width=True):
+if st.button("🔄 Run Integrity Checks", width="stretch"):
     st.session_state["integrity_results"] = run_integrity_checks()
 
 # Display results
@@ -309,7 +309,7 @@ st.markdown("### Quick Actions")
 col1, col2 = st.columns(2)
 
 with col1:
-    if st.button("🔧 Fix All Safe Issues", use_container_width=True,
+    if st.button("🔧 Fix All Safe Issues", width="stretch",
                 help="Fix orphaned records and invalid references"):
         # Run all safe fixes
         fixed = 0
@@ -352,7 +352,7 @@ with col1:
         st.rerun()
 
 with col2:
-    if st.button("📊 Refresh Checks", use_container_width=True):
+    if st.button("📊 Refresh Checks", width="stretch"):
         st.session_state["integrity_results"] = run_integrity_checks()
         st.rerun()
 

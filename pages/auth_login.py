@@ -151,7 +151,7 @@ def render_login():
 
     st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
 
-    if st.button("Sign In", type="primary", use_container_width=True, key="login_btn"):
+    if st.button("Sign In", type="primary", width="stretch", key="login_btn"):
         if login_username and login_password:
             user = authenticate_user(db, login_username, login_password)
             if user:

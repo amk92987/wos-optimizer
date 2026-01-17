@@ -342,7 +342,7 @@ with st.expander("🔧 Reset Options"):
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("Reset Priorities to Default", use_container_width=True):
+        if st.button("Reset Priorities to Default", width="stretch"):
             profile.priority_svs = 5
             profile.priority_rally = 4
             profile.priority_castle_battle = 4
@@ -356,7 +356,7 @@ with st.expander("🔧 Reset Options"):
             st.rerun()
 
     with col2:
-        if st.button("⚠️ Clear All Hero Data", type="secondary", use_container_width=True):
+        if st.button("⚠️ Clear All Hero Data", type="secondary", width="stretch"):
             st.session_state.confirm_reset = True
 
         if st.session_state.get('confirm_reset'):
