@@ -167,12 +167,12 @@ def render_troop_ratio_multi(title: str, ratios: list):
     st.markdown(f'<div style="background:rgba(255,107,53,0.15);border:1px solid #FF6B35;border-radius:8px;padding:12px;margin:12px 0;min-height:120px;"><div style="font-weight:bold;color:#FF6B35;margin-bottom:8px;">{title}</div>{rows_html}</div>', unsafe_allow_html=True)
 
 
-def render_why_this_lineup(template_key: str, expander_key: str = None):
+def render_why_this_lineup(template_key: str, user_heroes_selected: list = None):
     """Render a 'Why This Lineup' expander using native Streamlit components.
 
     Args:
         template_key: Key from LINEUP_TEMPLATES (e.g., 'bear_trap', 'crazy_joe')
-        expander_key: Optional unique key for the expander widget
+        user_heroes_selected: List of hero names actually selected for user's lineup
     """
     template = LINEUP_TEMPLATES.get(template_key)
     if not template:
@@ -180,14 +180,77 @@ def render_why_this_lineup(template_key: str, expander_key: str = None):
 
     hero_explanations = template.get("hero_explanations", {})
     ratio_explanation = template.get("ratio_explanation", "")
+    key_heroes = template.get("key_heroes", [])
 
     if not hero_explanations and not ratio_explanation:
         return
 
     with st.expander("💡 Why This Lineup?", expanded=False):
-        if hero_explanations:
-            st.markdown("**Hero Selection:**")
-            for hero_name, explanation in hero_explanations.items():
+        # Show explanations for user's actual heroes first
+        if user_heroes_selected:
+            st.markdown("**Your Heroes:**")
+            for hero_name in user_heroes_selected:
+                if hero_name in hero_explanations:
+                    st.markdown(f"- **{hero_name}:** {hero_explanations[hero_name]}")
+                else:
+                    # Generate basic explanation from hero data
+                    hero_data = HEROES_BY_NAME.get(hero_name, {})
+                    if hero_data:
+                        tier = hero_data.get("tier_overall", "?")
+                        gen = hero_data.get("generation", "?")
+                        hero_class = hero_data.get("hero_class", "?")
+                        st.markdown(f"- **{hero_name}:** Gen {gen} {tier}-tier {hero_class}. Your strongest available option.")
+
+            # Check for better options the user OWNS but aren't in lineup (underleveled)
+            # Only suggest if they're same or higher tier than current selection
+            tier_rank = {"S+": 6, "S": 5, "A": 4, "B": 3, "C": 2, "D": 1, "?": 0}
+
+            # Get the tiers of currently selected heroes by class
+            selected_tiers_by_class = {}
+            for hero_name in user_heroes_selected:
+                hero_data = HEROES_BY_NAME.get(hero_name, {})
+                hero_class = hero_data.get("hero_class", "")
+                hero_tier = hero_data.get("tier_overall", "?")
+                selected_tiers_by_class[hero_class] = tier_rank.get(hero_tier, 0)
+
+            potential_upgrades = []
+            for hero_name in key_heroes:
+                if hero_name not in user_heroes_selected and hero_name in USER_HEROES:
+                    hero_data = HEROES_BY_NAME.get(hero_name, {})
+                    hero_class = hero_data.get("hero_class", "")
+                    hero_tier = hero_data.get("tier_overall", "?")
+                    hero_tier_rank = tier_rank.get(hero_tier, 0)
+
+                    # Only suggest if same or higher tier than current selection for that class
+                    current_tier_rank = selected_tiers_by_class.get(hero_class, 0)
+                    if hero_tier_rank >= current_tier_rank:
+                        potential_upgrades.append(hero_name)
+
+            if potential_upgrades:
+                st.markdown("**Potential Upgrades:**")
+                for hero_name in potential_upgrades[:2]:
+                    if hero_name in hero_explanations:
+                        st.caption(f"- If you level up {hero_name}, they could be more effective: {hero_explanations[hero_name]}")
+
+            # Check for better options in upcoming generations
+            next_gen = USER_GEN + 1 if USER_GEN < 14 else None
+            if next_gen:
+                upcoming_heroes = []
+                for hero_name in key_heroes:
+                    hero_data = HEROES_BY_NAME.get(hero_name, {})
+                    hero_gen = hero_data.get("generation", 0)
+                    if hero_gen >= next_gen and hero_name not in user_heroes_selected:
+                        upcoming_heroes.append((hero_name, hero_gen))
+
+                if upcoming_heroes:
+                    st.markdown("**Coming Soon:**")
+                    for hero_name, hero_gen in upcoming_heroes[:2]:
+                        if hero_name in hero_explanations:
+                            st.caption(f"- {hero_name} (Gen {hero_gen}): {hero_explanations[hero_name]}")
+        else:
+            # No user heroes - show general recommendations
+            st.markdown("**Recommended Heroes:**")
+            for hero_name, explanation in list(hero_explanations.items())[:5]:
                 st.markdown(f"- **{hero_name}:** {explanation}")
 
         if ratio_explanation:
@@ -287,6 +350,9 @@ with tab_rally_lead:
 
         col1, col2 = st.columns(2)
 
+        # Collect user's actual selected heroes for explanations
+        attack_heroes_selected = []
+
         with col1:
             st.markdown("**Your Best Heroes:**")
             if USER_HEROES:
@@ -294,6 +360,7 @@ with tab_rally_lead:
                     best, note = get_best_hero_by_class(USER_HEROES, hero_class, prefer_sustain=False)
                     if best:
                         render_hero_card(best, note)
+                        attack_heroes_selected.append(best)
                     else:
                         st.warning(f"No {hero_class} hero found - add heroes in Hero Tracker!")
                 st.caption("*Shows your strongest heroes by power (level, stars, gear). When equal, newer generation heroes are preferred.*")
@@ -310,22 +377,25 @@ with tab_rally_lead:
 
             if event_ratios == "Bear Trap":
                 render_troop_ratio(0, 10, 90, "Bear is slow - maximize Marksman DPS window")
-                render_why_this_lineup("bear_trap")
+                render_why_this_lineup("bear_trap", attack_heroes_selected)
             elif event_ratios == "Crazy Joe":
                 render_troop_ratio(90, 10, 0, "Infantry kills before Joe's backline attacks hit")
-                render_why_this_lineup("crazy_joe")
+                render_why_this_lineup("crazy_joe", attack_heroes_selected)
             elif event_ratios == "SvS Rally":
                 render_troop_ratio(40, 20, 40, "Balanced for SvS combat")
-                render_why_this_lineup("svs_march")
+                render_why_this_lineup("svs_march", attack_heroes_selected)
             else:  # Castle Attack
                 render_troop_ratio(50, 20, 30, "Balanced for sustained castle fights")
-                render_why_this_lineup("svs_attack")
+                render_why_this_lineup("svs_attack", attack_heroes_selected)
 
     with defense_tab:
         st.markdown("### Garrison Leader")
         st.markdown("*For defending your castle - prioritize sustain and damage reduction*")
 
         st.success("**Defense priorities:** Natalia/Logan/Flint (sustain Infantry), Philly/Molly (healing Lancer)")
+
+        # Collect user's actual selected heroes for explanations
+        defense_heroes_selected = []
 
         col1, col2 = st.columns(2)
 
@@ -336,6 +406,7 @@ with tab_rally_lead:
                     best, note = get_best_hero_by_class(USER_HEROES, hero_class, prefer_sustain=True)
                     if best:
                         render_hero_card(best, note)
+                        defense_heroes_selected.append(best)
                     else:
                         st.warning(f"No {hero_class} hero found")
             else:
@@ -357,7 +428,7 @@ with tab_rally_lead:
             """)
 
             render_troop_ratio(60, 20, 20, "Heavy Infantry wall for attrition defense")
-            render_why_this_lineup("garrison")
+            render_why_this_lineup("garrison", defense_heroes_selected)
 
 # =============================================================================
 # RALLY JOINER TAB

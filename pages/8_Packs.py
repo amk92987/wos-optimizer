@@ -20,7 +20,7 @@ if css_file.exists():
     with open(css_file) as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# CSS to make tab labels wrap and evenly spaced
+# CSS to make tab labels wrap and evenly spaced, and shrink number inputs
 st.markdown("""
 <style>
 .stTabs [data-baseweb="tab-list"] {
@@ -29,10 +29,19 @@ st.markdown("""
 }
 .stTabs [data-baseweb="tab-list"] button {
     flex: 1 1 0 !important;
+    min-width: 85px !important;
 }
 .stTabs [data-baseweb="tab-list"] button p {
     white-space: pre-wrap !important;
     text-align: center !important;
+    font-size: 12px !important;
+    line-height: 1.3 !important;
+}
+/* Shrink number input fields to 60% width and center them */
+.stNumberInput {
+    max-width: 60% !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -111,7 +120,7 @@ PACK_ITEMS = {
         ]
     },
     "chief_gear": {
-        "label": "Chief Gear\n& Charms",
+        "label": "Chief Gear",
         "category": "unique",
         "items": [
             {"id": "hardened_alloy", "name": "Hardened Alloy", "image": "hardened_alloy.png", "fs_value": 0.067, "tier": "C", "desc": "Primary material for chief gear (cheap)"},
@@ -123,7 +132,7 @@ PACK_ITEMS = {
         ]
     },
     "currency": {
-        "label": "Currency\n& Premium",
+        "label": "Gems\n& VIP",
         "category": "currency",
         "items": [
             {"id": "gems", "name": "Gems", "image": "gems.png", "fs_value": 0.033, "tier": "A", "desc": "Premium currency (30 gems = 1 FS)"},
@@ -241,7 +250,7 @@ PACK_ITEMS = {
         ]
     },
     "late_game": {
-        "label": "Late Game\n(FC5+)",
+        "label": "FC5+\nItems",
         "category": "unique",
         "items": [
             {"id": "expert_sigil", "name": "Expert Sigils", "image": "common_expert_sigil.png", "fs_value": 20, "tier": "A", "desc": "Material for hero expertise trees"},
@@ -282,7 +291,7 @@ PACK_ITEMS = {
         ]
     },
     "resources": {
-        "label": "Resources\n(Filler)",
+        "label": "Resource\nFillers",
         "category": "resources",
         "is_resource_grid": True,
         "columns": {
@@ -789,14 +798,16 @@ st.markdown("---")
 # =============================================================================
 # Form for Enter key support (clear_on_submit resets inputs after adding)
 with st.form("pack_entry_form", clear_on_submit=True):
-    # Header with Add and Clear buttons
-    col_header, col_add, col_clear = st.columns([3, 1, 1])
+    # Header row with title and buttons vertically centered
+    col_header, col_spacer, col_add, col_clear = st.columns([3, 1, 1, 1])
     with col_header:
-        st.markdown("### Enter Pack Contents")
+        st.markdown('<div style="font-size:24px;font-weight:600;color:#E8F4F8;padding-top:4px;">Enter Pack Contents</div>', unsafe_allow_html=True)
     with col_add:
         submitted = st.form_submit_button("Add to Pack", type="primary", use_container_width=True)
     with col_clear:
         clear_clicked = st.form_submit_button("Clear Pack", use_container_width=True)
+
+    st.markdown('<hr style="margin:8px 0 16px 0;border-color:#4A90D9;">', unsafe_allow_html=True)
 
     # Tabs for item categories
     tab_names = [cat_data["label"] for cat_data in PACK_ITEMS.values()]
