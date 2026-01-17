@@ -135,12 +135,12 @@ LINEUP_TEMPLATES = {
     "world_march": {
         "name": "World March",
         "slots": [
-            # Infantry: Jeronimo (S+ Infantry), Wu Ming (S+ Infantry), Natalia (A Infantry), Flint (A Infantry)
-            {"class": "Infantry", "role": "Lead/Tank", "preferred": ["Jeronimo", "Wu Ming", "Natalia", "Flint", "Ahmose", "Logan"], "is_lead": True},
-            # Lancer: Molly (B Lancer), Philly (A Lancer), Mia (A Lancer)
-            {"class": "Lancer", "role": "Support/Heal", "preferred": ["Molly", "Philly", "Mia", "Norah"]},
-            # Marksman: Alonso (A Marksman), Zinman (C Marksman), Bahiti (B Marksman)
-            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Zinman", "Bahiti", "Seo-yoon", "Gina"]},
+            # Infantry: S+ first (Elif, Hervor, Magnus, Wu Ming, Jeronimo), then S (Gatot, Edith), then A
+            {"class": "Infantry", "role": "Lead/Tank", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Flint"], "is_lead": True},
+            # Lancer: S first (Dominic, Flora, Karol, Freya, Sonya, Gordon, Renee, Norah), then A
+            {"class": "Lancer", "role": "Support/Heal", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly"]},
+            # Marksman: S+ first (Vulcanus, Blanchette), then S, then A
+            {"class": "Marksman", "role": "Main DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
         ],
         "troop_ratio": {"infantry": 50, "lancer": 20, "marksman": 30},
         "notes": "Standard balanced march. Jeronimo for burst, Wu Ming/Natalia for sustain.",
@@ -158,11 +158,11 @@ LINEUP_TEMPLATES = {
     "bear_trap": {
         "name": "Bear Trap Rally",
         "slots": [
-            # Marksman: Hendrik (S), Xura (S), Wayne (A), Alonso (A), Zinman (C), Bahiti (B)
-            {"class": "Marksman", "role": "Main DPS Lead", "preferred": ["Hendrik", "Xura", "Wayne", "Alonso", "Zinman", "Bahiti"], "is_lead": True},
-            {"class": "Marksman", "role": "Secondary DPS", "preferred": ["Xura", "Wayne", "Alonso", "Zinman", "Seo-yoon", "Bahiti"]},
-            # Infantry: Jeronimo (S+), Natalia (A), Flint (A)
-            {"class": "Infantry", "role": "Frontline Buffer", "preferred": ["Jeronimo", "Natalia", "Flint"]},
+            # Marksman: S+ first (Vulcanus, Blanchette), then S (Cara, Ligeia, Rufus, Xura, Hendrik, etc.)
+            {"class": "Marksman", "role": "Main DPS Lead", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"], "is_lead": True},
+            {"class": "Marksman", "role": "Secondary DPS", "preferred": ["Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
+            # Infantry: S+ for ATK buffs (Jeronimo, Wu Ming, Elif, Hervor, Magnus)
+            {"class": "Infantry", "role": "Frontline Buffer", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Natalia", "Flint"]},
         ],
         "troop_ratio": {"infantry": 0, "lancer": 10, "marksman": 90},
         "notes": "Bear moves SLOWLY - maximize ranged damage window. 90% Marksman troops deal massive DPS before melee begins.",
@@ -181,9 +181,10 @@ LINEUP_TEMPLATES = {
     "crazy_joe": {
         "name": "Crazy Joe Rally",
         "slots": [
-            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Wu Ming", "Natalia", "Greg"], "is_lead": True},
-            {"class": "Infantry", "role": "Tank Support", "preferred": ["Wu Ming", "Natalia", "Sergey", "Ahmose"]},
-            {"class": "Infantry", "role": "Infantry DPS", "preferred": ["Natalia", "Greg", "Hector"]},
+            # Infantry only - S+ first, then S, then A
+            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Gregory"], "is_lead": True},
+            {"class": "Infantry", "role": "Tank Support", "preferred": ["Wu Ming", "Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Gregory", "Sergey"]},
+            {"class": "Infantry", "role": "Infantry DPS", "preferred": ["Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Gregory", "Hector"]},
         ],
         "troop_ratio": {"infantry": 90, "lancer": 10, "marksman": 0},
         "notes": "Infantry kills before back row attacks. 90/10/0 ratio is key. Joe targets backline first - 0% Marksman is MANDATORY.",
@@ -199,12 +200,12 @@ LINEUP_TEMPLATES = {
     "svs_attack": {
         "name": "SvS Castle Attack",
         "slots": [
-            # Infantry: Jeronimo (S+), Natalia (A), Flint (A), Ahmose (A)
-            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Natalia", "Flint", "Ahmose", "Logan"], "is_lead": True},
-            # Lancer: Molly (B), Philly (A), Mia (A)
-            {"class": "Lancer", "role": "Support", "preferred": ["Molly", "Philly", "Mia", "Norah"]},
-            # Marksman: Alonso (A), Zinman (C), Bahiti (B), Seo-yoon (C)
-            {"class": "Marksman", "role": "DPS", "preferred": ["Alonso", "Zinman", "Bahiti", "Seo-yoon"]},
+            # Infantry: S+ first for offense (Jeronimo, Wu Ming, Elif, Hervor, Magnus)
+            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Flint"], "is_lead": True},
+            # Lancer: S first, then A (Molly is B-tier, should be last)
+            {"class": "Lancer", "role": "Support", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly"]},
+            # Marksman: S+ first (Vulcanus, Blanchette), then S, then A
+            {"class": "Marksman", "role": "DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
         ],
         "troop_ratio": {"infantry": 50, "lancer": 20, "marksman": 30},
         "notes": "Rally leader setup. See Natalia vs Jeronimo tab for when to swap.",
@@ -220,12 +221,12 @@ LINEUP_TEMPLATES = {
     "garrison": {
         "name": "Castle Garrison",
         "slots": [
-            # Infantry: Natalia (A), Flint (A), Ahmose (A)
-            {"class": "Infantry", "role": "Tank Lead", "preferred": ["Natalia", "Flint", "Ahmose"], "is_lead": True},
-            # Lancer: Molly (B), Philly (A), Mia (A)
-            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Philly", "Mia"]},
-            # Marksman: Alonso (A), Zinman (C), Bahiti (B)
-            {"class": "Marksman", "role": "Counter DPS", "preferred": ["Alonso", "Zinman", "Bahiti"]},
+            # Infantry: For defense, sustain matters - Natalia still good, but S+ tiers offer raw stats
+            {"class": "Infantry", "role": "Tank Lead", "preferred": ["Elif", "Hervor", "Magnus", "Wu Ming", "Gatot", "Edith", "Natalia", "Flint", "Ahmose"], "is_lead": True},
+            # Lancer: S first for healing (Gordon, Sonya have heal abilities), then others
+            {"class": "Lancer", "role": "Healer", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly"]},
+            # Marksman: S+ first for counterattack DPS
+            {"class": "Marksman", "role": "Counter DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
         ],
         "troop_ratio": {"infantry": 60, "lancer": 15, "marksman": 25},
         "notes": "Defense = survival. Natalia's sustain is key.",
@@ -273,11 +274,14 @@ LINEUP_TEMPLATES = {
     "arena": {
         "name": "Arena (5 Heroes)",
         "slots": [
-            {"class": "Infantry", "role": "Primary Tank", "preferred": ["Natalia", "Jeronimo", "Ahmose"], "is_lead": True},
-            {"class": "Infantry", "role": "Secondary Tank", "preferred": ["Flint", "Wu Ming", "Sergey"]},
-            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Seo-yoon", "Zinman", "Greg"]},
-            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Norah", "Philly", "Mia"]},
-            {"class": "Marksman", "role": "Secondary DPS", "preferred": ["Wayne", "Gina", "Bahiti"]},
+            # Infantry: S+ and S first for raw power
+            {"class": "Infantry", "role": "Primary Tank", "preferred": ["Elif", "Hervor", "Magnus", "Wu Ming", "Jeronimo", "Gatot", "Edith", "Natalia"], "is_lead": True},
+            {"class": "Infantry", "role": "Secondary Tank", "preferred": ["Hervor", "Magnus", "Wu Ming", "Gatot", "Edith", "Natalia", "Flint", "Sergey"]},
+            # Marksman: S+ first
+            {"class": "Marksman", "role": "Main DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
+            # Lancer: S first
+            {"class": "Lancer", "role": "Healer", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly"]},
+            {"class": "Marksman", "role": "Secondary DPS", "preferred": ["Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
         ],
         "troop_ratio": {"infantry": 45, "lancer": 25, "marksman": 30},
         "notes": "5-hero mode. Double infantry frontline is meta.",
@@ -294,9 +298,12 @@ LINEUP_TEMPLATES = {
     "exploration": {
         "name": "Exploration / PvE",
         "slots": [
-            {"class": "Infantry", "role": "Tank", "preferred": ["Natalia", "Flint", "Sergey", "Jeronimo", "Logan"], "is_lead": True},
-            {"class": "Lancer", "role": "Healer", "preferred": ["Molly", "Norah", "Philly", "Mia"]},
-            {"class": "Marksman", "role": "DPS", "preferred": ["Alonso", "Zinman", "Greg", "Gina", "Bahiti"]},
+            # For exploration, sustain/survival heroes preferred - Natalia's heal keeps her at top
+            {"class": "Infantry", "role": "Tank", "preferred": ["Natalia", "Elif", "Hervor", "Magnus", "Wu Ming", "Gatot", "Edith", "Flint", "Sergey"], "is_lead": True},
+            # Lancer: S first for healing
+            {"class": "Lancer", "role": "Healer", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly"]},
+            # Marksman: S+ first
+            {"class": "Marksman", "role": "DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
         ],
         "troop_ratio": {"infantry": 40, "lancer": 30, "marksman": 30},
         "notes": "Uses EXPLORATION skills (left side). Survival > speed.",
@@ -312,9 +319,12 @@ LINEUP_TEMPLATES = {
     "svs_march": {
         "name": "SvS Field March",
         "slots": [
-            {"class": "Infantry", "role": "Lead/Tank", "preferred": ["Jeronimo", "Wu Ming", "Natalia", "Flint", "Ahmose", "Logan"], "is_lead": True},
-            {"class": "Lancer", "role": "Support/Heal", "preferred": ["Molly", "Norah", "Philly", "Mia"]},
-            {"class": "Marksman", "role": "Main DPS", "preferred": ["Alonso", "Seo-yoon", "Zinman", "Wayne", "Greg"]},
+            # Infantry: S+ first for field combat (Jeronimo for offense buffs)
+            {"class": "Infantry", "role": "Lead/Tank", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Flint"], "is_lead": True},
+            # Lancer: S first
+            {"class": "Lancer", "role": "Support/Heal", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly"]},
+            # Marksman: S+ first
+            {"class": "Marksman", "role": "Main DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
         ],
         "troop_ratio": {"infantry": 40, "lancer": 20, "marksman": 40},
         "notes": "Balanced for unpredictable SvS field combat. Jeronimo for burst, Wu Ming for sustain.",
