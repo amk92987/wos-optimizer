@@ -35,6 +35,7 @@ class User(Base):
     ai_requests_today = Column(Integer, default=0)
     ai_request_reset_date = Column(DateTime, nullable=True)  # Date when count resets
     last_ai_request = Column(DateTime, nullable=True)  # For cooldown
+    ai_access_level = Column(String(20), default='limited')  # 'off', 'limited', 'unlimited'
 
     # Metadata
     created_at = Column(DateTime, default=datetime.utcnow)

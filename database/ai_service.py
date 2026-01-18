@@ -48,16 +48,26 @@ def check_rate_limit(db: Session, user: User) -> Tuple[bool, str, int]:
     Returns:
         Tuple of (allowed: bool, message: str, remaining: int)
     """
+    # First check user-level AI access
+    user_ai_level = getattr(user, 'ai_access_level', 'limited') or 'limited'
+
+    if user_ai_level == 'off':
+        return False, "AI features are disabled for your account.", 0
+
+    if user_ai_level == 'unlimited':
+        return True, "Unlimited access", -1  # -1 means unlimited
+
+    # User is 'limited' - check global settings
     settings = get_ai_settings(db)
 
-    # Check mode
+    # Check global mode
     if settings.mode == 'off':
         return False, "AI features are currently disabled.", 0
 
     if settings.mode == 'unlimited':
         return True, "Unlimited mode", -1  # -1 means unlimited
 
-    # Mode is 'on' - check rate limits
+    # Global mode is 'on' - check rate limits
     is_admin = user.role == 'admin'
     daily_limit = settings.daily_limit_admin if is_admin else settings.daily_limit_free
 

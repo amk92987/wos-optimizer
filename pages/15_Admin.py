@@ -246,8 +246,8 @@ with tab_users:
 
     st.caption(f"Showing {len(filtered_users)} users")
 
-    # Header row (matches data row: 11 columns - username IS email now)
-    header_cols = st.columns([0.3, 2.6, 0.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.6, 0.5])
+    # Header row (matches data row: 12 columns - username IS email now)
+    header_cols = st.columns([0.3, 2.4, 0.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.5, 0.6, 0.5])
     with header_cols[0]:
         st.caption("Role")
     with header_cols[1]:
@@ -263,6 +263,8 @@ with tab_users:
     with header_cols[6]:
         st.caption("Last")
     with header_cols[7]:
+        st.caption("AI")
+    with header_cols[8]:
         st.caption("Actions")
 
     st.markdown("<hr style='margin: 2px 0 8px 0; border-color: rgba(74, 144, 217, 0.4);'>", unsafe_allow_html=True)
@@ -304,8 +306,8 @@ with tab_users:
         # Get user's profile info (count and states)
         profile_count, user_states = get_user_profile_info(user.id)
 
-        # User row with inline actions (11 columns - username IS email)
-        row_cols = st.columns([0.3, 2.6, 0.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.6, 0.5])
+        # User row with inline actions (12 columns - username IS email)
+        row_cols = st.columns([0.3, 2.4, 0.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.5, 0.6, 0.5])
 
         # Consistent cell style for vertical alignment with buttons
         cell_style = "display:flex;align-items:center;height:32px;margin:0;"
@@ -333,19 +335,32 @@ with tab_users:
         with row_cols[6]:
             st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{last_login}</div>", unsafe_allow_html=True)
 
-        # Action buttons inline (no help param, no emoji issues)
+        # AI access level button (cycles: off -> limited -> unlimited -> off)
         with row_cols[7]:
+            ai_level = getattr(user, 'ai_access_level', 'limited') or 'limited'
+            ai_labels = {'off': 'Off', 'limited': 'Ltd', 'unlimited': 'Unl'}
+            ai_colors = {'off': '#E74C3C', 'limited': '#F1C40F', 'unlimited': '#2ECC71'}
+            ai_next = {'off': 'limited', 'limited': 'unlimited', 'unlimited': 'off'}
+
+            if st.button(ai_labels.get(ai_level, 'Ltd'), key=f"ai_{user.id}",
+                        help=f"AI: {ai_level} (click to change)"):
+                user.ai_access_level = ai_next.get(ai_level, 'limited')
+                db.commit()
+                st.rerun()
+
+        # Action buttons inline (no help param, no emoji issues)
+        with row_cols[8]:
             if st.button("Edit", key=f"edit_{user.id}"):
                 st.session_state[f"editing_{user.id}"] = True
                 st.rerun()
 
-        with row_cols[8]:
+        with row_cols[9]:
             if not is_self:
                 if st.button("Login", key=f"impersonate_{user.id}"):
                     login_as_user(user)
                     st.rerun()
 
-        with row_cols[9]:
+        with row_cols[10]:
             if not is_self:
                 if user.is_active:
                     if st.button("Suspend", key=f"suspend_{user.id}"):
@@ -358,7 +373,7 @@ with tab_users:
                         db.commit()
                         st.rerun()
 
-        with row_cols[10]:
+        with row_cols[11]:
             if not is_self:
                 if st.button("Delete", key=f"del_{user.id}", type="primary"):
                     st.session_state[f"confirm_del_{user.id}"] = True
