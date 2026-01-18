@@ -1,0 +1,13 @@
+[theme]
+# Match the frost/winter theme colors to prevent purple flash on load
+primaryColor = "#7DD3FC"
+backgroundColor = "#0A1628"
+secondaryBackgroundColor = "#0F2847"
+textColor = "#E0F7FF"
+font = "sans serif"
+
+[server]
+headless = true
+
+[browser]
+gatherUsageStats = false
