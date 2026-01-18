@@ -11,7 +11,7 @@ import sys
 # Page config must be first Streamlit command
 st.set_page_config(
     page_title="Bear's Den",
-    page_icon="❄️",
+    page_icon="static/favicon.svg",
     layout="wide",
     initial_sidebar_state="expanded"  # Sidebar visible for authenticated users
 )

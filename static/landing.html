@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bear's Den - Whiteout Survival Companion</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
     <style>
         * {
             margin: 0;
@@ -385,9 +386,72 @@
                 gap: 20px;
             }
         }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg,
+                #0A1628 0%,
+                #0A1628 20%,
+                #0F2847 45%,
+                #1A4B6E 70%,
+                #2E7DA8 88%,
+                #5AADD6 96%,
+                #7DD3FC 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-paw {
+            animation: pulse 1.2s ease-in-out infinite;
+        }
+
+        .loading-text {
+            color: #E0F7FF;
+            font-size: 18px;
+            margin-top: 20px;
+            font-weight: 500;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <svg class="loading-paw" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="80" height="80">
+            <defs>
+                <linearGradient id="pawGradLoad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:#7DD3FC"/>
+                    <stop offset="100%" style="stop-color:#E0F7FF"/>
+                </linearGradient>
+            </defs>
+            <circle cx="16" cy="20" r="9" fill="url(#pawGradLoad)"/>
+            <circle cx="7" cy="10" r="5" fill="url(#pawGradLoad)"/>
+            <circle cx="16" cy="5" r="5" fill="url(#pawGradLoad)"/>
+            <circle cx="25" cy="10" r="5" fill="url(#pawGradLoad)"/>
+        </svg>
+        <div class="loading-text">Loading Bear's Den...</div>
+    </div>
+
     <div class="container">
         <!-- Header -->
         <header class="header">
@@ -553,5 +617,24 @@
             <p class="copyright">&copy; 2025 Random Chaos Labs. All rights reserved.</p>
         </footer>
     </div>
+
+    <script>
+        // Show loading overlay when navigating to the app
+        document.addEventListener('DOMContentLoaded', function() {
+            const overlay = document.getElementById('loadingOverlay');
+            const appLinks = document.querySelectorAll('a[href*="wosapp.randomchaoslabs.com"]');
+
+            appLinks.forEach(function(link) {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    overlay.classList.add('active');
+                    // Small delay to ensure overlay is visible before navigation
+                    setTimeout(function() {
+                        window.location.href = link.href;
+                    }, 100);
+                });
+            });
+        });
+    </script>
 </body>
 </html>
