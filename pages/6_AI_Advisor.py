@@ -69,6 +69,18 @@ st.markdown("Get personalized recommendations powered by AI.")
 
 render_donate_message()
 
+# Show AI access status
+if current_user:
+    user_ai_level = getattr(current_user, 'ai_access_level', None) or 'limited'
+
+    if user_ai_level == 'off':
+        st.error("**AI Access: Disabled** - AI features have been turned off for your account. Contact support if you believe this is an error.")
+    elif user_ai_level == 'unlimited':
+        st.success("**AI Access: Unlimited** - You have unlimited AI queries.")
+    else:  # limited
+        daily_limit = ai_settings.daily_limit_admin if current_user.role == 'admin' else ai_settings.daily_limit_free
+        st.info(f"**AI Access: Limited** - AI queries are expensive to run, so we limit free accounts to {daily_limit} questions per day. {rate_message}")
+
 st.markdown("---")
 
 # Initialize session state

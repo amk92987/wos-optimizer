@@ -337,13 +337,12 @@ with tab_users:
 
         # AI access level button (cycles: off -> limited -> unlimited -> off)
         with row_cols[7]:
-            ai_level = getattr(user, 'ai_access_level', 'limited') or 'limited'
+            ai_level = getattr(user, 'ai_access_level', None) or 'limited'
             ai_labels = {'off': 'Off', 'limited': 'Ltd', 'unlimited': 'Unl'}
-            ai_colors = {'off': '#E74C3C', 'limited': '#F1C40F', 'unlimited': '#2ECC71'}
             ai_next = {'off': 'limited', 'limited': 'unlimited', 'unlimited': 'off'}
+            btn_label = ai_labels.get(ai_level, 'Ltd')
 
-            if st.button(ai_labels.get(ai_level, 'Ltd'), key=f"ai_{user.id}",
-                        help=f"AI: {ai_level} (click to change)"):
+            if st.button(btn_label, key=f"ai_{user.id}"):
                 user.ai_access_level = ai_next.get(ai_level, 'limited')
                 db.commit()
                 st.rerun()
