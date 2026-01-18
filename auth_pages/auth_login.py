@@ -138,9 +138,9 @@ def render_login():
     </style>
     """, unsafe_allow_html=True)
 
-    # Back link
+    # Back link - goes to static landing page
     st.markdown("""
-    <a href="/" style="color: #7DD3FC; text-decoration: none; font-size: 14px;">
+    <a href="https://wos.randomchaoslabs.com" style="color: #7DD3FC; text-decoration: none; font-size: 14px;">
         ← Back to Home
     </a>
     """, unsafe_allow_html=True)
