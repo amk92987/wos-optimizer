@@ -115,9 +115,10 @@ st.caption(f"System overview • {datetime.now().strftime('%B %d, %Y at %I:%M %p
 all_users = get_all_users(db)
 now = datetime.now()
 
-# Separate admins from regular users
+# Separate admins from regular users, exclude test accounts from metrics
 admin_users = [u for u in all_users if u.role == 'admin']
-regular_users = [u for u in all_users if u.role != 'admin']
+test_users = [u for u in all_users if u.is_test_account]
+regular_users = [u for u in all_users if u.role != 'admin' and not u.is_test_account]
 
 # Active users calculations (regular users only)
 def count_active_users(users: list, days: int) -> int:
@@ -133,10 +134,29 @@ new_today = len([u for u in regular_users if u.created_at and u.created_at >= no
 new_this_week = len([u for u in regular_users if u.created_at and u.created_at >= now - timedelta(days=7)])
 new_this_month = len([u for u in regular_users if u.created_at and u.created_at >= now - timedelta(days=30)])
 
-# Content stats
-total_profiles = db.query(UserProfile).count()
-total_heroes_tracked = db.query(UserHero).count()
-total_inventory_items = db.query(UserInventory).count()
+# Content stats (exclude test account data)
+test_user_ids = [u.id for u in test_users]
+admin_user_ids = [u.id for u in admin_users]
+excluded_user_ids = test_user_ids + admin_user_ids
+
+if excluded_user_ids:
+    total_profiles = db.query(UserProfile).filter(~UserProfile.user_id.in_(excluded_user_ids)).count()
+    total_heroes_tracked = db.query(UserHero).join(UserProfile).filter(~UserProfile.user_id.in_(excluded_user_ids)).count()
+    total_inventory_items = db.query(UserInventory).join(UserProfile).filter(~UserProfile.user_id.in_(excluded_user_ids)).count()
+    # Count unique states
+    from sqlalchemy import func
+    unique_states = db.query(func.count(func.distinct(UserProfile.state_number))).filter(
+        ~UserProfile.user_id.in_(excluded_user_ids),
+        UserProfile.state_number.isnot(None)
+    ).scalar() or 0
+else:
+    total_profiles = db.query(UserProfile).count()
+    total_heroes_tracked = db.query(UserHero).count()
+    total_inventory_items = db.query(UserInventory).count()
+    from sqlalchemy import func
+    unique_states = db.query(func.count(func.distinct(UserProfile.state_number))).filter(
+        UserProfile.state_number.isnot(None)
+    ).scalar() or 0
 
 # Inactive users (30+ days)
 inactive_30d = len([u for u in regular_users if not u.last_login or u.last_login < now - timedelta(days=30)])
@@ -190,8 +210,8 @@ with col5:
     st.markdown(f"""
     <div style="background: linear-gradient(135deg, rgba(230, 126, 34, 0.2), rgba(230, 126, 34, 0.1));
                 padding: 20px; border-radius: 12px; text-align: center; border: 1px solid rgba(230, 126, 34, 0.3);">
-        <div style="font-size: 32px; font-weight: bold; color: #E67E22;">{total_heroes_tracked}</div>
-        <div style="font-size: 12px; color: #888; margin-top: 4px;">Heroes Tracked</div>
+        <div style="font-size: 32px; font-weight: bold; color: #E67E22;">{unique_states}</div>
+        <div style="font-size: 12px; color: #888; margin-top: 4px;">States Represented</div>
     </div>
     """, unsafe_allow_html=True)
 
