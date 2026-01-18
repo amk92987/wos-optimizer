@@ -336,16 +336,20 @@ with tab_users:
             st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{last_login}</div>", unsafe_allow_html=True)
 
         # AI access level button (cycles: off -> limited -> unlimited -> off)
+        # Only show for non-admin users (admins don't use AI features)
         with row_cols[7]:
-            ai_level = getattr(user, 'ai_access_level', None) or 'limited'
-            ai_labels = {'off': 'Off', 'limited': 'Ltd', 'unlimited': 'Unl'}
-            ai_next = {'off': 'limited', 'limited': 'unlimited', 'unlimited': 'off'}
-            btn_label = ai_labels.get(ai_level, 'Ltd')
+            if user.role != 'admin':
+                ai_level = getattr(user, 'ai_access_level', None) or 'limited'
+                ai_labels = {'off': 'Off', 'limited': 'Ltd', 'unlimited': 'Unl'}
+                ai_next = {'off': 'limited', 'limited': 'unlimited', 'unlimited': 'off'}
+                btn_label = ai_labels.get(ai_level, 'Ltd')
 
-            if st.button(btn_label, key=f"ai_{user.id}"):
-                user.ai_access_level = ai_next.get(ai_level, 'limited')
-                db.commit()
-                st.rerun()
+                if st.button(btn_label, key=f"ai_{user.id}"):
+                    user.ai_access_level = ai_next.get(ai_level, 'limited')
+                    db.commit()
+                    st.rerun()
+            else:
+                st.markdown(f"<div style='{cell_style};color:#666;font-size:11px;'>—</div>", unsafe_allow_html=True)
 
         # Action buttons inline (no help param, no emoji issues)
         with row_cols[8]:
