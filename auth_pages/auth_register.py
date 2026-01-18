@@ -16,41 +16,6 @@ from database.auth import create_user, login_user
 def render_register():
     """Render the registration page."""
 
-    # Check if form was submitted
-    if st.session_state.get("register_submitted"):
-        email = st.session_state.get("reg_email", "")
-        password = st.session_state.get("reg_password", "")
-        password2 = st.session_state.get("reg_password2", "")
-
-        error = None
-        if not email or not password:
-            error = "Email and password are required"
-        elif '@' not in email or '.' not in email:
-            error = "Please enter a valid email address"
-        elif len(password) < 6:
-            error = "Password must be at least 6 characters"
-        elif password != password2:
-            error = "Passwords don't match"
-        else:
-            db = get_db()
-            user = create_user(db, email, password)
-
-            if user:
-                login_user(user)
-                db.close()
-                # Clear form state
-                for key in ["register_submitted", "reg_email", "reg_password", "reg_password2", "register_error"]:
-                    st.session_state.pop(key, None)
-                st.rerun()
-            else:
-                db.close()
-                error = "Email already registered"
-
-        if error:
-            st.session_state["register_error"] = error
-
-        st.session_state.pop("register_submitted", None)
-
     # Full page styling
     st.markdown("""
     <style>
@@ -107,8 +72,9 @@ def render_register():
         font-size: 14px !important;
     }
 
-    /* Style button */
-    .stButton > button {
+    /* Style button (both regular and form submit) */
+    .stButton > button,
+    .stFormSubmitButton > button {
         width: 100% !important;
         padding: 14px !important;
         background: linear-gradient(135deg, #38BDF8, #0EA5E9) !important;
@@ -121,7 +87,8 @@ def render_register():
         cursor: pointer !important;
     }
 
-    .stButton > button:hover {
+    .stButton > button:hover,
+    .stFormSubmitButton > button:hover {
         box-shadow: 0 0 30px rgba(56, 189, 248, 0.6) !important;
         background: linear-gradient(135deg, #7DD3FC, #38BDF8) !important;
     }
@@ -203,19 +170,43 @@ def render_register():
             </ul>
         </div>
         """, unsafe_allow_html=True)
-        # Error message
+        # Error message (stored in session state to persist across form submission)
         if st.session_state.get("register_error"):
             st.error(st.session_state["register_error"])
             st.session_state.pop("register_error", None)
 
-        # Form
-        email = st.text_input("Email", placeholder="your@email.com", key="reg_email")
-        password = st.text_input("Password", type="password", placeholder="Min 6 characters", key="reg_password")
-        password2 = st.text_input("Confirm Password", type="password", placeholder="Re-enter password", key="reg_password2")
+        # Form using st.form for reliable submission
+        with st.form("register_form"):
+            email = st.text_input("Email", placeholder="your@email.com")
+            password = st.text_input("Password", type="password", placeholder="Min 6 characters")
+            password2 = st.text_input("Confirm Password", type="password", placeholder="Re-enter password")
+            submitted = st.form_submit_button("Create Account", use_container_width=True)
 
-        if st.button("Create Account", key="register_btn", use_container_width=True):
-            st.session_state["register_submitted"] = True
-            st.rerun()
+            if submitted:
+                error = None
+                if not email or not password:
+                    error = "Email and password are required"
+                elif '@' not in email or '.' not in email:
+                    error = "Please enter a valid email address"
+                elif len(password) < 6:
+                    error = "Password must be at least 6 characters"
+                elif password != password2:
+                    error = "Passwords don't match"
+                else:
+                    db = get_db()
+                    user = create_user(db, email, password)
+
+                    if user:
+                        login_user(user)
+                        db.close()
+                        st.rerun()
+                    else:
+                        db.close()
+                        error = "Email already registered"
+
+                if error:
+                    st.session_state["register_error"] = error
+                    st.rerun()
 
     # Login link
     st.markdown("""

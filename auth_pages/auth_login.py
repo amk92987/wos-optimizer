@@ -16,30 +16,6 @@ from database.auth import authenticate_user, login_user
 def render_login():
     """Render the login page."""
 
-    # Check if form was submitted
-    if st.session_state.get("login_submitted"):
-        email = st.session_state.get("login_email", "")
-        password = st.session_state.get("login_password", "")
-
-        if email and password:
-            db = get_db()
-            user = authenticate_user(db, email, password)
-
-            if user:
-                login_user(user)
-                db.close()
-                # Clear form state
-                st.session_state.pop("login_submitted", None)
-                st.session_state.pop("login_email", None)
-                st.session_state.pop("login_password", None)
-                st.session_state.pop("login_error", None)
-                st.rerun()
-            else:
-                db.close()
-                st.session_state["login_error"] = "Invalid email or password"
-
-        st.session_state.pop("login_submitted", None)
-
     # Full page styling
     st.markdown("""
     <style>
@@ -96,8 +72,9 @@ def render_login():
         font-size: 14px !important;
     }
 
-    /* Style button */
-    .stButton > button {
+    /* Style button (both regular and form submit) */
+    .stButton > button,
+    .stFormSubmitButton > button {
         width: 100% !important;
         padding: 14px !important;
         background: linear-gradient(135deg, #38BDF8, #0EA5E9) !important;
@@ -110,7 +87,8 @@ def render_login():
         cursor: pointer !important;
     }
 
-    .stButton > button:hover {
+    .stButton > button:hover,
+    .stFormSubmitButton > button:hover {
         box-shadow: 0 0 30px rgba(56, 189, 248, 0.6) !important;
         background: linear-gradient(135deg, #7DD3FC, #38BDF8) !important;
     }
@@ -181,18 +159,32 @@ def render_login():
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
-        # Error message
+        # Error message (stored in session state to persist across form submission)
         if st.session_state.get("login_error"):
             st.error(st.session_state["login_error"])
             st.session_state.pop("login_error", None)
 
-        # Form
-        email = st.text_input("Email", placeholder="Enter your email", key="login_email")
-        password = st.text_input("Password", type="password", placeholder="Enter your password", key="login_password")
+        # Form using st.form for reliable submission
+        with st.form("login_form"):
+            email = st.text_input("Email", placeholder="Enter your email")
+            password = st.text_input("Password", type="password", placeholder="Enter your password")
+            submitted = st.form_submit_button("Sign In", use_container_width=True)
 
-        if st.button("Sign In", key="login_btn", use_container_width=True):
-            st.session_state["login_submitted"] = True
-            st.rerun()
+            if submitted:
+                if email and password:
+                    db = get_db()
+                    user = authenticate_user(db, email, password)
+
+                    if user:
+                        login_user(user)
+                        db.close()
+                        st.rerun()
+                    else:
+                        db.close()
+                        st.session_state["login_error"] = "Invalid email or password"
+                        st.rerun()
+                else:
+                    st.warning("Please enter email and password")
 
     # Register link
     st.markdown("""
