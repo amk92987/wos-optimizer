@@ -1292,10 +1292,10 @@ def cleanup_test_users():
     print("Cleanup complete.")
 
 
-def main():
-    """Run the comprehensive test suite."""
+def create_all_test_accounts():
+    """Create all test accounts (called separately or as part of full test suite)."""
     print("="*70)
-    print("COMPREHENSIVE AI AND RECOMMENDATION SYSTEM TEST SUITE")
+    print("CREATING TEST ACCOUNTS")
     print("="*70)
 
     # Ensure heroes are in database
@@ -1312,6 +1312,50 @@ def main():
     new_user, new_profile = setup_brand_new_player()
     rally_user, rally_profile = setup_rally_leader()
     gen12_user, gen12_main = setup_gen12_whale()
+
+    print("\n" + "="*70)
+    print("TEST ACCOUNTS CREATED SUCCESSFULLY")
+    print("="*70)
+    print("\nTest account credentials (all use password: test123):")
+    print("  - test_gen10_dolphin@test.com (Dolphin, FC5, main + farm)")
+    print("  - test_gen4_f2p@test.com (F2P, FC4)")
+    print("  - test_gen2_whale@test.com (Whale, FC3, main + farm)")
+    print("  - test_multi_state@test.com (2 profiles in different states)")
+    print("  - test_new_player@test.com (Day 7 new player)")
+    print("  - test_rally_leader@test.com (Orca, rally leader)")
+    print("  - test_gen12_whale@test.com (Whale, Gen 12)")
+
+    return {
+        'gen10': (gen10_user, gen10_main, gen10_farm),
+        'gen4': (gen4_user, gen4_profile),
+        'gen2': (gen2_user, gen2_main, gen2_farm),
+        'multi': (multi_user, multi_main, multi_new_state),
+        'new': (new_user, new_profile),
+        'rally': (rally_user, rally_profile),
+        'gen12': (gen12_user, gen12_main),
+    }
+
+
+def main(create_only=False):
+    """Run the comprehensive test suite."""
+    print("="*70)
+    print("COMPREHENSIVE AI AND RECOMMENDATION SYSTEM TEST SUITE")
+    print("="*70)
+
+    # Create test accounts
+    accounts = create_all_test_accounts()
+
+    if create_only:
+        return {'accounts_created': True}
+
+    # Unpack accounts for testing
+    gen10_user, gen10_main, gen10_farm = accounts['gen10']
+    gen4_user, gen4_profile = accounts['gen4']
+    gen2_user, gen2_main, gen2_farm = accounts['gen2']
+    multi_user, multi_main, multi_new_state = accounts['multi']
+    new_user, new_profile = accounts['new']
+    rally_user, rally_profile = accounts['rally']
+    gen12_user, gen12_main = accounts['gen12']
 
     # Run tests on each profile
     all_results = {
@@ -1405,4 +1449,10 @@ def main():
 
 
 if __name__ == "__main__":
-    results = main()
+    import argparse
+    parser = argparse.ArgumentParser(description='WoS Test Suite')
+    parser.add_argument('--create-only', action='store_true',
+                        help='Only create test accounts, skip running tests')
+    args = parser.parse_args()
+
+    results = main(create_only=args.create_only)

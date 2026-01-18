@@ -434,4 +434,86 @@ if recent_users:
 else:
     st.info("No recent user activity.")
 
+st.markdown("---")
+
+# ============================================
+# Admin Tools
+# ============================================
+
+st.markdown("### Admin Tools")
+
+tool_col1, tool_col2, tool_col3 = st.columns(3)
+
+with tool_col1:
+    st.markdown("""
+    <div style="background: rgba(155, 89, 182, 0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(155, 89, 182, 0.3);">
+        <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">Test Accounts</div>
+        <div style="font-size: 12px; color: #888; margin-bottom: 12px;">Create/reset test users for QA testing</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("Create Test Accounts", key="create_test_accounts", use_container_width=True):
+        with st.spinner("Creating test accounts..."):
+            import subprocess
+            result = subprocess.run(
+                [sys.executable, str(PROJECT_ROOT / "scripts" / "test_ai_comprehensive.py"), "--create-only"],
+                capture_output=True,
+                text=True,
+                cwd=str(PROJECT_ROOT)
+            )
+            if result.returncode == 0:
+                st.success("Test accounts created successfully!")
+                st.code(result.stdout[-1000:] if len(result.stdout) > 1000 else result.stdout)
+            else:
+                st.error("Failed to create test accounts")
+                st.code(result.stderr[-500:] if result.stderr else "No error output")
+
+with tool_col2:
+    st.markdown("""
+    <div style="background: rgba(52, 152, 219, 0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(52, 152, 219, 0.3);">
+        <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">Data Audit</div>
+        <div style="font-size: 12px; color: #888; margin-bottom: 12px;">Validate game data files</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("Run Data Audit", key="run_data_audit", use_container_width=True):
+        with st.spinner("Running data audit..."):
+            import subprocess
+            result = subprocess.run(
+                [sys.executable, str(PROJECT_ROOT / "scripts" / "run_data_audit.py")],
+                capture_output=True,
+                text=True,
+                cwd=str(PROJECT_ROOT)
+            )
+            if result.returncode == 0:
+                st.success("Data audit completed!")
+                st.code(result.stdout[-2000:] if len(result.stdout) > 2000 else result.stdout)
+            else:
+                st.warning("Data audit found issues")
+                st.code(result.stdout[-1500:] if result.stdout else result.stderr[-500:])
+
+with tool_col3:
+    st.markdown("""
+    <div style="background: rgba(46, 204, 113, 0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(46, 204, 113, 0.3);">
+        <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">QA Check</div>
+        <div style="font-size: 12px; color: #888; margin-bottom: 12px;">Run web app QA validation</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if st.button("Run QA Check", key="run_qa_check", use_container_width=True):
+        with st.spinner("Running QA check..."):
+            import subprocess
+            result = subprocess.run(
+                [sys.executable, str(PROJECT_ROOT / "scripts" / "run_qa_check.py")],
+                capture_output=True,
+                text=True,
+                cwd=str(PROJECT_ROOT)
+            )
+            if result.returncode == 0:
+                st.success("QA check passed!")
+                st.code(result.stdout[-2000:] if len(result.stdout) > 2000 else result.stdout)
+            else:
+                st.warning("QA check found issues")
+                st.code(result.stdout[-1500:] if result.stdout else result.stderr[-500:])
+
 db.close()
