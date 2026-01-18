@@ -160,8 +160,13 @@ with tab_create:
                 )
                 db.add(new_ann)
                 db.commit()
-                st.success("Announcement published!")
+                st.session_state['announcement_created'] = True
                 st.rerun()
+
+    # Show success message after rerun
+    if st.session_state.get('announcement_created'):
+        st.success("Announcement published! View it in the 'Active' tab.")
+        st.session_state['announcement_created'] = False
 
 with tab_archive:
     # Get archived announcements

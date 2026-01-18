@@ -248,24 +248,25 @@ with tab_users:
 
     # Header row (matches data row: 12 columns - username IS email now)
     header_cols = st.columns([0.3, 2.4, 0.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.5, 0.6, 0.5])
+    hdr_style = "text-align:center;color:#8F9DB4;font-size:12px;"
     with header_cols[0]:
-        st.caption("Role")
+        st.markdown(f"<div style='{hdr_style}'>Role</div>", unsafe_allow_html=True)
     with header_cols[1]:
-        st.caption("User")
+        st.markdown(f"<div style='{hdr_style}'>User</div>", unsafe_allow_html=True)
     with header_cols[2]:
-        st.caption("Profiles")
+        st.markdown(f"<div style='{hdr_style}'>Profiles</div>", unsafe_allow_html=True)
     with header_cols[3]:
-        st.caption("State(s)")
+        st.markdown(f"<div style='{hdr_style}'>State(s)</div>", unsafe_allow_html=True)
     with header_cols[4]:
-        st.caption("Status")
+        st.markdown(f"<div style='{hdr_style}'>Status</div>", unsafe_allow_html=True)
     with header_cols[5]:
-        st.caption("Usage")
+        st.markdown(f"<div style='{hdr_style}'>Usage</div>", unsafe_allow_html=True)
     with header_cols[6]:
-        st.caption("Last")
+        st.markdown(f"<div style='{hdr_style}'>Last</div>", unsafe_allow_html=True)
     with header_cols[7]:
-        st.caption("AI")
+        st.markdown(f"<div style='{hdr_style}'>AI</div>", unsafe_allow_html=True)
     with header_cols[8]:
-        st.caption("Actions")
+        st.markdown(f"<div style='{hdr_style}'>Actions</div>", unsafe_allow_html=True)
 
     st.markdown("<hr style='margin: 2px 0 8px 0; border-color: rgba(74, 144, 217, 0.4);'>", unsafe_allow_html=True)
 
@@ -309,31 +310,32 @@ with tab_users:
         # User row with inline actions (12 columns - username IS email)
         row_cols = st.columns([0.3, 2.4, 0.4, 0.5, 0.6, 0.4, 0.5, 0.5, 0.5, 0.5, 0.6, 0.5])
 
-        # Consistent cell style for vertical alignment with buttons
-        cell_style = "display:flex;align-items:center;height:32px;margin:0;"
+        # Cell styles: centered for most columns, left-aligned for User
+        cell_center = "display:flex;align-items:center;justify-content:center;height:32px;margin:0;"
+        cell_left = "display:flex;align-items:center;height:32px;margin:0;"
 
         with row_cols[0]:
-            st.markdown(f"<div style='{cell_style}'>{role_icon}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_center}'>{role_icon}</div>", unsafe_allow_html=True)
 
         with row_cols[1]:
             test_badge = " <code>TEST</code>" if getattr(user, 'is_test_account', False) else ""
             you_badge = " <em>(you)</em>" if is_self else ""
-            st.markdown(f"<div style='{cell_style}'><strong>{user.username}</strong>{test_badge}{you_badge}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_left}'><strong>{user.username}</strong>{test_badge}{you_badge}</div>", unsafe_allow_html=True)
 
         with row_cols[2]:
-            st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{profile_count}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_center};color:#8F9DB4;font-size:12px;'>{profile_count}</div>", unsafe_allow_html=True)
 
         with row_cols[3]:
-            st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{user_states}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_center};color:#8F9DB4;font-size:12px;'>{user_states}</div>", unsafe_allow_html=True)
 
         with row_cols[4]:
-            st.markdown(f"<div style='{cell_style}' class='{status_css}'>{status_label}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_center}' class='{status_css}'>{status_label}</div>", unsafe_allow_html=True)
 
         with row_cols[5]:
-            st.markdown(f"<div style='{cell_style}' class='{usage_css}'>{usage_label}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_center}' class='{usage_css}'>{usage_label}</div>", unsafe_allow_html=True)
 
         with row_cols[6]:
-            st.markdown(f"<div style='{cell_style};color:#8F9DB4;font-size:12px;'>{last_login}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='{cell_center};color:#8F9DB4;font-size:12px;'>{last_login}</div>", unsafe_allow_html=True)
 
         # AI access level button (cycles: off -> limited -> unlimited -> off)
         # Only show for non-admin users (admins don't use AI features)
@@ -349,7 +351,7 @@ with tab_users:
                     db.commit()
                     st.rerun()
             else:
-                st.markdown(f"<div style='{cell_style};color:#666;font-size:11px;'>—</div>", unsafe_allow_html=True)
+                st.markdown(f"<div style='{cell_center};color:#666;font-size:11px;'>—</div>", unsafe_allow_html=True)
 
         # Action buttons inline (no help param, no emoji issues)
         with row_cols[8]:
@@ -417,15 +419,16 @@ with tab_users:
 
         # Delete confirmation appears BELOW the row
         if st.session_state.get(f"confirm_del_{user.id}"):
-            del_cols = st.columns([4, 1, 1])
+            # Layout: wide message area, then Yes (under Login), No (under Delete)
+            del_cols = st.columns([5, 0.5, 1, 0.5])
             with del_cols[0]:
-                st.warning(f"Delete **{user.username}**? This cannot be undone!")
+                st.markdown(f"<div style='display:flex;align-items:center;height:32px;color:#FCA5A5;white-space:nowrap;'>Delete <strong style='margin:0 4px;'>{user.username}</strong>? This cannot be undone!</div>", unsafe_allow_html=True)
             with del_cols[1]:
                 if st.button("Yes", key=f"confirm_delete_{user.id}", type="primary"):
                     delete_user(db, user.id)
                     st.session_state[f"confirm_del_{user.id}"] = False
                     st.rerun()
-            with del_cols[2]:
+            with del_cols[3]:
                 if st.button("No", key=f"cancel_delete_{user.id}"):
                     st.session_state[f"confirm_del_{user.id}"] = False
                     st.rerun()

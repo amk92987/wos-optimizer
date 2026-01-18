@@ -161,6 +161,31 @@ if is_impersonating():
             logout_user()
             st.rerun()
 
+# Show active announcements as banners (for non-admin users)
+if not is_admin():
+    from database.models import Announcement
+    active_announcements = db.query(Announcement).filter(Announcement.is_active == True).order_by(Announcement.created_at.desc()).all()
+
+    for ann in active_announcements:
+        type_colors = {
+            "info": ("#3498DB", "#E8F4FC"),
+            "warning": ("#F1C40F", "#FEF9E7"),
+            "success": ("#2ECC71", "#E8F8F0"),
+            "error": ("#E74C3C", "#FDEDEC")
+        }
+        type_icons = {"info": "ℹ️", "warning": "⚠️", "success": "✅", "error": "🚨"}
+
+        border_color, bg_color = type_colors.get(ann.type, ("#3498DB", "#E8F4FC"))
+        icon = type_icons.get(ann.type, "ℹ️")
+
+        st.markdown(f"""
+        <div style="background: {bg_color}15; border-left: 4px solid {border_color};
+                    padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 12px;">
+            <div style="font-weight: 600; color: {border_color};">{icon} {ann.title}</div>
+            <div style="color: #B8D4E8; margin-top: 4px; font-size: 14px;">{ann.message}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
 profile = get_or_create_profile(db)
 
 # Ensure assets directory exists

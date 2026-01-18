@@ -35,58 +35,30 @@ db = get_db()
 stats = get_ai_stats(db)
 settings = get_ai_settings(db)
 
-# Mode selector with visual indicator
-st.markdown("### AI Mode")
-
-mode_colors = {
-    'off': '#E74C3C',
-    'on': '#2ECC71',
-    'unlimited': '#9B59B6'
-}
-mode_icons = {
-    'off': '🔴',
-    'on': '🟢',
-    'unlimited': '🟣'
-}
+# Global fallback mode (individual users can override via Admin > Users)
+st.markdown("### Global AI Mode")
+st.caption("This sets the default for users with 'Limited' access. Individual users can be set to Off/Limited/Unlimited in Admin → Users.")
 
 current_mode = stats['mode']
-st.markdown(f"""
-<div style="background: {mode_colors[current_mode]}22; border: 2px solid {mode_colors[current_mode]};
-            border-radius: 12px; padding: 20px; margin-bottom: 20px;">
-    <div style="font-size: 24px; font-weight: bold; color: {mode_colors[current_mode]};">
-        {mode_icons[current_mode]} AI is {current_mode.upper()}
-    </div>
-    <div style="color: #B8D4E8; margin-top: 8px;">
-        {
-            'AI features are completely disabled for all users.' if current_mode == 'off' else
-            f'AI is enabled with rate limits ({stats["daily_limit_free"]} requests/day for users).' if current_mode == 'on' else
-            'AI is enabled with no rate limits (use with caution).'
-        }
-    </div>
-</div>
-""", unsafe_allow_html=True)
 
 # Mode toggle buttons
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    if st.button("🔴 Turn OFF", width="stretch",
-                 disabled=(current_mode == 'off'),
-                 help="Disable AI for all users"):
+    if st.button("🔴 OFF", use_container_width=True,
+                 disabled=(current_mode == 'off')):
         set_ai_mode(db, 'off', get_current_user_id())
         st.rerun()
 
 with col2:
-    if st.button("🟢 Turn ON (Limited)", width="stretch",
-                 disabled=(current_mode == 'on'),
-                 help="Enable AI with rate limits"):
+    if st.button("🟢 LIMITED", use_container_width=True,
+                 disabled=(current_mode == 'on')):
         set_ai_mode(db, 'on', get_current_user_id())
         st.rerun()
 
 with col3:
-    if st.button("🟣 UNLIMITED", width="stretch",
-                 disabled=(current_mode == 'unlimited'),
-                 help="Enable AI with no rate limits"):
+    if st.button("🟣 UNLIMITED", use_container_width=True,
+                 disabled=(current_mode == 'unlimited')):
         set_ai_mode(db, 'unlimited', get_current_user_id())
         st.rerun()
 
