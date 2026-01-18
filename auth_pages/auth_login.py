@@ -135,6 +135,11 @@ def render_login():
         border: 1px solid rgba(220, 38, 38, 0.5) !important;
         color: #FCA5A5 !important;
     }
+
+    /* Hide "Press Enter to Apply" hint */
+    .stTextInput div[data-testid="InputInstructions"] {
+        display: none !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
