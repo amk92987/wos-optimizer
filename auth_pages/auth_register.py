@@ -170,43 +170,57 @@ def render_register():
             </ul>
         </div>
         """, unsafe_allow_html=True)
-        # Error message (stored in session state to persist across form submission)
-        if st.session_state.get("register_error"):
-            st.error(st.session_state["register_error"])
-            st.session_state.pop("register_error", None)
 
-        # Form using st.form for reliable submission
-        with st.form("register_form"):
-            email = st.text_input("Email", placeholder="your@email.com")
-            password = st.text_input("Password", type="password", placeholder="Min 6 characters")
-            password2 = st.text_input("Confirm Password", type="password", placeholder="Re-enter password")
-            submitted = st.form_submit_button("Create Account", use_container_width=True)
+        # Use placeholder so we can clear it on successful registration
+        form_container = st.empty()
 
-            if submitted:
-                error = None
-                if not email or not password:
-                    error = "Email and password are required"
-                elif '@' not in email or '.' not in email:
-                    error = "Please enter a valid email address"
-                elif len(password) < 6:
-                    error = "Password must be at least 6 characters"
-                elif password != password2:
-                    error = "Passwords don't match"
-                else:
-                    db = get_db()
-                    user = create_user(db, email, password)
+        with form_container.container():
+            # Error message (stored in session state to persist across form submission)
+            if st.session_state.get("register_error"):
+                st.error(st.session_state["register_error"])
+                st.session_state.pop("register_error", None)
 
-                    if user:
-                        login_user(user)
-                        db.close()
-                        st.rerun()
+            # Form using st.form for reliable submission
+            with st.form("register_form"):
+                email = st.text_input("Email", placeholder="your@email.com")
+                password = st.text_input("Password", type="password", placeholder="Min 6 characters")
+                password2 = st.text_input("Confirm Password", type="password", placeholder="Re-enter password")
+                submitted = st.form_submit_button("Create Account", use_container_width=True)
+
+                if submitted:
+                    error = None
+                    if not email or not password:
+                        error = "Email and password are required"
+                    elif '@' not in email or '.' not in email:
+                        error = "Please enter a valid email address"
+                    elif len(password) < 6:
+                        error = "Password must be at least 6 characters"
+                    elif password != password2:
+                        error = "Passwords don't match"
                     else:
-                        db.close()
-                        error = "Email already registered"
+                        # Clear form and show loading state
+                        form_container.empty()
+                        with form_container.container():
+                            st.markdown("""
+                            <div style="text-align: center; padding: 40px;">
+                                <p style="color: #93C5E0; font-size: 16px;">Creating your account...</p>
+                            </div>
+                            """, unsafe_allow_html=True)
 
-                if error:
-                    st.session_state["register_error"] = error
-                    st.rerun()
+                        db = get_db()
+                        user = create_user(db, email, password)
+
+                        if user:
+                            login_user(user)
+                            db.close()
+                            st.rerun()
+                        else:
+                            db.close()
+                            error = "Email already registered"
+
+                    if error:
+                        st.session_state["register_error"] = error
+                        st.rerun()
 
     # Login link
     st.markdown("""

@@ -1,5 +1,5 @@
 """
-Battle Strategies - Advanced tactics for Castle Battles, Bear Trap, Foundry, and Frostfire Mine.
+Battle Strategies - Advanced tactics for Castle Battles, Bear Trap, Canyon Clash, Foundry, and Frostfire Mine.
 Coordination techniques that win battles against stronger opponents.
 """
 
@@ -7,6 +7,7 @@ import streamlit as st
 from pathlib import Path
 import sys
 import json
+import base64
 
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -801,7 +802,7 @@ def render_bear_trap():
 
         with col1:
             st.markdown(f"""
-            <div style="background:rgba(74,144,217,0.15);border-left:4px solid #3498DB;padding:16px;border-radius:8px;">
+            <div style="background:rgba(74,144,217,0.15);border-left:4px solid #3498DB;padding:16px;border-radius:8px;min-height:180px;">
                 <div style="font-weight:bold;color:#3498DB;font-size:16px;margin-bottom:8px;">Rally Leader</div>
                 <div style="color:#E8F4F8;margin-bottom:12px;">{leader.get("description", "")}</div>
                 <div style="color:#B8D4E8;font-size:13px;font-style:italic;">{leader.get("note", "")}</div>
@@ -810,7 +811,7 @@ def render_bear_trap():
 
         with col2:
             st.markdown(f"""
-            <div style="background:rgba(46,204,113,0.15);border-left:4px solid #2ECC71;padding:16px;border-radius:8px;">
+            <div style="background:rgba(46,204,113,0.15);border-left:4px solid #2ECC71;padding:16px;border-radius:8px;min-height:180px;">
                 <div style="font-weight:bold;color:#2ECC71;font-size:16px;margin-bottom:8px;">Rally Joiner</div>
                 <div style="color:#E8F4F8;margin-bottom:8px;">{joiner.get("description", "")}</div>
                 <div style="color:#E8F4F8;margin-bottom:12px;"><strong>Selection:</strong> {joiner.get('selection', '')}</div>
@@ -849,6 +850,7 @@ def render_bear_trap():
                 </div>
                 """, unsafe_allow_html=True)
 
+        st.markdown("<div style='margin-top: 16px;'></div>", unsafe_allow_html=True)
         st.info(f"**Why Marksman?** {troop_comp.get('why_marksman', '')}")
 
     # Hero selection
@@ -1155,15 +1157,190 @@ def render_bear_trap():
                 """, unsafe_allow_html=True)
 
 
+def render_canyon_clash():
+    """Render canyon clash strategies."""
+    canyon_data = BATTLE_STRATEGIES.get("canyon_clash", {})
+
+    st.markdown("### Canyon Clash")
+    st.markdown(canyon_data.get("overview", canyon_data.get("description", "")))
+
+    # Display Canyon Clash banner image if available
+    banner_path = PROJECT_ROOT / "assets" / "events" / "canyon_clash_banner.png"
+    if banner_path.exists():
+        with open(banner_path, "rb") as f:
+            banner_data = base64.b64encode(f.read()).decode()
+        st.markdown(f"""
+        <div style="text-align:center;margin:16px 0;">
+            <img src="data:image/png;base64,{banner_data}"
+                 style="max-width:100%;max-height:300px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);"
+                 alt="Canyon Clash Event">
+        </div>
+        """, unsafe_allow_html=True)
+
+    # Event basics
+    basics = canyon_data.get("event_basics", {})
+    if basics:
+        st.warning(f"**{basics.get('type', 'Alliance PvP')}** - {basics.get('key_resource', 'Fuel management is critical')}")
+
+    # Schedule
+    schedule = canyon_data.get("schedule", {})
+    if schedule:
+        st.markdown("---")
+        st.markdown("## Weekly Schedule")
+        cols = st.columns(4)
+        with cols[0]:
+            st.markdown(f"**Mon-Tue**\n\n{schedule.get('monday_tuesday', '')}")
+        with cols[1]:
+            st.markdown(f"**Wed-Thu**\n\n{schedule.get('wednesday_thursday', '')}")
+        with cols[2]:
+            st.markdown(f"**Friday**\n\n{schedule.get('friday', '')}")
+        with cols[3]:
+            st.markdown(f"**Battle Day**\n\n{schedule.get('battle_day', '')}")
+
+    # Phases
+    phases = canyon_data.get("phases", [])
+    if phases:
+        st.markdown("---")
+        st.markdown("## Battle Phases")
+        for phase in phases:
+            phase_num = phase.get("phase", "?")
+            phase_name = phase.get("name", "")
+            duration = phase.get("duration", "")
+            objective = phase.get("objective", "")
+            tips = phase.get("tips", [])
+
+            color = ["#3498DB", "#2ECC71", "#F39C12", "#E74C3C"][phase_num - 1] if phase_num <= 4 else "#666"
+
+            with st.expander(f"Phase {phase_num}: {phase_name} ({duration})", expanded=phase_num == 4):
+                st.markdown(f"**Objective:** {objective}")
+                if tips:
+                    st.markdown("**Tips:**")
+                    for tip in tips:
+                        st.markdown(f"- {tip}")
+
+    # Team Strategy
+    team_strat = canyon_data.get("team_strategy", {})
+    if team_strat:
+        st.markdown("---")
+        st.markdown("## Three-Team Strategy")
+
+        three_team = team_strat.get("three_team_split", {})
+        if three_team:
+            st.info(three_team.get("description", ""))
+
+            cols = st.columns(3)
+            with cols[0]:
+                st.markdown(f"""
+                <div style="background:rgba(52,152,219,0.15);border-left:4px solid #3498DB;padding:12px;border-radius:8px;">
+                    <div style="font-weight:bold;color:#3498DB;margin-bottom:8px;">Team 1</div>
+                    <div style="color:#E8F4F8;">{three_team.get('team_1', '')}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            with cols[1]:
+                st.markdown(f"""
+                <div style="background:rgba(46,204,113,0.15);border-left:4px solid #2ECC71;padding:12px;border-radius:8px;">
+                    <div style="font-weight:bold;color:#2ECC71;margin-bottom:8px;">Team 2</div>
+                    <div style="color:#E8F4F8;">{three_team.get('team_2', '')}</div>
+                </div>
+                """, unsafe_allow_html=True)
+            with cols[2]:
+                st.markdown(f"""
+                <div style="background:rgba(231,76,60,0.15);border-left:4px solid #E74C3C;padding:12px;border-radius:8px;">
+                    <div style="font-weight:bold;color:#E74C3C;margin-bottom:8px;">Team 3 (Citadel)</div>
+                    <div style="color:#E8F4F8;">{three_team.get('team_3', '')}</div>
+                </div>
+                """, unsafe_allow_html=True)
+
+    # Fuel Management
+    fuel = canyon_data.get("fuel_management", {})
+    if fuel:
+        st.markdown("---")
+        st.markdown("## Fuel Management")
+        st.error(f"**{fuel.get('importance', '')}**")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("**Fuel Costs:**")
+            for cost in fuel.get("fuel_costs", []):
+                st.markdown(f"- {cost}")
+        with col2:
+            st.markdown(f"**Recovery:** {fuel.get('fuel_recovery', '')}")
+            st.markdown(f"**Common Mistake:** {fuel.get('common_mistake', '')}")
+            st.success(f"**Tip:** {fuel.get('tip', '')}")
+
+    # Frozen Citadel
+    citadel = canyon_data.get("frozen_citadel", {})
+    if citadel:
+        st.markdown("---")
+        st.markdown("## The Frozen Citadel")
+        st.warning(f"**{citadel.get('importance', '')}**")
+
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(f"**Unlock:** {citadel.get('unlock', '')}")
+            st.markdown(f"**Capture:** {citadel.get('capture', '')}")
+        with col2:
+            st.markdown(f"**If You Control:** {citadel.get('if_you_control', '')}")
+            st.markdown(f"**If Enemy Controls:** {citadel.get('if_enemy_controls', '')}")
+
+    # Communication
+    comm = canyon_data.get("communication", {})
+    if comm:
+        st.markdown("---")
+        st.markdown("## Communication")
+        st.info(f"**Voice Chat:** {comm.get('voice_chat', '')}")
+
+        callouts = comm.get("callouts", [])
+        if callouts:
+            st.markdown("**Key Callouts:** " + " • ".join(callouts))
+
+    # Common Mistakes
+    mistakes = canyon_data.get("common_mistakes", [])
+    if mistakes:
+        st.markdown("---")
+        st.markdown("## Common Mistakes")
+        for mistake in mistakes:
+            st.markdown(f"""
+            <div style="background:rgba(231,76,60,0.1);border-left:4px solid #E74C3C;padding:12px;border-radius:8px;margin-bottom:8px;">
+                <div style="color:#E74C3C;font-weight:bold;margin-bottom:4px;">Mistake: {mistake.get('mistake', '')}</div>
+                <div style="color:#2ECC71;">Fix: {mistake.get('correction', '')}</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+    # Quick Reference
+    quick_ref = canyon_data.get("quick_reference", {})
+    if quick_ref:
+        st.markdown("---")
+        st.markdown("## Quick Reference Checklist")
+
+        col1, col2, col3 = st.columns(3)
+
+        with col1:
+            st.markdown("#### Before Event")
+            for item in quick_ref.get("before_event", []):
+                st.checkbox(item, key=f"cc_before_{item[:20]}", disabled=True, value=False)
+
+        with col2:
+            st.markdown("#### During Event")
+            for item in quick_ref.get("during_event", []):
+                st.markdown(f"- {item}")
+
+        with col3:
+            st.markdown("#### Key Tips")
+            for tip in quick_ref.get("key_tips", []):
+                st.success(tip)
+
+
 def render_battle_strategies():
     """Render the battle strategies page."""
     st.markdown("# Battle Strategies")
     st.markdown("Advanced tactics for competitive events. Coordination and timing beat raw power.")
 
     # Navigation tabs
-    tab1, tab2, tab3, tab4 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "Castle Battles",
         "Bear Trap",
+        "Canyon Clash",
         "Foundry",
         "Frostfire Mine"
     ])
@@ -1175,9 +1352,12 @@ def render_battle_strategies():
         render_bear_trap()
 
     with tab3:
-        render_foundry()
+        render_canyon_clash()
 
     with tab4:
+        render_foundry()
+
+    with tab5:
         render_frostfire()
 
     # Footer

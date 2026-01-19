@@ -321,6 +321,21 @@ with col1:
 with col2:
     selected_gen = st.selectbox("Your Generation:", options=list(range(1, 15)), index=min(USER_GEN - 1, 13))
 
+# PvE vs PvP explanation
+with st.expander("Understanding PvE vs PvP Content", expanded=False):
+    st.markdown("""
+**PvE (Player vs Environment)** - Fighting against the game:
+- Bear Trap, Crazy Joe, Labyrinth, Exploration
+- Uses **Exploration Skills**
+
+**PvP (Player vs Player)** - Fighting against other players:
+- Rally Leader/Joiner, Garrison Defense, SvS, Arena, Brothers in Arms
+- Uses **Expedition Skills**
+
+**City Attacks (Brothers in Arms, SvS):**
+When attacking enemy cities, use your **Rally Leader** lineup with your strongest Expedition heroes. Always attack in a rally - never solo. The combined troop strength greatly increases odds of victory and reduces losses.
+    """)
+
 # =============================================================================
 # MAIN TABS
 # =============================================================================
@@ -346,7 +361,7 @@ with tab_rally_lead:
 
     with attack_tab:
         st.markdown("### Attack Rally Leader")
-        st.markdown("*Bear Trap, Crazy Joe, SvS Rallies, Castle Attacks*")
+        st.markdown("*Bear Trap, Crazy Joe, SvS Rallies, Brothers in Arms, Castle Attacks*")
 
         col1, col2 = st.columns(2)
 

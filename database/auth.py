@@ -437,6 +437,8 @@ def logout_user():
         st.session_state.username = None
         st.session_state.user_role = None
         st.session_state.impersonating = False
+        # Redirect to login page after logout
+        st.query_params["page"] = "login"
 
 
 def login_as_user(user: User):
@@ -495,7 +497,12 @@ def require_auth():
 
 def require_admin():
     """Decorator/check for pages that require admin role."""
-    if not is_admin():
+    if not is_authenticated():
+        # Not logged in - redirect to login page
+        st.query_params["page"] = "login"
+        st.rerun()
+    elif not is_admin():
+        # Logged in but not admin
         st.error("Access denied. Admin privileges required.")
         st.stop()
 

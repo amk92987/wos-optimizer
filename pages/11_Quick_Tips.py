@@ -32,6 +32,74 @@ if TIPS_PATH.exists():
 else:
     QUICK_TIPS = {"categories": {}, "most_common_mistakes": []}
 
+# Load hero data for skills display
+HEROES_PATH = PROJECT_ROOT / "data" / "heroes.json"
+if HEROES_PATH.exists():
+    with open(HEROES_PATH, encoding='utf-8') as f:
+        HERO_DATA = json.load(f)
+    HEROES_BY_NAME = {h["name"]: h for h in HERO_DATA.get("heroes", [])}
+else:
+    HEROES_BY_NAME = {}
+
+# Niche use badges - heroes with special uses in specific game modes
+# Format: {"Hero Name": [{"badge": "Badge Text", "tooltip": "Key skill explanation"}]}
+HERO_NICHE_USES = {
+    "Mia": [
+        {"badge": "Bear Trap Star", "tooltip": "All 3 skills work regardless of Lancer count. Bad Luck Streak (+50% enemy dmg taken) + Lucky Charm (+50% extra dmg) = massive burst with RNG."}
+    ],
+    "Greg": [
+        {"badge": "Arena Strong", "tooltip": "Law and Order gives guaranteed +25% HP to all troops. Deterrence of Law reduces enemy damage. Great for sustained PvP fights."}
+    ],
+    "Jessie": [
+        {"badge": "Best Attack Joiner", "tooltip": "Stand of Arms: +25% damage dealt for ALL troops. Put in leftmost slot when joining rallies."}
+    ],
+    "Sergey": [
+        {"badge": "Best Defense Joiner", "tooltip": "Defender's Edge: -20% damage taken for ALL troops. Put in leftmost slot when reinforcing garrisons."}
+    ],
+    "Norah": [
+        {"badge": "Best Rally Joiner", "tooltip": "Sneak Strike: 20% chance for 20-100% extra damage to ALL enemies. Top-tier rally support."}
+    ],
+    "Wayne": [
+        {"badge": "Mia Synergy", "tooltip": "Thunder Strike: Extra attack every 4 turns + Fleet: 5-25% crit rate. Pairs with Mia for explosive Bear Trap damage."}
+    ],
+    "Bahiti": [
+        {"badge": "F2P Bear Trap", "tooltip": "Fluorescence: 50% chance of +10-50% damage for all troops. Similar RNG mechanics to Mia but Gen 1."}
+    ],
+    "Patrick": [
+        {"badge": "Early Utility", "tooltip": "Super Nutrients: +25% HP for all troops. Caloric Booster: +25% Attack. Solid early-game buffs."}
+    ],
+    "Natalia": [
+        {"badge": "Sustain Tank", "tooltip": "Feral Protection: 40% chance to reduce damage taken by 10-50%. Great for extended fights and garrison defense."}
+    ],
+    "Jeronimo": [
+        {"badge": "Best Rally Lead", "tooltip": "Battle Manifesto + Swordmentor + Expert Swordsmanship: Triple damage/attack buffs for ALL troops. #1 rally leader forever."}
+    ],
+    "Alonso": [
+        {"badge": "Poison DPS", "tooltip": "Poison Harpoon: 50% chance to deal 10-50% additional damage. Iron Strength: 20% chance to reduce enemy damage."}
+    ],
+    "Hector": [
+        {"badge": "Bear Trap Tank", "tooltip": "Rampant: +100-200% Infantry damage AND +20-100% Marksman damage. Great for Mia Bear Trap comps."}
+    ],
+    "Logan": [
+        {"badge": "Garrison Defense", "tooltip": "Lion Intimidation: -20% enemy Attack. Leader Inspiration: +20% Defense for all troops. Sustain tank for defense."}
+    ],
+    "Flint": [
+        {"badge": "Infantry DPS", "tooltip": "Pyromaniac: +100% Infantry Damage. Immolation: +25% Lethality for all troops. High damage output."}
+    ],
+    "Bradley": [
+        {"badge": "Attack Booster", "tooltip": "Veteran's Might: +25% Attack for all troops. Tactical Assistance: +30% offense boost every 4 turns. Solid Marksman."}
+    ],
+    "Blanchette": [
+        {"badge": "Crit DPS", "tooltip": "Crimson Sniper: +20% Crit Rate and +50% Crit Damage for all troops. Blood Hunter: +25% vs wounded. Top Marksman damage."}
+    ],
+    "Hervor": [
+        {"badge": "Top Infantry", "tooltip": "Call For Blood: +25% damage for all. Undying: -30% Infantry damage taken. Battlethirsty: +100% Infantry damage. S+ tier Infantry."}
+    ],
+    "Lloyd": [
+        {"badge": "Lethality King", "tooltip": "Ingenious Mastery: +50% Lethality for all troops. Bird Invasion: -20% enemy Lethality. Top late-game Lancer."}
+    ]
+}
+
 
 def get_priority_color(priority):
     """Get color for priority level."""
@@ -220,13 +288,13 @@ def get_tier_color(tier: str) -> str:
 
 
 def get_class_icon(hero_class: str) -> str:
-    """Get emoji for hero class."""
+    """Get emoji for hero class - matches Lineups page."""
     icons = {
         "Infantry": "🛡️",
-        "Lancer": "🔱",
-        "Marksman": "🎯"
+        "Lancer": "⚔️",
+        "Marksman": "🏹"
     }
-    return icons.get(hero_class, "⚔️")
+    return icons.get(hero_class, "?")
 
 
 def get_rarity_color(rarity: str) -> str:
@@ -240,17 +308,24 @@ def get_rarity_color(rarity: str) -> str:
 
 
 def render_hero_card(hero: dict):
-    """Render a single hero investment card."""
+    """Render a single hero investment card with skills and niche badges."""
     name = hero.get("name", "Unknown")
     hero_class = hero.get("class", "")
     tier = hero.get("tier", "C")
-    tier_exp = hero.get("tier_expedition", tier)
+    tier_exp = hero.get("tier_expedition", "")
     rarity = hero.get("rarity", "")
     has_mythic = hero.get("mythic", False)
     investment = hero.get("investment", "MEDIUM")
     why = hero.get("why", "")
-    skills = hero.get("skills", "")
+    skills_advice = hero.get("skills", "")
     longevity = hero.get("longevity", "")
+
+    # Get additional data from heroes.json
+    hero_data = HEROES_BY_NAME.get(name, {})
+    if not tier_exp and hero_data:
+        tier_exp = hero_data.get("tier_expedition", tier)
+    if not hero_class and hero_data:
+        hero_class = hero_data.get("hero_class", "")
 
     tier_color = get_tier_color(tier)
     investment_color = get_investment_color(investment)
@@ -261,25 +336,65 @@ def render_hero_card(hero: dict):
     if tier_exp and tier_exp != tier:
         tier_display = f"{tier} (Exp: {tier_exp})"
 
-    # Build badges
+    # Build tier badge
     badges_html = f'<span style="background: {tier_color}; padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #fff;">{tier_display}</span>'
 
     # Add mythic gear badge if applicable
     if has_mythic:
         badges_html += ' <span style="background: linear-gradient(135deg, #FFD700, #FFA500); padding: 2px 8px; border-radius: 4px; font-size: 10px; color: #000; font-weight: bold;">MYTHIC GEAR</span>'
 
+    # Add niche use badges with hover tooltips
+    niche_badges_html = ""
+    if name in HERO_NICHE_USES:
+        for niche in HERO_NICHE_USES[name]:
+            badge_text = niche["badge"]
+            tooltip = niche["tooltip"].replace('"', '&quot;')
+            niche_badges_html += f' <span style="background: linear-gradient(135deg, #9B59B6, #8E44AD); padding: 2px 8px; border-radius: 4px; font-size: 10px; color: #fff; cursor: help;" title="{tooltip}">{badge_text}</span>'
+
+    # Get actual skills from hero data (already loaded above)
+    skills_html = ""
+    if hero_data:
+        # Exploration skills (PvE: Bear Trap, Crazy Joe, etc.)
+        explore_skills = []
+        for i in range(1, 4):
+            skill_name = hero_data.get(f"exploration_skill_{i}", "")
+            skill_desc = hero_data.get(f"exploration_skill_{i}_desc", "")
+            if skill_name:
+                if skill_desc:
+                    skill_desc_escaped = skill_desc.replace('"', '&quot;')
+                    explore_skills.append(f'<span style="color: #2ECC71; cursor: help; border-bottom: 1px dotted #2ECC71;" title="{skill_desc_escaped}">{skill_name}</span>')
+                else:
+                    explore_skills.append(f'<span style="color: #2ECC71;">{skill_name}</span>')
+
+        # Expedition skills (PvP: Rallies, SvS, Garrison)
+        exp_skills = []
+        for i in range(1, 4):
+            skill_name = hero_data.get(f"expedition_skill_{i}", "")
+            skill_desc = hero_data.get(f"expedition_skill_{i}_desc", "")
+            if skill_name:
+                if skill_desc:
+                    skill_desc_escaped = skill_desc.replace('"', '&quot;')
+                    exp_skills.append(f'<span style="color: #7DD3FC; cursor: help; border-bottom: 1px dotted #7DD3FC;" title="{skill_desc_escaped}">{skill_name}</span>')
+                else:
+                    exp_skills.append(f'<span style="color: #7DD3FC;">{skill_name}</span>')
+
+        if explore_skills:
+            skills_html += f'''<div style="margin-bottom: 4px;"><strong>Exploration</strong> <span style="color: #666; font-size: 11px;">(PvE)</span><strong>:</strong> {" • ".join(explore_skills)}</div>'''
+        if exp_skills:
+            skills_html += f'''<div style="margin-bottom: 6px;"><strong>Expedition</strong> <span style="color: #666; font-size: 11px;">(PvP)</span><strong>:</strong> {" • ".join(exp_skills)}</div>'''
+
     html = f'''<div style="background: rgba(74, 144, 217, 0.08); border-left: 4px solid {investment_color}; padding: 14px; border-radius: 8px; margin-bottom: 10px;">
 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 8px;">
 <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
 <span style="font-size: 18px;">{class_icon}</span>
 <span style="font-weight: bold; color: #E8F4F8; font-size: 16px;">{name}</span>
-{badges_html}
+{badges_html}{niche_badges_html}
 </div>
 <span style="background: {investment_color}; padding: 3px 10px; border-radius: 4px; font-size: 11px; white-space: nowrap; color: #fff;">{investment}</span>
 </div>
 <div style="color: #B8D4E8; font-size: 13px; line-height: 1.6;">
 <div style="margin-bottom: 6px;"><strong>Why:</strong> {why}</div>
-<div style="margin-bottom: 6px;"><strong>Skills:</strong> {skills}</div>
+{skills_html}<div style="margin-bottom: 6px;"><strong>Investment Tip:</strong> {skills_advice}</div>
 <div><strong>Longevity:</strong> {longevity}</div>
 </div>
 </div>'''
@@ -310,6 +425,24 @@ def render_hero_investment():
     spending = profile.spending_profile or "f2p"
     if spending in spending_advice:
         st.info(f"**{spending.upper()} Tip:** {spending_advice[spending]}")
+
+    # PvE vs PvP explanation
+    with st.expander("What do PvE and PvP mean?", expanded=False):
+        st.markdown("""
+**PvE (Player vs Environment)** - Content where you fight against the game, not other players:
+- Bear Trap, Crazy Joe, Labyrinth, Exploration
+- Uses **Exploration Skills** (green skills above)
+
+**PvP (Player vs Player)** - Content where you fight against other players:
+- Rallies, Garrison Defense, SvS, Arena, Brothers in Arms
+- Uses **Expedition Skills** (blue skills above)
+
+**Why This Matters:**
+- Some heroes are amazing for PvE but weak in PvP (and vice versa)
+- Mia's Exploration skills have RNG damage (great for Bear Trap retries)
+- Jessie's Expedition skill (+25% damage) makes her the best rally joiner
+- When attacking enemy cities (Brothers in Arms, SvS), use your **Rally Leader** lineup with best Expedition heroes
+        """)
 
     st.markdown("---")
 

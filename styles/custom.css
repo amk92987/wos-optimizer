@@ -1,5 +1,41 @@
 /* Whiteout Survival Optimizer - Arctic Night Theme (Dark Glacier Blue) */
 
+/* ============================================
+   INITIAL LOAD - Prevent flash of unstyled content
+   Everything starts as solid blue, then fades in
+   ============================================ */
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Initially hide all content with blue background */
+.stApp {
+    background-color: #0A1628 !important;
+}
+
+/* Fade in the main content after load */
+.main .block-container,
+[data-testid="stSidebar"],
+[data-testid="stSidebarContent"] {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Ensure sidebar matches during load */
+[data-testid="stSidebar"] {
+    background-color: #0A1628 !important;
+}
+
+/* Hide default Streamlit loading elements that cause flash */
+.stApp > header,
+.stDeployButton,
+[data-testid="stToolbar"],
+[data-testid="stDecoration"] {
+    display: none !important;
+}
+
 /* Color Variables - Dark Glacier Theme */
 :root {
     --glacier-primary: #233D5D;
@@ -869,6 +905,30 @@ hr {
     box-shadow: 0 0 0 8px #1A3A5C !important;
 }
 
+/* Remove double border from forms inside popovers/expanders */
+[data-testid="stPopover"] [data-testid="stForm"],
+[data-testid="stPopover"] form,
+[data-testid="stExpander"] [data-testid="stForm"],
+[data-testid="stExpander"] form {
+    border: none !important;
+    padding: 0 !important;
+}
+
+/* Form submit buttons inside popovers - ensure proper contrast */
+[data-testid="stPopover"] .stFormSubmitButton > button,
+[data-testid="stPopover"] [data-testid="stFormSubmitButton"] > button {
+    background: linear-gradient(135deg, #1E5A8A, #2E7AB8) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(74, 144, 217, 0.5) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-testid="stPopover"] .stFormSubmitButton > button:hover,
+[data-testid="stPopover"] [data-testid="stFormSubmitButton"] > button:hover {
+    background: linear-gradient(135deg, #2E7AB8, #3E8AC8) !important;
+    box-shadow: 0 4px 12px rgba(46, 122, 184, 0.4) !important;
+}
+
 /* Popover - remove double background issue */
 /* Make ALL outer layers transparent, only innermost content has background */
 [data-baseweb="popover"] {
@@ -951,6 +1011,37 @@ hr {
     background: linear-gradient(135deg, var(--accent-fire), #E55A2B) !important;
     border-color: var(--accent-fire) !important;
     box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4) !important;
+}
+
+/* Form submit buttons - ensure proper contrast */
+.stFormSubmitButton > button,
+[data-testid="stFormSubmitButton"] > button {
+    background: linear-gradient(135deg, #1E5A8A, #2E7AB8) !important;
+    color: #FFFFFF !important;
+    border: 1px solid rgba(74, 144, 217, 0.5) !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+.stFormSubmitButton > button:hover,
+[data-testid="stFormSubmitButton"] > button:hover {
+    background: linear-gradient(135deg, #2E7AB8, #3E8AC8) !important;
+    box-shadow: 0 4px 12px rgba(46, 122, 184, 0.4) !important;
+}
+
+/* Primary buttons specifically (type="primary") */
+button[kind="primary"],
+button[data-testid="baseButton-primary"] {
+    background: linear-gradient(135deg, #1E5A8A, #2E7AB8) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    font-weight: 600 !important;
+}
+
+button[kind="primary"]:hover,
+button[data-testid="baseButton-primary"]:hover {
+    background: linear-gradient(135deg, #2E7AB8, #3E8AC8) !important;
 }
 
 /* Small action buttons (emoji icons) */

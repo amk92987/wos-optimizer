@@ -296,30 +296,30 @@
         "name": "Phase 1 Opening",
         "priority": "CRITICAL",
         "steps": [
-          "Rush Transit Station immediately (50% teleport CD is huge)",
-          "Capture Boiler Room (faster building captures)",
-          "Control Prototype Sites for early points",
-          "Establish defensive positions"
+          "Rush Transit Station by sending your 2 fastest march-speed players at 0:00 - teleport adjacent and capture before enemy arrives",
+          "Capture Boiler Room with your next 2 players - the 50% faster capture time helps all future building takes",
+          "Split remaining players to Prototype Sites (2 per site) - these generate 1,200 pts/min each",
+          "Establish defensive positions by leaving 2 players garrisoned at each captured building - never leave buildings empty"
         ]
       },
       "phase_2_strategy": {
         "name": "Phase 2 Push",
         "priority": "HIGH",
         "steps": [
-          "Send strongest troops to Imperial Foundry",
-          "Use coordinated double rallies (time ARRIVALS, not launches)",
-          "Control Munitions Warehouse for damage bonus",
-          "Deploy Mercenary Camp strike teams"
+          "Send A1 team (8 strongest) to Imperial Foundry - coordinate arrival with double rally timing",
+          "Double rally Imperial Foundry: A1 leader starts rally, A2 leader follows 10 seconds later so both land together",
+          "Control Munitions Warehouse with 3 players after Foundry is secure - the +15% damage buff helps all future fights",
+          "Deploy Mercenary Camp strike teams against enemy gatherers on the mini-map - free harassment while you hold positions"
         ]
       },
       "phase_3_strategy": {
         "name": "Phase 3 Cleanup",
         "priority": "HIGH",
         "steps": [
-          "Hunt Weapon Workshops (great F2P opportunity)",
-          "Maintain control of high-value buildings",
-          "If trailing, target unguarded neutral sites",
-          "Final push with maximum point accumulation"
+          "Hunt Weapon Workshops by watching the mini-map for spawn alerts - send your closest available player immediately",
+          "Maintain control by keeping 2-3 defenders per high-value building - rotate wounded players out to heal",
+          "If trailing by 20%+ points, send 4 players to target unguarded neutral sites while defenders hold",
+          "Final push at 5 min remaining: call all available players to mass assault the highest-value enemy building"
         ]
       },
       "point_looting": {
@@ -539,23 +539,23 @@
     "name": "Bear Trap (Bear Hunt)",
     "confidence": "A",
     "description": "Alliance rally event where you hunt bears for valuable rewards including pet fragments and essence stones",
-    "overview": "Bear Trap is an S-Tier event that should NEVER be skipped. Your alliance rallies against powerful bears using expedition skills. Proper troop composition and hero selection are critical for success.",
+    "overview": "Bear Trap is an S-Tier event that should NEVER be skipped. Your alliance rallies against powerful bears. Rally leaders use EXPLORATION skills while joiners contribute EXPEDITION skills. Proper troop composition and hero selection are critical for success.",
 
     "event_basics": {
       "priority": "S-TIER - Never skip this event",
       "mechanics": "Alliance rallies against NPC bears",
-      "skill_type": "EXPEDITION skills (top-right) are used, NOT exploration skills",
-      "rally_system": "Leader's 3 heroes use their expedition skills, plus top 4 highest-LEVEL skills from all joiners"
+      "skill_type": "BOTH skill types used: Leaders use EXPLORATION skills, Joiners use EXPEDITION skills (top-right)",
+      "rally_system": "Leader's 3 heroes use their exploration skills, plus top 4 highest-LEVEL expedition skills from all joiners"
     },
 
     "rally_mechanics": {
       "leader_contribution": {
-        "description": "Rally leader's 3 deployed heroes contribute their expedition skills",
-        "note": "Place your STRONGEST expedition skill hero in leftmost slot"
+        "description": "Rally leader's 3 deployed heroes contribute their EXPLORATION skills (active abilities)",
+        "note": "Use heroes with strong exploration damage skills for maximum bear damage"
       },
       "joiner_contribution": {
-        "description": "Only the leftmost hero's TOP-RIGHT expedition skill is considered from each joiner",
-        "selection": "System picks top 4 highest LEVEL skills from all joiners combined",
+        "description": "Only the leftmost hero's TOP-RIGHT EXPEDITION skill is considered from each joiner",
+        "selection": "System picks top 4 highest LEVEL expedition skills from all joiners combined",
         "tip": "Level matters more than the skill itself - a level 5 mediocre skill beats a level 1 great skill"
       }
     },
@@ -571,10 +571,22 @@
     },
 
     "hero_selection": {
+      "troop_type_scaling_note": {
+        "title": "Unverified: Rally Leader Troop-Type Scaling",
+        "description": "Some players report that the rally leader's hero class (Infantry/Lancer/Marksman) may affect damage scaling for troops of the same type. If true, using a Marksman hero as rally leader would boost your 80-90% Marksman troops more than an Infantry or Lancer leader.",
+        "status": "UNVERIFIED - needs in-game testing",
+        "recommendation": "To be safe, consider using a Marksman hero as your rally leader for Bear Trap. List Marksman heroes first when selecting leaders.",
+        "if_verified": "This would mean hero class matching matters more than raw skill power for troop-heavy compositions."
+      },
+      "rally_leader_priority": {
+        "description": "For Bear Trap's 80-90% Marksman composition, prioritize Marksman heroes as rally leader (Slot 1) to potentially benefit from troop-type scaling.",
+        "order": ["Marksman heroes first", "Then Lancer heroes", "Then Infantry heroes"],
+        "note": "This only applies to the Rally Leader's Slot 1 hero. For joiners, hero class doesn't matter - only their expedition skill matters."
+      },
       "jeronimo_decision": {
         "question": "Should Jeronimo lead or join rallies?",
-        "answer": "LEAD (in most cases)",
-        "reasoning": "Jeronimo's skills are ALL-TROOP universal, not Infantry-specific. As leader, all 3 expedition skills apply. As joiner, only 1 skill applies - the SAME value as Jessie. Leading maximizes his value.",
+        "answer": "Consider a Marksman leader instead",
+        "reasoning": "While Jeronimo's exploration skills are strong, Bear Trap uses 80-90% Marksman troops. A Marksman hero as rally leader may provide better troop-type scaling. Jeronimo can still contribute as a joiner with his +25% DMG expedition skill.",
         "leader_value": {
           "skills_applied": 3,
           "effects": ["+25% DMG all troops", "+25% ATK all troops", "+30% periodic DMG all troops"]
@@ -584,33 +596,29 @@
           "effects": ["+25% DMG all troops"],
           "comparison": "Same as Jessie's joiner contribution"
         },
-        "optimal_strategy": "Jeronimo LEADS, Jessie JOINS. Both contribute damage, but Jeronimo's 2 extra leader skills aren't wasted."
+        "optimal_strategy": "Use your best Marksman hero as rally leader. Jeronimo joins to contribute his expedition skill."
       },
       "generation_recommendations": {
-        "description": "Best rally leader changes as you unlock new generations. Jeronimo remains best for most players.",
+        "description": "Best rally leader by generation. Prioritize Marksman heroes for Bear Trap's troop composition.",
         "by_generation": {
           "gen_1_to_7": {
-            "best_leader": "Jeronimo",
-            "reason": "No hero matches his 3 all-troop offensive skills. All alternatives have class-specific skills.",
-            "best_joiners": ["Jessie (+25% DMG)", "Jasser (+25% DMG)", "Norah (Gen 5 - Combined Arms)"]
+            "best_leaders": ["Cloris (Marksman)", "Natalia (Marksman)", "Alonso (Marksman, Gen 2)"],
+            "reason": "Marksman heroes may provide better scaling for 80-90% Marksman troops.",
+            "alternative": "Jeronimo if your Marksman heroes are underleveled",
+            "best_joiners": ["Jessie (+25% DMG)", "Jasser (+25% DMG)", "Jeronimo (+25% DMG)", "Norah (Gen 5)"]
           },
           "gen_8_plus": {
-            "best_leader": "Jeronimo (still)",
-            "alternative": "Hendrik",
-            "hendrik_case": "Hendrik's -25% enemy Defense is massive damage amplification. BUT using him as leader wastes his unique debuff as a joiner. Jeronimo as joiner = same as Jessie (no unique value lost).",
-            "recommendation": "Keep Jeronimo as leader. Use Hendrik as joiner for his unique -25% enemy Defense debuff.",
-            "best_joiners": ["Jessie (+25% DMG)", "Hendrik (-25% enemy DEF)", "Norah", "Blanchette (Gen 10)"]
+            "best_leaders": ["Sonya (Marksman, Gen 8)", "Natalia", "Alonso"],
+            "reason": "Marksman heroes with strong exploration skills maximize both troop scaling and skill damage.",
+            "best_joiners": ["Jessie (+25% DMG)", "Hendrik (-25% enemy DEF)", "Jeronimo (+25% DMG)", "Norah", "Blanchette (Gen 10)"]
           },
           "gen_12_plus": {
-            "best_leader": "Jeronimo (still)",
-            "alternatives": ["Hervor", "Vulcanus"],
-            "why_jeronimo_wins": "Hervor and Vulcanus have strong skills but most are class-specific (Infantry/Marksman). Jeronimo's 3 all-troop skills still provide more universal value.",
-            "hervor_note": "Hervor has Call For Blood (+25% DMG all troops) but his other 2 skills are Infantry-specific. As leader, you lose 2/3 value on non-Infantry troops.",
-            "vulcanus_note": "Vulcanus has strong Marksman buffs but defense reduction works best as joiner debuff.",
-            "best_joiners": ["Jessie", "Hendrik", "Vulcanus (-60% enemy Inf/Lancer DEF)", "Hervor (+25% DMG)"]
+            "best_leaders": ["Vulcanus (Marksman, Gen 13)", "Ligeia (Marksman, Gen 12)", "Sonya"],
+            "reason": "Late-gen Marksman heroes have powerful exploration skills plus troop-type synergy.",
+            "best_joiners": ["Jessie", "Hendrik", "Jeronimo", "Vulcanus (if not leading)", "Hervor (+25% DMG)"]
           }
         },
-        "exception": "Only switch leader from Jeronimo if: (1) Your Jeronimo is severely underleveled, AND (2) You have a max-level Hendrik/Hervor/Vulcanus. Even then, the math usually favors Jeronimo."
+        "exception": "If your Marksman heroes are severely underleveled, a maxed Infantry hero like Jeronimo may still outperform due to raw skill power."
       },
       "full_allocation": {
         "description": "Bear Trap gives you 1 lead rally + 6 join rallies = 7 total. Here's optimal hero placement.",
@@ -624,7 +632,7 @@
         "lead_rally": {
           "slots": 3,
           "all_skills_apply": true,
-          "recommended": ["Jeronimo (BEST - all 3 skills apply)", "Natalia (3 good all-troop skills)", "Any strong expedition hero"]
+          "recommended": ["Marksman hero in Slot 1 (for potential troop-type scaling)", "Natalia, Alonso, Sonya, or Vulcanus as leader", "Fill remaining slots with strong exploration skill heroes"]
         },
         "join_rallies": {
           "slots_per_rally": 1,
@@ -646,16 +654,16 @@
           "note": "Use heroes you have based on your generation. If you don't have a combat-skill hero available, join with NO HERO."
         },
         "example_allocation": {
-          "description": "Use your combat-skill heroes first, then NO HERO for remaining rallies",
-          "lead": "Jeronimo + 2 others (all 3 Jeronimo skills apply)",
-          "join_1": "Jessie (+25% DMG) - BEST",
-          "join_2": "Jasser (+25% DMG) - Gen 1 Epic",
-          "join_3": "Seo-yoon (+25% ATK) - Gen 1 Epic",
-          "join_4": "Later-gen hero if available (Norah, Wu Ming, etc.)",
+          "description": "Marksman hero leads for troop scaling, joiners ranked by best expedition skill (class doesn't matter for joiners)",
+          "lead": "Marksman hero (Natalia/Alonso/Sonya) in Slot 1 + 2 others with strong exploration skills",
+          "join_1": "Jessie (+25% DMG) - BEST joiner regardless of class",
+          "join_2": "Jeronimo (+25% DMG) - now available as joiner",
+          "join_3": "Jasser (+25% DMG) - Gen 1 Epic",
+          "join_4": "Later-gen hero if available (Hendrik, Norah, Wu Ming, etc.)",
           "join_5": "NO HERO (troops only)",
           "join_6": "NO HERO (troops only)"
         },
-        "realistic_note": "Most players have 2-4 heroes with combat expedition skills. Use those, then join remaining rallies with JUST TROOPS (no hero) to avoid polluting the skill pool."
+        "realistic_note": "Hero class only matters for Rally Leader (potential troop-type scaling). For joiners, only the expedition skill matters - pick the best attack/damage skills regardless of hero class."
       },
       "best_joiners": [
         {
@@ -709,8 +717,8 @@
         "priority": "CRITICAL",
         "steps": [
           "Fill rally with 80-90% Marksman troops",
-          "Place 3 heroes with strongest EXPEDITION (not exploration) skills",
-          "Leftmost hero should have best single expedition skill",
+          "Place 3 heroes with strongest EXPLORATION skills (active damage abilities)",
+          "Hero slot order matters less for leaders - all 3 exploration skills activate",
           "Wait for rally to fill before launching",
           "Communicate rally timing with alliance"
         ]
@@ -764,7 +772,7 @@
       },
       {
         "mistake": "Confusing expedition vs exploration skills",
-        "correction": "Bear Trap uses EXPEDITION (top-right) skills, NOT exploration skills."
+        "correction": "Bear Trap uses BOTH: Leaders use EXPLORATION skills (active abilities), Joiners use EXPEDITION skills (top-right passive buff)."
       },
       {
         "mistake": "Joining with low-level expedition skills",
@@ -794,8 +802,8 @@
         "80-90% Marksman composition"
       ],
       "leader_checklist": [
-        "Lead with Jeronimo if you have him (wastes skills as joiner)",
-        "3 heroes with strong expedition skills",
+        "Lead with Jeronimo if you have him (wastes potential as joiner)",
+        "3 heroes with strong EXPLORATION skills (active damage abilities)",
         "80-90% Marksman troops",
         "Wait for rally to fill before launching",
         "Target highest level bear for best rewards"
@@ -1094,6 +1102,168 @@
         "Loot scattered piles from defeated veins",
         "Full marches to veins (not partial)",
         "Heroes cooldown 5 min after defeat - manage carefully"
+      ]
+    }
+  },
+
+  "canyon_clash": {
+    "name": "Canyon Clash",
+    "confidence": "B",
+    "description": "Large-scale alliance PvP event where three alliances battle for control of ancient ruins in the Lost Canyon",
+    "overview": "Canyon Clash is a strategic team event where fuel management, communication, and coordination determine victory. Three alliances fight across four phases to control buildings and ultimately the Frozen Citadel.",
+
+    "event_basics": {
+      "type": "Alliance PvP (3-way battle)",
+      "eligibility": "Top 20 alliances by power, Furnace 16+, active in last 5 days",
+      "duration": "60 minutes total across 4 phases",
+      "key_resource": "Fuel - required for ALL actions (moving, attacking, reviving)",
+      "legion_requirements": "Minimum 15 combatants per Legion, Alliance Level 6 for 2nd Legion"
+    },
+
+    "schedule": {
+      "monday_tuesday": "Vote for preferred battle timezone",
+      "wednesday_thursday": "Registration opens for alliance members",
+      "friday": "Matchmaking - opponent randomly selected",
+      "battle_day": "Saturday or Sunday depending on timezone vote"
+    },
+
+    "phases": [
+      {
+        "phase": 1,
+        "name": "Preparation",
+        "duration": "3 minutes",
+        "objective": "Position your marches, plan team assignments",
+        "tips": [
+          "Split into 3 teams by pre-assigning roles in Discord before the match starts",
+          "Assign 2 strong players per team with designated 'pusher' and 'defender' roles",
+          "Put your strongest player on Team 3 (Citadel assault) - they'll need the most fuel for Phase 4"
+        ]
+      },
+      {
+        "phase": 2,
+        "name": "Seize & Conquer",
+        "duration": "17 minutes",
+        "objective": "Capture all buildings on your island, push into enemy territory",
+        "tips": [
+          "Secure YOUR island first by sending 1 player to each neutral building before pushing out",
+          "Block enemy bridges by stationing 1-2 defenders at bridge exits on your side - forces enemies to fight through you",
+          "Don't overextend - capture only what you can hold. Each uncaptured building drains fuel to retake later"
+        ]
+      },
+      {
+        "phase": 3,
+        "name": "Fortress Occupation",
+        "duration": "20 minutes",
+        "objective": "Hold fortresses for points, prepare for Citadel",
+        "tips": [
+          "Assign guardians by having R4+ designate your lower-fuel players as Guardians at captured buildings",
+          "Rotate guardian duty every 5 min - Guardians recover fuel 2x faster, letting pushers refuel for Phase 4",
+          "Save your top 3-5 players' fuel for Phase 4 - they should minimize combat and let others defend"
+        ]
+      },
+      {
+        "phase": 4,
+        "name": "Citadel Onslaught",
+        "duration": "20 minutes",
+        "objective": "Capture and hold the Frozen Citadel",
+        "tips": [
+          "All-in on Citadel if you're strongest: Send your top 5 players simultaneously to defeat the NPC guard first, then immediately garrison",
+          "Cut off reinforcements if enemy holds Citadel: Station 2 players at each bridge leading to Citadel to intercept their reinforcements",
+          "Coordinate final push at 5 min remaining: Count down '3-2-1-GO' in voice chat so everyone attacks at once"
+        ]
+      }
+    ],
+
+    "team_strategy": {
+      "three_team_split": {
+        "description": "Split your combatants into three teams for maximum coverage",
+        "team_1": "2 strong players - defend your island + early push",
+        "team_2": "2 strong players - mid-map control + fortress capture",
+        "team_3": "Your strongest player + support - Citadel assault team"
+      },
+      "formations": {
+        "pushing_squads": "2 offensive formations for capturing buildings",
+        "defensive_squad": "1 formation for holding captured positions",
+        "flexibility": "Be ready to switch roles based on battle flow"
+      }
+    },
+
+    "fuel_management": {
+      "importance": "CRITICAL - Running out of fuel mid-battle is game-losing",
+      "fuel_costs": ["Moving", "Attacking (conscripting)", "Advancing", "Retreating", "Instant revives"],
+      "fuel_recovery": "Guardians recover fuel faster - rotate guardian duty",
+      "common_mistake": "Aggressive players run out of fuel at 50% through the event",
+      "tip": "Monitor your fuel constantly. Better to be conservative than stranded."
+    },
+
+    "frozen_citadel": {
+      "importance": "Most important building - massive points + bonuses",
+      "unlock": "Available only in Phase 4 (final 20 minutes)",
+      "capture": "Defeat the NPC guard first, then hold against enemy alliances",
+      "if_you_control": "Maintain steady reinforcement flow, defend flanks",
+      "if_enemy_controls": "Focus on cutting their reinforcement routes, coordinate mass assault"
+    },
+
+    "communication": {
+      "voice_chat": "Highly recommended - typing is too slow during combat",
+      "callouts": ["Enemy positions", "Low fuel warnings", "Reinforcement requests", "Citadel timing"],
+      "pre_battle": "Agree on team assignments, fallback positions, and Citadel strategy"
+    },
+
+    "rewards": {
+      "personal_merit": "Based on individual performance (kills, captures, objectives)",
+      "alliance_ranking": "Top 3 placement rewards",
+      "canyon_shop": "Event currency for exclusive items"
+    },
+
+    "common_mistakes": [
+      {
+        "mistake": "Solo pushing without team coordination",
+        "correction": "Always move with your assigned team. Solo players get surrounded and waste fuel."
+      },
+      {
+        "mistake": "Burning all fuel in Phase 2",
+        "correction": "Pace yourself. Phase 4 Citadel fight requires everyone to have fuel."
+      },
+      {
+        "mistake": "Ignoring your own island",
+        "correction": "Secure home base first. Lost buildings on your island give enemies free points."
+      },
+      {
+        "mistake": "No guardian rotation",
+        "correction": "Guardians recover fuel faster. Rotate duty so everyone can refuel."
+      },
+      {
+        "mistake": "Attacking Citadel without coordination",
+        "correction": "Announce Citadel push timing. Uncoordinated attacks just feed the defenders."
+      },
+      {
+        "mistake": "Not using voice chat",
+        "correction": "Set up Discord/voice before battle. Real-time communication wins close fights."
+      }
+    ],
+
+    "quick_reference": {
+      "before_event": [
+        "Join an eligible alliance (top 20 power)",
+        "Vote for timezone (Mon-Tue)",
+        "Register during sign-up window (Wed-Thu)",
+        "Set up voice chat with alliance",
+        "Discuss team assignments and strategy"
+      ],
+      "during_event": [
+        "Phase 1: Position with your team, don't waste fuel",
+        "Phase 2: Secure your island, then push bridges",
+        "Phase 3: Hold fortresses, assign guardians, save fuel",
+        "Phase 4: Coordinate Citadel assault or disruption",
+        "Always: Monitor fuel, communicate positions, help teammates"
+      ],
+      "key_tips": [
+        "Fuel > aggression. Conservative play beats running dry.",
+        "3-team strategy covers more ground than blob tactics",
+        "Guardians refuel faster - rotate the role",
+        "Citadel wins games - save resources for Phase 4",
+        "Voice chat is almost mandatory for competitive play"
       ]
     }
   }

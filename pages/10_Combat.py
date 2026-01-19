@@ -364,6 +364,25 @@ def render_combat_optimization():
     st.markdown("# Combat Optimization Guide")
     st.markdown("Find your hidden weaknesses. Understand why similar-power players crush each other.")
 
+    # PvE vs PvP explanation
+    with st.expander("Understanding PvE vs PvP Combat", expanded=False):
+        st.markdown("""
+**PvE (Player vs Environment)** - Fighting against the game:
+- Bear Trap, Crazy Joe, Labyrinth, Exploration
+- Uses **Exploration Skills**
+- You can retry for better RNG (especially Bear Trap)
+
+**PvP (Player vs Player)** - Fighting against other players:
+- Rally Leader/Joiner, Garrison Defense, SvS, Arena, Brothers in Arms
+- Uses **Expedition Skills**
+- No retries - optimize your lineup before engaging
+
+**City Attacks (Brothers in Arms, SvS):**
+When attacking enemy cities, use your **Rally Leader** lineup with your strongest Expedition heroes. Always attack in a rally - never solo. The combined troop strength greatly increases odds of victory and reduces losses.
+
+**Key Difference:** PvE content often rewards RNG-heavy heroes (like Mia) since you can retry. PvP rewards consistent buffs and debuffs that don't rely on luck.
+        """)
+
     # Core insight
     render_core_insight()
 

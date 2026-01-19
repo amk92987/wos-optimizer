@@ -159,32 +159,45 @@ def render_login():
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
-        # Error message (stored in session state to persist across form submission)
-        if st.session_state.get("login_error"):
-            st.error(st.session_state["login_error"])
-            st.session_state.pop("login_error", None)
+        # Use placeholder so we can clear it on successful login
+        form_container = st.empty()
 
-        # Form using st.form for reliable submission
-        with st.form("login_form"):
-            email = st.text_input("Email", placeholder="Enter your email")
-            password = st.text_input("Password", type="password", placeholder="Enter your password")
-            submitted = st.form_submit_button("Sign In", use_container_width=True)
+        with form_container.container():
+            # Error message (stored in session state to persist across form submission)
+            if st.session_state.get("login_error"):
+                st.error(st.session_state["login_error"])
+                st.session_state.pop("login_error", None)
 
-            if submitted:
-                if email and password:
-                    db = get_db()
-                    user = authenticate_user(db, email, password)
+            # Form using st.form for reliable submission
+            with st.form("login_form"):
+                email = st.text_input("Email", placeholder="Enter your email")
+                password = st.text_input("Password", type="password", placeholder="Enter your password")
+                submitted = st.form_submit_button("Sign In", use_container_width=True)
 
-                    if user:
-                        login_user(user)
-                        db.close()
-                        st.rerun()
+                if submitted:
+                    if email and password:
+                        # Clear form and show loading state
+                        form_container.empty()
+                        with form_container.container():
+                            st.markdown("""
+                            <div style="text-align: center; padding: 40px;">
+                                <p style="color: #93C5E0; font-size: 16px;">Signing in...</p>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                        db = get_db()
+                        user = authenticate_user(db, email, password)
+
+                        if user:
+                            login_user(user)
+                            db.close()
+                            st.rerun()
+                        else:
+                            db.close()
+                            st.session_state["login_error"] = "Invalid email or password"
+                            st.rerun()
                     else:
-                        db.close()
-                        st.session_state["login_error"] = "Invalid email or password"
-                        st.rerun()
-                else:
-                    st.warning("Please enter email and password")
+                        st.warning("Please enter email and password")
 
     # Register link
     st.markdown("""

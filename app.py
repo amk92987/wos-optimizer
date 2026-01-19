@@ -7,6 +7,7 @@ import streamlit as st
 from pathlib import Path
 from datetime import datetime
 import sys
+import base64
 
 # Page config must be first Streamlit command
 st.set_page_config(
@@ -327,8 +328,16 @@ with login_container:
 
             st.markdown("---")
 
+            # Load frost star image for donate button
+            frost_star_path = PROJECT_ROOT / "assets" / "items" / "frost_star.png"
+            frost_star_icon = "❄️"  # fallback
+            if frost_star_path.exists():
+                with open(frost_star_path, "rb") as f:
+                    frost_star_b64 = base64.b64encode(f.read()).decode()
+                frost_star_icon = f'<img src="data:image/png;base64,{frost_star_b64}" style="width:20px;height:20px;vertical-align:middle;">'
+
             # Donate link - deeper orange for contrast, centered text
-            st.markdown("""
+            st.markdown(f"""
             <a href="https://ko-fi.com/randomchaoslabs" target="_blank" style="
                 display: flex;
                 align-items: center;
@@ -343,7 +352,7 @@ with login_container:
                 margin-bottom: 8px;
                 text-shadow: 0 1px 2px rgba(0,0,0,0.3);
             ">
-                <span>☕</span>
+                <span>{frost_star_icon}</span>
                 <span>Support Bear's Den</span>
             </a>
             """, unsafe_allow_html=True)
