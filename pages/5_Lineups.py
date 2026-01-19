@@ -336,11 +336,18 @@ with st.expander("Understanding PvE vs PvP Content", expanded=False):
 When attacking enemy cities, use your **Rally Leader** lineup with your strongest Expedition heroes. Always attack in a rally - never solo. The combined troop strength greatly increases odds of victory and reduces losses.
     """)
 
+# Default ratio note
+st.markdown("""
+**Default Troop Ratio: 50% Infantry / 20% Lancer / 30% Marksman**
+
+This works for most situations. See event-specific recommendations below for optimal ratios.
+""")
+
 # =============================================================================
 # MAIN TABS
 # =============================================================================
-tab_rally_lead, tab_rally_join, tab_labyrinth, tab_exploration, tab_reference = st.tabs([
-    "🏰 Rally Leader", "🤝 Rally Joiner", "🏛️ Labyrinth", "🗺️ Exploration", "📚 Reference"
+tab_rally_lead, tab_rally_join, tab_exploration, tab_reference = st.tabs([
+    "🏰 Rally Leader", "🤝 Rally Joiner", "🗺️ Exploration", "📚 Reference"
 ])
 
 # =============================================================================
@@ -387,7 +394,7 @@ with tab_rally_lead:
             st.markdown("**Troop Ratios by Event:**")
 
             event_ratios = st.selectbox("Select event:",
-                ["Bear Trap", "Crazy Joe", "SvS Rally", "Castle Attack"],
+                ["Bear Trap", "Crazy Joe", "Castle / SvS"],
                 key="attack_event")
 
             if event_ratios == "Bear Trap":
@@ -396,11 +403,8 @@ with tab_rally_lead:
             elif event_ratios == "Crazy Joe":
                 render_troop_ratio(90, 10, 0, "Infantry kills before Joe's backline attacks hit")
                 render_why_this_lineup("crazy_joe", attack_heroes_selected)
-            elif event_ratios == "SvS Rally":
-                render_troop_ratio(40, 20, 40, "Balanced for SvS combat")
-                render_why_this_lineup("svs_march", attack_heroes_selected)
-            else:  # Castle Attack
-                render_troop_ratio(50, 20, 30, "Balanced for sustained castle fights")
+            else:  # Castle / SvS
+                render_troop_ratio(50, 20, 30, "Balanced for castle attacks and SvS rallies")
                 render_why_this_lineup("svs_attack", attack_heroes_selected)
 
     with defense_tab:
@@ -512,7 +516,7 @@ with tab_rally_join:
         render_troop_ratio_multi("Attack Joiner - Match Event", [
             ("Bear Trap", 0, 10, 90),
             ("Crazy Joe", 90, 10, 0),
-            ("Castle/SvS", 50, 20, 30),
+            ("Castle / SvS", 50, 20, 30),
         ])
         render_why_this_lineup("rally_joiner_attack")
     with ratio_col2:
@@ -532,79 +536,6 @@ with tab_rally_join:
 
     *At Gen 12+, Hervor and Karol have equivalent skills. Choose based on which has higher skill level.*
     """)
-
-# =============================================================================
-# LABYRINTH TAB
-# =============================================================================
-with tab_labyrinth:
-    st.markdown("## The Labyrinth")
-    st.markdown("Weekly competitive PvP with 6 zones - each tests different parts of your account!")
-
-    st.info("""
-    **Key Mechanics:**
-    - Most zones provide **Lv.10 troops** (your troop tier doesn't matter)
-    - **Gaia Heart** (Sunday) uses YOUR actual troops
-    - 5 daily attempts per zone
-    """)
-
-    # Zone overview table
-    st.markdown("### Zone Summary")
-    st.markdown("""
-    | Zone | Days | Format | Stats That Matter | Floor 1-9 Ratio | Floor 10 Ratio |
-    |------|------|--------|-------------------|-----------------|----------------|
-    | **Land of the Brave** | Mon-Tue | 3v3 | Heroes, Hero Gear, Exclusive Gear | 50/20/30 | 40/15/45 |
-    | **Cave of Monsters** | Wed-Thu | 2v2 | Pets, Pet Skills | 52/13/35 | 40/15/45 |
-    | **Glowstone Mine** | Wed-Thu | 2v2 | Chief Charms (FC25+) | 52/13/35 | 40/15/45 |
-    | **Earthlab** | Fri-Sat | 2v2 | Research, War Academy | 52/13/35 | 40/15/45 |
-    | **Dark Forge** | Fri-Sat | 2v2 | Chief Gear (FC22+) | 52/13/35 | 40/15/45 |
-    | **Gaia Heart** | Sunday | 3v3 | ALL stats + YOUR troops | 50/20/30 | 40/15/45 |
-    """)
-
-    st.markdown("""
-    **Floor 10 Strategy:** AI switches from 33/33/33 to **53/27/20** (Infantry-heavy) on Floor 10.
-    Counter with more Marksmen (40/15/45) to exploit their Infantry focus.
-    """)
-
-    # Detailed zone tabs
-    with st.expander("📋 Detailed Zone Strategies"):
-        zone_tabs = st.tabs(["Land of Brave", "Cave of Monsters", "Glowstone Mine", "Earthlab", "Dark Forge", "Gaia Heart"])
-
-        with zone_tabs[0]:
-            st.markdown("**Land of the Brave** (Mon-Tue)")
-            st.markdown("Format: 3v3 with up to 9 heroes")
-            st.success("Stats: Heroes, Hero Gear, Hero Exclusive Gear")
-            st.markdown("Strategy: Focus on exclusive gear upgrades, pick heroes with AoE/CC")
-
-        with zone_tabs[1]:
-            st.markdown("**Cave of Monsters** (Wed-Thu)")
-            st.markdown("Format: 2v2 squad battles")
-            st.success("Stats: Pets, Pet Skills only")
-            st.markdown("Strategy: Pair tank heroes with healing pets. Turn order is random.")
-
-        with zone_tabs[2]:
-            st.markdown("**Glowstone Mine** (Wed-Thu)")
-            st.markdown("Format: 2v2 squad battles | Unlocks: FC25")
-            st.success("Stats: Chief Charms only")
-            st.markdown("Strategy: Balance offensive and defensive charms")
-
-        with zone_tabs[3]:
-            st.markdown("**Earthlab** (Fri-Sat)")
-            st.markdown("Format: 2v2 squad battles")
-            st.success("Stats: Research Center Tech, War Academy Tech")
-            st.markdown("Strategy: Max your tech levels - long-term investment")
-
-        with zone_tabs[4]:
-            st.markdown("**Dark Forge** (Fri-Sat)")
-            st.markdown("Format: 2v2 squad battles | Unlocks: FC22")
-            st.success("Stats: Chief Gear only")
-            st.markdown("Strategy: Balance all gear slots, don't neglect any piece")
-
-        with zone_tabs[5]:
-            st.markdown("**Gaia Heart** (Sunday)")
-            st.markdown("Format: 3v3 with YOUR troops")
-            st.warning("This is the ONLY zone where your troop tier matters!")
-            st.success("Stats: ALL stats combined")
-            st.markdown("Strategy: Use your best Fire Crystal/Helios troops")
 
 # =============================================================================
 # EXPLORATION TAB
@@ -675,7 +606,7 @@ with tab_reference:
     st.markdown("""
     | Situation | Infantry | Lancer | Marksman | Notes |
     |-----------|----------|--------|----------|-------|
-    | **Default / Balanced** | 50% | 20% | 30% | Safe for unknown matchups |
+    | **Castle / SvS** | 50% | 20% | 30% | Balanced for castle attacks |
     | **Bear Trap** | 0% | 10% | 90% | Maximize ranged DPS |
     | **Crazy Joe** | 90% | 10% | 0% | Infantry kills before backline attacks |
     | **Garrison Defense** | 60% | 20% | 20% | Heavy Infantry wall |

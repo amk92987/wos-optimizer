@@ -650,3 +650,58 @@ class LineupEngineImprovement(Base):
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class UserDailyLogin(Base):
+    """Track daily logins for usage analytics."""
+    __tablename__ = 'user_daily_logins'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
+    login_date = Column(DateTime, nullable=False, index=True)  # Date only (time set to midnight)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationship
+    user = relationship("User", backref=backref("daily_logins", cascade="all, delete-orphan"))
+
+
+class ErrorLog(Base):
+    """Application error logging for debugging and monitoring."""
+    __tablename__ = 'error_logs'
+
+    id = Column(Integer, primary_key=True)
+
+    # Error details
+    error_type = Column(String(100), nullable=False, index=True)  # Exception class name
+    error_message = Column(Text, nullable=False)
+    stack_trace = Column(Text, nullable=True)
+
+    # Context
+    page = Column(String(100), nullable=True, index=True)  # Which page/module
+    function = Column(String(100), nullable=True)  # Function name if available
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=True, index=True)
+    profile_id = Column(Integer, nullable=True)
+
+    # Request context
+    session_id = Column(String(100), nullable=True)  # Streamlit session ID
+    user_agent = Column(String(500), nullable=True)
+    extra_context = Column(JSON, nullable=True)  # Any additional debug info
+
+    # Environment
+    environment = Column(String(20), nullable=True)  # production, staging, development
+
+    # Status tracking
+    status = Column(String(20), default='new', index=True)  # new, reviewed, fixed, ignored
+    reviewed_by = Column(Integer, ForeignKey('users.id'), nullable=True)
+    reviewed_at = Column(DateTime, nullable=True)
+    fix_notes = Column(Text, nullable=True)
+
+    # Email notification
+    email_sent = Column(Boolean, default=False)
+
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
+
+    # Relationships
+    user = relationship("User", foreign_keys=[user_id], backref="errors")
+    reviewer = relationship("User", foreign_keys=[reviewed_by])

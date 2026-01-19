@@ -14,7 +14,7 @@ from database.db import get_db
 from database.auth import (
     require_admin, get_all_users, create_user,
     update_user_password, update_user_role, delete_user,
-    login_as_user, get_current_user_id
+    login_as_user, get_current_user_id, get_days_active
 )
 from database.models import User, UserProfile
 
@@ -142,27 +142,16 @@ def get_user_profile_info(user_id: int) -> tuple:
 
 # Calculate usage stats (days active in last 7 days)
 def get_usage_stat(user) -> tuple:
-    """Returns (days_active, label, css_class)"""
-    if not user.last_login:
-        return (0, "0/7", "usage-low")
+    """Returns (days_active, label, css_class) using actual daily login data."""
+    days_active = get_days_active(db, user.id, days=7)
 
-    now = datetime.now()
-    # For simplicity, we'll estimate based on last_login
-    # In production, you'd track daily logins in a separate table
-    days_since = (now - user.last_login).days
-
-    if days_since == 0:
-        days_active = 7  # Assume active user
-    elif days_since <= 1:
-        days_active = 5
-    elif days_since <= 3:
-        days_active = 3
-    elif days_since <= 7:
-        days_active = 1
+    if days_active >= 5:
+        css = "usage-high"
+    elif days_active >= 2:
+        css = "usage-medium"
     else:
-        days_active = 0
+        css = "usage-low"
 
-    css = "usage-high" if days_active >= 5 else "usage-medium" if days_active >= 2 else "usage-low"
     return (days_active, f"{days_active}/7", css)
 
 # Get unique states for metrics

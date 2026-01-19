@@ -413,8 +413,16 @@ if st.session_state.get('pending_question'):
             response_time_ms = int((time.time() - start_time) * 1000)
             source = 'error'
             answer_text = "Sorry, an error occurred. Please try again."
-            import traceback
-            traceback.print_exc()
+            # Log error to database and send email notification
+            from utils.error_logger import log_error
+            error_id = log_error(
+                e,
+                page="AI Advisor",
+                function="engine.ask",
+                extra_context={"question": pending_q[:200]}
+            )
+            if error_id:
+                answer_text += f" (Error #{error_id})"
 
     # Thread management
     is_new_thread = st.session_state.current_thread_id is None

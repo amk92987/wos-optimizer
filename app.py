@@ -26,7 +26,8 @@ from database.auth import (
     init_session_state, is_authenticated, is_admin, login_user, logout_user,
     authenticate_user, ensure_admin_exists, get_current_username, is_impersonating,
     get_current_user_id, update_user_password, get_user_email,
-    request_email_change, verify_email_change, get_pending_email_change, cancel_email_change
+    request_email_change, verify_email_change, get_pending_email_change, cancel_email_change,
+    record_daily_login
 )
 from database.models import Feedback
 
@@ -44,6 +45,11 @@ if st.session_state.get('authenticated') and st.session_state.get('user_id'):
         st.session_state.clear()
         init_session_state()
         st.rerun()
+    else:
+        # Record daily login for usage tracking (only once per session)
+        if 'daily_login_recorded' not in st.session_state:
+            record_daily_login(db, st.session_state.user_id)
+            st.session_state.daily_login_recorded = True
 
 # Ensure admin exists before auto-login attempt
 ensure_admin_exists(db)

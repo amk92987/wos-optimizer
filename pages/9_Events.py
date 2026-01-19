@@ -804,18 +804,65 @@ def render_events_guide():
 
     st.markdown("---")
 
-    # Event list (no filters - show all)
+    # Event categories for tabs
+    EVENT_CATEGORIES = {
+        "all": {
+            "label": "All Events",
+            "events": None,  # Special: show all
+            "description": "All events sorted by priority"
+        },
+        "alliance_pve": {
+            "label": "Alliance PvE",
+            "events": ["bear_trap", "crazy_joe", "mercenary_prestige", "frostdragon_tyrant", "labyrinth", "frostfire_mine"],
+            "description": "Alliance rallies against PvE bosses and dungeons"
+        },
+        "pvp_svs": {
+            "label": "PvP / SvS",
+            "events": ["svs_prep", "svs_battle", "alliance_showdown", "king_of_icefield", "canyon_clash", "foundry_battle", "brother_in_arms", "alliance_championship", "tundra_arms_league"],
+            "description": "State vs State and alliance combat"
+        },
+        "growth": {
+            "label": "Growth",
+            "events": ["hall_of_chiefs", "hero_rally", "flame_and_fang", "tundra_album"],
+            "description": "Power growth, progression, and collection systems"
+        },
+        "solo_gacha": {
+            "label": "Solo / Gacha",
+            "events": ["lucky_wheel", "artisans_trove", "flame_lotto", "mix_and_match", "treasure_hunter", "tundra_trading", "snowbusters", "fishing_tournament"],
+            "description": "Individual rewards and lucky draws"
+        }
+    }
+
+    # Create tabs
+    tab_labels = [cat["label"] for cat in EVENT_CATEGORIES.values()]
+    tabs = st.tabs(tab_labels)
+
     events = EVENTS_GUIDE.get("events", {})
-
-    # Sort by priority
     priority_order = {"S": 0, "A": 1, "B": 2, "C": 3, "D": 4}
-    sorted_events = sorted(
-        events.items(),
-        key=lambda x: priority_order.get(x[1].get("priority", "C"), 5)
-    )
 
-    for event_id, event_data in sorted_events:
-        render_event_card(event_id, event_data)
+    for tab, (cat_id, cat_info) in zip(tabs, EVENT_CATEGORIES.items()):
+        with tab:
+            st.caption(cat_info["description"])
+
+            # Filter events for this category
+            if cat_info["events"] is None:
+                # "All" tab - show everything
+                filtered_events = events.items()
+            else:
+                # Filter to only events in this category
+                filtered_events = [(eid, events[eid]) for eid in cat_info["events"] if eid in events]
+
+            # Sort by priority
+            sorted_events = sorted(
+                filtered_events,
+                key=lambda x: priority_order.get(x[1].get("priority", "C"), 5)
+            )
+
+            if sorted_events:
+                for event_id, event_data in sorted_events:
+                    render_event_card(event_id, event_data)
+            else:
+                st.info("No events in this category yet.")
 
     st.markdown("---")
 

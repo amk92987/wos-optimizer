@@ -214,6 +214,143 @@
         "tip": "Coordinate with alliance. Complete stages together."
       },
       "rewards": ["Alliance coins", "Resources", "Materials"]
+    },
+    "mercenary_prestige": {
+      "name": "Mercenary Prestige",
+      "short_name": "MP",
+      "category": "pve",
+      "frequency": "monthly",
+      "duration_hours": 168,
+      "description": "Defeat 50 Phaethon Mercenaries across difficulty tiers. Features both personal challenges and alliance boss fights.",
+      "structure": {
+        "personal_challenge": {
+          "levels": 50,
+          "boss_levels": [10, 20, 30, 40, 50],
+          "boss_note": "Every 10th level is a boss with better rewards - use team rallies on these!",
+          "difficulties": ["Easy", "Normal", "Hard", "Nightmare", "Insane"],
+          "tiers": ["Champions", "Legends"],
+          "unlock_note": "Must complete all 50 levels to unlock next difficulty. Takes 10 events minimum to unlock all difficulties."
+        },
+        "alliance_challenge": {
+          "name": "Phaethon Captains",
+          "trigger": "R4/R5 can summon when enough members complete requirements",
+          "timer_minutes": 30,
+          "strategy": "Everyone sends a troop to hit it first, THEN send full rally march after all participants have attacked"
+        }
+      },
+      "stamina_costs": {
+        "scout": 15,
+        "solo_attack": 10,
+        "solo_with_gina": 8,
+        "rally_attack": 25,
+        "rally_with_gina": 20,
+        "total_per_event": "1,250-2,000 stamina (1,150-1,750 with Gina)"
+      },
+      "tips": [
+        "Use Gina (4+ stars) to reduce stamina costs by 20%",
+        "Every 10th level boss gives better rewards - call team rally for these",
+        "If you can't beat a level solo, ask an alliance member to hold a rally for you",
+        "You get 5 help requests per event (+1 each time you help someone)",
+        "Save help requests for higher difficulty levels",
+        "You don't need to be in the rally to get rewards - just request help",
+        "Trade help with alliance members: they rally yours, you rally theirs"
+      ],
+      "optimizer_relevance": {
+        "priority_systems": ["hero_exploration_skills", "hero_level", "stamina_management"],
+        "key_heroes": ["Gina", "Philly", "Wu Ming", "Blanchette"],
+        "tip": "Start with Gina for stamina savings, swap to your main team when you hit a wall."
+      },
+      "rewards": {
+        "champions_tier": ["Mythic General Hero Shards", "Gems", "Speedups", "Resource chests"],
+        "legends_tier": ["Fire Crystals", "Chief Gear Materials", "Higher quantities of Champions rewards"]
+      }
+    },
+    "canyon_clash": {
+      "name": "Canyon Clash",
+      "short_name": "CC",
+      "category": "competitive",
+      "frequency": "periodic",
+      "description": "Alliance vs Alliance battle in canyon terrain.",
+      "optimizer_relevance": {
+        "priority_systems": ["rally_capacity", "hero_expedition_skills", "march_speed"],
+        "key_heroes": ["Jeronimo", "Jessie", "Wu Ming", "Sergey"],
+        "tip": "Coordinate timing with alliance. Control key positions."
+      },
+      "rewards": ["Alliance coins", "Resources", "Speedups"]
+    },
+    "foundry_battle": {
+      "name": "Foundry Battle",
+      "short_name": "FB",
+      "category": "competitive",
+      "frequency": "periodic",
+      "description": "Compete for control of foundry resources.",
+      "optimizer_relevance": {
+        "priority_systems": ["march_capacity", "hero_expedition_skills"],
+        "tip": "Coordinate with alliance for resource control."
+      },
+      "rewards": ["Foundry materials", "Resources", "Speedups"]
+    },
+    "alliance_mobilization": {
+      "name": "Alliance Mobilization",
+      "short_name": "AM",
+      "category": "growth",
+      "frequency": "weekly",
+      "description": "Alliance-wide activity event. Complete tasks together for alliance rewards.",
+      "optimizer_relevance": {
+        "priority_systems": ["alliance_coordination", "daily_tasks"],
+        "tip": "Complete your daily tasks. Coordinate big upgrades during this event."
+      },
+      "rewards": ["Alliance coins", "Resources", "Speedups", "Alliance gifts"]
+    },
+    "sunfire_castle": {
+      "name": "Sunfire Castle",
+      "short_name": "SC",
+      "category": "pve",
+      "frequency": "periodic",
+      "description": "Explore and conquer the Sunfire Castle dungeon.",
+      "optimizer_relevance": {
+        "priority_systems": ["hero_exploration_skills", "hero_level"],
+        "key_heroes": ["Philly", "Wu Ming", "Blanchette"],
+        "tip": "Progress through stages systematically. Bring a healer."
+      },
+      "rewards": ["Resources", "Materials", "Hero XP"]
+    },
+    "frostfire_mine": {
+      "name": "Frostfire Mine",
+      "short_name": "FFM",
+      "category": "pve",
+      "frequency": "periodic",
+      "description": "Mine resources from the Frostfire Mine dungeon.",
+      "optimizer_relevance": {
+        "priority_systems": ["hero_exploration_skills"],
+        "tip": "Maximize resource extraction. Coordinate with alliance."
+      },
+      "rewards": ["Frostfire materials", "Resources", "Gems"]
+    },
+    "brother_in_arms": {
+      "name": "Brother In Arms",
+      "short_name": "BIA",
+      "category": "competitive",
+      "frequency": "periodic",
+      "description": "Alliance kill event. Earn points by killing enemy troops.",
+      "optimizer_relevance": {
+        "priority_systems": ["troop_tier", "rally_capacity", "hero_expedition_skills"],
+        "key_heroes": ["Jeronimo", "Jessie", "Wu Ming"],
+        "tip": "Coordinate rallies with alliance. Target weak enemies."
+      },
+      "rewards": ["Kill event points", "Resources", "Speedups"]
+    },
+    "alliance_championship": {
+      "name": "Alliance Championship",
+      "short_name": "AC",
+      "category": "competitive",
+      "frequency": "seasonal",
+      "description": "Top alliances compete for server championship.",
+      "optimizer_relevance": {
+        "priority_systems": ["all_combat_systems", "alliance_coordination"],
+        "tip": "Only for top alliances. Requires maximum coordination."
+      },
+      "rewards": ["Championship titles", "Exclusive rewards", "Alliance buffs"]
     }
   },
   "event_calendar": {

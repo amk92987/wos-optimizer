@@ -51,6 +51,7 @@ DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI")
 
 # Admin
 ADMIN_DISCORD_IDS = os.getenv("ADMIN_DISCORD_IDS", "").split(",") if os.getenv("ADMIN_DISCORD_IDS") else []
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL", "adam@randomchaoslabs.com")
 
 # Feature flags (can be overridden by database FeatureFlag table)
 DEFAULT_FEATURES = {

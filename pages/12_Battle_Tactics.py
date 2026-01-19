@@ -1331,18 +1331,91 @@ def render_canyon_clash():
                 st.success(tip)
 
 
+def render_labyrinth():
+    """Render labyrinth strategies."""
+    st.markdown("## The Labyrinth")
+    st.markdown("Weekly competitive PvP with 6 zones - each tests different parts of your account!")
+
+    st.info("""
+    **Key Mechanics:**
+    - Most zones provide **Lv.10 troops** (your troop tier doesn't matter)
+    - **Gaia Heart** (Sunday) uses YOUR actual troops
+    - 5 daily attempts per zone
+    """)
+
+    # Zone overview table
+    st.markdown("### Zone Summary")
+    st.markdown("""
+    | Zone | Days | Format | Stats That Matter | Floor 1-9 Ratio | Floor 10 Ratio |
+    |------|------|--------|-------------------|-----------------|----------------|
+    | **Land of the Brave** | Mon-Tue | 3v3 | Heroes, Hero Gear, Exclusive Gear | 50/20/30 | 40/15/45 |
+    | **Cave of Monsters** | Wed-Thu | 2v2 | Pets, Pet Skills | 52/13/35 | 40/15/45 |
+    | **Glowstone Mine** | Wed-Thu | 2v2 | Chief Charms (FC25+) | 52/13/35 | 40/15/45 |
+    | **Earthlab** | Fri-Sat | 2v2 | Research, War Academy | 52/13/35 | 40/15/45 |
+    | **Dark Forge** | Fri-Sat | 2v2 | Chief Gear (FC22+) | 52/13/35 | 40/15/45 |
+    | **Gaia Heart** | Sunday | 3v3 | ALL stats + YOUR troops | 50/20/30 | 40/15/45 |
+    """)
+
+    st.markdown("""
+    **Floor 10 Strategy:** AI switches from 33/33/33 to **53/27/20** (Infantry-heavy) on Floor 10.
+    Counter with more Marksmen (40/15/45) to exploit their Infantry focus.
+    """)
+
+    # Detailed zone tabs
+    with st.expander("📋 Detailed Zone Strategies"):
+        zone_tabs = st.tabs(["Land of Brave", "Cave of Monsters", "Glowstone Mine", "Earthlab", "Dark Forge", "Gaia Heart"])
+
+        with zone_tabs[0]:
+            st.markdown("**Land of the Brave** (Mon-Tue)")
+            st.markdown("Format: 3v3 with up to 9 heroes")
+            st.success("Stats: Heroes, Hero Gear, Hero Exclusive Gear")
+            st.markdown("Strategy: Focus on exclusive gear upgrades, pick heroes with AoE/CC")
+
+        with zone_tabs[1]:
+            st.markdown("**Cave of Monsters** (Wed-Thu)")
+            st.markdown("Format: 2v2 squad battles")
+            st.success("Stats: Pets, Pet Skills only")
+            st.markdown("Strategy: Pair tank heroes with healing pets. Turn order is random.")
+
+        with zone_tabs[2]:
+            st.markdown("**Glowstone Mine** (Wed-Thu)")
+            st.markdown("Format: 2v2 squad battles | Unlocks: FC25")
+            st.success("Stats: Chief Charms only")
+            st.markdown("Strategy: Balance offensive and defensive charms")
+
+        with zone_tabs[3]:
+            st.markdown("**Earthlab** (Fri-Sat)")
+            st.markdown("Format: 2v2 squad battles")
+            st.success("Stats: Research Center Tech, War Academy Tech")
+            st.markdown("Strategy: Max your tech levels - long-term investment")
+
+        with zone_tabs[4]:
+            st.markdown("**Dark Forge** (Fri-Sat)")
+            st.markdown("Format: 2v2 squad battles | Unlocks: FC22")
+            st.success("Stats: Chief Gear only")
+            st.markdown("Strategy: Balance all gear slots, don't neglect any piece")
+
+        with zone_tabs[5]:
+            st.markdown("**Gaia Heart** (Sunday)")
+            st.markdown("Format: 3v3 with YOUR troops")
+            st.warning("This is the ONLY zone where your troop tier matters!")
+            st.success("Stats: ALL stats combined")
+            st.markdown("Strategy: Use your best Fire Crystal/Helios troops")
+
+
 def render_battle_strategies():
     """Render the battle strategies page."""
     st.markdown("# Battle Strategies")
     st.markdown("Advanced tactics for competitive events. Coordination and timing beat raw power.")
 
     # Navigation tabs
-    tab1, tab2, tab3, tab4, tab5 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
         "Castle Battles",
         "Bear Trap",
         "Canyon Clash",
         "Foundry",
-        "Frostfire Mine"
+        "Frostfire Mine",
+        "Labyrinth"
     ])
 
     with tab1:
@@ -1359,6 +1432,9 @@ def render_battle_strategies():
 
     with tab5:
         render_frostfire()
+
+    with tab6:
+        render_labyrinth()
 
     # Footer
     st.markdown("---")

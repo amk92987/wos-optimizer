@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
 
-from database.models import User, UserProfile
+from database.models import User, UserProfile, UserDailyLogin
 
 
 import re
@@ -100,6 +100,35 @@ def create_user(db: Session, email: str, password: str,
     return user
 
 
+def record_daily_login(db: Session, user_id: int):
+    """Record a daily login for usage tracking. Only one record per user per day."""
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+
+    # Check if already recorded today
+    existing = db.query(UserDailyLogin).filter(
+        UserDailyLogin.user_id == user_id,
+        UserDailyLogin.login_date == today
+    ).first()
+
+    if not existing:
+        login_record = UserDailyLogin(user_id=user_id, login_date=today)
+        db.add(login_record)
+        db.commit()
+
+
+def get_days_active(db: Session, user_id: int, days: int = 7) -> int:
+    """Get number of days user was active in the last N days."""
+    from datetime import timedelta
+    cutoff = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=days-1)
+
+    count = db.query(UserDailyLogin).filter(
+        UserDailyLogin.user_id == user_id,
+        UserDailyLogin.login_date >= cutoff
+    ).count()
+
+    return count
+
+
 def authenticate_user(db: Session, email_or_username: str, password: str) -> Optional[User]:
     """
     Authenticate a user by email (primary) or username (legacy fallback).
@@ -124,9 +153,10 @@ def authenticate_user(db: Session, email_or_username: str, password: str) -> Opt
     if not verify_password(password, user.password_hash):
         return None
 
-    # Update last login
+    # Update last login and record daily login
     user.last_login = datetime.utcnow()
     db.commit()
+    record_daily_login(db, user.id)
 
     return user
 

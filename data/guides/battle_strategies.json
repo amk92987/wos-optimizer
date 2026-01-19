@@ -1266,5 +1266,184 @@
         "Voice chat is almost mandatory for competitive play"
       ]
     }
+  },
+
+  "labyrinth": {
+    "name": "The Labyrinth",
+    "description": "Multi-zone exploration dungeon with weekly rotation. Uses EXPEDITION skills, not exploration!",
+    "overview": "The Labyrinth is a permanent dungeon with 6 zones that rotate throughout the week. Each zone buffs different power sources. You get Level 10 troops provided on weekdays, but Sunday's Gaia Heart uses your own troops. Uses EXPEDITION skills despite being PvE content!",
+
+    "event_basics": {
+      "unlock": "Furnace Level 19 + Command Center Level 1",
+      "daily_attempts": "5 challenges per zone (resets 00:00 UTC)",
+      "weekly_reset": "All stages reset every Monday",
+      "skill_type": "EXPEDITION skills (NOT exploration!)",
+      "troop_provision": "Level 10 troops provided on weekdays; Sunday uses your own troops"
+    },
+
+    "weekly_schedule": {
+      "description": "Each zone opens on specific days and buffs different power sources",
+      "zones": [
+        {
+          "days": "Monday - Tuesday",
+          "zone": "Land of the Brave",
+          "buff_focus": "Heroes, Hero Gear & Exclusive Gear",
+          "color": "#3498DB"
+        },
+        {
+          "days": "Wednesday - Thursday",
+          "zone": "Cave of Monsters",
+          "buff_focus": "Pets & Pet Skills",
+          "color": "#9B59B6"
+        },
+        {
+          "days": "Wednesday - Thursday",
+          "zone": "Glowstone Mine",
+          "buff_focus": "Chief Charms",
+          "color": "#F39C12"
+        },
+        {
+          "days": "Friday - Saturday",
+          "zone": "Earthlab",
+          "buff_focus": "Research Center & War Academy Tech",
+          "color": "#2ECC71"
+        },
+        {
+          "days": "Friday - Saturday",
+          "zone": "Dark Forge",
+          "buff_focus": "Chief Gear",
+          "color": "#E74C3C"
+        },
+        {
+          "days": "Sunday",
+          "zone": "Gaia Heart",
+          "buff_focus": "All Stats (except Territory/Gem buffs)",
+          "special": "Uses YOUR OWN troops - no casualties",
+          "color": "#FFD700"
+        }
+      ]
+    },
+
+    "troop_ratios": {
+      "description": "Ratios vary by encounter type. Fine-tune based on your zone stats - you have 5 attempts daily to experiment.",
+      "standard": {
+        "ratio": "50/20/30",
+        "infantry": "50%",
+        "lancer": "20%",
+        "marksman": "30%",
+        "use_for": "Most stages, solid starting point"
+      },
+      "level_10_boss": {
+        "ratio": "53/27/20 or 60/12/28",
+        "infantry": "53-60%",
+        "lancer": "12-27%",
+        "marksman": "20-28%",
+        "use_for": "Level 10 boss fights - heavier infantry",
+        "note": "AI uses ~53/27/20 on level 10 bosses"
+      },
+      "1v1_no_heroes": {
+        "ratio": "50/10/40 or 60/5/35",
+        "infantry": "50-60%",
+        "lancer": "5-10%",
+        "marksman": "35-40%",
+        "use_for": "1v1 encounters without hero combat",
+        "note": "Reduce lancers when heroes aren't fighting"
+      },
+      "multi_squad_f2p": {
+        "description": "F2P strategy using 3 squads with different ratios",
+        "squad_1": {
+          "ratio": "60/40/0",
+          "note": "Infantry-Lancer focus, Marksman heroes for buffs only"
+        },
+        "squad_2": {
+          "ratio": "54/3/43",
+          "note": "Infantry-Marksman focus, minimal Lancers"
+        },
+        "squad_3": {
+          "ratio": "50/20/30",
+          "note": "Balanced support squad"
+        },
+        "tip": "Rotate gear across squads rather than concentrating in one formation"
+      }
+    },
+
+    "level_10_strategy": {
+      "name": "Level 10 Boss Strategy",
+      "description": "Each zone's level 10 is a boss fight with better rewards. Requires adjusted tactics.",
+      "tips": [
+        "Use heavier infantry ratio (53-60%) for boss survivability",
+        "Save your best attempts for level 10",
+        "Boss fights may have multiple rounds - factor in troop losses",
+        "Expedition skills matter more than troop count on bosses",
+        "If stuck, try 60/12/28 ratio - it handles multi-round fights better"
+      ],
+      "rewards": "Clearing all 10 stages unlocks raid feature for automatic reward collection"
+    },
+
+    "strategies": {
+      "progression_focus": {
+        "name": "Push Max Stage First",
+        "priority": "HIGH",
+        "steps": [
+          "Use first 2-3 attempts to push your max stage",
+          "Experiment with ratios if stuck",
+          "Once you hit your wall, use remaining attempts for raid rewards",
+          "Focus on zones that buff your weakest stats"
+        ]
+      },
+      "reward_optimization": {
+        "name": "Prioritize Valuable Rewards",
+        "priority": "MEDIUM",
+        "steps": [
+          "Prioritize Mithril and Fire Crystal Shards from rewards",
+          "Clear all 10 stages to unlock raid feature",
+          "Use raid for consistent daily rewards",
+          "Monday reset gives chance to re-earn First Win rewards"
+        ]
+      }
+    },
+
+    "common_mistakes": [
+      {
+        "mistake": "Using Exploration skills instead of Expedition",
+        "correction": "Labyrinth uses EXPEDITION skills despite being PvE! Check your hero skill loadout."
+      },
+      {
+        "mistake": "Using same ratio for all stages",
+        "correction": "Adjust ratios based on stage type. Level 10 bosses need heavier infantry."
+      },
+      {
+        "mistake": "Wasting attempts on impossible stages",
+        "correction": "If you fail 2-3 times, you've hit your wall. Save remaining attempts for raid rewards."
+      },
+      {
+        "mistake": "Ignoring weekly zone rotation",
+        "correction": "Focus on zones that buff your weakest stats for biggest gains."
+      },
+      {
+        "mistake": "Not using raid feature",
+        "correction": "Once you clear stages 1-10, raid gives automatic rewards without manual battles."
+      }
+    ],
+
+    "quick_reference": {
+      "daily_checklist": [
+        "Check which zones are open today",
+        "Use 5 attempts per open zone",
+        "Push max stage first, then raid",
+        "Prioritize Mithril and FC Shard rewards"
+      ],
+      "troop_ratios_summary": [
+        "Standard: 50/20/30 (most stages)",
+        "Level 10 Boss: 53/27/20 or 60/12/28",
+        "1v1 No Heroes: 50/10/40 or 60/5/35"
+      ],
+      "key_reminders": [
+        "Uses EXPEDITION skills, NOT exploration",
+        "Level 10 troops provided (except Sunday)",
+        "Stages reset every Monday",
+        "5 attempts per zone per day"
+      ]
+    }
   }
 }

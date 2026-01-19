@@ -965,13 +965,308 @@
       },
       "f2p_friendly": "partially",
       "notes": "Good way to get specific heroes. Value depends on featured hero."
+    },
+
+    "mercenary_prestige": {
+      "name": "Mercenary Prestige",
+      "type": "alliance",
+      "frequency": "Monthly",
+      "duration": "7 days",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "Defeat 50 Phaethon Mercenaries across difficulty tiers. Features personal challenges and alliance boss fights.",
+      "gameplay": "A monthly PvE event where you fight through 50 levels of Phaethon Mercenaries. Each level gets harder. Every 10th level (10, 20, 30, 40, 50) is a BOSS with better rewards - call team rallies on these! Alliance R4/R5 can summon Phaethon Captains for group fights. You must complete all 50 levels on one difficulty to unlock the next (takes minimum 10 events to reach Insane difficulty). Two progression tiers: Champions (normal rewards) and Legends (Fire Crystals, Chief Gear materials).",
+      "rewards": {
+        "primary": ["Mythic General Hero Shards", "Fire Crystals", "Chief Gear Materials"],
+        "quality": "high",
+        "backpack_items": ["General Speedups", "Resource Chests", "Gems"]
+      },
+      "preparation": {
+        "save_before": ["Stamina (1,250-2,000 per event)"],
+        "heroes_needed": "exploration",
+        "tips": [
+          "Use Gina (4+ stars) in your team to reduce stamina costs by 20%",
+          "Every 10th level is a BOSS - call team rally for better rewards",
+          "Scout costs 15 stamina, solo attack 10 (8 with Gina), rally 25 (20 with Gina)",
+          "If stuck, ask alliance member to rally your level - you still get rewards",
+          "You get 5 help requests per event (+1 each time you help someone)",
+          "Alliance Captains: Everyone hits once FIRST, then send full rally march",
+          "30 minute timer on Alliance Captains - coordinate quickly",
+          "Save help requests for higher difficulty levels you can't beat",
+          "Start with Gina for stamina savings, swap to main team when stuck"
+        ]
+      },
+      "structure": {
+        "personal_challenge": {
+          "total_levels": 50,
+          "boss_levels": "10, 20, 30, 40, 50",
+          "difficulties": "Easy → Normal → Hard → Nightmare → Insane",
+          "progression_tiers": "Champions → Legends"
+        },
+        "alliance_challenge": {
+          "name": "Phaethon Captains",
+          "trigger": "R4/R5 summons when requirements met",
+          "timer": "30 minutes",
+          "strategy": "Everyone taps once, then full rally"
+        }
+      },
+      "stamina_costs": {
+        "scout": "15",
+        "solo_attack": "10 (8 with Gina)",
+        "rally_attack": "25 (20 with Gina)",
+        "total_per_event": "1,250-2,000 (1,150-1,750 with Gina)"
+      },
+      "f2p_friendly": true,
+      "notes": "Excellent F2P event with valuable rewards. Gina is essential for stamina efficiency. Progress unlocks permanently - each difficulty takes 10 events minimum to unlock. Legends tier gives Fire Crystals and Chief Gear materials."
+    },
+
+    "brother_in_arms": {
+      "name": "Brother In Arms",
+      "type": "competitive",
+      "frequency": "Periodic",
+      "duration": "2-3 days",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "Alliance kill event. Attack enemy cities and gathering nodes to earn points.",
+      "gameplay": "A PvP event where your alliance earns points by killing enemy troops. Attack enemy cities (especially unshielded ones) and hit gathering nodes where enemies are collecting resources. Coordinate with alliance to target weak enemies and maximize kills. Points are based on troop tier killed - higher tier = more points.",
+      "rewards": {
+        "primary": ["Kill Event Points", "Speedups", "Resources"],
+        "quality": "high",
+        "backpack_items": ["General Speedups", "Resource Chests"]
+      },
+      "preparation": {
+        "save_before": ["Stamina", "Rally attempts", "Shields (for defense)"],
+        "heroes_needed": "expedition",
+        "tips": [
+          "Scout before attacking - find unshielded cities with troops",
+          "Target gathering nodes - easy kills with less retaliation risk",
+          "Coordinate rallies on bigger targets with alliance",
+          "Keep your own gatherers shielded or recalled during event",
+          "Higher tier troop kills = more points",
+          "Use anti-scout if you have troops to protect"
+        ]
+      },
+      "troop_ratio": {
+        "infantry": "40%",
+        "lancer": "20%",
+        "marksman": "40%",
+        "reasoning": "Balanced composition for attacking cities. Infantry absorbs damage, marksmen deal damage. Adjust based on target's composition."
+      },
+      "f2p_friendly": true,
+      "notes": "Good event for active players. Coordinate timing with alliance. Avoid attacking much stronger players - target appropriately."
+    },
+
+    "tundra_arms_league": {
+      "name": "Tundra Arms League",
+      "type": "competitive",
+      "frequency": "Periodic",
+      "duration": "Multiple days",
+      "cost_category": "medium_spend",
+      "priority": "B",
+      "description": "Cross-state league competition with tiered matchups.",
+      "gameplay": "A cross-state competitive event where states are matched based on power. Complete various activities to earn points for your state. Rewards scale based on league tier and final ranking. Requires state-wide coordination for best results.",
+      "rewards": {
+        "primary": ["League Rewards", "Hero Shards", "Speedups"],
+        "quality": "high",
+        "backpack_items": ["Legendary Hero Shards", "Speedups", "Resources"]
+      },
+      "preparation": {
+        "save_before": ["Speedups", "Resources for activities"],
+        "heroes_needed": "varies",
+        "tips": [
+          "Check your state's league tier for expected competition",
+          "Coordinate with state leadership on point strategies",
+          "Save resources for high-point activities",
+          "Participate in all available point-earning tasks"
+        ]
+      },
+      "f2p_friendly": "partially",
+      "notes": "Rewards depend heavily on state coordination and league tier."
+    },
+
+    "frostdragon_tyrant": {
+      "name": "Frostdragon Tyrant",
+      "type": "alliance",
+      "frequency": "Periodic",
+      "duration": "Limited time",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "Alliance boss event. Rally against the Frostdragon for massive rewards.",
+      "gameplay": "A powerful dragon boss spawns that requires alliance coordination to defeat. Launch rallies against the Frostdragon - damage dealt determines your reward tier. Similar to Bear Trap mechanics but with a dragon boss. Coordinate rally timing for maximum participation.",
+      "rewards": {
+        "primary": ["Dragon Materials", "Hero Shards", "Speedups"],
+        "quality": "very_high",
+        "backpack_items": ["Legendary Materials", "Speedups", "Resources"]
+      },
+      "preparation": {
+        "save_before": ["Stamina", "Rally attempts"],
+        "heroes_needed": "expedition",
+        "tips": [
+          "Similar strategy to Bear Trap - use expedition skills",
+          "Rally leaders use Marksman-heavy compositions",
+          "Joiners put Jessie first for +DMG skill",
+          "Coordinate rally timing with alliance",
+          "Position rally leaders close to dragon"
+        ]
+      },
+      "troop_ratio": {
+        "leader": {
+          "infantry": "10%",
+          "lancer": "10%",
+          "marksman": "80%",
+          "reasoning": "Maximize DPS against boss. Need 1 of each type to activate all expedition skills."
+        },
+        "joiner": {
+          "infantry": "0%",
+          "lancer": "0%",
+          "marksman": "100%",
+          "reasoning": "Pure marksmen for maximum damage contribution."
+        }
+      },
+      "f2p_friendly": true,
+      "notes": "High-value event. Treat like Bear Trap - expedition skills and rally coordination matter most."
+    },
+
+    "frostfire_mine": {
+      "name": "Frostfire Mine",
+      "type": "pve",
+      "frequency": "Periodic",
+      "duration": "Limited time",
+      "cost_category": "free",
+      "priority": "B",
+      "description": "Mine resources from dungeon levels. Progress through increasingly difficult stages.",
+      "gameplay": "Enter the Frostfire Mine dungeon and clear stages to collect resources. Each stage has enemies to defeat. Deeper stages have better rewards but tougher enemies. Use your exploration team to progress as far as possible.",
+      "rewards": {
+        "primary": ["Frostfire Materials", "Resources", "Gems"],
+        "quality": "medium-high",
+        "backpack_items": ["Special Materials", "Resources"]
+      },
+      "preparation": {
+        "save_before": ["Stamina"],
+        "heroes_needed": "exploration",
+        "tips": [
+          "Use exploration skills team (Philly healer is essential)",
+          "Progress as deep as your team can handle",
+          "Don't waste attempts on stages you can't clear",
+          "Upgrade exploration skills for better progress"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Exploration-focused event. Your exploration team strength determines progress."
+    },
+
+    "tundra_album": {
+      "name": "Tundra Album",
+      "type": "collection",
+      "frequency": "Permanent",
+      "duration": "Ongoing (lifetime)",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "Collection system with permanent stat bonuses. Earn album shards by completing in-game events.",
+      "gameplay": "The Tundra Album is a collection system that runs for the entirety of playing the game. You earn album shards and puzzle pieces by completing events, unlocking heroes, and progressing through the game. As you unlock more things, you get more pieces. Each completed album page grants PERMANENT stat bonuses to your account - this adds up significantly over time!",
+      "rewards": {
+        "primary": ["Permanent Stat Bonuses", "Account Power"],
+        "quality": "very_high",
+        "backpack_items": []
+      },
+      "preparation": {
+        "save_before": [],
+        "heroes_needed": "none",
+        "tips": [
+          "Album shards come from completing events - just play normally",
+          "Prioritize pages with combat stat bonuses (ATK, DEF, HP, Lethality)",
+          "Check which items you're close to completing",
+          "As you unlock heroes and content, more pieces become available",
+          "Album bonuses are PERMANENT - huge long-term value",
+          "This is a marathon, not a sprint - progress naturally over time"
+        ]
+      },
+      "stat_bonuses": {
+        "types": ["Troop Attack", "Troop Defense", "Troop Health", "Troop Lethality", "March Speed", "Gathering Speed"],
+        "note": "Bonuses are permanent and apply to all troops"
+      },
+      "f2p_friendly": true,
+      "notes": "100% F2P - earn shards by completing events and unlocking content. Critical long-term progression that runs for the life of your account. The stat bonuses compound and make a real difference in combat!"
+    },
+
+    "alliance_championship": {
+      "name": "Alliance Championship",
+      "type": "competitive",
+      "frequency": "Seasonal",
+      "duration": "Multiple weeks",
+      "cost_category": "heavy_spend",
+      "priority": "A",
+      "description": "Pick your top 3 heroes and optimal troop ratio. Alliance members compete in bracket-style tournaments.",
+      "gameplay": "Each player picks their TOP 3 HEROES for their lineup. The game auto-deploys you with 33/33/33 troop ratio but this is NOT optimal - change it! Your lineup fights automatically against opponents. PvP buffs (minister, pet, battle) work so ensure they're active when you register. F2P players should register later in the phase to coincide with pet buffs and city bonuses for maximum points.",
+      "rewards": {
+        "primary": ["Championship Titles", "Exclusive Rewards", "Alliance Buffs"],
+        "quality": "very_high",
+        "backpack_items": ["Legendary Hero Shards", "Exclusive Items"]
+      },
+      "preparation": {
+        "save_before": ["Activate all PvP buffs before registering"],
+        "heroes_needed": "expedition",
+        "tips": [
+          "Pick your TOP 3 strongest expedition heroes",
+          "Change troop ratio from default 33/33/33 to 50/20/30",
+          "Activate minister, pet, and battle buffs BEFORE registering",
+          "F2P: Register later in phase when buffs are active",
+          "Large stat gaps (150-200% higher) beat any ratio strategy",
+          "Experiment with 45/25/30 or 60/20/20 if 50/20/30 doesn't work"
+        ]
+      },
+      "troop_ratio": {
+        "infantry": "50%",
+        "lancer": "20%",
+        "marksman": "30%",
+        "reasoning": "Infantry frontline tanks damage, protecting Lancers and Marksmen in backline for max damage output. This ratio is balanced and hard to counter."
+      },
+      "alternative_ratios": [
+        {"ratio": "45/25/30", "note": "More lancer utility"},
+        {"ratio": "60/20/20", "note": "Heavy infantry, more defensive"},
+        {"ratio": "60/30/10", "note": "Minimal marksmen, used by some top alliances"}
+      ],
+      "f2p_friendly": "partially",
+      "notes": "Pick your best 3 heroes and set 50/20/30 ratio. No universal 'best' ratio - large stat gaps override strategy. Activate all buffs before registering!"
+    },
+
+    "labyrinth": {
+      "name": "Labyrinth",
+      "type": "pve",
+      "frequency": "Permanent",
+      "duration": "Ongoing",
+      "cost_category": "free",
+      "priority": "A",
+      "description": "Multi-zone exploration dungeon with 6 zones. Progress for exclusive gear and materials.",
+      "gameplay": "A permanent dungeon with 6 distinct zones: Frozen Tundra, Scorched Desert, Verdant Forest, Dark Caverns, Crystal Caves, and Infernal Depths. Each zone has multiple stages with increasing difficulty. Clear stages to earn zone-specific materials and exclusive gear. Your exploration team strength determines how far you can progress.",
+      "zones": ["Frozen Tundra", "Scorched Desert", "Verdant Forest", "Dark Caverns", "Crystal Caves", "Infernal Depths"],
+      "rewards": {
+        "primary": ["Zone Materials", "Exclusive Gear", "Resources"],
+        "quality": "high",
+        "backpack_items": ["Labyrinth Materials", "Gear Pieces"]
+      },
+      "preparation": {
+        "save_before": ["Stamina for attempts"],
+        "heroes_needed": "exploration",
+        "key_heroes": ["Philly", "Wu Ming", "Blanchette", "Jeronimo", "Mia"],
+        "tips": [
+          "Philly is ESSENTIAL - her healing keeps your team alive",
+          "Use exploration skills, not expedition",
+          "Don't skip zones - progress systematically",
+          "Upgrade hero gear to push further",
+          "Each zone has unique mechanics - learn them",
+          "Reset attempts refresh daily - use them all"
+        ]
+      },
+      "f2p_friendly": true,
+      "notes": "Critical PvE content for gear progression. Philly's healing is the key to deep progress. Take it zone by zone."
     }
   },
 
   "summary_by_priority": {
     "S_tier_never_skip": ["bear_trap", "svs_prep", "svs_battle", "hall_of_chiefs"],
-    "A_tier_high_value": ["crazy_joe", "alliance_showdown", "king_of_icefield", "artisans_trove", "flame_lotto", "canyon_clash", "flame_and_fang"],
-    "B_tier_do_if_active": ["lucky_wheel", "tundra_trading", "mix_and_match", "treasure_hunter", "foundry_battle", "hero_rally"],
+    "A_tier_high_value": ["crazy_joe", "alliance_showdown", "king_of_icefield", "artisans_trove", "flame_lotto", "canyon_clash", "flame_and_fang", "mercenary_prestige", "brother_in_arms", "frostdragon_tyrant", "tundra_album", "alliance_championship", "labyrinth"],
+    "B_tier_do_if_active": ["lucky_wheel", "tundra_trading", "mix_and_match", "treasure_hunter", "foundry_battle", "hero_rally", "tundra_arms_league", "frostfire_mine"],
     "C_tier_low_priority": ["snowbusters", "fishing_tournament"],
     "D_tier_skip": []
   },
@@ -1006,8 +1301,8 @@
       "tip": "Save Essence Stones for SvS Prep Day 4."
     },
     "stamina": {
-      "save_for": ["svs_prep", "svs_battle", "bear_trap", "alliance_showdown", "canyon_clash"],
-      "tip": "Day 3 Polar Terror rallies need stamina. Max before Battle Phase."
+      "save_for": ["svs_prep", "svs_battle", "bear_trap", "alliance_showdown", "canyon_clash", "mercenary_prestige"],
+      "tip": "Day 3 Polar Terror rallies need stamina. Max before Battle Phase. Mercenary Prestige uses 1,250-2,000 stamina per event."
     },
     "flames": {
       "save_for": ["flame_lotto"],

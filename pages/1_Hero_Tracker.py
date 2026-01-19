@@ -399,25 +399,18 @@ def render_hero_row(hero: dict, user_hero, hero_key: str):
             st.markdown(f'<div style="color:#4A90D9;opacity:{opacity};padding-top:4px;">{level_display}</div>', unsafe_allow_html=True)
 
         with info_cols[6]:
-            # "Owned" checkbox with label
+            # "Owned" checkbox - rerun needed to refresh DB state immediately
             new_owned = st.checkbox("Owned", value=is_owned, key=f"owned_{hero_key}")
             if new_owned != is_owned:
                 if new_owned:
                     save_user_hero(hero)
-                    # Mark this hero to auto-expand after rerun
-                    st.session_state.auto_expand_hero = hero_key
-                    st.rerun()
                 else:
                     remove_user_hero(hero['name'])
-                    st.rerun()
+                st.rerun()
 
-        # Expandable section below info row
+        # Expandable section below info row (always collapsed by default)
         if is_owned:
-            # Check if this hero should auto-expand (just marked as owned)
-            should_expand = st.session_state.get('auto_expand_hero') == hero_key
-            if should_expand:
-                st.session_state.auto_expand_hero = None  # Clear after use
-            with st.expander(f"Edit {hero['name']}", expanded=should_expand):
+            with st.expander(f"Edit {hero['name']}", expanded=False):
                 render_hero_editor(hero, user_hero, hero_key)
         else:
             with st.expander(f"View {hero['name']} — check 'Owned' to track progress", expanded=False):
