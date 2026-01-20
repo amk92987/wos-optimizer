@@ -1,384 +1,199 @@
-# Deployment Planning
+# Deployment Guide
 
-This document tracks architectural decisions and requirements for deploying the WoS Optimizer to AWS for public use.
+## AWS CLI
 
-## Current State (Local Development)
+**Path:** `"C:\Program Files\Amazon\AWSCLIV2\aws.exe"`
 
-- **Database**: SQLite (single file, local storage)
-- **Auth**: None (single user assumed)
-- **Profiles**: Stored locally, no user isolation
-- **Sessions**: Streamlit's built-in session state
+**SSH Key:** `C:\Users\adam\.ssh\lightsail-key.pem`
 
----
+## Environments
 
-## Landing Page / Login Experience
+| Name | Instance | IP | URL | Database | Cost |
+|------|----------|-----|-----|----------|------|
+| **Local** | Your machine | localhost:8501 | N/A | SQLite (wos.db) | Free |
+| **Dev** | wos-dev-micro | 98.87.57.79 | wosdev.randomchaoslabs.com | PostgreSQL | $7/mo |
+| **Live** | wos-live-micro | 52.55.47.124 | wos.randomchaoslabs.com | PostgreSQL | $7/mo |
+| **Landing** | randomchaoslabs-server | 52.20.89.13 | www.randomchaoslabs.com | N/A | $5/mo |
 
-**First-time visitor flow:**
-```
-1. User visits site → Landing page (not logged in)
-2. See app description, features preview
-3. "Login with Discord" button prominently displayed
-4. Donation callout visible
-5. After login → redirect to main app
-```
+## DNS (Route 53)
 
-**Donation Section** (visible on landing/login page):
-```
-┌─────────────────────────────────────────────────────────────┐
-│                                                             │
-│   Random Chaos Labs relies on donations to continue         │
-│   creating content. Please consider donating to the cause.  │
-│                                                             │
-│   [ Ko-fi ]  [ PayPal ]  [ Patreon ]                       │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
+**Hosted Zone ID:** `Z072351926TTPYOWDY0N3`
+
+| Domain | Type | Points To | Purpose |
+|--------|------|-----------|---------|
+| randomchaoslabs.com | A | 52.20.89.13 | Landing page |
+| www.randomchaoslabs.com | A | 52.20.89.13 | Landing page |
+| wos.randomchaoslabs.com | A | 52.55.47.124 | Live app |
+| wosapp.randomchaoslabs.com | A | 52.55.47.124 | Live app (alias) |
+| wosdev.randomchaoslabs.com | A | 98.87.57.79 | Dev app |
+
+### Update DNS Record
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" route53 change-resource-record-sets --hosted-zone-id Z072351926TTPYOWDY0N3 --change-batch "{\"Changes\":[{\"Action\":\"UPSERT\",\"ResourceRecordSet\":{\"Name\":\"<subdomain>.randomchaoslabs.com\",\"Type\":\"A\",\"TTL\":300,\"ResourceRecords\":[{\"Value\":\"<ip-address>\"}]}}]}"
 ```
 
-**Tasks**:
-- [ ] Create landing page component (shown when not logged in)
-- [ ] Add donation button/links (Ko-fi, PayPal, Patreon - pick one or more)
-- [ ] Add brief feature overview / screenshots
-- [ ] Add "Login with Discord" button
-- [ ] Optional: Show limited features without login, full features require login
-
-**Donation Platform Options**:
-| Platform | Pros | Cons |
-|----------|------|------|
-| Ko-fi | Simple, no fees on donations | Less features |
-| Patreon | Recurring support, tiers | Takes percentage |
-| PayPal | Universal, trusted | Fees on transactions |
-| Buy Me a Coffee | Gaming-friendly | Takes percentage |
-| GitHub Sponsors | Developer-focused | Requires approval |
-
----
-
-## Pre-Deployment Requirements
-
-### 1. Database Migration (SQLite → PostgreSQL)
-
-**Why**: SQLite doesn't handle concurrent writes well. Multiple users hitting the app simultaneously will cause issues.
-
-**Tasks**:
-- [ ] Set up PostgreSQL on AWS RDS (or same EC2 instance to start)
-- [ ] Update SQLAlchemy connection string to support both SQLite (dev) and PostgreSQL (prod)
-- [ ] Add environment variable for database URL (`DATABASE_URL`)
-- [ ] Test migration scripts
-- [ ] Add connection pooling for production
-
-**Schema changes needed**:
-- [ ] Add `User` table (id, email, discord_id, created_at, last_login, is_admin)
-- [ ] Add `user_id` foreign key to `UserProfile` table
-- [ ] Add index on `user_id` for profile queries
-
----
-
-### 2. Authentication System
-
-**Recommended**: Discord OAuth (WoS community lives on Discord)
-
-**Alternative**: Google OAuth or email/password
-
-**User Flow**:
-```
-1. User visits site → sees landing page with "Login with Discord" button
-2. User clicks → redirected to Discord OAuth
-3. User authorizes → redirected back with auth token
-4. App creates/updates User record → creates session
-5. User can now create/manage their profiles
+### List All DNS Records
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" route53 list-resource-record-sets --hosted-zone-id Z072351926TTPYOWDY0N3 --output table
 ```
 
-**Tasks**:
-- [ ] Register Discord application at https://discord.com/developers/applications
-- [ ] Add OAuth callback URL configuration
-- [ ] Implement login/logout endpoints
-- [ ] Add session management (database-backed sessions)
-- [ ] Add "Login with Discord" button to UI
-- [ ] Protect profile routes - require login
-- [ ] Store Discord user ID, username, avatar
+## Lightsail Instances
 
-**Libraries to consider**:
-- `Authlib` for OAuth
-- `streamlit-authenticator` (simpler but less flexible)
-- Custom implementation with Discord API
+| Instance | Bundle | RAM | Static IP |
+|----------|--------|-----|-----------|
+| wos-dev-micro | micro_3_0 | 1 GB | wos-dev-ip (98.87.57.79) |
+| wos-live-micro | micro_3_0 | 1 GB | wos-live-ip (52.55.47.124) |
+| randomchaoslabs-server | nano_3_0 | 0.5 GB | randomchaoslabs-ip (52.20.89.13) |
 
----
+### Bundle Sizes
+| Bundle | RAM | vCPU | Storage | Cost |
+|--------|-----|------|---------|------|
+| nano_3_0 | 0.5 GB | 1 | 20 GB | $5/mo |
+| micro_3_0 | 1 GB | 1 | 40 GB | $7/mo |
+| small_3_0 | 2 GB | 1 | 60 GB | $12/mo |
+| medium_3_0 | 4 GB | 2 | 80 GB | $24/mo |
 
-### 3. User & Admin System
+## Common Commands
 
-**User Hierarchy**:
-```
-Admin (role: admin)
-├── Can view all profiles (read-only by default)
-├── Can impersonate users for debugging
-├── Access to admin dashboard
-├── Audit log of admin actions
-└── Can promote/demote users
-
-Regular Users (role: user)
-├── Own their profiles (1 or more cities)
-├── Can only see their own data
-├── Self-service account management
-└── Can delete their own account
+### Check Instance Status
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" lightsail get-instance --instance-name wos-dev-micro
 ```
 
-**Database Schema**:
-```sql
-CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
-    discord_id VARCHAR(50) UNIQUE,
-    discord_username VARCHAR(100),
-    discord_avatar VARCHAR(255),
-    email VARCHAR(255),
-    role VARCHAR(20) DEFAULT 'user',  -- 'user', 'admin', 'moderator'
-    created_at TIMESTAMP DEFAULT NOW(),
-    last_login TIMESTAMP,
-    is_active BOOLEAN DEFAULT TRUE
-);
-
-CREATE TABLE user_profiles (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
-    name VARCHAR(100),
-    server_age_days INTEGER,
-    furnace_level INTEGER,
-    -- ... existing profile fields ...
-    created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP
-);
-
-CREATE TABLE admin_audit_log (
-    id SERIAL PRIMARY KEY,
-    admin_user_id INTEGER REFERENCES users(id),
-    action VARCHAR(50),  -- 'view_profile', 'impersonate', 'edit_user', etc.
-    target_user_id INTEGER REFERENCES users(id),
-    target_profile_id INTEGER,
-    details JSONB,
-    ip_address VARCHAR(45),
-    created_at TIMESTAMP DEFAULT NOW()
-);
+### List All Instances
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" lightsail get-instances --query "instances[].{name:name,state:state.name,ip:publicIpAddress,bundle:bundleId}" --output table
 ```
 
-**Admin Features**:
-- [ ] Admin dashboard page (protected)
-- [ ] User list with search/filter
-- [ ] View user profiles (read-only, logged)
-- [ ] Impersonate user (for debugging, logged)
-- [ ] User statistics and analytics
-- [ ] Ability to disable problematic accounts
-
-**Tasks**:
-- [ ] Add `role` field to User model
-- [ ] Create admin check decorator/function
-- [ ] Build admin dashboard page
-- [ ] Implement audit logging
-- [ ] Add your Discord ID as initial admin (hardcoded or env var)
-
----
-
-### 4. Security Considerations
-
-**Must Have**:
-- [ ] HTTPS only (AWS Certificate Manager + Load Balancer or Let's Encrypt)
-- [ ] Environment variables for secrets (never commit to git)
-- [ ] SQL injection protection (SQLAlchemy handles this)
-- [ ] Session security (secure cookies, expiration)
-- [ ] Rate limiting on auth endpoints
-- [ ] CORS configuration if API endpoints added later
-
-**Secrets to manage**:
-```
-DATABASE_URL=postgresql://user:pass@host:5432/wos_optimizer
-DISCORD_CLIENT_ID=xxx
-DISCORD_CLIENT_SECRET=xxx
-SECRET_KEY=xxx  # For session signing
-ADMIN_DISCORD_IDS=your_discord_id,other_admin_id
+### Deploy to Dev
+```bash
+ssh -i "C:\Users\adam\.ssh\lightsail-key.pem" ubuntu@98.87.57.79 "cd /home/ubuntu/wos-app && git pull && sudo systemctl restart streamlit"
 ```
 
-**Nice to Have**:
-- [ ] Content Security Policy headers
-- [ ] Request logging for debugging
-- [ ] Automated security updates
-
----
-
-### 5. Hosting Architecture
-
-**Simple Start (Recommended)**:
-```
-┌─────────────────────────────────────────────────────────┐
-│                        AWS                               │
-│  ┌─────────────────┐      ┌─────────────────────────┐   │
-│  │   EC2 Instance  │      │     RDS PostgreSQL      │   │
-│  │                 │      │                         │   │
-│  │  - Streamlit    │ ───► │  - User data            │   │
-│  │  - Nginx        │      │  - Profiles             │   │
-│  │  - SSL/HTTPS    │      │  - Audit logs           │   │
-│  └─────────────────┘      └─────────────────────────┘   │
-│           │                                              │
-│           ▼                                              │
-│  ┌─────────────────┐                                    │
-│  │  Route 53 DNS   │  ← wos-optimizer.yourdomain.com    │
-│  └─────────────────┘                                    │
-└─────────────────────────────────────────────────────────┘
+### Deploy to Live
+```bash
+ssh -i "C:\Users\adam\.ssh\lightsail-key.pem" ubuntu@52.55.47.124 "cd /home/ubuntu/wos-app && git pull && sudo systemctl restart streamlit"
 ```
 
-**EC2 Instance**:
-- t3.small or t3.medium to start ($15-30/month)
-- Ubuntu 22.04 LTS
-- Nginx as reverse proxy
-- Let's Encrypt for SSL
-- systemd service for Streamlit
-
-**RDS PostgreSQL**:
-- db.t3.micro for free tier (first year)
-- db.t3.small after (~$15/month)
-- Enable automated backups
-
-**Alternative (Serverless)**:
-- AWS App Runner or ECS Fargate
-- More complex but auto-scales
-- Consider later if traffic grows
-
----
-
-### 6. Environment Configuration
-
-**Development** (current):
-```python
-# .env.development
-DATABASE_URL=sqlite:///./wos_optimizer.db
-DEBUG=True
+### View Logs (Dev)
+```bash
+ssh -i "C:\Users\adam\.ssh\lightsail-key.pem" ubuntu@98.87.57.79 "sudo journalctl -u streamlit -f"
 ```
 
-**Production**:
-```python
-# .env.production (NEVER COMMIT)
-DATABASE_URL=postgresql://user:pass@rds-endpoint:5432/wos_optimizer
-DISCORD_CLIENT_ID=xxx
-DISCORD_CLIENT_SECRET=xxx
-SECRET_KEY=generate-a-long-random-string
-ADMIN_DISCORD_IDS=your_discord_id
-DEBUG=False
+### View Logs (Live)
+```bash
+ssh -i "C:\Users\adam\.ssh\lightsail-key.pem" ubuntu@52.55.47.124 "sudo journalctl -u streamlit -f"
 ```
 
-**Config loader** (to implement):
-```python
-import os
-from dotenv import load_dotenv
-
-ENV = os.getenv("ENVIRONMENT", "development")
-load_dotenv(f".env.{ENV}")
-
-DATABASE_URL = os.getenv("DATABASE_URL")
-DEBUG = os.getenv("DEBUG", "False").lower() == "true"
-# etc.
+### Restart Service (Dev)
+```bash
+ssh -i "C:\Users\adam\.ssh\lightsail-key.pem" ubuntu@98.87.57.79 "sudo systemctl restart streamlit"
 ```
 
----
-
-### 7. Deployment Checklist
-
-**Before First Deploy**:
-- [ ] PostgreSQL migration complete and tested
-- [ ] Discord OAuth working locally
-- [ ] Admin account system implemented
-- [ ] Environment variable configuration
-- [ ] All secrets out of codebase
-- [ ] Basic error handling/logging
-
-**Deploy Steps**:
-- [ ] Set up EC2 instance
-- [ ] Set up RDS PostgreSQL
-- [ ] Configure security groups
-- [ ] Install dependencies on EC2
-- [ ] Set up Nginx reverse proxy
-- [ ] Configure SSL with Let's Encrypt
-- [ ] Set up systemd service for Streamlit
-- [ ] Configure Route 53 DNS
-- [ ] Run database migrations
-- [ ] Deploy application code
-- [ ] Verify admin account works
-- [ ] Test user registration flow
-
-**Post-Deploy**:
-- [ ] Set up monitoring (CloudWatch)
-- [ ] Configure automated backups
-- [ ] Set up error alerting
-- [ ] Document recovery procedures
-
----
-
-## Feature Flags for Gradual Rollout
-
-Consider implementing feature flags to enable features gradually:
-
-```python
-FEATURES = {
-    "profiles": True,           # Multi-profile support
-    "ai_advisor": False,        # AI features (cost $)
-    "social_sharing": False,    # Share lineups publicly
-    "alliance_features": False, # Alliance-wide tracking
-}
+### Restart Service (Live)
+```bash
+ssh -i "C:\Users\adam\.ssh\lightsail-key.pem" ubuntu@52.55.47.124 "sudo systemctl restart streamlit"
 ```
 
----
+### SSH to Dev
+```bash
+ssh -i "C:\Users\adam\.ssh\lightsail-key.pem" ubuntu@98.87.57.79
+```
 
-## Cost Estimates
+### SSH to Live
+```bash
+ssh -i "C:\Users\adam\.ssh\lightsail-key.pem" ubuntu@52.55.47.124
+```
 
-| Service | Tier | Monthly Cost |
-|---------|------|--------------|
-| EC2 | t3.small | ~$15 |
-| RDS PostgreSQL | db.t3.micro | Free (year 1), then ~$15 |
-| Route 53 | Hosted zone | ~$0.50 |
-| Data Transfer | Light usage | ~$5 |
-| **Total** | | **~$20-35/month** |
+## Snapshot & Instance Management
 
----
+### Create Snapshot
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" lightsail create-instance-snapshot --instance-name wos-dev-micro --instance-snapshot-name <snapshot-name>
+```
 
-## Timeline Suggestion
+### Create Instance from Snapshot
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" lightsail create-instances-from-snapshot --instance-names <new-instance-name> --availability-zone us-east-1a --bundle-id micro_3_0 --instance-snapshot-name <snapshot-name>
+```
 
-1. **Phase 1 - Core Features** (current): Build all features locally
-2. **Phase 2 - Auth & Database**: Implement PostgreSQL + Discord OAuth
-3. **Phase 3 - Admin System**: Build admin dashboard and audit logging
-4. **Phase 4 - Deploy**: Set up AWS infrastructure and deploy
-5. **Phase 5 - Monitor**: Watch for issues, gather feedback, iterate
+### Delete Instance
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" lightsail delete-instance --instance-name <instance-name>
+```
 
----
+## Static IP Management
 
-## Notes & Decisions
+### Allocate New Static IP
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" lightsail allocate-static-ip --static-ip-name <ip-name>
+```
 
-*Add notes here as decisions are made:*
+### Attach Static IP to Instance
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" lightsail attach-static-ip --static-ip-name <ip-name> --instance-name <instance-name>
+```
 
-- **2026-01-10**: Created deployment planning document
-- **Decision**: Use Discord OAuth (community is on Discord)
-- **Decision**: Start with single EC2 + RDS, scale later if needed
-- **Decision**: Admin account will have read access to all profiles with audit logging
-- **Branding**: "Random Chaos Labs" - use this name on landing page and donation callouts
-- **Decision**: Landing page will include donation message: "Random Chaos Labs relies on donations to continue creating content. Please consider donating to the cause."
+### Detach Static IP
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" lightsail detach-static-ip --static-ip-name <ip-name>
+```
 
----
+### List Static IPs
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" lightsail get-static-ips
+```
 
-## Planned Features (Pre-Deployment)
+## Service Configuration (on server)
 
-### Rule-Based Recommendation Engine
-See `RECOMMENDATION_ENGINE.md` for full design.
+**Service file:** `/etc/systemd/system/streamlit.service`
 
-**Summary:** Replace AI-first recommendations with a rule-based engine that uses our curated game data. AI becomes a fallback for complex questions only.
+**Environment file:** `/home/ubuntu/wos-app/.env`
 
-**Benefits:**
-- Instant responses (no API latency)
-- Zero cost for 80%+ of queries
-- Uses accurate, curated data
-- AI available for edge cases
+**App directory:** `/home/ubuntu/wos-app`
 
-**Status:** Design complete, implementation pending
+### Key Environment Variables
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `ENVIRONMENT` | `production`, `sandbox`, or `development` |
+| `EMAIL_MODE` | `smtp` or `debug` |
+| `SMTP_HOST` | SES endpoint (email-smtp.us-east-1.amazonaws.com) |
+| `SMTP_PORT` | 587 |
+| `SMTP_USER` | SES SMTP username |
+| `SMTP_PASSWORD` | SES SMTP password |
+| `SMTP_FROM` | From email address |
+| `SMTP_FROM_NAME` | From display name |
 
----
+### Reload Service After Config Change
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart streamlit
+```
 
-## Questions to Resolve
+## Email (AWS SES)
 
-- [ ] Domain name for the app?
-- [ ] Will you need email notifications? (password reset, etc.)
-- [ ] Any plans for mobile app later? (would need API endpoints)
-- [ ] Budget constraints for hosting?
-- [ ] Expected user count at launch?
+Email is configured via AWS SES. DKIM records are set up in Route 53.
+
+**Status:** Sandbox mode (can only send to verified emails)
+
+SPF record: `"v=spf1 include:spf.improvmx.com include:amazonses.com ~all"`
+
+### Verify an Email Address (for sandbox testing)
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" ses verify-email-identity --email-address user@example.com
+```
+
+### List Verified Emails
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" ses list-identities --identity-type EmailAddress
+```
+
+### Check SES Sending Limits
+```bash
+"C:\Program Files\Amazon\AWSCLIV2\aws.exe" ses get-send-quota
+```
+
+### Request Production Access
+To send to any email address, request production access via AWS Console:
+SES → Account dashboard → Request production access

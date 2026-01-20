@@ -87,6 +87,19 @@ current_page = st.query_params.get("page", "home")
 if not is_authenticated():
     st.markdown("""
     <style>
+    /* Apply background immediately to prevent flash */
+    .stApp {
+        background: linear-gradient(180deg,
+            #0A1628 0%,
+            #0A1628 20%,
+            #0F2847 45%,
+            #1A4B6E 70%,
+            #2E7DA8 88%,
+            #5AADD6 96%,
+            #7DD3FC 100%) !important;
+        background-attachment: fixed !important;
+    }
+
     /* Hide sidebar completely */
     [data-testid="stSidebar"] {
         display: none !important;
