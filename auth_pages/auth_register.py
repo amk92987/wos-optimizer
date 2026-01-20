@@ -222,44 +222,14 @@ def render_register():
                         st.session_state["register_error"] = error
                         st.rerun()
 
-    # Navigation button styled as centered text link
-    st.markdown("""
-    <style>
-    .link-button-container .stButton {
-        text-align: center;
-    }
-    .link-button-container .stButton button {
-        background: none !important;
-        border: none !important;
-        color: #7DD3FC !important;
-        padding: 0 !important;
-        font-size: 14px !important;
-        font-weight: normal !important;
-        box-shadow: none !important;
-        width: auto !important;
-        margin: 0 auto !important;
-    }
-    .link-button-container .stButton button:hover {
-        color: #B8EAFF !important;
-        text-decoration: underline !important;
-        background: none !important;
-    }
-    .link-button-container .stButton button:focus {
-        box-shadow: none !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    # Login link (using button to prevent page reload flash)
+    st.markdown("<div style='height: 10px'></div>", unsafe_allow_html=True)
 
-    # Login link
-    st.markdown("<p style='text-align: center; color: #93C5E0; font-size: 14px; margin: 20px 0 5px 0;'>Already have an account?</p>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        with st.container():
-            st.markdown('<div class="link-button-container">', unsafe_allow_html=True)
-            if st.button("Sign in", key="login_link", use_container_width=True):
-                st.query_params["page"] = "login"
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+        if st.button("Already have an account? Sign in", key="login_link", type="tertiary", use_container_width=True):
+            st.query_params["page"] = "login"
+            st.rerun()
 
     # Footer
     st.markdown("""

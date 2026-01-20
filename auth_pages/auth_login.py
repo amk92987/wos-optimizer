@@ -199,56 +199,18 @@ def render_login():
                     else:
                         st.warning("Please enter email and password")
 
-    # Navigation buttons styled as centered text links
-    st.markdown("""
-    <style>
-    /* Hide button container padding/margins for link-style buttons */
-    .link-button-container .stButton {
-        text-align: center;
-    }
-    .link-button-container .stButton button {
-        background: none !important;
-        border: none !important;
-        color: #7DD3FC !important;
-        padding: 0 !important;
-        font-size: 14px !important;
-        font-weight: normal !important;
-        box-shadow: none !important;
-        width: auto !important;
-        margin: 0 auto !important;
-    }
-    .link-button-container .stButton button:hover {
-        color: #B8EAFF !important;
-        text-decoration: underline !important;
-        background: none !important;
-    }
-    .link-button-container .stButton button:focus {
-        box-shadow: none !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    # Navigation links (using buttons to prevent page reload flash)
+    st.markdown("<div style='height: 10px'></div>", unsafe_allow_html=True)
 
-    # Forgot password
-    st.markdown("<div style='text-align: center; margin-top: 20px;'></div>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 1, 1])
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        with st.container():
-            st.markdown('<div class="link-button-container">', unsafe_allow_html=True)
-            if st.button("Forgot your password?", key="forgot_link", use_container_width=True):
-                st.query_params["page"] = "forgot-password"
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+        if st.button("Forgot your password?", key="forgot_link", type="tertiary", use_container_width=True):
+            st.query_params["page"] = "forgot-password"
+            st.rerun()
 
-    # Register
-    st.markdown("<p style='text-align: center; color: #93C5E0; font-size: 14px; margin: 10px 0 5px 0;'>Don't have an account?</p>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 1, 1])
-    with col2:
-        with st.container():
-            st.markdown('<div class="link-button-container">', unsafe_allow_html=True)
-            if st.button("Create one", key="register_link", use_container_width=True):
-                st.query_params["page"] = "register"
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+        if st.button("Don't have an account? Create one", key="register_link", type="tertiary", use_container_width=True):
+            st.query_params["page"] = "register"
+            st.rerun()
 
     # Footer
     st.markdown("""

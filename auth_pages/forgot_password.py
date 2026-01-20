@@ -132,42 +132,10 @@ def render_forgot_password():
     </style>
     """, unsafe_allow_html=True)
 
-    # CSS for link-styled buttons
-    st.markdown("""
-    <style>
-    .link-button-container .stButton {
-        text-align: center;
-    }
-    .link-button-container .stButton button,
-    .back-link-container .stButton button {
-        background: none !important;
-        border: none !important;
-        color: #7DD3FC !important;
-        padding: 0 !important;
-        font-size: 14px !important;
-        font-weight: normal !important;
-        box-shadow: none !important;
-        width: auto !important;
-    }
-    .link-button-container .stButton button:hover,
-    .back-link-container .stButton button:hover {
-        color: #B8EAFF !important;
-        text-decoration: underline !important;
-        background: none !important;
-    }
-    .link-button-container .stButton button:focus,
-    .back-link-container .stButton button:focus {
-        box-shadow: none !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
-
-    # Back link
-    st.markdown('<div class="back-link-container">', unsafe_allow_html=True)
-    if st.button("← Back to Login", key="back_to_login"):
+    # Back link (using button to prevent page reload flash)
+    if st.button("← Back to Login", key="back_to_login", type="tertiary"):
         st.query_params["page"] = "login"
         st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
 
     st.markdown("<div style='height: 20px'></div>", unsafe_allow_html=True)
 
@@ -260,16 +228,14 @@ def render_forgot_password():
                     else:
                         st.warning("Please enter your email address")
 
-    # Login link
-    st.markdown("<p style='text-align: center; color: #93C5E0; font-size: 14px; margin: 20px 0 5px 0;'>Remember your password?</p>", unsafe_allow_html=True)
-    col1, col2, col3 = st.columns([1, 1, 1])
+    # Login link (using button to prevent page reload flash)
+    st.markdown("<div style='height: 10px'></div>", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
-        with st.container():
-            st.markdown('<div class="link-button-container">', unsafe_allow_html=True)
-            if st.button("Sign in", key="login_link", use_container_width=True):
-                st.query_params["page"] = "login"
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+        if st.button("Remember your password? Sign in", key="login_link", type="tertiary", use_container_width=True):
+            st.query_params["page"] = "login"
+            st.rerun()
 
     # Footer
     st.markdown("""
