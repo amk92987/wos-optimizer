@@ -13,7 +13,8 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import get_db, init_db
 from database.auth import require_admin, get_all_users, login_as_user
-from database.models import User, UserProfile, UserHero, UserInventory, AdminMetrics, AuditLog, Announcement, Base
+from database.models import User, UserProfile, UserHero, UserInventory, AdminMetrics, AuditLog, Announcement, Base, ErrorLog
+from utils.error_logger import get_error_summary
 
 # Ensure tables exist
 init_db()
@@ -392,6 +393,25 @@ with col_right:
     db_path = PROJECT_ROOT / "wos.db"
     db_size = db_path.stat().st_size / (1024 * 1024) if db_path.exists() else 0
 
+    # Get error summary
+    error_summary = get_error_summary()
+    new_errors = error_summary.get('new', 0)
+    errors_24h = error_summary.get('last_24h', 0)
+
+    # Determine status based on errors
+    if new_errors > 5:
+        status_color = "#E74C3C"
+        status_text = "Needs Attention"
+        status_icon = "🔴"
+    elif new_errors > 0:
+        status_color = "#F1C40F"
+        status_text = "Has New Errors"
+        status_icon = "🟡"
+    else:
+        status_color = "#2ECC71"
+        status_text = "Healthy"
+        status_icon = "🟢"
+
     st.markdown(f"""
     <div style="background: rgba(46, 204, 113, 0.1); padding: 16px; border-radius: 8px;">
         <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
@@ -403,11 +423,37 @@ with col_right:
             <strong>{len(admin_users)}</strong>
         </div>
         <div style="display: flex; justify-content: space-between;">
-            <span>🟢 Status</span>
-            <strong style="color: #2ECC71;">Healthy</strong>
+            <span>{status_icon} Status</span>
+            <strong style="color: {status_color};">{status_text}</strong>
         </div>
     </div>
     """, unsafe_allow_html=True)
+
+    # Error metrics
+    st.markdown("")
+    st.markdown("### Error Tracking")
+
+    error_color = "#E74C3C" if new_errors > 0 else "#2ECC71"
+    st.markdown(f"""
+    <div style="background: rgba(231, 76, 60, 0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(231, 76, 60, 0.2);">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span>🆕 New Errors</span>
+            <strong style="color: {error_color};">{new_errors}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span>📊 Last 24 Hours</span>
+            <strong>{errors_24h}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+            <span>✅ Fixed</span>
+            <strong style="color: #2ECC71;">{error_summary.get('fixed', 0)}</strong>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if new_errors > 0:
+        if st.button("View Errors", key="view_errors_btn", use_container_width=True):
+            st.switch_page("pages/5_Admin_Inbox.py")
 
 st.markdown("---")
 

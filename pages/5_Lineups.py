@@ -12,6 +12,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
 from engine.analyzers.lineup_builder import LineupBuilder, LINEUP_TEMPLATES
+from utils.error_logger import log_error
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -60,22 +61,27 @@ def get_current_generation(server_age_days: int) -> int:
 
 def get_user_heroes(db, profile_id: int) -> dict:
     """Get user's owned heroes with their stats."""
-    from database.models import UserHero, Hero
-    user_heroes = db.query(UserHero).filter(UserHero.profile_id == profile_id).all()
-    heroes_dict = {}
-    for uh in user_heroes:
-        hero = db.query(Hero).filter(Hero.id == uh.hero_id).first()
-        if hero:
-            heroes_dict[hero.name] = {
-                "level": uh.level or 1,
-                "stars": uh.stars or 0,
-                "gear_avg": (
-                    (uh.gear_slot1_quality or 0) + (uh.gear_slot2_quality or 0) +
-                    (uh.gear_slot3_quality or 0) + (uh.gear_slot4_quality or 0)
-                ) / 4,
-                "owned": True
-            }
-    return heroes_dict
+    try:
+        from database.models import UserHero, Hero
+        user_heroes = db.query(UserHero).filter(UserHero.profile_id == profile_id).all()
+        heroes_dict = {}
+        for uh in user_heroes:
+            hero = db.query(Hero).filter(Hero.id == uh.hero_id).first()
+            if hero:
+                heroes_dict[hero.name] = {
+                    "level": uh.level or 1,
+                    "stars": uh.stars or 0,
+                    "gear_avg": (
+                        (uh.gear_slot1_quality or 0) + (uh.gear_slot2_quality or 0) +
+                        (uh.gear_slot3_quality or 0) + (uh.gear_slot4_quality or 0)
+                    ) / 4,
+                    "owned": True
+                }
+        return heroes_dict
+    except Exception as e:
+        log_error(e, page="Lineups", function="get_user_heroes", extra_context={"profile_id": profile_id})
+        st.error("Failed to load heroes. Please refresh the page.")
+        return {}
 
 
 def get_best_hero_by_class(user_heroes: dict, hero_class: str, prefer_sustain: bool = False) -> tuple:

@@ -11,6 +11,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import get_db
 from database.auth import create_user, login_user
+from utils.error_logger import log_error
 
 
 def render_register():
@@ -207,16 +208,20 @@ def render_register():
                             </div>
                             """, unsafe_allow_html=True)
 
-                        db = get_db()
-                        user = create_user(db, email, password)
+                        try:
+                            db = get_db()
+                            user = create_user(db, email, password)
 
-                        if user:
-                            login_user(user)
-                            db.close()
-                            st.rerun()
-                        else:
-                            db.close()
-                            error = "Email already registered"
+                            if user:
+                                login_user(user)
+                                db.close()
+                                st.rerun()
+                            else:
+                                db.close()
+                                error = "Email already registered"
+                        except Exception as e:
+                            log_error(e, page="Register", function="create_user", extra_context={"email": email})
+                            error = "An error occurred. Please try again."
 
                     if error:
                         st.session_state["register_error"] = error

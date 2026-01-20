@@ -12,6 +12,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import UserChiefGear, UserChiefCharm
 from utils.theme_colors import get_colors, text_shadow
+from utils.error_logger import log_error
 
 # Initialize
 init_db()
@@ -256,7 +257,8 @@ def get_or_create_chief_gear():
             db.refresh(gear)
         return gear
     except Exception as e:
-        st.error(f"Database error loading gear: {e}. Try deleting wos_optimizer.db and restarting.")
+        log_error(e, page="Chief Tracker", function="get_or_create_chief_gear")
+        st.error("Database error loading gear. Please try again.")
         return None
 
 
@@ -271,7 +273,8 @@ def get_or_create_chief_charms():
             db.refresh(charms)
         return charms
     except Exception as e:
-        st.error(f"Database error loading charms: {e}. Try deleting wos_optimizer.db and restarting.")
+        log_error(e, page="Chief Tracker", function="get_or_create_chief_charms")
+        st.error("Database error loading charms. Please try again.")
         return None
 
 
@@ -386,11 +389,16 @@ def render_gear_slot(slot_id, slot_info, gear_data):
 
     # Save if changed
     if new_tier_id != current_tier_id:
-        setattr(gear_data, quality_attr, new_tier_id)
-        setattr(gear_data, level_attr, new_tier_id)  # Keep in sync
-        db.commit()
-        st.toast(f"Saved {slot_info['name']}")
-        st.rerun()
+        try:
+            setattr(gear_data, quality_attr, new_tier_id)
+            setattr(gear_data, level_attr, new_tier_id)  # Keep in sync
+            db.commit()
+            st.toast(f"Saved {slot_info['name']}")
+            st.rerun()
+        except Exception as e:
+            log_error(e, page="Chief Tracker", function="render_gear_slot", extra_context={"slot_id": slot_id})
+            db.rollback()
+            st.error("Failed to save gear. Please try again.")
 
 
 def render_chief_gear_tab():
@@ -559,10 +567,15 @@ def render_gear_charms(gear_id, gear_name, gear_data, charm_data, key_prefix):
             label_visibility="collapsed"
         )
         if charm_data and new_level != current_levels[0]:
-            setattr(charm_data, slot_fields[0], new_level)
-            db.commit()
-            st.toast(f"Saved {charm_name}")
-            st.rerun()
+            try:
+                setattr(charm_data, slot_fields[0], new_level)
+                db.commit()
+                st.toast(f"Saved {charm_name}")
+                st.rerun()
+            except Exception as e:
+                log_error(e, page="Chief Tracker", function="render_charm_group", extra_context={"charm_name": charm_name, "slot": 0})
+                db.rollback()
+                st.error("Failed to save charm. Please try again.")
 
     # Bottom two charms (slots 2 and 3)
     col_left, col_right = st.columns(2)
@@ -587,10 +600,15 @@ def render_gear_charms(gear_id, gear_name, gear_data, charm_data, key_prefix):
                 label_visibility="collapsed"
             )
             if charm_data and new_level != current_levels[slot_idx]:
-                setattr(charm_data, slot_fields[slot_idx], new_level)
-                db.commit()
-                st.toast(f"Saved {charm_name}")
-                st.rerun()
+                try:
+                    setattr(charm_data, slot_fields[slot_idx], new_level)
+                    db.commit()
+                    st.toast(f"Saved {charm_name}")
+                    st.rerun()
+                except Exception as e:
+                    log_error(e, page="Chief Tracker", function="render_charm_group", extra_context={"charm_name": charm_name, "slot": slot_idx})
+                    db.rollback()
+                    st.error("Failed to save charm. Please try again.")
 
 
 def render_chief_charms_tab():

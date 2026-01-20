@@ -272,7 +272,7 @@ if is_admin_view:
     admin_audit = st.Page("pages/2_Admin_Audit_Log.py", title="Audit Log", icon="📜")
     admin_flags = st.Page("pages/3_Admin_Feature_Flags.py", title="Feature Flags", icon="🚩")
     admin_ai = st.Page("pages/10_Admin_AI.py", title="AI Settings", icon="🤖")
-    admin_feedback = st.Page("pages/5_Admin_Feedback.py", title="Feedback", icon="📬")
+    admin_inbox = st.Page("pages/5_Admin_Inbox.py", title="Inbox", icon="📬")
     admin_database = st.Page("pages/4_Admin_Database.py", title="Database", icon="🗄️")
     admin_game_data = st.Page("pages/6_Admin_Game_Data.py", title="Game Data", icon="🎮")
     admin_integrity = st.Page("pages/7_Admin_Data_Integrity.py", title="Data Integrity", icon="🔍")
@@ -281,7 +281,7 @@ if is_admin_view:
 
     pg = st.navigation({
         "Overview": [admin_home, admin_users],
-        "Communication": [admin_announcements, admin_feedback],
+        "Communication": [admin_announcements, admin_inbox],
         "System": [admin_flags, admin_ai, admin_audit, admin_database, admin_integrity],
         "Data": [admin_game_data, admin_reports, admin_export],
     }, expanded=True)

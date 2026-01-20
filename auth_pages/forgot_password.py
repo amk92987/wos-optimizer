@@ -13,6 +13,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from database.db import get_db
 from database.auth import create_password_reset_token
 from utils.email import send_password_reset_email
+from utils.error_logger import log_error
 
 
 def get_base_url():
@@ -233,20 +234,24 @@ def render_forgot_password():
                             </div>
                             """, unsafe_allow_html=True)
 
-                        db = get_db()
-                        success, message, token = create_password_reset_token(db, email)
+                        try:
+                            db = get_db()
+                            success, message, token = create_password_reset_token(db, email)
 
-                        if success and token:
-                            # Send email
-                            base_url = get_base_url()
-                            email_success, email_msg = send_password_reset_email(email, token, base_url)
+                            if success and token:
+                                # Send email
+                                base_url = get_base_url()
+                                email_success, email_msg = send_password_reset_email(email, token, base_url)
 
-                            if email_success:
-                                st.session_state["reset_email_sent"] = True
-                            else:
-                                st.session_state["forgot_error"] = f"Failed to send email. Please try again."
+                                if email_success:
+                                    st.session_state["reset_email_sent"] = True
+                                else:
+                                    st.session_state["forgot_error"] = f"Failed to send email. Please try again."
 
-                        db.close()
+                            db.close()
+                        except Exception as e:
+                            log_error(e, page="Forgot Password", function="create_password_reset_token", extra_context={"email": email})
+                            st.session_state["forgot_error"] = "An error occurred. Please try again."
                         st.rerun()
                     else:
                         st.warning("Please enter your email address")

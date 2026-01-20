@@ -16,6 +16,7 @@ HERO_IMAGES_DIR = PROJECT_ROOT / "assets" / "heroes"
 
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import Hero, UserHero
+from utils.error_logger import log_error
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -241,92 +242,105 @@ def save_user_hero(hero_data: dict, level: int = 1, stars: int = 0, ascension: i
                    exp_skill1: int = 1, exp_skill2: int = 1, exp_skill3: int = 1,
                    exped_skill1: int = 1, exped_skill2: int = 1, exped_skill3: int = 1,
                    gear_data: dict = None, mythic_data: dict = None):
-    hero_ref = db.query(Hero).filter(Hero.name == hero_data['name']).first()
-    if not hero_ref:
-        hero_ref = Hero(
-            name=hero_data['name'],
-            generation=hero_data['generation'],
-            hero_class=hero_data['hero_class'],
-            rarity=hero_data['rarity'],
-            tier_overall=hero_data['tier_overall'],
-            tier_expedition=hero_data['tier_expedition'],
-            tier_exploration=hero_data['tier_exploration'],
-            image_filename=hero_data['image_filename']
-        )
-        db.add(hero_ref)
-        db.commit()
-        db.refresh(hero_ref)
+    try:
+        hero_ref = db.query(Hero).filter(Hero.name == hero_data['name']).first()
+        if not hero_ref:
+            hero_ref = Hero(
+                name=hero_data['name'],
+                generation=hero_data['generation'],
+                hero_class=hero_data['hero_class'],
+                rarity=hero_data['rarity'],
+                tier_overall=hero_data['tier_overall'],
+                tier_expedition=hero_data['tier_expedition'],
+                tier_exploration=hero_data['tier_exploration'],
+                image_filename=hero_data['image_filename']
+            )
+            db.add(hero_ref)
+            db.commit()
+            db.refresh(hero_ref)
 
-    user_hero = db.query(UserHero).filter(
-        UserHero.profile_id == profile.id,
-        UserHero.hero_id == hero_ref.id
-    ).first()
-
-    if user_hero:
-        user_hero.level = level
-        user_hero.stars = stars
-        user_hero.ascension_tier = ascension
-        user_hero.exploration_skill_1_level = exp_skill1
-        user_hero.exploration_skill_2_level = exp_skill2
-        user_hero.exploration_skill_3_level = exp_skill3
-        user_hero.expedition_skill_1_level = exped_skill1
-        user_hero.expedition_skill_2_level = exped_skill2
-        user_hero.expedition_skill_3_level = exped_skill3
-        if gear_data:
-            user_hero.gear_slot1_quality = gear_data.get('slot1_quality', 0)
-            user_hero.gear_slot1_level = gear_data.get('slot1_level', 0)
-            user_hero.gear_slot1_mastery = gear_data.get('slot1_mastery', 0)
-            user_hero.gear_slot2_quality = gear_data.get('slot2_quality', 0)
-            user_hero.gear_slot2_level = gear_data.get('slot2_level', 0)
-            user_hero.gear_slot2_mastery = gear_data.get('slot2_mastery', 0)
-            user_hero.gear_slot3_quality = gear_data.get('slot3_quality', 0)
-            user_hero.gear_slot3_level = gear_data.get('slot3_level', 0)
-            user_hero.gear_slot3_mastery = gear_data.get('slot3_mastery', 0)
-            user_hero.gear_slot4_quality = gear_data.get('slot4_quality', 0)
-            user_hero.gear_slot4_level = gear_data.get('slot4_level', 0)
-            user_hero.gear_slot4_mastery = gear_data.get('slot4_mastery', 0)
-        if mythic_data:
-            user_hero.mythic_gear_unlocked = mythic_data.get('unlocked', False)
-            user_hero.mythic_gear_quality = mythic_data.get('quality', 0)
-            user_hero.mythic_gear_level = mythic_data.get('level', 0)
-            user_hero.mythic_gear_mastery = mythic_data.get('mastery', 0)
-    else:
-        user_hero = UserHero(
-            profile_id=profile.id,
-            hero_id=hero_ref.id,
-            level=level,
-            stars=stars,
-            ascension_tier=ascension,
-            exploration_skill_1_level=exp_skill1,
-            exploration_skill_2_level=exp_skill2,
-            exploration_skill_3_level=exp_skill3,
-            expedition_skill_1_level=exped_skill1,
-            expedition_skill_2_level=exped_skill2,
-            expedition_skill_3_level=exped_skill3
-        )
-        db.add(user_hero)
-
-    # Auto-update generation if hero is from a newer generation than profile shows
-    hero_gen = hero_data.get('generation', 1)
-    current_gen = get_current_generation(profile.server_age_days)
-    if hero_gen > current_gen:
-        # Update server_age_days to minimum for that generation
-        profile.server_age_days = get_min_days_for_generation(hero_gen)
-
-    db.commit()
-    return True
-
-
-def remove_user_hero(hero_name: str):
-    hero_ref = db.query(Hero).filter(Hero.name == hero_name).first()
-    if hero_ref:
         user_hero = db.query(UserHero).filter(
             UserHero.profile_id == profile.id,
             UserHero.hero_id == hero_ref.id
         ).first()
+
         if user_hero:
-            db.delete(user_hero)
-            db.commit()
+            user_hero.level = level
+            user_hero.stars = stars
+            user_hero.ascension_tier = ascension
+            user_hero.exploration_skill_1_level = exp_skill1
+            user_hero.exploration_skill_2_level = exp_skill2
+            user_hero.exploration_skill_3_level = exp_skill3
+            user_hero.expedition_skill_1_level = exped_skill1
+            user_hero.expedition_skill_2_level = exped_skill2
+            user_hero.expedition_skill_3_level = exped_skill3
+            if gear_data:
+                user_hero.gear_slot1_quality = gear_data.get('slot1_quality', 0)
+                user_hero.gear_slot1_level = gear_data.get('slot1_level', 0)
+                user_hero.gear_slot1_mastery = gear_data.get('slot1_mastery', 0)
+                user_hero.gear_slot2_quality = gear_data.get('slot2_quality', 0)
+                user_hero.gear_slot2_level = gear_data.get('slot2_level', 0)
+                user_hero.gear_slot2_mastery = gear_data.get('slot2_mastery', 0)
+                user_hero.gear_slot3_quality = gear_data.get('slot3_quality', 0)
+                user_hero.gear_slot3_level = gear_data.get('slot3_level', 0)
+                user_hero.gear_slot3_mastery = gear_data.get('slot3_mastery', 0)
+                user_hero.gear_slot4_quality = gear_data.get('slot4_quality', 0)
+                user_hero.gear_slot4_level = gear_data.get('slot4_level', 0)
+                user_hero.gear_slot4_mastery = gear_data.get('slot4_mastery', 0)
+            if mythic_data:
+                user_hero.mythic_gear_unlocked = mythic_data.get('unlocked', False)
+                user_hero.mythic_gear_quality = mythic_data.get('quality', 0)
+                user_hero.mythic_gear_level = mythic_data.get('level', 0)
+                user_hero.mythic_gear_mastery = mythic_data.get('mastery', 0)
+        else:
+            user_hero = UserHero(
+                profile_id=profile.id,
+                hero_id=hero_ref.id,
+                level=level,
+                stars=stars,
+                ascension_tier=ascension,
+                exploration_skill_1_level=exp_skill1,
+                exploration_skill_2_level=exp_skill2,
+                exploration_skill_3_level=exp_skill3,
+                expedition_skill_1_level=exped_skill1,
+                expedition_skill_2_level=exped_skill2,
+                expedition_skill_3_level=exped_skill3
+            )
+            db.add(user_hero)
+
+        # Auto-update generation if hero is from a newer generation than profile shows
+        hero_gen = hero_data.get('generation', 1)
+        current_gen = get_current_generation(profile.server_age_days)
+        if hero_gen > current_gen:
+            # Update server_age_days to minimum for that generation
+            profile.server_age_days = get_min_days_for_generation(hero_gen)
+
+        db.commit()
+        return True
+    except Exception as e:
+        log_error(e, page="Hero Tracker", function="save_user_hero", extra_context={"hero_name": hero_data.get('name')})
+        db.rollback()
+        st.error("Failed to save hero. Please try again.")
+        return False
+
+
+def remove_user_hero(hero_name: str):
+    try:
+        hero_ref = db.query(Hero).filter(Hero.name == hero_name).first()
+        if hero_ref:
+            user_hero = db.query(UserHero).filter(
+                UserHero.profile_id == profile.id,
+                UserHero.hero_id == hero_ref.id
+            ).first()
+            if user_hero:
+                db.delete(user_hero)
+                db.commit()
+        return True
+    except Exception as e:
+        log_error(e, page="Hero Tracker", function="remove_user_hero", extra_context={"hero_name": hero_name})
+        db.rollback()
+        st.error("Failed to remove hero. Please try again.")
+        return False
 
 
 def render_hero_row(hero: dict, user_hero, hero_key: str):

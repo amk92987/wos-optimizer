@@ -11,6 +11,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import get_db
 from database.auth import authenticate_user, login_user
+from utils.error_logger import log_error
 
 
 def render_login():
@@ -185,16 +186,21 @@ def render_login():
                             </div>
                             """, unsafe_allow_html=True)
 
-                        db = get_db()
-                        user = authenticate_user(db, email, password)
+                        try:
+                            db = get_db()
+                            user = authenticate_user(db, email, password)
 
-                        if user:
-                            login_user(user)
-                            db.close()
-                            st.rerun()
-                        else:
-                            db.close()
-                            st.session_state["login_error"] = "Invalid email or password"
+                            if user:
+                                login_user(user)
+                                db.close()
+                                st.rerun()
+                            else:
+                                db.close()
+                                st.session_state["login_error"] = "Invalid email or password"
+                                st.rerun()
+                        except Exception as e:
+                            log_error(e, page="Login", function="authenticate_user", extra_context={"email": email})
+                            st.session_state["login_error"] = "An error occurred. Please try again."
                             st.rerun()
                     else:
                         st.warning("Please enter email and password")

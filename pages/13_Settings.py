@@ -11,6 +11,19 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import UserHero, UserInventory
+from utils.error_logger import log_error
+
+
+def safe_save(context: str = "settings"):
+    """Safely commit database changes with error logging."""
+    try:
+        safe_save()
+        return True
+    except Exception as e:
+        log_error(e, page="Settings", function="safe_save", extra_context={"context": context})
+        db.rollback()
+        st.error("Failed to save. Please try again.")
+        return False
 
 
 # Load CSS
@@ -140,7 +153,7 @@ with col1:
     if server_days != profile.server_age_days:
         if st.button("Update Server Age", type="primary"):
             profile.server_age_days = server_days
-            db.commit()
+            safe_save()
             st.toast("Saved")
             st.rerun()
 
@@ -203,7 +216,7 @@ with col2:
     if new_furnace_level != profile.furnace_level or new_fc_level != current_fc_normalized:
         profile.furnace_level = new_furnace_level
         profile.furnace_fc_level = new_fc_level
-        db.commit()
+        safe_save()
         st.toast("Saved")
         st.rerun()
 
@@ -256,7 +269,7 @@ with col1:
     )
     if selected_spending != profile.spending_profile:
         profile.spending_profile = selected_spending
-        db.commit()
+        safe_save()
         st.toast("Saved")
 
 with col2:
@@ -277,7 +290,7 @@ with col2:
     )
     if selected_focus != profile.priority_focus:
         profile.priority_focus = selected_focus
-        db.commit()
+        safe_save()
         st.toast("Saved")
 
 with col3:
@@ -299,7 +312,7 @@ with col3:
     )
     if selected_role != profile.alliance_role:
         profile.alliance_role = selected_role
-        db.commit()
+        safe_save()
         st.toast("Saved")
 
 st.markdown("---")
@@ -330,7 +343,7 @@ if (new_svs != profile.priority_svs or new_rally != profile.priority_rally or
     profile.priority_castle_battle = new_castle
     profile.priority_exploration = new_exploration
     profile.priority_gathering = new_gathering
-    db.commit()
+    safe_save()
     st.toast("Saved")
 
 st.markdown("---")
@@ -351,7 +364,7 @@ with st.expander("🔧 Reset Options"):
             profile.spending_profile = "f2p"
             profile.priority_focus = "balanced_growth"
             profile.alliance_role = "filler"
-            db.commit()
+            safe_save()
             st.toast("Priorities reset")
             st.rerun()
 
@@ -364,7 +377,7 @@ with st.expander("🔧 Reset Options"):
             if st.button("Yes, Clear Everything", type="primary"):
                 db.query(UserHero).filter(UserHero.profile_id == profile.id).delete()
                 db.query(UserInventory).filter(UserInventory.profile_id == profile.id).delete()
-                db.commit()
+                safe_save()
                 st.session_state.confirm_reset = False
                 st.success("Data cleared")
                 st.rerun()

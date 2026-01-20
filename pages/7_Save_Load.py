@@ -11,6 +11,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile, get_user_profiles
 from database.models import UserHero, Hero, UserProfile
+from utils.error_logger import log_error
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
@@ -58,6 +59,7 @@ def delete_profile(profile_id: int, hard_delete: bool = False) -> tuple[bool, st
             db.commit()
             return True, "Profile deleted"
     except Exception as e:
+        log_error(e, page="Save/Load", function="delete_profile", extra_context={"profile_id": profile_id})
         return False, f"Error: {str(e)}"
 
 
@@ -82,6 +84,7 @@ def restore_profile(profile_id: int) -> tuple[bool, str]:
             return True, "Profile restored"
         return False, "Profile not found or not deleted"
     except Exception as e:
+        log_error(e, page="Save/Load", function="restore_profile", extra_context={"profile_id": profile_id})
         return False, f"Error: {str(e)}"
 
 
@@ -96,6 +99,7 @@ def update_profile(profile_id: int, new_name: str, state_number: int = None) -> 
             return True, "Profile updated"
         return False, "Profile not found"
     except Exception as e:
+        log_error(e, page="Save/Load", function="update_profile", extra_context={"profile_id": profile_id, "new_name": new_name})
         return False, f"Error: {str(e)}"
 
 
@@ -165,6 +169,7 @@ def duplicate_profile(profile_id: int, new_name: str) -> tuple[bool, str, int]:
         db.commit()
         return True, f"Duplicated with {len(original_heroes)} heroes", new_profile.id
     except Exception as e:
+        log_error(e, page="Save/Load", function="duplicate_profile", extra_context={"profile_id": profile_id, "new_name": new_name})
         return False, f"Error: {str(e)}", None
 
 

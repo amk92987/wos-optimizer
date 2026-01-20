@@ -8,11 +8,19 @@ import streamlit as st
 from datetime import datetime
 from typing import Optional
 from sqlalchemy.orm import Session
+import re
 
 from database.models import User, UserProfile, UserDailyLogin
 
 
-import re
+def _log_auth_error(exception, function_name: str, extra_context: dict = None):
+    """Log authentication errors. Lazy import to avoid circular dependency."""
+    try:
+        from utils.error_logger import log_error
+        log_error(exception, page="Auth", function=function_name, extra_context=extra_context, send_email=False)
+    except Exception:
+        # Don't let logging errors break auth
+        pass
 
 def is_valid_email(email: str) -> bool:
     """Validate email format."""
@@ -50,54 +58,59 @@ def create_user(db: Session, email: str, password: str,
     Username is optional and defaults to email if not provided.
     Creates a default profile with {email_prefix}_city1 naming unless skip_default_profile=True.
     """
-    # Normalize email
-    email = normalize_email(email)
+    try:
+        # Normalize email
+        email = normalize_email(email)
 
-    # Email is required and must be valid
-    if not is_valid_email(email):
-        return None
+        # Email is required and must be valid
+        if not is_valid_email(email):
+            return None
 
-    # Check if email already exists
-    if db.query(User).filter(User.email == email).first():
-        return None
+        # Check if email already exists
+        if db.query(User).filter(User.email == email).first():
+            return None
 
-    # Username defaults to email if not provided
-    if not username:
-        username = email
+        # Username defaults to email if not provided
+        if not username:
+            username = email
 
-    # Check if username exists (for backwards compatibility)
-    if db.query(User).filter(User.username == username).first():
-        return None
+        # Check if username exists (for backwards compatibility)
+        if db.query(User).filter(User.username == username).first():
+            return None
 
-    user = User(
-        username=username,
-        email=email,
-        password_hash=hash_password(password),
-        role=role,
-        is_active=True
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    # Create default profile for new users
-    if not skip_default_profile:
-        # Extract email prefix (part before @)
-        email_prefix = email.split('@')[0]
-        profile_name = f"{email_prefix}_city1"
-
-        default_profile = UserProfile(
-            user_id=user.id,
-            name=profile_name,
-            furnace_level=1,
-            server_age_days=0,
-            spending_profile="f2p",
-            alliance_role="filler"
+        user = User(
+            username=username,
+            email=email,
+            password_hash=hash_password(password),
+            role=role,
+            is_active=True
         )
-        db.add(default_profile)
+        db.add(user)
         db.commit()
+        db.refresh(user)
 
-    return user
+        # Create default profile for new users
+        if not skip_default_profile:
+            # Extract email prefix (part before @)
+            email_prefix = email.split('@')[0]
+            profile_name = f"{email_prefix}_city1"
+
+            default_profile = UserProfile(
+                user_id=user.id,
+                name=profile_name,
+                furnace_level=1,
+                server_age_days=0,
+                spending_profile="f2p",
+                alliance_role="filler"
+            )
+            db.add(default_profile)
+            db.commit()
+
+        return user
+    except Exception as e:
+        _log_auth_error(e, "create_user", {"email": email})
+        db.rollback()
+        raise
 
 
 def record_daily_login(db: Session, user_id: int):
@@ -134,31 +147,35 @@ def authenticate_user(db: Session, email_or_username: str, password: str) -> Opt
     Authenticate a user by email (primary) or username (legacy fallback).
     Email lookup is case-insensitive.
     """
-    # Normalize input for email lookup
-    normalized = normalize_email(email_or_username)
+    try:
+        # Normalize input for email lookup
+        normalized = normalize_email(email_or_username)
 
-    # Try email first (primary method)
-    user = db.query(User).filter(User.email == normalized).first()
+        # Try email first (primary method)
+        user = db.query(User).filter(User.email == normalized).first()
 
-    # Fall back to username for legacy accounts
-    if not user:
-        user = db.query(User).filter(User.username == email_or_username).first()
+        # Fall back to username for legacy accounts
+        if not user:
+            user = db.query(User).filter(User.username == email_or_username).first()
 
-    if not user:
-        return None
+        if not user:
+            return None
 
-    if not user.is_active:
-        return None
+        if not user.is_active:
+            return None
 
-    if not verify_password(password, user.password_hash):
-        return None
+        if not verify_password(password, user.password_hash):
+            return None
 
-    # Update last login and record daily login
-    user.last_login = datetime.utcnow()
-    db.commit()
-    record_daily_login(db, user.id)
+        # Update last login and record daily login
+        user.last_login = datetime.utcnow()
+        db.commit()
+        record_daily_login(db, user.id)
 
-    return user
+        return user
+    except Exception as e:
+        _log_auth_error(e, "authenticate_user", {"email_or_username": email_or_username})
+        raise
 
 
 def get_user_by_id(db: Session, user_id: int) -> Optional[User]:
@@ -552,35 +569,40 @@ def create_password_reset_token(db: Session, email: str) -> tuple[bool, str, Opt
     from datetime import timedelta
     from database.models import PasswordResetToken
 
-    # Normalize email
-    email = normalize_email(email)
+    try:
+        # Normalize email
+        email = normalize_email(email)
 
-    # Find user by email
-    user = db.query(User).filter(User.email == email).first()
-    if not user:
-        # Don't reveal if email exists for security
-        return True, "If an account exists with that email, a reset link has been sent.", None
+        # Find user by email
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            # Don't reveal if email exists for security
+            return True, "If an account exists with that email, a reset link has been sent.", None
 
-    # Check if user is active
-    if not user.is_active:
-        return True, "If an account exists with that email, a reset link has been sent.", None
+        # Check if user is active
+        if not user.is_active:
+            return True, "If an account exists with that email, a reset link has been sent.", None
 
-    # Delete any existing tokens for this user
-    db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user.id).delete()
+        # Delete any existing tokens for this user
+        db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user.id).delete()
 
-    # Generate secure token (32 bytes = 64 hex chars)
-    token = secrets.token_hex(32)
+        # Generate secure token (32 bytes = 64 hex chars)
+        token = secrets.token_hex(32)
 
-    # Create token record (expires in 1 hour)
-    reset_token = PasswordResetToken(
-        user_id=user.id,
-        token=token,
-        expires_at=datetime.utcnow() + timedelta(hours=1)
-    )
-    db.add(reset_token)
-    db.commit()
+        # Create token record (expires in 1 hour)
+        reset_token = PasswordResetToken(
+            user_id=user.id,
+            token=token,
+            expires_at=datetime.utcnow() + timedelta(hours=1)
+        )
+        db.add(reset_token)
+        db.commit()
 
-    return True, "If an account exists with that email, a reset link has been sent.", token
+        return True, "If an account exists with that email, a reset link has been sent.", token
+    except Exception as e:
+        _log_auth_error(e, "create_password_reset_token", {"email": email})
+        db.rollback()
+        raise
 
 
 def validate_password_reset_token(db: Session, token: str) -> tuple[bool, str, Optional[int]]:
@@ -616,31 +638,36 @@ def reset_password_with_token(db: Session, token: str, new_password: str) -> tup
     """
     from database.models import PasswordResetToken
 
-    # Validate token
-    valid, message, user_id = validate_password_reset_token(db, token)
-    if not valid:
-        return False, message
+    try:
+        # Validate token
+        valid, message, user_id = validate_password_reset_token(db, token)
+        if not valid:
+            return False, message
 
-    # Validate new password
-    if len(new_password) < 6:
-        return False, "Password must be at least 6 characters."
+        # Validate new password
+        if len(new_password) < 6:
+            return False, "Password must be at least 6 characters."
 
-    # Get user
-    user = get_user_by_id(db, user_id)
-    if not user:
-        return False, "User not found."
+        # Get user
+        user = get_user_by_id(db, user_id)
+        if not user:
+            return False, "User not found."
 
-    # Update password
-    user.password_hash = hash_password(new_password)
+        # Update password
+        user.password_hash = hash_password(new_password)
 
-    # Mark token as used
-    reset_token = db.query(PasswordResetToken).filter(PasswordResetToken.token == token).first()
-    reset_token.used = True
-    reset_token.used_at = datetime.utcnow()
+        # Mark token as used
+        reset_token = db.query(PasswordResetToken).filter(PasswordResetToken.token == token).first()
+        reset_token.used = True
+        reset_token.used_at = datetime.utcnow()
 
-    db.commit()
+        db.commit()
 
-    return True, "Password has been reset successfully. You can now log in."
+        return True, "Password has been reset successfully. You can now log in."
+    except Exception as e:
+        _log_auth_error(e, "reset_password_with_token", {"token_prefix": token[:8] if token else None})
+        db.rollback()
+        raise
 
 
 # ============================================
