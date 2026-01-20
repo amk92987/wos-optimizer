@@ -199,18 +199,43 @@ def render_login():
                     else:
                         st.warning("Please enter email and password")
 
-    # Navigation links using Streamlit buttons (prevents page reload flash)
-    st.markdown("<div style='height: 15px'></div>", unsafe_allow_html=True)
+    # Navigation links styled as text links (using buttons to prevent page reload flash)
+    # CSS to make these specific buttons look like inline text links
+    st.markdown("""
+    <style>
+    /* Style nav link buttons as text links */
+    div[data-testid="stVerticalBlock"] button[kind="tertiary"] {
+        background: none !important;
+        border: none !important;
+        color: #7DD3FC !important;
+        padding: 0 !important;
+        font-size: 14px !important;
+        font-weight: normal !important;
+        box-shadow: none !important;
+        min-height: 0 !important;
+        height: auto !important;
+    }
+    div[data-testid="stVerticalBlock"] button[kind="tertiary"]:hover {
+        color: #B8EAFF !important;
+        text-decoration: underline !important;
+        background: none !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-    link_col1, link_col2, link_col3 = st.columns([1, 2, 1])
-    with link_col2:
-        if st.button("Forgot your password?", key="forgot_link", use_container_width=True, type="tertiary"):
+    # Forgot password link
+    forgot_col1, forgot_col2, forgot_col3 = st.columns([1.2, 1.6, 1.2])
+    with forgot_col2:
+        if st.button("Forgot your password?", key="forgot_link", type="tertiary"):
             st.query_params["page"] = "forgot-password"
             st.rerun()
 
-        st.markdown("<p style='text-align: center; color: #93C5E0; font-size: 14px; margin: 5px 0;'>Don't have an account?</p>", unsafe_allow_html=True)
-
-        if st.button("Create one", key="register_link", use_container_width=True, type="tertiary"):
+    # Register link - text with inline button
+    reg_col1, reg_col2, reg_col3, reg_col4, reg_col5 = st.columns([1, 1.1, 0.6, 1.1, 1])
+    with reg_col2:
+        st.markdown("<p style='text-align: right; color: #93C5E0; font-size: 14px; margin: 0; padding-top: 6px;'>Don't have an account?</p>", unsafe_allow_html=True)
+    with reg_col3:
+        if st.button("Create one", key="register_link", type="tertiary"):
             st.query_params["page"] = "register"
             st.rerun()
 
