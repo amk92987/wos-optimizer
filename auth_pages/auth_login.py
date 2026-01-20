@@ -199,19 +199,20 @@ def render_login():
                     else:
                         st.warning("Please enter email and password")
 
-    # Forgot password link
-    st.markdown("""
-    <div style="text-align: center; margin-top: 15px; color: #93C5E0; font-size: 14px;">
-        <a href="?page=forgot-password">Forgot your password?</a>
-    </div>
-    """, unsafe_allow_html=True)
+    # Navigation links using Streamlit buttons (prevents page reload flash)
+    st.markdown("<div style='height: 15px'></div>", unsafe_allow_html=True)
 
-    # Register link
-    st.markdown("""
-    <div style="text-align: center; margin-top: 10px; color: #93C5E0; font-size: 14px;">
-        Don't have an account? <a href="?page=register">Create one</a>
-    </div>
-    """, unsafe_allow_html=True)
+    link_col1, link_col2, link_col3 = st.columns([1, 2, 1])
+    with link_col2:
+        if st.button("Forgot your password?", key="forgot_link", use_container_width=True, type="tertiary"):
+            st.query_params["page"] = "forgot-password"
+            st.rerun()
+
+        st.markdown("<p style='text-align: center; color: #93C5E0; font-size: 14px; margin: 5px 0;'>Don't have an account?</p>", unsafe_allow_html=True)
+
+        if st.button("Create one", key="register_link", use_container_width=True, type="tertiary"):
+            st.query_params["page"] = "register"
+            st.rerun()
 
     # Footer
     st.markdown("""

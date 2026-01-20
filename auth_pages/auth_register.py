@@ -222,12 +222,16 @@ def render_register():
                         st.session_state["register_error"] = error
                         st.rerun()
 
-    # Login link
-    st.markdown("""
-    <div style="text-align: center; margin-top: 20px; color: #93C5E0; font-size: 14px;">
-        Already have an account? <a href="?page=login">Sign in</a>
-    </div>
-    """, unsafe_allow_html=True)
+    # Login link using Streamlit button (prevents page reload flash)
+    st.markdown("<div style='height: 15px'></div>", unsafe_allow_html=True)
+
+    link_col1, link_col2, link_col3 = st.columns([1, 2, 1])
+    with link_col2:
+        st.markdown("<p style='text-align: center; color: #93C5E0; font-size: 14px; margin: 5px 0;'>Already have an account?</p>", unsafe_allow_html=True)
+
+        if st.button("Sign in", key="login_link", use_container_width=True, type="tertiary"):
+            st.query_params["page"] = "login"
+            st.rerun()
 
     # Footer
     st.markdown("""
