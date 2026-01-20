@@ -13,7 +13,13 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import get_db, init_db
 from database.auth import require_admin, get_current_user_id
-from database.models import Feedback, User, ErrorLog
+from database.models import Feedback, User, ErrorLog, MessageThread, Message
+from database.messaging_service import (
+    get_admin_conversations, create_message_thread, add_message_to_thread,
+    has_unread_user_replies, mark_user_replies_read, get_thread_messages,
+    close_thread, reopen_thread, get_admin_unread_count,
+    mark_message_unread, mark_message_read
+)
 
 init_db()
 
@@ -29,17 +35,40 @@ st.markdown("# 📬 Inbox")
 
 db = get_db()
 
-# Top-level tabs for inbox categories
-inbox_tab_feedback, inbox_tab_errors, inbox_tab_conversations = st.tabs([
-    "💬 Feedback",
-    "🚨 Errors",
-    "📨 Conversations"
-])
+# Get unread counts for tab labels
+admin_unread_convos = get_admin_unread_count(db)
+convo_badge = f" ({admin_unread_convos})" if admin_unread_convos > 0 else ""
+
+# Use session state to preserve tab selection across reruns
+if 'admin_inbox_tab' not in st.session_state:
+    st.session_state.admin_inbox_tab = "Feedback"
+
+# Tab options
+tab_options = ["Feedback", "Errors", "Conversations"]
+tab_labels = {
+    "Feedback": "💬 Feedback",
+    "Errors": "🚨 Errors",
+    "Conversations": f"📨 Conversations{convo_badge}"
+}
+
+# Tab selection using radio buttons (preserves state on rerun)
+selected_admin_tab = st.radio(
+    "Select tab",
+    tab_options,
+    format_func=lambda x: tab_labels[x],
+    horizontal=True,
+    label_visibility="collapsed",
+    key="admin_inbox_tab_selector",
+    index=tab_options.index(st.session_state.admin_inbox_tab)
+)
+st.session_state.admin_inbox_tab = selected_admin_tab
+
+st.markdown("---")
 
 # ============================================
 # FEEDBACK TAB
 # ============================================
-with inbox_tab_feedback:
+if selected_admin_tab == "Feedback":
     # Stats row
     total = db.query(Feedback).count()
     new_count = db.query(Feedback).filter(Feedback.status == 'new').count()
@@ -295,7 +324,7 @@ with inbox_tab_feedback:
 # ============================================
 # ERRORS TAB
 # ============================================
-with inbox_tab_errors:
+if selected_admin_tab == "Errors":
     # Stats row
     yesterday = datetime.utcnow() - timedelta(hours=24)
     error_new = db.query(ErrorLog).filter(ErrorLog.status == 'new').count()
@@ -519,17 +548,190 @@ with inbox_tab_errors:
 
 
 # ============================================
-# CONVERSATIONS TAB (Future)
+# CONVERSATIONS TAB
 # ============================================
-with inbox_tab_conversations:
-    st.info("**Coming Soon:** Direct messaging with users will be available here.")
-    st.markdown("""
-    Planned features:
-    - Send messages to users about their feedback or errors
-    - Receive responses from users
-    - Track conversation history
-    - Notify users when their issues are resolved
-    """)
+if selected_admin_tab == "Conversations":
+    # New Message button
+    col1, col2, col3 = st.columns([1, 1, 4])
+    with col1:
+        if st.button("➕ New Message", key="new_convo_btn"):
+            st.session_state.show_new_convo_form = True
+
+    # New conversation form
+    if st.session_state.get('show_new_convo_form'):
+        st.markdown("---")
+        st.markdown("### New Conversation")
+
+        # Get list of users to message
+        users = db.query(User).filter(
+            User.is_active == True,
+            User.role != 'admin'
+        ).order_by(User.username).all()
+
+        if not users:
+            st.warning("No users available to message.")
+        else:
+            with st.form(key="new_conversation_form"):
+                user_options = {f"{u.username} ({u.email})": u.id for u in users}
+                selected_user = st.selectbox("Select User", list(user_options.keys()))
+                subject = st.text_input("Subject *", placeholder="Conversation subject...")
+                message_text = st.text_area("Message *", placeholder="Your message...", height=150)
+
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    if st.form_submit_button("📨 Send Message", use_container_width=True, type="primary"):
+                        if not subject:
+                            st.error("Subject is required")
+                        elif not message_text:
+                            st.error("Message is required")
+                        else:
+                            user_id = user_options[selected_user]
+                            create_message_thread(
+                                db,
+                                user_id=user_id,
+                                subject=subject,
+                                admin_id=get_current_user_id(),
+                                initial_message=message_text
+                            )
+                            st.session_state.show_new_convo_form = False
+                            st.success("Message sent!")
+                            st.rerun()
+                with col2:
+                    if st.form_submit_button("Cancel", use_container_width=True):
+                        st.session_state.show_new_convo_form = False
+                        st.rerun()
+
+        st.markdown("---")
+
+    # List all conversations
+    threads = get_admin_conversations(db, limit=50)
+
+    if not threads:
+        st.info("No conversations yet. Click 'New Message' to start one.")
+    else:
+        # Track which thread is expanded
+        if 'admin_expanded_thread' not in st.session_state:
+            st.session_state.admin_expanded_thread = None
+
+        for thread in threads:
+            user = thread.user
+            has_unread = has_unread_user_replies(db, thread.id)
+
+            unread_badge = " 🔵" if has_unread else ""
+            closed_badge = " (Closed)" if thread.is_closed else ""
+            username = html.escape(user.username if user else "Unknown")
+            subject = html.escape(thread.subject)
+
+            with st.container():
+                col1, col2, col3, col4 = st.columns([5.3, 0.7, 1, 0.5])
+                with col1:
+                    time_str = thread.updated_at.strftime("%b %d, %Y %I:%M %p")
+                    st.markdown(f"""
+                    <div style="font-weight: bold; font-size: 15px;">
+                        {subject}{unread_badge}{closed_badge}
+                    </div>
+                    <div style="font-size: 12px; color: #888;">
+                        To: {username} · Last activity: {time_str}
+                    </div>
+                    """, unsafe_allow_html=True)
+                with col2:
+                    is_expanded = st.session_state.admin_expanded_thread == thread.id
+                    btn_label = "Close" if is_expanded else "View"
+                    if st.button(btn_label, key=f"admin_toggle_{thread.id}"):
+                        if is_expanded:
+                            st.session_state.admin_expanded_thread = None
+                        else:
+                            st.session_state.admin_expanded_thread = thread.id
+                            # Mark user replies as read
+                            mark_user_replies_read(db, thread.id)
+                        st.rerun()
+                with col3:
+                    # Thread-level read/unread toggle
+                    if has_unread:
+                        if st.button("Mark Read", key=f"admin_mark_read_{thread.id}"):
+                            mark_user_replies_read(db, thread.id)
+                            st.rerun()
+                    else:
+                        if st.button("Mark Unread", key=f"admin_mark_unread_{thread.id}"):
+                            # Mark the most recent user message as unread
+                            for msg in reversed(thread.messages):
+                                if not msg.is_from_admin:
+                                    mark_message_unread(db, msg.id)
+                                    break
+                            st.rerun()
+                with col4:
+                    if thread.is_closed:
+                        if st.button("Reopen", key=f"reopen_{thread.id}"):
+                            reopen_thread(db, thread.id)
+                            st.rerun()
+                    else:
+                        if st.button("End", key=f"close_{thread.id}"):
+                            close_thread(db, thread.id)
+                            st.rerun()
+
+                # Show messages if expanded
+                if st.session_state.admin_expanded_thread == thread.id:
+                    messages = get_thread_messages(db, thread.id)
+
+                    st.markdown("---")
+
+                    for msg in messages:
+                        sender = db.query(User).filter(User.id == msg.sender_id).first()
+                        sender_name = "You (Admin)" if msg.is_from_admin else (sender.username if sender else "User")
+                        msg_time = msg.created_at.strftime("%b %d %I:%M %p")
+                        content = html.escape(msg.content)
+
+                        if msg.is_from_admin:
+                            # Admin message - right aligned
+                            st.markdown(f"""
+                            <div style="background: rgba(52, 152, 219, 0.15); padding: 12px; border-radius: 8px; margin-bottom: 8px; margin-left: 40px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-weight: bold; color: #3498DB;">{sender_name}</span>
+                                    <span style="font-size: 11px; color: #888;">{msg_time}</span>
+                                </div>
+                                <div style="white-space: pre-wrap;">{content}</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+                        else:
+                            # User message - left aligned
+                            unread_indicator = " 🔵" if not msg.is_read else ""
+                            st.markdown(f"""
+                            <div style="background: rgba(46, 204, 113, 0.15); padding: 12px; border-radius: 8px; margin-bottom: 8px; margin-right: 40px;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                    <span style="font-weight: bold; color: #2ECC71;">{sender_name}{unread_indicator}</span>
+                                    <span style="font-size: 11px; color: #888;">{msg_time}</span>
+                                </div>
+                                <div style="white-space: pre-wrap;">{content}</div>
+                            </div>
+                            """, unsafe_allow_html=True)
+
+                    # Reply form if thread is not closed
+                    if not thread.is_closed:
+                        st.markdown("---")
+                        with st.form(key=f"admin_reply_{thread.id}", clear_on_submit=True):
+                            reply_text = st.text_area(
+                                "Your reply",
+                                placeholder="Type your reply...",
+                                height=100,
+                                key=f"admin_reply_text_{thread.id}",
+                                label_visibility="collapsed"
+                            )
+                            if st.form_submit_button("Send Reply", use_container_width=True, type="primary"):
+                                if reply_text and len(reply_text.strip()) >= 2:
+                                    add_message_to_thread(
+                                        db,
+                                        thread_id=thread.id,
+                                        sender_id=get_current_user_id(),
+                                        content=reply_text.strip(),
+                                        is_from_admin=True
+                                    )
+                                    st.rerun()
+                                else:
+                                    st.warning("Please enter a message")
+                    else:
+                        st.caption("This conversation is closed. Reopen to reply.")
+
+                st.markdown("---")
 
 
 db.close()

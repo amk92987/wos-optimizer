@@ -73,6 +73,9 @@ def _run_sqlite_migrations():
         ("feature_flags", "enabled_for_users", "JSON", None),
         ("feature_flags", "created_at", "DATETIME", None),
         ("feature_flags", "updated_at", "DATETIME", None),
+        # Announcement display type for inbox notifications
+        ("announcements", "display_type", "VARCHAR(20)", "'banner'"),
+        ("announcements", "inbox_content", "VARCHAR(2000)", None),
     ]
 
     for table, column, col_type, default in migrations:
@@ -109,6 +112,9 @@ def _run_postgres_migrations():
         ("ai_conversations", "is_favorite", "BOOLEAN", "FALSE"),
         ("ai_conversations", "thread_id", "VARCHAR(36)", None),
         ("ai_conversations", "thread_title", "VARCHAR(100)", None),
+        # Announcement display type for inbox notifications
+        ("announcements", "display_type", "VARCHAR(20)", "'banner'"),
+        ("announcements", "inbox_content", "VARCHAR(2000)", None),
     ]
 
     with engine.connect() as conn:

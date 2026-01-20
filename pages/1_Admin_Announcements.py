@@ -13,6 +13,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from database.db import get_db, init_db
 from database.auth import require_admin, get_current_user_id
 from database.models import Announcement
+from database.messaging_service import create_notification_for_users
 
 init_db()
 
@@ -30,10 +31,60 @@ st.caption("Create and manage system-wide announcements for users")
 db = get_db()
 
 # Ensure table exists
-from sqlalchemy import inspect
+from sqlalchemy import inspect, or_
 inspector = inspect(db.get_bind())
 if 'announcements' not in inspector.get_table_names():
     Announcement.__table__.create(db.get_bind(), checkfirst=True)
+
+# Current Banner Status - show what users currently see
+current_banner = db.query(Announcement).filter(
+    Announcement.is_active == True,
+    or_(
+        Announcement.display_type == 'banner',
+        Announcement.display_type == 'both',
+        Announcement.display_type.is_(None)
+    )
+).order_by(Announcement.created_at.desc()).first()
+
+st.markdown("### Current Banner")
+if current_banner:
+    # Calculate days remaining if show_until is set
+    days_remaining = None
+    expiry_text = "No expiration"
+    if current_banner.show_until:
+        from datetime import datetime
+        now = datetime.utcnow()
+        if current_banner.show_until > now:
+            delta = current_banner.show_until - now
+            days_remaining = delta.days
+            if days_remaining == 0:
+                hours_remaining = delta.seconds // 3600
+                expiry_text = f"Expires in {hours_remaining} hours" if hours_remaining > 0 else "Expires soon"
+            elif days_remaining == 1:
+                expiry_text = "Expires tomorrow"
+            else:
+                expiry_text = f"{days_remaining} days remaining"
+        else:
+            expiry_text = "Expired (still showing)"
+
+    type_icons = {"info": "ℹ️", "warning": "⚠️", "success": "✅", "error": "🚨"}
+    icon = type_icons.get(current_banner.type, "ℹ️")
+
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown(f"""
+        <div style="background: rgba(52, 152, 219, 0.15); padding: 16px; border-radius: 8px; border-left: 4px solid #3498DB;">
+            <div style="font-weight: bold; font-size: 16px;">{icon} {current_banner.title}</div>
+            <div style="color: #ccc; margin-top: 6px; font-size: 14px;">{current_banner.message[:100]}{'...' if len(current_banner.message) > 100 else ''}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.metric("Status", expiry_text)
+        st.caption(f"Created: {current_banner.created_at.strftime('%b %d, %Y')}")
+else:
+    st.info("No banner currently showing to users.")
+
+st.markdown("---")
 
 # Tabs
 tab_active, tab_create, tab_archive = st.tabs(["📋 Active", "➕ Create New", "📦 Archive"])
@@ -62,13 +113,25 @@ with tab_active:
             icon = type_icons.get(ann.type, "ℹ️")
 
             with st.container():
+                # Display type badge
+                display_type = getattr(ann, 'display_type', 'banner') or 'banner'
+                display_badges = {
+                    "banner": ("📺", "Banner"),
+                    "inbox": ("📬", "Inbox"),
+                    "both": ("📢", "Both")
+                }
+                d_icon, d_label = display_badges.get(display_type, ("📺", "Banner"))
+
                 st.markdown(f"""
                 <div style="background: linear-gradient(135deg, rgba({int(color[1:3], 16)}, {int(color[3:5], 16)}, {int(color[5:7], 16)}, 0.2), rgba({int(color[1:3], 16)}, {int(color[3:5], 16)}, {int(color[5:7], 16)}, 0.1));
                             padding: 16px; border-radius: 8px; margin-bottom: 12px;
                             border-left: 4px solid {color};">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="font-size: 16px; font-weight: bold;">{icon} {ann.title}</div>
-                        <div style="font-size: 11px; color: #888;">{ann.created_at.strftime('%m/%d/%y %I:%M %p')}</div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 10px;">{d_icon} {d_label}</span>
+                            <span style="font-size: 11px; color: #888;">{ann.created_at.strftime('%m/%d/%y %I:%M %p')}</span>
+                        </div>
                     </div>
                     <div style="margin-top: 8px; color: #ccc;">{ann.message}</div>
                 </div>
@@ -132,18 +195,55 @@ with tab_create:
 
     with st.form("create_announcement"):
         title = st.text_input("Title *", placeholder="Announcement title...")
-        message = st.text_area("Message *", placeholder="Announcement message...", height=150)
+        message = st.text_area("Message *", placeholder="Announcement message (shown in banner)...", height=100)
 
         col1, col2 = st.columns(2)
         with col1:
             ann_type = st.selectbox("Type", ["info", "warning", "success", "error"])
         with col2:
-            st.markdown("")
-            st.markdown("")
-            preview_types = {"info": "ℹ️ Info", "warning": "⚠️ Warning", "success": "✅ Success", "error": "🚨 Error"}
-            st.caption(f"Preview: {preview_types[ann_type]}")
+            display_type = st.radio(
+                "Display",
+                ["banner", "inbox", "both"],
+                horizontal=True,
+                help="Banner: top of page | Inbox: user inbox only | Both: everywhere"
+            )
 
-        submitted = st.form_submit_button("📢 Publish Announcement", width="stretch")
+        # Expiration settings (for banners)
+        if display_type in ["banner", "both"]:
+            st.markdown("**Expiration**")
+            exp_col1, exp_col2 = st.columns([1, 2])
+            with exp_col1:
+                set_expiration = st.checkbox("Set expiration", value=False)
+            with exp_col2:
+                if set_expiration:
+                    expiration_days = st.number_input(
+                        "Days until expiration",
+                        min_value=1,
+                        max_value=365,
+                        value=7,
+                        help="Banner will auto-hide after this many days"
+                    )
+                else:
+                    expiration_days = None
+                    st.caption("No expiration - banner shows until manually archived")
+        else:
+            set_expiration = False
+            expiration_days = None
+
+        # Show inbox content field when inbox delivery is selected
+        inbox_content = None
+        if display_type in ["inbox", "both"]:
+            inbox_content = st.text_area(
+                "Inbox Content (optional)",
+                placeholder="Optional longer message for inbox. Leave blank to use the banner message.",
+                height=100,
+                help="If provided, this longer message will appear in user inboxes instead of the banner message."
+            )
+
+        preview_types = {"info": "ℹ️ Info", "warning": "⚠️ Warning", "success": "✅ Success", "error": "🚨 Error"}
+        st.caption(f"Preview: {preview_types[ann_type]}")
+
+        submitted = st.form_submit_button("📢 Publish Announcement", use_container_width=True)
 
         if submitted:
             if not title:
@@ -151,22 +251,45 @@ with tab_create:
             elif not message:
                 st.error("Message is required")
             else:
+                # Calculate show_until if expiration is set
+                show_until = None
+                if set_expiration and expiration_days:
+                    show_until = datetime.utcnow() + timedelta(days=expiration_days)
+
                 new_ann = Announcement(
                     title=title,
                     message=message,
                     type=ann_type,
+                    display_type=display_type,
+                    inbox_content=inbox_content if inbox_content else None,
+                    show_until=show_until,
                     is_active=True,
                     created_by=get_current_user_id()
                 )
                 db.add(new_ann)
                 db.commit()
-                st.session_state['announcement_created'] = True
+                db.refresh(new_ann)
+
+                # Create notifications for users if inbox delivery is enabled
+                if display_type in ["inbox", "both"]:
+                    notif_count = create_notification_for_users(db, new_ann.id)
+                    st.session_state['announcement_created'] = True
+                    st.session_state['notification_count'] = notif_count
+                else:
+                    st.session_state['announcement_created'] = True
+                    st.session_state['notification_count'] = 0
+
                 st.rerun()
 
     # Show success message after rerun
     if st.session_state.get('announcement_created'):
-        st.success("Announcement published! View it in the 'Active' tab.")
+        notif_count = st.session_state.get('notification_count', 0)
+        if notif_count > 0:
+            st.success(f"Announcement published! Delivered to {notif_count} user inboxes.")
+        else:
+            st.success("Announcement published! View it in the 'Active' tab.")
         st.session_state['announcement_created'] = False
+        st.session_state['notification_count'] = 0
 
 with tab_archive:
     # Get archived announcements

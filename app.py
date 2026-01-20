@@ -187,12 +187,28 @@ if is_impersonating():
             logout_user()
             st.rerun()
 
-# Show active announcements as banners (for non-admin users)
+# Show ONE active banner announcement (for non-admin users)
+# Only shows the most recent announcement with display_type='banner' or 'both'
 if not is_admin():
     from database.models import Announcement
-    active_announcements = db.query(Announcement).filter(Announcement.is_active == True).order_by(Announcement.created_at.desc()).all()
+    from sqlalchemy import or_
 
-    for ann in active_announcements:
+    # Get the most recent active, non-expired banner announcement
+    current_banner = db.query(Announcement).filter(
+        Announcement.is_active == True,
+        or_(
+            Announcement.display_type == 'banner',
+            Announcement.display_type == 'both',
+            Announcement.display_type.is_(None)  # Legacy announcements without display_type
+        ),
+        # Check expiration: either no expiration set, or not expired yet
+        or_(
+            Announcement.show_until.is_(None),
+            Announcement.show_until > datetime.utcnow()
+        )
+    ).order_by(Announcement.created_at.desc()).first()
+
+    if current_banner:
         type_colors = {
             "info": ("#3498DB", "#E8F4FC"),
             "warning": ("#F1C40F", "#FEF9E7"),
@@ -201,14 +217,14 @@ if not is_admin():
         }
         type_icons = {"info": "ℹ️", "warning": "⚠️", "success": "✅", "error": "🚨"}
 
-        border_color, bg_color = type_colors.get(ann.type, ("#3498DB", "#E8F4FC"))
-        icon = type_icons.get(ann.type, "ℹ️")
+        border_color, bg_color = type_colors.get(current_banner.type, ("#3498DB", "#E8F4FC"))
+        icon = type_icons.get(current_banner.type, "ℹ️")
 
         st.markdown(f"""
         <div style="background: {bg_color}15; border-left: 4px solid {border_color};
                     padding: 12px 16px; border-radius: 0 8px 8px 0; margin-bottom: 12px;">
-            <div style="font-weight: 600; color: {border_color};">{icon} {ann.title}</div>
-            <div style="color: #B8D4E8; margin-top: 4px; font-size: 14px;">{ann.message}</div>
+            <div style="font-weight: 600; color: {border_color};">{icon} {current_banner.title}</div>
+            <div style="color: #B8D4E8; margin-top: 4px; font-size: 14px;">{current_banner.message}</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -264,7 +280,14 @@ def update_priority(priority_name: str, value: int):
 # Check if admin (not impersonating) to show different navigation
 is_admin_view = is_admin() and not is_impersonating()
 
+# Get inbox badge counts for sidebar
+from database.messaging_service import get_unread_count, get_admin_unread_count
+
 if is_admin_view:
+    # Admin inbox badge - shows unread user replies
+    admin_inbox_unread = get_admin_unread_count(db)
+    admin_inbox_title = f"Inbox ({admin_inbox_unread})" if admin_inbox_unread > 0 else "Inbox"
+
     # Admin navigation - focused on system management
     admin_home = st.Page("pages/0_Admin_Home.py", title="Dashboard", icon="📊", default=True)
     admin_users = st.Page("pages/15_Admin.py", title="Users", icon="👥")
@@ -272,7 +295,7 @@ if is_admin_view:
     admin_audit = st.Page("pages/2_Admin_Audit_Log.py", title="Audit Log", icon="📜")
     admin_flags = st.Page("pages/3_Admin_Feature_Flags.py", title="Feature Flags", icon="🚩")
     admin_ai = st.Page("pages/10_Admin_AI.py", title="AI Settings", icon="🤖")
-    admin_inbox = st.Page("pages/5_Admin_Inbox.py", title="Inbox", icon="📬")
+    admin_inbox = st.Page("pages/5_Admin_Inbox.py", title=admin_inbox_title, icon="📬")
     admin_database = st.Page("pages/4_Admin_Database.py", title="Database", icon="🗄️")
     admin_game_data = st.Page("pages/6_Admin_Game_Data.py", title="Game Data", icon="🎮")
     admin_integrity = st.Page("pages/7_Admin_Data_Integrity.py", title="Data Integrity", icon="🔍")
@@ -287,6 +310,10 @@ if is_admin_view:
     }, expanded=True)
 
 else:
+    # User inbox badge - shows unread notifications + messages
+    user_inbox_unread = get_unread_count(db, get_current_user_id())
+    user_inbox_title = f"Inbox ({user_inbox_unread})" if user_inbox_unread > 0 else "Inbox"
+
     # Regular user navigation - game focused
     home_page = st.Page("pages/0_Home.py", title="Home", icon="🏠", default=True)
     beginners_page = st.Page("pages/00_Beginner_Guide.py", title="Beginner Guide", icon="🔥")
@@ -311,6 +338,7 @@ else:
     # Account section
     profiles_page = st.Page("pages/7_Save_Load.py", title="Save/Load", icon="👤")
     settings_page = st.Page("pages/13_Settings.py", title="Settings", icon="⚙️")
+    inbox_page = st.Page("pages/16_User_Inbox.py", title=user_inbox_title, icon="📬")
 
     # Navigation with grouped sections
     pg = st.navigation({
@@ -318,7 +346,7 @@ else:
         "Tracker": [heroes_page, chief_page],
         "Analysis": [ai_advisor_page, lineups_page, packs_page],
         "Guides": [items_page, events_page, combat_page, tips_page, tactics_page, daybreak_page],
-        "Account": [profiles_page, settings_page],
+        "Account": [profiles_page, settings_page, inbox_page],
     }, expanded=True)
 
 # Top-right user menu - styling is in theme CSS files
@@ -340,7 +368,14 @@ with login_container:
             role_badge = "🛡️"  # Shield for Chief
             role_title = "Chief"
 
-        with st.popover(f"{role_badge} {display_name}"):
+        # Get unread count for badge (reuse already-calculated value for users)
+        if is_admin_view:
+            unread_count = 0  # Admins don't see user inbox badge on their menu
+        else:
+            unread_count = user_inbox_unread  # Already calculated above
+        unread_badge = f" ({unread_count})" if unread_count > 0 else ""
+
+        with st.popover(f"{role_badge} {display_name}{unread_badge}"):
             # Header with role - show email prefix as name, full email below
             st.markdown(f"""
             <div style="text-align: center; padding-bottom: 8px;">
@@ -381,6 +416,29 @@ with login_container:
                 <span>Support Bear's Den</span>
             </a>
             """, unsafe_allow_html=True)
+
+            # Inbox link (for regular users only)
+            if not is_admin() or is_impersonating():
+                inbox_label = f"Inbox ({unread_count})" if unread_count > 0 else "Inbox"
+                inbox_style = "background: rgba(52, 152, 219, 0.3);" if unread_count > 0 else "background: rgba(255, 255, 255, 0.1);"
+                st.markdown(f"""
+                <a href="/User_Inbox" target="_self" style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    padding: 10px 12px;
+                    {inbox_style}
+                    color: white;
+                    text-decoration: none;
+                    border-radius: 8px;
+                    font-weight: 500;
+                    margin-bottom: 8px;
+                ">
+                    <span>📬</span>
+                    <span>{inbox_label}</span>
+                </a>
+                """, unsafe_allow_html=True)
 
             # Feedback section - wrapped in form to allow Enter for line breaks
             with st.expander("💬 Send Feedback"):

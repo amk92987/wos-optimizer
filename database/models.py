@@ -1,6 +1,6 @@
 """SQLAlchemy models for Whiteout Survival Optimizer."""
 
-from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, JSON, Text
+from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, JSON, Text, UniqueConstraint
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, backref
 from datetime import datetime
@@ -45,6 +45,8 @@ class User(Base):
     # Relationships - cascade delete all child data when user is permanently deleted
     profiles = relationship("UserProfile", back_populates="user", cascade="all, delete-orphan")
     ai_conversations = relationship("AIConversation", back_populates="user", cascade="all, delete-orphan")
+    notifications = relationship("UserNotification", back_populates="user", cascade="all, delete-orphan")
+    message_threads = relationship("MessageThread", back_populates="user", cascade="all, delete-orphan")
 
 
 class UserProfile(Base):
@@ -384,10 +386,18 @@ class Announcement(Base):
     show_from = Column(DateTime, nullable=True)
     show_until = Column(DateTime, nullable=True)
 
+    # Display type: 'banner' (top of page), 'inbox' (user inbox only), 'both'
+    display_type = Column(String(20), default='banner')
+    # Optional longer content for inbox view (if different from banner message)
+    inbox_content = Column(String(2000), nullable=True)
+
     # Who created it
     created_by = Column(Integer, ForeignKey('users.id'), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    user_notifications = relationship("UserNotification", back_populates="announcement", cascade="all, delete-orphan")
 
 
 class FeatureFlag(Base):
@@ -728,3 +738,59 @@ class ErrorLog(Base):
     # Relationships
     user = relationship("User", foreign_keys=[user_id], backref="errors")
     reviewer = relationship("User", foreign_keys=[reviewed_by])
+
+
+class UserNotification(Base):
+    """Tracks per-user delivery of announcements to their inbox."""
+    __tablename__ = 'user_notifications'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
+    announcement_id = Column(Integer, ForeignKey('announcements.id'), nullable=False, index=True)
+
+    is_read = Column(Boolean, default=False)
+    read_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User", back_populates="notifications")
+    announcement = relationship("Announcement", back_populates="user_notifications")
+
+    # Ensure each user only gets one notification per announcement
+    __table_args__ = (
+        UniqueConstraint('user_id', 'announcement_id', name='uq_user_announcement'),
+    )
+
+
+class MessageThread(Base):
+    """Conversation container for admin-to-user messaging."""
+    __tablename__ = 'message_threads'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False, index=True)
+    subject = Column(String(200), nullable=False)
+    is_closed = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    user = relationship("User", back_populates="message_threads")
+    messages = relationship("Message", back_populates="thread", order_by="Message.created_at", cascade="all, delete-orphan")
+
+
+class Message(Base):
+    """Individual messages within a conversation thread."""
+    __tablename__ = 'messages'
+
+    id = Column(Integer, primary_key=True)
+    thread_id = Column(Integer, ForeignKey('message_threads.id'), nullable=False, index=True)
+    sender_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+    content = Column(String(5000), nullable=False)
+    is_from_admin = Column(Boolean, default=False)
+    is_read = Column(Boolean, default=False)
+    read_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    thread = relationship("MessageThread", back_populates="messages")
+    sender = relationship("User")
