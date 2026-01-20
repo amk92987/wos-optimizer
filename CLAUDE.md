@@ -22,6 +22,36 @@ Whiteout Survival Optimizer - A comprehensive web-based tool to help Whiteout Su
 - AI: Claude (Anthropic) or OpenAI API for AI-powered recommendations
 - OCR: EasyOCR (optional, for screenshot parsing)
 
+## Environments (IMPORTANT)
+
+| Name | Instance | IP | URL | Database | Purpose |
+|------|----------|-----|-----|----------|---------|
+| **Local** | Your machine | localhost:8501 | N/A | SQLite (wos.db) | Development |
+| **Dev** | wos-dev | 100.52.213.9 | dev.randomchaoslabs.com | PostgreSQL | Testing changes |
+| **Live** | wos-live-micro | 52.55.47.124 | www.randomchaoslabs.com | PostgreSQL | Production users |
+
+**Naming Convention:**
+- "Local" = your development machine
+- "Dev" = AWS Lightsail dev instance for testing (formerly called "sandbox")
+- "Live" = AWS Lightsail production instance (also called "production" or "prod")
+
+**Deployment Commands:**
+```bash
+# Deploy to Dev
+ssh -i ~/.ssh/lightsail-key.pem ubuntu@100.52.213.9 "cd ~/wos-app && git pull origin master && sudo systemctl restart streamlit"
+
+# Deploy to Live (be careful!)
+ssh -i ~/.ssh/lightsail-key.pem ubuntu@52.55.47.124 "cd ~/wos-app && git pull origin master && sudo systemctl restart streamlit"
+
+# Check service status
+ssh -i ~/.ssh/lightsail-key.pem ubuntu@<IP> "sudo systemctl status streamlit"
+```
+
+**Email Configuration:**
+- Local: Debug mode (logs to console)
+- Dev: SMTP configured for testing
+- Live: SMTP configured for real emails
+
 ## Commands
 
 ```bash

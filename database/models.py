@@ -521,6 +521,29 @@ class PendingEmailChange(Base):
     user = relationship("User", backref=backref("pending_email_change", uselist=False, cascade="all, delete-orphan"))
 
 
+class PasswordResetToken(Base):
+    """Password reset tokens for forgot password flow."""
+    __tablename__ = 'password_reset_tokens'
+
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
+
+    # Secure random token (32 bytes hex = 64 chars)
+    token = Column(String(64), nullable=False, unique=True, index=True)
+
+    # Expiration (1 hour from creation)
+    expires_at = Column(DateTime, nullable=False)
+
+    # Track if token has been used
+    used = Column(Boolean, default=False)
+    used_at = Column(DateTime, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationship
+    user = relationship("User", backref=backref("password_reset_tokens", cascade="all, delete-orphan"))
+
+
 class LineupTestRun(Base):
     """Groups results from a single lineup test execution."""
     __tablename__ = 'lineup_test_runs'

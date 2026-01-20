@@ -538,6 +538,112 @@ def require_admin():
 
 
 # ============================================
+# Password Reset
+# ============================================
+
+def create_password_reset_token(db: Session, email: str) -> tuple[bool, str, Optional[str]]:
+    """
+    Create a password reset token for the given email.
+
+    Returns (success, message, token) tuple.
+    Token is only returned on success for sending via email.
+    """
+    import secrets
+    from datetime import timedelta
+    from database.models import PasswordResetToken
+
+    # Normalize email
+    email = normalize_email(email)
+
+    # Find user by email
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        # Don't reveal if email exists for security
+        return True, "If an account exists with that email, a reset link has been sent.", None
+
+    # Check if user is active
+    if not user.is_active:
+        return True, "If an account exists with that email, a reset link has been sent.", None
+
+    # Delete any existing tokens for this user
+    db.query(PasswordResetToken).filter(PasswordResetToken.user_id == user.id).delete()
+
+    # Generate secure token (32 bytes = 64 hex chars)
+    token = secrets.token_hex(32)
+
+    # Create token record (expires in 1 hour)
+    reset_token = PasswordResetToken(
+        user_id=user.id,
+        token=token,
+        expires_at=datetime.utcnow() + timedelta(hours=1)
+    )
+    db.add(reset_token)
+    db.commit()
+
+    return True, "If an account exists with that email, a reset link has been sent.", token
+
+
+def validate_password_reset_token(db: Session, token: str) -> tuple[bool, str, Optional[int]]:
+    """
+    Validate a password reset token.
+
+    Returns (valid, message, user_id) tuple.
+    """
+    from database.models import PasswordResetToken
+
+    if not token or len(token) != 64:
+        return False, "Invalid reset link.", None
+
+    reset_token = db.query(PasswordResetToken).filter(PasswordResetToken.token == token).first()
+
+    if not reset_token:
+        return False, "Invalid or expired reset link.", None
+
+    if reset_token.used:
+        return False, "This reset link has already been used.", None
+
+    if reset_token.expires_at < datetime.utcnow():
+        return False, "This reset link has expired. Please request a new one.", None
+
+    return True, "Valid token.", reset_token.user_id
+
+
+def reset_password_with_token(db: Session, token: str, new_password: str) -> tuple[bool, str]:
+    """
+    Reset password using a valid token.
+
+    Returns (success, message) tuple.
+    """
+    from database.models import PasswordResetToken
+
+    # Validate token
+    valid, message, user_id = validate_password_reset_token(db, token)
+    if not valid:
+        return False, message
+
+    # Validate new password
+    if len(new_password) < 6:
+        return False, "Password must be at least 6 characters."
+
+    # Get user
+    user = get_user_by_id(db, user_id)
+    if not user:
+        return False, "User not found."
+
+    # Update password
+    user.password_hash = hash_password(new_password)
+
+    # Mark token as used
+    reset_token = db.query(PasswordResetToken).filter(PasswordResetToken.token == token).first()
+    reset_token.used = True
+    reset_token.used_at = datetime.utcnow()
+
+    db.commit()
+
+    return True, "Password has been reset successfully. You can now log in."
+
+
+# ============================================
 # Initial Setup
 # ============================================
 

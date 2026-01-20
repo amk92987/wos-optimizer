@@ -139,6 +139,12 @@ if not is_authenticated():
     elif current_page == "register":
         from auth_pages.auth_register import render_register
         render_register()
+    elif current_page == "forgot-password":
+        from auth_pages.forgot_password import render_forgot_password
+        render_forgot_password()
+    elif current_page == "reset-password":
+        from auth_pages.reset_password import render_reset_password
+        render_reset_password()
     else:
         from auth_pages.landing import render_landing
         render_landing()

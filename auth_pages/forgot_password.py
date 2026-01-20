@@ -1,22 +1,35 @@
 """
-Login Page - Native Streamlit components with custom styling.
+Forgot Password Page - Request password reset email.
 """
 
 import streamlit as st
 from pathlib import Path
 import sys
+import os
 
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import get_db
-from database.auth import authenticate_user, login_user
+from database.auth import create_password_reset_token
+from utils.email import send_password_reset_email
 
 
-def render_login():
-    """Render the login page."""
+def get_base_url():
+    """Get the base URL for the current environment."""
+    env = os.getenv('ENVIRONMENT', 'development')
+    if env == 'production':
+        return "https://www.randomchaoslabs.com"
+    elif env == 'sandbox':
+        return "https://dev.randomchaoslabs.com"
+    else:
+        return "http://localhost:8501"
 
-    # Full page styling
+
+def render_forgot_password():
+    """Render the forgot password page."""
+
+    # Full page styling (same as login)
     st.markdown("""
     <style>
     /* Full page gradient background */
@@ -72,7 +85,7 @@ def render_login():
         font-size: 14px !important;
     }
 
-    /* Style button (both regular and form submit) */
+    /* Style button */
     .stButton > button,
     .stFormSubmitButton > button {
         width: 100% !important;
@@ -107,11 +120,9 @@ def render_login():
         color: #B8EAFF !important;
     }
 
-    /* Error message styling */
-    .stAlert {
-        background: rgba(220, 38, 38, 0.2) !important;
-        border: 1px solid rgba(220, 38, 38, 0.5) !important;
-        color: #FCA5A5 !important;
+    /* Success/Error message styling */
+    .stAlert[data-baseweb="notification"] {
+        border-radius: 8px !important;
     }
 
     /* Hide "Press Enter to Apply" hint */
@@ -121,10 +132,10 @@ def render_login():
     </style>
     """, unsafe_allow_html=True)
 
-    # Back link - goes to static landing page
+    # Back link
     st.markdown("""
-    <a href="https://wos.randomchaoslabs.com" style="color: #7DD3FC; text-decoration: none; font-size: 14px;">
-        ← Back to Home
+    <a href="?page=login" style="color: #7DD3FC; text-decoration: none; font-size: 14px;">
+        ← Back to Login
     </a>
     """, unsafe_allow_html=True)
 
@@ -151,85 +162,90 @@ def render_login():
 
     # Title
     st.markdown("""
-    <h2 style="text-align: center; color: #E0F7FF; margin-bottom: 8px; font-size: 28px;">Welcome Back</h2>
-    <p style="text-align: center; color: #93C5E0; margin-bottom: 30px; font-size: 15px;">Sign in to continue</p>
+    <h2 style="text-align: center; color: #E0F7FF; margin-bottom: 8px; font-size: 28px;">Reset Password</h2>
+    <p style="text-align: center; color: #93C5E0; margin-bottom: 30px; font-size: 15px;">
+        Enter your email and we'll send you a reset link
+    </p>
     """, unsafe_allow_html=True)
 
     # Center the form using columns
     col1, col2, col3 = st.columns([1, 2, 1])
 
     with col2:
-        # Use placeholder so we can clear it on successful login
+        # Check if we already sent an email (success state)
+        if st.session_state.get("reset_email_sent"):
+            st.success("Check your email for the reset link. It may take a few minutes to arrive.")
+            st.markdown("""
+            <div style="text-align: center; margin-top: 20px; color: #93C5E0; font-size: 14px;">
+                Didn't receive it? Check your spam folder or <a href="?page=forgot-password">try again</a>
+            </div>
+            """, unsafe_allow_html=True)
+            # Clear the flag after showing
+            if st.button("Back to Login", use_container_width=True):
+                st.session_state.pop("reset_email_sent", None)
+                st.query_params["page"] = "login"
+                st.rerun()
+            return
+
+        # Form container
         form_container = st.empty()
 
         with form_container.container():
-            # Error message (stored in session state to persist across form submission)
-            if st.session_state.get("login_error"):
-                st.error(st.session_state["login_error"])
-                st.session_state.pop("login_error", None)
+            # Error message
+            if st.session_state.get("forgot_error"):
+                st.error(st.session_state["forgot_error"])
+                st.session_state.pop("forgot_error", None)
 
-            # Form using st.form for reliable submission
-            with st.form("login_form"):
-                email = st.text_input("Email", placeholder="Enter your email")
-                password = st.text_input("Password", type="password", placeholder="Enter your password")
-                submitted = st.form_submit_button("Sign In", use_container_width=True)
+            # Form
+            with st.form("forgot_password_form"):
+                email = st.text_input("Email", placeholder="Enter your email address")
+                submitted = st.form_submit_button("Send Reset Link", use_container_width=True)
 
                 if submitted:
-                    if email and password:
-                        # Clear form and show loading state
+                    if email:
+                        # Show loading state
                         form_container.empty()
                         with form_container.container():
                             st.markdown("""
                             <div style="text-align: center; padding: 40px;">
-                                <p style="color: #93C5E0; font-size: 16px;">Signing in...</p>
+                                <p style="color: #93C5E0; font-size: 16px;">Sending reset link...</p>
                             </div>
                             """, unsafe_allow_html=True)
 
                         db = get_db()
-                        user = authenticate_user(db, email, password)
+                        success, message, token = create_password_reset_token(db, email)
 
-                        if user:
-                            login_user(user)
-                            db.close()
-                            st.rerun()
-                        else:
-                            db.close()
-                            st.session_state["login_error"] = "Invalid email or password"
-                            st.rerun()
+                        if success and token:
+                            # Send email
+                            base_url = get_base_url()
+                            email_success, email_msg = send_password_reset_email(email, token, base_url)
+
+                            if email_success:
+                                st.session_state["reset_email_sent"] = True
+                            else:
+                                st.session_state["forgot_error"] = f"Failed to send email. Please try again."
+
+                        db.close()
+                        st.rerun()
                     else:
-                        st.warning("Please enter email and password")
+                        st.warning("Please enter your email address")
 
-    # Forgot password link
+    # Login link
     st.markdown("""
-    <div style="text-align: center; margin-top: 15px; color: #93C5E0; font-size: 14px;">
-        <a href="?page=forgot-password">Forgot your password?</a>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # Register link
-    st.markdown("""
-    <div style="text-align: center; margin-top: 10px; color: #93C5E0; font-size: 14px;">
-        Don't have an account? <a href="?page=register">Create one</a>
+    <div style="text-align: center; margin-top: 20px; color: #93C5E0; font-size: 14px;">
+        Remember your password? <a href="?page=login">Sign in</a>
     </div>
     """, unsafe_allow_html=True)
 
     # Footer
     st.markdown("""
     <div style="margin-top: 50px; text-align: center;">
-        <div style="font-size: 24px;">&#127922;</div>
-        <p style="font-size: 11px; color: #5AADD6; margin-top: 5px;">
+        <p style="font-size: 11px; color: #5AADD6;">
             <a href="https://www.randomchaoslabs.com">Random Chaos Labs</a>
         </p>
-        <div style="margin-top: 15px; padding: 15px; background: rgba(125, 211, 252, 0.08);
-                    border: 1px solid rgba(125, 211, 252, 0.15); border-radius: 8px;
-                    font-size: 10px; color: #93C5E0; line-height: 1.6;">
-            Bear's Den is not affiliated with Century Games or Whiteout Survival.
-            All trademarks are property of their respective owners. Use at your own risk.
-        </div>
-        <p style="margin-top: 15px; font-size: 11px; color: #7DD3FC;">© 2025 Random Chaos Labs</p>
     </div>
     """, unsafe_allow_html=True)
 
 
 if __name__ == "__main__":
-    render_login()
+    render_forgot_password()

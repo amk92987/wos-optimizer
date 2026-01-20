@@ -155,3 +155,69 @@ If you didn't request this change, you can safely ignore this email.
 """
 
     return send_email(to_email, subject, body_text, body_html)
+
+
+def send_password_reset_email(to_email: str, reset_token: str, base_url: str = "https://www.randomchaoslabs.com") -> tuple[bool, str]:
+    """
+    Send password reset email with reset link.
+
+    Args:
+        to_email: Recipient email address
+        reset_token: Secure reset token
+        base_url: Base URL for the reset link
+
+    Returns:
+        (success, message) tuple
+    """
+    reset_url = f"{base_url}/?page=reset-password&token={reset_token}"
+
+    subject = "Bear's Den - Reset Your Password"
+
+    body_text = f"""Hi Chief!
+
+You requested to reset your password for Bear's Den.
+
+Click the link below to reset your password:
+{reset_url}
+
+This link expires in 1 hour.
+
+If you didn't request this reset, you can safely ignore this email. Your password will not be changed.
+
+- The Bear's Den Team
+"""
+
+    body_html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; background: #0A1628; color: #E0F7FF; padding: 20px; }}
+        .container {{ max-width: 500px; margin: 0 auto; background: #1A3A5C; padding: 30px; border-radius: 10px; }}
+        .button {{ display: inline-block; background: linear-gradient(135deg, #4A90D9 0%, #7DD3FC 100%); color: #0A1628; padding: 15px 30px; border-radius: 8px; text-decoration: none; font-weight: bold; margin: 20px 0; }}
+        .link {{ word-break: break-all; background: #0A1628; padding: 10px; border-radius: 4px; font-size: 12px; color: #93C5E0; }}
+        .footer {{ font-size: 12px; color: #93C5E0; margin-top: 30px; text-align: center; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 style="color: #7DD3FC;">Reset Your Password</h2>
+        <p>Hi Chief!</p>
+        <p>You requested to reset your password for Bear's Den.</p>
+        <p style="text-align: center;">
+            <a href="{reset_url}" class="button">Reset My Password</a>
+        </p>
+        <p>Or copy and paste this link into your browser:</p>
+        <div class="link">{reset_url}</div>
+        <p>This link expires in <strong>1 hour</strong>.</p>
+        <p>If you didn't request this reset, you can safely ignore this email. Your password will not be changed.</p>
+        <div class="footer">
+            - The Bear's Den Team<br>
+            <a href="https://www.randomchaoslabs.com" style="color: #7DD3FC;">randomchaoslabs.com</a>
+        </div>
+    </div>
+</body>
+</html>
+"""
+
+    return send_email(to_email, subject, body_text, body_html)
