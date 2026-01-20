@@ -526,6 +526,9 @@ with login_container:
             else:
                 if st.button("Logout", key="logout_btn", use_container_width=True):
                     logout_user()
+                    # Redirect to login page
+                    st.query_params.clear()
+                    st.query_params["page"] = "login"
                     st.rerun()
 
 # Render sidebar content
