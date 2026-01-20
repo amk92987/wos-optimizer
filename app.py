@@ -87,7 +87,12 @@ current_page = st.query_params.get("page", "home")
 if not is_authenticated():
     st.markdown("""
     <style>
-    /* Apply background immediately to prevent flash */
+    /* Apply background immediately and fade in to mask any flash */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
     .stApp {
         background: linear-gradient(180deg,
             #0A1628 0%,
@@ -98,6 +103,7 @@ if not is_authenticated():
             #5AADD6 96%,
             #7DD3FC 100%) !important;
         background-attachment: fixed !important;
+        animation: fadeIn 0.15s ease-in;
     }
 
     /* Hide sidebar completely */

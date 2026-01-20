@@ -132,33 +132,12 @@ def render_forgot_password():
     </style>
     """, unsafe_allow_html=True)
 
-    # CSS to make nav link buttons look like text links
+    # Back link
     st.markdown("""
-    <style>
-    /* Style nav link buttons as text links */
-    div[data-testid="stVerticalBlock"] button[kind="tertiary"] {
-        background: none !important;
-        border: none !important;
-        color: #7DD3FC !important;
-        padding: 0 !important;
-        font-size: 14px !important;
-        font-weight: normal !important;
-        box-shadow: none !important;
-        min-height: 0 !important;
-        height: auto !important;
-    }
-    div[data-testid="stVerticalBlock"] button[kind="tertiary"]:hover {
-        color: #B8EAFF !important;
-        text-decoration: underline !important;
-        background: none !important;
-    }
-    </style>
+    <a href="?page=login" style="color: #7DD3FC; text-decoration: none; font-size: 14px;">
+        ← Back to Login
+    </a>
     """, unsafe_allow_html=True)
-
-    # Back link using Streamlit button (prevents page reload flash)
-    if st.button("← Back to Login", key="back_to_login", type="tertiary"):
-        st.query_params["page"] = "login"
-        st.rerun()
 
     st.markdown("<div style='height: 20px'></div>", unsafe_allow_html=True)
 
@@ -251,14 +230,12 @@ def render_forgot_password():
                     else:
                         st.warning("Please enter your email address")
 
-    # Login link - text with inline button
-    login_col1, login_col2, login_col3, login_col4, login_col5 = st.columns([1, 1.1, 0.5, 1.1, 1])
-    with login_col2:
-        st.markdown("<p style='text-align: right; color: #93C5E0; font-size: 14px; margin: 0; padding-top: 6px;'>Remember your password?</p>", unsafe_allow_html=True)
-    with login_col3:
-        if st.button("Sign in", key="login_link", type="tertiary"):
-            st.query_params["page"] = "login"
-            st.rerun()
+    # Login link
+    st.markdown("""
+    <div style="text-align: center; margin-top: 20px; color: #93C5E0; font-size: 14px;">
+        Remember your password? <a href="?page=login">Sign in</a>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Footer
     st.markdown("""

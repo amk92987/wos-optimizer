@@ -222,37 +222,12 @@ def render_register():
                         st.session_state["register_error"] = error
                         st.rerun()
 
-    # Login link styled as text link (using button to prevent page reload flash)
+    # Login link
     st.markdown("""
-    <style>
-    /* Style nav link buttons as text links */
-    div[data-testid="stVerticalBlock"] button[kind="tertiary"] {
-        background: none !important;
-        border: none !important;
-        color: #7DD3FC !important;
-        padding: 0 !important;
-        font-size: 14px !important;
-        font-weight: normal !important;
-        box-shadow: none !important;
-        min-height: 0 !important;
-        height: auto !important;
-    }
-    div[data-testid="stVerticalBlock"] button[kind="tertiary"]:hover {
-        color: #B8EAFF !important;
-        text-decoration: underline !important;
-        background: none !important;
-    }
-    </style>
+    <div style="text-align: center; margin-top: 20px; color: #93C5E0; font-size: 14px;">
+        Already have an account? <a href="?page=login">Sign in</a>
+    </div>
     """, unsafe_allow_html=True)
-
-    # Login link - text with inline button
-    login_col1, login_col2, login_col3, login_col4, login_col5 = st.columns([1, 1.2, 0.5, 1.2, 1])
-    with login_col2:
-        st.markdown("<p style='text-align: right; color: #93C5E0; font-size: 14px; margin: 0; padding-top: 6px;'>Already have an account?</p>", unsafe_allow_html=True)
-    with login_col3:
-        if st.button("Sign in", key="login_link", type="tertiary"):
-            st.query_params["page"] = "login"
-            st.rerun()
 
     # Footer
     st.markdown("""

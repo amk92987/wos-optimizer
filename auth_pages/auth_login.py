@@ -199,45 +199,19 @@ def render_login():
                     else:
                         st.warning("Please enter email and password")
 
-    # Navigation links styled as text links (using buttons to prevent page reload flash)
-    # CSS to make these specific buttons look like inline text links
+    # Forgot password link
     st.markdown("""
-    <style>
-    /* Style nav link buttons as text links */
-    div[data-testid="stVerticalBlock"] button[kind="tertiary"] {
-        background: none !important;
-        border: none !important;
-        color: #7DD3FC !important;
-        padding: 0 !important;
-        font-size: 14px !important;
-        font-weight: normal !important;
-        box-shadow: none !important;
-        min-height: 0 !important;
-        height: auto !important;
-    }
-    div[data-testid="stVerticalBlock"] button[kind="tertiary"]:hover {
-        color: #B8EAFF !important;
-        text-decoration: underline !important;
-        background: none !important;
-    }
-    </style>
+    <div style="text-align: center; margin-top: 15px; color: #93C5E0; font-size: 14px;">
+        <a href="?page=forgot-password">Forgot your password?</a>
+    </div>
     """, unsafe_allow_html=True)
 
-    # Forgot password link
-    forgot_col1, forgot_col2, forgot_col3 = st.columns([1.2, 1.6, 1.2])
-    with forgot_col2:
-        if st.button("Forgot your password?", key="forgot_link", type="tertiary"):
-            st.query_params["page"] = "forgot-password"
-            st.rerun()
-
-    # Register link - text with inline button
-    reg_col1, reg_col2, reg_col3, reg_col4, reg_col5 = st.columns([1, 1.1, 0.6, 1.1, 1])
-    with reg_col2:
-        st.markdown("<p style='text-align: right; color: #93C5E0; font-size: 14px; margin: 0; padding-top: 6px;'>Don't have an account?</p>", unsafe_allow_html=True)
-    with reg_col3:
-        if st.button("Create one", key="register_link", type="tertiary"):
-            st.query_params["page"] = "register"
-            st.rerun()
+    # Register link
+    st.markdown("""
+    <div style="text-align: center; margin-top: 10px; color: #93C5E0; font-size: 14px;">
+        Don't have an account? <a href="?page=register">Create one</a>
+    </div>
+    """, unsafe_allow_html=True)
 
     # Footer
     st.markdown("""
