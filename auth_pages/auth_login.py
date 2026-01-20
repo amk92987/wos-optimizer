@@ -199,7 +199,30 @@ def render_login():
                     else:
                         st.warning("Please enter email and password")
 
-    # Navigation links (using buttons to prevent page reload flash)
+    # Navigation links (styled as plain text links)
+    st.markdown("""
+    <style>
+    /* Style tertiary buttons as plain text links */
+    button[kind="tertiary"] {
+        background: none !important;
+        border: none !important;
+        color: #7DD3FC !important;
+        font-size: 14px !important;
+        font-weight: normal !important;
+        box-shadow: none !important;
+        padding: 5px 0 !important;
+    }
+    button[kind="tertiary"]:hover {
+        color: #B8EAFF !important;
+        text-decoration: underline !important;
+        background: none !important;
+    }
+    button[kind="tertiary"]:focus {
+        box-shadow: none !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.markdown("<div style='height: 10px'></div>", unsafe_allow_html=True)
 
     col1, col2, col3 = st.columns([1, 2, 1])

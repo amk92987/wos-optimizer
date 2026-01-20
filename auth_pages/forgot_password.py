@@ -132,7 +132,30 @@ def render_forgot_password():
     </style>
     """, unsafe_allow_html=True)
 
-    # Back link (using button to prevent page reload flash)
+    # Style tertiary buttons as plain text links
+    st.markdown("""
+    <style>
+    button[kind="tertiary"] {
+        background: none !important;
+        border: none !important;
+        color: #7DD3FC !important;
+        font-size: 14px !important;
+        font-weight: normal !important;
+        box-shadow: none !important;
+        padding: 5px 0 !important;
+    }
+    button[kind="tertiary"]:hover {
+        color: #B8EAFF !important;
+        text-decoration: underline !important;
+        background: none !important;
+    }
+    button[kind="tertiary"]:focus {
+        box-shadow: none !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # Back link
     if st.button("← Back to Login", key="back_to_login", type="tertiary"):
         st.query_params["page"] = "login"
         st.rerun()
