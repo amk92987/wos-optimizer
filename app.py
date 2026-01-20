@@ -103,7 +103,7 @@ if not is_authenticated():
             #5AADD6 96%,
             #7DD3FC 100%) !important;
         background-attachment: fixed !important;
-        animation: fadeIn 0.15s ease-in;
+        animation: fadeIn 0.4s ease-in;
     }
 
     /* Hide sidebar completely */
