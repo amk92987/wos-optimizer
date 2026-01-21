@@ -28,10 +28,10 @@ if css_file.exists():
     with open(css_file, encoding='utf-8') as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-# Require login
+# Require login - redirect to login page if not authenticated
 if not is_authenticated():
-    st.warning("Please log in to view your inbox.")
-    st.stop()
+    st.query_params["page"] = "login"
+    st.rerun()
 
 user_id = get_current_user_id()
 db = get_db()
