@@ -215,17 +215,13 @@ with tab_create:
             with exp_col1:
                 set_expiration = st.checkbox("Set expiration", value=False)
             with exp_col2:
-                if set_expiration:
-                    expiration_days = st.number_input(
-                        "Days until expiration",
-                        min_value=1,
-                        max_value=365,
-                        value=7,
-                        help="Banner will auto-hide after this many days"
-                    )
-                else:
-                    expiration_days = None
-                    st.caption("No expiration - banner shows until manually archived")
+                expiration_days = st.number_input(
+                    "Days until expiration",
+                    min_value=1,
+                    max_value=365,
+                    value=7,
+                    help="Banner will auto-hide after this many days (only used if checkbox is checked)"
+                )
         else:
             set_expiration = False
             expiration_days = None
