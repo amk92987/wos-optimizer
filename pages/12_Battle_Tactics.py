@@ -1318,7 +1318,7 @@ def render_canyon_clash():
         with col1:
             st.markdown("#### Before Event")
             for item in quick_ref.get("before_event", []):
-                st.checkbox(item, key=f"cc_before_{item[:20]}", disabled=True, value=False)
+                st.markdown(f"- {item}")
 
         with col2:
             st.markdown("#### During Event")
@@ -1328,7 +1328,7 @@ def render_canyon_clash():
         with col3:
             st.markdown("#### Key Tips")
             for tip in quick_ref.get("key_tips", []):
-                st.success(tip)
+                st.markdown(f"- {tip}")
 
 
 def render_labyrinth():
