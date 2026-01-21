@@ -623,7 +623,7 @@ if selected_admin_tab == "Conversations":
             subject = html.escape(thread.subject)
 
             with st.container():
-                col1, col2, col3, col4 = st.columns([5.3, 0.7, 1, 0.5])
+                col1, col2, col3, col4 = st.columns([5.2, 0.7, 1, 0.6])
                 with col1:
                     time_str = thread.updated_at.strftime("%b %d, %Y %I:%M %p")
                     st.markdown(f"""
