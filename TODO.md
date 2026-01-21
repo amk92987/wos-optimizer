@@ -129,9 +129,12 @@
   - Firebase Cloud Messaging or similar
   - Notification permission handling
 
-- [ ] **Consider moving off Streamlit to AWS** - Major architecture decision
-  - FastAPI backend + React frontend
-  - Better scaling and performance
+- [ ] **Enterprise UI Exploration** - Try Next.js frontend on dev
+  - Build a proof-of-concept with FastAPI backend + Next.js (React) frontend
+  - Use Tailwind CSS + shadcn/ui for polished enterprise look
+  - Keep existing SQLAlchemy models and business logic
+  - Test on dev environment, leave current Streamlit app as-is
+  - Goal: See what a more professional UI could look like
 
 ## Infrastructure
 
@@ -139,13 +142,13 @@
 | Environment | URL | Instance |
 |-------------|-----|----------|
 | Local Dev | localhost:8501 | N/A |
-| Sandbox/Dev | wos-dev (100.52.213.9) | Lightsail nano |
+| Sandbox/Dev | wosdev.randomchaoslabs.com (98.87.57.79) | Lightsail nano |
 | Production | wos-live-micro (52.55.47.124) | Lightsail micro |
 
 ### Deployment
 ```bash
 # Deploy to dev
-ssh ubuntu@100.52.213.9
+ssh ubuntu@98.87.57.79
 cd ~/wos-app && git pull origin master
 sudo systemctl restart streamlit
 
