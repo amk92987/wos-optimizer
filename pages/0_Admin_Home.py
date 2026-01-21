@@ -591,21 +591,4 @@ with tool_col3:
                 st.warning("QA check found issues")
                 st.code(result.stdout[-1500:] if result.stdout else result.stderr[-500:])
 
-# Second row of tools
-tool_col4, tool_col5, tool_col6 = st.columns(3)
-
-with tool_col4:
-    st.markdown("""
-    <div style="background: rgba(241, 196, 15, 0.1); padding: 16px; border-radius: 8px; border: 1px solid rgba(241, 196, 15, 0.3);">
-        <div style="font-size: 14px; font-weight: bold; margin-bottom: 8px;">Reset Charts</div>
-        <div style="font-size: 12px; color: #888; margin-bottom: 12px;">Clear historical metrics to recalculate</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    if st.button("Reset Chart Data", key="reset_charts", use_container_width=True):
-        db.query(AdminMetrics).delete()
-        db.commit()
-        st.success("Chart data cleared! Refresh to see updated metrics.")
-        st.rerun()
-
 db.close()
