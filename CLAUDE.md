@@ -27,8 +27,8 @@ Whiteout Survival Optimizer - A comprehensive web-based tool to help Whiteout Su
 | Name | Instance | IP | URL | Database | Purpose |
 |------|----------|-----|-----|----------|---------|
 | **Local** | Your machine | localhost:8501 | N/A | SQLite (wos.db) | Development |
-| **Dev** | wos-dev | 100.52.213.9 | dev.randomchaoslabs.com | PostgreSQL | Testing changes |
-| **Live** | wos-live-micro | 52.55.47.124 | www.randomchaoslabs.com | PostgreSQL | Production users |
+| **Dev** | wos-dev-micro | 98.87.57.79 | wosdev.randomchaoslabs.com | PostgreSQL | Testing changes |
+| **Live** | wos-live-micro | 52.55.47.124 | wos.randomchaoslabs.com | PostgreSQL | Production users |
 
 **Naming Convention:**
 - "Local" = your development machine
@@ -38,7 +38,7 @@ Whiteout Survival Optimizer - A comprehensive web-based tool to help Whiteout Su
 **Deployment Commands:**
 ```bash
 # Deploy to Dev
-ssh -i ~/.ssh/lightsail-key.pem ubuntu@100.52.213.9 "cd ~/wos-app && git pull origin master && sudo systemctl restart streamlit"
+ssh -i ~/.ssh/lightsail-key.pem ubuntu@98.87.57.79 "cd ~/wos-app && git pull origin master && sudo systemctl restart streamlit"
 
 # Deploy to Live (be careful!)
 ssh -i ~/.ssh/lightsail-key.pem ubuntu@52.55.47.124 "cd ~/wos-app && git pull origin master && sudo systemctl restart streamlit"
