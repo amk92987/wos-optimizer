@@ -43,7 +43,7 @@ if 'announcements' not in existing_tables:
 
 
 def record_daily_metrics():
-    """Record today's metrics snapshot."""
+    """Record today's metrics snapshot (excludes test accounts)."""
     today = date.today()
     today_start = datetime.combine(today, datetime.min.time())
 
@@ -53,15 +53,24 @@ def record_daily_metrics():
         return  # Already recorded
 
     all_users = get_all_users(db)
-    regular_users = [u for u in all_users if u.role != 'admin']
+    # Exclude admins and test accounts from metrics
+    regular_users = [u for u in all_users if u.role != 'admin' and not u.is_test_account]
+    test_and_admin_ids = [u.id for u in all_users if u.role == 'admin' or u.is_test_account]
 
-    # Calculate metrics
+    # Calculate metrics (excluding test accounts)
     total_users = len(regular_users)
     new_users = len([u for u in regular_users if u.created_at and u.created_at >= today_start])
     active_users = len([u for u in regular_users if u.last_login and u.last_login >= today_start])
-    total_profiles = db.query(UserProfile).count()
-    total_heroes = db.query(UserHero).count()
-    total_inventory = db.query(UserInventory).count()
+
+    # Exclude test account data from content stats
+    if test_and_admin_ids:
+        total_profiles = db.query(UserProfile).filter(~UserProfile.user_id.in_(test_and_admin_ids)).count()
+        total_heroes = db.query(UserHero).join(UserProfile).filter(~UserProfile.user_id.in_(test_and_admin_ids)).count()
+        total_inventory = db.query(UserInventory).join(UserProfile).filter(~UserProfile.user_id.in_(test_and_admin_ids)).count()
+    else:
+        total_profiles = db.query(UserProfile).count()
+        total_heroes = db.query(UserHero).count()
+        total_inventory = db.query(UserInventory).count()
 
     # Create metrics record
     metrics = AdminMetrics(
