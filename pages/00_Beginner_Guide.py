@@ -9,6 +9,13 @@ import sys
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
+from database.auth import is_authenticated
+
+# Require login - redirect to login page if not authenticated
+if not is_authenticated():
+    st.query_params["page"] = "login"
+    st.rerun()
+
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"
 if css_file.exists():

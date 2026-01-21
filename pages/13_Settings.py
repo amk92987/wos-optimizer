@@ -11,7 +11,13 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import UserHero, UserInventory
+from database.auth import is_authenticated
 from utils.error_logger import log_error
+
+# Require login - redirect to login page if not authenticated
+if not is_authenticated():
+    st.query_params["page"] = "login"
+    st.rerun()
 
 
 def safe_save(context: str = "settings"):

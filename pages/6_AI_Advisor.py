@@ -15,7 +15,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import UserHero, User, AIConversation
-from database.auth import get_current_user_id
+from database.auth import get_current_user_id, is_authenticated
 from database.ai_service import (
     get_ai_mode, check_rate_limit, record_ai_request,
     log_ai_conversation, rate_conversation, get_ai_settings,
@@ -25,6 +25,11 @@ from database.ai_service import (
 )
 from engine import RecommendationEngine, AIRecommender
 from utils.toolbar import render_donate_message
+
+# Require login - redirect to login page if not authenticated
+if not is_authenticated():
+    st.query_params["page"] = "login"
+    st.rerun()
 
 # Load CSS
 css_file = PROJECT_ROOT / "styles" / "custom.css"

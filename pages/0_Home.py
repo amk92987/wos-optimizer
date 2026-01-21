@@ -36,7 +36,11 @@ def get_current_generation(server_age_days: int) -> int:
     return 14 + ((server_age_days - 1080) // 80)
 
 
-# This page is only shown to authenticated users (app.py handles routing)
+# Require login - redirect to login page if not authenticated
+if not is_authenticated():
+    st.query_params["page"] = "login"
+    st.rerun()
+
 profile = get_or_create_profile(db)
 colors = get_colors()
 

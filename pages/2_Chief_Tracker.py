@@ -11,8 +11,14 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import init_db, get_db, get_or_create_profile
 from database.models import UserChiefGear, UserChiefCharm
+from database.auth import is_authenticated
 from utils.theme_colors import get_colors, text_shadow
 from utils.error_logger import log_error
+
+# Require login - redirect to login page if not authenticated
+if not is_authenticated():
+    st.query_params["page"] = "login"
+    st.rerun()
 
 # Initialize
 init_db()
