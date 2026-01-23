@@ -262,7 +262,7 @@ for flag in filtered_flags:
         <div style="padding: 4px 0;">
             <span style="font-size: 16px;">{meta['icon']}</span>
             <strong style="margin-left: 6px; color: {status_color};">{meta['display_name']}</strong>
-            <div style="font-size: 10px; color: #888; margin-top: 2px;">{meta['category']}</div>
+            <div style="font-size: 11px; color: #888; margin-top: 2px;">{meta['category']}</div>
         </div>
         """, unsafe_allow_html=True)
 

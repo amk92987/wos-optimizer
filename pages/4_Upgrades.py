@@ -311,7 +311,7 @@ else:
                         <div style="text-align: right;">
                             <div style="color: #4A90D9; font-size: 14px; font-weight: bold;">{level_progress}</div>
                             <div style="color: #FFD700; font-size: 12px;">{stars_display}</div>
-                            <div style="color: #888; font-size: 10px;">Target: {target_stars_display}</div>
+                            <div style="color: #888; font-size: 11px;">Target: {target_stars_display}</div>
                         </div>
                     </div>
                     <div style="color: #4CAF50; font-size: 13px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(74,144,217,0.2);">

@@ -674,7 +674,7 @@ def render_event_card(event_id, event_data):
                                         padding: 10px; border-radius: 8px; text-align: center;">
                                 <div style="font-size: 12px; color: #B8D4E8;">Day {day}</div>
                                 <div style="font-size: 28px; font-weight: bold; color: {border_color};">{points}</div>
-                                <div style="font-size: 10px; color: #B8D4E8;">VP</div>
+                                <div style="font-size: 11px; color: #B8D4E8;">VP</div>
                             </div>
                             """, unsafe_allow_html=True)
 

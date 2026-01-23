@@ -55,8 +55,8 @@ st.markdown("""
 /* Very small action buttons */
 .stButton > button {
     padding: 2px 6px !important;
-    min-height: 24px !important;
-    font-size: 10px !important;
+    min-height: 32px !important;
+    font-size: 11px !important;
     border-radius: 4px !important;
     white-space: nowrap !important;
     background: linear-gradient(135deg, #1A3A5C, #2E5A8C) !important;

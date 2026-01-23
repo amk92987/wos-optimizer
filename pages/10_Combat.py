@@ -225,7 +225,7 @@ def render_quick_audit():
                 st.markdown(f"""
                 <div style="background:rgba(74,144,217,0.1);border-left:3px solid {impact_color};padding:8px 12px;margin:6px 0;border-radius:4px;">
                     <div style="display:flex;align-items:center;gap:8px;">
-                        <span style="background:{impact_color};color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5);padding:2px 6px;border-radius:3px;font-size:10px;">{impact}</span>
+                        <span style="background:{impact_color};color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.8), 0 0 4px rgba(0,0,0,0.5);padding:2px 6px;border-radius:3px;font-size:11px;">{impact}</span>
                         <span style="font-weight:bold;color:#E8F4F8;">{question}</span>
                     </div>
                     <div style="font-size:12px;color:#B8D4E8;margin-top:4px;">{why}</div>

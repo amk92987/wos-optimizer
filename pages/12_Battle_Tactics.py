@@ -584,7 +584,7 @@ def render_frostfire():
             # Column headers
             st.markdown("""
             <div style="display:flex;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);">
-                <div style="width:120px;font-weight:bold;color:#4A90D9;font-size:14px;">Event Time</div>
+                <div style="min-width:80px;max-width:120px;flex-shrink:0;font-weight:bold;color:#4A90D9;font-size:14px;">Event Time</div>
                 <div style="flex:1;font-weight:bold;color:#4A90D9;font-size:14px;">Strategy</div>
             </div>
             """, unsafe_allow_html=True)
@@ -613,7 +613,7 @@ def render_frostfire():
                 # Two-column layout: timestamp outside, strategy inside box
                 st.markdown(f"""
                 <div style="display:flex;margin-bottom:10px;align-items:flex-start;">
-                    <div style="width:120px;flex-shrink:0;padding-top:12px;">
+                    <div style="min-width:80px;max-width:120px;flex-shrink:0;padding-top:12px;">
                         <span style="font-weight:bold;color:{border_color};font-size:15px;">{time}</span>
                     </div>
                     <div style="flex:1;background:{bg_color};border-left:4px solid {border_color};padding:12px;border-radius:6px;">

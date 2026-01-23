@@ -558,7 +558,7 @@ def render_gear_charms(gear_id, gear_name, gear_data, charm_data, key_prefix):
     with col_top:
         current_bonus = get_charm_bonus(current_levels[0])
         st.markdown(
-            f'<div style="text-align:center;font-size:10px;{text_shadow}">'
+            f'<div style="text-align:center;font-size:11px;{text_shadow}">'
             f'<span style="color:{charm_color};">{charm_icon}</span> '
             f'<span style="color:#FFD700;">+{current_bonus:.0f}%</span></div>',
             unsafe_allow_html=True
@@ -591,7 +591,7 @@ def render_gear_charms(gear_id, gear_name, gear_data, charm_data, key_prefix):
         with col:
             current_bonus = get_charm_bonus(current_levels[slot_idx])
             st.markdown(
-                f'<div style="text-align:center;font-size:10px;{text_shadow}">'
+                f'<div style="text-align:center;font-size:11px;{text_shadow}">'
                 f'<span style="color:{charm_color};">{charm_icon}</span> '
                 f'<span style="color:#FFD700;">+{current_bonus:.0f}%</span></div>',
                 unsafe_allow_html=True

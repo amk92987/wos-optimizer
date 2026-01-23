@@ -306,8 +306,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Chat messages container
-chat_container = st.container(height=400)
+# Chat messages container (320px works better on mobile)
+chat_container = st.container(height=320)
 
 with chat_container:
     if not st.session_state.chat_messages and 'pending_question' not in st.session_state:

@@ -129,7 +129,7 @@ with tab_active:
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="font-size: 16px; font-weight: bold;">{icon} {ann.title}</div>
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 10px;">{d_icon} {d_label}</span>
+                            <span style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 11px;">{d_icon} {d_label}</span>
                             <span style="font-size: 11px; color: #888;">{ann.created_at.strftime('%m/%d/%y %I:%M %p')}</span>
                         </div>
                     </div>

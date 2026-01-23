@@ -218,7 +218,7 @@ def render_item_table(items):
             img_b64 = get_image_base64(item["image"])
             if img_b64:
                 mime_type = get_image_mime_type(item["image"])
-                img_html = f'<img src="data:{mime_type};base64,{img_b64}" width="32" height="32" style="border-radius:4px;vertical-align:middle;">'
+                img_html = f'<img src="data:{mime_type};base64,{img_b64}" width="32" height="32" style="border-radius:4px;vertical-align:middle;max-width:100%;">'
 
         if not img_html and item.get("emoji"):
             img_html = f'<span style="font-size:24px;">{item["emoji"]}</span>'
@@ -229,7 +229,7 @@ def render_item_table(items):
         # Duration note if applicable
         duration_note = ""
         if item.get("durations"):
-            duration_note = f'<br><span style="color:#FFD700;font-size:10px;">{item["durations"]}</span>'
+            duration_note = f'<br><span style="color:#FFD700;font-size:11px;">{item["durations"]}</span>'
 
         rows_html += f'''<tr style="border-bottom:1px solid rgba(74,144,217,0.2);">
             <td style="padding:10px;text-align:center;width:50px;">{img_html}</td>

@@ -546,7 +546,7 @@ def render_analysis_section(analysis: dict):
                 # Get image or emoji (use 'or' to handle explicit None)
                 img_b64 = get_image_base64(item.get("image"))
                 if img_b64:
-                    icon_html = f'<img src="data:image/png;base64,{img_b64}" width="20" height="20" style="vertical-align:middle;margin-right:6px;">'
+                    icon_html = f'<img src="data:image/png;base64,{img_b64}" width="20" height="20" style="vertical-align:middle;margin-right:6px;max-width:100%;">'
                 else:
                     emoji = item.get("emoji") or "📦"
                     icon_html = f'<span style="margin-right:6px;">{emoji}</span>'
@@ -602,7 +602,7 @@ def render_item_grid(category_key: str, category_data: dict, quantities: dict):
                 tooltip = item.get("desc", item["name"])
 
                 if img_b64:
-                    icon_html = f'<img src="data:image/png;base64,{img_b64}" width="48" height="48" style="border-radius:6px;cursor:help;" title="{tooltip}">'
+                    icon_html = f'<img src="data:image/png;base64,{img_b64}" width="48" height="48" style="border-radius:6px;cursor:help;max-width:100%;" title="{tooltip}">'
                 else:
                     icon_html = f'<span style="font-size:40px;cursor:help;" title="{tooltip}">{item.get("emoji", "📦")}</span>'
 
@@ -710,7 +710,7 @@ def render_resource_grid(category_data: dict, quantities: dict):
             if img_b64:
                 st.markdown(f"""
                 <div style="text-align:center;">
-                    <img src="data:image/png;base64,{img_b64}" width="24" height="24" style="vertical-align:middle;">
+                    <img src="data:image/png;base64,{img_b64}" width="24" height="24" style="vertical-align:middle;max-width:100%;">
                     <span style="font-weight:bold;margin-left:4px;">{col_info['label']}</span>
                 </div>
                 """, unsafe_allow_html=True)
