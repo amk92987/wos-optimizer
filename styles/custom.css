@@ -224,10 +224,13 @@
     padding: 0 !important;
 }
 
-/* Hide sidebar collapse button - keep sidebar always visible */
-[data-testid="stSidebarCollapseButton"],
-[data-testid="collapsedControl"] {
-    display: none !important;
+/* Hide sidebar collapse button on DESKTOP - keep sidebar always visible */
+@media screen and (min-width: 769px) {
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
 }
 
 /* Hide sidebar link previews and status indicators */
@@ -277,16 +280,41 @@ iframe[title="streamlit_status"],
     pointer-events: auto;
 }
 
-/* Hide any status/connection indicator and header bar */
+/* Hide status widget and footer everywhere */
 [data-testid="stStatusWidget"],
-[data-testid="stToolbar"],
-[data-testid="stHeader"],
-header[data-testid="stHeader"],
-.stApp > header,
 .streamlit-footer {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
+}
+
+/* Hide toolbar and header on DESKTOP only - mobile needs hamburger menu */
+@media screen and (min-width: 769px) {
+    [data-testid="stToolbar"],
+    [data-testid="stHeader"],
+    header[data-testid="stHeader"],
+    .stApp > header {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+    }
+}
+
+/* On MOBILE, show minimal header for hamburger menu */
+@media screen and (max-width: 768px) {
+    [data-testid="stHeader"],
+    header[data-testid="stHeader"] {
+        display: block !important;
+        visibility: visible !important;
+        background: transparent !important;
+        height: auto !important;
+        min-height: 60px !important;
+    }
+
+    /* Hide toolbar items but keep the hamburger */
+    [data-testid="stToolbar"] {
+        display: none !important;
+    }
 }
 
 /* Remove top padding that header leaves behind */
@@ -1057,10 +1085,11 @@ button[data-testid="baseButton-primary"]:hover {
 
 /* Mobile screens (under 768px) */
 @media screen and (max-width: 768px) {
-    /* Hide sidebar on mobile by default */
+    /* Sidebar starts collapsed on mobile */
     [data-testid="stSidebar"] {
         min-width: 0 !important;
         width: 0 !important;
+        transition: width 0.3s ease, min-width 0.3s ease !important;
     }
 
     [data-testid="stSidebar"][aria-expanded="true"] {
@@ -1068,16 +1097,47 @@ button[data-testid="baseButton-primary"]:hover {
         width: 280px !important;
     }
 
-    /* Show sidebar collapse button on mobile */
+    /* CRITICAL: Show sidebar toggle button on mobile - all possible selectors */
     [data-testid="stSidebarCollapseButton"],
-    [data-testid="collapsedControl"] {
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"],
+    button[kind="header"],
+    [data-testid="stHeader"] button {
         display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: fixed !important;
+        top: 12px !important;
+        left: 12px !important;
+        z-index: 999999 !important;
+        background: linear-gradient(135deg, #1A3A5C, #2E5A8C) !important;
+        border: 2px solid rgba(74, 144, 217, 0.6) !important;
+        border-radius: 8px !important;
+        padding: 10px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
     }
 
-    /* Adjust main content padding */
+    [data-testid="stSidebarCollapseButton"]:hover,
+    [data-testid="stSidebarCollapsedControl"]:hover {
+        background: linear-gradient(135deg, #2E5A8C, #3E6A9C) !important;
+    }
+
+    /* Ensure the hamburger icon is visible */
+    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="stSidebarCollapsedControl"] svg {
+        color: #E8F4F8 !important;
+        fill: #E8F4F8 !important;
+        width: 24px !important;
+        height: 24px !important;
+    }
+
+    /* Adjust main content padding - extra top for hamburger menu */
     .block-container {
         padding-left: 1rem !important;
         padding-right: 1rem !important;
+        padding-top: 70px !important;
         max-width: 100% !important;
     }
 
