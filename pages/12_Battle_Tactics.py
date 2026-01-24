@@ -1170,18 +1170,19 @@ def render_canyon_clash():
     st.markdown("### Canyon Clash")
     st.markdown(canyon_data.get("overview", canyon_data.get("description", "")))
 
-    # Display Canyon Clash banner image if available
-    banner_path = PROJECT_ROOT / "assets" / "events" / "canyon_clash_banner.png"
-    if banner_path.exists():
-        with open(banner_path, "rb") as f:
-            banner_data = base64.b64encode(f.read()).decode()
+    # Display Canyon Clash arena map image
+    map_path = PROJECT_ROOT / "Screenshots" / "canyon-clash-guides-whiteout-survival-v0-8fsabubt2jyd1.png"
+    if map_path.exists():
+        with open(map_path, "rb") as f:
+            map_data = base64.b64encode(f.read()).decode()
         st.markdown(f"""
         <div style="text-align:center;margin:16px 0;">
-            <img src="data:image/png;base64,{banner_data}"
-                 style="max-width:100%;max-height:300px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);"
-                 alt="Canyon Clash Event">
+            <img src="data:image/png;base64,{map_data}"
+                 style="max-width:100%;max-height:400px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);"
+                 alt="Canyon Clash Arena Map">
         </div>
         """, unsafe_allow_html=True)
+        st.caption("Canyon Clash Arena Map")
 
     # Event basics
     basics = canyon_data.get("event_basics", {})
