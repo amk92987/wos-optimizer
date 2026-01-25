@@ -301,18 +301,41 @@ iframe[title="streamlit_status"],
 }
 
 /* ============================================
-   MOBILE LAYOUT - Minimal fixes only
+   GLOBAL OVERFLOW CONTROL - Prevent horizontal scroll
+   ============================================ */
+html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain !important;
+}
+
+.stApp,
+[data-testid="stAppViewContainer"],
+[data-testid="stAppViewBlockContainer"],
+.main,
+[data-testid="stMain"],
+[data-testid="stMainBlockContainer"] {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+}
+
+/* Force all content to stay within bounds */
+* {
+    max-width: 100vw;
+}
+
+/* ============================================
+   MOBILE LAYOUT - Hide sidebar collapse on mobile
    ============================================ */
 @media screen and (max-width: 768px) {
-    /* Prevent horizontal overflow */
-    .stApp {
-        max-width: 100vw !important;
-        overflow-x: hidden !important;
-    }
-
-    /* Disable pull-to-refresh to prevent accidental logouts */
-    html, body {
-        overscroll-behavior-y: contain !important;
+    /* HIDE the sidebar collapse button completely on mobile */
+    /* Users will use the native Streamlit hamburger in the header */
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"] {
+        display: none !important;
+        visibility: hidden !important;
     }
 
     .main .block-container {
@@ -327,11 +350,19 @@ iframe[title="streamlit_status"],
         height: auto !important;
     }
 
-    /* Tables scroll horizontally */
+    /* Tables scroll horizontally within their container */
     table, .stDataFrame {
         display: block !important;
         max-width: 100% !important;
         overflow-x: auto !important;
+    }
+
+    /* Ensure inline HTML doesn't overflow */
+    [data-testid="stMarkdownContainer"] div,
+    .stMarkdown div {
+        max-width: 100% !important;
+        overflow-x: hidden !important;
+        word-wrap: break-word !important;
     }
 }
 
@@ -1103,55 +1134,21 @@ button[data-testid="baseButton-primary"]:hover {
 
 /* Mobile screens (under 768px) */
 @media screen and (max-width: 768px) {
-    /* Sidebar starts collapsed on mobile */
-    [data-testid="stSidebar"] {
-        min-width: 0 !important;
-        width: 0 !important;
-        transition: width 0.3s ease, min-width 0.3s ease !important;
-    }
-
-    [data-testid="stSidebar"][aria-expanded="true"] {
-        min-width: 280px !important;
-        width: 280px !important;
-    }
-
-    /* CRITICAL: Show sidebar toggle button on mobile - all possible selectors */
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="stSidebarCollapsedControl"],
-    [data-testid="collapsedControl"],
-    button[kind="header"],
-    [data-testid="stHeader"] button {
+    /* Show the Streamlit header with hamburger on mobile */
+    [data-testid="stHeader"],
+    header[data-testid="stHeader"] {
         display: flex !important;
         visibility: visible !important;
-        opacity: 1 !important;
-        position: fixed !important;
-        top: 12px !important;
-        left: 12px !important;
-        z-index: 999999 !important;
-        background: linear-gradient(135deg, #1A3A5C, #2E5A8C) !important;
-        border: 2px solid rgba(74, 144, 217, 0.6) !important;
-        border-radius: 8px !important;
-        padding: 10px !important;
-        min-width: 44px !important;
-        min-height: 44px !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+        height: auto !important;
+        background: #0A1628 !important;
     }
 
-    [data-testid="stSidebarCollapseButton"]:hover,
-    [data-testid="stSidebarCollapsedControl"]:hover {
-        background: linear-gradient(135deg, #2E5A8C, #3E6A9C) !important;
+    /* Sidebar behavior on mobile - controlled by Streamlit's hamburger */
+    [data-testid="stSidebar"] {
+        z-index: 999 !important;
     }
 
-    /* Ensure the hamburger icon is visible */
-    [data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="stSidebarCollapsedControl"] svg {
-        color: #E8F4F8 !important;
-        fill: #E8F4F8 !important;
-        width: 24px !important;
-        height: 24px !important;
-    }
-
-    /* Adjust main content padding - extra top for hamburger menu */
+    /* Adjust main content padding - extra top for header */
     .block-container {
         padding-left: 1rem !important;
         padding-right: 1rem !important;

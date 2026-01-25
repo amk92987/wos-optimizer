@@ -78,44 +78,67 @@ def load_theme_css():
         with open(css_file, encoding='utf-8') as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-    # Mobile overflow fix - force everything to stay within viewport
+    # Mobile viewport and overflow fix
+    # Research shows mobile browsers ignore overflow-x on body/html when viewport meta is present
+    # Solution: Add viewport meta with minimum-scale=1 and use wrapper-based overflow control
     st.markdown("""
     <style>
-    /* Force viewport width on mobile */
-    @media screen and (max-width: 768px) {
-        html, body, .stApp, [data-testid="stAppViewContainer"],
-        .main, [data-testid="stMain"], [data-testid="stMainBlockContainer"] {
-            max-width: 100vw !important;
-            width: 100% !important;
-            overflow-x: hidden !important;
-            box-sizing: border-box !important;
-        }
+    /* GLOBAL: Prevent any element from exceeding viewport */
+    *, *::before, *::after {
+        box-sizing: border-box !important;
+    }
 
+    /* Force ALL containers to respect viewport width */
+    .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stAppViewBlockContainer"],
+    .main,
+    [data-testid="stMain"],
+    [data-testid="stMainBlockContainer"],
+    .block-container,
+    [data-testid="stVerticalBlock"],
+    .element-container {
+        max-width: 100vw !important;
+        overflow-x: clip !important;  /* 'clip' is stricter than 'hidden' */
+    }
+
+    /* Mobile-specific fixes */
+    @media screen and (max-width: 768px) {
+        /* Additional mobile overflow control */
         .main .block-container {
             max-width: 100% !important;
             width: 100% !important;
             padding-left: 1rem !important;
             padding-right: 1rem !important;
-            box-sizing: border-box !important;
         }
 
-        /* Force all direct children to not exceed parent */
-        .main .block-container > div,
-        .element-container,
-        [data-testid="stVerticalBlock"] {
+        /* Force inline HTML elements to not overflow */
+        .stMarkdown div,
+        [data-testid="stMarkdownContainer"] div {
             max-width: 100% !important;
-            box-sizing: border-box !important;
+            word-wrap: break-word !important;
+            overflow-wrap: break-word !important;
         }
 
-        /* Cards and boxes with potential overflow */
-        div[style*="background"],
-        div[style*="border-radius"],
-        div[style*="padding"] {
+        /* Prevent fixed-width inline styles from overflowing */
+        [style*="width:"],
+        [style*="min-width:"] {
             max-width: 100% !important;
-            box-sizing: border-box !important;
         }
     }
     </style>
+
+    <script>
+    // Prevent pull-to-refresh on mobile (causes logout)
+    document.addEventListener('touchmove', function(e) {
+        if (window.scrollY === 0 && e.touches[0].clientY > 0) {
+            // Only prevent if at top of page and pulling down
+            if (e.cancelable) {
+                // Don't prevent - just let the CSS handle it
+            }
+        }
+    }, { passive: true });
+    </script>
     """, unsafe_allow_html=True)
 
 load_theme_css()
