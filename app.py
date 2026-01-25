@@ -78,68 +78,6 @@ def load_theme_css():
         with open(css_file, encoding='utf-8') as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-    # Mobile viewport and overflow fix
-    # Research shows mobile browsers ignore overflow-x on body/html when viewport meta is present
-    # Solution: Add viewport meta with minimum-scale=1 and use wrapper-based overflow control
-    st.markdown("""
-    <style>
-    /* GLOBAL: Prevent any element from exceeding viewport */
-    *, *::before, *::after {
-        box-sizing: border-box !important;
-    }
-
-    /* Force ALL containers to respect viewport width */
-    .stApp,
-    [data-testid="stAppViewContainer"],
-    [data-testid="stAppViewBlockContainer"],
-    .main,
-    [data-testid="stMain"],
-    [data-testid="stMainBlockContainer"],
-    .block-container,
-    [data-testid="stVerticalBlock"],
-    .element-container {
-        max-width: 100vw !important;
-        overflow-x: clip !important;  /* 'clip' is stricter than 'hidden' */
-    }
-
-    /* Mobile-specific fixes */
-    @media screen and (max-width: 768px) {
-        /* Additional mobile overflow control */
-        .main .block-container {
-            max-width: 100% !important;
-            width: 100% !important;
-            padding-left: 1rem !important;
-            padding-right: 1rem !important;
-        }
-
-        /* Force inline HTML elements to not overflow */
-        .stMarkdown div,
-        [data-testid="stMarkdownContainer"] div {
-            max-width: 100% !important;
-            word-wrap: break-word !important;
-            overflow-wrap: break-word !important;
-        }
-
-        /* Prevent fixed-width inline styles from overflowing */
-        [style*="width:"],
-        [style*="min-width:"] {
-            max-width: 100% !important;
-        }
-    }
-    </style>
-
-    <script>
-    // Prevent pull-to-refresh on mobile (causes logout)
-    document.addEventListener('touchmove', function(e) {
-        if (window.scrollY === 0 && e.touches[0].clientY > 0) {
-            // Only prevent if at top of page and pulling down
-            if (e.cancelable) {
-                // Don't prevent - just let the CSS handle it
-            }
-        }
-    }, { passive: true });
-    </script>
-    """, unsafe_allow_html=True)
 
 load_theme_css()
 
