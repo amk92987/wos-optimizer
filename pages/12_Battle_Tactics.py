@@ -584,7 +584,7 @@ def render_frostfire():
             # Column headers
             st.markdown("""
             <div style="display:flex;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,0.1);">
-                <div style="width:120px;font-weight:bold;color:#4A90D9;font-size:14px;">Event Time</div>
+                <div style="min-width:80px;max-width:120px;flex-shrink:0;font-weight:bold;color:#4A90D9;font-size:14px;">Event Time</div>
                 <div style="flex:1;font-weight:bold;color:#4A90D9;font-size:14px;">Strategy</div>
             </div>
             """, unsafe_allow_html=True)
@@ -613,7 +613,7 @@ def render_frostfire():
                 # Two-column layout: timestamp outside, strategy inside box
                 st.markdown(f"""
                 <div style="display:flex;margin-bottom:10px;align-items:flex-start;">
-                    <div style="width:120px;flex-shrink:0;padding-top:12px;">
+                    <div style="min-width:80px;max-width:120px;flex-shrink:0;padding-top:12px;">
                         <span style="font-weight:bold;color:{border_color};font-size:15px;">{time}</span>
                     </div>
                     <div style="flex:1;background:{bg_color};border-left:4px solid {border_color};padding:12px;border-radius:6px;">
@@ -1170,18 +1170,19 @@ def render_canyon_clash():
     st.markdown("### Canyon Clash")
     st.markdown(canyon_data.get("overview", canyon_data.get("description", "")))
 
-    # Display Canyon Clash banner image if available
-    banner_path = PROJECT_ROOT / "assets" / "events" / "canyon_clash_banner.png"
-    if banner_path.exists():
-        with open(banner_path, "rb") as f:
-            banner_data = base64.b64encode(f.read()).decode()
+    # Display Canyon Clash arena map image
+    map_path = PROJECT_ROOT / "Screenshots" / "canyon-clash-guides-whiteout-survival-v0-8fsabubt2jyd1.png"
+    if map_path.exists():
+        with open(map_path, "rb") as f:
+            map_data = base64.b64encode(f.read()).decode()
         st.markdown(f"""
         <div style="text-align:center;margin:16px 0;">
-            <img src="data:image/png;base64,{banner_data}"
-                 style="max-width:100%;max-height:300px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);"
-                 alt="Canyon Clash Event">
+            <img src="data:image/png;base64,{map_data}"
+                 style="max-width:100%;max-height:400px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.3);"
+                 alt="Canyon Clash Arena Map">
         </div>
         """, unsafe_allow_html=True)
+        st.caption("Canyon Clash Arena Map")
 
     # Event basics
     basics = canyon_data.get("event_basics", {})

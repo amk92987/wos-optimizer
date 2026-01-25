@@ -170,7 +170,7 @@ def get_hero_role_badge(hero_name: str) -> str:
             border:1px solid {color};
             border-radius:4px;
             padding:1px 5px;
-            font-size:9px;
+            font-size:11px;
             color:{color};
             white-space:nowrap;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
@@ -375,7 +375,7 @@ def render_hero_row(hero: dict, user_hero, hero_key: str):
         if user_hero.stars < 5 and user_hero.ascension_tier > 0:
             asc_filled = "●" * user_hero.ascension_tier
             asc_empty = "○" * (5 - user_hero.ascension_tier)
-            stars_html += f' <span style="color:#9B59B6;font-size:10px;">{asc_filled}{asc_empty}</span>'
+            stars_html += f' <span style="color:#9B59B6;font-size:11px;">{asc_filled}{asc_empty}</span>'
         level_display = f"Lv.{user_hero.level}"
     else:
         stars_html = '<span style="color:#4A5568;">☆☆☆☆☆</span>'
@@ -387,7 +387,7 @@ def render_hero_row(hero: dict, user_hero, hero_key: str):
     with img_col:
         # Large hero image
         if hero_image_b64:
-            st.markdown(f'<img src="{hero_image_b64}" style="width:80px;height:80px;border-radius:8px;border:3px solid {border_color};opacity:{opacity};" />', unsafe_allow_html=True)
+            st.markdown(f'<img src="{hero_image_b64}" style="width:80px;height:80px;max-width:100%;border-radius:8px;border:3px solid {border_color};opacity:{opacity};" />', unsafe_allow_html=True)
         else:
             st.markdown(f'<div style="width:80px;height:80px;background:#1E2A3A;border-radius:8px;border:3px solid {border_color};display:flex;align-items:center;justify-content:center;font-size:32px;opacity:{opacity};">{get_class_symbol(hero["hero_class"])}</div>', unsafe_allow_html=True)
 

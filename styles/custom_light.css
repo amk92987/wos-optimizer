@@ -113,10 +113,10 @@ header[data-testid="stHeader"],
     color: #D4A000 !important;
     padding: 0 !important;
     margin: 0 !important;
-    min-height: 24px !important;
-    height: 24px !important;
+    min-height: 44px !important;
+    height: 44px !important;
     font-size: 16px !important;
-    line-height: 24px !important;
+    line-height: 44px !important;
 }
 
 [data-testid="stSidebar"] .stButton > button:hover {
@@ -295,7 +295,7 @@ h1, h2, h3 {
 }
 
 .stats-card .label {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -739,8 +739,8 @@ div[data-baseweb="popover"] > div:first-child {
     color: #FFFFFF !important;
     border: 1px solid rgba(57, 106, 168, 0.5) !important;
     border-radius: 8px !important;
-    min-width: 36px !important;
-    min-height: 36px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
 }
 
 .main .stButton > button:hover,
@@ -773,4 +773,42 @@ div[data-baseweb="popover"] > div:first-child {
 [data-baseweb="tooltip"] *,
 [role="tooltip"] * {
     color: #FFFFFF !important;
+}
+
+/* ============================================
+   MOBILE RESPONSIVE BREAKPOINTS
+   ============================================ */
+
+/* Tablet breakpoint */
+@media screen and (max-width: 768px) {
+    /* Reduce padding on mobile */
+    .block-container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }
+
+    /* Ensure touch targets are large enough */
+    .stButton > button {
+        min-height: 44px !important;
+        padding: 8px 16px !important;
+    }
+
+    /* Sidebar adjustments */
+    [data-testid="stSidebar"] {
+        min-width: 200px !important;
+    }
+}
+
+/* Mobile breakpoint */
+@media screen and (max-width: 480px) {
+    /* Even smaller padding on small phones */
+    .block-container {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+
+    /* Stack elements that might overflow */
+    [data-testid="stHorizontalBlock"] {
+        flex-wrap: wrap !important;
+    }
 }

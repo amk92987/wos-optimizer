@@ -224,10 +224,13 @@
     padding: 0 !important;
 }
 
-/* Hide sidebar collapse button - keep sidebar always visible */
-[data-testid="stSidebarCollapseButton"],
-[data-testid="collapsedControl"] {
-    display: none !important;
+/* Hide sidebar collapse button on DESKTOP - keep sidebar always visible */
+@media screen and (min-width: 769px) {
+    [data-testid="stSidebarCollapseButton"],
+    [data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"] {
+        display: none !important;
+    }
 }
 
 /* Hide sidebar link previews and status indicators */
@@ -277,16 +280,41 @@ iframe[title="streamlit_status"],
     pointer-events: auto;
 }
 
-/* Hide any status/connection indicator and header bar */
+/* Hide status widget and footer everywhere */
 [data-testid="stStatusWidget"],
-[data-testid="stToolbar"],
-[data-testid="stHeader"],
-header[data-testid="stHeader"],
-.stApp > header,
 .streamlit-footer {
     display: none !important;
     visibility: hidden !important;
     height: 0 !important;
+}
+
+/* Hide toolbar and header on DESKTOP only - mobile needs hamburger menu */
+@media screen and (min-width: 769px) {
+    [data-testid="stToolbar"],
+    [data-testid="stHeader"],
+    header[data-testid="stHeader"],
+    .stApp > header {
+        display: none !important;
+        visibility: hidden !important;
+        height: 0 !important;
+    }
+}
+
+/* ============================================
+   MOBILE LAYOUT - Minimal, non-breaking fixes
+   ============================================ */
+@media screen and (max-width: 768px) {
+    .main .block-container {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        padding-top: 60px !important;
+    }
+
+    /* Images respect container */
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
 }
 
 /* Remove top padding that header leaves behind */
@@ -304,10 +332,10 @@ header[data-testid="stHeader"],
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    min-height: 36px !important;
-    height: 36px !important;
+    min-height: 44px !important;
+    height: 44px !important;
     font-size: 26px !important;
-    line-height: 36px !important;
+    line-height: 44px !important;
     min-width: 100% !important;
     width: 100% !important;
     color: #5A6A7A !important;
@@ -389,7 +417,7 @@ h1 a, h2 a, h3 a, h4 a,
 }
 
 /* Blurb section fixed height */
-div[style*="background:rgba(0,0,0,0.3)"][style*="font-size:10px"] {
+div[style*="background:rgba(0,0,0,0.3)"][style*="font-size:11px"] {
     min-height: 45px;
     max-height: 60px;
     overflow: hidden;
@@ -656,7 +684,7 @@ div[style*="background:rgba(0,0,0,0.3)"][style*="font-size:10px"] {
 }
 
 .stats-card .label {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -1001,8 +1029,8 @@ hr {
     color: #FFFFFF !important;
     border: 2px solid rgba(74, 144, 217, 0.6) !important;
     border-radius: 8px !important;
-    min-width: 40px !important;
-    min-height: 40px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -1057,30 +1085,6 @@ button[data-testid="baseButton-primary"]:hover {
 
 /* Mobile screens (under 768px) */
 @media screen and (max-width: 768px) {
-    /* Hide sidebar on mobile by default */
-    [data-testid="stSidebar"] {
-        min-width: 0 !important;
-        width: 0 !important;
-    }
-
-    [data-testid="stSidebar"][aria-expanded="true"] {
-        min-width: 280px !important;
-        width: 280px !important;
-    }
-
-    /* Show sidebar collapse button on mobile */
-    [data-testid="stSidebarCollapseButton"],
-    [data-testid="collapsedControl"] {
-        display: flex !important;
-    }
-
-    /* Adjust main content padding */
-    .block-container {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        max-width: 100% !important;
-    }
-
     /* Stack columns vertically */
     [data-testid="stHorizontalBlock"] {
         flex-direction: column !important;
@@ -1095,90 +1099,31 @@ button[data-testid="baseButton-primary"]:hover {
 
     /* Larger touch targets for buttons */
     .stButton > button {
-        min-height: 48px !important;
-        min-width: 48px !important;
-        padding: 12px 20px !important;
-        font-size: 16px !important;
+        min-height: 44px !important;
+        padding: 10px 16px !important;
     }
 
     /* Larger form inputs for touch */
-    input, textarea, select,
-    [data-baseweb="input"],
-    [data-baseweb="textarea"],
-    [data-baseweb="select"] {
-        min-height: 48px !important;
+    input, textarea, select {
+        min-height: 44px !important;
         font-size: 16px !important;
-    }
-
-    /* Larger selectbox */
-    .stSelectbox > div > div {
-        min-height: 48px !important;
     }
 
     /* Tab styling for mobile */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 0 !important;
         flex-wrap: wrap !important;
     }
 
     .stTabs [data-baseweb="tab"] {
-        padding: 12px 8px !important;
+        padding: 10px 8px !important;
         font-size: 13px !important;
         flex: 1 1 auto !important;
-        min-width: 80px !important;
-        justify-content: center !important;
-    }
-
-    /* Hero cards - single column */
-    .hero-card {
-        margin: 4px 0 !important;
-        padding: 12px !important;
     }
 
     /* Smaller headers on mobile */
-    h1 {
-        font-size: 1.5rem !important;
-    }
-
-    h2 {
-        font-size: 1.2rem !important;
-    }
-
-    h3 {
-        font-size: 1rem !important;
-    }
-
-    /* Chat message boxes - full width */
-    [data-testid="stChatMessage"] {
-        max-width: 100% !important;
-    }
-
-    /* Expander improvements for touch */
-    .streamlit-expanderHeader {
-        padding: 16px !important;
-    }
-
-    /* Metrics - stack on mobile */
-    [data-testid="stMetric"] {
-        padding: 16px !important;
-    }
-
-    /* Table scroll on mobile */
-    [data-testid="stTable"] {
-        overflow-x: auto !important;
-    }
-
-    /* Popover adjustments for mobile */
-    [data-testid="stPopoverBody"] {
-        min-width: 260px !important;
-        max-width: calc(100vw - 40px) !important;
-    }
-
-    /* Rating buttons larger touch targets */
-    [data-testid="stMainBlockContainer"] .stButton > button {
-        min-height: 44px !important;
-        min-width: 44px !important;
-    }
+    h1 { font-size: 1.5rem !important; }
+    h2 { font-size: 1.2rem !important; }
+    h3 { font-size: 1rem !important; }
 }
 
 /* Small mobile screens (under 480px) */
@@ -1262,6 +1207,8 @@ button[data-testid="baseButton-primary"]:hover {
     padding: 16px;
     margin: 16px 0;
     text-align: center;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .pwa-install-banner h4 {

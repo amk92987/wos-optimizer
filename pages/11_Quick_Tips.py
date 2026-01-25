@@ -347,7 +347,7 @@ def render_hero_card(hero: dict):
 
     # Add mythic gear badge if applicable
     if has_mythic:
-        badges_html += ' <span style="background: linear-gradient(135deg, #FFD700, #FFA500); padding: 2px 8px; border-radius: 4px; font-size: 10px; color: #000; font-weight: bold;">MYTHIC GEAR</span>'
+        badges_html += ' <span style="background: linear-gradient(135deg, #FFD700, #FFA500); padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #000; font-weight: bold;">MYTHIC GEAR</span>'
 
     # Add niche use badges with hover tooltips
     niche_badges_html = ""
@@ -355,7 +355,7 @@ def render_hero_card(hero: dict):
         for niche in HERO_NICHE_USES[name]:
             badge_text = niche["badge"]
             tooltip = niche["tooltip"].replace('"', '&quot;')
-            niche_badges_html += f' <span style="background: linear-gradient(135deg, #9B59B6, #8E44AD); padding: 2px 8px; border-radius: 4px; font-size: 10px; color: #fff; cursor: help;" title="{tooltip}">{badge_text}</span>'
+            niche_badges_html += f' <span style="background: linear-gradient(135deg, #9B59B6, #8E44AD); padding: 2px 8px; border-radius: 4px; font-size: 11px; color: #fff; cursor: help;" title="{tooltip}">{badge_text}</span>'
 
     # Get actual skills from hero data (already loaded above)
     skills_html = ""

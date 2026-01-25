@@ -137,7 +137,7 @@ def render_hero_card(hero_name: str, note: str = "", is_critical: bool = False):
     bg_color = "rgba(255,215,0,0.1)" if is_critical else "rgba(46,90,140,0.3)"
 
     note_html = f'<span style="color:#2ECC71;font-size:11px;margin-left:8px;">✓ {note}</span>' if note else ""
-    critical_badge = '<span style="background:#FFD700;color:black;padding:1px 6px;border-radius:3px;font-size:10px;margin-left:8px;">CRITICAL</span>' if is_critical else ""
+    critical_badge = '<span style="background:#FFD700;color:black;padding:1px 6px;border-radius:3px;font-size:11px;margin-left:8px;">CRITICAL</span>' if is_critical else ""
 
     st.markdown(f'''
     <div style="background:{bg_color};border:1px solid {border_color};border-radius:8px;padding:12px;margin:6px 0;">

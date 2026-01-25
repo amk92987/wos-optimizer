@@ -345,32 +345,38 @@ def render_donate_message():
         background: linear-gradient(135deg, rgba(211, 84, 0, 0.15), rgba(230, 126, 34, 0.1));
         border: 1px solid rgba(211, 84, 0, 0.3);
         border-radius: 12px;
-        padding: 16px 20px;
+        padding: 12px 16px;
         margin: 16px 0;
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        gap: 16px;
+        justify-content: center;
+        gap: 10px;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
     ">
-        <div style="font-size: 32px;">{frost_star_img}</div>
-        <div style="flex: 1;">
-            <div style="color: #E8F4F8; font-size: 14px; font-weight: 500; margin-bottom: 4px;">
+        <div style="font-size: 28px; flex-shrink: 0;">{frost_star_img}</div>
+        <div style="flex: 1 1 150px; min-width: 0;">
+            <div style="color: #E8F4F8; font-size: 13px; font-weight: 500; margin-bottom: 4px;">
                 Chief, running this Settlement costs resources!
             </div>
-            <div style="color: #B8D4E8; font-size: 13px;">
+            <div style="color: #B8D4E8; font-size: 12px; word-wrap: break-word;">
                 If Bear's Den has helped your journey, consider fueling us with some Frost Stars.
-                Every donation keeps the fires burning and features coming!
             </div>
         </div>
         <a href="https://ko-fi.com/randomchaoslabs" target="_blank" style="
             background: linear-gradient(135deg, #D35400, #E67E22);
             color: white;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 20px;
             text-decoration: none;
             font-weight: 600;
-            font-size: 14px;
-            white-space: nowrap;
+            font-size: 13px;
             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            text-align: center;
+            white-space: nowrap;
         ">
             Support Us
         </a>

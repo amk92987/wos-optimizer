@@ -31,6 +31,8 @@ def render_register():
             #5AADD6 96%,
             #7DD3FC 100%) !important;
         background-attachment: fixed !important;
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
     }
 
     /* Hide Streamlit chrome */
