@@ -310,6 +310,11 @@ iframe[title="streamlit_status"],
         overflow-x: hidden !important;
     }
 
+    /* Disable pull-to-refresh to prevent accidental logouts */
+    html, body {
+        overscroll-behavior-y: contain !important;
+    }
+
     .main .block-container {
         padding-left: 0.75rem !important;
         padding-right: 0.75rem !important;
