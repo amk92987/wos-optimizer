@@ -1335,6 +1335,8 @@ button[data-testid="baseButton-primary"]:hover {
     padding: 16px;
     margin: 16px 0;
     text-align: center;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .pwa-install-banner h4 {

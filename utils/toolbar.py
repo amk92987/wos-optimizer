@@ -348,11 +348,14 @@ def render_donate_message():
         padding: 16px 20px;
         margin: 16px 0;
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
+        box-sizing: border-box;
+        max-width: 100%;
     ">
         <div style="font-size: 32px;">{frost_star_img}</div>
-        <div style="flex: 1;">
+        <div style="flex: 1; min-width: 200px;">
             <div style="color: #E8F4F8; font-size: 14px; font-weight: 500; margin-bottom: 4px;">
                 Chief, running this Settlement costs resources!
             </div>
@@ -369,8 +372,9 @@ def render_donate_message():
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
-            white-space: nowrap;
             text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            text-align: center;
+            flex-shrink: 0;
         ">
             Support Us
         </a>

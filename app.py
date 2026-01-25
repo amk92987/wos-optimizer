@@ -78,39 +78,44 @@ def load_theme_css():
         with open(css_file, encoding='utf-8') as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-    # Simple mobile menu button
+    # Mobile overflow fix - force everything to stay within viewport
     st.markdown("""
     <style>
-    #mobile-menu-btn {
-        display: none;
-        position: fixed;
-        top: 12px;
-        left: 12px;
-        z-index: 9999999;
-        width: 48px;
-        height: 48px;
-        background: linear-gradient(135deg, #4A90D9, #2E5A8C);
-        border: 2px solid #7DD3FC;
-        border-radius: 10px;
-        color: white;
-        font-size: 22px;
-        cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-        align-items: center;
-        justify-content: center;
-    }
-
+    /* Force viewport width on mobile */
     @media screen and (max-width: 768px) {
-        #mobile-menu-btn {
-            display: flex !important;
+        html, body, .stApp, [data-testid="stAppViewContainer"],
+        .main, [data-testid="stMain"], [data-testid="stMainBlockContainer"] {
+            max-width: 100vw !important;
+            width: 100% !important;
+            overflow-x: hidden !important;
+            box-sizing: border-box !important;
+        }
+
+        .main .block-container {
+            max-width: 100% !important;
+            width: 100% !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Force all direct children to not exceed parent */
+        .main .block-container > div,
+        .element-container,
+        [data-testid="stVerticalBlock"] {
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        /* Cards and boxes with potential overflow */
+        div[style*="background"],
+        div[style*="border-radius"],
+        div[style*="padding"] {
+            max-width: 100% !important;
+            box-sizing: border-box !important;
         }
     }
     </style>
-
-    <button id="mobile-menu-btn" onclick="
-        var btns = document.querySelectorAll('[data-testid=stSidebarCollapsedControl], [data-testid=stSidebarCollapseButton], button[kind=headerNoPadding]');
-        for(var i=0; i<btns.length; i++) { btns[i].click(); break; }
-    ">☰</button>
     """, unsafe_allow_html=True)
 
 load_theme_css()
