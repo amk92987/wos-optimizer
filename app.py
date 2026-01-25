@@ -78,91 +78,121 @@ def load_theme_css():
         with open(css_file, encoding='utf-8') as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-    # Mobile fixes: floating menu button + overflow fix
+    # Mobile fixes: floating menu button + overlay sidebar
     st.markdown("""
     <style>
-    /* Prevent horizontal overflow globally */
-    html, body, .stApp, [data-testid="stAppViewContainer"], .main {
-        max-width: 100vw !important;
-        overflow-x: hidden !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Force all children to respect container width */
-    .main .block-container {
-        max-width: 100% !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-        box-sizing: border-box !important;
-    }
-
     /* Custom floating menu button for mobile */
     #mobile-menu-btn {
         display: none;
         position: fixed;
-        top: 10px;
-        left: 10px;
+        top: 12px;
+        left: 12px;
         z-index: 9999999;
-        width: 50px;
-        height: 50px;
+        width: 48px;
+        height: 48px;
         background: linear-gradient(135deg, #4A90D9, #2E5A8C);
         border: 2px solid #7DD3FC;
-        border-radius: 12px;
+        border-radius: 10px;
         color: white;
-        font-size: 24px;
+        font-size: 22px;
         cursor: pointer;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         align-items: center;
         justify-content: center;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
     }
 
     #mobile-menu-btn:active {
-        transform: scale(0.95);
+        transform: scale(0.92);
+        background: linear-gradient(135deg, #2E5A8C, #1A3A5C);
+    }
+
+    /* Backdrop overlay when sidebar is open */
+    #sidebar-backdrop {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 999997;
+        -webkit-tap-highlight-color: transparent;
     }
 
     @media screen and (max-width: 768px) {
         #mobile-menu-btn {
             display: flex !important;
         }
-
-        /* Add top padding for the floating button */
-        .main .block-container {
-            padding-top: 70px !important;
-        }
     }
     </style>
 
+    <div id="sidebar-backdrop" onclick="closeSidebar()"></div>
     <button id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
 
     <script>
-    function toggleSidebar() {
-        // Try multiple methods to toggle sidebar
-        const expandBtn = document.querySelector('[data-testid="stSidebarCollapsedControl"]');
-        const collapseBtn = document.querySelector('[data-testid="stSidebarCollapseButton"]');
-        const sidebar = document.querySelector('[data-testid="stSidebar"]');
+    (function() {
+        let sidebarOpen = false;
 
-        if (expandBtn) {
-            expandBtn.click();
-        } else if (collapseBtn) {
-            collapseBtn.click();
-        } else if (sidebar) {
-            // Manual toggle via attribute
-            const isCollapsed = sidebar.getAttribute('aria-expanded') === 'false';
-            if (isCollapsed) {
-                sidebar.style.marginLeft = '0';
+        window.toggleSidebar = function() {
+            const sidebar = document.querySelector('[data-testid="stSidebar"]');
+            const backdrop = document.getElementById('sidebar-backdrop');
+            const btn = document.getElementById('mobile-menu-btn');
+
+            if (!sidebar) return;
+
+            sidebarOpen = !sidebarOpen;
+
+            if (sidebarOpen) {
                 sidebar.style.transform = 'translateX(0)';
+                sidebar.setAttribute('aria-expanded', 'true');
+                backdrop.style.display = 'block';
+                btn.innerHTML = '✕';
+                document.body.style.overflow = 'hidden';
             } else {
-                sidebar.style.marginLeft = '-100%';
                 sidebar.style.transform = 'translateX(-100%)';
+                sidebar.setAttribute('aria-expanded', 'false');
+                backdrop.style.display = 'none';
+                btn.innerHTML = '☰';
+                document.body.style.overflow = '';
             }
-        }
-    }
+        };
 
-    // Fix overflow on load
-    document.addEventListener('DOMContentLoaded', function() {
-        document.body.style.overflowX = 'hidden';
-        document.documentElement.style.overflowX = 'hidden';
-    });
+        window.closeSidebar = function() {
+            if (sidebarOpen) {
+                toggleSidebar();
+            }
+        };
+
+        // Initialize on load
+        function initMobile() {
+            if (window.innerWidth <= 768) {
+                const sidebar = document.querySelector('[data-testid="stSidebar"]');
+                if (sidebar) {
+                    sidebar.style.transform = 'translateX(-100%)';
+                    sidebar.setAttribute('aria-expanded', 'false');
+                }
+            }
+
+            // Fix overflow
+            document.body.style.overflowX = 'hidden';
+            document.documentElement.style.overflowX = 'hidden';
+        }
+
+        // Run init after DOM is ready and after Streamlit rerenders
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initMobile);
+        } else {
+            initMobile();
+        }
+
+        // Re-init when Streamlit updates the page
+        const observer = new MutationObserver(function(mutations) {
+            initMobile();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    })();
     </script>
     """, unsafe_allow_html=True)
 
