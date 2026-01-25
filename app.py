@@ -78,10 +78,9 @@ def load_theme_css():
         with open(css_file, encoding='utf-8') as f:
             st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
-    # Mobile fixes: floating menu button + overlay sidebar
+    # Simple mobile menu button
     st.markdown("""
     <style>
-    /* Custom floating menu button for mobile */
     #mobile-menu-btn {
         display: none;
         position: fixed;
@@ -99,26 +98,6 @@ def load_theme_css():
         box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         align-items: center;
         justify-content: center;
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
-    }
-
-    #mobile-menu-btn:active {
-        transform: scale(0.92);
-        background: linear-gradient(135deg, #2E5A8C, #1A3A5C);
-    }
-
-    /* Backdrop overlay when sidebar is open */
-    #sidebar-backdrop {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 999997;
-        -webkit-tap-highlight-color: transparent;
     }
 
     @media screen and (max-width: 768px) {
@@ -128,72 +107,10 @@ def load_theme_css():
     }
     </style>
 
-    <div id="sidebar-backdrop" onclick="closeSidebar()"></div>
-    <button id="mobile-menu-btn" onclick="toggleSidebar()">☰</button>
-
-    <script>
-    (function() {
-        let sidebarOpen = false;
-
-        window.toggleSidebar = function() {
-            const sidebar = document.querySelector('[data-testid="stSidebar"]');
-            const backdrop = document.getElementById('sidebar-backdrop');
-            const btn = document.getElementById('mobile-menu-btn');
-
-            if (!sidebar) return;
-
-            sidebarOpen = !sidebarOpen;
-
-            if (sidebarOpen) {
-                sidebar.style.transform = 'translateX(0)';
-                sidebar.setAttribute('aria-expanded', 'true');
-                backdrop.style.display = 'block';
-                btn.innerHTML = '✕';
-                document.body.style.overflow = 'hidden';
-            } else {
-                sidebar.style.transform = 'translateX(-100%)';
-                sidebar.setAttribute('aria-expanded', 'false');
-                backdrop.style.display = 'none';
-                btn.innerHTML = '☰';
-                document.body.style.overflow = '';
-            }
-        };
-
-        window.closeSidebar = function() {
-            if (sidebarOpen) {
-                toggleSidebar();
-            }
-        };
-
-        // Initialize on load
-        function initMobile() {
-            if (window.innerWidth <= 768) {
-                const sidebar = document.querySelector('[data-testid="stSidebar"]');
-                if (sidebar) {
-                    sidebar.style.transform = 'translateX(-100%)';
-                    sidebar.setAttribute('aria-expanded', 'false');
-                }
-            }
-
-            // Fix overflow
-            document.body.style.overflowX = 'hidden';
-            document.documentElement.style.overflowX = 'hidden';
-        }
-
-        // Run init after DOM is ready and after Streamlit rerenders
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initMobile);
-        } else {
-            initMobile();
-        }
-
-        // Re-init when Streamlit updates the page
-        const observer = new MutationObserver(function(mutations) {
-            initMobile();
-        });
-        observer.observe(document.body, { childList: true, subtree: true });
-    })();
-    </script>
+    <button id="mobile-menu-btn" onclick="
+        var btns = document.querySelectorAll('[data-testid=stSidebarCollapsedControl], [data-testid=stSidebarCollapseButton], button[kind=headerNoPadding]');
+        for(var i=0; i<btns.length; i++) { btns[i].click(); break; }
+    ">☰</button>
     """, unsafe_allow_html=True)
 
 load_theme_css()
