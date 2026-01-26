@@ -4,10 +4,14 @@ import { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
 
-interface LineupSlot {
-  position: number;
-  heroName: string | null;
+interface LineupHero {
+  hero: string;
+  hero_class: string;
+  slot: string;
   role: string;
+  is_lead: boolean;
+  status: string;
+  power: number;
 }
 
 interface TroopRatio {
@@ -16,127 +20,208 @@ interface TroopRatio {
   marksman: number;
 }
 
-interface LineupTemplate {
-  name: string;
-  description: string;
-  heroes: string[];
-  troops: TroopRatio;
+interface LineupResponse {
+  game_mode: string;
+  heroes: LineupHero[];
+  troop_ratio: TroopRatio;
   notes: string;
+  confidence: string;
+  recommended_to_get: Array<{ hero: string; reason: string }>;
 }
 
-interface SavedLineup {
-  id: number;
+interface LineupTemplate {
   name: string;
-  event_type: string;
-  heroes: string[];
-  troops: TroopRatio;
-  created_at: string;
+  troop_ratio: TroopRatio;
+  notes: string;
+  key_heroes: string[];
+  ratio_explanation: string;
+  hero_explanations?: Record<string, string>;
+}
+
+interface JoinerRecommendation {
+  hero: string | null;
+  status: string;
+  skill_level: number | null;
+  max_skill: number;
+  recommendation: string;
+  action: string;
+  critical_note: string;
 }
 
 const eventTypes = [
   { id: 'bear_trap', name: 'Bear Trap', icon: '🐻' },
   { id: 'crazy_joe', name: 'Crazy Joe', icon: '🤪' },
   { id: 'garrison', name: 'Garrison Defense', icon: '🏰' },
-  { id: 'svs_march', name: 'SvS March', icon: '⚔️' },
+  { id: 'svs_attack', name: 'SvS March', icon: '⚔️' },
   { id: 'rally_attack', name: 'Rally Attack', icon: '🎯' },
-  { id: 'rally_defense', name: 'Rally Defense', icon: '🛡️' },
+  { id: 'rally_defense', name: 'Garrison Support', icon: '🛡️' },
 ];
 
-const lineupTemplates: Record<string, LineupTemplate> = {
-  bear_trap: {
-    name: 'Bear Trap',
-    description: 'Bear is slow - maximize marksman DPS',
-    heroes: ['Jessie', 'Molly', 'Natalia', 'Sergey', 'Jeronimo'],
-    troops: { infantry: 0, lancer: 10, marksman: 90 },
-    notes: 'Marksman-heavy because Bear moves slowly. Jessie for ATK buff, Molly for marksman power.',
-  },
-  crazy_joe: {
-    name: 'Crazy Joe',
-    description: 'Kill Joe before backline attacks',
-    heroes: ['Jeronimo', 'Hector', 'Gatot', 'Wu Ming', 'Jessie'],
-    troops: { infantry: 90, lancer: 10, marksman: 0 },
-    notes: 'Infantry-heavy to kill Joe quickly before his abilities hit your backline.',
-  },
-  garrison: {
-    name: 'Garrison Defense',
-    description: 'Survive incoming rallies',
-    heroes: ['Sergey', 'Jeronimo', 'Hector', 'Jessie', 'Natalia'],
-    troops: { infantry: 60, lancer: 25, marksman: 15 },
-    notes: 'Sergey MUST be first for Defenders Edge skill. Infantry-heavy for defense.',
-  },
-  svs_march: {
-    name: 'SvS March',
-    description: 'Balanced field combat',
-    heroes: ['Jessie', 'Jeronimo', 'Molly', 'Sergey', 'Natalia'],
-    troops: { infantry: 40, lancer: 20, marksman: 40 },
-    notes: 'Balanced composition for unpredictable field encounters.',
-  },
-  rally_attack: {
-    name: 'Rally Joiner (Attack)',
-    description: 'Support rally leader composition',
-    heroes: ['Jessie', 'Molly', 'Jeronimo', 'Natalia', 'Sergey'],
-    troops: { infantry: 30, lancer: 20, marksman: 50 },
-    notes: 'Put your highest level Jessie FIRST for Stand of Arms buff.',
-  },
-  rally_defense: {
-    name: 'Rally Joiner (Defense)',
-    description: 'Support garrison defense',
-    heroes: ['Sergey', 'Jeronimo', 'Hector', 'Jessie', 'Natalia'],
-    troops: { infantry: 50, lancer: 30, marksman: 20 },
-    notes: 'Put Sergey FIRST for Defenders Edge damage reduction.',
-  },
-};
-
-type TabType = 'optimal' | 'joiner' | 'mylineups' | 'debate';
+type TabType = 'optimal' | 'joiner' | 'reference';
 
 export default function LineupsPage() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('optimal');
   const [selectedEvent, setSelectedEvent] = useState('bear_trap');
-  const [savedLineups, setSavedLineups] = useState<SavedLineup[]>([]);
+  const [selectedGeneration, setSelectedGeneration] = useState(8);
+  const [personalizedLineup, setPersonalizedLineup] = useState<LineupResponse | null>(null);
+  const [generalLineup, setGeneralLineup] = useState<LineupResponse | null>(null);
+  const [templates, setTemplates] = useState<Record<string, LineupTemplate>>({});
+  const [templateDetails, setTemplateDetails] = useState<LineupTemplate | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [joinerAttack, setJoinerAttack] = useState<JoinerRecommendation | null>(null);
+  const [joinerDefense, setJoinerDefense] = useState<JoinerRecommendation | null>(null);
 
+  // Fetch templates on mount
+  useEffect(() => {
+    fetchTemplates();
+  }, []);
+
+  // Fetch lineup when event changes
   useEffect(() => {
     if (token) {
-      fetchSavedLineups();
+      fetchPersonalizedLineup();
+    } else {
+      fetchGeneralLineup();
     }
-  }, [token]);
+    fetchTemplateDetails();
+  }, [selectedEvent, selectedGeneration, token]);
 
-  const fetchSavedLineups = async () => {
+  // Fetch joiner recommendations when tab changes
+  useEffect(() => {
+    if (activeTab === 'joiner' && token) {
+      fetchJoinerRecommendations();
+    }
+  }, [activeTab, token]);
+
+  const fetchTemplates = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/lineups', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch('http://localhost:8000/api/lineups/templates');
       if (res.ok) {
-        setSavedLineups(await res.json());
+        setTemplates(await res.json());
       }
     } catch (error) {
-      console.error('Failed to fetch lineups:', error);
+      console.error('Failed to fetch templates:', error);
     }
   };
 
-  const template = lineupTemplates[selectedEvent];
+  const fetchTemplateDetails = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/api/lineups/template/${selectedEvent}`);
+      if (res.ok) {
+        setTemplateDetails(await res.json());
+      }
+    } catch (error) {
+      console.error('Failed to fetch template details:', error);
+    }
+  };
+
+  const fetchPersonalizedLineup = async () => {
+    if (!token) return;
+    setIsLoading(true);
+    try {
+      const res = await fetch(`http://localhost:8000/api/lineups/build/${selectedEvent}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setPersonalizedLineup(await res.json());
+      }
+    } catch (error) {
+      console.error('Failed to fetch personalized lineup:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchGeneralLineup = async () => {
+    setIsLoading(true);
+    try {
+      const res = await fetch(
+        `http://localhost:8000/api/lineups/general/${selectedEvent}?max_generation=${selectedGeneration}`
+      );
+      if (res.ok) {
+        setGeneralLineup(await res.json());
+      }
+    } catch (error) {
+      console.error('Failed to fetch general lineup:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchJoinerRecommendations = async () => {
+    if (!token) return;
+    try {
+      const [attackRes, defenseRes] = await Promise.all([
+        fetch('http://localhost:8000/api/lineups/joiner/attack', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch('http://localhost:8000/api/lineups/joiner/defense', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+      if (attackRes.ok) setJoinerAttack(await attackRes.json());
+      if (defenseRes.ok) setJoinerDefense(await defenseRes.json());
+    } catch (error) {
+      console.error('Failed to fetch joiner recommendations:', error);
+    }
+  };
+
+  const currentLineup = token ? personalizedLineup : generalLineup;
 
   return (
     <PageLayout>
       <div className="max-w-4xl mx-auto animate-fadeIn">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-frost">Lineup Builder</h1>
-          <p className="text-frost-muted mt-2">Optimal hero compositions for every event</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-frost">Lineup Builder</h1>
+            <p className="text-frost-muted mt-2">Optimal hero compositions for every event</p>
+          </div>
+          {!token && (
+            <div>
+              <label className="text-xs text-frost-muted block mb-1">Your Generation</label>
+              <select
+                value={selectedGeneration}
+                onChange={(e) => setSelectedGeneration(Number(e.target.value))}
+                className="input w-32"
+              >
+                {[...Array(14)].map((_, i) => (
+                  <option key={i + 1} value={i + 1}>
+                    Gen {i + 1}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
+        {/* Login prompt for personalized recommendations */}
+        {!token && (
+          <div className="card mb-6 border-ice/30 bg-ice/5">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">💡</span>
+              <div>
+                <p className="text-frost">Want personalized recommendations based on YOUR heroes?</p>
+                <p className="text-sm text-frost-muted mt-1">
+                  Log in and add your heroes in the Hero Tracker for customized lineups.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-surface-border pb-2">
+        <div className="flex gap-2 mb-6 border-b border-surface-border pb-2 overflow-x-auto">
           {[
             { id: 'optimal' as const, label: 'Optimal Lineups' },
             { id: 'joiner' as const, label: 'Rally Joiner Guide' },
-            { id: 'mylineups' as const, label: 'My Lineups' },
-            { id: 'debate' as const, label: 'Natalia vs Jeronimo' },
+            { id: 'reference' as const, label: 'Quick Reference' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-ice/20 text-ice'
                   : 'text-frost-muted hover:text-frost hover:bg-surface'
@@ -153,18 +238,20 @@ export default function LineupsPage() {
             eventTypes={eventTypes}
             selectedEvent={selectedEvent}
             setSelectedEvent={setSelectedEvent}
-            template={template}
+            lineup={currentLineup}
+            template={templateDetails}
+            isLoading={isLoading}
+            isPersonalized={!!token}
           />
         )}
-        {activeTab === 'joiner' && <RallyJoinerGuideTab />}
-        {activeTab === 'mylineups' && (
-          <MyLineupsTab
-            token={token!}
-            savedLineups={savedLineups}
-            onRefresh={fetchSavedLineups}
+        {activeTab === 'joiner' && (
+          <RallyJoinerGuideTab
+            token={token}
+            joinerAttack={joinerAttack}
+            joinerDefense={joinerDefense}
           />
         )}
-        {activeTab === 'debate' && <DebateTab />}
+        {activeTab === 'reference' && <ReferenceTab templates={templates} />}
       </div>
     </PageLayout>
   );
@@ -174,13 +261,23 @@ function OptimalLineupsTab({
   eventTypes,
   selectedEvent,
   setSelectedEvent,
+  lineup,
   template,
+  isLoading,
+  isPersonalized,
 }: {
   eventTypes: typeof eventTypes;
   selectedEvent: string;
   setSelectedEvent: (id: string) => void;
-  template: LineupTemplate;
+  lineup: LineupResponse | null;
+  template: LineupTemplate | null;
+  isLoading: boolean;
+  isPersonalized: boolean;
 }) {
+  const [showExplanation, setShowExplanation] = useState(false);
+
+  const troopRatio = lineup?.troop_ratio || template?.troop_ratio || { infantry: 50, lancer: 20, marksman: 30 };
+
   return (
     <>
       {/* Event Selection */}
@@ -206,58 +303,90 @@ function OptimalLineupsTab({
 
       {/* Lineup Display */}
       <div className="card mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-frost">{template.name}</h2>
-          <span className="badge-info">{template.description}</span>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <h2 className="text-xl font-bold text-frost">{template?.name || selectedEvent}</h2>
+          <div className="flex items-center gap-2">
+            {isPersonalized && (
+              <span className="badge badge-success text-xs">Personalized</span>
+            )}
+            {lineup?.confidence && (
+              <span className="badge badge-info text-xs">{lineup.confidence} confidence</span>
+            )}
+          </div>
         </div>
 
         {/* Heroes */}
-        <div className="mb-6">
-          <h3 className="text-sm font-medium text-frost-muted mb-3">Recommended Heroes</h3>
-          <div className="flex gap-3">
-            {template.heroes.map((hero, i) => (
-              <div
-                key={hero}
-                className={`flex-1 p-3 rounded-lg text-center ${
-                  i === 0 ? 'bg-fire/20 border border-fire/30' : 'bg-surface'
-                }`}
-              >
-                <div className="w-12 h-12 mx-auto mb-2 bg-surface-hover rounded-full flex items-center justify-center">
-                  <span className="text-2xl">🦸</span>
-                </div>
-                <p className="text-sm font-medium text-frost">{hero}</p>
-                {i === 0 && <p className="text-xs text-fire mt-1">Lead</p>}
+        {isLoading ? (
+          <div className="flex gap-3 mb-6">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex-1 p-3 rounded-lg bg-surface animate-pulse">
+                <div className="w-12 h-12 mx-auto mb-2 bg-surface-hover rounded-full" />
+                <div className="h-4 bg-surface-hover rounded w-20 mx-auto" />
               </div>
             ))}
           </div>
-        </div>
+        ) : lineup?.heroes && lineup.heroes.length > 0 ? (
+          <div className="mb-6">
+            <h3 className="text-sm font-medium text-frost-muted mb-3">
+              {isPersonalized ? 'Your Best Heroes' : 'Recommended Heroes'}
+            </h3>
+            <div className="flex gap-3 flex-wrap">
+              {lineup.heroes.map((hero, i) => (
+                <div
+                  key={hero.hero}
+                  className={`flex-1 min-w-[120px] p-3 rounded-lg text-center ${
+                    hero.is_lead ? 'bg-fire/20 border border-fire/30' : 'bg-surface'
+                  }`}
+                >
+                  <div className="w-12 h-12 mx-auto mb-2 bg-surface-hover rounded-full flex items-center justify-center">
+                    <span className="text-xl">
+                      {hero.hero_class === 'Infantry' ? '🛡️' : hero.hero_class === 'Lancer' ? '⚔️' : '🏹'}
+                    </span>
+                  </div>
+                  <p className="text-sm font-medium text-frost">{hero.hero}</p>
+                  <p className="text-xs text-frost-muted">{hero.hero_class}</p>
+                  {hero.status && (
+                    <p className="text-xs text-success mt-1">{hero.status}</p>
+                  )}
+                  {hero.is_lead && <p className="text-xs text-fire mt-1">Lead</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="mb-6 p-4 rounded-lg bg-warning/10 border border-warning/30">
+            <p className="text-sm text-frost">
+              Add heroes in the Hero Tracker to see personalized recommendations.
+            </p>
+          </div>
+        )}
 
         {/* Troop Ratio */}
         <div className="mb-6">
           <h3 className="text-sm font-medium text-frost-muted mb-3">Troop Ratio</h3>
-          <div className="flex gap-2 h-8 rounded-lg overflow-hidden">
-            {template.troops.infantry > 0 && (
+          <div className="flex gap-1 h-8 rounded-lg overflow-hidden">
+            {troopRatio.infantry > 0 && (
               <div
                 className="bg-red-500 flex items-center justify-center text-xs font-bold text-white"
-                style={{ width: `${template.troops.infantry}%` }}
+                style={{ width: `${troopRatio.infantry}%` }}
               >
-                {template.troops.infantry}%
+                {troopRatio.infantry}%
               </div>
             )}
-            {template.troops.lancer > 0 && (
+            {troopRatio.lancer > 0 && (
               <div
                 className="bg-green-500 flex items-center justify-center text-xs font-bold text-white"
-                style={{ width: `${template.troops.lancer}%` }}
+                style={{ width: `${troopRatio.lancer}%` }}
               >
-                {template.troops.lancer}%
+                {troopRatio.lancer}%
               </div>
             )}
-            {template.troops.marksman > 0 && (
+            {troopRatio.marksman > 0 && (
               <div
                 className="bg-blue-500 flex items-center justify-center text-xs font-bold text-white"
-                style={{ width: `${template.troops.marksman}%` }}
+                style={{ width: `${troopRatio.marksman}%` }}
               >
-                {template.troops.marksman}%
+                {troopRatio.marksman}%
               </div>
             )}
           </div>
@@ -276,29 +405,136 @@ function OptimalLineupsTab({
 
         {/* Notes */}
         <div className="p-4 rounded-lg bg-ice/10 border border-ice/20">
-          <p className="text-sm text-frost">💡 {template.notes}</p>
+          <p className="text-sm text-frost">💡 {lineup?.notes || template?.notes || 'Select an event to see recommendations.'}</p>
         </div>
+
+        {/* Why This Lineup - Expandable */}
+        {template?.hero_explanations && Object.keys(template.hero_explanations).length > 0 && (
+          <div className="mt-4">
+            <button
+              onClick={() => setShowExplanation(!showExplanation)}
+              className="flex items-center gap-2 text-sm text-ice hover:text-ice/80"
+            >
+              <span>{showExplanation ? '▼' : '▶'}</span>
+              Why This Lineup?
+            </button>
+            {showExplanation && (
+              <div className="mt-3 p-4 rounded-lg bg-surface">
+                <h4 className="text-sm font-medium text-frost mb-2">Hero Explanations</h4>
+                <ul className="space-y-2 text-sm text-frost-muted">
+                  {Object.entries(template.hero_explanations).map(([hero, explanation]) => (
+                    <li key={hero}>
+                      <strong className="text-frost">{hero}:</strong> {explanation}
+                    </li>
+                  ))}
+                </ul>
+                {template.ratio_explanation && (
+                  <>
+                    <h4 className="text-sm font-medium text-frost mt-4 mb-2">Troop Ratio</h4>
+                    <p className="text-sm text-frost-muted">{template.ratio_explanation}</p>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Recommended to Get */}
+        {lineup?.recommended_to_get && lineup.recommended_to_get.length > 0 && (
+          <div className="mt-4 p-4 rounded-lg bg-warning/10 border border-warning/30">
+            <h4 className="text-sm font-medium text-warning mb-2">Recommended to Unlock</h4>
+            <ul className="space-y-1 text-sm text-frost-muted">
+              {lineup.recommended_to_get.map((rec, i) => (
+                <li key={i}>
+                  <strong className="text-frost">{rec.hero}:</strong> {rec.reason}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </>
   );
 }
 
-function RallyJoinerGuideTab() {
+function RallyJoinerGuideTab({
+  token,
+  joinerAttack,
+  joinerDefense,
+}: {
+  token: string | null;
+  joinerAttack: JoinerRecommendation | null;
+  joinerDefense: JoinerRecommendation | null;
+}) {
   return (
     <div className="space-y-6">
       <div className="card">
         <h2 className="section-header">Rally Joiner Mechanics</h2>
-        <div className="space-y-4 text-sm text-frost-muted">
-          <p>
-            <strong className="text-frost">Critical:</strong> When joining a rally, only the{' '}
-            <strong className="text-ice">leftmost hero's top-right expedition skill</strong> is used.
+        <div className="p-4 rounded-lg bg-error/10 border border-error/30 mb-4">
+          <p className="text-sm text-frost">
+            <strong>CRITICAL:</strong> When joining a rally, <strong className="text-ice">ONLY your leftmost hero's expedition skill matters!</strong>
           </p>
+          <p className="text-xs text-frost-muted mt-2">
+            Your 2nd and 3rd heroes contribute nothing except troop capacity. Choose slot 1 wisely.
+          </p>
+        </div>
+        <div className="space-y-2 text-sm text-frost-muted">
           <p>
             <strong className="text-frost">Skill Level Priority:</strong> Only the top 4 highest LEVEL
             expedition skills from all joiners apply to the rally.
           </p>
         </div>
       </div>
+
+      {/* Personalized Joiner Recommendations */}
+      {token && (joinerAttack || joinerDefense) && (
+        <div className="card">
+          <h2 className="section-header">Your Joiner Setup</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            {/* Attack */}
+            <div className={`p-4 rounded-lg ${joinerAttack?.hero ? 'bg-success/10 border border-success/20' : 'bg-warning/10 border border-warning/20'}`}>
+              <h3 className="font-medium text-frost mb-3">For Attack Rallies</h3>
+              {joinerAttack?.hero ? (
+                <>
+                  <div className="p-3 rounded bg-surface mb-3">
+                    <p className="font-medium text-frost">{joinerAttack.hero}</p>
+                    <p className="text-xs text-frost-muted">
+                      Skill Level: {joinerAttack.skill_level}/{joinerAttack.max_skill}
+                    </p>
+                  </div>
+                  <p className="text-sm text-frost-muted">{joinerAttack.recommendation}</p>
+                  {joinerAttack.action && (
+                    <p className="text-xs text-success mt-2">{joinerAttack.action}</p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-warning">{joinerAttack?.critical_note || 'No attack joiner found'}</p>
+              )}
+            </div>
+
+            {/* Defense */}
+            <div className={`p-4 rounded-lg ${joinerDefense?.hero ? 'bg-ice/10 border border-ice/20' : 'bg-warning/10 border border-warning/20'}`}>
+              <h3 className="font-medium text-frost mb-3">For Garrison Defense</h3>
+              {joinerDefense?.hero ? (
+                <>
+                  <div className="p-3 rounded bg-surface mb-3">
+                    <p className="font-medium text-frost">{joinerDefense.hero}</p>
+                    <p className="text-xs text-frost-muted">
+                      Skill Level: {joinerDefense.skill_level}/{joinerDefense.max_skill}
+                    </p>
+                  </div>
+                  <p className="text-sm text-frost-muted">{joinerDefense.recommendation}</p>
+                  {joinerDefense.action && (
+                    <p className="text-xs text-ice mt-2">{joinerDefense.action}</p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-warning">{joinerDefense?.critical_note || 'No defense joiner found'}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="card">
         <h2 className="section-header">Best Joiner Heroes</h2>
@@ -312,9 +548,9 @@ function RallyJoinerGuideTab() {
                 <p className="text-xs text-success mt-1">Best for Bear Trap, Castle attacks</p>
               </div>
               <div className="p-3 rounded bg-surface">
-                <p className="font-medium text-frost">Jeronimo (Gen 1)</p>
-                <p className="text-xs text-frost-muted">Infantry ATK buff</p>
-                <p className="text-xs text-success mt-1">Good for Crazy Joe</p>
+                <p className="font-medium text-frost">Hervor (Gen 12)</p>
+                <p className="text-xs text-frost-muted">Call For Blood: +5-25% DMG dealt</p>
+                <p className="text-xs text-frost-muted mt-1">Equivalent to Jessie - use higher skill level</p>
               </div>
             </div>
           </div>
@@ -328,9 +564,9 @@ function RallyJoinerGuideTab() {
                 <p className="text-xs text-ice mt-1">Essential for all garrison defense</p>
               </div>
               <div className="p-3 rounded bg-surface">
-                <p className="font-medium text-frost">Hector (Gen 5)</p>
-                <p className="text-xs text-frost-muted">Infantry defense boost</p>
-                <p className="text-xs text-ice mt-1">Good secondary tank</p>
+                <p className="font-medium text-frost">Karol (Gen 12)</p>
+                <p className="text-xs text-frost-muted">In the Wings: -4-20% DMG taken</p>
+                <p className="text-xs text-frost-muted mt-1">Equivalent to Sergey - use higher skill level</p>
               </div>
             </div>
           </div>
@@ -338,45 +574,34 @@ function RallyJoinerGuideTab() {
       </div>
 
       <div className="card">
-        <h2 className="section-header">Joiner Skill Reference</h2>
+        <h2 className="section-header">Investment Priority</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-surface-border">
-                <th className="text-left p-2 text-frost-muted">Hero</th>
-                <th className="text-left p-2 text-frost-muted">Gen</th>
-                <th className="text-left p-2 text-frost-muted">Top-Right Skill</th>
-                <th className="text-left p-2 text-frost-muted">Effect</th>
+                <th className="text-left p-2 text-frost-muted">Priority</th>
+                <th className="text-left p-2 text-frost-muted">Action</th>
               </tr>
             </thead>
             <tbody>
               <tr className="border-b border-surface-border/50">
-                <td className="p-2 font-medium text-frost">Jessie</td>
-                <td className="p-2 text-frost-muted">1</td>
-                <td className="p-2 text-frost">Stand of Arms</td>
-                <td className="p-2 text-success">+5-25% DMG dealt</td>
+                <td className="p-2 text-success">HIGH</td>
+                <td className="p-2 text-frost">Level up Jessie/Sergey's expedition skill (right side)</td>
               </tr>
               <tr className="border-b border-surface-border/50">
-                <td className="p-2 font-medium text-frost">Sergey</td>
-                <td className="p-2 text-frost-muted">1</td>
-                <td className="p-2 text-frost">Defenders' Edge</td>
-                <td className="p-2 text-ice">-4-20% DMG taken</td>
+                <td className="p-2 text-warning">Medium</td>
+                <td className="p-2 text-frost">Get them to functional gear (Legendary is fine)</td>
               </tr>
               <tr className="border-b border-surface-border/50">
-                <td className="p-2 font-medium text-frost">Jeronimo</td>
-                <td className="p-2 text-frost-muted">1</td>
-                <td className="p-2 text-frost">Infantry ATK</td>
-                <td className="p-2 text-warning">Scales with level</td>
-              </tr>
-              <tr className="border-b border-surface-border/50">
-                <td className="p-2 font-medium text-frost">Molly</td>
-                <td className="p-2 text-frost-muted">1</td>
-                <td className="p-2 text-frost">Marksman ATK</td>
-                <td className="p-2 text-warning">Scales with level</td>
+                <td className="p-2 text-error">LOW</td>
+                <td className="p-2 text-frost">Don't waste premium resources on joiners</td>
               </tr>
             </tbody>
           </table>
         </div>
+        <p className="text-xs text-frost-muted mt-3">
+          Only the skill level determines their contribution. Hero level, stars, and gear don't affect the rally buff.
+        </p>
       </div>
 
       <div className="card border-warning/30 bg-warning/5">
@@ -404,173 +629,142 @@ function RallyJoinerGuideTab() {
   );
 }
 
-function MyLineupsTab({
-  token,
-  savedLineups,
-  onRefresh,
-}: {
-  token: string;
-  savedLineups: SavedLineup[];
-  onRefresh: () => void;
-}) {
-  const [isCreating, setIsCreating] = useState(false);
-
-  const handleDelete = async (id: number) => {
-    try {
-      await fetch(`http://localhost:8000/api/lineups/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      onRefresh();
-    } catch (error) {
-      console.error('Failed to delete lineup:', error);
-    }
-  };
-
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
-  };
-
+function ReferenceTab({ templates }: { templates: Record<string, LineupTemplate> }) {
   return (
     <div className="space-y-6">
       <div className="card">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="section-header mb-0">Your Saved Lineups</h2>
-          <button onClick={() => setIsCreating(true)} className="btn-primary">
-            Create Lineup
-          </button>
+        <h2 className="section-header">Troop Ratio Quick Reference</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left p-2 text-frost-muted">Situation</th>
+                <th className="text-center p-2 text-red-400">Infantry</th>
+                <th className="text-center p-2 text-green-400">Lancer</th>
+                <th className="text-center p-2 text-blue-400">Marksman</th>
+                <th className="text-left p-2 text-frost-muted">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">Castle / SvS</td>
+                <td className="p-2 text-center">50%</td>
+                <td className="p-2 text-center">20%</td>
+                <td className="p-2 text-center">30%</td>
+                <td className="p-2 text-frost-muted">Balanced for castle attacks</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">Bear Trap</td>
+                <td className="p-2 text-center">0%</td>
+                <td className="p-2 text-center">10%</td>
+                <td className="p-2 text-center">90%</td>
+                <td className="p-2 text-frost-muted">Maximize ranged DPS</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">Crazy Joe</td>
+                <td className="p-2 text-center">90%</td>
+                <td className="p-2 text-center">10%</td>
+                <td className="p-2 text-center">0%</td>
+                <td className="p-2 text-frost-muted">Kill before backline attacks</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">Garrison Defense</td>
+                <td className="p-2 text-center">60%</td>
+                <td className="p-2 text-center">20%</td>
+                <td className="p-2 text-center">20%</td>
+                <td className="p-2 text-frost-muted">Heavy Infantry wall</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">Labyrinth 3v3</td>
+                <td className="p-2 text-center">50%</td>
+                <td className="p-2 text-center">20%</td>
+                <td className="p-2 text-center">30%</td>
+                <td className="p-2 text-frost-muted">Standard</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-        <p className="text-sm text-frost-muted">
-          Save custom lineups for quick reference during events.
-        </p>
       </div>
 
-      {savedLineups.length === 0 ? (
-        <div className="card text-center py-12">
-          <div className="text-4xl mb-4">📋</div>
-          <h3 className="text-lg font-medium text-frost mb-2">No saved lineups</h3>
-          <p className="text-frost-muted mb-4">
-            Create a custom lineup based on your available heroes
-          </p>
+      <div className="card">
+        <h2 className="section-header">Joiner Skills Reference</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left p-2 text-frost-muted">Role</th>
+                <th className="text-left p-2 text-frost-muted">Best Hero</th>
+                <th className="text-left p-2 text-frost-muted">Gen 12+ Alt</th>
+                <th className="text-left p-2 text-frost-muted">Skill Effect</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-success">Attack Joiner</td>
+                <td className="p-2 text-frost font-medium">Jessie (Gen 1)</td>
+                <td className="p-2 text-frost">Hervor</td>
+                <td className="p-2 text-frost-muted">+5/10/15/20/25% DMG dealt</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-ice">Defense Joiner</td>
+                <td className="p-2 text-frost font-medium">Sergey (Gen 1)</td>
+                <td className="p-2 text-frost">Karol</td>
+                <td className="p-2 text-frost-muted">-4/8/12/16/20% DMG taken</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      ) : (
-        <div className="grid md:grid-cols-2 gap-4">
-          {savedLineups.map((lineup) => (
-            <div key={lineup.id} className="card">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-medium text-frost">{lineup.name}</h3>
-                  <p className="text-xs text-frost-muted">
-                    {lineup.event_type} · {formatDate(lineup.created_at)}
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleDelete(lineup.id)}
-                  className="text-frost-muted hover:text-error"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="flex gap-2 mb-3">
-                {lineup.heroes.map((hero, i) => (
-                  <span
-                    key={i}
-                    className={`px-2 py-1 rounded text-xs ${
-                      i === 0 ? 'bg-fire/20 text-fire' : 'bg-surface text-frost-muted'
-                    }`}
-                  >
-                    {hero}
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-1 h-4 rounded overflow-hidden">
-                {lineup.troops.infantry > 0 && (
-                  <div className="bg-red-500" style={{ width: `${lineup.troops.infantry}%` }} />
-                )}
-                {lineup.troops.lancer > 0 && (
-                  <div className="bg-green-500" style={{ width: `${lineup.troops.lancer}%` }} />
-                )}
-                {lineup.troops.marksman > 0 && (
-                  <div className="bg-blue-500" style={{ width: `${lineup.troops.marksman}%` }} />
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      </div>
 
-      {/* Create Modal - simplified for now */}
-      {isCreating && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-surface rounded-xl border border-surface-border max-w-md w-full p-6 animate-fadeIn">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-frost">Create Lineup</h2>
-              <button onClick={() => setIsCreating(false)} className="text-frost-muted hover:text-frost">
-                ✕
-              </button>
-            </div>
-            <p className="text-frost-muted text-sm mb-4">
-              This feature is coming soon. Use the Optimal Lineups tab as a reference for now.
+      <div className="card">
+        <h2 className="section-header">Investment Priority by Spending Level</h2>
+        <div className="space-y-4">
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">F2P / Low Spender</h3>
+            <p className="text-sm text-frost-muted">
+              Focus on 3-4 heroes maximum: Natalia (tank), Alonso (DPS), Molly (healer), Jessie (joiner skill only).
+              Join rallies, don't lead them.
             </p>
-            <button onClick={() => setIsCreating(false)} className="btn-secondary w-full">
-              Close
-            </button>
+          </div>
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">Medium Spender</h3>
+            <p className="text-sm text-frost-muted">
+              Develop 6-9 heroes. Add Flint (Arena), Jeronimo (rallies), Philly (healing).
+              Can lead rallies occasionally.
+            </p>
+          </div>
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">Heavy Spender</h3>
+            <p className="text-sm text-frost-muted">
+              Develop 12+ heroes with mythic gear on top 6. Lead rallies, compete in all modes.
+              Hero diversity wins Championships.
+            </p>
           </div>
         </div>
-      )}
-    </div>
-  );
-}
-
-function DebateTab() {
-  return (
-    <div className="card">
-      <h2 className="section-header">The Great Debate: Natalia vs Jeronimo</h2>
-      <p className="text-frost-muted mb-6">
-        A common question among players - which Gen 1 hero deserves your investment?
-      </p>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Natalia */}
-        <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-          <h3 className="text-lg font-bold text-blue-400 mb-3">🏹 Natalia (Marksman)</h3>
-          <ul className="space-y-2 text-sm text-frost-muted">
-            <li>✓ High single-target damage</li>
-            <li>✓ Great for Bear Trap (slow target)</li>
-            <li>✓ Strong expedition skills</li>
-            <li>✓ Works well in marksman-heavy lineups</li>
-            <li className="text-warning">△ Less effective vs fast enemies</li>
-            <li className="text-warning">△ Squishy in garrison</li>
-          </ul>
-        </div>
-
-        {/* Jeronimo */}
-        <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-          <h3 className="text-lg font-bold text-red-400 mb-3">⚔️ Jeronimo (Infantry)</h3>
-          <ul className="space-y-2 text-sm text-frost-muted">
-            <li>✓ Excellent tank and bruiser</li>
-            <li>✓ Great for Crazy Joe (quick kill)</li>
-            <li>✓ Strong infantry ATK buff</li>
-            <li>✓ Versatile across all content</li>
-            <li className="text-warning">△ Less burst damage</li>
-            <li className="text-warning">△ Needs infantry support</li>
-          </ul>
-        </div>
       </div>
 
-      <div className="mt-6 p-4 rounded-lg bg-surface">
-        <h4 className="font-medium text-frost mb-2">Verdict</h4>
-        <p className="text-sm text-frost-muted">
-          <strong className="text-frost">Both are excellent investments.</strong> Prioritize based on your playstyle:
-        </p>
-        <ul className="mt-2 text-sm text-frost-muted list-disc list-inside">
-          <li>Rally focus → Jeronimo (infantry rallies dominate)</li>
-          <li>Bear Trap focus → Natalia (marksman shreds slow targets)</li>
-          <li>Balanced play → Level both, use situationally</li>
-        </ul>
+      <div className="card">
+        <h2 className="section-header">PvE vs PvP Content</h2>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">PvE (Exploration Skills)</h3>
+            <p className="text-sm text-frost-muted mb-2">Fighting against the game:</p>
+            <ul className="text-sm text-frost-muted list-disc list-inside">
+              <li>Bear Trap, Crazy Joe</li>
+              <li>Labyrinth, Exploration</li>
+              <li>Uses left-side skills</li>
+            </ul>
+          </div>
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">PvP (Expedition Skills)</h3>
+            <p className="text-sm text-frost-muted mb-2">Fighting other players:</p>
+            <ul className="text-sm text-frost-muted list-disc list-inside">
+              <li>Rally Leader/Joiner</li>
+              <li>Garrison, SvS, Arena</li>
+              <li>Uses right-side skills</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -91,8 +91,17 @@ export default function AdminUsersPage() {
     }
   };
 
+  const { impersonate } = useAuth();
+
   const handleImpersonate = async (userId: number) => {
-    alert('Impersonation not yet implemented in the new API');
+    try {
+      await impersonate(userId);
+      // Redirect to home page after impersonation
+      window.location.href = '/';
+    } catch (error: any) {
+      console.error('Failed to impersonate user:', error);
+      alert('Failed to impersonate: ' + error.message);
+    }
   };
 
   const handleDelete = async (userId: number) => {
@@ -390,17 +399,23 @@ export default function AdminUsersPage() {
                             {/* AI */}
                             <td className="p-2 text-center">
                               {u.role !== 'admin' ? (
-                                <button
-                                  onClick={() => handleCycleAI(u.id, u.ai_access_level || 'limited')}
-                                  className={`px-2 py-0.5 text-[10px] rounded font-medium ${
-                                    u.ai_access_level === 'off' ? 'bg-surface text-frost-muted' :
-                                    u.ai_access_level === 'unlimited' ? 'bg-warning/20 text-warning' :
-                                    'bg-success/20 text-success'
-                                  }`}
-                                >
-                                  {u.ai_access_level === 'off' ? 'Off' :
-                                   u.ai_access_level === 'unlimited' ? 'Unl' : 'Ltd'}
-                                </button>
+                                <div className="flex flex-col items-center gap-0.5">
+                                  <button
+                                    onClick={() => handleCycleAI(u.id, u.ai_access_level || 'limited')}
+                                    className={`px-2 py-0.5 text-[10px] rounded font-medium ${
+                                      u.ai_access_level === 'off' ? 'bg-surface text-frost-muted' :
+                                      u.ai_access_level === 'unlimited' ? 'bg-warning/20 text-warning' :
+                                      u.ai_daily_limit ? 'bg-ice/20 text-ice' : 'bg-success/20 text-success'
+                                    }`}
+                                  >
+                                    {u.ai_access_level === 'off' ? 'Off' :
+                                     u.ai_access_level === 'unlimited' ? 'Unl' :
+                                     u.ai_daily_limit ? 'Custom' : 'Ltd'}
+                                  </button>
+                                  {u.ai_access_level === 'limited' && u.ai_daily_limit && (
+                                    <span className="text-[9px] text-ice">{u.ai_requests_today}/{u.ai_daily_limit}</span>
+                                  )}
+                                </div>
                               ) : (
                                 <span className="text-frost-muted text-xs">—</span>
                               )}

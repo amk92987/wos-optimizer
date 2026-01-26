@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, authApi } from './api';
+import { User, authApi, adminApi } from './api';
 
 // Dev mode auto-login credentials (only used in development)
 // Set enabled: true to always auto-login, or use NODE_ENV check for safety
@@ -18,6 +18,8 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  impersonate: (userId: number) => Promise<void>;
+  switchBack: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -89,8 +91,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
+  const impersonate = async (userId: number) => {
+    if (!token) throw new Error('Not authenticated');
+    const response = await adminApi.impersonateUser(token, userId);
+    localStorage.setItem('token', response.access_token);
+    setToken(response.access_token);
+    setUser(response.user);
+  };
+
+  const switchBack = async () => {
+    if (!token) throw new Error('Not authenticated');
+    const response = await adminApi.switchBack(token);
+    localStorage.setItem('token', response.access_token);
+    setToken(response.access_token);
+    setUser(response.user);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, token, isLoading, login, register, logout, impersonate, switchBack }}>
       {children}
     </AuthContext.Provider>
   );

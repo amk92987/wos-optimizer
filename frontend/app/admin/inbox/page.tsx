@@ -6,13 +6,12 @@ import { useAuth } from '@/lib/auth';
 
 interface FeedbackItem {
   id: number;
-  user_id: number;
-  user_email: string;
+  user_id: number | null;
+  user_email: string | null;
   category: string;
   message: string;
   status: string;
   created_at: string;
-  updated_at: string;
 }
 
 interface ErrorItem {
@@ -283,7 +282,7 @@ function FeedbackTab({
                 </div>
                 <p className="text-frost truncate">{item.message}</p>
                 <p className="text-xs text-frost-muted mt-1">
-                  {item.user_email} · {formatDate(item.created_at)}
+                  {item.user_email || 'Anonymous'} · {formatDate(item.created_at)}
                 </p>
               </div>
               <span className="text-frost-muted">→</span>
@@ -347,12 +346,433 @@ function ErrorsTab({
   );
 }
 
+interface AIConversation {
+  id: number;
+  user_id: number;
+  user_email: string;
+  question: string;
+  answer: string;
+  provider: string;
+  model: string;
+  routed_to: string | null;
+  is_helpful: boolean | null;
+  rating: number | null;
+  user_feedback: string | null;
+  is_good_example: boolean;
+  is_bad_example: boolean;
+  admin_notes: string | null;
+  created_at: string;
+}
+
+interface ConversationStats {
+  total: number;
+  ai_routed: number;
+  rules_routed: number;
+  ai_percentage: number;
+  good_examples: number;
+  bad_examples: number;
+  helpful: number;
+  unhelpful: number;
+}
+
 function ConversationsTab({ token }: { token: string }) {
+  const [conversations, setConversations] = useState<AIConversation[]>([]);
+  const [stats, setStats] = useState<ConversationStats | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [selectedConversation, setSelectedConversation] = useState<AIConversation | null>(null);
+
+  // Filters
+  const [ratingFilter, setRatingFilter] = useState('all');
+  const [curationFilter, setCurationFilter] = useState('all');
+  const [sourceFilter, setSourceFilter] = useState('all');
+
+  useEffect(() => {
+    fetchConversations();
+    fetchStats();
+  }, [ratingFilter, curationFilter, sourceFilter]);
+
+  const fetchConversations = async () => {
+    setIsLoading(true);
+    try {
+      const params = new URLSearchParams();
+      if (ratingFilter !== 'all') params.append('rating_filter', ratingFilter);
+      if (curationFilter !== 'all') params.append('curation_filter', curationFilter);
+      if (sourceFilter !== 'all') params.append('source_filter', sourceFilter);
+
+      const res = await fetch(`http://localhost:8000/api/admin/conversations?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setConversations(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch conversations:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchStats = async () => {
+    try {
+      const res = await fetch('http://localhost:8000/api/admin/conversations/stats', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        setStats(await res.json());
+      }
+    } catch (error) {
+      console.error('Failed to fetch stats:', error);
+    }
+  };
+
+  const handleCurate = async (id: number, isGood: boolean | null, isBad: boolean | null) => {
+    try {
+      await fetch(`http://localhost:8000/api/admin/conversations/${id}/curate`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          is_good_example: isGood,
+          is_bad_example: isBad,
+        }),
+      });
+      fetchConversations();
+      fetchStats();
+    } catch (error) {
+      console.error('Failed to curate:', error);
+    }
+  };
+
+  const handleSaveNotes = async (id: number, notes: string) => {
+    try {
+      await fetch(`http://localhost:8000/api/admin/conversations/${id}/curate`, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ admin_notes: notes }),
+      });
+      fetchConversations();
+    } catch (error) {
+      console.error('Failed to save notes:', error);
+    }
+  };
+
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  };
+
   return (
-    <div className="card text-center py-12">
-      <div className="text-4xl mb-4">💬</div>
-      <p className="text-frost-muted mb-4">Admin-to-user messaging</p>
-      <button className="btn-primary">Start New Conversation</button>
+    <div className="space-y-6">
+      {/* Stats */}
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="card text-center">
+            <div className="text-2xl font-bold text-frost">{stats.total}</div>
+            <div className="text-xs text-frost-muted">Total</div>
+          </div>
+          <div className="card text-center">
+            <div className="text-2xl font-bold text-ice">{stats.ai_percentage}%</div>
+            <div className="text-xs text-frost-muted">AI Routed</div>
+          </div>
+          <div className="card text-center">
+            <div className="text-2xl font-bold text-success">{stats.good_examples}</div>
+            <div className="text-xs text-frost-muted">Good Examples</div>
+          </div>
+          <div className="card text-center">
+            <div className="text-2xl font-bold text-warning">{stats.helpful}</div>
+            <div className="text-xs text-frost-muted">Helpful</div>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div className="card">
+        <div className="flex flex-wrap gap-4">
+          <div>
+            <label className="text-xs text-frost-muted uppercase tracking-wide block mb-1">Rating</label>
+            <select
+              value={ratingFilter}
+              onChange={(e) => setRatingFilter(e.target.value)}
+              className="input text-sm py-1"
+            >
+              <option value="all">All</option>
+              <option value="rated">Rated</option>
+              <option value="unrated">Unrated</option>
+              <option value="helpful">Helpful</option>
+              <option value="unhelpful">Not Helpful</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-frost-muted uppercase tracking-wide block mb-1">Curation</label>
+            <select
+              value={curationFilter}
+              onChange={(e) => setCurationFilter(e.target.value)}
+              className="input text-sm py-1"
+            >
+              <option value="all">All</option>
+              <option value="good">Good Examples</option>
+              <option value="bad">Bad Examples</option>
+              <option value="not_curated">Not Curated</option>
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-frost-muted uppercase tracking-wide block mb-1">Source</label>
+            <select
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+              className="input text-sm py-1"
+            >
+              <option value="all">All</option>
+              <option value="ai">AI</option>
+              <option value="rules">Rules Engine</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Conversations List */}
+      {isLoading ? (
+        <div className="card">
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="p-4 rounded-lg bg-surface animate-pulse">
+                <div className="h-4 bg-surface-hover rounded w-48 mb-2" />
+                <div className="h-3 bg-surface-hover rounded w-full" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : conversations.length === 0 ? (
+        <div className="card text-center py-12">
+          <div className="text-4xl mb-4">💬</div>
+          <p className="text-frost-muted">No conversations found with these filters</p>
+        </div>
+      ) : (
+        <div className="card">
+          <p className="text-xs text-frost-muted mb-4">Showing {conversations.length} conversations</p>
+          <div className="space-y-3">
+            {conversations.map((conv) => (
+              <button
+                key={conv.id}
+                onClick={() => setSelectedConversation(conv)}
+                className={`w-full p-4 rounded-lg transition-colors text-left ${
+                  conv.is_good_example
+                    ? 'bg-success/10 border border-success/30'
+                    : conv.is_bad_example
+                    ? 'bg-error/10 border border-error/30'
+                    : 'bg-surface hover:bg-surface-hover'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className={`text-xs px-2 py-0.5 rounded ${
+                        conv.routed_to === 'ai'
+                          ? 'bg-ice/20 text-ice'
+                          : 'bg-surface-hover text-frost-muted'
+                      }`}>
+                        {conv.routed_to === 'ai' ? 'AI' : 'Rules'}
+                      </span>
+                      {conv.is_helpful === true && (
+                        <span className="text-xs text-success">Helpful</span>
+                      )}
+                      {conv.is_helpful === false && (
+                        <span className="text-xs text-error">Not Helpful</span>
+                      )}
+                      {conv.is_good_example && (
+                        <span className="badge badge-success text-xs">Good</span>
+                      )}
+                      {conv.is_bad_example && (
+                        <span className="badge badge-error text-xs">Bad</span>
+                      )}
+                    </div>
+                    <p className="text-frost truncate">{conv.question}</p>
+                    <p className="text-xs text-frost-muted mt-1">
+                      {conv.user_email} · {formatDate(conv.created_at)}
+                    </p>
+                  </div>
+                  <span className="text-frost-muted">→</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Conversation Detail Modal */}
+      {selectedConversation && (
+        <ConversationDetailModal
+          conversation={selectedConversation}
+          onClose={() => setSelectedConversation(null)}
+          onCurate={handleCurate}
+          onSaveNotes={handleSaveNotes}
+          formatDate={formatDate}
+        />
+      )}
+    </div>
+  );
+}
+
+function ConversationDetailModal({
+  conversation,
+  onClose,
+  onCurate,
+  onSaveNotes,
+  formatDate,
+}: {
+  conversation: AIConversation;
+  onClose: () => void;
+  onCurate: (id: number, isGood: boolean | null, isBad: boolean | null) => void;
+  onSaveNotes: (id: number, notes: string) => void;
+  formatDate: (date: string) => string;
+}) {
+  const [notes, setNotes] = useState(conversation.admin_notes || '');
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-surface rounded-xl border border-surface-border max-w-2xl w-full p-6 animate-fadeIn max-h-[85vh] overflow-y-auto">
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <h2 className="text-xl font-bold text-frost">Conversation Details</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`text-xs px-2 py-0.5 rounded ${
+                conversation.routed_to === 'ai'
+                  ? 'bg-ice/20 text-ice'
+                  : 'bg-surface-hover text-frost-muted'
+              }`}>
+                {conversation.routed_to === 'ai' ? 'AI' : 'Rules'}
+              </span>
+              <span className="text-sm text-frost-muted">{formatDate(conversation.created_at)}</span>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-frost-muted hover:text-frost">
+            ✕
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          <div>
+            <label className="text-xs text-frost-muted uppercase tracking-wide">From</label>
+            <p className="text-frost">{conversation.user_email}</p>
+          </div>
+
+          <div>
+            <label className="text-xs text-frost-muted uppercase tracking-wide">Question</label>
+            <div className="p-3 rounded-lg bg-background mt-1">
+              <p className="text-frost whitespace-pre-wrap">{conversation.question}</p>
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs text-frost-muted uppercase tracking-wide">Answer</label>
+            <div className="p-3 rounded-lg bg-background mt-1 max-h-64 overflow-y-auto">
+              <p className="text-frost whitespace-pre-wrap">{conversation.answer}</p>
+            </div>
+          </div>
+
+          {/* Metadata row */}
+          <div className="flex flex-wrap gap-4 text-sm">
+            <div>
+              <span className="text-frost-muted">Provider:</span>{' '}
+              <span className="text-frost">{conversation.provider}</span>
+            </div>
+            <div>
+              <span className="text-frost-muted">Model:</span>{' '}
+              <span className="text-frost">{conversation.model}</span>
+            </div>
+            {conversation.is_helpful !== null && (
+              <div>
+                <span className="text-frost-muted">Helpful:</span>{' '}
+                <span className={conversation.is_helpful ? 'text-success' : 'text-error'}>
+                  {conversation.is_helpful ? 'Yes' : 'No'}
+                </span>
+              </div>
+            )}
+            {conversation.rating && (
+              <div>
+                <span className="text-frost-muted">Rating:</span>{' '}
+                <span className="text-warning">{'★'.repeat(conversation.rating)}</span>
+              </div>
+            )}
+          </div>
+
+          {conversation.user_feedback && (
+            <div>
+              <label className="text-xs text-frost-muted uppercase tracking-wide">User Feedback</label>
+              <p className="text-frost mt-1">{conversation.user_feedback}</p>
+            </div>
+          )}
+
+          {/* Curation */}
+          <div>
+            <label className="text-xs text-frost-muted uppercase tracking-wide block mb-2">
+              Curate for Training
+            </label>
+            <div className="flex gap-2">
+              <button
+                onClick={() => onCurate(conversation.id, true, false)}
+                disabled={conversation.is_good_example}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  conversation.is_good_example
+                    ? 'bg-success/20 text-success cursor-default'
+                    : 'bg-surface-hover text-frost-muted hover:text-frost'
+                }`}
+              >
+                Good Example
+              </button>
+              <button
+                onClick={() => onCurate(conversation.id, false, true)}
+                disabled={conversation.is_bad_example}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  conversation.is_bad_example
+                    ? 'bg-error/20 text-error cursor-default'
+                    : 'bg-surface-hover text-frost-muted hover:text-frost'
+                }`}
+              >
+                Bad Example
+              </button>
+              <button
+                onClick={() => onCurate(conversation.id, false, false)}
+                disabled={!conversation.is_good_example && !conversation.is_bad_example}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-surface-hover text-frost-muted hover:text-frost transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
+
+          {/* Admin Notes */}
+          <div>
+            <label className="text-xs text-frost-muted uppercase tracking-wide block mb-2">
+              Admin Notes
+            </label>
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Add notes about this conversation..."
+              className="input w-full h-20 resize-none"
+            />
+            {notes !== (conversation.admin_notes || '') && (
+              <button
+                onClick={() => onSaveNotes(conversation.id, notes)}
+                className="btn-primary text-sm mt-2"
+              >
+                Save Notes
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -384,12 +804,12 @@ function FeedbackDetailModal({
         <div className="space-y-4">
           <div>
             <label className="text-xs text-frost-muted uppercase tracking-wide">From</label>
-            <p className="text-frost">{feedback.user_email}</p>
+            <p className="text-frost">{feedback.user_email || 'Anonymous'}</p>
           </div>
 
           <div>
             <label className="text-xs text-frost-muted uppercase tracking-wide">Category</label>
-            <p className="text-frost capitalize">{feedback.category}</p>
+            <p className="text-frost capitalize">{feedback.category || 'Other'}</p>
           </div>
 
           <div>

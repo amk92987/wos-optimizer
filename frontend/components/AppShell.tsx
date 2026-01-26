@@ -19,6 +19,39 @@ const mobileNavItems = [
   { href: '/settings', label: 'More', icon: '☰' },
 ];
 
+function ImpersonationBanner({ email }: { email: string }) {
+  const { switchBack } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSwitchBack = async () => {
+    setIsLoading(true);
+    try {
+      await switchBack();
+      window.location.href = '/admin/users';
+    } catch (error) {
+      console.error('Failed to switch back:', error);
+      alert('Failed to switch back to admin');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-fire/20 border-t border-fire/30 px-4 py-2 text-center">
+      <span className="text-xs text-fire">
+        Viewing as: {email}
+      </span>
+      <button
+        onClick={handleSwitchBack}
+        disabled={isLoading}
+        className="ml-2 text-xs text-frost underline hover:text-ice transition-colors disabled:opacity-50"
+      >
+        {isLoading ? 'Switching...' : 'Switch Back'}
+      </button>
+    </div>
+  );
+}
+
 function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -204,14 +237,7 @@ export default function AppShell({ children }: AppShellProps) {
 
           {/* Impersonation banner */}
           {user?.impersonating && (
-            <div className="bg-fire/20 border-t border-fire/30 px-4 py-2 text-center">
-              <span className="text-xs text-fire">
-                Viewing as: {user.email}
-              </span>
-              <button className="ml-2 text-xs text-frost underline">
-                Switch Back
-              </button>
-            </div>
+            <ImpersonationBanner email={user.email} />
           )}
         </header>
 

@@ -218,6 +218,13 @@ export const adminApi = {
 
   updateFeedbackStatus: (token: string, id: number, status: string) =>
     api(`/api/admin/feedback/${id}?status=${status}`, { method: 'PUT', token }),
+
+  // Impersonation
+  impersonateUser: (token: string, userId: number) =>
+    api<{ access_token: string; user: User }>(`/api/admin/users/${userId}/impersonate`, { method: 'POST', token }),
+
+  switchBack: (token: string) =>
+    api<{ access_token: string; user: User }>('/api/admin/users/switch-back', { method: 'POST', token }),
 };
 
 // Types
@@ -226,6 +233,8 @@ export interface User {
   email: string;
   username: string;
   role: string;
+  impersonating?: boolean;
+  original_admin_id?: number;
 }
 
 export interface Hero {
@@ -249,12 +258,47 @@ export interface UserHero {
   level: number;
   stars: number;
   ascension: number;
+  // Skill levels
   exploration_skill_1: number;
   exploration_skill_2: number;
   exploration_skill_3: number;
   expedition_skill_1: number;
   expedition_skill_2: number;
   expedition_skill_3: number;
+  // Skill names
+  exploration_skill_1_name: string | null;
+  exploration_skill_2_name: string | null;
+  exploration_skill_3_name: string | null;
+  expedition_skill_1_name: string | null;
+  expedition_skill_2_name: string | null;
+  expedition_skill_3_name: string | null;
+  // Skill descriptions
+  exploration_skill_1_desc: string | null;
+  exploration_skill_2_desc: string | null;
+  exploration_skill_3_desc: string | null;
+  expedition_skill_1_desc: string | null;
+  expedition_skill_2_desc: string | null;
+  expedition_skill_3_desc: string | null;
+  // Gear slots (4 slots)
+  gear_slot1_quality: number;
+  gear_slot1_level: number;
+  gear_slot1_mastery: number;
+  gear_slot2_quality: number;
+  gear_slot2_level: number;
+  gear_slot2_mastery: number;
+  gear_slot3_quality: number;
+  gear_slot3_level: number;
+  gear_slot3_mastery: number;
+  gear_slot4_quality: number;
+  gear_slot4_level: number;
+  gear_slot4_mastery: number;
+  // Mythic gear
+  mythic_gear_name: string | null;
+  mythic_gear_unlocked: boolean;
+  mythic_gear_quality: number;
+  mythic_gear_level: number;
+  mythic_gear_mastery: number;
+  // Image
   image_base64: string | null;
 }
 

@@ -9,6 +9,8 @@ import { heroesApi, UserHero, Hero } from '@/lib/api';
 
 type Tab = 'owned' | 'all';
 type FilterClass = 'all' | 'infantry' | 'lancer' | 'marksman';
+type FilterTier = 'all' | 'S+' | 'S' | 'A' | 'B' | 'C' | 'D';
+type FilterGeneration = 'all' | number;
 type SortBy = 'name' | 'level' | 'generation' | 'tier';
 
 export default function HeroesPage() {
@@ -18,6 +20,8 @@ export default function HeroesPage() {
   const [allHeroes, setAllHeroes] = useState<Hero[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filterClass, setFilterClass] = useState<FilterClass>('all');
+  const [filterTier, setFilterTier] = useState<FilterTier>('all');
+  const [filterGeneration, setFilterGeneration] = useState<FilterGeneration>('all');
   const [sortBy, setSortBy] = useState<SortBy>('generation');
   const [searchQuery, setSearchQuery] = useState('');
   const [addingHeroId, setAddingHeroId] = useState<number | null>(null);
@@ -88,6 +92,12 @@ export default function HeroesPage() {
       if (filterClass !== 'all' && h.hero_class.toLowerCase() !== filterClass) {
         return false;
       }
+      if (filterTier !== 'all' && h.tier_overall !== filterTier) {
+        return false;
+      }
+      if (filterGeneration !== 'all' && h.generation !== filterGeneration) {
+        return false;
+      }
       if (searchQuery && !h.name.toLowerCase().includes(searchQuery.toLowerCase())) {
         return false;
       }
@@ -115,6 +125,12 @@ export default function HeroesPage() {
   const filteredAllHeroes = allHeroes
     .filter(h => {
       if (filterClass !== 'all' && h.hero_class.toLowerCase() !== filterClass) {
+        return false;
+      }
+      if (filterTier !== 'all' && h.tier_overall !== filterTier) {
+        return false;
+      }
+      if (filterGeneration !== 'all' && h.generation !== filterGeneration) {
         return false;
       }
       if (searchQuery && !h.name.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -202,48 +218,99 @@ export default function HeroesPage() {
 
         {/* Filters */}
         <div className="card mb-6">
-          <div className="flex flex-col md:flex-row gap-4">
-            {/* Search */}
-            <div className="flex-1">
-              <input
-                type="text"
-                placeholder="Search heroes..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="input"
-              />
+          <div className="flex flex-col gap-4">
+            {/* Row 1: Search + Sort */}
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1">
+                <input
+                  type="text"
+                  placeholder="Search heroes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="input"
+                />
+              </div>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortBy)}
+                className="input w-auto"
+              >
+                <option value="generation">Sort by Generation</option>
+                <option value="name">Sort by Name</option>
+                {activeTab === 'owned' && <option value="level">Sort by Level</option>}
+                <option value="tier">Sort by Tier</option>
+              </select>
             </div>
 
-            {/* Class Filter */}
-            <div className="flex gap-2">
-              {classFilters.map((filter) => (
-                <button
-                  key={filter.value}
-                  onClick={() => setFilterClass(filter.value)}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    filterClass === filter.value
-                      ? filter.value === 'all'
-                        ? 'bg-amber text-zinc-900'
-                        : filter.color + ' ring-1 ring-current'
-                      : 'bg-surface text-zinc-400 hover:text-zinc-100'
-                  }`}
+            {/* Row 2: Filters */}
+            <div className="flex flex-wrap gap-3 items-center">
+              {/* Generation Filter */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-frost-muted">Gen:</span>
+                <select
+                  value={filterGeneration}
+                  onChange={(e) => setFilterGeneration(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
+                  className="input py-1 px-2 text-sm w-auto"
                 >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
+                  <option value="all">All</option>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(g => (
+                    <option key={g} value={g}>Gen {g}</option>
+                  ))}
+                </select>
+              </div>
 
-            {/* Sort */}
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortBy)}
-              className="input w-auto"
-            >
-              <option value="generation">Sort by Generation</option>
-              <option value="name">Sort by Name</option>
-              {activeTab === 'owned' && <option value="level">Sort by Level</option>}
-              <option value="tier">Sort by Tier</option>
-            </select>
+              {/* Tier Filter */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-frost-muted">Tier:</span>
+                <select
+                  value={filterTier}
+                  onChange={(e) => setFilterTier(e.target.value as FilterTier)}
+                  className="input py-1 px-2 text-sm w-auto"
+                >
+                  <option value="all">All</option>
+                  <option value="S+">S+</option>
+                  <option value="S">S</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                </select>
+              </div>
+
+              {/* Class Filter */}
+              <div className="flex gap-1">
+                {classFilters.map((filter) => (
+                  <button
+                    key={filter.value}
+                    onClick={() => setFilterClass(filter.value)}
+                    className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                      filterClass === filter.value
+                        ? filter.value === 'all'
+                          ? 'bg-amber text-zinc-900'
+                          : filter.color + ' ring-1 ring-current'
+                        : 'bg-surface text-zinc-400 hover:text-zinc-100'
+                    }`}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Clear Filters */}
+              {(filterClass !== 'all' || filterTier !== 'all' || filterGeneration !== 'all' || searchQuery) && (
+                <button
+                  onClick={() => {
+                    setFilterClass('all');
+                    setFilterTier('all');
+                    setFilterGeneration('all');
+                    setSearchQuery('');
+                  }}
+                  className="text-xs text-ice hover:text-ice/80 underline"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

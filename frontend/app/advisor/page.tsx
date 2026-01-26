@@ -9,14 +9,17 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   source?: 'rules' | 'ai';
+  conversationId?: number;
   timestamp: Date;
+  rated?: 'up' | 'down' | null;
 }
 
 interface ChatHistory {
   id: number;
-  preview: string;
+  question: string;
+  answer: string;
+  source: string;
   created_at: string;
-  message_count: number;
 }
 
 export default function AIAdvisorPage() {
@@ -26,6 +29,11 @@ export default function AIAdvisorPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackType, setFeedbackType] = useState<'bug' | 'feature' | 'bad_recommendation'>('bad_recommendation');
+  const [feedbackMessage, setFeedbackMessage] = useState('');
+  const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
+  const [feedbackSuccess, setFeedbackSuccess] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -39,14 +47,65 @@ export default function AIAdvisorPage() {
   const fetchChatHistory = async () => {
     if (!token) return;
     try {
-      const res = await fetch('http://localhost:8000/api/ai/history?limit=10', {
+      const res = await fetch('http://localhost:8000/api/advisor/history?limit=10', {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
-        setChatHistory(await res.json());
+        const data = await res.json();
+        setChatHistory(Array.isArray(data) ? data : []);
       }
     } catch (error) {
       console.error('Failed to fetch chat history:', error);
+    }
+  };
+
+  const loadChatFromHistory = (chat: ChatHistory) => {
+    // Load a past conversation into the chat
+    const userMsg: Message = {
+      id: `hist-user-${chat.id}`,
+      role: 'user',
+      content: chat.question,
+      timestamp: new Date(chat.created_at),
+    };
+    const assistantMsg: Message = {
+      id: `hist-asst-${chat.id}`,
+      role: 'assistant',
+      content: chat.answer,
+      source: chat.source as 'rules' | 'ai',
+      conversationId: chat.id,
+      timestamp: new Date(chat.created_at),
+    };
+    setMessages([userMsg, assistantMsg]);
+    setShowHistory(false);
+  };
+
+  const submitFeedback = async () => {
+    if (!feedbackMessage.trim()) return;
+    setFeedbackSubmitting(true);
+    try {
+      const res = await fetch('http://localhost:8000/api/feedback', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          type: feedbackType,
+          message: feedbackMessage,
+        }),
+      });
+      if (res.ok) {
+        setFeedbackSuccess(true);
+        setFeedbackMessage('');
+        setTimeout(() => {
+          setShowFeedback(false);
+          setFeedbackSuccess(false);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Failed to submit feedback:', error);
+    } finally {
+      setFeedbackSubmitting(false);
     }
   };
 
@@ -66,7 +125,7 @@ export default function AIAdvisorPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8000/api/ai/ask', {
+      const res = await fetch('http://localhost:8000/api/advisor/ask', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -82,7 +141,9 @@ export default function AIAdvisorPage() {
         role: 'assistant',
         content: data.answer || 'Sorry, I could not process your request.',
         source: data.source,
+        conversationId: data.conversation_id,
         timestamp: new Date(),
+        rated: null,
       };
 
       setMessages((prev) => [...prev, assistantMessage]);
@@ -107,15 +168,24 @@ export default function AIAdvisorPage() {
     setMessages([]);
   };
 
-  const handleRating = async (messageId: string, isHelpful: boolean) => {
+  const handleRating = async (messageId: string, conversationId: number | undefined, isHelpful: boolean) => {
+    if (!conversationId) return;
+
+    // Update local state to show rating
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === messageId ? { ...m, rated: isHelpful ? 'up' : 'down' } : m
+      )
+    );
+
     try {
-      await fetch('http://localhost:8000/api/ai/rate', {
+      await fetch('http://localhost:8000/api/advisor/rate', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ message_id: messageId, is_helpful: isHelpful }),
+        body: JSON.stringify({ conversation_id: conversationId, is_helpful: isHelpful }),
       });
     } catch (error) {
       console.error('Failed to submit rating:', error);
@@ -140,6 +210,12 @@ export default function AIAdvisorPage() {
           </div>
           <div className="flex gap-2">
             <button
+              onClick={() => setShowFeedback(!showFeedback)}
+              className="btn-ghost text-sm"
+            >
+              Feedback
+            </button>
+            <button
               onClick={() => setShowHistory(!showHistory)}
               className="btn-secondary text-sm"
             >
@@ -151,10 +227,72 @@ export default function AIAdvisorPage() {
           </div>
         </div>
 
+        {/* Feedback Form */}
+        {showFeedback && (
+          <div className="card mb-4 border-fire/30">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-frost">Send Feedback</h3>
+              <button
+                onClick={() => setShowFeedback(false)}
+                className="text-frost-muted hover:text-frost"
+              >
+                ✕
+              </button>
+            </div>
+            {feedbackSuccess ? (
+              <div className="text-center py-4">
+                <span className="text-2xl">✓</span>
+                <p className="text-success mt-2">Thank you for your feedback!</p>
+              </div>
+            ) : (
+              <>
+                <div className="flex gap-2 mb-3">
+                  {[
+                    { value: 'bad_recommendation', label: 'Bad Recommendation' },
+                    { value: 'bug', label: 'Bug Report' },
+                    { value: 'feature', label: 'Feature Request' },
+                  ].map((type) => (
+                    <button
+                      key={type.value}
+                      onClick={() => setFeedbackType(type.value as typeof feedbackType)}
+                      className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                        feedbackType === type.value
+                          ? 'bg-fire/20 text-fire ring-1 ring-fire'
+                          : 'bg-surface text-frost-muted hover:text-frost'
+                      }`}
+                    >
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+                <textarea
+                  value={feedbackMessage}
+                  onChange={(e) => setFeedbackMessage(e.target.value)}
+                  placeholder={
+                    feedbackType === 'bad_recommendation'
+                      ? "What was wrong with the recommendation? Include your question and what you expected..."
+                      : feedbackType === 'bug'
+                      ? "Describe the bug and steps to reproduce it..."
+                      : "Describe the feature you'd like to see..."
+                  }
+                  className="input w-full h-24 resize-none mb-3"
+                />
+                <button
+                  onClick={submitFeedback}
+                  disabled={!feedbackMessage.trim() || feedbackSubmitting}
+                  className="btn-primary text-sm"
+                >
+                  {feedbackSubmitting ? 'Sending...' : 'Send Feedback'}
+                </button>
+              </>
+            )}
+          </div>
+        )}
+
         {/* Chat History Sidebar */}
         {showHistory && (
           <div className="card mb-4 max-h-48 overflow-y-auto">
-            <h3 className="text-sm font-medium text-frost-muted mb-2">Recent Chats</h3>
+            <h3 className="text-sm font-medium text-frost-muted mb-2">Recent Conversations</h3>
             {chatHistory.length === 0 ? (
               <p className="text-sm text-frost-muted">No chat history yet</p>
             ) : (
@@ -162,11 +300,12 @@ export default function AIAdvisorPage() {
                 {chatHistory.map((chat) => (
                   <button
                     key={chat.id}
+                    onClick={() => loadChatFromHistory(chat)}
                     className="w-full p-2 text-left rounded hover:bg-surface transition-colors"
                   >
-                    <p className="text-sm text-frost truncate">{chat.preview}</p>
+                    <p className="text-sm text-frost truncate">{chat.question}</p>
                     <p className="text-xs text-frost-muted">
-                      {chat.message_count} messages ·{' '}
+                      {chat.source === 'rules' ? '(Rules)' : '(AI)'} ·{' '}
                       {new Date(chat.created_at).toLocaleDateString()}
                     </p>
                   </button>
@@ -217,20 +356,30 @@ export default function AIAdvisorPage() {
                         {msg.source === 'rules' ? '(Rules)' : msg.source === 'ai' ? '(AI)' : ''}
                       </span>
                       <div className="flex gap-2">
-                        <button
-                          onClick={() => handleRating(msg.id, true)}
-                          className="text-lg hover:scale-110 transition-transform"
-                          title="Helpful"
-                        >
-                          👍
-                        </button>
-                        <button
-                          onClick={() => handleRating(msg.id, false)}
-                          className="text-lg hover:scale-110 transition-transform"
-                          title="Not helpful"
-                        >
-                          👎
-                        </button>
+                        {msg.rated ? (
+                          <span className="text-xs text-frost-muted">
+                            {msg.rated === 'up' ? '👍 Thanks!' : '👎 Thanks for feedback'}
+                          </span>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleRating(msg.id, msg.conversationId, true)}
+                              className="text-lg hover:scale-110 transition-transform"
+                              title="Helpful"
+                              disabled={!msg.conversationId}
+                            >
+                              👍
+                            </button>
+                            <button
+                              onClick={() => handleRating(msg.id, msg.conversationId, false)}
+                              className="text-lg hover:scale-110 transition-transform"
+                              title="Not helpful"
+                              disabled={!msg.conversationId}
+                            >
+                              👎
+                            </button>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}

@@ -3,7 +3,7 @@
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import Sidebar from './Sidebar';
+import AppShell from './AppShell';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -37,11 +37,8 @@ export default function PageLayout({ children }: PageLayoutProps) {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="flex-1 p-8 overflow-auto">
-        {children}
-      </main>
-    </div>
+    <AppShell>
+      {children}
+    </AppShell>
   );
 }

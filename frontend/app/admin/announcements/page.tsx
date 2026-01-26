@@ -9,11 +9,21 @@ interface Announcement {
   title: string;
   message: string;
   display_type: string;
+  type: string; // info, warning, success, error
   is_active: boolean;
   priority: number;
   created_at: string;
-  expires_at: string | null;
+  show_from: string | null;
+  show_until: string | null;
+  inbox_content: string | null;
 }
+
+const TYPE_STYLES: Record<string, { color: string; icon: string; bgClass: string }> = {
+  info: { color: 'text-ice', icon: 'ℹ️', bgClass: 'border-ice/30 bg-ice/10' },
+  warning: { color: 'text-warning', icon: '⚠️', bgClass: 'border-warning/30 bg-warning/10' },
+  success: { color: 'text-success', icon: '✓', bgClass: 'border-success/30 bg-success/10' },
+  error: { color: 'text-error', icon: '⚠', bgClass: 'border-error/30 bg-error/10' },
+};
 
 export default function AdminAnnouncementsPage() {
   const { token, user } = useAuth();
@@ -107,6 +117,30 @@ export default function AdminAnnouncementsPage() {
             + New Announcement
           </button>
         </div>
+
+        {/* Current Banner Status */}
+        {announcements.filter((a) => a.is_active && (a.display_type === 'banner' || a.display_type === 'both')).length > 0 && (
+          <div className="card mb-6 border-ice/30">
+            <h2 className="section-header">Current Banner Preview</h2>
+            {announcements
+              .filter((a) => a.is_active && (a.display_type === 'banner' || a.display_type === 'both'))
+              .sort((a, b) => b.priority - a.priority)
+              .slice(0, 1)
+              .map((a) => {
+                const typeStyle = TYPE_STYLES[a.type] || TYPE_STYLES.info;
+                return (
+                  <div key={a.id} className={`p-4 rounded-lg border ${typeStyle.bgClass}`}>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">{typeStyle.icon}</span>
+                      <span className={`font-medium ${typeStyle.color}`}>{a.title}</span>
+                      <span className="text-frost-muted">—</span>
+                      <span className="text-frost">{a.message}</span>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        )}
 
         {/* Active Announcements */}
         <div className="card mb-6">
@@ -205,20 +239,46 @@ function AnnouncementCard({
   };
 
   const displayInfo = displayTypeLabels[announcement.display_type] || displayTypeLabels.banner;
+  const typeStyle = TYPE_STYLES[announcement.type] || TYPE_STYLES.info;
+
+  // Calculate days remaining
+  const getDaysRemaining = () => {
+    if (!announcement.show_until) return null;
+    const now = new Date();
+    const until = new Date(announcement.show_until);
+    const diff = Math.ceil((until.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return 'Expired';
+    if (diff === 0) return 'Expires today';
+    if (diff === 1) return '1 day left';
+    return `${diff} days left`;
+  };
+
+  const daysRemaining = getDaysRemaining();
 
   return (
-    <div className={`p-4 rounded-lg border ${announcement.is_active ? 'bg-surface border-ice/20' : 'bg-surface/50 border-surface-border opacity-60'}`}>
+    <div className={`p-4 rounded-lg border ${announcement.is_active ? typeStyle.bgClass : 'bg-surface/50 border-surface-border opacity-60'}`}>
       <div className="flex items-start justify-between gap-4">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-2">
-            <h3 className="font-medium text-frost">{announcement.title}</h3>
+            <span className="text-lg">{typeStyle.icon}</span>
+            <h3 className={`font-medium ${typeStyle.color}`}>{announcement.title}</h3>
             <span className={`badge text-xs ${displayInfo.color}`}>{displayInfo.label}</span>
             <span className="badge badge-secondary text-xs">P{announcement.priority}</span>
+            {daysRemaining && (
+              <span className={`text-xs px-2 py-0.5 rounded ${daysRemaining === 'Expired' ? 'bg-error/20 text-error' : 'bg-surface text-frost-muted'}`}>
+                {daysRemaining}
+              </span>
+            )}
           </div>
           <p className="text-sm text-frost-muted mb-2">{announcement.message}</p>
+          {announcement.inbox_content && (
+            <p className="text-xs text-frost-muted italic mb-2">
+              Inbox: {announcement.inbox_content.substring(0, 100)}...
+            </p>
+          )}
           <p className="text-xs text-text-muted">
             Created: {formatDate(announcement.created_at)}
-            {announcement.expires_at && ` · Expires: ${formatDate(announcement.expires_at)}`}
+            {announcement.show_until && ` · Until: ${formatDate(announcement.show_until)}`}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -264,7 +324,10 @@ function AnnouncementModal({
   const [title, setTitle] = useState(announcement?.title || '');
   const [message, setMessage] = useState(announcement?.message || '');
   const [displayType, setDisplayType] = useState(announcement?.display_type || 'banner');
+  const [type, setType] = useState(announcement?.type || 'info');
   const [priority, setPriority] = useState(announcement?.priority || 1);
+  const [inboxContent, setInboxContent] = useState(announcement?.inbox_content || '');
+  const [expiresInDays, setExpiresInDays] = useState<number | ''>('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -278,13 +341,29 @@ function AnnouncementModal({
         ? `http://localhost:8000/api/admin/announcements/${announcement.id}`
         : 'http://localhost:8000/api/admin/announcements';
 
+      // Calculate show_until date if expiry is set
+      let show_until = null;
+      if (expiresInDays && typeof expiresInDays === 'number') {
+        const date = new Date();
+        date.setDate(date.getDate() + expiresInDays);
+        show_until = date.toISOString();
+      }
+
       const res = await fetch(url, {
         method: announcement ? 'PUT' : 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ title, message, display_type: displayType, priority }),
+        body: JSON.stringify({
+          title,
+          message,
+          display_type: displayType,
+          type,
+          priority,
+          inbox_content: inboxContent || null,
+          show_until,
+        }),
       });
 
       if (!res.ok) {
@@ -302,7 +381,7 @@ function AnnouncementModal({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-surface rounded-xl border border-surface-border max-w-lg w-full p-6 animate-fadeIn">
+      <div className="bg-surface rounded-xl border border-surface-border max-w-lg w-full p-6 animate-fadeIn max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-bold text-frost mb-4">
           {announcement ? 'Edit Announcement' : 'New Announcement'}
         </h2>
@@ -326,16 +405,31 @@ function AnnouncementModal({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-frost-muted mb-1">Message</label>
+            <label className="block text-sm font-medium text-frost-muted mb-1">Banner Message</label>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="input min-h-[100px]"
+              className="input min-h-[80px]"
+              placeholder="Short message for the banner..."
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-frost-muted mb-1">Type</label>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="input"
+              >
+                <option value="info">ℹ️ Info</option>
+                <option value="warning">⚠️ Warning</option>
+                <option value="success">✓ Success</option>
+                <option value="error">⚠ Error</option>
+              </select>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-frost-muted mb-1">Display Type</label>
               <select
@@ -348,7 +442,9 @@ function AnnouncementModal({
                 <option value="both">Both</option>
               </select>
             </div>
+          </div>
 
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-frost-muted mb-1">Priority</label>
               <input
@@ -360,7 +456,33 @@ function AnnouncementModal({
                 max={10}
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-frost-muted mb-1">Expires in (days)</label>
+              <input
+                type="number"
+                value={expiresInDays}
+                onChange={(e) => setExpiresInDays(e.target.value ? parseInt(e.target.value) : '')}
+                className="input"
+                placeholder="Optional"
+                min={1}
+              />
+            </div>
           </div>
+
+          {(displayType === 'inbox' || displayType === 'both') && (
+            <div>
+              <label className="block text-sm font-medium text-frost-muted mb-1">
+                Inbox Content <span className="text-frost-muted font-normal">(full message for inbox)</span>
+              </label>
+              <textarea
+                value={inboxContent}
+                onChange={(e) => setInboxContent(e.target.value)}
+                className="input min-h-[100px]"
+                placeholder="Detailed message that appears in user's inbox..."
+              />
+            </div>
+          )}
 
           <div className="flex gap-3 pt-4">
             <button type="button" onClick={onClose} className="btn-secondary flex-1">

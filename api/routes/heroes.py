@@ -41,12 +41,47 @@ class UserHeroData(BaseModel):
     level: int
     stars: int
     ascension: int
+    # Skill levels
     exploration_skill_1: int
     exploration_skill_2: int
     exploration_skill_3: int
     expedition_skill_1: int
     expedition_skill_2: int
     expedition_skill_3: int
+    # Skill names (from heroes.json)
+    exploration_skill_1_name: Optional[str] = None
+    exploration_skill_2_name: Optional[str] = None
+    exploration_skill_3_name: Optional[str] = None
+    expedition_skill_1_name: Optional[str] = None
+    expedition_skill_2_name: Optional[str] = None
+    expedition_skill_3_name: Optional[str] = None
+    # Skill descriptions
+    exploration_skill_1_desc: Optional[str] = None
+    exploration_skill_2_desc: Optional[str] = None
+    exploration_skill_3_desc: Optional[str] = None
+    expedition_skill_1_desc: Optional[str] = None
+    expedition_skill_2_desc: Optional[str] = None
+    expedition_skill_3_desc: Optional[str] = None
+    # Gear slots (4 slots)
+    gear_slot1_quality: int = 0
+    gear_slot1_level: int = 0
+    gear_slot1_mastery: int = 0
+    gear_slot2_quality: int = 0
+    gear_slot2_level: int = 0
+    gear_slot2_mastery: int = 0
+    gear_slot3_quality: int = 0
+    gear_slot3_level: int = 0
+    gear_slot3_mastery: int = 0
+    gear_slot4_quality: int = 0
+    gear_slot4_level: int = 0
+    gear_slot4_mastery: int = 0
+    # Mythic/Exclusive gear
+    mythic_gear_name: Optional[str] = None
+    mythic_gear_unlocked: bool = False
+    mythic_gear_quality: int = 0
+    mythic_gear_level: int = 0
+    mythic_gear_mastery: int = 0
+    # Image
     image_base64: Optional[str] = None
 
 
@@ -60,6 +95,24 @@ class UpdateHeroRequest(BaseModel):
     expedition_skill_1: Optional[int] = None
     expedition_skill_2: Optional[int] = None
     expedition_skill_3: Optional[int] = None
+    # Gear
+    gear_slot1_quality: Optional[int] = None
+    gear_slot1_level: Optional[int] = None
+    gear_slot1_mastery: Optional[int] = None
+    gear_slot2_quality: Optional[int] = None
+    gear_slot2_level: Optional[int] = None
+    gear_slot2_mastery: Optional[int] = None
+    gear_slot3_quality: Optional[int] = None
+    gear_slot3_level: Optional[int] = None
+    gear_slot3_mastery: Optional[int] = None
+    gear_slot4_quality: Optional[int] = None
+    gear_slot4_level: Optional[int] = None
+    gear_slot4_mastery: Optional[int] = None
+    # Mythic
+    mythic_gear_unlocked: Optional[bool] = None
+    mythic_gear_quality: Optional[int] = None
+    mythic_gear_level: Optional[int] = None
+    mythic_gear_mastery: Optional[int] = None
 
 
 def get_hero_image_base64(image_filename: str) -> Optional[str]:
@@ -114,6 +167,16 @@ def get_all_heroes(include_images: bool = False):
     return heroes
 
 
+def load_heroes_json():
+    """Load heroes.json data for skill names and mythic gear info."""
+    heroes_path = PROJECT_ROOT / "data" / "heroes.json"
+    if heroes_path.exists():
+        with open(heroes_path, encoding="utf-8") as f:
+            data = json.load(f)
+        return {h["name"]: h for h in data.get("heroes", [])}
+    return {}
+
+
 @router.get("/owned", response_model=List[UserHeroData])
 def get_owned_heroes(
     include_images: bool = True,
@@ -132,6 +195,9 @@ def get_owned_heroes(
         db.close()
         return []
 
+    # Load heroes.json for skill names
+    heroes_json = load_heroes_json()
+
     # Get owned heroes with hero details
     user_heroes = db.query(UserHero, Hero).join(
         Hero, UserHero.hero_id == Hero.id
@@ -141,6 +207,9 @@ def get_owned_heroes(
 
     result = []
     for uh, hero in user_heroes:
+        # Get skill names and descriptions from heroes.json
+        hero_data = heroes_json.get(hero.name, {})
+
         data = {
             "hero_id": hero.id,
             "name": hero.name,
@@ -149,13 +218,47 @@ def get_owned_heroes(
             "tier_overall": hero.tier_overall,
             "level": uh.level,
             "stars": uh.stars,
-            "ascension": uh.ascension,
-            "exploration_skill_1": uh.exploration_skill_1,
-            "exploration_skill_2": uh.exploration_skill_2,
-            "exploration_skill_3": uh.exploration_skill_3,
-            "expedition_skill_1": uh.expedition_skill_1,
-            "expedition_skill_2": uh.expedition_skill_2,
-            "expedition_skill_3": uh.expedition_skill_3,
+            "ascension": getattr(uh, 'ascension_tier', uh.ascension) if hasattr(uh, 'ascension_tier') else uh.ascension,
+            # Skill levels
+            "exploration_skill_1": getattr(uh, 'exploration_skill_1_level', uh.exploration_skill_1) if hasattr(uh, 'exploration_skill_1_level') else uh.exploration_skill_1,
+            "exploration_skill_2": getattr(uh, 'exploration_skill_2_level', uh.exploration_skill_2) if hasattr(uh, 'exploration_skill_2_level') else uh.exploration_skill_2,
+            "exploration_skill_3": getattr(uh, 'exploration_skill_3_level', uh.exploration_skill_3) if hasattr(uh, 'exploration_skill_3_level') else uh.exploration_skill_3,
+            "expedition_skill_1": getattr(uh, 'expedition_skill_1_level', uh.expedition_skill_1) if hasattr(uh, 'expedition_skill_1_level') else uh.expedition_skill_1,
+            "expedition_skill_2": getattr(uh, 'expedition_skill_2_level', uh.expedition_skill_2) if hasattr(uh, 'expedition_skill_2_level') else uh.expedition_skill_2,
+            "expedition_skill_3": getattr(uh, 'expedition_skill_3_level', uh.expedition_skill_3) if hasattr(uh, 'expedition_skill_3_level') else uh.expedition_skill_3,
+            # Skill names from heroes.json
+            "exploration_skill_1_name": hero_data.get("exploration_skill_1"),
+            "exploration_skill_2_name": hero_data.get("exploration_skill_2"),
+            "exploration_skill_3_name": hero_data.get("exploration_skill_3"),
+            "expedition_skill_1_name": hero_data.get("expedition_skill_1"),
+            "expedition_skill_2_name": hero_data.get("expedition_skill_2"),
+            "expedition_skill_3_name": hero_data.get("expedition_skill_3"),
+            # Skill descriptions
+            "exploration_skill_1_desc": hero_data.get("exploration_skill_1_desc"),
+            "exploration_skill_2_desc": hero_data.get("exploration_skill_2_desc"),
+            "exploration_skill_3_desc": hero_data.get("exploration_skill_3_desc"),
+            "expedition_skill_1_desc": hero_data.get("expedition_skill_1_desc"),
+            "expedition_skill_2_desc": hero_data.get("expedition_skill_2_desc"),
+            "expedition_skill_3_desc": hero_data.get("expedition_skill_3_desc"),
+            # Gear slots
+            "gear_slot1_quality": getattr(uh, 'gear_slot1_quality', 0) or 0,
+            "gear_slot1_level": getattr(uh, 'gear_slot1_level', 0) or 0,
+            "gear_slot1_mastery": getattr(uh, 'gear_slot1_mastery', 0) or 0,
+            "gear_slot2_quality": getattr(uh, 'gear_slot2_quality', 0) or 0,
+            "gear_slot2_level": getattr(uh, 'gear_slot2_level', 0) or 0,
+            "gear_slot2_mastery": getattr(uh, 'gear_slot2_mastery', 0) or 0,
+            "gear_slot3_quality": getattr(uh, 'gear_slot3_quality', 0) or 0,
+            "gear_slot3_level": getattr(uh, 'gear_slot3_level', 0) or 0,
+            "gear_slot3_mastery": getattr(uh, 'gear_slot3_mastery', 0) or 0,
+            "gear_slot4_quality": getattr(uh, 'gear_slot4_quality', 0) or 0,
+            "gear_slot4_level": getattr(uh, 'gear_slot4_level', 0) or 0,
+            "gear_slot4_mastery": getattr(uh, 'gear_slot4_mastery', 0) or 0,
+            # Mythic gear
+            "mythic_gear_name": hero_data.get("mythic_gear"),
+            "mythic_gear_unlocked": getattr(uh, 'mythic_gear_unlocked', False) or False,
+            "mythic_gear_quality": getattr(uh, 'mythic_gear_quality', 0) or 0,
+            "mythic_gear_level": getattr(uh, 'mythic_gear_level', 0) or 0,
+            "mythic_gear_mastery": getattr(uh, 'mythic_gear_mastery', 0) or 0,
             "image_base64": None
         }
 
