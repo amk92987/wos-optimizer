@@ -51,7 +51,7 @@ export function InstallPrompt() {
     setIsAndroid(isAndroidDevice);
 
     // For iOS, show custom instructions (iOS doesn't support beforeinstallprompt)
-    if (isIOSDevice && !navigator.standalone) {
+    if (isIOSDevice && !(navigator as any).standalone) {
       // Show after a short delay
       const timer = setTimeout(() => setShowPrompt(true), 3000);
       return () => clearTimeout(timer);

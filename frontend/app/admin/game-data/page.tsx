@@ -83,7 +83,7 @@ export default function AdminGameDataPage() {
   };
 
   // Extract unique categories
-  const categories = [...new Set(files.map((f) => f.category))].sort();
+  const categories = Array.from(new Set(files.map((f) => f.category))).sort();
 
   // Filter files
   const filteredFiles = filterCategory

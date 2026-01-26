@@ -4,6 +4,14 @@ import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
 
+interface GearSlot {
+  id: string;
+  displayName: string;
+  type: string;
+  icon: string;
+  charmKey: string;
+}
+
 // 42-tier gear progression matching game's system
 const GEAR_TIERS = [
   { id: 1, name: "Green 0★", color: "#2ECC71", bonus: 9.35 },
@@ -362,7 +370,7 @@ function GearTab({
   handleUpdateGear,
 }: {
   gear: ChiefGearData;
-  gearSlots: typeof gearSlots;
+  gearSlots: GearSlot[];
   typeColors: Record<string, string>;
   typeTextColors: Record<string, string>;
   handleUpdateGear: (slotId: string, tierId: number) => void;
@@ -371,9 +379,9 @@ function GearTab({
 
   // Group by troop type
   const troopGroups = [
-    { type: 'Lancer', slots: gearSlots.filter(s => s.type === 'Lancer') },
-    { type: 'Infantry', slots: gearSlots.filter(s => s.type === 'Infantry') },
-    { type: 'Marksman', slots: gearSlots.filter(s => s.type === 'Marksman') },
+    { type: 'Lancer', slots: gearSlots.filter((s: GearSlot) => s.type === 'Lancer') },
+    { type: 'Infantry', slots: gearSlots.filter((s: GearSlot) => s.type === 'Infantry') },
+    { type: 'Marksman', slots: gearSlots.filter((s: GearSlot) => s.type === 'Marksman') },
   ];
 
   return (
@@ -510,7 +518,7 @@ function CharmsTab({
   handleUpdateCharm,
 }: {
   charms: ChiefCharmData;
-  gearSlots: typeof gearSlots;
+  gearSlots: GearSlot[];
   handleUpdateCharm: (field: string, value: string) => void;
 }) {
   const charmTypeInfo = {
@@ -575,7 +583,7 @@ function CharmsTab({
       {/* Charm Grid by troop type */}
       {['Lancer', 'Infantry', 'Marksman'].map((troopType) => {
         const info = charmTypeInfo[troopType as keyof typeof charmTypeInfo];
-        const slots = gearSlots.filter(s => s.type === troopType);
+        const slots = gearSlots.filter((s: GearSlot) => s.type === troopType);
 
         return (
           <div key={troopType} className="mb-6">
@@ -584,7 +592,7 @@ function CharmsTab({
             </div>
 
             <div className="grid md:grid-cols-2 gap-4">
-              {slots.map((slot) => {
+              {slots.map((slot: GearSlot) => {
                 const charmKey = slot.charmKey;
                 const slot1 = (charms as any)[`${charmKey}_slot_1`] || '1';
                 const slot2 = (charms as any)[`${charmKey}_slot_2`] || '1';

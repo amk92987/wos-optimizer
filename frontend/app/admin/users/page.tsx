@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
@@ -22,7 +22,7 @@ interface AdminUser {
   usage_7d: number;
 }
 
-export default function AdminUsersPage() {
+function AdminUsersContent() {
   const { token, user } = useAuth();
   const searchParams = useSearchParams();
   const [users, setUsers] = useState<AdminUser[]>([]);
@@ -121,7 +121,7 @@ export default function AdminUsersPage() {
   const regularUsers = users.filter(u => u.role !== 'admin');
   const adminUsers = users.filter(u => u.role === 'admin');
   const activeIn7d = regularUsers.filter(u => u.usage_7d > 0).length;
-  const uniqueStates = [...new Set(users.flatMap(u => u.states || []))].sort((a, b) => a - b);
+  const uniqueStates = Array.from(new Set(users.flatMap(u => u.states || []))).sort((a, b) => a - b);
   const suspendedCount = users.filter(u => !u.is_active).length;
   const testCount = users.filter(u => u.is_test_account).length;
 
@@ -799,5 +799,13 @@ function EditUserModal({
         </form>
       </div>
     </div>
+  );
+}
+
+export default function AdminUsersPage() {
+  return (
+    <Suspense fallback={<PageLayout><div className="text-center py-16">Loading...</div></PageLayout>}>
+      <AdminUsersContent />
+    </Suspense>
   );
 }

@@ -48,7 +48,13 @@ interface JoinerRecommendation {
   critical_note: string;
 }
 
-const eventTypes = [
+interface EventType {
+  id: string;
+  name: string;
+  icon: string;
+}
+
+const eventTypes: EventType[] = [
   { id: 'bear_trap', name: 'Bear Trap', icon: '🐻' },
   { id: 'crazy_joe', name: 'Crazy Joe', icon: '🤪' },
   { id: 'garrison', name: 'Garrison Defense', icon: '🏰' },
@@ -266,7 +272,7 @@ function OptimalLineupsTab({
   isLoading,
   isPersonalized,
 }: {
-  eventTypes: typeof eventTypes;
+  eventTypes: EventType[];
   selectedEvent: string;
   setSelectedEvent: (id: string) => void;
   lineup: LineupResponse | null;
@@ -284,7 +290,7 @@ function OptimalLineupsTab({
       <div className="card mb-6">
         <h2 className="section-header">Select Event Type</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {eventTypes.map((event) => (
+          {eventTypes.map((event: EventType) => (
             <button
               key={event.id}
               onClick={() => setSelectedEvent(event.id)}

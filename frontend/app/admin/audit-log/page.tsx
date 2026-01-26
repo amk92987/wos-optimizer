@@ -52,7 +52,7 @@ export default function AdminAuditLogPage() {
   };
 
   // Extract unique actions for filter
-  const uniqueActions = [...new Set(logs.map((l) => l.action))].sort();
+  const uniqueActions = Array.from(new Set(logs.map((l) => l.action))).sort();
 
   // Filter logs
   const filteredLogs = logs.filter((log) => {
