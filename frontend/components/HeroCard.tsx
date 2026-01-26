@@ -7,9 +7,10 @@ import Expander from './Expander';
 interface HeroCardProps {
   hero: UserHero;
   onUpdate?: (heroId: number, data: Partial<UserHero>) => void;
+  onRemove?: () => void;
 }
 
-export default function HeroCard({ hero, onUpdate }: HeroCardProps) {
+export default function HeroCard({ hero, onUpdate, onRemove }: HeroCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [level, setLevel] = useState(hero.level);
   const [stars, setStars] = useState(hero.stars);
@@ -180,30 +181,42 @@ export default function HeroCard({ hero, onUpdate }: HeroCardProps) {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-2 pt-2 border-t border-border">
-          {isEditing ? (
-            <>
+        <div className="flex justify-between pt-2 border-t border-border">
+          <div>
+            {onRemove && !isEditing && (
               <button
-                onClick={() => setIsEditing(false)}
-                className="btn-ghost text-sm"
+                onClick={onRemove}
+                className="text-sm text-red-400 hover:text-red-300 transition-colors"
               >
-                Cancel
+                Remove from collection
               </button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            {isEditing ? (
+              <>
+                <button
+                  onClick={() => setIsEditing(false)}
+                  className="btn-ghost text-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="btn-primary text-sm"
+                >
+                  Save Changes
+                </button>
+              </>
+            ) : (
               <button
-                onClick={handleSave}
-                className="btn-primary text-sm"
+                onClick={() => setIsEditing(true)}
+                className="btn-secondary text-sm"
               >
-                Save Changes
+                Edit Hero
               </button>
-            </>
-          ) : (
-            <button
-              onClick={() => setIsEditing(true)}
-              className="btn-secondary text-sm"
-            >
-              Edit Hero
-            </button>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </Expander>

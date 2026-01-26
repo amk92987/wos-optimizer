@@ -1,0 +1,40 @@
+{
+  "name": "Bear's Den - Whiteout Survival Companion",
+  "short_name": "Bear's Den",
+  "description": "Your Whiteout Survival companion app for hero tracking, lineups, and strategy",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A1628",
+  "theme_color": "#4A90D9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/bear_paw.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games", "utilities"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Hero Tracker",
+      "url": "/heroes"
+    },
+    {
+      "name": "AI Advisor",
+      "url": "/advisor"
+    },
+    {
+      "name": "Lineups",
+      "url": "/lineups"
+    }
+  ]
+}

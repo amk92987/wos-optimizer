@@ -17,7 +17,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from database.db import get_db, init_db
 from database.auth import authenticate_user, hash_password
-from database.models import User
+from database.models import User, UserDailyLogin
 
 router = APIRouter()
 security = HTTPBearer()
@@ -107,6 +107,17 @@ def login(request: LoginRequest):
 
     # Update last login
     user.last_login = datetime.utcnow()
+
+    # Track daily login for usage analytics (one record per user per day)
+    today = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    existing_login = db.query(UserDailyLogin).filter(
+        UserDailyLogin.user_id == user.id,
+        UserDailyLogin.login_date == today
+    ).first()
+    if not existing_login:
+        daily_login = UserDailyLogin(user_id=user.id, login_date=today)
+        db.add(daily_login)
+
     db.commit()
 
     # Create token

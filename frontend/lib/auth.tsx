@@ -3,6 +3,14 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, authApi } from './api';
 
+// Dev mode auto-login credentials (only used in development)
+// Set enabled: true to always auto-login, or use NODE_ENV check for safety
+const DEV_AUTO_LOGIN = {
+  enabled: true, // Always enabled for local dev - change to false for production builds
+  email: 'dev@local',
+  password: 'dev123',
+};
+
 interface AuthContextType {
   user: User | null;
   token: string | null;
@@ -19,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Check for existing token on mount
+  // Check for existing token on mount, or auto-login in dev mode
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
@@ -29,10 +37,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .catch(() => {
           localStorage.removeItem('token');
           setToken(null);
+          // Try auto-login in dev mode if token expired
+          if (DEV_AUTO_LOGIN.enabled) {
+            autoLoginDev();
+          } else {
+            setIsLoading(false);
+          }
         })
-        .finally(() => setIsLoading(false));
+        .finally(() => {
+          if (storedToken) setIsLoading(false);
+        });
+    } else if (DEV_AUTO_LOGIN.enabled) {
+      // No token, auto-login in dev mode
+      autoLoginDev();
     } else {
       setIsLoading(false);
+    }
+
+    async function autoLoginDev() {
+      try {
+        console.log('[Dev] Auto-logging in as', DEV_AUTO_LOGIN.email);
+        const response = await authApi.login(DEV_AUTO_LOGIN.email, DEV_AUTO_LOGIN.password);
+        localStorage.setItem('token', response.access_token);
+        setToken(response.access_token);
+        setUser(response.user);
+      } catch (error) {
+        console.error('[Dev] Auto-login failed:', error);
+      } finally {
+        setIsLoading(false);
+      }
     }
   }, []);
 
