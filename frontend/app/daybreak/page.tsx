@@ -154,7 +154,7 @@ function GettingStartedTab() {
         {newPlayerTips.map((tip, i) => {
           const colors = priorityColors[tip.priority];
           return (
-            <div key={i} className={`${colors.bg} border-l-4 ${colors.border} p-4 rounded-r-lg`}>
+            <div key={i} className={`${colors.bg} border-l-4 ${colors.border} p-4 rounded-lg`}>
               <div className="flex justify-between items-start gap-3">
                 <div className="flex-1">
                   <p className="font-semibold text-frost">{tip.tip}</p>
@@ -334,7 +334,7 @@ function TreeOfLifeTab() {
         {treeOfLifeProgression.map((level) => {
           const colors = priorityColors[level.combatValue];
           return (
-            <div key={level.level} className={`${colors.bg} border-l-4 ${colors.border} p-3 rounded-r-lg flex items-center justify-between`}>
+            <div key={level.level} className={`${colors.bg} border-l-4 ${colors.border} p-3 rounded-lg flex items-center justify-between`}>
               <div className="flex items-center gap-3">
                 <span className={`${colors.text} bg-surface px-3 py-1 rounded-full text-sm font-bold`}>
                   L{level.level}
@@ -449,7 +449,7 @@ function StrategyTab() {
       <h3 className="text-lg font-bold text-frost mb-4">Common Mistakes</h3>
       <div className="space-y-3">
         {commonMistakes.map((mistake, i) => (
-          <div key={i} className="bg-surface/30 border-l-4 border-l-red-500/50 p-4 rounded-r-lg">
+          <div key={i} className="bg-surface/30 border-l-4 border-l-red-500/50 p-4 rounded-lg">
             <p className="font-medium text-frost mb-2">{mistake.mistake}</p>
             <p className="text-sm text-frost-muted mb-2">
               <span className="text-red-400">Why bad:</span> {mistake.whyBad}

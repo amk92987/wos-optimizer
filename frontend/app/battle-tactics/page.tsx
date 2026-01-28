@@ -600,16 +600,74 @@ function FoundryTab() {
               <li>• <strong className="text-frost">60 minutes</strong> - 3 phases</li>
               <li>• <strong className="text-ice">NO troop deaths</strong> - troops are unlimited</li>
               <li>• <strong className="text-frost">30 alliance members</strong> can participate</li>
-              <li>• Capture buildings for points over time</li>
+              <li>• Capture buildings AND gather loot for points</li>
             </ul>
           </div>
           <div className="p-4 rounded-lg bg-surface">
             <h3 className="font-medium text-frost mb-2">Winning Strategy</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• <strong className="text-fire">Double rally</strong> on high-value buildings</li>
-              <li>• Split into Attack (A1, A2) and Defense teams</li>
+              <li>• <strong className="text-amber-400">Gather loot</strong> - often more valuable than holding!</li>
+              <li>• Split teams: Garrison + Attackers + Gatherers</li>
               <li>• <strong className="text-frost">Voice chat</strong> is essential for coordination</li>
-              <li>• Never let enemies hold Imperial Foundry unchallenged</li>
+              <li>• Keep buildings changing hands to generate loot</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* CRITICAL: Loot Mechanic */}
+      <div className="card border-amber-500/50 bg-gradient-to-r from-amber-500/10 to-transparent">
+        <h2 className="section-header text-amber-400">CRITICAL: The Loot Mechanic</h2>
+        <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30 mb-4">
+          <p className="text-frost font-medium">
+            <span className="text-red-400">WARNING:</span> You can hold ALL buildings and STILL LOSE!
+            Controlling buildings alone is NOT enough to win.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-amber-400 mb-2">How Loot Works</h3>
+            <ul className="text-sm text-frost-muted space-y-2">
+              <li>• When a building <strong className="text-frost">changes hands</strong>, it releases <strong className="text-amber-400">loot</strong> onto the map</li>
+              <li>• <strong className="text-ice">The longer a building is held, the MORE loot it releases</strong> when captured</li>
+              <li>• Loot appears as gatherable resources on the battlefield</li>
+              <li>• <strong className="text-amber-400">Gathering loot gives MORE points than just holding buildings!</strong></li>
+              <li>• Capturing a building gives instant points + triggers loot spawn</li>
+            </ul>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
+              <h3 className="font-medium text-green-400 mb-2">Winning Team Strategy</h3>
+              <ul className="text-sm text-frost-muted space-y-1">
+                <li>• <strong className="text-frost">Garrison Team:</strong> Hold key buildings</li>
+                <li>• <strong className="text-frost">Attack Team:</strong> Teleport around, capture enemy buildings</li>
+                <li>• <strong className="text-frost">Gather Team:</strong> Collect ALL loot immediately</li>
+                <li>• Keep buildings flipping to generate more loot!</li>
+              </ul>
+            </div>
+            <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
+              <h3 className="font-medium text-red-400 mb-2">Common Mistake (Why You Lost)</h3>
+              <ul className="text-sm text-frost-muted space-y-1">
+                <li>• Sitting in buildings just garrisoning</li>
+                <li>• Ignoring loot spawns on the map</li>
+                <li>• Not attacking enemy buildings</li>
+                <li>• Letting enemy gather YOUR loot when they cap</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+            <h3 className="font-medium text-amber-400 mb-2">Pro Tip: The "Flip & Gather" Strategy</h3>
+            <p className="text-sm text-frost-muted mb-2">
+              If you have MORE players than the enemy alliance:
+            </p>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• <strong className="text-frost">Intentionally let some buildings get taken</strong> (especially ones held a long time)</li>
+              <li>• <strong className="text-frost">Immediately retake them</strong> - triggers HUGE loot drop</li>
+              <li>• <strong className="text-frost">Have gatherers ready</strong> to collect the loot instantly</li>
+              <li>• Repeat! More flips = more loot = more points</li>
             </ul>
           </div>
         </div>
@@ -658,48 +716,46 @@ function FoundryTab() {
         </div>
       </div>
 
-      {/* 4-Team Formation */}
+      {/* Team Roles */}
       <div className="card">
-        <h2 className="section-header">4-Team Formation</h2>
-        <p className="text-frost-muted mb-4">Standard team organization for Foundry:</p>
+        <h2 className="section-header">Team Roles (Revised Strategy)</h2>
+        <p className="text-frost-muted mb-4">Optimal team organization including loot gathering:</p>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
           <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
-            <h3 className="font-medium text-red-400 mb-2">Team Alpha (Strongest)</h3>
+            <h3 className="font-medium text-red-400 mb-2">Garrison Team (30-40%)</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Top 5 players by power</li>
-              <li>• Target: Stronghold</li>
-              <li>• Lead the main assault</li>
-              <li>• Double rally when possible</li>
+              <li>• Strongest players</li>
+              <li>• Hold high-value buildings</li>
+              <li>• Defend against enemy attacks</li>
+              <li>• Call out incoming enemies</li>
             </ul>
           </div>
           <div className="p-4 rounded-lg bg-orange-500/10 border border-orange-500/30">
-            <h3 className="font-medium text-orange-400 mb-2">Team Bravo</h3>
+            <h3 className="font-medium text-orange-400 mb-2">Attack Team (30-40%)</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Next 5 strongest</li>
-              <li>• Target: Barracks</li>
-              <li>• Support Alpha when needed</li>
-              <li>• Secondary Stronghold if clear</li>
+              <li>• Fast, mobile players</li>
+              <li>• Teleport around the map</li>
+              <li>• Capture enemy buildings</li>
+              <li>• Generate loot by flipping buildings</li>
             </ul>
           </div>
-          <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
-            <h3 className="font-medium text-blue-400 mb-2">Team Charlie</h3>
+          <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+            <h3 className="font-medium text-amber-400 mb-2">Gather Team (20-30%)</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Mid-power players</li>
-              <li>• Target: Arsenal</li>
-              <li>• Flexible - help where needed</li>
-              <li>• Quick building clears</li>
+              <li>• <strong className="text-amber-400">CRITICAL ROLE!</strong></li>
+              <li>• Collect ALL loot immediately</li>
+              <li>• Follow attack team's captures</li>
+              <li>• Never leave loot on the ground</li>
             </ul>
           </div>
-          <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
-            <h3 className="font-medium text-green-400 mb-2">Team Delta</h3>
-            <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Remaining players</li>
-              <li>• Target: Watchtowers</li>
-              <li>• Quick point accumulation</li>
-              <li>• Scout enemy positions</li>
-            </ul>
-          </div>
+        </div>
+
+        <div className="mt-4 p-3 rounded-lg bg-ice/10 border border-ice/30">
+          <p className="text-sm text-frost">
+            <strong className="text-ice">Adapt based on enemy numbers:</strong> If you outnumber them, focus more on Attack + Gather.
+            If outnumbered, focus more on Garrison + opportunistic gathering.
+          </p>
         </div>
       </div>
 

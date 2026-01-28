@@ -425,7 +425,7 @@ const spendingAdvice: Record<string, string> = {
 function TipCard({ tip, detail, priority, categoryBadge }: { tip: string; detail: string; priority: 'critical' | 'high' | 'medium' | 'low'; categoryBadge?: string }) {
   const colors = priorityColors[priority];
   return (
-    <div className={`bg-surface/50 border-l-4 ${colors.border} p-4 rounded-r-lg mb-3`}>
+    <div className={`bg-surface/50 border-l-4 ${colors.border} p-4 rounded-lg mb-3`}>
       <div className="flex justify-between items-start gap-3">
         <div className="flex-1">
           <p className="font-semibold text-frost mb-1">{tip}</p>
@@ -453,7 +453,7 @@ function HeroCard({ hero }: { hero: HeroData }) {
   const niches = heroNicheUses[hero.name] || [];
 
   return (
-    <div className={`bg-surface/50 border-l-4 p-4 rounded-r-lg mb-3 ${
+    <div className={`bg-surface/50 border-l-4 p-4 rounded-lg mb-3 ${
       hero.investment.includes('MAX') ? 'border-l-red-500' :
       hero.investment.includes('HIGH') ? 'border-l-orange-500' :
       hero.investment.includes('MEDIUM') ? 'border-l-blue-500' :

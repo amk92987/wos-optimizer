@@ -77,6 +77,7 @@ const PRIORITY_ORDER: Record<string, number> = { 'S': 0, 'A': 1, 'B': 2, 'C': 3,
 
 export default function EventsPage() {
   const [eventsGuide, setEventsGuide] = useState<EventsGuide | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedEvent, setSelectedEvent] = useState<{ id: string; event: Event } | null>(null);
   const [filterF2P, setFilterF2P] = useState<boolean>(false);
@@ -85,12 +86,23 @@ export default function EventsPage() {
   useEffect(() => {
     // Fetch events guide data from FastAPI backend
     const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    setIsLoading(true);
     fetch(`${apiBase}/api/events/guide`)
-      .then(res => res.json())
-      .then(data => setEventsGuide(data))
-      .catch(() => {
-        // Fallback to static data if API fails
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json();
+      })
+      .then(data => {
+        if (data && data.events) {
+          setEventsGuide(data);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load events guide:', err);
         setEventsGuide(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
 
@@ -128,7 +140,7 @@ export default function EventsPage() {
 
   // Filter and sort events
   const getFilteredEvents = () => {
-    if (!eventsGuide) return [];
+    if (!eventsGuide || !eventsGuide.events) return [];
 
     let events = Object.entries(eventsGuide.events);
 
@@ -239,7 +251,7 @@ export default function EventsPage() {
         </div>
 
         {/* Events List */}
-        {!eventsGuide ? (
+        {isLoading ? (
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="card animate-pulse">
@@ -248,6 +260,12 @@ export default function EventsPage() {
                 <div className="h-3 bg-surface-hover rounded w-1/2"></div>
               </div>
             ))}
+          </div>
+        ) : !eventsGuide ? (
+          <div className="card text-center py-12">
+            <div className="text-4xl mb-4">⚠️</div>
+            <h3 className="text-lg font-medium text-frost mb-2">Unable to load events</h3>
+            <p className="text-frost-muted">Make sure the API server is running at localhost:8000</p>
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="card text-center py-12">

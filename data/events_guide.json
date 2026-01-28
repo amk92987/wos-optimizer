@@ -1194,10 +1194,11 @@
       "type": "competitive",
       "frequency": "Seasonal",
       "duration": "Multiple weeks",
-      "cost_category": "heavy_spend",
-      "priority": "A",
-      "description": "Pick your top 3 heroes and optimal troop ratio. Alliance members compete in bracket-style tournaments.",
-      "gameplay": "Each player picks their TOP 3 HEROES for their lineup. The game auto-deploys you with 33/33/33 troop ratio but this is NOT optimal - change it! Your lineup fights automatically against opponents. PvP buffs (minister, pet, battle) work so ensure they're active when you register. F2P players should register later in the phase to coincide with pet buffs and city bonuses for maximum points.",
+      "cost_category": "free",
+      "priority": "S",
+      "f2p_friendly": true,
+      "description": "Pick your top 3 heroes and optimal troop ratio. Runs in the background - just deploy your squad!",
+      "gameplay": "A passive event! Pick your TOP 3 HEROES and set your troop ratio, then the game auto-battles for you. The default 33/33/33 ratio is NOT optimal - change it! PvP buffs (minister, pet, battle) work so ensure they're active when you register. F2P players should register later in the phase to coincide with pet buffs and city bonuses for maximum points.",
       "rewards": {
         "primary": ["Championship Titles", "Exclusive Rewards", "Alliance Buffs"],
         "quality": "very_high",
@@ -1264,8 +1265,8 @@
   },
 
   "summary_by_priority": {
-    "S_tier_never_skip": ["bear_trap", "svs_prep", "svs_battle", "hall_of_chiefs"],
-    "A_tier_high_value": ["crazy_joe", "alliance_showdown", "king_of_icefield", "artisans_trove", "flame_lotto", "canyon_clash", "flame_and_fang", "mercenary_prestige", "brother_in_arms", "frostdragon_tyrant", "tundra_album", "alliance_championship", "labyrinth"],
+    "S_tier_never_skip": ["bear_trap", "svs_prep", "svs_battle", "hall_of_chiefs", "alliance_championship"],
+    "A_tier_high_value": ["crazy_joe", "alliance_showdown", "king_of_icefield", "artisans_trove", "flame_lotto", "canyon_clash", "flame_and_fang", "mercenary_prestige", "brother_in_arms", "frostdragon_tyrant", "tundra_album", "labyrinth"],
     "B_tier_do_if_active": ["lucky_wheel", "tundra_trading", "mix_and_match", "treasure_hunter", "foundry_battle", "hero_rally", "tundra_arms_league", "frostfire_mine"],
     "C_tier_low_priority": ["snowbusters", "fishing_tournament"],
     "D_tier_skip": []
