@@ -302,6 +302,25 @@ export default function ChiefTrackerPage() {
     );
   }
 
+  if (!gear && !charms) {
+    return (
+      <PageLayout>
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold text-frost mb-4">Chief Tracker</h1>
+          <div className="card border-fire/30">
+            <h2 className="text-lg font-medium text-frost mb-2">Profile Required</h2>
+            <p className="text-frost-muted mb-4">
+              You need to create a profile before tracking your chief gear and charms.
+            </p>
+            <a href="/profiles" className="btn-primary">
+              Go to Profiles
+            </a>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout>
       <div className="max-w-4xl mx-auto animate-fadeIn">
