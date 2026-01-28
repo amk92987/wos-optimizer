@@ -50,12 +50,14 @@ class ConversationResponse(BaseModel):
     created_at: datetime
     rating: Optional[int] = None
     is_helpful: Optional[bool] = None
+    is_favorite: bool = False
 
 
 class RateRequest(BaseModel):
     conversation_id: int
     rating: Optional[int] = None
     is_helpful: Optional[bool] = None
+    user_feedback: Optional[str] = None
 
 
 @router.post("/ask", response_model=AskResponse)
@@ -184,10 +186,75 @@ def get_conversation_history(
                 "source": conv.routed_to or "rules",
                 "created_at": conv.created_at,
                 "rating": conv.rating,
-                "is_helpful": conv.is_helpful
+                "is_helpful": conv.is_helpful,
+                "is_favorite": conv.is_favorite or False
             })
 
         return result
+
+    finally:
+        db.close()
+
+
+@router.get("/favorites", response_model=List[ConversationResponse])
+def get_favorites(
+    limit: int = 20,
+    current_user: User = Depends(get_current_user)
+):
+    """Get user's favorited conversations."""
+    init_db()
+    db = get_db()
+
+    try:
+        conversations = db.query(AIConversation).filter(
+            AIConversation.user_id == current_user.id,
+            AIConversation.is_favorite == True
+        ).order_by(AIConversation.created_at.desc()).limit(limit).all()
+
+        result = []
+        for conv in conversations:
+            result.append({
+                "id": conv.id,
+                "question": conv.question,
+                "answer": conv.answer,
+                "source": conv.routed_to or "rules",
+                "created_at": conv.created_at,
+                "rating": conv.rating,
+                "is_helpful": conv.is_helpful,
+                "is_favorite": True
+            })
+
+        return result
+
+    finally:
+        db.close()
+
+
+@router.post("/favorite/{conversation_id}")
+def toggle_favorite(
+    conversation_id: int,
+    current_user: User = Depends(get_current_user)
+):
+    """Toggle favorite status for a conversation."""
+    init_db()
+    db = get_db()
+
+    try:
+        conversation = db.query(AIConversation).filter(
+            AIConversation.id == conversation_id,
+            AIConversation.user_id == current_user.id
+        ).first()
+
+        if not conversation:
+            raise HTTPException(status_code=404, detail="Conversation not found")
+
+        conversation.is_favorite = not (conversation.is_favorite or False)
+        db.commit()
+
+        return {
+            "status": "success",
+            "is_favorite": conversation.is_favorite
+        }
 
     finally:
         db.close()
@@ -215,6 +282,8 @@ def rate_conversation(
             conversation.rating = request.rating
         if request.is_helpful is not None:
             conversation.is_helpful = request.is_helpful
+        if request.user_feedback is not None:
+            conversation.user_feedback = request.user_feedback
 
         db.commit()
 

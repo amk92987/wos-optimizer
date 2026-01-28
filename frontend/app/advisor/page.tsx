@@ -13,6 +13,8 @@ interface Message {
   conversationId?: number;
   timestamp: Date;
   rated?: 'up' | 'down' | null;
+  showFeedbackForm?: boolean;
+  isFavorite?: boolean;
 }
 
 interface ChatHistory {
@@ -21,7 +23,11 @@ interface ChatHistory {
   answer: string;
   source: string;
   created_at: string;
+  is_favorite: boolean;
 }
+
+// Storage key for localStorage
+const CHAT_STORAGE_KEY = 'bears_den_advisor_chat';
 
 export default function AIAdvisorPage() {
   const { token } = useAuth();
@@ -29,16 +35,50 @@ export default function AIAdvisorPage() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
+  const [favorites, setFavorites] = useState<ChatHistory[]>([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [historyTab, setHistoryTab] = useState<'recent' | 'favorites'>('recent');
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedbackType, setFeedbackType] = useState<'bug' | 'feature' | 'bad_recommendation'>('bad_recommendation');
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [feedbackSubmitting, setFeedbackSubmitting] = useState(false);
   const [feedbackSuccess, setFeedbackSuccess] = useState(false);
+  const [inlineFeedbackId, setInlineFeedbackId] = useState<string | null>(null);
+  const [inlineFeedbackText, setInlineFeedbackText] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load messages from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(CHAT_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // Restore dates as Date objects
+        const restored = parsed.map((m: any) => ({
+          ...m,
+          timestamp: new Date(m.timestamp),
+        }));
+        setMessages(restored);
+      }
+    } catch (error) {
+      console.error('Failed to restore chat from localStorage:', error);
+    }
+  }, []);
+
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    if (messages.length > 0) {
+      try {
+        localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+      } catch (error) {
+        console.error('Failed to save chat to localStorage:', error);
+      }
+    }
+  }, [messages]);
 
   useEffect(() => {
     fetchChatHistory();
+    fetchFavorites();
   }, [token]);
 
   useEffect(() => {
@@ -60,7 +100,72 @@ export default function AIAdvisorPage() {
     }
   };
 
-  const loadChatFromHistory = (chat: ChatHistory) => {
+  const fetchFavorites = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch('http://localhost:8000/api/advisor/favorites?limit=20', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setFavorites(Array.isArray(data) ? data : []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch favorites:', error);
+    }
+  };
+
+  const toggleFavorite = async (chat: ChatHistory, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent loading the chat when clicking favorite
+    if (!token) return;
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/advisor/favorite/${chat.id}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Update local state
+        setChatHistory((prev) =>
+          prev.map((c) =>
+            c.id === chat.id ? { ...c, is_favorite: data.is_favorite } : c
+          )
+        );
+        // Refresh favorites list
+        fetchFavorites();
+      }
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+    }
+  };
+
+  const toggleMessageFavorite = async (messageId: string, conversationId: number) => {
+    if (!token) return;
+
+    try {
+      const res = await fetch(`http://localhost:8000/api/advisor/favorite/${conversationId}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // Update message state
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === messageId ? { ...m, isFavorite: data.is_favorite } : m
+          )
+        );
+        // Refresh history and favorites
+        fetchChatHistory();
+        fetchFavorites();
+      }
+    } catch (error) {
+      console.error('Failed to toggle favorite:', error);
+    }
+  };
+
+  const loadChatFromHistory = (chat: ChatHistory, continueChat: boolean = false) => {
     // Load a past conversation into the chat
     const userMsg: Message = {
       id: `hist-user-${chat.id}`,
@@ -75,8 +180,17 @@ export default function AIAdvisorPage() {
       source: chat.source as 'rules' | 'ai',
       conversationId: chat.id,
       timestamp: new Date(chat.created_at),
+      rated: null, // Allow re-rating from history
+      isFavorite: chat.is_favorite,
     };
-    setMessages([userMsg, assistantMsg]);
+
+    if (continueChat && messages.length > 0) {
+      // Append to existing conversation
+      setMessages((prev) => [...prev, userMsg, assistantMsg]);
+    } else {
+      // Replace current conversation
+      setMessages([userMsg, assistantMsg]);
+    }
     setShowHistory(false);
   };
 
@@ -167,15 +281,46 @@ export default function AIAdvisorPage() {
 
   const handleNewChat = () => {
     setMessages([]);
+    localStorage.removeItem(CHAT_STORAGE_KEY);
   };
 
   const handleRating = async (messageId: string, conversationId: number | undefined, isHelpful: boolean) => {
     if (!conversationId) return;
 
+    if (isHelpful) {
+      // Thumbs up - submit immediately
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, rated: 'up' } : m
+        )
+      );
+
+      try {
+        await fetch('http://localhost:8000/api/advisor/rate', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ conversation_id: conversationId, is_helpful: true }),
+        });
+      } catch (error) {
+        console.error('Failed to submit rating:', error);
+      }
+    } else {
+      // Thumbs down - show inline feedback form
+      setInlineFeedbackId(messageId);
+      setInlineFeedbackText('');
+    }
+  };
+
+  const submitInlineFeedback = async (messageId: string, conversationId: number) => {
+    if (!inlineFeedbackText.trim()) return;
+
     // Update local state to show rating
     setMessages((prev) =>
       prev.map((m) =>
-        m.id === messageId ? { ...m, rated: isHelpful ? 'up' : 'down' } : m
+        m.id === messageId ? { ...m, rated: 'down' } : m
       )
     );
 
@@ -186,11 +331,23 @@ export default function AIAdvisorPage() {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ conversation_id: conversationId, is_helpful: isHelpful }),
+        body: JSON.stringify({
+          conversation_id: conversationId,
+          is_helpful: false,
+          user_feedback: inlineFeedbackText,
+        }),
       });
     } catch (error) {
-      console.error('Failed to submit rating:', error);
+      console.error('Failed to submit feedback:', error);
     }
+
+    setInlineFeedbackId(null);
+    setInlineFeedbackText('');
+  };
+
+  const cancelInlineFeedback = () => {
+    setInlineFeedbackId(null);
+    setInlineFeedbackText('');
   };
 
   const suggestedQuestions = [
@@ -292,27 +449,117 @@ export default function AIAdvisorPage() {
 
         {/* Chat History Sidebar */}
         {showHistory && (
-          <div className="card mb-4 max-h-48 overflow-y-auto">
-            <h3 className="text-sm font-medium text-frost-muted mb-2">Recent Conversations</h3>
-            {chatHistory.length === 0 ? (
-              <p className="text-sm text-frost-muted">No chat history yet</p>
-            ) : (
-              <div className="space-y-1">
-                {chatHistory.map((chat) => (
-                  <button
-                    key={chat.id}
-                    onClick={() => loadChatFromHistory(chat)}
-                    className="w-full p-2 text-left rounded hover:bg-surface transition-colors"
-                  >
-                    <p className="text-sm text-frost truncate">{chat.question}</p>
-                    <p className="text-xs text-frost-muted">
-                      {chat.source === 'rules' ? '(Rules)' : '(AI)'} ·{' '}
-                      {new Date(chat.created_at).toLocaleDateString()}
+          <div className="card mb-4 max-h-64 overflow-hidden flex flex-col">
+            {/* Tabs */}
+            <div className="flex gap-2 mb-3 border-b border-surface-border pb-2">
+              <button
+                onClick={() => setHistoryTab('recent')}
+                className={`text-sm font-medium px-3 py-1 rounded transition-colors ${
+                  historyTab === 'recent'
+                    ? 'bg-ice/20 text-ice'
+                    : 'text-frost-muted hover:text-frost'
+                }`}
+              >
+                Recent
+              </button>
+              <button
+                onClick={() => setHistoryTab('favorites')}
+                className={`text-sm font-medium px-3 py-1 rounded transition-colors ${
+                  historyTab === 'favorites'
+                    ? 'bg-fire/20 text-fire'
+                    : 'text-frost-muted hover:text-frost'
+                }`}
+              >
+                Favorites {favorites.length > 0 && `(${favorites.length})`}
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="overflow-y-auto flex-1">
+              {historyTab === 'recent' ? (
+                chatHistory.length === 0 ? (
+                  <p className="text-sm text-frost-muted">No chat history yet</p>
+                ) : (
+                  <div className="space-y-1">
+                    {chatHistory.map((chat) => (
+                      <div
+                        key={chat.id}
+                        className="group flex items-start gap-2 p-2 rounded hover:bg-surface transition-colors"
+                      >
+                        <button
+                          onClick={() => loadChatFromHistory(chat)}
+                          className="flex-1 text-left"
+                        >
+                          <p className="text-sm text-frost truncate">{chat.question}</p>
+                          <p className="text-xs text-frost-muted">
+                            {chat.source === 'rules' ? '(Rules)' : '(AI)'} ·{' '}
+                            {new Date(chat.created_at).toLocaleDateString()}
+                          </p>
+                        </button>
+                        <div className="flex gap-1">
+                          <button
+                            onClick={(e) => toggleFavorite(chat, e)}
+                            className={`p-1 rounded transition-colors ${
+                              chat.is_favorite
+                                ? 'text-fire'
+                                : 'text-frost-muted opacity-0 group-hover:opacity-100 hover:text-fire'
+                            }`}
+                            title={chat.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
+                          >
+                            {chat.is_favorite ? '★' : '☆'}
+                          </button>
+                          {messages.length > 0 && (
+                            <button
+                              onClick={() => loadChatFromHistory(chat, true)}
+                              className="p-1 text-frost-muted opacity-0 group-hover:opacity-100 hover:text-ice transition-colors text-xs"
+                              title="Add to current chat"
+                            >
+                              +
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                favorites.length === 0 ? (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-frost-muted">No favorites yet</p>
+                    <p className="text-xs text-frost-muted mt-1">
+                      Click the ☆ on any chat to save it
                     </p>
-                  </button>
-                ))}
-              </div>
-            )}
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {favorites.map((chat) => (
+                      <div
+                        key={chat.id}
+                        className="group flex items-start gap-2 p-2 rounded hover:bg-surface transition-colors"
+                      >
+                        <button
+                          onClick={() => loadChatFromHistory(chat)}
+                          className="flex-1 text-left"
+                        >
+                          <p className="text-sm text-frost truncate">{chat.question}</p>
+                          <p className="text-xs text-frost-muted">
+                            {chat.source === 'rules' ? '(Rules)' : '(AI)'} ·{' '}
+                            {new Date(chat.created_at).toLocaleDateString()}
+                          </p>
+                        </button>
+                        <button
+                          onClick={(e) => toggleFavorite(chat, e)}
+                          className="p-1 text-fire transition-colors"
+                          title="Remove from favorites"
+                        >
+                          ★
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+            </div>
           </div>
         )}
 
@@ -352,37 +599,80 @@ export default function AIAdvisorPage() {
                 >
                   <p className="whitespace-pre-wrap">{msg.content}</p>
                   {msg.role === 'assistant' && (
-                    <div className="flex items-center justify-between mt-3 pt-3 border-t border-surface-border/50">
-                      <span className="text-xs text-frost-muted">
-                        {msg.source === 'rules' ? '(Rules)' : msg.source === 'ai' ? '(AI)' : ''}
-                      </span>
-                      <div className="flex gap-2">
-                        {msg.rated ? (
-                          <span className="text-xs text-frost-muted">
-                            {msg.rated === 'up' ? '👍 Thanks!' : '👎 Thanks for feedback'}
-                          </span>
-                        ) : (
-                          <>
+                    <>
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-surface-border/50">
+                        <span className="text-xs text-frost-muted">
+                          {msg.source === 'rules' ? '(Rules)' : msg.source === 'ai' ? '(AI)' : ''}
+                        </span>
+                        <div className="flex items-center gap-3">
+                          {/* Favorite toggle */}
+                          {msg.conversationId && (
                             <button
-                              onClick={() => handleRating(msg.id, msg.conversationId, true)}
-                              className="text-lg hover:scale-110 transition-transform"
-                              title="Helpful"
-                              disabled={!msg.conversationId}
+                              onClick={() => toggleMessageFavorite(msg.id, msg.conversationId!)}
+                              className={`text-lg hover:scale-110 transition-all ${
+                                msg.isFavorite ? 'text-fire' : 'text-frost-muted hover:text-fire'
+                              }`}
+                              title={msg.isFavorite ? 'Remove from favorites' : 'Save to favorites'}
                             >
-                              👍
+                              {msg.isFavorite ? '★' : '☆'}
                             </button>
-                            <button
-                              onClick={() => handleRating(msg.id, msg.conversationId, false)}
-                              className="text-lg hover:scale-110 transition-transform"
-                              title="Not helpful"
-                              disabled={!msg.conversationId}
-                            >
-                              👎
-                            </button>
-                          </>
-                        )}
+                          )}
+                          {/* Rating buttons */}
+                          {msg.rated ? (
+                            <span className="text-xs text-frost-muted">
+                              {msg.rated === 'up' ? '👍 Thanks!' : '👎 Thanks for feedback'}
+                            </span>
+                          ) : inlineFeedbackId === msg.id ? null : (
+                            <>
+                              <button
+                                onClick={() => handleRating(msg.id, msg.conversationId, true)}
+                                className="text-lg hover:scale-110 transition-transform"
+                                title="Helpful"
+                                disabled={!msg.conversationId}
+                              >
+                                👍
+                              </button>
+                              <button
+                                onClick={() => handleRating(msg.id, msg.conversationId, false)}
+                                className="text-lg hover:scale-110 transition-transform"
+                                title="Not helpful"
+                                disabled={!msg.conversationId}
+                              >
+                                👎
+                              </button>
+                            </>
+                          )}
+                        </div>
                       </div>
-                    </div>
+                      {/* Inline feedback form for thumbs down */}
+                      {inlineFeedbackId === msg.id && (
+                        <div className="mt-3 pt-3 border-t border-surface-border/50">
+                          <p className="text-sm font-medium text-frost mb-2">Chief, what went wrong?</p>
+                          <textarea
+                            value={inlineFeedbackText}
+                            onChange={(e) => setInlineFeedbackText(e.target.value)}
+                            placeholder="Please be specific so we can improve! e.g., 'The hero tier was wrong' or 'Didn't account for my FC level'"
+                            className="input w-full h-20 resize-none text-sm mb-2"
+                            autoFocus
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => msg.conversationId && submitInlineFeedback(msg.id, msg.conversationId)}
+                              disabled={!inlineFeedbackText.trim()}
+                              className="btn-primary text-xs px-3 py-1"
+                            >
+                              Submit
+                            </button>
+                            <button
+                              onClick={cancelInlineFeedback}
+                              className="btn-secondary text-xs px-3 py-1"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

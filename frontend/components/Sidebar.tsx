@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 // Navigation structure matching Streamlit
 const userNavigation = [
@@ -94,8 +94,32 @@ interface SidebarProps {
 
 export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  // Fetch unread notification count
+  const fetchUnreadCount = useCallback(async () => {
+    if (!token) return;
+    try {
+      const res = await fetch('http://localhost:8000/api/inbox/unread-count', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUnreadCount(data.total_unread);
+      }
+    } catch (error) {
+      console.error('Failed to fetch unread count:', error);
+    }
+  }, [token]);
+
+  // Fetch unread count on mount and periodically
+  useEffect(() => {
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, [fetchUnreadCount]);
 
   // Persist collapsed state
   useEffect(() => {
@@ -194,6 +218,9 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               <ul className="space-y-0.5">
                 {group.items.map((item) => {
                   const isActive = pathname === item.href;
+                  const isInbox = item.href === '/inbox' || item.href === '/admin/inbox';
+                  const showBadge = isInbox && unreadCount > 0;
+
                   return (
                     <li key={item.href}>
                       <Link
@@ -202,7 +229,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                         className={`
                           flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}
                           ${isCollapsed ? 'px-2' : 'px-3'} py-2 rounded-lg
-                          transition-all duration-200 text-sm
+                          transition-all duration-200 text-sm relative
                           ${
                             isActive
                               ? 'bg-ice/10 text-ice border border-ice/20'
@@ -211,8 +238,24 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                         `}
                         title={isCollapsed ? item.label : undefined}
                       >
-                        <span className={`${isCollapsed ? 'text-lg' : 'text-base'}`}>{item.icon}</span>
-                        {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                        <span className={`${isCollapsed ? 'text-lg' : 'text-base'} relative`}>
+                          {item.icon}
+                          {showBadge && isCollapsed && (
+                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                              {unreadCount > 9 ? '9+' : unreadCount}
+                            </span>
+                          )}
+                        </span>
+                        {!isCollapsed && (
+                          <>
+                            <span className="font-medium flex-1">{item.label}</span>
+                            {showBadge && (
+                              <span className="w-5 h-5 bg-error text-white text-xs font-bold rounded-full flex items-center justify-center">
+                                {unreadCount > 9 ? '9+' : unreadCount}
+                              </span>
+                            )}
+                          </>
+                        )}
                       </Link>
                     </li>
                   );
@@ -244,10 +287,10 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                   href="https://randomchaoslabs.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm text-text-muted hover:text-ice transition-colors"
+                  className="inline-flex items-center gap-2"
                 >
                   <span className="text-2xl">🎲</span>
-                  <span>Random Chaos Labs</span>
+                  <span className="text-sm font-bold animate-gold-shine">Random Chaos Labs</span>
                 </a>
               </div>
             ) : (

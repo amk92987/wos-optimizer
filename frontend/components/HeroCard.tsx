@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { UserHero } from '@/lib/api';
 import Expander from './Expander';
+import HeroRoleBadges from './HeroRoleBadges';
 
 interface HeroCardProps {
   hero: UserHero;
@@ -158,13 +159,20 @@ export default function HeroCard({ hero, onUpdate, onRemove }: HeroCardProps) {
     color?: string;
   }) => (
     <div className="flex items-center justify-between py-1">
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 flex items-center gap-1">
         <span
-          className={`text-sm text-frost truncate block ${desc ? 'cursor-help border-b border-dotted border-ice/30' : ''}`}
+          className={`text-sm text-frost truncate ${desc ? 'cursor-help' : ''}`}
           title={desc || undefined}
         >
           {name || 'Unknown Skill'}
         </span>
+        {desc && (
+          <span className="text-ice/50 text-xs" title={desc}>
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+            </svg>
+          </span>
+        )}
       </div>
       {isEditing ? (
         <select
@@ -273,12 +281,13 @@ export default function HeroCard({ hero, onUpdate, onRemove }: HeroCardProps) {
             {hero.tier_overall || 'B'}
           </span>
         </div>
-        <div className="flex items-center gap-3 text-sm">
+        <div className="flex items-center gap-3 text-sm mb-1">
           <span className={getClassBadge(hero.hero_class)}>
             {hero.hero_class}
           </span>
           <span className="text-zinc-500">Gen {hero.generation}</span>
         </div>
+        <HeroRoleBadges heroName={hero.name} />
       </div>
 
       {/* Level & Stars */}

@@ -361,31 +361,48 @@ function CanyonClashTab() {
     <div className="space-y-6">
       <div className="card bg-gradient-to-r from-purple-500/10 to-transparent border-purple-500/30">
         <p className="text-frost">
-          Canyon Clash is a <strong className="text-purple-400">cross-server alliance battle</strong> held on weekends.
-          Your alliance fights against another alliance for control of the Frozen Citadel.
+          Canyon Clash is a <strong className="text-purple-400">3-way alliance PvP battle</strong> where three alliances fight for control of buildings and the Frozen Citadel.
+          <strong className="text-fire ml-1">Fuel management is everything.</strong>
         </p>
       </div>
 
-      {/* Schedule */}
+      {/* Arena Map Image */}
       <div className="card">
-        <h2 className="section-header">Weekly Schedule</h2>
+        <h2 className="section-header">Arena Map</h2>
+        <div className="flex justify-center">
+          <img
+            src="/Screenshots/canyon-clash-guides-whiteout-survival-v0-8fsabubt2jyd1.png"
+            alt="Canyon Clash Arena Map"
+            className="max-w-full rounded-lg border border-surface-border"
+            style={{ maxHeight: '400px' }}
+          />
+        </div>
+        <p className="text-xs text-frost-muted text-center mt-2">
+          Three alliances start on separate islands, connected by bridges to the central Frozen Citadel
+        </p>
+      </div>
+
+      {/* How It Works */}
+      <div className="card">
+        <h2 className="section-header">How Canyon Clash Works</h2>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="p-4 rounded-lg bg-surface">
-            <h3 className="font-medium text-frost mb-2">Timing</h3>
+            <h3 className="font-medium text-frost mb-2">Event Basics</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• <strong className="text-frost">Saturday & Sunday</strong></li>
-              <li>• Two 30-minute battle phases</li>
-              <li>• Check your server's specific times</li>
-              <li>• Usually 12:00 and 20:00 server time</li>
+              <li>• <strong className="text-frost">3-way battle</strong> - Top 20 alliances compete</li>
+              <li>• <strong className="text-frost">60 minutes</strong> across 4 phases</li>
+              <li>• <strong className="text-frost">Fuel</strong> is required for ALL actions (moving, attacking, reviving)</li>
+              <li>• <strong className="text-frost">Min 15 players</strong> per Legion to participate</li>
+              <li>• <strong className="text-frost">Furnace 16+</strong> required</li>
             </ul>
           </div>
           <div className="p-4 rounded-lg bg-surface">
-            <h3 className="font-medium text-frost mb-2">Rewards</h3>
+            <h3 className="font-medium text-frost mb-2">Weekly Schedule</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Canyon Coins for shop purchases</li>
-              <li>• Hero shards (varies by rank)</li>
-              <li>• Speedups and resources</li>
-              <li>• Ranking rewards for top performers</li>
+              <li>• <strong className="text-frost">Mon-Tue:</strong> Vote for battle timezone</li>
+              <li>• <strong className="text-frost">Wed-Thu:</strong> Registration opens</li>
+              <li>• <strong className="text-frost">Friday:</strong> Matchmaking (random opponent)</li>
+              <li>• <strong className="text-frost">Sat/Sun:</strong> Battle day (based on vote)</li>
             </ul>
           </div>
         </div>
@@ -393,36 +410,73 @@ function CanyonClashTab() {
 
       {/* Battle Phases */}
       <div className="card">
-        <h2 className="section-header">Battle Phases</h2>
+        <h2 className="section-header">Battle Phases (60 min total)</h2>
 
         <div className="space-y-4">
-          <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
-            <h3 className="font-medium text-blue-400 mb-2">Phase 1: Resource Gathering (0-10 min)</h3>
+          <div className="p-4 rounded-lg bg-surface border border-surface-border">
+            <h3 className="font-medium text-frost mb-2">Phase 1: Preparation (3 min)</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Collect resources scattered across the map</li>
-              <li>• Build up fuel for your march</li>
-              <li>• Scout enemy positions</li>
-              <li>• <strong className="text-frost">Don't engage yet</strong> - build fuel first</li>
+              <li>• Position your marches, plan team assignments</li>
+              <li>• <strong className="text-frost">Pre-assign roles in Discord</strong> before match starts</li>
+              <li>• Put your strongest player on Citadel assault team (needs most fuel)</li>
+            </ul>
+          </div>
+
+          <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
+            <h3 className="font-medium text-blue-400 mb-2">Phase 2: Seize & Conquer (17 min)</h3>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• <strong className="text-frost">Secure YOUR island first</strong> - send 1 player to each neutral building</li>
+              <li>• Block enemy bridges by stationing defenders at bridge exits</li>
+              <li>• Don't overextend - capture only what you can hold</li>
+              <li>• Each uncaptured building drains fuel to retake later</li>
             </ul>
           </div>
 
           <div className="p-4 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-            <h3 className="font-medium text-yellow-400 mb-2">Phase 2: Skirmish (10-20 min)</h3>
+            <h3 className="font-medium text-yellow-400 mb-2">Phase 3: Fortress Occupation (20 min)</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Small engagements begin</li>
-              <li>• Control key resource points</li>
-              <li>• Don't overcommit - save fuel for final push</li>
-              <li>• Coordinate with teammates for ganks</li>
+              <li>• Hold fortresses for points, prepare for Citadel</li>
+              <li>• Designate lower-fuel players as Guardians at captured buildings</li>
+              <li>• Monitor fuel levels - save for final push</li>
             </ul>
           </div>
 
           <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
-            <h3 className="font-medium text-red-400 mb-2">Phase 3: Citadel Fight (20-30 min)</h3>
+            <h3 className="font-medium text-red-400 mb-2">Phase 4: Final Battle (20 min)</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• <strong className="text-frost">All-out assault on Frozen Citadel</strong></li>
-              <li>• Use all remaining fuel</li>
-              <li>• Focus fire on same targets as team</li>
-              <li>• Whoever holds citadel at end wins</li>
+              <li>• <strong className="text-fire">All-out assault on Frozen Citadel!</strong></li>
+              <li>• Citadel control = MASSIVE point multiplier</li>
+              <li>• Use all remaining fuel - coordinate the push</li>
+              <li>• <strong className="text-frost">Whoever holds citadel at end wins</strong></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Fuel Management */}
+      <div className="card">
+        <h2 className="section-header">Fuel Management (CRITICAL)</h2>
+        <div className="p-4 rounded-lg bg-fire/10 border border-fire/30 mb-4">
+          <p className="text-frost font-medium">
+            Fuel is required for EVERYTHING: moving, attacking, reviving. Run out = you're useless.
+          </p>
+        </div>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">Fuel Costs</h3>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• <strong className="text-frost">Moving:</strong> Consumes fuel per tile</li>
+              <li>• <strong className="text-frost">Attacking:</strong> Large fuel cost per attack</li>
+              <li>• <strong className="text-frost">Reviving:</strong> Costs fuel to respawn</li>
+            </ul>
+          </div>
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">Fuel Tips</h3>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• <strong className="text-frost">Save 30%</strong> of fuel for Phase 4</li>
+              <li>• Don't chase kills - wastes fuel</li>
+              <li>• Capture buildings = fuel income</li>
+              <li>• <strong className="text-fire">Running out early = game over</strong></li>
             </ul>
           </div>
         </div>
@@ -515,9 +569,50 @@ function FoundryTab() {
     <div className="space-y-6">
       <div className="card bg-gradient-to-r from-amber-500/10 to-transparent border-amber-500/30">
         <p className="text-frost">
-          Foundry is a <strong className="text-amber-400">4-team alliance event</strong> where you coordinate attacks on buildings to accumulate points.
-          Building selection and attack timing are critical for high scores.
+          Foundry is a <strong className="text-amber-400">biweekly alliance event</strong> (every 2 weeks, 60 minutes).
+          <strong className="text-ice ml-1">NO troop deaths!</strong> - troops don't permanently die, making this very F2P-friendly.
         </p>
+      </div>
+
+      {/* Battlefield Map */}
+      <div className="card">
+        <h2 className="section-header">Battlefield Map</h2>
+        <div className="flex justify-center">
+          <img
+            src="https://cdn-www.bluestacks.com/bs-images/WhiteoutSurvival_Guide_FoundryBattleGuide_EN2.jpg"
+            alt="Foundry Battle Map"
+            className="max-w-full rounded-lg border border-surface-border"
+            style={{ maxHeight: '350px' }}
+          />
+        </div>
+        <p className="text-xs text-frost-muted text-center mt-2">
+          Key locations: Imperial Foundry (center), Transit Station (50% teleport CD reduction), Boiler Room (faster captures)
+        </p>
+      </div>
+
+      {/* How It Works */}
+      <div className="card">
+        <h2 className="section-header">How Foundry Works</h2>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">Event Basics</h3>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• <strong className="text-frost">60 minutes</strong> - 3 phases</li>
+              <li>• <strong className="text-ice">NO troop deaths</strong> - troops are unlimited</li>
+              <li>• <strong className="text-frost">30 alliance members</strong> can participate</li>
+              <li>• Capture buildings for points over time</li>
+            </ul>
+          </div>
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">Winning Strategy</h3>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• <strong className="text-fire">Double rally</strong> on high-value buildings</li>
+              <li>• Split into Attack (A1, A2) and Defense teams</li>
+              <li>• <strong className="text-frost">Voice chat</strong> is essential for coordination</li>
+              <li>• Never let enemies hold Imperial Foundry unchallenged</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* Building Values */}
@@ -703,25 +798,49 @@ function FrostfireMineTab() {
     <div className="space-y-6">
       <div className="card bg-gradient-to-r from-cyan-500/10 to-transparent border-cyan-500/30">
         <p className="text-frost">
-          Frostfire Mine is a <strong className="text-cyan-400">solo PvE event</strong> where you navigate a mine, collect ores, and make strategic decisions about skill upgrades.
-          The key to success is following the optimal skill build path.
+          Frostfire Mine is a <strong className="text-cyan-400">30-minute competitive mining event</strong> with PvP elements.
+          <strong className="text-ice ml-1">NO troop losses!</strong> Gather Orichalcum by occupying veins, defeating patrols, and rushing Vein Outbursts.
         </p>
+      </div>
+
+      {/* Event Basics */}
+      <div className="card">
+        <h2 className="section-header">Event Basics</h2>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">Key Info</h3>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• <strong className="text-frost">Duration:</strong> 30 min active + 3 min prep</li>
+              <li>• <strong className="text-frost">Frequency:</strong> Biweekly (every 2 weeks)</li>
+              <li>• <strong className="text-frost">Requirement:</strong> Furnace 16+</li>
+              <li>• <strong className="text-ice">NO troop deaths</strong> - troops are unlimited!</li>
+            </ul>
+          </div>
+          <div className="p-4 rounded-lg bg-fire/10 border border-fire/30">
+            <h3 className="font-medium text-fire mb-2">Rewards</h3>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• <strong className="text-frost">Charm Designs</strong> and <strong className="text-frost">Charm Guides</strong></li>
+              <li>• Key materials for Chief Charm upgrades (FC25+)</li>
+              <li>• Milestone rewards at 10K-150K Orichalcum</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* Skill Build */}
       <div className="card border-yellow-500/30">
-        <h2 className="section-header text-yellow-400">Optimal Skill Build: R-R-L-L-R</h2>
+        <h2 className="section-header text-yellow-400">Skill Build: R-R-L-L-R</h2>
         <p className="text-frost-muted mb-4">
-          When you reach a fork, choose skills in this order for maximum efficiency:
+          Defeat Mine Patrols on map edges to earn XP and unlock skills. Choose LEFT or RIGHT at each level:
         </p>
 
         <div className="flex flex-wrap gap-3 mb-4">
           {[
-            { choice: 'R', label: 'Right', desc: 'Mining Speed' },
-            { choice: 'R', label: 'Right', desc: 'Ore Capacity' },
-            { choice: 'L', label: 'Left', desc: 'Combat Damage' },
-            { choice: 'L', label: 'Left', desc: 'Combat Defense' },
-            { choice: 'R', label: 'Right', desc: 'Final Mining Boost' },
+            { choice: 'R', label: 'Right', desc: '1,500 Orichalcum per patrol' },
+            { choice: 'R', label: 'Right', desc: '25% march speed' },
+            { choice: 'L', label: 'Left', desc: '5,000/60s while on vein' },
+            { choice: 'L', label: 'Left', desc: '15% gathering efficiency' },
+            { choice: 'R', label: 'Right', desc: '+50 speed for 60s (SAVE FOR OUTBURSTS!)' },
           ].map((skill, i) => (
             <div key={i} className="flex items-center gap-2">
               <span className="text-frost-muted text-sm">{i + 1}.</span>
@@ -733,44 +852,46 @@ function FrostfireMineTab() {
           ))}
         </div>
 
-        <div className="p-3 rounded-lg bg-yellow-500/10">
+        <div className="p-3 rounded-lg bg-fire/10 border border-fire/30">
           <p className="text-sm text-frost">
-            <strong className="text-yellow-400">Why this order?</strong> Mining skills early maximize total ore collected.
-            Combat skills in middle handle mid-game difficulty spike. Final mining boost for endgame efficiency.
+            <strong className="text-fire">CRITICAL:</strong> Save Skill 5 for Vein Outbursts ONLY!
+            The +50 gathering speed for 60 seconds is wasted on regular veins.
           </p>
         </div>
       </div>
 
       {/* Minute-by-Minute Guide */}
       <div className="card">
-        <h2 className="section-header">Minute-by-Minute Guide</h2>
+        <h2 className="section-header">Minute-by-Minute Strategy</h2>
+        <p className="text-frost-muted mb-4 text-sm">Event time counts DOWN from 30:00 to 0:00</p>
 
         <div className="space-y-3">
           {[
-            { time: '0:00-1:00', phase: 'Start', action: 'Collect nearby ores, move toward first fork', tip: 'Don\'t fight anything yet' },
-            { time: '1:00-3:00', phase: 'Fork 1', action: 'Choose RIGHT (Mining Speed)', tip: 'Increases ore per node' },
-            { time: '3:00-5:00', phase: 'Mining', action: 'Clear ore nodes in main chamber', tip: 'Avoid monster aggro' },
-            { time: '5:00-7:00', phase: 'Fork 2', action: 'Choose RIGHT (Ore Capacity)', tip: 'Carry more before smelter' },
-            { time: '7:00-10:00', phase: 'Mid-Mine', action: 'Push deeper, collect high-value ores', tip: 'Monsters get stronger here' },
-            { time: '10:00-12:00', phase: 'Fork 3', action: 'Choose LEFT (Combat Damage)', tip: 'Needed for upcoming fights' },
-            { time: '12:00-15:00', phase: 'Combat Zone', action: 'Clear monster camps for bonus ores', tip: 'Use damage skill' },
-            { time: '15:00-17:00', phase: 'Fork 4', action: 'Choose LEFT (Combat Defense)', tip: 'Survive harder enemies' },
-            { time: '17:00-20:00', phase: 'Deep Mine', action: 'Access deepest ore veins', tip: 'Highest value ores here' },
-            { time: '20:00-22:00', phase: 'Fork 5', action: 'Choose RIGHT (Final Mining Boost)', tip: 'Maximize remaining time' },
-            { time: '22:00-25:00', phase: 'Cleanup', action: 'Collect remaining ores, visit smelter', tip: 'Don\'t get greedy' },
-            { time: '25:00-30:00', phase: 'Exit', action: 'Return to entrance with ores', tip: 'Must exit to keep ores!' },
+            { time: '30:00-27:00', phase: 'Opening Rush', priority: 'high', action: 'Hunt Mine Patrols on map edges for skill XP', tip: 'Don\'t waste time on veins yet!' },
+            { time: '27:00-23:00', phase: 'Skill Building', priority: 'medium', action: 'Continue patrols, unlock skills 1-3. Send ONE squad to a vein.', tip: 'Watch for first Outburst alert at ~23:00' },
+            { time: '22:00-20:00', phase: 'OUTBURST WAVE 1', priority: 'critical', action: 'DROP EVERYTHING! Outbursts at min 8, 9, 10. Activate Skill 5!', tip: '4,000 Orichalcum in 20 seconds each!' },
+            { time: '20:00-13:00', phase: 'Mid-Game Grind', priority: 'medium', action: 'Resume patrols if skills not maxed. Occupy Level 2-3 veins.', tip: 'Avoid unnecessary PvP - save heroes for Outbursts' },
+            { time: '12:00-10:00', phase: 'OUTBURST WAVE 2', priority: 'critical', action: 'DROP EVERYTHING! Outbursts at min 18, 19, 20. Skill 5 again!', tip: 'Same priority as first wave' },
+            { time: '10:00-7:30', phase: 'Pre-Smelter', priority: 'medium', action: 'Max skills if not done. Occupy highest-value veins.', tip: 'Prepare for Smelter decision' },
+            { time: '7:30-0:00', phase: 'Smelter Opens', priority: 'situational', action: 'Top 3? Rush smelter. Mid-tier? Stay on veins.', tip: 'Don\'t waste time fighting stronger players' },
           ].map((step, i) => (
-            <div key={i} className="p-3 rounded-lg bg-surface">
+            <div key={i} className={`p-3 rounded-lg ${
+              step.priority === 'critical' ? 'bg-fire/10 border border-fire/30' :
+              step.priority === 'situational' ? 'bg-purple-500/10 border border-purple-500/30' :
+              step.priority === 'high' ? 'bg-orange-500/10 border border-orange-500/30' :
+              'bg-surface'
+            }`}>
               <div className="flex flex-wrap items-start gap-3">
                 <span className="font-mono text-sm text-ice whitespace-nowrap">{step.time}</span>
                 <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                  step.phase.includes('Fork') ? 'bg-yellow-500/20 text-yellow-400' :
-                  step.phase === 'Combat Zone' ? 'bg-red-500/20 text-red-400' :
-                  'bg-slate-500/20 text-slate-400'
+                  step.priority === 'critical' ? 'bg-fire/20 text-fire' :
+                  step.priority === 'situational' ? 'bg-purple-500/20 text-purple-400' :
+                  step.priority === 'high' ? 'bg-orange-500/20 text-orange-400' :
+                  'bg-blue-500/20 text-blue-400'
                 }`}>{step.phase}</span>
                 <div className="flex-1">
                   <p className="text-sm text-frost">{step.action}</p>
-                  <p className="text-xs text-frost-muted mt-1">Tip: {step.tip}</p>
+                  <p className="text-xs text-frost-muted mt-1">{step.tip}</p>
                 </div>
               </div>
             </div>
@@ -778,59 +899,93 @@ function FrostfireMineTab() {
         </div>
       </div>
 
-      {/* Vein Outbursts */}
-      <div className="card">
-        <h2 className="section-header">Vein Outbursts</h2>
+      {/* Vein Outbursts - CRITICAL */}
+      <div className="card border-fire/50">
+        <h2 className="section-header text-fire">Vein Outbursts (MOST IMPORTANT!)</h2>
+        <div className="p-4 rounded-lg bg-fire/10 border border-fire/30 mb-4">
+          <p className="text-frost font-medium text-lg">
+            4,000 Orichalcum in 20 seconds! DROP EVERYTHING when these spawn!
+          </p>
+        </div>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="p-4 rounded-lg bg-surface">
-            <h3 className="font-medium text-frost mb-2">What Are They?</h3>
+            <h3 className="font-medium text-frost mb-2">Spawn Times (NOT Random!)</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Random events during mining</li>
-              <li>• Ore vein "explodes" with bonus ores</li>
-              <li>• Indicated by glowing animation</li>
-              <li>• More common in deep mine</li>
+              <li>• <strong className="text-fire">Wave 1:</strong> Minutes 8, 9, 10</li>
+              <li>• <strong className="text-fire">Wave 2:</strong> Minutes 18, 19, 20</li>
+              <li>• Banner appears 60s and 10s before</li>
+              <li>• Worth more than 10 min of regular veins!</li>
             </ul>
           </div>
           <div className="p-4 rounded-lg bg-surface">
-            <h3 className="font-medium text-frost mb-2">How to Handle</h3>
+            <h3 className="font-medium text-frost mb-2">How to Maximize</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• <strong className="text-frost">Drop everything and collect!</strong></li>
-              <li>• Worth 3-5x normal ore value</li>
-              <li>• Limited time before disappears</li>
-              <li>• Don't fight during outburst</li>
+              <li>• <strong className="text-frost">Activate Skill 5</strong> right as they spawn</li>
+              <li>• Teleport to outburst location immediately</li>
+              <li>• Prioritize over EVERYTHING including smelter</li>
+              <li>• These are the #1 source of points!</li>
             </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Vein Levels */}
+      <div className="card">
+        <h2 className="section-header">Vein Levels (What "Deep Ores" Means)</h2>
+        <p className="text-frost-muted mb-4">Higher level veins give MORE ore per second. Level 3 = 4x better than Level 1!</p>
+        <div className="grid md:grid-cols-3 gap-4">
+          <div className="p-4 rounded-lg bg-surface text-center">
+            <h3 className="font-medium text-frost mb-2">Level 1</h3>
+            <p className="text-2xl font-bold text-blue-400">+8/s</p>
+            <p className="text-xs text-frost-muted">Near spawn</p>
+          </div>
+          <div className="p-4 rounded-lg bg-surface text-center">
+            <h3 className="font-medium text-frost mb-2">Level 2</h3>
+            <p className="text-2xl font-bold text-yellow-400">+16/s</p>
+            <p className="text-xs text-frost-muted">Middle areas</p>
+          </div>
+          <div className="p-4 rounded-lg bg-surface text-center border border-fire/30">
+            <h3 className="font-medium text-fire mb-2">Level 3</h3>
+            <p className="text-2xl font-bold text-fire">+32/s</p>
+            <p className="text-xs text-frost-muted">Deep in mine</p>
           </div>
         </div>
       </div>
 
       {/* Smelter Decision */}
       <div className="card">
-        <h2 className="section-header">Smelter Strategy</h2>
-        <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
-          <p className="text-frost mb-3">
-            The <strong className="text-purple-400">Smelter</strong> converts raw ores to refined ores (higher value).
-            But it takes time - is it worth it?
+        <h2 className="section-header">Smelter (Is It Worth It?)</h2>
+        <div className="p-4 rounded-lg bg-fire/10 border border-fire/30 mb-4">
+          <p className="text-lg font-bold text-fire">
+            NO for most players!
           </p>
+          <p className="text-frost mt-2">
+            The Smelter is a BONUS objective in the center. Opens at 7:30 remaining.
+            Only the strongest players who get there first benefit.
+          </p>
+        </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="p-3 rounded-lg bg-green-500/10">
-              <h4 className="font-medium text-green-400 mb-2">Use Smelter When:</h4>
-              <ul className="text-sm text-frost-muted space-y-1">
-                <li>• You have 5+ minutes remaining</li>
-                <li>• Carrying maximum ore capacity</li>
-                <li>• Clear path back to entrance</li>
-              </ul>
-            </div>
-            <div className="p-3 rounded-lg bg-red-500/10">
-              <h4 className="font-medium text-red-400 mb-2">Skip Smelter When:</h4>
-              <ul className="text-sm text-frost-muted space-y-1">
-                <li>• Less than 3 minutes left</li>
-                <li>• Still have ore nodes to collect</li>
-                <li>• Enemies between you and exit</li>
-              </ul>
-            </div>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="p-3 rounded-lg bg-green-500/10">
+            <h4 className="font-medium text-green-400 mb-2">Go for it IF:</h4>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• You're top 3 strongest in the match</li>
+              <li>• You can teleport there immediately</li>
+              <li>• Your heroes are NOT on cooldown</li>
+            </ul>
+          </div>
+          <div className="p-3 rounded-lg bg-red-500/10">
+            <h4 className="font-medium text-red-400 mb-2">Skip it IF:</h4>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• You're mid-tier or below in power</li>
+              <li>• Others are already fighting over it</li>
+              <li>• Vein Outbursts are spawning soon (min 18-20)</li>
+            </ul>
           </div>
         </div>
+        <p className="text-sm text-frost-muted mt-4 text-center">
+          <strong className="text-ice">Better alternative:</strong> Focus on Vein Outbursts at min 18-20 instead - guaranteed 4,000 each!
+        </p>
       </div>
 
       {/* Quick Reference */}
@@ -841,18 +996,23 @@ function FrostfireMineTab() {
 ========================
 
 Skill Build: R → R → L → L → R
-(Mining → Mining → Combat → Combat → Mining)
+(Ore bonus → March speed → Vein bonus → Efficiency → SAVE FOR OUTBURSTS)
 
-Priority:
-1. Ore collection > Combat
-2. Vein outbursts > Everything
-3. Smelter if 5+ min left
-4. EXIT BEFORE TIME RUNS OUT
+Priority Order:
+1. VEIN OUTBURSTS (min 8-10 and 18-20) - 4,000 each!
+2. Mine Patrols for skill XP (early game)
+3. Level 3 veins (deep in mine, +32/s)
+4. Smelter ONLY if you're top 3 power
+
+Key Timing:
+- Min 8-10: First Outburst wave
+- Min 18-20: Second Outburst wave
+- 7:30 remaining: Smelter opens
 
 Don't forget:
-- Must exit to keep ores
-- Monsters respawn
-- High-value ores are deep`}</pre>
+- Use Skill 5 ONLY on Outbursts
+- Higher level veins = more ore/second
+- Teleport has 6 min cooldown - use it!`}</pre>
         </div>
       </div>
     </div>

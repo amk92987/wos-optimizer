@@ -133,26 +133,44 @@ export default function SettingsPage() {
                 placeholder="e.g. 456"
               />
             </div>
-            <div>
+            <div className="md:col-span-2">
               <label className="text-sm text-zinc-400 block mb-2">Furnace Level</label>
-              <input
-                type="number"
-                value={profile?.furnace_level || 1}
-                onChange={(e) => handleSave({ furnace_level: parseInt(e.target.value) || 1 })}
-                className="input"
-                min={1}
-                max={30}
-              />
-            </div>
-            <div>
-              <label className="text-sm text-zinc-400 block mb-2">FC Level</label>
-              <input
-                type="text"
-                value={profile?.furnace_fc_level || ''}
-                onChange={(e) => handleSave({ furnace_fc_level: e.target.value || null })}
-                className="input"
-                placeholder="e.g. FC5"
-              />
+              <select
+                value={profile?.furnace_fc_level || (profile?.furnace_level ? `${profile.furnace_level}` : '1')}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val.startsWith('FC')) {
+                    handleSave({ furnace_level: 30, furnace_fc_level: val });
+                  } else {
+                    handleSave({ furnace_level: parseInt(val), furnace_fc_level: null });
+                  }
+                }}
+                className="select"
+              >
+                <optgroup label="Pre-FC Levels">
+                  {Array.from({ length: 29 }, (_, i) => i + 1).map((lvl) => (
+                    <option key={lvl} value={lvl}>Level {lvl}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="FC Levels">
+                  <option value="30">Level 30 (Pre-FC)</option>
+                  {Array.from({ length: 10 }, (_, i) => i + 1).map((fc) => (
+                    <>
+                      <option key={`FC${fc}`} value={`FC${fc}`}>FC{fc}</option>
+                      {fc < 10 && (
+                        <>
+                          <option key={`FC${fc}-1`} value={`FC${fc}-1`}>FC{fc}-1</option>
+                          <option key={`FC${fc}-2`} value={`FC${fc}-2`}>FC{fc}-2</option>
+                          <option key={`FC${fc}-3`} value={`FC${fc}-3`}>FC{fc}-3</option>
+                        </>
+                      )}
+                    </>
+                  ))}
+                </optgroup>
+              </select>
+              <p className="text-xs text-frost-muted mt-1">
+                FC levels have sub-steps (FC1-1, FC1-2, FC1-3) before reaching the next level
+              </p>
             </div>
           </div>
         </Expander>

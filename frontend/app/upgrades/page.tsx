@@ -5,19 +5,18 @@ import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
 
 interface Recommendation {
-  hero_name: string;
-  hero_class: string;
-  tier: string;
-  generation: number;
-  upgrade_type: string;
-  current_value: string;
-  target_value: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: number;
+  action: string;
+  category: string;
+  hero: string | null;
   reason: string;
+  resources: string;
+  relevance_tags: string[];
+  source: string;
 }
 
 interface HeroInvestment {
-  name: string;
+  hero: string;
   hero_class: string;
   tier: string;
   generation: number;
@@ -25,8 +24,8 @@ interface HeroInvestment {
   target_level: number;
   current_stars: number;
   target_stars: number;
-  priority_score: number;
-  reasons: string[];
+  priority: number;
+  reason: string;
 }
 
 type TabType = 'recommendations' | 'heroes' | 'analysis';
@@ -67,16 +66,19 @@ export default function UpgradesPage() {
     }
   };
 
-  const upgradeTypes = ['all', 'level', 'stars', 'exploration_skill', 'expedition_skill', 'gear'];
+  const upgradeTypes = ['all', 'hero', 'gear', 'building', 'research', 'troop'];
   const priorityLevels = ['all', 'high', 'medium', 'low'];
 
+  // Convert numeric priority to category (1-3 = high, 4-6 = medium, 7+ = low)
+  const getPriorityLevel = (p: number) => p <= 3 ? 'high' : p <= 6 ? 'medium' : 'low';
+
   const filteredRecs = recommendations.filter((rec) => {
-    if (filterType !== 'all' && rec.upgrade_type !== filterType) return false;
-    if (filterPriority !== 'all' && rec.priority !== filterPriority) return false;
+    if (filterType !== 'all' && rec.category !== filterType) return false;
+    if (filterPriority !== 'all' && getPriorityLevel(rec.priority) !== filterPriority) return false;
     return true;
   });
 
-  const priorityColors = {
+  const priorityColors: Record<string, string> = {
     high: 'border-fire/50 bg-fire/10',
     medium: 'border-warning/50 bg-warning/10',
     low: 'border-ice/50 bg-ice/10',
@@ -97,12 +99,12 @@ export default function UpgradesPage() {
     Marksman: 'text-blue-400',
   };
 
-  const upgradeIcons: Record<string, string> = {
-    level: '📊',
-    stars: '⭐',
-    exploration_skill: '🗺️',
-    expedition_skill: '⚔️',
+  const categoryIcons: Record<string, string> = {
+    hero: '🦸',
     gear: '🛡️',
+    building: '🏗️',
+    research: '🔬',
+    troop: '⚔️',
   };
 
   return (
@@ -167,9 +169,8 @@ export default function UpgradesPage() {
             upgradeTypes={upgradeTypes}
             priorityLevels={priorityLevels}
             priorityColors={priorityColors}
-            tierColors={tierColors}
-            classColors={classColors}
-            upgradeIcons={upgradeIcons}
+            categoryIcons={categoryIcons}
+            getPriorityLevel={getPriorityLevel}
           />
         ) : activeTab === 'heroes' ? (
           <HeroInvestmentsTab
@@ -194,9 +195,8 @@ function RecommendationsTab({
   upgradeTypes,
   priorityLevels,
   priorityColors,
-  tierColors,
-  classColors,
-  upgradeIcons,
+  categoryIcons,
+  getPriorityLevel,
 }: {
   recommendations: Recommendation[];
   filterType: string;
@@ -206,9 +206,8 @@ function RecommendationsTab({
   upgradeTypes: string[];
   priorityLevels: string[];
   priorityColors: Record<string, string>;
-  tierColors: Record<string, string>;
-  classColors: Record<string, string>;
-  upgradeIcons: Record<string, string>;
+  categoryIcons: Record<string, string>;
+  getPriorityLevel: (p: number) => string;
 }) {
   return (
     <>
@@ -216,7 +215,7 @@ function RecommendationsTab({
       <div className="card mb-6">
         <div className="flex flex-wrap gap-4">
           <div>
-            <label className="text-xs text-frost-muted block mb-1">Upgrade Type</label>
+            <label className="text-xs text-frost-muted block mb-1">Category</label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
@@ -224,7 +223,7 @@ function RecommendationsTab({
             >
               {upgradeTypes.map((type) => (
                 <option key={type} value={type}>
-                  {type === 'all' ? 'All Types' : type.replace('_', ' ')}
+                  {type === 'all' ? 'All Categories' : type.charAt(0).toUpperCase() + type.slice(1)}
                 </option>
               ))}
             </select>
@@ -238,7 +237,7 @@ function RecommendationsTab({
             >
               {priorityLevels.map((p) => (
                 <option key={p} value={p}>
-                  {p === 'all' ? 'All Priorities' : p}
+                  {p === 'all' ? 'All Priorities' : p.charAt(0).toUpperCase() + p.slice(1)}
                 </option>
               ))}
             </select>
@@ -257,39 +256,52 @@ function RecommendationsTab({
         </div>
       ) : (
         <div className="space-y-4">
-          {recommendations.map((rec, i) => (
-            <div
-              key={i}
-              className={`card border-2 ${priorityColors[rec.priority]}`}
-            >
-              <div className="flex items-start gap-4">
-                <div className="text-3xl">{upgradeIcons[rec.upgrade_type] || '📋'}</div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-frost">{rec.hero_name}</span>
-                    <span className={`text-sm ${tierColors[rec.tier] || 'text-frost-muted'}`}>
-                      {rec.tier}
-                    </span>
-                    <span className={`text-sm ${classColors[rec.hero_class] || 'text-frost-muted'}`}>
-                      {rec.hero_class}
-                    </span>
-                    <span className="text-xs text-frost-muted">Gen {rec.generation}</span>
+          {recommendations.map((rec, i) => {
+            const level = getPriorityLevel(rec.priority);
+            return (
+              <div
+                key={i}
+                className={`card border-2 ${priorityColors[level] || 'border-surface-border'}`}
+              >
+                <div className="flex items-start gap-4">
+                  <div className="text-3xl">{categoryIcons[rec.category] || '📋'}</div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      {rec.hero && (
+                        <span className="font-bold text-frost">{rec.hero}</span>
+                      )}
+                      <span className="text-sm px-2 py-0.5 rounded bg-surface-hover text-frost-muted">
+                        {rec.category}
+                      </span>
+                      {rec.relevance_tags?.length > 0 && (
+                        <div className="flex gap-1">
+                          {rec.relevance_tags.slice(0, 3).map((tag, j) => (
+                            <span key={j} className="text-xs px-1.5 py-0.5 rounded bg-ice/10 text-ice">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-frost">{rec.action}</p>
+                    {rec.reason && (
+                      <p className="text-sm text-frost-muted mt-2">{rec.reason}</p>
+                    )}
+                    {rec.resources && (
+                      <p className="text-xs text-frost-muted mt-1">Resources: {rec.resources}</p>
+                    )}
                   </div>
-                  <p className="text-frost">
-                    {rec.upgrade_type.replace('_', ' ')}: {rec.current_value} → {rec.target_value}
-                  </p>
-                  <p className="text-sm text-frost-muted mt-2">{rec.reason}</p>
-                </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  rec.priority === 'high' ? 'bg-fire/20 text-fire' :
-                  rec.priority === 'medium' ? 'bg-warning/20 text-warning' :
-                  'bg-ice/20 text-ice'
-                }`}>
-                  {rec.priority}
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    level === 'high' ? 'bg-fire/20 text-fire' :
+                    level === 'medium' ? 'bg-warning/20 text-warning' :
+                    'bg-ice/20 text-ice'
+                  }`}>
+                    {level}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </>
@@ -325,37 +337,34 @@ function HeroInvestmentsTab({
         </p>
       </div>
 
-      {investments.map((hero, i) => (
-        <div key={hero.name} className="card">
+      {investments.map((inv, i) => (
+        <div key={inv.hero} className="card">
           <div className="flex items-start gap-4">
             <div className="w-12 h-12 bg-surface-hover rounded-lg flex items-center justify-center text-2xl">
               {i + 1}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-2">
-                <span className="font-bold text-frost">{hero.name}</span>
-                <span className={`text-sm ${tierColors[hero.tier] || 'text-frost-muted'}`}>
-                  {hero.tier}
+                <span className="font-bold text-frost">{inv.hero}</span>
+                <span className={`text-sm ${tierColors[inv.tier] || 'text-frost-muted'}`}>
+                  {inv.tier}
                 </span>
-                <span className={`text-sm ${classColors[hero.hero_class] || 'text-frost-muted'}`}>
-                  {hero.hero_class}
+                <span className={`text-sm ${classColors[inv.hero_class] || 'text-frost-muted'}`}>
+                  {inv.hero_class}
                 </span>
+                <span className="text-xs text-frost-muted">Gen {inv.generation}</span>
               </div>
               <div className="flex items-center gap-4 text-sm text-frost-muted mb-2">
-                <span>Lv.{hero.current_level} → Lv.{hero.target_level}</span>
-                <span>{'★'.repeat(hero.current_stars)}{'☆'.repeat(5 - hero.current_stars)} → {'★'.repeat(hero.target_stars)}</span>
+                <span>Lv.{inv.current_level} → Lv.{inv.target_level}</span>
+                <span>{'★'.repeat(inv.current_stars)}{'☆'.repeat(5 - inv.current_stars)} → {'★'.repeat(inv.target_stars)}</span>
               </div>
-              <div className="flex flex-wrap gap-2">
-                {hero.reasons.map((reason, j) => (
-                  <span key={j} className="text-xs px-2 py-1 rounded bg-surface text-frost-muted">
-                    {reason}
-                  </span>
-                ))}
-              </div>
+              {inv.reason && (
+                <p className="text-sm text-frost-muted">{inv.reason}</p>
+              )}
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-ice">{hero.priority_score}</p>
-              <p className="text-xs text-frost-muted">score</p>
+              <p className="text-2xl font-bold text-ice">#{inv.priority}</p>
+              <p className="text-xs text-frost-muted">priority</p>
             </div>
           </div>
         </div>

@@ -8,6 +8,45 @@ import AppShell from '@/components/AppShell';
 import { useAuth } from '@/lib/auth';
 import { MetricCard } from '@/components/ui';
 
+// Generation thresholds for server age estimation
+const GEN_THRESHOLDS = [
+  { gen: 1, minDays: 0, maxDays: 40 },
+  { gen: 2, minDays: 40, maxDays: 120 },
+  { gen: 3, minDays: 120, maxDays: 200 },
+  { gen: 4, minDays: 200, maxDays: 280 },
+  { gen: 5, minDays: 280, maxDays: 360 },
+  { gen: 6, minDays: 360, maxDays: 440 },
+  { gen: 7, minDays: 440, maxDays: 520 },
+  { gen: 8, minDays: 520, maxDays: 600 },
+  { gen: 9, minDays: 600, maxDays: 680 },
+  { gen: 10, minDays: 680, maxDays: 760 },
+  { gen: 11, minDays: 760, maxDays: 840 },
+  { gen: 12, minDays: 840, maxDays: 920 },
+  { gen: 13, minDays: 920, maxDays: 1000 },
+  { gen: 14, minDays: 1000, maxDays: 1080 },
+];
+
+// Get generation from server age
+function getGenerationFromDays(days: number): number {
+  for (const t of GEN_THRESHOLDS) {
+    if (days < t.maxDays) return t.gen;
+  }
+  return 14 + Math.floor((days - 1080) / 80);
+}
+
+// Get estimated server age range from generation
+function getEstimatedDaysFromGeneration(gen: number): string {
+  const threshold = GEN_THRESHOLDS.find(t => t.gen === gen);
+  if (threshold) {
+    return `${threshold.minDays}-${threshold.maxDays}`;
+  }
+  if (gen > 14) {
+    const minDays = 1080 + (gen - 14) * 80;
+    return `${minDays}+`;
+  }
+  return '?';
+}
+
 // Generation data with colors
 const generations = [
   { gen: 1, days: '0-40', heroes: 'Jessie, Sergey, Natalia, Molly, Jeronimo...', color: 'bg-blue-600' },
@@ -120,10 +159,20 @@ export default function HomePage() {
             <div className="card text-center">
               <p className="text-text-secondary text-xs uppercase tracking-wide mb-1">Generation</p>
               <p className="text-2xl font-bold text-success">Gen {stats?.generation || '?'}</p>
+              {stats?.generation && (
+                <p className="text-xs text-frost-muted mt-1">
+                  Day {getEstimatedDaysFromGeneration(stats.generation)}
+                </p>
+              )}
             </div>
             <div className="card text-center">
               <p className="text-text-secondary text-xs uppercase tracking-wide mb-1">Server Age</p>
               <p className="text-2xl font-bold text-ice">{stats?.server_age_days || '?'} days</p>
+              {stats?.server_age_days && (
+                <p className="text-xs text-frost-muted mt-1">
+                  = Gen {getGenerationFromDays(stats.server_age_days)}
+                </p>
+              )}
             </div>
             <div className="card text-center">
               <p className="text-text-secondary text-xs uppercase tracking-wide mb-1">Furnace Level</p>

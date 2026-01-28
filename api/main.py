@@ -12,7 +12,7 @@ import sys
 PROJECT_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from api.routes import auth, heroes, profiles, dashboard, chief, recommendations, advisor, lineups, admin
+from api.routes import auth, heroes, profiles, dashboard, chief, recommendations, advisor, lineups, admin, inbox, feedback, events
 
 app = FastAPI(
     title="Bear's Den API",
@@ -46,6 +46,9 @@ app.include_router(recommendations.router, prefix="/api/recommendations", tags=[
 app.include_router(advisor.router, prefix="/api/advisor", tags=["AI Advisor"])
 app.include_router(lineups.router, prefix="/api/lineups", tags=["Lineups"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
+app.include_router(inbox.router, prefix="/api", tags=["Inbox"])
+app.include_router(feedback.router, prefix="/api", tags=["Feedback"])
+app.include_router(events.router, prefix="/api/events", tags=["Events"])
 
 
 @app.get("/")

@@ -1,8 +1,18 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+
+// Helper to get the gear tier image path
+function getGearImagePath(slotKey: string, color: string, subtier: string, stars: number): string {
+  // Map subtier to tier number (Base=0, T1=1, T2=2, T3=3)
+  const tierNum = subtier === 'Base' ? 0 : parseInt(subtier.replace('T', ''));
+  // Color names in images are lowercase
+  const colorLower = color.toLowerCase();
+  return `/images/chief_gear/tiers/${slotKey}_${colorLower}_t${tierNum}_${stars}star.png`;
+}
 
 interface GearSlot {
   id: string;
@@ -365,6 +375,7 @@ export default function ChiefTrackerPage() {
           <CharmsTab
             charms={charms}
             gearSlots={gearSlots}
+            gear={gear}
             handleUpdateCharm={handleUpdateCharm}
           />
         )}
@@ -432,7 +443,18 @@ function GearTab({
               return (
                 <div key={slot.id} className={`card border ${typeColors[slot.type]}`}>
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="text-3xl">{slot.icon}</span>
+                    <div className="relative w-16 h-16 flex-shrink-0">
+                      <Image
+                        src={getGearImagePath(slot.charmKey, color, subtier, stars)}
+                        alt={`${slot.displayName} ${tier.name}`}
+                        fill
+                        className="object-contain"
+                        onError={(e) => {
+                          // Fallback to emoji if image fails
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    </div>
                     <div className="flex-1">
                       <h3 className="font-medium text-frost">{slot.displayName}</h3>
                       <div className="flex items-center gap-2">
@@ -534,10 +556,12 @@ function GearTab({
 function CharmsTab({
   charms,
   gearSlots,
+  gear,
   handleUpdateCharm,
 }: {
   charms: ChiefCharmData;
   gearSlots: GearSlot[];
+  gear: ChiefGearData | null;
   handleUpdateCharm: (field: string, value: string) => void;
 }) {
   const charmTypeInfo = {
@@ -617,10 +641,25 @@ function CharmsTab({
                 const slot2 = (charms as any)[`${charmKey}_slot_2`] || '1';
                 const slot3 = (charms as any)[`${charmKey}_slot_3`] || '1';
 
+                // Get gear tier info for the image
+                const qualityField = `${slot.id}_quality` as keyof ChiefGearData;
+                const tierId = gear?.[qualityField] || 1;
+                const { color: gearColor, subtier: gearSubtier, stars: gearStars } = parseTierToSelections(tierId);
+
                 return (
                   <div key={slot.id} className={`card border ${info.borderColor}`}>
                     <div className="flex items-center gap-3 mb-4">
-                      <span className="text-2xl">{slot.icon}</span>
+                      <div className="relative w-14 h-14 flex-shrink-0">
+                        <Image
+                          src={getGearImagePath(slot.charmKey, gearColor, gearSubtier, gearStars)}
+                          alt={`${slot.displayName}`}
+                          fill
+                          className="object-contain"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
+                        />
+                      </div>
                       <div>
                         <h3 className="font-medium text-frost">{slot.displayName}</h3>
                         <p className={`text-sm ${info.color}`}>3× {info.name} Charms</p>

@@ -76,10 +76,44 @@ export default function CombatPage() {
             <span className="text-fire">Formula:</span>{' '}
             <span className="text-frost">Damage = (sqrt(Troops) x Attack x Lethality x SkillModifier) / (Enemy Defense x Enemy Health)</span>
           </div>
-          <p className="text-sm text-frost-muted">
+          <p className="text-sm text-frost-muted mb-4">
             <strong className="text-fire">Key insight:</strong> Attack and Lethality MULTIPLY together.
             A 10% boost to each = 21% more damage. These stats come from places most players neglect.
           </p>
+
+          {/* Troop Type Advantage */}
+          <div className="bg-surface rounded-lg p-4">
+            <h3 className="font-semibold text-frost mb-3">Troop Type Advantage (~30% bonus damage)</h3>
+            <div className="flex flex-wrap items-center justify-center gap-3 text-center">
+              <div className="flex flex-col items-center">
+                <span className="text-2xl mb-1">🗡️</span>
+                <span className="text-red-400 font-bold">Infantry</span>
+              </div>
+              <span className="text-success text-xl">→</span>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl mb-1">🔱</span>
+                <span className="text-green-400 font-bold">Lancer</span>
+              </div>
+              <span className="text-success text-xl">→</span>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl mb-1">🏹</span>
+                <span className="text-blue-400 font-bold">Marksman</span>
+              </div>
+              <span className="text-success text-xl">→</span>
+              <div className="flex flex-col items-center">
+                <span className="text-2xl mb-1">🗡️</span>
+                <span className="text-red-400 font-bold">Infantry</span>
+              </div>
+            </div>
+            <p className="text-xs text-frost-muted text-center mt-3">
+              <strong className="text-frost">Infantry</strong> beats <strong className="text-green-400">Lancer</strong> •
+              <strong className="text-green-400"> Lancer</strong> beats <strong className="text-blue-400">Marksman</strong> •
+              <strong className="text-blue-400"> Marksman</strong> beats <strong className="text-red-400">Infantry</strong>
+            </p>
+            <p className="text-xs text-warning text-center mt-1">
+              Match your troops to counter the enemy's main type for a significant damage boost!
+            </p>
+          </div>
         </div>
 
         {/* Tabs */}

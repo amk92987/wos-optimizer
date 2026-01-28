@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import PageLayout from '@/components/PageLayout';
 import HeroCard from '@/components/HeroCard';
+import HeroRoleBadges from '@/components/HeroRoleBadges';
 import { useAuth } from '@/lib/auth';
 import { heroesApi, UserHero, Hero } from '@/lib/api';
 
@@ -25,6 +26,8 @@ export default function HeroesPage() {
   const [sortBy, setSortBy] = useState<SortBy>('generation');
   const [searchQuery, setSearchQuery] = useState('');
   const [addingHeroId, setAddingHeroId] = useState<number | null>(null);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [addSuccess, setAddSuccess] = useState<string | null>(null);
 
   // Load owned heroes
   useEffect(() => {
@@ -59,16 +62,31 @@ export default function HeroesPage() {
     }
   };
 
-  const handleAddHero = async (heroId: number) => {
+  const handleAddHero = async (heroId: number, heroName?: string) => {
     if (!token) return;
 
     setAddingHeroId(heroId);
+    setAddError(null);
+    setAddSuccess(null);
+
     try {
       await heroesApi.addHero(token, heroId);
       const updated = await heroesApi.getOwned(token);
       setOwnedHeroes(updated);
-    } catch (error) {
+
+      // Show success message
+      setAddSuccess(`${heroName || 'Hero'} added to your collection!`);
+      setTimeout(() => setAddSuccess(null), 3000);
+    } catch (error: any) {
       console.error('Failed to add hero:', error);
+      // Show user-friendly error message
+      const message = error?.message || 'Failed to add hero. Please try again.';
+      if (message.includes('No profile found')) {
+        setAddError('Please set up your profile in Settings first.');
+      } else {
+        setAddError(message);
+      }
+      setTimeout(() => setAddError(null), 5000);
     } finally {
       setAddingHeroId(null);
     }
@@ -215,6 +233,24 @@ export default function HeroesPage() {
             All Heroes
           </button>
         </div>
+
+        {/* Success/Error Messages */}
+        {addSuccess && (
+          <div className="mb-4 p-3 rounded-lg bg-success/20 border border-success/30 text-success text-sm flex items-center gap-2 animate-fadeIn">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            {addSuccess}
+          </div>
+        )}
+        {addError && (
+          <div className="mb-4 p-3 rounded-lg bg-error/20 border border-error/30 text-error text-sm flex items-center gap-2 animate-fadeIn">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {addError}
+          </div>
+        )}
 
         {/* Filters */}
         <div className="card mb-6">
@@ -455,13 +491,14 @@ export default function HeroesPage() {
                             {hero.tier_overall || '?'}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-xs text-zinc-500">
+                        <div className="flex items-center gap-2 text-xs text-zinc-500 mb-1">
                           <span>Gen {hero.generation}</span>
                           <span>•</span>
                           <span className={getClassColor(hero.hero_class).split(' ')[0]}>
                             {hero.hero_class}
                           </span>
                         </div>
+                        <HeroRoleBadges heroName={hero.name} compact />
                       </div>
 
                       {/* Add/Owned Button */}
@@ -474,10 +511,10 @@ export default function HeroesPage() {
                         </span>
                       ) : (
                         <button
-                          onClick={() => handleAddHero(hero.id)}
+                          onClick={() => handleAddHero(hero.id, hero.name)}
                           disabled={isAdding}
                           className="px-3 py-1.5 bg-success/20 text-success hover:bg-success/30
-                                     rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                                     rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex-shrink-0"
                         >
                           {isAdding ? (
                             <span className="flex items-center gap-1">
