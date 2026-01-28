@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
 
@@ -423,7 +424,7 @@ export default function AIAdvisorPage() {
         {/* Donate Banner */}
         <div className="card mt-4 border-fire/30 bg-gradient-to-r from-fire/10 to-fire/5">
           <div className="flex items-center gap-4">
-            <span className="text-2xl">⭐</span>
+            <Image src="/images/frost_star.png" alt="Frost Star" width={32} height={32} className="flex-shrink-0" />
             <div className="flex-1">
               <p className="text-sm text-frost">
                 Finding the AI Advisor helpful? Support Bear's Den development!

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import Sidebar from './Sidebar';
 import { useAuth } from '@/lib/auth';
 
@@ -113,7 +114,7 @@ function UserMenu() {
               className="flex items-center gap-3 px-4 py-2.5 text-sm text-frost hover:bg-surface-hover transition-colors"
               onClick={() => setIsOpen(false)}
             >
-              <span>☕</span>
+              <Image src="/images/frost_star.png" alt="" width={20} height={20} />
               <span>Support Bear's Den</span>
             </a>
 

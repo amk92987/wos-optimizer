@@ -146,9 +146,9 @@ def get_all_heroes(include_images: bool = False):
         data = json.load(f)
 
     heroes = []
-    for h in data.get("heroes", []):
+    for idx, h in enumerate(data.get("heroes", []), start=1):
         hero = {
-            "id": h.get("id"),
+            "id": h.get("id") or idx,  # Use existing id or generate from index
             "name": h.get("name"),
             "generation": h.get("generation"),
             "hero_class": h.get("hero_class"),
