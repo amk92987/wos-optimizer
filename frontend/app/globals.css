@@ -353,6 +353,336 @@ body {
 }
 
 /* ============================================
+   HERO RARITY & TIER EFFECTS
+   ============================================ */
+
+/* Rarity glow effects for hero cards */
+.rarity-common {
+  border-color: rgba(156, 163, 175, 0.3);
+}
+
+.rarity-rare {
+  border-color: rgba(59, 130, 246, 0.4);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+}
+
+.rarity-epic {
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+}
+
+.rarity-legendary {
+  border-color: rgba(255, 215, 0, 0.5);
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.25), inset 0 0 20px rgba(255, 215, 0, 0.05);
+}
+
+.rarity-mythic {
+  border-color: rgba(255, 107, 53, 0.5);
+  box-shadow: 0 0 30px rgba(255, 107, 53, 0.3), inset 0 0 25px rgba(255, 107, 53, 0.08);
+  animation: mythicPulse 3s ease-in-out infinite;
+}
+
+/* Tier badge glow on hover */
+.tier-splus:hover, .tier-s:hover {
+  box-shadow: 0 0 15px currentColor;
+  transform: scale(1.05);
+  transition: all 0.2s ease-out;
+}
+
+/* Hero card enhancements */
+.hero-card {
+  @apply card transition-all duration-300;
+}
+
+.hero-card:hover {
+  @apply border-ice/50;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3), 0 0 20px rgba(74, 144, 217, 0.15);
+}
+
+/* Star rating with glow */
+.star-filled {
+  color: #FFD700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+.star-empty {
+  color: rgba(255, 215, 0, 0.3);
+}
+
+/* Ascension pips */
+.ascension-pip {
+  @apply w-2 h-2 rounded-full transition-all duration-200;
+}
+
+.ascension-pip-filled {
+  @apply ascension-pip bg-purple-400;
+  box-shadow: 0 0 6px rgba(168, 85, 247, 0.6);
+}
+
+.ascension-pip-empty {
+  @apply ascension-pip bg-surface;
+}
+
+/* ============================================
+   CARD DEPTH SYSTEM
+   ============================================ */
+
+.card-elevated {
+  @apply card;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), 0 0 1px rgba(74, 144, 217, 0.1);
+}
+
+.card-floating {
+  @apply card;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 1px rgba(74, 144, 217, 0.15);
+}
+
+.card-interactive {
+  @apply card transition-all duration-200 cursor-pointer;
+}
+
+.card-interactive:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25), 0 0 25px rgba(74, 144, 217, 0.1);
+  border-color: rgba(74, 144, 217, 0.4);
+}
+
+.card-interactive:active {
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   ENHANCED NAVIGATION
+   ============================================ */
+
+.nav-link {
+  @apply relative px-3 py-2 text-text-secondary font-medium transition-colors duration-200;
+}
+
+.nav-link:hover {
+  @apply text-frost;
+}
+
+.nav-link-active {
+  @apply nav-link text-ice;
+}
+
+.nav-link-active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--ice), transparent);
+  animation: navUnderline 0.3s ease-out;
+}
+
+@keyframes navUnderline {
+  from {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  to {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   BUTTON ENHANCEMENTS
+   ============================================ */
+
+/* Button sizes */
+.btn-xs {
+  @apply px-2 py-1 text-xs rounded-md;
+  min-height: 28px;
+}
+
+.btn-sm {
+  @apply px-3 py-1.5 text-sm rounded-lg;
+  min-height: 32px;
+}
+
+.btn-lg {
+  @apply px-6 py-3 text-lg rounded-xl;
+  min-height: 52px;
+}
+
+/* Button with icon */
+.btn-icon {
+  @apply btn p-2 rounded-lg aspect-square flex items-center justify-center;
+}
+
+.btn-icon-sm {
+  @apply btn-icon;
+  min-width: 32px;
+  min-height: 32px;
+}
+
+/* Gradient hover effect */
+.btn-primary:hover {
+  background: linear-gradient(135deg, #5BA3E8 0%, #7DD3FC 100%);
+}
+
+.btn-fire:hover {
+  background: linear-gradient(135deg, #FF8247 0%, #FFA366 100%);
+}
+
+/* Gold/Premium button */
+.btn-gold {
+  @apply btn bg-gradient-to-r from-yellow-500 to-amber-400 text-gray-900 font-semibold;
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+}
+
+.btn-gold:hover {
+  box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+}
+
+/* ============================================
+   FROST THEME DECORATIVE ELEMENTS
+   ============================================ */
+
+/* Frost border effect */
+.frost-border {
+  position: relative;
+}
+
+.frost-border::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg,
+    rgba(125, 211, 252, 0.3) 0%,
+    rgba(74, 144, 217, 0.1) 50%,
+    rgba(125, 211, 252, 0.3) 100%);
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.frost-border:hover::before {
+  opacity: 1;
+}
+
+/* Ice crystal corners */
+.ice-corners {
+  position: relative;
+}
+
+.ice-corners::before,
+.ice-corners::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: var(--ice);
+  border-style: solid;
+  opacity: 0.5;
+}
+
+.ice-corners::before {
+  top: -1px;
+  left: -1px;
+  border-width: 2px 0 0 2px;
+  border-radius: 8px 0 0 0;
+}
+
+.ice-corners::after {
+  bottom: -1px;
+  right: -1px;
+  border-width: 0 2px 2px 0;
+  border-radius: 0 0 8px 0;
+}
+
+/* Snowflake decoration (subtle) */
+.snowflake-bg {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath fill='%234A90D9' fill-opacity='0.03' d='M30 0l2 10-2 10-2-10 2-10zm0 40l2 10-2 10-2-10 2-10zM0 30l10-2 10 2-10 2-10-2zm40 0l10-2 10 2-10 2-10-2z'/%3E%3C/svg%3E");
+}
+
+/* ============================================
+   FORM ENHANCEMENTS
+   ============================================ */
+
+/* Floating label effect */
+.input-group {
+  @apply relative;
+}
+
+.input-group .input:not(:placeholder-shown) + label,
+.input-group .input:focus + label {
+  @apply text-xs -translate-y-6 text-ice;
+}
+
+.input-group label {
+  @apply absolute left-3 top-3 text-text-muted transition-all duration-200 pointer-events-none;
+}
+
+/* Input with validation state */
+.input-success {
+  @apply input border-success focus:border-success focus:ring-success/50;
+}
+
+.input-error {
+  @apply input border-error focus:border-error focus:ring-error/50;
+}
+
+/* Inline validation message */
+.input-hint {
+  @apply text-xs mt-1 text-text-muted;
+}
+
+.input-hint-error {
+  @apply input-hint text-error;
+}
+
+.input-hint-success {
+  @apply input-hint text-success;
+}
+
+/* Enhanced select/dropdown */
+.select:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%234A90D9' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3E%3C/svg%3E");
+}
+
+/* ============================================
+   PROGRESS INDICATORS (XP BAR STYLE)
+   ============================================ */
+
+.xp-bar {
+  @apply relative h-5 bg-surface rounded-full overflow-hidden;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.xp-bar-fill {
+  @apply h-full rounded-full transition-all duration-500 ease-out;
+  background: linear-gradient(90deg, #4A90D9, #7DD3FC);
+  box-shadow: 0 0 10px rgba(74, 144, 217, 0.5);
+}
+
+.xp-bar-label {
+  @apply absolute inset-0 flex items-center justify-center text-xs font-bold text-frost;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Gear quality progress bar */
+.gear-progress {
+  @apply relative h-3 bg-surface rounded-full overflow-hidden;
+}
+
+.gear-progress-fill {
+  @apply h-full rounded-full transition-all duration-300;
+}
+
+.gear-progress-fill.quality-common { background: #9CA3AF; }
+.gear-progress-fill.quality-rare { background: linear-gradient(90deg, #3B82F6, #60A5FA); }
+.gear-progress-fill.quality-epic { background: linear-gradient(90deg, #8B5CF6, #A78BFA); }
+.gear-progress-fill.quality-legendary { background: linear-gradient(90deg, #F59E0B, #FBBF24); box-shadow: 0 0 8px rgba(245, 158, 11, 0.5); }
+.gear-progress-fill.quality-mythic { background: linear-gradient(90deg, #FF6B35, #FF8C42); box-shadow: 0 0 10px rgba(255, 107, 53, 0.5); }
+
+/* ============================================
    ANIMATIONS
    ============================================ */
 
@@ -388,10 +718,47 @@ body {
   50% { box-shadow: 0 0 20px rgba(74, 144, 217, 0.4); }
 }
 
+@keyframes mythicPulse {
+  0%, 100% {
+    box-shadow: 0 0 30px rgba(255, 107, 53, 0.3), inset 0 0 25px rgba(255, 107, 53, 0.08);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(255, 107, 53, 0.5), inset 0 0 35px rgba(255, 107, 53, 0.12);
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
 .animate-fade-in { animation: fadeIn 0.3s ease-out; }
 .animate-slide-up { animation: slideUp 0.3s ease-out; }
 .animate-slide-in { animation: slideIn 0.3s ease-out; }
 .animate-pulse-glow { animation: pulseGlow 2s ease-in-out infinite; }
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+}
+.animate-bounce-subtle { animation: bounce-subtle 2s ease-in-out infinite; }
+.animate-spin-slow { animation: spin-slow 3s linear infinite; }
+.animate-glow { animation: glow 2s ease-in-out infinite; }
 
 /* Page transition */
 .page-enter {

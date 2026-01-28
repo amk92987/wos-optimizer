@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import { AuthProvider } from '@/lib/auth';
 import { ServiceWorkerProvider } from '@/components/ServiceWorkerProvider';
+import { ToastProvider } from '@/components/ui/Toast';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -55,9 +56,11 @@ export default function RootLayout({
       </head>
       <body className={`${inter.className} safe-top`}>
         <AuthProvider>
-          <ServiceWorkerProvider>
-            {children}
-          </ServiceWorkerProvider>
+          <ToastProvider>
+            <ServiceWorkerProvider>
+              {children}
+            </ServiceWorkerProvider>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

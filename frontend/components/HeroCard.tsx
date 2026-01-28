@@ -56,11 +56,21 @@ export default function HeroCard({ hero, onUpdate, onRemove }: HeroCardProps) {
   const getTierClass = (tier: string | null) => {
     if (!tier) return 'tier-b';
     const t = tier.toLowerCase();
+    if (t === 's+') return 'tier-splus';
     if (t.includes('s')) return 'tier-s';
     if (t.includes('a')) return 'tier-a';
     if (t.includes('b')) return 'tier-b';
     if (t.includes('c')) return 'tier-c';
     return 'tier-d';
+  };
+
+  const getRarityClass = (tier: string | null) => {
+    if (!tier) return 'rarity-common';
+    const t = tier.toLowerCase();
+    if (t === 's+') return 'rarity-legendary';
+    if (t.includes('s')) return 'rarity-epic';
+    if (t.includes('a')) return 'rarity-rare';
+    return 'rarity-common';
   };
 
   const getClassBadge = (heroClass: string) => {
@@ -117,7 +127,7 @@ export default function HeroCard({ hero, onUpdate, onRemove }: HeroCardProps) {
         {[...Array(max)].map((_, i) => (
           <span
             key={i}
-            className={`text-sm ${i < count ? 'text-amber' : 'text-zinc-600'}`}
+            className={`text-sm ${i < count ? 'star-filled' : 'star-empty'}`}
           >
             ★
           </span>
@@ -241,7 +251,7 @@ export default function HeroCard({ hero, onUpdate, onRemove }: HeroCardProps) {
   const heroHeader = (
     <div className="flex items-center gap-4 w-full">
       {/* Hero Image */}
-      <div className="w-16 h-16 rounded-xl overflow-hidden bg-surface-hover flex-shrink-0 border-2 border-zinc-700">
+      <div className={`w-16 h-16 rounded-xl overflow-hidden bg-surface-hover flex-shrink-0 border-2 ${getRarityClass(hero.tier_overall)}`}>
         {hero.image_base64 ? (
           <img
             src={hero.image_base64}
@@ -277,9 +287,11 @@ export default function HeroCard({ hero, onUpdate, onRemove }: HeroCardProps) {
         <div className="flex items-center gap-1">
           {renderStars(hero.stars)}
           {hero.stars < 5 && hero.ascension > 0 && (
-            <span className="text-purple-400 text-xs ml-1">
-              {'●'.repeat(hero.ascension)}{'○'.repeat(5 - hero.ascension)}
-            </span>
+            <div className="flex gap-0.5 ml-1">
+              {[...Array(5)].map((_, i) => (
+                <span key={i} className={i < hero.ascension ? 'ascension-pip-filled' : 'ascension-pip-empty'} />
+              ))}
+            </div>
           )}
         </div>
       </div>
