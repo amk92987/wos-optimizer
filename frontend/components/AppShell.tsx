@@ -70,6 +70,15 @@ function UserMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Listen for custom event to open feedback modal from other pages
+  useEffect(() => {
+    function handleOpenFeedback() {
+      setShowFeedbackModal(true);
+    }
+    window.addEventListener('open-feedback-modal', handleOpenFeedback);
+    return () => window.removeEventListener('open-feedback-modal', handleOpenFeedback);
+  }, []);
+
   const displayName = user?.email?.split('@')[0] || 'User';
   const isAdmin = user?.role === 'admin';
 
@@ -260,8 +269,13 @@ function FeedbackModal({ token, onClose }: { token: string; onClose: () => void 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-      <div className="bg-surface rounded-xl border border-surface-border max-w-md w-full max-h-[90vh] overflow-y-auto p-6 animate-fade-in">
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100]" onClick={onClose} />
+      {/* Modal */}
+      <div className="fixed inset-0 z-[101] flex items-center justify-center p-4 pointer-events-none">
+        <div className="bg-surface rounded-xl border border-surface-border max-w-md w-full p-6 animate-fade-in pointer-events-auto max-h-[90vh] overflow-y-auto"
+             onClick={e => e.stopPropagation()}>
         {success ? (
           <div className="text-center py-8">
             <div className="text-4xl mb-4">✓</div>
@@ -347,8 +361,9 @@ function FeedbackModal({ token, onClose }: { token: string; onClose: () => void 
             </form>
           </>
         )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

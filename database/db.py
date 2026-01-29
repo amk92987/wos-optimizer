@@ -76,6 +76,8 @@ def _run_sqlite_migrations():
         # Announcement display type for inbox notifications
         ("announcements", "display_type", "VARCHAR(20)", "'banner'"),
         ("announcements", "inbox_content", "VARCHAR(2000)", None),
+        # Exclusive gear skill level
+        ("user_heroes", "exclusive_gear_skill_level", "INTEGER", "0"),
     ]
 
     for table, column, col_type, default in migrations:
@@ -115,6 +117,8 @@ def _run_postgres_migrations():
         # Announcement display type for inbox notifications
         ("announcements", "display_type", "VARCHAR(20)", "'banner'"),
         ("announcements", "inbox_content", "VARCHAR(2000)", None),
+        # Exclusive gear skill level
+        ("user_heroes", "exclusive_gear_skill_level", "INTEGER", "0"),
     ]
 
     with engine.connect() as conn:

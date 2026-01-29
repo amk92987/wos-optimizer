@@ -479,6 +479,119 @@ export default function EventsPage() {
                   </div>
                 )}
 
+                {/* Phases (SvS Prep days etc.) */}
+                {selectedEvent.event.phases && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-3">Phase Breakdown</h3>
+                    <div className="space-y-3">
+                      {Object.entries(selectedEvent.event.phases).map(([phaseKey, phase]: [string, any]) => (
+                        <details key={phaseKey} className="group">
+                          <summary className="cursor-pointer p-3 rounded-lg bg-surface hover:bg-surface-hover transition-colors flex items-center justify-between">
+                            <div>
+                              <span className="font-medium text-frost">{phase.name || phaseKey}</span>
+                              {phase.focus && <span className="text-xs text-frost-muted ml-2">- {phase.focus}</span>}
+                            </div>
+                            <svg className="w-4 h-4 text-frost-muted group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </summary>
+                          <div className="mt-2 pl-3 space-y-2">
+                            {/* Best value tasks */}
+                            {phase.best_value_tasks && (
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                  <thead>
+                                    <tr className="text-frost-muted border-b border-border">
+                                      <th className="text-left py-1 pr-3">Task</th>
+                                      <th className="text-right py-1 pr-3">Points</th>
+                                      <th className="text-right py-1">Per</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="text-frost">
+                                    {phase.best_value_tasks.map((task: any, i: number) => (
+                                      <tr key={i} className="border-b border-border/30">
+                                        <td className="py-1 pr-3">{task.task}</td>
+                                        <td className="py-1 pr-3 text-right font-medium text-amber">{typeof task.points === 'number' ? task.points.toLocaleString() : task.points}</td>
+                                        <td className="py-1 text-right text-frost-muted">{task.per}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            )}
+
+                            {/* Hunting strategy (Day 3 specific) */}
+                            {phase.hunting_strategy && (
+                              <div className="space-y-2 mt-2">
+                                <h4 className="text-xs font-semibold text-green-400 uppercase tracking-wide">Hunting Strategy: Auto-Hunt AFK</h4>
+                                <p className="text-sm text-frost-muted">{phase.hunting_strategy.auto_hunt_strategy?.description}</p>
+                                {phase.hunting_strategy.auto_hunt_strategy?.formation && (
+                                  <div className="space-y-1">
+                                    {phase.hunting_strategy.auto_hunt_strategy.formation.map((hero: string, i: number) => (
+                                      <p key={i} className="text-sm text-frost-muted"><span className="text-green-400">Slot {i+1}:</span> {hero}</p>
+                                    ))}
+                                  </div>
+                                )}
+                                {phase.hunting_strategy.auto_hunt_strategy?.important && (
+                                  <p className="text-sm text-amber p-2 rounded bg-amber/10 border border-amber/30">
+                                    {phase.hunting_strategy.auto_hunt_strategy.important}
+                                  </p>
+                                )}
+                                {/* Efficiency comparison */}
+                                {phase.hunting_strategy.efficiency && (
+                                  <div className="grid grid-cols-2 gap-2 text-xs">
+                                    <div className="p-2 rounded bg-surface">
+                                      <span className="text-frost-muted">Rally (w/ Gina):</span>
+                                      <span className="text-green-400 font-medium ml-1">{phase.hunting_strategy.efficiency.rally_with_gina}</span>
+                                    </div>
+                                    <div className="p-2 rounded bg-surface">
+                                      <span className="text-frost-muted">Solo Lv26-30 (w/ Gina):</span>
+                                      <span className="text-green-400 font-medium ml-1">{phase.hunting_strategy.efficiency.solo_26_30_with_gina}</span>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Day 4 efficiency analysis */}
+                            {phase.efficiency_analysis && (
+                              <div className="space-y-2 mt-2">
+                                <h4 className="text-xs font-semibold text-amber uppercase tracking-wide">Speedup vs Promotion Analysis</h4>
+                                <p className="text-sm text-frost-muted">{phase.efficiency_analysis.description}</p>
+                                {phase.efficiency_analysis.optimal_strategy && (
+                                  <ul className="space-y-1">
+                                    {phase.efficiency_analysis.optimal_strategy.map((step: string, i: number) => (
+                                      <li key={i} className="flex items-start gap-2 text-sm text-frost-muted">
+                                        <span className="text-amber mt-0.5">{i+1}.</span>
+                                        <span>{step}</span>
+                                      </li>
+                                    ))}
+                                  </ul>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Save for this day */}
+                            {phase.save_for_this_day && (
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                <span className="text-xs text-fire font-medium">Save:</span>
+                                {phase.save_for_this_day.map((item: string, i: number) => (
+                                  <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-fire/10 text-fire/80">{item}</span>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Note */}
+                            {phase.note && (
+                              <p className="text-xs text-amber mt-1">{phase.note}</p>
+                            )}
+                          </div>
+                        </details>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Preparation Tips */}
                 {selectedEvent.event.preparation?.tips && (
                   <div className="card bg-background">

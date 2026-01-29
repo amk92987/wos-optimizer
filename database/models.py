@@ -171,6 +171,9 @@ class UserHero(Base):
     mythic_gear_level = Column(Integer, default=0)
     mythic_gear_mastery = Column(Integer, default=0)  # 0-20
 
+    # Exclusive gear skill level (1-10, 0 = not unlocked/not applicable)
+    exclusive_gear_skill_level = Column(Integer, default=0)
+
     owned = Column(Boolean, default=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

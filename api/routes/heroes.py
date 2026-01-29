@@ -25,11 +25,32 @@ class HeroBase(BaseModel):
     name: str
     generation: int
     hero_class: str
+    rarity: Optional[str] = None
     tier_overall: Optional[str]
     tier_expedition: Optional[str]
     tier_exploration: Optional[str]
     image_filename: Optional[str]
     image_base64: Optional[str] = None
+    # Additional info
+    how_to_obtain: Optional[str] = None
+    notes: Optional[str] = None
+    best_use: Optional[str] = None
+    # Skill names
+    exploration_skill_1: Optional[str] = None
+    exploration_skill_2: Optional[str] = None
+    exploration_skill_3: Optional[str] = None
+    expedition_skill_1: Optional[str] = None
+    expedition_skill_2: Optional[str] = None
+    expedition_skill_3: Optional[str] = None
+    # Skill descriptions
+    exploration_skill_1_desc: Optional[str] = None
+    exploration_skill_2_desc: Optional[str] = None
+    exploration_skill_3_desc: Optional[str] = None
+    expedition_skill_1_desc: Optional[str] = None
+    expedition_skill_2_desc: Optional[str] = None
+    expedition_skill_3_desc: Optional[str] = None
+    # Mythic gear
+    mythic_gear: Optional[str] = None
 
 
 class UserHeroData(BaseModel):
@@ -81,6 +102,7 @@ class UserHeroData(BaseModel):
     mythic_gear_quality: int = 0
     mythic_gear_level: int = 0
     mythic_gear_mastery: int = 0
+    exclusive_gear_skill_level: int = 0
     # Image
     image_base64: Optional[str] = None
 
@@ -113,6 +135,7 @@ class UpdateHeroRequest(BaseModel):
     mythic_gear_quality: Optional[int] = None
     mythic_gear_level: Optional[int] = None
     mythic_gear_mastery: Optional[int] = None
+    exclusive_gear_skill_level: Optional[int] = None
 
 
 def get_hero_image_base64(image_filename: str) -> Optional[str]:
@@ -152,11 +175,32 @@ def get_all_heroes(include_images: bool = False):
             "name": h.get("name"),
             "generation": h.get("generation"),
             "hero_class": h.get("hero_class"),
+            "rarity": h.get("rarity"),
             "tier_overall": h.get("tier_overall"),
             "tier_expedition": h.get("tier_expedition"),
             "tier_exploration": h.get("tier_exploration"),
             "image_filename": h.get("image_filename"),
-            "image_base64": None
+            "image_base64": None,
+            # Additional info
+            "how_to_obtain": h.get("how_to_obtain"),
+            "notes": h.get("notes"),
+            "best_use": h.get("best_use"),
+            # Skill names
+            "exploration_skill_1": h.get("exploration_skill_1"),
+            "exploration_skill_2": h.get("exploration_skill_2"),
+            "exploration_skill_3": h.get("exploration_skill_3"),
+            "expedition_skill_1": h.get("expedition_skill_1"),
+            "expedition_skill_2": h.get("expedition_skill_2"),
+            "expedition_skill_3": h.get("expedition_skill_3"),
+            # Skill descriptions
+            "exploration_skill_1_desc": h.get("exploration_skill_1_desc"),
+            "exploration_skill_2_desc": h.get("exploration_skill_2_desc"),
+            "exploration_skill_3_desc": h.get("exploration_skill_3_desc"),
+            "expedition_skill_1_desc": h.get("expedition_skill_1_desc"),
+            "expedition_skill_2_desc": h.get("expedition_skill_2_desc"),
+            "expedition_skill_3_desc": h.get("expedition_skill_3_desc"),
+            # Mythic gear
+            "mythic_gear": h.get("mythic_gear"),
         }
 
         if include_images:
@@ -218,14 +262,14 @@ def get_owned_heroes(
             "tier_overall": hero.tier_overall,
             "level": uh.level,
             "stars": uh.stars,
-            "ascension": getattr(uh, 'ascension_tier', uh.ascension) if hasattr(uh, 'ascension_tier') else uh.ascension,
+            "ascension": uh.ascension_tier,
             # Skill levels
-            "exploration_skill_1": getattr(uh, 'exploration_skill_1_level', uh.exploration_skill_1) if hasattr(uh, 'exploration_skill_1_level') else uh.exploration_skill_1,
-            "exploration_skill_2": getattr(uh, 'exploration_skill_2_level', uh.exploration_skill_2) if hasattr(uh, 'exploration_skill_2_level') else uh.exploration_skill_2,
-            "exploration_skill_3": getattr(uh, 'exploration_skill_3_level', uh.exploration_skill_3) if hasattr(uh, 'exploration_skill_3_level') else uh.exploration_skill_3,
-            "expedition_skill_1": getattr(uh, 'expedition_skill_1_level', uh.expedition_skill_1) if hasattr(uh, 'expedition_skill_1_level') else uh.expedition_skill_1,
-            "expedition_skill_2": getattr(uh, 'expedition_skill_2_level', uh.expedition_skill_2) if hasattr(uh, 'expedition_skill_2_level') else uh.expedition_skill_2,
-            "expedition_skill_3": getattr(uh, 'expedition_skill_3_level', uh.expedition_skill_3) if hasattr(uh, 'expedition_skill_3_level') else uh.expedition_skill_3,
+            "exploration_skill_1": uh.exploration_skill_1_level,
+            "exploration_skill_2": uh.exploration_skill_2_level,
+            "exploration_skill_3": uh.exploration_skill_3_level,
+            "expedition_skill_1": uh.expedition_skill_1_level,
+            "expedition_skill_2": uh.expedition_skill_2_level,
+            "expedition_skill_3": uh.expedition_skill_3_level,
             # Skill names from heroes.json
             "exploration_skill_1_name": hero_data.get("exploration_skill_1"),
             "exploration_skill_2_name": hero_data.get("exploration_skill_2"),
@@ -259,6 +303,7 @@ def get_owned_heroes(
             "mythic_gear_quality": getattr(uh, 'mythic_gear_quality', 0) or 0,
             "mythic_gear_level": getattr(uh, 'mythic_gear_level', 0) or 0,
             "mythic_gear_mastery": getattr(uh, 'mythic_gear_mastery', 0) or 0,
+            "exclusive_gear_skill_level": getattr(uh, 'exclusive_gear_skill_level', 0) or 0,
             "image_base64": None
         }
 
@@ -304,7 +349,7 @@ def add_owned_hero(
         hero_id=hero_id,
         level=1,
         stars=0,
-        ascension=0
+        ascension_tier=0
     )
 
     db.add(user_hero)
@@ -341,11 +386,23 @@ def update_hero(
         db.close()
         raise HTTPException(status_code=404, detail="Hero not owned")
 
+    # Map request field names to database model field names
+    field_mapping = {
+        "ascension": "ascension_tier",
+        "exploration_skill_1": "exploration_skill_1_level",
+        "exploration_skill_2": "exploration_skill_2_level",
+        "exploration_skill_3": "exploration_skill_3_level",
+        "expedition_skill_1": "expedition_skill_1_level",
+        "expedition_skill_2": "expedition_skill_2_level",
+        "expedition_skill_3": "expedition_skill_3_level",
+    }
+
     # Update fields
     update_data = request.dict(exclude_unset=True)
     for field, value in update_data.items():
         if value is not None:
-            setattr(user_hero, field, value)
+            db_field = field_mapping.get(field, field)
+            setattr(user_hero, db_field, value)
 
     db.commit()
     db.close()

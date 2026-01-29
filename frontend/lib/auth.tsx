@@ -31,28 +31,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Check for existing token on mount, or auto-login in dev mode
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
-    if (storedToken) {
-      setToken(storedToken);
-      authApi.me(storedToken)
-        .then(user => setUser(user))
-        .catch(() => {
+    async function initAuth() {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        setToken(storedToken);
+        try {
+          const userData = await authApi.me(storedToken);
+          setUser(userData);
+        } catch {
+          // Token expired or invalid - clear it
           localStorage.removeItem('token');
           setToken(null);
-          // Try auto-login in dev mode if token expired
+          // Try auto-login in dev mode
           if (DEV_AUTO_LOGIN.enabled) {
-            autoLoginDev();
-          } else {
-            setIsLoading(false);
+            await autoLoginDev();
           }
-        })
-        .finally(() => {
-          if (storedToken) setIsLoading(false);
-        });
-    } else if (DEV_AUTO_LOGIN.enabled) {
-      // No token, auto-login in dev mode
-      autoLoginDev();
-    } else {
+        }
+      } else if (DEV_AUTO_LOGIN.enabled) {
+        await autoLoginDev();
+      }
       setIsLoading(false);
     }
 
@@ -65,10 +62,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(response.user);
       } catch (error) {
         console.error('[Dev] Auto-login failed:', error);
-      } finally {
-        setIsLoading(false);
       }
     }
+
+    initAuth();
   }, []);
 
   const login = async (email: string, password: string) => {

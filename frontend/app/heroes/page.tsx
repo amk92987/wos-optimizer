@@ -5,6 +5,7 @@ import Image from 'next/image';
 import PageLayout from '@/components/PageLayout';
 import HeroCard from '@/components/HeroCard';
 import HeroRoleBadges from '@/components/HeroRoleBadges';
+import HeroDetailModal from '@/components/HeroDetailModal';
 import { useAuth } from '@/lib/auth';
 import { heroesApi, UserHero, Hero } from '@/lib/api';
 
@@ -28,6 +29,7 @@ export default function HeroesPage() {
   const [addingHeroId, setAddingHeroId] = useState<number | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
+  const [selectedHero, setSelectedHero] = useState<Hero | null>(null);
 
   // Load owned heroes
   useEffect(() => {
@@ -50,15 +52,13 @@ export default function HeroesPage() {
 
   const ownedHeroIds = new Set(ownedHeroes.map(h => h.hero_id));
 
-  const handleUpdateHero = async (heroId: number, data: Partial<UserHero>) => {
+  const refreshOwnedHeroes = async () => {
     if (!token) return;
-
     try {
-      await heroesApi.updateHero(token, heroId, data);
       const updated = await heroesApi.getOwned(token);
       setOwnedHeroes(updated);
     } catch (error) {
-      console.error('Failed to update hero:', error);
+      console.error('Failed to refresh heroes:', error);
     }
   };
 
@@ -394,7 +394,8 @@ export default function HeroesPage() {
                   <HeroCard
                     key={hero.hero_id}
                     hero={hero}
-                    onUpdate={handleUpdateHero}
+                    token={token}
+                    onSaved={refreshOwnedHeroes}
                     onRemove={() => handleRemoveHero(hero.hero_id)}
                   />
                 ))}
@@ -464,9 +465,10 @@ export default function HeroesPage() {
                   return (
                     <div
                       key={hero.id}
-                      className={`card flex items-center gap-4 transition-all ${
+                      className={`card flex items-center gap-4 transition-all cursor-pointer hover:border-ice/30 ${
                         isOwned ? 'border-ice/30 bg-ice/5' : ''
                       }`}
+                      onClick={() => setSelectedHero(hero)}
                     >
                       {/* Hero Image */}
                       <div className={`w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 ${getClassColor(hero.hero_class)}`}>
@@ -511,7 +513,10 @@ export default function HeroesPage() {
                         </span>
                       ) : (
                         <button
-                          onClick={() => handleAddHero(hero.id, hero.name)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleAddHero(hero.id, hero.name);
+                          }}
                           disabled={isAdding}
                           className="px-3 py-1.5 bg-success/20 text-success hover:bg-success/30
                                      rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex-shrink-0"
@@ -568,6 +573,19 @@ export default function HeroesPage() {
               </div>
             </div>
           </>
+        )}
+
+        {/* Hero Detail Modal */}
+        {selectedHero && (
+          <HeroDetailModal
+            hero={selectedHero}
+            isOwned={ownedHeroIds.has(selectedHero.id)}
+            onClose={() => setSelectedHero(null)}
+            onAdd={() => {
+              handleAddHero(selectedHero.id, selectedHero.name);
+              setSelectedHero(null);
+            }}
+          />
         )}
       </div>
     </PageLayout>

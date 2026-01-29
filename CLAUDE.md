@@ -252,7 +252,7 @@ WoS/
 - Stars (0-5) and ascension tier (0-5)
 - Skill levels (1-5 for each of 6 skills: 3 exploration + 3 expedition)
 - Hero gear: 4 slots with quality (0=None through 6=Legendary), level (0-100), mastery (0-20 for Gold+)
-- Exclusive gear: unlocked status, quality, level, mastery
+- Exclusive gear: unlocked status, quality, level, mastery, exclusive_gear_skill_level (0-10)
 
 **UserInventory**: Backpack items and quantities
 
@@ -342,22 +342,40 @@ WoS/
 - Training data curation (mark good/bad examples)
 - Export for fine-tuning (JSONL, CSV)
 
-### Hero Card Features
+### Hero Card Features (Always-Interactive UI)
 
-Each hero row displays:
+Each hero card is an expandable row. The collapsed header shows:
 - **Hero portrait** - Actual hero image from assets/heroes/ (80x80px)
 - **Tier badge** with hover tooltip (S+ through D)
 - **Rarity border** color-coded (Blue=Rare, Purple=Epic, Gold=Legendary)
 - **Generation** column
 - **Star rating** with purple ascension pips (shown when not at max stars)
 - **Level** display
-- **Owned checkbox** - auto-expands editor when checked
+- **Save indicator** - shows saving/saved/error status next to hero name
 
-Hero editor (expander) includes:
-- **Level/Stars/Ascension** row with visual pips
-- **Skills** side-by-side with hoverable names showing descriptions
-- **Gear** 4 slots with quality dropdown, level (0-100), mastery (0-20 for Gold+)
-- **Exclusive gear** section for heroes with mythic gear
+The expanded body is **always interactive** (no edit/save/cancel buttons). All changes auto-save via debounced API calls (300ms). Components:
+- **Level** - NumberStepper `[-] value [+]`, click number to type directly
+- **Stars** - 5 clickable star icons, tap to set, tap current to decrement
+- **Ascension pips** - 5 clickable purple circles below stars (hidden at 5 stars), tap to set
+- **Skills** - Clickable pip circles (green=exploration, orange=expedition), tap to set level, tap current to decrement
+- **Gear** - 4 slots with always-visible quality dropdown + conditional level/mastery steppers
+- **Exclusive gear** - Toggle switch, quality/level/mastery editors, plus 10 clickable exclusive skill level pips (1-10)
+- **Remove** - "Remove from collection" link (only action button remaining)
+
+**Frontend architecture** (`frontend/components/hero/`):
+- `SaveIndicator.tsx` - Save status display
+- `StarRating.tsx` - Clickable stars + ascension pips
+- `SkillPips.tsx` - Clickable skill level circles
+- `NumberStepper.tsx` - Reusable `[-] value [+]` control
+- `GearSlotEditor.tsx` - Inline gear slot with quality dropdown + steppers
+- `MythicGearEditor.tsx` - Exclusive gear toggle + editors + skill pips
+
+**Auto-save hook** (`frontend/hooks/useAutoSave.ts`):
+- Debounces 300ms, merges concurrent changes into single API call
+- Optimistic UI updates, reverts on error
+- Returns `saveField()`, `saveFields()`, and `saveStatus`
+
+**HeroCard props**: `hero`, `token`, `onSaved?`, `onRemove?` (no `onUpdate`)
 
 ### Upgrade Recommendations
 

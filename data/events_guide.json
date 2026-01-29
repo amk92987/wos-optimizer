@@ -189,7 +189,37 @@
           ],
           "save_for_this_day": ["Stamina", "Wild Marks", "Pet Refinement Materials"],
           "note": "NO SPEEDUP POINTS on Day 3! Coordinate Polar Terror rallies with alliance.",
-          "speedups_give_points": false
+          "speedups_give_points": false,
+          "hunting_strategy": {
+            "stamina_costs": {
+              "polar_terror_rally": {"base": 25, "with_gina": 20},
+              "solo_beast_hunt": {"base": 10, "with_gina": 8}
+            },
+            "points_per_beast_level": {
+              "26-30": 12000, "21-25": 11250, "16-20": 10500, "11-15": 9750, "1-10": 9000
+            },
+            "efficiency": {
+              "rally_no_gina": "1,200 pts/stamina",
+              "rally_with_gina": "1,500 pts/stamina",
+              "solo_26_30_no_gina": "1,200 pts/stamina",
+              "solo_26_30_with_gina": "1,500 pts/stamina"
+            },
+            "auto_hunt_strategy": {
+              "description": "Auto-hunting with Gina + Lumak Bokan is a semi-AFK strategy that matches rally efficiency with no active play required.",
+              "formation": ["Gina (-20% stamina, +100% wilderness march speed)", "Lumak Bokan (+100% hunting march speed)", "Your strongest combat hero"],
+              "setup": {
+                "target_level": "26-30 only",
+                "search_radius": "150km (maximum)",
+                "troops": "Marksman-heavy for highest damage",
+                "also_enable": "Rally auto-join to help alliance mates"
+              },
+              "important": "Auto-hunting requires the Ultra Value Monthly Card and stops when the game is minimized or closed.",
+              "vs_rallies": {
+                "advantages": ["Same pts/stamina efficiency with Gina", "Fully automated, no management", "No alliance dependency", "200% faster marches with Gina + Lumak"],
+                "disadvantages": ["Requires Ultra Value Monthly Card", "Game must stay open on device", "12k per beast vs 30k per rally"]
+              }
+            }
+          }
         },
         "day_4_hero_development": {
           "name": "Day 4: Hero Development / Training",

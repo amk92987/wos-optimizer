@@ -1,21 +1,49 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import Expander from '@/components/Expander';
 import { useAuth } from '@/lib/auth';
 import { profileApi, Profile } from '@/lib/api';
+
+const GEN_SERVER_DAYS: Record<number, { min: number; max: number | null }> = {
+  1:  { min: 0,    max: 40 },
+  2:  { min: 40,   max: 120 },
+  3:  { min: 120,  max: 200 },
+  4:  { min: 200,  max: 280 },
+  5:  { min: 280,  max: 360 },
+  6:  { min: 360,  max: 440 },
+  7:  { min: 440,  max: 520 },
+  8:  { min: 520,  max: 600 },
+  9:  { min: 600,  max: 680 },
+  10: { min: 680,  max: 760 },
+  11: { min: 760,  max: 840 },
+  12: { min: 840,  max: 920 },
+  13: { min: 920,  max: 1000 },
+  14: { min: 1000, max: null },
+};
+
+function estimateGenFromDays(days: number): number {
+  for (let gen = 14; gen >= 1; gen--) {
+    if (days >= GEN_SERVER_DAYS[gen].min) return gen;
+  }
+  return 1;
+}
 
 export default function SettingsPage() {
   const { token, user } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [currentGen, setCurrentGen] = useState(1);
 
   useEffect(() => {
     if (token) {
       profileApi.getCurrent(token)
-        .then(setProfile)
+        .then((p) => {
+          setProfile(p);
+          setCurrentGen(estimateGenFromDays(p.server_age_days));
+        })
         .catch(console.error)
         .finally(() => setIsLoading(false));
     }
@@ -104,7 +132,7 @@ export default function SettingsPage() {
             <div>
               <h2 className="text-lg font-semibold text-zinc-100">Server & Progression</h2>
               <p className="text-sm text-zinc-500">
-                Day {profile?.server_age_days} · {profile?.furnace_fc_level || `Lv.${profile?.furnace_level}`}
+                Gen {currentGen} · {profile?.furnace_fc_level || `Lv.${profile?.furnace_level}`}
               </p>
             </div>
           }
@@ -113,15 +141,34 @@ export default function SettingsPage() {
         >
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-sm text-zinc-400 block mb-2">Server Age (Days)</label>
-              <input
-                type="number"
-                value={profile?.server_age_days || 0}
-                onChange={(e) => handleSave({ server_age_days: parseInt(e.target.value) || 0 })}
-                className="input"
-                min={0}
-                max={2000}
-              />
+              <label className="text-sm text-zinc-400 block mb-2">Current Hero Generation</label>
+              <select
+                value={currentGen}
+                onChange={(e) => {
+                  const gen = parseInt(e.target.value);
+                  setCurrentGen(gen);
+                  const range = GEN_SERVER_DAYS[gen];
+                  if (range) {
+                    // Save midpoint as server age estimate
+                    const midpoint = range.max ? Math.round((range.min + range.max) / 2) : range.min;
+                    handleSave({ server_age_days: midpoint });
+                  }
+                }}
+                className="select"
+              >
+                {Object.entries(GEN_SERVER_DAYS).map(([gen, range]) => (
+                  <option key={gen} value={gen}>
+                    Gen {gen} ({range.max ? `${range.min}-${range.max}` : `${range.min}+`} days)
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-frost-muted mt-1">
+                Estimated server age: {(() => {
+                  const range = GEN_SERVER_DAYS[currentGen];
+                  if (!range) return '?';
+                  return range.max ? `${range.min}-${range.max} days` : `${range.min}+ days`;
+                })()}
+              </p>
             </div>
             <div>
               <label className="text-sm text-zinc-400 block mb-2">State Number</label>
@@ -139,7 +186,7 @@ export default function SettingsPage() {
                 value={profile?.furnace_fc_level || (profile?.furnace_level ? `${profile.furnace_level}` : '1')}
                 onChange={(e) => {
                   const val = e.target.value;
-                  if (val.startsWith('FC')) {
+                  if (val.startsWith('FC') || val.startsWith('30-')) {
                     handleSave({ furnace_level: 30, furnace_fc_level: val });
                   } else {
                     handleSave({ furnace_level: parseInt(val), furnace_fc_level: null });
@@ -149,27 +196,32 @@ export default function SettingsPage() {
               >
                 <optgroup label="Pre-FC Levels">
                   {Array.from({ length: 29 }, (_, i) => i + 1).map((lvl) => (
-                    <option key={lvl} value={lvl}>Level {lvl}</option>
+                    <option key={lvl} value={String(lvl)}>Level {lvl}</option>
                   ))}
                 </optgroup>
+                <optgroup label="Level 30 (Pre-FC)">
+                  <option value="30">Level 30</option>
+                  <option value="30-1">Level 30-1</option>
+                  <option value="30-2">Level 30-2</option>
+                  <option value="30-3">Level 30-3</option>
+                </optgroup>
                 <optgroup label="FC Levels">
-                  <option value="30">Level 30 (Pre-FC)</option>
                   {Array.from({ length: 10 }, (_, i) => i + 1).map((fc) => (
-                    <>
-                      <option key={`FC${fc}`} value={`FC${fc}`}>FC{fc}</option>
+                    <React.Fragment key={`fc-group-${fc}`}>
+                      <option value={`FC${fc}`}>FC{fc}</option>
                       {fc < 10 && (
                         <>
-                          <option key={`FC${fc}-1`} value={`FC${fc}-1`}>FC{fc}-1</option>
-                          <option key={`FC${fc}-2`} value={`FC${fc}-2`}>FC{fc}-2</option>
-                          <option key={`FC${fc}-3`} value={`FC${fc}-3`}>FC{fc}-3</option>
+                          <option value={`FC${fc}-1`}>FC{fc}-1</option>
+                          <option value={`FC${fc}-2`}>FC{fc}-2</option>
+                          <option value={`FC${fc}-3`}>FC{fc}-3</option>
                         </>
                       )}
-                    </>
+                    </React.Fragment>
                   ))}
                 </optgroup>
               </select>
               <p className="text-xs text-frost-muted mt-1">
-                FC levels have sub-steps (FC1-1, FC1-2, FC1-3) before reaching the next level
+                Levels 30 and FC have sub-steps (30-1, 30-2, 30-3, then FC1, FC1-1, etc.)
               </p>
             </div>
           </div>

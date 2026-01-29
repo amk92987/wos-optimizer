@@ -14,9 +14,11 @@ export default function HeroRoleBadges({ heroName, compact = false }: HeroRoleBa
     return null;
   }
 
+  const displayRoles = compact ? roles.slice(0, 2) : roles;
+
   return (
     <div className={`flex flex-wrap gap-1 ${compact ? '' : 'mt-1'}`}>
-      {roles.map((role, index) => (
+      {displayRoles.map((role, index) => (
         <span
           key={index}
           className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded border font-medium cursor-help"
@@ -27,7 +29,7 @@ export default function HeroRoleBadges({ heroName, compact = false }: HeroRoleBa
           }}
           title={role.detail}
         >
-          {compact && roles.length > 1 ? role.role.split(' ').pop() : role.role}
+          {role.role}
         </span>
       ))}
     </div>

@@ -33,11 +33,48 @@ export async function api<T>(endpoint: string, options: ApiOptions = {}): Promis
   });
 
   if (!response.ok) {
+    // On 401, try to refresh token via dev auto-login and retry once
+    if (response.status === 401 && token) {
+      const newToken = await tryRefreshToken();
+      if (newToken) {
+        const retryHeaders: HeadersInit = {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${newToken}`,
+        };
+        const retryResponse = await fetch(`${API_BASE}${endpoint}`, {
+          method,
+          headers: retryHeaders,
+          body: body ? JSON.stringify(body) : undefined,
+        });
+        if (retryResponse.ok) {
+          return retryResponse.json();
+        }
+      }
+    }
     const error = await response.json().catch(() => ({ detail: 'Request failed' }));
     throw new Error(error.detail || 'Request failed');
   }
 
   return response.json();
+}
+
+async function tryRefreshToken(): Promise<string | null> {
+  try {
+    // Re-login with dev credentials to get a fresh token
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'dev@local', password: 'dev123' }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      localStorage.setItem('token', data.access_token);
+      return data.access_token;
+    }
+  } catch {
+    // Refresh failed
+  }
+  return null;
 }
 
 // Auth API
@@ -242,11 +279,32 @@ export interface Hero {
   name: string;
   generation: number;
   hero_class: string;
+  rarity: string | null;
   tier_overall: string | null;
   tier_expedition: string | null;
   tier_exploration: string | null;
   image_filename: string | null;
   image_base64: string | null;
+  // Additional info
+  how_to_obtain: string | null;
+  notes: string | null;
+  best_use: string | null;
+  // Skill names
+  exploration_skill_1: string | null;
+  exploration_skill_2: string | null;
+  exploration_skill_3: string | null;
+  expedition_skill_1: string | null;
+  expedition_skill_2: string | null;
+  expedition_skill_3: string | null;
+  // Skill descriptions
+  exploration_skill_1_desc: string | null;
+  exploration_skill_2_desc: string | null;
+  exploration_skill_3_desc: string | null;
+  expedition_skill_1_desc: string | null;
+  expedition_skill_2_desc: string | null;
+  expedition_skill_3_desc: string | null;
+  // Mythic gear
+  mythic_gear: string | null;
 }
 
 export interface UserHero {
@@ -298,6 +356,7 @@ export interface UserHero {
   mythic_gear_quality: number;
   mythic_gear_level: number;
   mythic_gear_mastery: number;
+  exclusive_gear_skill_level: number;
   // Image
   image_base64: string | null;
 }

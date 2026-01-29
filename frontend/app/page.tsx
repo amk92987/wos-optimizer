@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+
 import Image from 'next/image';
 import AppShell from '@/components/AppShell';
 import { useAuth } from '@/lib/auth';
@@ -245,9 +245,12 @@ export default function HomePage() {
               <p className="text-sm text-frost-muted mb-3">
                 Help us improve Bear's Den by reporting bugs, suggesting features, or pointing out data errors.
               </p>
-              <Link href="/inbox" className="btn-secondary inline-block">
+              <button
+                onClick={() => window.dispatchEvent(new Event('open-feedback-modal'))}
+                className="btn-secondary"
+              >
                 Submit Feedback
-              </Link>
+              </button>
             </div>
           </details>
         </div>
