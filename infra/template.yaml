@@ -1,0 +1,962 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  WoS Bear's Den - Whiteout Survival Optimizer
+  Serverless stack: API Gateway + Lambda + DynamoDB + Cognito + S3/CloudFront
+
+Globals:
+  Function:
+    Runtime: python3.13
+    Timeout: 30
+    MemorySize: 256
+    Architectures:
+      - arm64
+    Environment:
+      Variables:
+        STAGE: !Ref Stage
+        MAIN_TABLE: !Ref MainTable
+        ADMIN_TABLE: !Ref AdminTable
+        REFERENCE_TABLE: !Ref ReferenceTable
+        USER_POOL_ID: !Ref UserPool
+        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+        SECRETS_ARN: !Ref AppSecrets
+        SES_FROM_EMAIL: !Sub "noreply@${DomainName}"
+        POWERTOOLS_SERVICE_NAME: wos
+        POWERTOOLS_LOG_LEVEL: INFO
+    Layers:
+      - !Ref CommonLayer
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - live
+  DomainName:
+    Type: String
+    Default: randomchaoslabs.com
+  ApiDomainPrefix:
+    Type: String
+    Default: api
+  FrontendDomainPrefix:
+    Type: String
+    Default: wos
+  CertificateArn:
+    Type: String
+    Description: ACM certificate ARN for custom domains (us-east-1)
+    Default: ""
+
+Conditions:
+  IsLive: !Equals [!Ref Stage, "live"]
+  HasCertificate: !Not [!Equals [!Ref CertificateArn, ""]]
+
+Resources:
+
+  # ============================================================
+  # Cognito User Pool
+  # ============================================================
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub "wos-users-${Stage}"
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      MfaConfiguration: "OFF"
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 6
+          RequireLowercase: false
+          RequireNumbers: false
+          RequireSymbols: false
+          RequireUppercase: false
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Required: true
+          Mutable: true
+        - Name: role
+          AttributeDataType: String
+          Mutable: true
+        - Name: is_test_account
+          AttributeDataType: String
+          Mutable: true
+      LambdaConfig:
+        UserMigration: !GetAtt UserMigrationFunction.Arn
+      EmailConfiguration:
+        EmailSendingAccount: COGNITO_DEFAULT
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub "wos-client-${Stage}"
+      UserPoolId: !Ref UserPool
+      GenerateSecret: false
+      ExplicitAuthFlows:
+        - ALLOW_USER_PASSWORD_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+      PreventUserExistenceErrors: ENABLED
+      AccessTokenValidity: 1
+      IdTokenValidity: 1
+      RefreshTokenValidity: 30
+      TokenValidityUnits:
+        AccessToken: hours
+        IdToken: hours
+        RefreshToken: days
+
+  UserMigrationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "wos-user-migration-${Stage}"
+      Handler: handlers/auth.user_migration_handler
+      CodeUri: ../backend/
+      MemorySize: 128
+      Timeout: 10
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MainTable
+
+  UserMigrationPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt UserMigrationFunction.Arn
+      Principal: cognito-idp.amazonaws.com
+      Action: lambda:InvokeFunction
+      SourceArn: !GetAtt UserPool.Arn
+
+  # ============================================================
+  # API Gateway (HTTP API)
+  # ============================================================
+
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: !Ref Stage
+      CorsConfiguration:
+        AllowOrigins:
+          - !If
+            - IsLive
+            - !Sub "https://${FrontendDomainPrefix}.${DomainName}"
+            - "*"
+        AllowHeaders:
+          - Authorization
+          - Content-Type
+          - X-Impersonate-User
+        AllowMethods:
+          - GET
+          - POST
+          - PUT
+          - DELETE
+          - OPTIONS
+        AllowCredentials: !If [IsLive, true, false]
+      Auth:
+        DefaultAuthorizer: CognitoAuthorizer
+        Authorizers:
+          CognitoAuthorizer:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}"
+              audience:
+                - !Ref UserPoolClient
+
+  # ============================================================
+  # DynamoDB Tables
+  # ============================================================
+
+  MainTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "wos-main-${Stage}"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+        - AttributeName: user_id
+          AttributeType: S
+        - AttributeName: thread_id
+          AttributeType: S
+        - AttributeName: entity_type
+          AttributeType: S
+        - AttributeName: created_at
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1-Email
+          KeySchema:
+            - AttributeName: email
+              KeyType: HASH
+            - AttributeName: SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: GSI2-ProfileUser
+          KeySchema:
+            - AttributeName: user_id
+              KeyType: HASH
+            - AttributeName: SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: GSI3-ThreadId
+          KeySchema:
+            - AttributeName: thread_id
+              KeyType: HASH
+            - AttributeName: SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        - IndexName: GSI4-AdminUserList
+          KeySchema:
+            - AttributeName: entity_type
+              KeyType: HASH
+            - AttributeName: created_at
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: !If [IsLive, true, false]
+
+  AdminTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "wos-admin-${Stage}"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: status
+          AttributeType: S
+        - AttributeName: created_at
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1-Status
+          KeySchema:
+            - AttributeName: status
+              KeyType: HASH
+            - AttributeName: created_at
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: !If [IsLive, true, false]
+
+  ReferenceTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub "wos-reference-${Stage}"
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+
+  # ============================================================
+  # Lambda Layer (shared code)
+  # ============================================================
+
+  CommonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub "wos-common-${Stage}"
+      Description: Shared code - db, models, auth, config, exceptions, repos
+      ContentUri: ../backend/common/
+      CompatibleRuntimes:
+        - python3.13
+      CompatibleArchitectures:
+        - arm64
+    Metadata:
+      BuildMethod: python3.13
+
+  # ============================================================
+  # Lambda Functions
+  # ============================================================
+
+  AuthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "wos-auth-${Stage}"
+      Handler: handlers/auth.lambda_handler
+      CodeUri: ../backend/
+      Timeout: 15
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:AdminCreateUser
+                - cognito-idp:AdminSetUserPassword
+                - cognito-idp:AdminInitiateAuth
+                - cognito-idp:AdminGetUser
+                - cognito-idp:AdminUpdateUserAttributes
+                - cognito-idp:SignUp
+                - cognito-idp:InitiateAuth
+              Resource: !GetAtt UserPool.Arn
+      Events:
+        Login:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/auth/login
+            Method: POST
+            Auth:
+              Authorizer: NONE
+        Register:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/auth/register
+            Method: POST
+            Auth:
+              Authorizer: NONE
+        Me:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/auth/me
+            Method: GET
+        ForgotPassword:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/auth/forgot-password
+            Method: POST
+            Auth:
+              Authorizer: NONE
+        ConfirmReset:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/auth/confirm-reset
+            Method: POST
+            Auth:
+              Authorizer: NONE
+        RefreshToken:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/auth/refresh
+            Method: POST
+            Auth:
+              Authorizer: NONE
+        ChangePassword:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/auth/change-password
+            Method: POST
+
+  HeroesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "wos-heroes-${Stage}"
+      Handler: handlers/heroes.lambda_handler
+      CodeUri: ../backend/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref ReferenceTable
+      Events:
+        GetAll:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/heroes/all
+            Method: GET
+        GetOwned:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/heroes/owned
+            Method: GET
+        UpdateHero:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/heroes/{heroName}
+            Method: PUT
+        BatchUpdate:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/heroes/batch
+            Method: PUT
+        DeleteHero:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/heroes/{heroName}
+            Method: DELETE
+
+  ProfilesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "wos-profiles-${Stage}"
+      Handler: handlers/profiles.lambda_handler
+      CodeUri: ../backend/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        ListProfiles:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/profiles
+            Method: GET
+        CreateProfile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/profiles
+            Method: POST
+        GetProfile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/profiles/{profileId}
+            Method: GET
+        UpdateProfile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/profiles/{profileId}
+            Method: PUT
+        DeleteProfile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/profiles/{profileId}
+            Method: DELETE
+        SwitchProfile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/profiles/{profileId}/switch
+            Method: POST
+
+  ChiefFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "wos-chief-${Stage}"
+      Handler: handlers/chief.lambda_handler
+      CodeUri: ../backend/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+      Events:
+        GetGear:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/chief/gear
+            Method: GET
+        UpdateGear:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/chief/gear
+            Method: PUT
+        GetCharms:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/chief/charms
+            Method: GET
+        UpdateCharms:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/chief/charms
+            Method: PUT
+
+  RecommendFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "wos-recommend-${Stage}"
+      Handler: handlers/recommendations.lambda_handler
+      CodeUri: ../backend/
+      MemorySize: 512
+      Timeout: 60
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MainTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref ReferenceTable
+      Events:
+        GetRecommendations:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/recommendations
+            Method: GET
+        GetInvestments:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/recommendations/investments
+            Method: GET
+
+  AdvisorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "wos-advisor-${Stage}"
+      Handler: handlers/advisor.lambda_handler
+      CodeUri: ../backend/
+      MemorySize: 512
+      Timeout: 90
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref AdminTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref ReferenceTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - secretsmanager:GetSecretValue
+              Resource: !Ref AppSecrets
+      Events:
+        Ask:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/advisor/ask
+            Method: POST
+        History:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/advisor/history
+            Method: GET
+        Rate:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/advisor/rate
+            Method: POST
+        Threads:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/advisor/threads
+            Method: GET
+        ThreadMessages:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/advisor/threads/{threadId}
+            Method: GET
+
+  AdminFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "wos-admin-${Stage}"
+      Handler: handlers/admin.lambda_handler
+      CodeUri: ../backend/
+      Timeout: 30
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AdminTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref ReferenceTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cognito-idp:AdminCreateUser
+                - cognito-idp:AdminSetUserPassword
+                - cognito-idp:AdminDisableUser
+                - cognito-idp:AdminEnableUser
+                - cognito-idp:AdminDeleteUser
+                - cognito-idp:AdminGetUser
+                - cognito-idp:AdminUpdateUserAttributes
+                - cognito-idp:ListUsers
+              Resource: !GetAtt UserPool.Arn
+      Events:
+        Users:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/users
+            Method: GET
+        UserDetail:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/users/{userId}
+            Method: GET
+        CreateUser:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/users
+            Method: POST
+        UpdateUser:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/users/{userId}
+            Method: PUT
+        DeleteUser:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/users/{userId}
+            Method: DELETE
+        Impersonate:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/impersonate/{userId}
+            Method: POST
+        Flags:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/flags
+            Method: GET
+        UpdateFlag:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/flags/{flagName}
+            Method: PUT
+        AISettings:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/ai-settings
+            Method: GET
+        UpdateAISettings:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/ai-settings
+            Method: PUT
+        AuditLog:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/audit-log
+            Method: GET
+        Metrics:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/metrics
+            Method: GET
+        Announcements:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/announcements
+            Method: GET
+        CreateAnnouncement:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/announcements
+            Method: POST
+        UpdateAnnouncement:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/announcements/{announcementId}
+            Method: PUT
+        DeleteAnnouncement:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/announcements/{announcementId}
+            Method: DELETE
+        AdminFeedback:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/feedback
+            Method: GET
+        UpdateFeedback:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/feedback/{feedbackId}
+            Method: PUT
+        AIConversations:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/ai-conversations
+            Method: GET
+        DatabaseTables:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/database/tables
+            Method: GET
+        DatabaseTableData:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/database/tables/{tableName}
+            Method: GET
+        ExportData:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/export/{format}
+            Method: GET
+
+  GeneralFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "wos-general-${Stage}"
+      Handler: handlers/general.lambda_handler
+      CodeUri: ../backend/
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AdminTable
+        - DynamoDBReadPolicy:
+            TableName: !Ref ReferenceTable
+      Events:
+        Dashboard:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/dashboard
+            Method: GET
+        Events:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/events
+            Method: GET
+        Inbox:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/inbox
+            Method: GET
+        DismissNotification:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/inbox/{notificationId}/dismiss
+            Method: POST
+        SubmitFeedback:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/feedback
+            Method: POST
+        Lineups:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/lineups
+            Method: GET
+        LineupByEvent:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/lineups/{eventType}
+            Method: GET
+
+  # ============================================================
+  # Scheduled Cleanup
+  # ============================================================
+
+  ScheduledCleanupFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "wos-cleanup-${Stage}"
+      Handler: handlers/general.cleanup_handler
+      CodeUri: ../backend/
+      Timeout: 300
+      MemorySize: 256
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MainTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AdminTable
+      Events:
+        DailyCleanup:
+          Type: Schedule
+          Properties:
+            Schedule: rate(1 day)
+            Description: Daily cleanup - purge soft-deleted items, snapshot metrics
+            Enabled: true
+
+  # ============================================================
+  # Secrets Manager
+  # ============================================================
+
+  AppSecrets:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: !Sub "wos/api-keys/${Stage}"
+      Description: API keys for AI providers
+      SecretString: '{"ANTHROPIC_API_KEY":"","OPENAI_API_KEY":""}'
+
+  # ============================================================
+  # S3 + CloudFront (Frontend)
+  # ============================================================
+
+  FrontendBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "wos-frontend-${Stage}-${AWS::AccountId}"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  FrontendBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref FrontendBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowCloudFrontOAC
+            Effect: Allow
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Action: s3:GetObject
+            Resource: !Sub "${FrontendBucket.Arn}/*"
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
+
+  CloudFrontOAC:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub "wos-oac-${Stage}"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  CloudFrontDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub "WoS Frontend - ${Stage}"
+        DefaultRootObject: index.html
+        PriceClass: PriceClass_100
+        Origins:
+          - Id: S3Origin
+            DomainName: !GetAtt FrontendBucket.RegionalDomainName
+            OriginAccessControlId: !Ref CloudFrontOAC
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+          - Id: ApiOrigin
+            DomainName: !Sub "${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+            CustomOriginConfig:
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+        DefaultCacheBehavior:
+          TargetOriginId: S3Origin
+          ViewerProtocolPolicy: redirect-to-https
+          CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
+          Compress: true
+        CacheBehaviors:
+          - PathPattern: "/api/*"
+            TargetOriginId: ApiOrigin
+            ViewerProtocolPolicy: https-only
+            CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad  # CachingDisabled
+            OriginRequestPolicyId: b689b0a8-53d0-40ab-baf2-68738e2966ac  # AllViewerExceptHostHeader
+            AllowedMethods:
+              - GET
+              - HEAD
+              - OPTIONS
+              - PUT
+              - POST
+              - PATCH
+              - DELETE
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+          - ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+            ErrorCachingMinTTL: 0
+
+# ============================================================
+# Outputs
+# ============================================================
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL
+    Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}"
+
+  CloudFrontUrl:
+    Description: CloudFront distribution URL
+    Value: !Sub "https://${CloudFrontDistribution.DomainName}"
+
+  CloudFrontDistributionId:
+    Description: CloudFront distribution ID (for cache invalidation)
+    Value: !Ref CloudFrontDistribution
+
+  FrontendBucketName:
+    Description: S3 bucket for frontend deployment
+    Value: !Ref FrontendBucket
+
+  UserPoolId:
+    Description: Cognito User Pool ID
+    Value: !Ref UserPool
+
+  UserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !Ref UserPoolClient
+
+  MainTableName:
+    Description: Main DynamoDB table name
+    Value: !Ref MainTable
+
+  AdminTableName:
+    Description: Admin DynamoDB table name
+    Value: !Ref AdminTable
+
+  ReferenceTableName:
+    Description: Reference DynamoDB table name
+    Value: !Ref ReferenceTable

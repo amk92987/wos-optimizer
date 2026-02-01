@@ -1,5 +1,6 @@
 /**
  * API client for Bear's Den backend
+ * Connects to API Gateway (Lambda) with Cognito token auth
  */
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -15,15 +16,50 @@ interface ApiOptions {
   token?: string;
 }
 
+/**
+ * Get the current Cognito ID token from localStorage.
+ * Falls back to legacy 'token' key for backwards compatibility.
+ */
+export function getStoredToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem('id_token') || localStorage.getItem('token') || null;
+}
+
+/**
+ * Store Cognito tokens in localStorage.
+ */
+export function storeTokens(tokens: { id_token: string; access_token: string; refresh_token?: string }) {
+  localStorage.setItem('id_token', tokens.id_token);
+  localStorage.setItem('access_token', tokens.access_token);
+  if (tokens.refresh_token) {
+    localStorage.setItem('refresh_token', tokens.refresh_token);
+  }
+  // Also store as legacy 'token' for any code that still reads it
+  localStorage.setItem('token', tokens.id_token);
+}
+
+/**
+ * Clear all auth tokens from localStorage.
+ */
+export function clearTokens() {
+  localStorage.removeItem('id_token');
+  localStorage.removeItem('access_token');
+  localStorage.removeItem('refresh_token');
+  localStorage.removeItem('token');
+}
+
 export async function api<T>(endpoint: string, options: ApiOptions = {}): Promise<T> {
   const { method = 'GET', body, token } = options;
+
+  // Use provided token, or fall back to stored Cognito ID token
+  const authToken = token || getStoredToken();
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
 
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  if (authToken) {
+    headers['Authorization'] = `Bearer ${authToken}`;
   }
 
   const response = await fetch(`${API_BASE}${endpoint}`, {
@@ -33,8 +69,8 @@ export async function api<T>(endpoint: string, options: ApiOptions = {}): Promis
   });
 
   if (!response.ok) {
-    // On 401, try to refresh token via dev auto-login and retry once
-    if (response.status === 401 && token) {
+    // On 401, try to refresh token using Cognito refresh_token and retry once
+    if (response.status === 401 && authToken) {
       const newToken = await tryRefreshToken();
       if (newToken) {
         const retryHeaders: HeadersInit = {
@@ -51,8 +87,8 @@ export async function api<T>(endpoint: string, options: ApiOptions = {}): Promis
         }
       }
     }
-    const error = await response.json().catch(() => ({ detail: 'Request failed' }));
-    throw new Error(error.detail || 'Request failed');
+    const error = await response.json().catch(() => ({ message: 'Request failed' }));
+    throw new Error(error.message || error.error || error.detail || 'Request failed');
   }
 
   return response.json();
@@ -60,16 +96,23 @@ export async function api<T>(endpoint: string, options: ApiOptions = {}): Promis
 
 async function tryRefreshToken(): Promise<string | null> {
   try {
-    // Re-login with dev credentials to get a fresh token
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
+    const refreshToken = localStorage.getItem('refresh_token');
+    if (!refreshToken) return null;
+
+    // Call the backend refresh endpoint with the Cognito refresh token
+    const res = await fetch(`${API_BASE}/api/auth/refresh`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: 'dev@local', password: 'dev123' }),
+      body: JSON.stringify({ refresh_token: refreshToken }),
     });
     if (res.ok) {
       const data = await res.json();
-      localStorage.setItem('token', data.access_token);
-      return data.access_token;
+      storeTokens({
+        id_token: data.id_token,
+        access_token: data.access_token,
+        refresh_token: data.refresh_token || refreshToken,
+      });
+      return data.id_token;
     }
   } catch {
     // Refresh failed
@@ -77,205 +120,244 @@ async function tryRefreshToken(): Promise<string | null> {
   return null;
 }
 
-// Auth API
+// Auth API - Cognito token-based authentication
+export interface AuthResponse {
+  id_token: string;
+  access_token: string;
+  refresh_token?: string;
+  user: User;
+}
+
 export const authApi = {
   login: (email: string, password: string) =>
-    api<{ access_token: string; user: User }>('/api/auth/login', {
+    api<AuthResponse>('/api/auth/login', {
       method: 'POST',
       body: { email, password },
     }),
 
   register: (email: string, password: string) =>
-    api<{ access_token: string; user: User }>('/api/auth/register', {
+    api<AuthResponse>('/api/auth/register', {
       method: 'POST',
       body: { email, password },
     }),
 
   me: (token: string) =>
     api<User>('/api/auth/me', { token }),
+
+  refresh: (refreshToken: string) =>
+    api<AuthResponse>('/api/auth/refresh', {
+      method: 'POST',
+      body: { refresh_token: refreshToken },
+    }),
 };
 
 // Heroes API
 export const heroesApi = {
   getAll: (token: string, includeImages = false) =>
-    api<Hero[]>(`/api/heroes/all?include_images=${includeImages}`, { token }),
+    api<{ heroes: Hero[] }>(`/api/heroes/all?include_images=${includeImages}`, { token }),
 
   getOwned: (token: string) =>
-    api<UserHero[]>('/api/heroes/owned?include_images=true', { token }),
+    api<{ heroes: UserHero[] }>('/api/heroes/owned?include_images=true', { token }),
 
-  addHero: (token: string, heroId: number) =>
-    api('/api/heroes/own/' + heroId, { method: 'POST', token }),
+  addHero: (token: string, heroName: string, data: Partial<UserHero> = {}) =>
+    api<{ hero: UserHero }>(`/api/heroes/${encodeURIComponent(heroName)}`, { method: 'PUT', body: data, token }),
 
-  updateHero: (token: string, heroId: number, data: Partial<UserHero>) =>
-    api('/api/heroes/update/' + heroId, { method: 'PUT', body: data, token }),
+  updateHero: (token: string, heroName: string, data: Partial<UserHero>) =>
+    api<{ hero: UserHero }>(`/api/heroes/${encodeURIComponent(heroName)}`, { method: 'PUT', body: data, token }),
 
-  removeHero: (token: string, heroId: number) =>
-    api('/api/heroes/remove/' + heroId, { method: 'DELETE', token }),
+  batchUpdate: (token: string, heroes: Partial<UserHero>[]) =>
+    api<{ updated: number; heroes: UserHero[] }>('/api/heroes/batch', { method: 'PUT', body: { heroes }, token }),
+
+  removeHero: (token: string, heroName: string) =>
+    api<{ deleted: string }>(`/api/heroes/${encodeURIComponent(heroName)}`, { method: 'DELETE', token }),
 };
 
 // Profile API
 export const profileApi = {
-  getCurrent: (token: string) =>
-    api<Profile>('/api/profiles/current', { token }),
+  list: (token: string) =>
+    api<{ profiles: Profile[] }>('/api/profiles', { token }),
 
-  update: (token: string, data: Partial<Profile>) =>
-    api<Profile>('/api/profiles/update', { method: 'PUT', body: data, token }),
+  get: (token: string, profileId: string) =>
+    api<{ profile: Profile }>(`/api/profiles/${profileId}`, { token }),
+
+  create: (token: string, data: { name?: string; state_number?: number; is_farm_account?: boolean }) =>
+    api<{ profile: Profile }>('/api/profiles', { method: 'POST', body: data, token }),
+
+  update: (token: string, profileId: string, data: Partial<Profile>) =>
+    api<{ profile: Profile }>(`/api/profiles/${profileId}`, { method: 'PUT', body: data, token }),
+
+  delete: (token: string, profileId: string, hard = false) =>
+    api(`/api/profiles/${profileId}?hard=${hard}`, { method: 'DELETE', token }),
+
+  switch: (token: string, profileId: string) =>
+    api(`/api/profiles/${profileId}/switch`, { method: 'POST', token }),
 };
 
 // Dashboard API
 export const dashboardApi = {
   getStats: (token: string) =>
-    api<DashboardStats>('/api/dashboard/stats', { token }),
+    api<DashboardStats>('/api/dashboard', { token }),
 };
 
 // Chief Gear & Charms API
 export const chiefApi = {
   getGear: (token: string) =>
-    api<ChiefGear>('/api/chief/gear', { token }),
+    api<{ gear: ChiefGear }>('/api/chief/gear', { token }),
 
   updateGear: (token: string, data: Partial<ChiefGear>) =>
-    api<ChiefGear>('/api/chief/gear', { method: 'PUT', body: data, token }),
+    api<{ gear: ChiefGear }>('/api/chief/gear', { method: 'PUT', body: data, token }),
 
   getCharms: (token: string) =>
-    api<ChiefCharms>('/api/chief/charms', { token }),
+    api<{ charms: ChiefCharms }>('/api/chief/charms', { token }),
 
   updateCharms: (token: string, data: Partial<ChiefCharms>) =>
-    api<ChiefCharms>('/api/chief/charms', { method: 'PUT', body: data, token }),
+    api<{ charms: ChiefCharms }>('/api/chief/charms', { method: 'PUT', body: data, token }),
 };
 
 // Recommendations API
 export const recommendationsApi = {
-  get: (token: string, limit = 10, includePower = true) =>
-    api<Recommendation[]>(`/api/recommendations/?limit=${limit}&include_power=${includePower}`, { token }),
+  get: (token: string) =>
+    api<{ recommendations: Recommendation[] }>('/api/recommendations', { token }),
 
-  getInvestments: (token: string, limit = 10) =>
-    api<Investment[]>(`/api/recommendations/investments?limit=${limit}`, { token }),
-
-  getPhase: (token: string) =>
-    api<PhaseInfo>('/api/recommendations/phase', { token }),
-
-  getGearPriority: (token: string) =>
-    api<GearPriority>('/api/recommendations/gear-priority', { token }),
+  getInvestments: (token: string) =>
+    api<{ investments: Investment[] }>('/api/recommendations/investments', { token }),
 };
 
 // AI Advisor API
 export const advisorApi = {
-  ask: (token: string, question: string, forceAi = false) =>
+  ask: (token: string, question: string, threadId?: string) =>
     api<AdvisorResponse>('/api/advisor/ask', {
       method: 'POST',
-      body: { question, force_ai: forceAi },
+      body: { question, thread_id: threadId },
       token,
     }),
 
   getHistory: (token: string, limit = 10) =>
-    api<Conversation[]>(`/api/advisor/history?limit=${limit}`, { token }),
+    api<{ conversations: Conversation[] }>(`/api/advisor/history?limit=${limit}`, { token }),
 
-  rate: (token: string, conversationId: number, rating?: number, isHelpful?: boolean) =>
-    api('/api/advisor/rate', {
+  rate: (token: string, conversationSk: string, data: { rating?: number; is_helpful?: boolean; user_feedback?: string; is_favorite?: boolean }) =>
+    api<{ conversation: Conversation }>('/api/advisor/rate', {
       method: 'POST',
-      body: { conversation_id: conversationId, rating, is_helpful: isHelpful },
+      body: { conversation_sk: conversationSk, ...data },
       token,
     }),
 
-  getStatus: (token: string) =>
-    api<AdvisorStatus>('/api/advisor/status', { token }),
+  getThreads: (token: string, limit = 10) =>
+    api<{ threads: any[] }>(`/api/advisor/threads?limit=${limit}`, { token }),
+
+  getThreadMessages: (token: string, threadId: string) =>
+    api<{ thread_id: string; messages: Conversation[] }>(`/api/advisor/threads/${threadId}`, { token }),
 };
 
 // Lineups API
 export const lineupsApi = {
-  getTemplates: () =>
-    api<Record<string, LineupTemplate>>('/api/lineups/templates'),
+  getAll: (token: string) =>
+    api<{ lineups: Record<string, any>; owned_heroes: number; hero_count: number }>('/api/lineups', { token }),
 
-  build: (token: string, gameMode: string) =>
-    api<LineupResponse>(`/api/lineups/build/${gameMode}`, { token }),
-
-  buildAll: (token: string) =>
-    api<Record<string, LineupResponse>>('/api/lineups/build-all', { token }),
-
-  getGeneral: (gameMode: string, maxGeneration = 8) =>
-    api<LineupResponse>(`/api/lineups/general/${gameMode}?max_generation=${maxGeneration}`),
-
-  getJoinerRecommendation: (token: string, attackType: string) =>
-    api<JoinerRecommendation>(`/api/lineups/joiner/${attackType}`, { token }),
-
-  getTemplateDetails: (gameMode: string) =>
-    api<LineupTemplateDetails>(`/api/lineups/template/${gameMode}`),
+  getForEvent: (token: string, eventType: string) =>
+    api<{ event_type: string; lineup: any; owned_heroes: string[] }>(`/api/lineups/${eventType}`, { token }),
 };
 
 // Admin API
 export const adminApi = {
   // Users
-  listUsers: (token: string, skip = 0, limit = 50, testOnly = false) =>
-    api<AdminUser[]>(`/api/admin/users?skip=${skip}&limit=${limit}&test_only=${testOnly}`, { token }),
+  listUsers: (token: string, limit = 50, testOnly = false) =>
+    api<{ users: AdminUser[] }>(`/api/admin/users?limit=${limit}&test_only=${testOnly}`, { token }),
+
+  getUser: (token: string, userId: string) =>
+    api<{ user: AdminUser; profiles: Profile[] }>(`/api/admin/users/${userId}`, { token }),
 
   createUser: (token: string, data: CreateUserRequest) =>
-    api<AdminUser>('/api/admin/users', { method: 'POST', body: data, token }),
+    api<{ user: AdminUser }>('/api/admin/users', { method: 'POST', body: data, token }),
 
-  updateUser: (token: string, userId: number, data: UpdateUserRequest) =>
-    api<AdminUser>(`/api/admin/users/${userId}`, { method: 'PUT', body: data, token }),
+  updateUser: (token: string, userId: string, data: UpdateUserRequest) =>
+    api<{ user: AdminUser }>(`/api/admin/users/${userId}`, { method: 'PUT', body: data, token }),
 
-  deleteUser: (token: string, userId: number) =>
+  deleteUser: (token: string, userId: string) =>
     api(`/api/admin/users/${userId}`, { method: 'DELETE', token }),
 
   // Announcements
-  listAnnouncements: (token: string, activeOnly = false) =>
-    api<Announcement[]>(`/api/admin/announcements?active_only=${activeOnly}`, { token }),
+  listAnnouncements: (token: string) =>
+    api<{ announcements: Announcement[] }>('/api/admin/announcements', { token }),
 
   createAnnouncement: (token: string, data: CreateAnnouncementRequest) =>
-    api<Announcement>('/api/admin/announcements', { method: 'POST', body: data, token }),
+    api<{ announcement: Announcement }>('/api/admin/announcements', { method: 'POST', body: data, token }),
 
-  toggleAnnouncement: (token: string, id: number, isActive: boolean) =>
-    api(`/api/admin/announcements/${id}?is_active=${isActive}`, { method: 'PUT', token }),
+  updateAnnouncement: (token: string, id: string, data: Partial<Announcement>) =>
+    api<{ announcement: Announcement }>(`/api/admin/announcements/${id}`, { method: 'PUT', body: data, token }),
+
+  deleteAnnouncement: (token: string, id: string) =>
+    api(`/api/admin/announcements/${id}`, { method: 'DELETE', token }),
 
   // Feature Flags
   listFeatureFlags: (token: string) =>
-    api<FeatureFlag[]>('/api/admin/feature-flags', { token }),
+    api<{ flags: FeatureFlag[] }>('/api/admin/flags', { token }),
 
-  toggleFeatureFlag: (token: string, name: string, isEnabled: boolean) =>
-    api(`/api/admin/feature-flags/${name}?is_enabled=${isEnabled}`, { method: 'PUT', token }),
+  updateFeatureFlag: (token: string, name: string, data: { is_enabled?: boolean; description?: string }) =>
+    api<{ flag: FeatureFlag }>(`/api/admin/flags/${name}`, { method: 'PUT', body: data, token }),
 
   // AI Settings
   getAISettings: (token: string) =>
-    api<AISettings>('/api/admin/ai-settings', { token }),
+    api<{ settings: AISettings }>('/api/admin/ai-settings', { token }),
 
   updateAISettings: (token: string, data: Partial<AISettings>) =>
-    api('/api/admin/ai-settings', { method: 'PUT', body: data, token }),
+    api<{ settings: AISettings }>('/api/admin/ai-settings', { method: 'PUT', body: data, token }),
 
-  // Stats
-  getStats: (token: string) =>
-    api<AdminStats>('/api/admin/stats', { token }),
+  // Metrics
+  getMetrics: (token: string) =>
+    api<AdminStats>('/api/admin/metrics', { token }),
 
-  // Feedback
-  listFeedback: (token: string, status?: string, feedbackType?: string) => {
+  // Audit Log
+  getAuditLog: (token: string, month?: string, limit = 100) => {
     const params = new URLSearchParams();
-    if (status) params.append('status', status);
-    if (feedbackType) params.append('feedback_type', feedbackType);
-    return api<FeedbackItem[]>(`/api/admin/feedback?${params}`, { token });
+    if (month) params.append('month', month);
+    params.append('limit', String(limit));
+    return api<{ logs: any[] }>(`/api/admin/audit-log?${params}`, { token });
   },
 
-  updateFeedbackStatus: (token: string, id: number, status: string) =>
-    api(`/api/admin/feedback/${id}?status=${status}`, { method: 'PUT', token }),
+  // Feedback
+  listFeedback: (token: string, status?: string, category?: string) => {
+    const params = new URLSearchParams();
+    if (status) params.append('status', status);
+    if (category) params.append('category', category);
+    return api<{ feedback: FeedbackItem[] }>(`/api/admin/feedback?${params}`, { token });
+  },
+
+  updateFeedback: (token: string, feedbackId: string, data: { status?: string; admin_notes?: string }) =>
+    api<{ feedback: FeedbackItem }>(`/api/admin/feedback/${feedbackId}`, { method: 'PUT', body: data, token }),
+
+  // AI Conversations (admin view)
+  listAIConversations: (token: string, limit = 50) =>
+    api<{ conversations: Conversation[] }>(`/api/admin/ai-conversations?limit=${limit}`, { token }),
+
+  // Database Browser
+  listTables: (token: string) =>
+    api<{ tables: { name: string; alias: string }[] }>('/api/admin/database/tables', { token }),
+
+  scanTable: (token: string, tableName: string, limit = 25) =>
+    api<{ table: string; items: any[]; count: number }>(`/api/admin/database/tables/${tableName}?limit=${limit}`, { token }),
+
+  // Export
+  exportData: (token: string, format: 'json' | 'csv', table = 'main') =>
+    api<any>(`/api/admin/export/${format}?table=${table}`, { token }),
 
   // Impersonation
-  impersonateUser: (token: string, userId: number) =>
-    api<{ access_token: string; user: User }>(`/api/admin/users/${userId}/impersonate`, { method: 'POST', token }),
-
-  switchBack: (token: string) =>
-    api<{ access_token: string; user: User }>('/api/admin/users/switch-back', { method: 'POST', token }),
+  impersonateUser: (token: string, userId: string) =>
+    api<{ user: User; profiles: Profile[]; impersonating: boolean }>(`/api/admin/impersonate/${userId}`, { method: 'POST', token }),
 };
 
 // Types
 export interface User {
-  id: number;
+  id: string;
   email: string;
   username: string;
   role: string;
-  impersonating?: boolean;
-  original_admin_id?: number;
+  is_active: boolean;
+  is_test_account: boolean;
+  created_at: string;
 }
 
 export interface Hero {
-  id: number;
   name: string;
   generation: number;
   hero_class: string;
@@ -308,7 +390,7 @@ export interface Hero {
 }
 
 export interface UserHero {
-  hero_id: number;
+  hero_name: string;
   name: string;
   generation: number;
   hero_class: string;
@@ -362,7 +444,8 @@ export interface UserHero {
 }
 
 export interface Profile {
-  id: number;
+  profile_id: string;
+  user_id: string;
   name: string | null;
   state_number: number | null;
   server_age_days: number;
@@ -377,25 +460,21 @@ export interface Profile {
   priority_exploration: number;
   priority_gathering: number;
   is_farm_account: boolean;
+  is_active: boolean;
+  created_at: string;
 }
 
 export interface DashboardStats {
-  total_heroes: number;
-  owned_heroes: number;
+  profile: Profile;
+  hero_count: number;
+  profile_count: number;
   furnace_level: number;
-  furnace_display: string;
-  server_age_days: number;
-  generation: number;
-  state_number: number | null;
   spending_profile: string;
-  alliance_role: string;
-  priority_focus: string;
+  announcements: Announcement[];
 }
 
 // Chief Gear & Charms Types
 export interface ChiefGear {
-  id: number;
-  profile_id: number;
   helmet_quality: number;
   helmet_level: number;
   armor_quality: number;
@@ -411,8 +490,6 @@ export interface ChiefGear {
 }
 
 export interface ChiefCharms {
-  id: number;
-  profile_id: number;
   cap_slot_1: string;
   cap_slot_2: string;
   cap_slot_3: string;
@@ -458,97 +535,33 @@ export interface Investment {
   priority: number;
 }
 
-export interface PhaseInfo {
-  phase_id: string;
-  phase_name: string;
-  focus_areas: string[];
-  common_mistakes: string[];
-  bottlenecks: string[];
-  next_milestone: Record<string, any> | null;
-}
-
-export interface GearPriority {
-  spending_profile: string;
-  priority: Record<string, any>[];
-}
-
 // AI Advisor Types
 export interface AdvisorResponse {
   answer: string;
   source: string;
-  category: string | null;
-  recommendations: Record<string, any>[];
-  lineup: Record<string, any> | null;
-  conversation_id: number | null;
+  conversation_id: string | null;
+  thread_id: string | null;
+  remaining_requests: number;
 }
 
 export interface Conversation {
-  id: number;
+  conversation_id: string;
   question: string;
   answer: string;
   source: string;
+  provider: string | null;
+  model: string | null;
   created_at: string;
   rating: number | null;
   is_helpful: boolean | null;
-}
-
-export interface AdvisorStatus {
-  ai_enabled: boolean;
-  mode: string;
-  daily_limit: number;
-  requests_today: number;
-  requests_remaining: number;
-  primary_provider?: string;
-}
-
-// Lineups Types
-export interface LineupHero {
-  hero: string;
-  hero_class: string;
-  slot: string;
-  role: string;
-  is_lead: boolean;
-  status: string;
-  power?: number;
-}
-
-export interface LineupResponse {
-  game_mode: string;
-  heroes: LineupHero[];
-  troop_ratio: Record<string, number>;
-  notes: string;
-  confidence: string;
-  recommended_to_get: Record<string, any>[];
-}
-
-export interface LineupTemplate {
-  name: string;
-  troop_ratio: Record<string, number>;
-  notes: string;
-  key_heroes: string[];
-  ratio_explanation: string;
-}
-
-export interface LineupTemplateDetails extends LineupTemplate {
-  slots: Record<string, any>[];
-  hero_explanations: Record<string, string>;
-  sustain_heroes?: Record<string, string>;
-  joiner_warning?: string;
-}
-
-export interface JoinerRecommendation {
-  hero: string | null;
-  status: string;
-  skill_level: number | null;
-  max_skill: number;
-  recommendation: string;
-  action: string;
-  critical_note: string;
+  user_feedback: string | null;
+  is_favorite: boolean;
+  thread_id: string | null;
 }
 
 // Admin Types
 export interface AdminUser {
-  id: number;
+  user_id: string;
   email: string;
   username: string;
   role: string;
@@ -573,12 +586,13 @@ export interface UpdateUserRequest {
 }
 
 export interface Announcement {
-  id: number;
+  announcement_id: string;
   title: string;
   message: string;
   type: string;
   is_active: boolean;
   display_type: string;
+  inbox_content: string | null;
   show_from: string | null;
   show_until: string | null;
   created_at: string;
@@ -595,8 +609,7 @@ export interface CreateAnnouncementRequest {
 }
 
 export interface FeatureFlag {
-  id: number;
-  name: string;
+  flag_name: string;
   is_enabled: boolean;
   description: string | null;
 }
@@ -627,10 +640,12 @@ export interface AdminStats {
 }
 
 export interface FeedbackItem {
-  id: number;
-  user_id: number;
-  type: string;
-  message: string;
+  feedback_id: string;
+  user_id: string;
+  category: string;
+  description: string;
+  page: string | null;
   status: string;
+  admin_notes: string | null;
   created_at: string;
 }

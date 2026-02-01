@@ -1,0 +1,27 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "wos-dev"
+resolve_s3 = true
+s3_prefix = "wos-dev"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
+parameter_overrides = "Stage=dev"
+tags = "project=wos environment=dev"
+
+[default.build.parameters]
+use_container = false
+
+[default.local_start_api.parameters]
+warm_containers = "EAGER"
+
+[live.deploy.parameters]
+stack_name = "wos-live"
+resolve_s3 = true
+s3_prefix = "wos-live"
+region = "us-east-1"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
+parameter_overrides = "Stage=live"
+tags = "project=wos environment=live"
