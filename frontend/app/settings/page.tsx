@@ -40,7 +40,8 @@ export default function SettingsPage() {
   useEffect(() => {
     if (token) {
       profileApi.getCurrent(token)
-        .then((p) => {
+        .then((data: any) => {
+          const p = data.profile || data;
           setProfile(p);
           setCurrentGen(estimateGenFromDays(p.server_age_days));
         })
@@ -50,11 +51,12 @@ export default function SettingsPage() {
   }, [token]);
 
   const handleSave = async (data: Partial<Profile>) => {
-    if (!token) return;
+    if (!token || !profile?.profile_id) return;
     setIsSaving(true);
 
     try {
-      const updated = await profileApi.update(token, data);
+      const result: any = await profileApi.update(token, profile.profile_id, data);
+      const updated = result.profile || result;
       setProfile(updated);
     } catch (error) {
       console.error('Failed to save:', error);

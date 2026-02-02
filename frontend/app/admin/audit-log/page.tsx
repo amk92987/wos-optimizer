@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { adminApi } from '@/lib/api';
 
 interface AuditLogEntry {
-  id: number;
-  user_id: number | null;
+  id: string;
+  user_id: string | null;
   user_email: string | null;
   action: string;
   details: string | null;
@@ -29,11 +30,8 @@ export default function AdminAuditLogPage() {
 
   const fetchLogs = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/admin/audit-log?limit=100', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setLogs(Array.isArray(data) ? data : []);
+      const data = await adminApi.getAuditLog(token!, undefined, 100);
+      setLogs(Array.isArray(data.logs) ? data.logs : Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch audit logs:', error);
     } finally {

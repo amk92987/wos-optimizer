@@ -4,6 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { inboxApi } from '@/lib/api';
 import { useState, useEffect, useCallback } from 'react';
 
 // Navigation structure matching Streamlit
@@ -102,13 +103,8 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const fetchUnreadCount = useCallback(async () => {
     if (!token) return;
     try {
-      const res = await fetch('http://localhost:8000/api/inbox/unread-count', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setUnreadCount(data.total_unread);
-      }
+      const data = await inboxApi.getUnreadCount(token);
+      setUnreadCount(data.total_unread);
     } catch (error) {
       console.error('Failed to fetch unread count:', error);
     }

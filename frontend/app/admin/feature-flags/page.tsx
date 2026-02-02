@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { adminApi } from '@/lib/api';
 
 interface FeatureFlag {
-  id: number;
+  id: string;
   name: string;
   description: string;
   is_enabled: boolean;
@@ -136,11 +137,8 @@ export default function AdminFeatureFlagsPage() {
 
   const fetchFlags = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/admin/feature-flags', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setFlags(Array.isArray(data) ? data : []);
+      const data = await adminApi.listFeatureFlags(token!);
+      setFlags(Array.isArray(data.flags) ? data.flags : Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch flags:', error);
     } finally {
@@ -150,14 +148,7 @@ export default function AdminFeatureFlagsPage() {
 
   const handleToggle = async (name: string, currentValue: boolean) => {
     try {
-      await fetch(`http://localhost:8000/api/admin/feature-flags/${name}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ is_enabled: !currentValue }),
-      });
+      await adminApi.updateFeatureFlag(token!, name, { is_enabled: !currentValue });
       fetchFlags();
     } catch (error) {
       console.error('Failed to toggle flag:', error);
@@ -167,25 +158,16 @@ export default function AdminFeatureFlagsPage() {
   const handleCreate = async () => {
     if (!newName.trim()) return;
     try {
-      const res = await fetch('http://localhost:8000/api/admin/feature-flags', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: newName.trim(),
-          description: newDesc.trim() || null,
-          is_enabled: newEnabled,
-        }),
+      await adminApi.createFeatureFlag(token!, {
+        name: newName.trim(),
+        description: newDesc.trim() || undefined,
+        is_enabled: newEnabled,
       });
-      if (res.ok) {
-        setNewName('');
-        setNewDesc('');
-        setNewEnabled(false);
-        setShowCreateForm(false);
-        fetchFlags();
-      }
+      setNewName('');
+      setNewDesc('');
+      setNewEnabled(false);
+      setShowCreateForm(false);
+      fetchFlags();
     } catch (error) {
       console.error('Failed to create flag:', error);
     }
@@ -193,16 +175,8 @@ export default function AdminFeatureFlagsPage() {
 
   const handleUpdate = async (name: string) => {
     try {
-      await fetch(`http://localhost:8000/api/admin/feature-flags/${name}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: editName.trim() || undefined,
-          description: editDesc,
-        }),
+      await adminApi.updateFeatureFlag(token!, name, {
+        description: editDesc,
       });
       setEditingFlag(null);
       fetchFlags();
@@ -213,10 +187,7 @@ export default function AdminFeatureFlagsPage() {
 
   const handleDelete = async (name: string) => {
     try {
-      await fetch(`http://localhost:8000/api/admin/feature-flags/${name}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await adminApi.deleteFeatureFlag(token!, name);
       setDeleteConfirm(null);
       fetchFlags();
     } catch (error) {
@@ -226,14 +197,7 @@ export default function AdminFeatureFlagsPage() {
 
   const handleBulkAction = async (action: string) => {
     try {
-      await fetch('http://localhost:8000/api/admin/feature-flags/bulk', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action }),
-      });
+      await adminApi.bulkFlagAction(token!, action);
       fetchFlags();
     } catch (error) {
       console.error('Failed to perform bulk action:', error);

@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { inboxApi } from '@/lib/api';
 
 interface Notification {
-  id: number;
+  id: string;
   title: string;
   message: string;
   is_read: boolean;
@@ -13,7 +14,7 @@ interface Notification {
 }
 
 interface MessageThread {
-  id: number;
+  id: string;
   subject: string;
   last_message: string;
   has_unread: boolean;
@@ -41,17 +42,13 @@ export default function UserInboxPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [notifRes, threadRes] = await Promise.all([
-        fetch('http://localhost:8000/api/inbox/notifications', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('http://localhost:8000/api/inbox/threads', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+      const [notifData, threadData] = await Promise.all([
+        inboxApi.getNotifications(token!),
+        inboxApi.getThreads(token!),
       ]);
 
-      if (notifRes.ok) setNotifications(await notifRes.json());
-      if (threadRes.ok) setThreads(await threadRes.json());
+      setNotifications(notifData.notifications || []);
+      setThreads(threadData.threads || []);
     } catch (error) {
       console.error('Failed to fetch inbox data:', error);
     } finally {
@@ -59,12 +56,9 @@ export default function UserInboxPage() {
     }
   };
 
-  const handleMarkRead = async (notificationId: number) => {
+  const handleMarkRead = async (notificationId: string) => {
     try {
-      await fetch(`http://localhost:8000/api/inbox/notifications/${notificationId}/read`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await inboxApi.markRead(token!, String(notificationId));
       fetchData();
     } catch (error) {
       console.error('Failed to mark notification as read:', error);
@@ -328,12 +322,8 @@ function ThreadModal({
 
   const fetchMessages = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/inbox/threads/${thread.id}/messages`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        setMessages(await res.json());
-      }
+      const data = await inboxApi.getThreadMessages(token, String(thread.id));
+      setMessages(data.messages || []);
     } catch (error) {
       console.error('Failed to fetch messages:', error);
     } finally {
@@ -347,14 +337,7 @@ function ThreadModal({
 
     setIsSending(true);
     try {
-      await fetch(`http://localhost:8000/api/inbox/threads/${thread.id}/reply`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ content: reply }),
-      });
+      await inboxApi.replyToThread(token, String(thread.id), reply);
       setReply('');
       fetchMessages();
     } catch (error) {

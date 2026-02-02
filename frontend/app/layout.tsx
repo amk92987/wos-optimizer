@@ -51,8 +51,7 @@ export default function RootLayout({
         <meta name="msapplication-TileColor" content="#0A1628" />
         <meta name="msapplication-tap-highlight" content="no" />
 
-        {/* Preconnect to API */}
-        <link rel="preconnect" href="http://localhost:8000" />
+        {/* Preconnect to API - configured via NEXT_PUBLIC_API_URL env var */}
       </head>
       <body className={`${inter.className} safe-top`}>
         <AuthProvider>

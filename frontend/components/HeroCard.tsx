@@ -54,7 +54,7 @@ export default function HeroCard({ hero, token, onSaved, onRemove }: HeroCardPro
   }));
 
   const { saveField, saveFields, saveStatus } = useAutoSave({
-    heroId: hero.hero_id,
+    heroName: hero.hero_name,
     token,
     onSaved,
   });

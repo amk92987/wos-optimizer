@@ -26,7 +26,7 @@ export default function HeroesPage() {
   const [filterGeneration, setFilterGeneration] = useState<FilterGeneration>('all');
   const [sortBy, setSortBy] = useState<SortBy>('generation');
   const [searchQuery, setSearchQuery] = useState('');
-  const [addingHeroId, setAddingHeroId] = useState<number | null>(null);
+  const [addingHeroName, setAddingHeroName] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
   const [addSuccess, setAddSuccess] = useState<string | null>(null);
   const [selectedHero, setSelectedHero] = useState<Hero | null>(null);
@@ -35,7 +35,7 @@ export default function HeroesPage() {
   useEffect(() => {
     if (token) {
       heroesApi.getOwned(token)
-        .then(setOwnedHeroes)
+        .then(data => setOwnedHeroes(data.heroes || []))
         .catch(console.error)
         .finally(() => setIsLoading(false));
     }
@@ -45,37 +45,37 @@ export default function HeroesPage() {
   useEffect(() => {
     if (token && activeTab === 'all' && allHeroes.length === 0) {
       heroesApi.getAll(token, true)
-        .then(setAllHeroes)
+        .then(data => setAllHeroes(data.heroes || []))
         .catch(console.error);
     }
   }, [token, activeTab, allHeroes.length]);
 
-  const ownedHeroIds = new Set(ownedHeroes.map(h => h.hero_id));
+  const ownedHeroNames = new Set(ownedHeroes.map(h => h.hero_name));
 
   const refreshOwnedHeroes = async () => {
     if (!token) return;
     try {
-      const updated = await heroesApi.getOwned(token);
-      setOwnedHeroes(updated);
+      const data = await heroesApi.getOwned(token);
+      setOwnedHeroes(data.heroes || []);
     } catch (error) {
       console.error('Failed to refresh heroes:', error);
     }
   };
 
-  const handleAddHero = async (heroId: number, heroName?: string) => {
+  const handleAddHero = async (heroName: string) => {
     if (!token) return;
 
-    setAddingHeroId(heroId);
+    setAddingHeroName(heroName);
     setAddError(null);
     setAddSuccess(null);
 
     try {
-      await heroesApi.addHero(token, heroId);
-      const updated = await heroesApi.getOwned(token);
-      setOwnedHeroes(updated);
+      await heroesApi.addHero(token, heroName);
+      const data = await heroesApi.getOwned(token);
+      setOwnedHeroes(data.heroes || []);
 
       // Show success message
-      setAddSuccess(`${heroName || 'Hero'} added to your collection!`);
+      setAddSuccess(`${heroName} added to your collection!`);
       setTimeout(() => setAddSuccess(null), 3000);
     } catch (error: any) {
       console.error('Failed to add hero:', error);
@@ -88,17 +88,17 @@ export default function HeroesPage() {
       }
       setTimeout(() => setAddError(null), 5000);
     } finally {
-      setAddingHeroId(null);
+      setAddingHeroName(null);
     }
   };
 
-  const handleRemoveHero = async (heroId: number) => {
+  const handleRemoveHero = async (heroName: string) => {
     if (!token) return;
 
     try {
-      await heroesApi.removeHero(token, heroId);
-      const updated = await heroesApi.getOwned(token);
-      setOwnedHeroes(updated);
+      await heroesApi.removeHero(token, heroName);
+      const data = await heroesApi.getOwned(token);
+      setOwnedHeroes(data.heroes || []);
     } catch (error) {
       console.error('Failed to remove hero:', error);
     }
@@ -392,11 +392,11 @@ export default function HeroesPage() {
               <div className="space-y-3">
                 {filteredOwnedHeroes.map((hero) => (
                   <HeroCard
-                    key={hero.hero_id}
+                    key={hero.hero_name}
                     hero={hero}
                     token={token}
                     onSaved={refreshOwnedHeroes}
-                    onRemove={() => handleRemoveHero(hero.hero_id)}
+                    onRemove={() => handleRemoveHero(hero.hero_name)}
                   />
                 ))}
               </div>
@@ -459,12 +459,12 @@ export default function HeroesPage() {
             ) : (
               <div className="grid gap-3 md:grid-cols-2">
                 {filteredAllHeroes.map((hero) => {
-                  const isOwned = ownedHeroIds.has(hero.id);
-                  const isAdding = addingHeroId === hero.id;
+                  const isOwned = ownedHeroNames.has(hero.name);
+                  const isAdding = addingHeroName === hero.name;
 
                   return (
                     <div
-                      key={hero.id}
+                      key={hero.name}
                       className={`card flex items-center gap-4 transition-all cursor-pointer hover:border-ice/30 ${
                         isOwned ? 'border-ice/30 bg-ice/5' : ''
                       }`}
@@ -515,7 +515,7 @@ export default function HeroesPage() {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            handleAddHero(hero.id, hero.name);
+                            handleAddHero(hero.name);
                           }}
                           disabled={isAdding}
                           className="px-3 py-1.5 bg-success/20 text-success hover:bg-success/30
@@ -579,10 +579,10 @@ export default function HeroesPage() {
         {selectedHero && (
           <HeroDetailModal
             hero={selectedHero}
-            isOwned={ownedHeroIds.has(selectedHero.id)}
+            isOwned={ownedHeroNames.has(selectedHero.name)}
             onClose={() => setSelectedHero(null)}
             onAdd={() => {
-              handleAddHero(selectedHero.id, selectedHero.name);
+              handleAddHero(selectedHero.name);
               setSelectedHero(null);
             }}
           />

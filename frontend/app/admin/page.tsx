@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { adminApi } from '@/lib/api';
 
 interface AdminStats {
   total_users: number;
@@ -23,10 +24,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (token) {
-      fetch('http://localhost:8000/api/admin/stats', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
+      adminApi.getStats(token)
         .then(setStats)
         .catch(console.error)
         .finally(() => setIsLoading(false));

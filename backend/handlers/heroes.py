@@ -75,6 +75,16 @@ def _merge_reference(user_hero: dict) -> dict:
         return user_hero
 
     merged = {**user_hero}
+
+    # Ensure 'name' is always present (frontend uses hero.name everywhere)
+    if "name" not in merged:
+        merged["name"] = hero_name
+
+    # Ensure 'ascension' alias exists (frontend reads hero.ascension,
+    # DB stores ascension_tier)
+    if "ascension" not in merged and "ascension_tier" in merged:
+        merged["ascension"] = merged["ascension_tier"]
+
     # Copy over useful reference fields that the client needs
     for key in (
         "generation",
@@ -84,24 +94,45 @@ def _merge_reference(user_hero: dict) -> dict:
         "tier_exploration",
         "rarity",
         "image_filename",
-        "exploration_skill_1",
-        "exploration_skill_1_desc",
-        "exploration_skill_2",
-        "exploration_skill_2_desc",
-        "exploration_skill_3",
-        "exploration_skill_3_desc",
-        "expedition_skill_1",
-        "expedition_skill_1_desc",
-        "expedition_skill_2",
-        "expedition_skill_2_desc",
-        "expedition_skill_3",
-        "expedition_skill_3_desc",
-        "mythic_gear_name",
-        "mythic_gear_skill",
-        "mythic_gear_skill_desc",
     ):
         if key in ref and key not in merged:
             merged[key] = ref[key]
+
+    # Map mythic_gear from reference to mythic_gear_name for frontend
+    if "mythic_gear_name" not in merged and "mythic_gear" in ref:
+        merged["mythic_gear_name"] = ref["mythic_gear"]
+
+    # Copy skill descriptions from reference
+    for key in (
+        "exploration_skill_1_desc",
+        "exploration_skill_2_desc",
+        "exploration_skill_3_desc",
+        "expedition_skill_1_desc",
+        "expedition_skill_2_desc",
+        "expedition_skill_3_desc",
+    ):
+        if key in ref:
+            merged[key] = ref[key]
+
+    # Map skill NAMES from reference into _name suffix fields so they
+    # don't collide with the _level numeric fields the frontend uses.
+    # Reference has e.g. "exploration_skill_1": "Heavy Strike" (string).
+    # DB has "exploration_skill_1_level": 3 (number).
+    # Frontend needs: exploration_skill_1 = level (number),
+    #                 exploration_skill_1_name = name (string).
+    for i in range(1, 4):
+        for prefix in ("exploration_skill", "expedition_skill"):
+            skill_key = f"{prefix}_{i}"
+            name_key = f"{prefix}_{i}_name"
+            level_key = f"{prefix}_{i}_level"
+            # Set _name from reference skill name
+            if skill_key in ref:
+                merged[name_key] = ref[skill_key]
+            # Set bare skill key to the numeric level from DB
+            if level_key in merged:
+                merged[skill_key] = merged[level_key]
+            elif skill_key not in merged:
+                merged[skill_key] = 1
 
     return merged
 

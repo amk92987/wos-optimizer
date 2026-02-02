@@ -6,14 +6,14 @@ import { heroesApi, UserHero } from '@/lib/api';
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 interface UseAutoSaveOptions {
-  heroId: number;
+  heroName: string;
   token: string | null;
   onSaved?: () => void;
   onError?: (error: Error) => void;
   debounceMs?: number;
 }
 
-export function useAutoSave({ heroId, token, onSaved, onError, debounceMs = 300 }: UseAutoSaveOptions) {
+export function useAutoSave({ heroName, token, onSaved, onError, debounceMs = 300 }: UseAutoSaveOptions) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const pendingChanges = useRef<Partial<UserHero>>({});
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -27,7 +27,7 @@ export function useAutoSave({ heroId, token, onSaved, onError, debounceMs = 300 
 
     setSaveStatus('saving');
     try {
-      await heroesApi.updateHero(token, heroId, changes);
+      await heroesApi.updateHero(token, heroName, changes);
       setSaveStatus('saved');
       onSaved?.();
 
@@ -41,7 +41,7 @@ export function useAutoSave({ heroId, token, onSaved, onError, debounceMs = 300 
       if (savedTimerRef.current) clearTimeout(savedTimerRef.current);
       savedTimerRef.current = setTimeout(() => setSaveStatus('idle'), 3000);
     }
-  }, [token, heroId, onSaved, onError]);
+  }, [token, heroName, onSaved, onError]);
 
   const saveField = useCallback((fieldName: string, value: any) => {
     pendingChanges.current = { ...pendingChanges.current, [fieldName]: value };

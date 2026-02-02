@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { adminApi } from '@/lib/api';
 
 interface DataFile {
   name: string;
@@ -29,11 +30,8 @@ export default function AdminGameDataPage() {
 
   const fetchFiles = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/admin/game-data/files', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setFiles(Array.isArray(data) ? data : []);
+      const data = await adminApi.getGameDataFiles(token!);
+      setFiles(Array.isArray(data.files) ? data.files : Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch files:', error);
       // Demo data
@@ -55,10 +53,7 @@ export default function AdminGameDataPage() {
     setIsLoadingContent(true);
     setSelectedFile(file);
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/game-data/file?path=${encodeURIComponent(file.path)}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const data = await adminApi.getGameDataFile(token!, file.path);
       setFileContent(data);
     } catch (error) {
       console.error('Failed to fetch file content:', error);

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
+import { eventsApi } from '@/lib/api';
 
 interface EventReward {
   primary: string[];
@@ -84,14 +85,8 @@ export default function EventsPage() {
   const [filterPriority, setFilterPriority] = useState<string>('all');
 
   useEffect(() => {
-    // Fetch events guide data from FastAPI backend
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
     setIsLoading(true);
-    fetch(`${apiBase}/api/events/guide`)
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to fetch');
-        return res.json();
-      })
+    eventsApi.getGuide()
       .then(data => {
         if (data && data.events) {
           setEventsGuide(data);
@@ -265,7 +260,7 @@ export default function EventsPage() {
           <div className="card text-center py-12">
             <div className="text-4xl mb-4">⚠️</div>
             <h3 className="text-lg font-medium text-frost mb-2">Unable to load events</h3>
-            <p className="text-frost-muted">Make sure the API server is running at localhost:8000</p>
+            <p className="text-frost-muted">Make sure the API server is running</p>
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="card text-center py-12">

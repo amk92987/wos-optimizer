@@ -74,7 +74,7 @@ def ask_advisor():
     return {
         "answer": answer,
         "source": source,
-        "conversation_id": conversation.get("conversation_id"),
+        "conversation_id": conversation.get("SK"),
         "thread_id": thread_id,
         "remaining_requests": remaining - (1 if source == "ai" else 0),
     }
@@ -107,6 +107,49 @@ def rate_conversation():
 
     result = ai_repo.rate_conversation(user_id, conversation_sk, updates)
     return {"conversation": result}
+
+
+@app.get("/api/advisor/favorites")
+def get_favorites():
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    params = app.current_event.query_string_parameters or {}
+    limit = int(params.get("limit", "20"))
+
+    conversations = ai_repo.get_conversation_history(user_id, limit=limit * 5)
+    favorites = [c for c in conversations if c.get("is_favorite")][:limit]
+    return {"favorites": favorites}
+
+
+@app.post("/api/advisor/favorite/<convSk>")
+def toggle_favorite(convSk: str):
+    user_id = get_effective_user_id(app.current_event.raw_event)
+
+    # Get current state and toggle
+    conversations = ai_repo.get_conversation_history(user_id, limit=200)
+    current = next((c for c in conversations if c.get("conversation_id") == convSk or c.get("SK") == convSk), None)
+    new_state = not (current.get("is_favorite", False) if current else False)
+
+    sk = convSk if convSk.startswith("AICONV#") else f"AICONV#{convSk}"
+    ai_repo.rate_conversation(user_id, sk, {"is_favorite": new_state})
+    return {"is_favorite": new_state}
+
+
+@app.get("/api/advisor/status")
+def get_advisor_status():
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    user = user_repo.get_user(user_id)
+    settings = ai_repo.get_ai_settings()
+    allowed, message, remaining = ai_repo.check_rate_limit(user or {}, settings)
+
+    mode = settings.get("mode", "off")
+    return {
+        "ai_enabled": mode != "off",
+        "mode": mode,
+        "daily_limit": settings.get("daily_limit_free", 10),
+        "requests_today": (user or {}).get("ai_requests_today", 0),
+        "requests_remaining": remaining,
+        "primary_provider": settings.get("primary_provider", "openai"),
+    }
 
 
 @app.get("/api/advisor/threads")

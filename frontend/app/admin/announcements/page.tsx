@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { adminApi } from '@/lib/api';
 
 interface Announcement {
-  id: number;
+  id: string;
   title: string;
   message: string;
   display_type: string;
@@ -40,11 +41,9 @@ export default function AdminAnnouncementsPage() {
 
   const fetchAnnouncements = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/admin/announcements', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setAnnouncements(Array.isArray(data) ? data : []);
+      const data = await adminApi.listAnnouncements(token!);
+      const list = data.announcements || data;
+      setAnnouncements(Array.isArray(list) ? list : []);
     } catch (error) {
       console.error('Failed to fetch announcements:', error);
     } finally {
@@ -52,30 +51,20 @@ export default function AdminAnnouncementsPage() {
     }
   };
 
-  const handleToggleActive = async (id: number, isActive: boolean) => {
+  const handleToggleActive = async (id: string, isActive: boolean) => {
     try {
-      await fetch(`http://localhost:8000/api/admin/announcements/${id}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ is_active: !isActive }),
-      });
+      await adminApi.updateAnnouncement(token!, String(id), { is_active: !isActive });
       fetchAnnouncements();
     } catch (error) {
       console.error('Failed to toggle announcement:', error);
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this announcement?')) return;
 
     try {
-      await fetch(`http://localhost:8000/api/admin/announcements/${id}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await adminApi.deleteAnnouncement(token!, String(id));
       fetchAnnouncements();
     } catch (error) {
       console.error('Failed to delete announcement:', error);
@@ -337,38 +326,27 @@ function AnnouncementModal({
     setIsLoading(true);
 
     try {
-      const url = announcement
-        ? `http://localhost:8000/api/admin/announcements/${announcement.id}`
-        : 'http://localhost:8000/api/admin/announcements';
-
       // Calculate show_until date if expiry is set
-      let show_until = null;
+      let show_until: string | undefined = undefined;
       if (expiresInDays && typeof expiresInDays === 'number') {
         const date = new Date();
         date.setDate(date.getDate() + expiresInDays);
         show_until = date.toISOString();
       }
 
-      const res = await fetch(url, {
-        method: announcement ? 'PUT' : 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title,
-          message,
-          display_type: displayType,
-          type,
-          priority,
-          inbox_content: inboxContent || null,
-          show_until,
-        }),
-      });
+      const body = {
+        title,
+        message,
+        display_type: displayType,
+        type,
+        inbox_content: inboxContent || undefined,
+        show_until,
+      };
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || 'Failed to save announcement');
+      if (announcement) {
+        await adminApi.updateAnnouncement(token, String(announcement.id), body as any);
+      } else {
+        await adminApi.createAnnouncement(token, body);
       }
 
       onSaved();

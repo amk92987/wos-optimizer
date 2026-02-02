@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { adminApi, API_BASE } from '@/lib/api';
 
 interface AISettings {
   mode: 'off' | 'on' | 'unlimited';
@@ -24,7 +25,7 @@ interface AIStats {
 }
 
 interface AIConversation {
-  id: number;
+  id: string;
   user_email: string;
   question: string;
   answer: string;
@@ -58,37 +59,18 @@ export default function AdminAIPage() {
 
   const fetchData = async () => {
     try {
-      // Fetch settings from the correct endpoint
-      const settingsRes = await fetch('http://localhost:8000/api/admin/ai-settings', {
-        headers: { Authorization: `Bearer ${token}` },
+      const result = await adminApi.getAISettings(token!);
+      const data = result.settings || result;
+      setSettings({
+        mode: data.mode || 'on',
+        primary_provider: data.primary_provider || 'openai',
+        fallback_provider: data.fallback_provider || 'anthropic',
+        primary_model: data.primary_model || 'gpt-4o-mini',
+        fallback_model: data.fallback_model || 'claude-3-haiku',
+        daily_limit_free: data.daily_limit_free || 10,
+        daily_limit_admin: data.daily_limit_admin || 1000,
+        cooldown_seconds: data.cooldown_seconds || 30,
       });
-
-      if (settingsRes.ok) {
-        const data = await settingsRes.json();
-        // Map backend response to frontend interface (add missing fields with defaults)
-        setSettings({
-          mode: data.mode || 'on',
-          primary_provider: data.primary_provider || 'openai',
-          fallback_provider: data.fallback_provider || 'anthropic',
-          primary_model: data.primary_model || 'gpt-4o-mini',
-          fallback_model: data.fallback_model || 'claude-3-haiku',
-          daily_limit_free: data.daily_limit_free || 10,
-          daily_limit_admin: data.daily_limit_admin || 1000,
-          cooldown_seconds: data.cooldown_seconds || 30,
-        });
-      } else {
-        // Use defaults if fetch fails
-        setSettings({
-          mode: 'on',
-          primary_provider: 'openai',
-          fallback_provider: 'anthropic',
-          primary_model: 'gpt-4o-mini',
-          fallback_model: 'claude-3-haiku',
-          daily_limit_free: 10,
-          daily_limit_admin: 1000,
-          cooldown_seconds: 30,
-        });
-      }
 
       // Stats endpoint doesn't exist yet - use placeholder
       setStats({
@@ -121,38 +103,16 @@ export default function AdminAIPage() {
 
   const handleUpdateSettings = async (updates: Partial<AISettings>) => {
     try {
-      // Build query params for the backend (it uses query params, not body)
-      const params = new URLSearchParams();
-      if (updates.mode) params.append('mode', updates.mode);
-      if (updates.daily_limit_free !== undefined) params.append('daily_limit_free', String(updates.daily_limit_free));
-      if (updates.daily_limit_admin !== undefined) params.append('daily_limit_admin', String(updates.daily_limit_admin));
-      if (updates.cooldown_seconds !== undefined) params.append('cooldown_seconds', String(updates.cooldown_seconds));
-
-      const res = await fetch(`http://localhost:8000/api/admin/ai-settings?${params}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (res.ok) {
-        // Update local state with the changes
-        setSettings(prev => prev ? { ...prev, ...updates } : null);
-      }
+      await adminApi.updateAISettings(token!, updates);
+      setSettings(prev => prev ? { ...prev, ...updates } : null);
     } catch (error) {
       console.error('Failed to update settings:', error);
     }
   };
 
-  const handleMarkExample = async (id: number, field: 'is_good_example' | 'is_bad_example', value: boolean) => {
+  const handleMarkExample = async (id: string, field: 'is_good_example' | 'is_bad_example', value: boolean) => {
     try {
-      await fetch(`http://localhost:8000/api/admin/ai/conversations/${id}`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ [field]: value }),
-      });
+      await adminApi.curateConversation(token!, String(id), { [field]: value });
       setConversations((prev) =>
         prev.map((c) => (c.id === id ? { ...c, [field]: value } : c))
       );
@@ -433,7 +393,7 @@ function ConversationsTab({
   conversations: AIConversation[];
   formatDate: (date: string) => string;
   isLoading: boolean;
-  onMarkExample: (id: number, field: 'is_good_example' | 'is_bad_example', value: boolean) => void;
+  onMarkExample: (id: string, field: 'is_good_example' | 'is_bad_example', value: boolean) => void;
 }) {
   const [selected, setSelected] = useState<AIConversation | null>(null);
 
@@ -592,7 +552,7 @@ function TrainingDataTab({
   goodExamples: AIConversation[];
   badExamples: AIConversation[];
   formatDate: (date: string) => string;
-  onMarkExample: (id: number, field: 'is_good_example' | 'is_bad_example', value: boolean) => void;
+  onMarkExample: (id: string, field: 'is_good_example' | 'is_bad_example', value: boolean) => void;
 }) {
   const [subTab, setSubTab] = useState<'good' | 'bad'>('good');
 
@@ -684,7 +644,7 @@ function ExportTab({
     setIsExporting(true);
     try {
       const res = await fetch(
-        `http://localhost:8000/api/admin/ai/export?format=${exportFormat}&filter=${exportFilter}`,
+        `${API_BASE}/api/admin/conversations/export?format=${exportFormat}&filter=${exportFilter}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

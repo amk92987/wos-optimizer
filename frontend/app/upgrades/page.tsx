@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { recommendationsApi } from '@/lib/api';
 
 interface Recommendation {
   priority: number;
@@ -48,17 +49,13 @@ export default function UpgradesPage() {
   const fetchRecommendations = async () => {
     setIsLoading(true);
     try {
-      const [recRes, investRes] = await Promise.all([
-        fetch('http://localhost:8000/api/recommendations', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('http://localhost:8000/api/recommendations/investments', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+      const [recData, investData] = await Promise.all([
+        recommendationsApi.get(token!),
+        recommendationsApi.getInvestments(token!),
       ]);
 
-      if (recRes.ok) setRecommendations(await recRes.json());
-      if (investRes.ok) setHeroInvestments(await investRes.json());
+      setRecommendations(recData.recommendations || []);
+      setHeroInvestments(investData.investments || []);
     } catch (error) {
       console.error('Failed to fetch recommendations:', error);
     } finally {

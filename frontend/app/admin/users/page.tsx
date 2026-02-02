@@ -4,9 +4,10 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { adminApi } from '@/lib/api';
 
 interface AdminUser {
-  id: number;
+  id: string;
   email: string;
   username: string;
   role: string;
@@ -42,11 +43,8 @@ function AdminUsersContent() {
 
   const fetchUsers = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/admin/users', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setUsers(Array.isArray(data) ? data : []);
+      const data = await adminApi.listUsers(token!);
+      setUsers(Array.isArray(data.users) ? data.users : Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch users:', error);
     } finally {
@@ -54,37 +52,23 @@ function AdminUsersContent() {
     }
   };
 
-  const handleToggleActive = async (userId: number, isActive: boolean) => {
+  const handleToggleActive = async (userId: string, isActive: boolean) => {
     try {
-      await fetch(`http://localhost:8000/api/admin/users/${userId}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ is_active: !isActive }),
-      });
+      await adminApi.updateUser(token!, String(userId), { is_active: !isActive });
       fetchUsers();
     } catch (error) {
       console.error('Failed to toggle user status:', error);
     }
   };
 
-  const handleCycleAI = async (userId: number, currentLevel: string) => {
+  const handleCycleAI = async (userId: string, currentLevel: string) => {
     const nextLevel: Record<string, string> = {
       'off': 'limited',
       'limited': 'unlimited',
       'unlimited': 'off'
     };
     try {
-      await fetch(`http://localhost:8000/api/admin/users/${userId}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ai_access_level: nextLevel[currentLevel] || 'limited' }),
-      });
+      await adminApi.updateUser(token!, String(userId), { ai_access_level: nextLevel[currentLevel] || 'limited' } as any);
       fetchUsers();
     } catch (error) {
       console.error('Failed to update AI access:', error);
@@ -93,7 +77,7 @@ function AdminUsersContent() {
 
   const { impersonate } = useAuth();
 
-  const handleImpersonate = async (userId: number) => {
+  const handleImpersonate = async (userId: string) => {
     try {
       await impersonate(userId);
       // Redirect to home page after impersonation
@@ -104,13 +88,10 @@ function AdminUsersContent() {
     }
   };
 
-  const handleDelete = async (userId: number) => {
+  const handleDelete = async (userId: string) => {
     if (!confirm('Are you sure you want to delete this user? This cannot be undone!')) return;
     try {
-      await fetch(`http://localhost:8000/api/admin/users/${userId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await adminApi.deleteUser(token!, String(userId));
       fetchUsers();
     } catch (error) {
       console.error('Failed to delete user:', error);
@@ -513,26 +494,14 @@ function CreateUserForm({ token, onCreated }: { token: string; onCreated: () => 
 
     setIsLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/admin/users', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-          role,
-          is_test_account: isTestAccount,
-        }),
+      await adminApi.createUser(token, {
+        email,
+        password,
+        role,
+        is_test_account: isTestAccount,
       });
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || 'Failed to create user');
-      }
-
-      setSuccess(`✅ Created user: ${email}${isTestAccount ? ' (test account)' : ''}`);
+      setSuccess(`Created user: ${email}${isTestAccount ? ' (test account)' : ''}`);
       setEmail('');
       setPassword('');
       setRole('user');
@@ -652,26 +621,11 @@ function EditUserModal({
     setIsLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/users/${user.id}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          is_test_account: isTestAccount,
-          role: isAdmin ? 'admin' : 'user',
-          ai_access_level: aiAccessLevel,
-          ai_daily_limit: aiDailyLimit ? parseInt(aiDailyLimit) : null,
-          password: newPassword || undefined,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || 'Failed to update user');
-      }
+      await adminApi.updateUser(token, String(user.id), {
+        email,
+        is_test_account: isTestAccount,
+        role: isAdmin ? 'admin' : 'user',
+      } as any);
 
       onUpdated();
     } catch (err: any) {

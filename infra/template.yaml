@@ -464,6 +464,36 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/profiles/{profileId}/switch
             Method: POST
+        CurrentProfile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/profiles/current
+            Method: GET
+        DeletedProfiles:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/profiles/deleted
+            Method: GET
+        DuplicateProfile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/profiles/{profileId}/duplicate
+            Method: POST
+        RestoreProfile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/profiles/{profileId}/restore
+            Method: POST
+        PreviewProfile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/profiles/{profileId}/preview
+            Method: GET
 
   ChiefFunction:
     Type: AWS::Serverless::Function
@@ -526,6 +556,18 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/recommendations/investments
             Method: GET
+        GetPhase:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/recommendations/phase
+            Method: GET
+        GetGearPriority:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/recommendations/gear-priority
+            Method: GET
 
   AdvisorFunction:
     Type: AWS::Serverless::Function
@@ -577,6 +619,24 @@ Resources:
           Properties:
             ApiId: !Ref HttpApi
             Path: /api/advisor/threads/{threadId}
+            Method: GET
+        Favorites:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/advisor/favorites
+            Method: GET
+        ToggleFavorite:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/advisor/favorite/{convSk}
+            Method: POST
+        AdvisorStatus:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/advisor/status
             Method: GET
 
   AdminFunction:
@@ -738,6 +798,132 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/admin/export/{format}
             Method: GET
+        AdminStats:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/stats
+            Method: GET
+        UsageStats:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/usage/stats
+            Method: GET
+        CreateFlag:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/flags
+            Method: POST
+        DeleteFlag:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/flags/{flagName}
+            Method: DELETE
+        BulkFlags:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/flags/bulk
+            Method: POST
+        FeatureFlags:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/feature-flags
+            Method: GET
+        UpdateFeatureFlag:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/feature-flags/{flagName}
+            Method: PUT
+        GetErrors:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/errors
+            Method: GET
+        ResolveError:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/errors/{errorId}/resolve
+            Method: POST
+        AdminConversations:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/conversations
+            Method: GET
+        CurateConversation:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/conversations/{conversationId}/curate
+            Method: PUT
+        ConversationStats:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/conversations/stats
+            Method: GET
+        ConversationExport:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/conversations/export
+            Method: GET
+        DataIntegrityCheck:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/data-integrity/check
+            Method: GET
+        DataIntegrityCheckPost:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/data-integrity/check
+            Method: POST
+        GameDataFiles:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/game-data/files
+            Method: GET
+        GameDataFile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/game-data/file
+            Method: GET
+        DatabaseBackups:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/database/backups
+            Method: GET
+        CreateBackup:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/database/backup
+            Method: POST
+        DatabaseCleanup:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/database/cleanup/{action}
+            Method: POST
+        DatabaseQuery:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/database/query
+            Method: POST
 
   GeneralFunction:
     Type: AWS::Serverless::Function
@@ -795,6 +981,92 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/lineups/{eventType}
             Method: GET
+        LineupTemplates:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/lineups/templates
+            Method: GET
+            Auth:
+              Authorizer: NONE
+        LineupBuildMode:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/lineups/build/{gameMode}
+            Method: GET
+        LineupBuildAll:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/lineups/build-all
+            Method: GET
+        LineupGeneral:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/lineups/general/{gameMode}
+            Method: GET
+            Auth:
+              Authorizer: NONE
+        LineupJoiner:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/lineups/joiner/{attackType}
+            Method: GET
+        LineupTemplate:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/lineups/template/{gameMode}
+            Method: GET
+            Auth:
+              Authorizer: NONE
+        EventsGuide:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/events/guide
+            Method: GET
+            Auth:
+              Authorizer: NONE
+        InboxNotifications:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/inbox/notifications
+            Method: GET
+        MarkNotificationRead:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/inbox/notifications/{notificationId}/read
+            Method: POST
+        UnreadCount:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/inbox/unread-count
+            Method: GET
+        InboxThreads:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/inbox/threads
+            Method: GET
+        InboxThreadMessages:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/inbox/threads/{threadId}/messages
+            Method: GET
+        InboxThreadReply:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/inbox/threads/{threadId}/reply
+            Method: POST
 
   # ============================================================
   # Scheduled Cleanup

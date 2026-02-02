@@ -30,12 +30,51 @@ def get_dashboard():
     # Active announcements
     announcements = admin_repo.get_announcements(active_only=True)
 
+    # Compute generation from server_age_days
+    server_age_days = profile.get("server_age_days", 0)
+    generation = 1
+    gen_thresholds = [40, 120, 200, 280, 360, 440, 520, 600, 680, 760, 840, 920, 1000]
+    for i, threshold in enumerate(gen_thresholds):
+        if server_age_days >= threshold:
+            generation = i + 2
+        else:
+            break
+
+    # Build furnace display string
+    furnace_level = profile.get("furnace_level", 1)
+    furnace_fc_level = profile.get("furnace_fc_level")
+    if furnace_fc_level:
+        furnace_display = furnace_fc_level
+    elif furnace_level:
+        furnace_display = f"Lv.{furnace_level}"
+    else:
+        furnace_display = "Lv.1"
+
+    # Load total hero count from reference data
+    heroes_path = os.path.join(Config.DATA_DIR, "heroes.json")
+    total_heroes = 0
+    try:
+        with open(heroes_path, encoding="utf-8") as f:
+            heroes_data = json.load(f)
+        total_heroes = len(heroes_data.get("heroes", []))
+    except Exception:
+        pass
+
+    # Get user info
+    user = user_repo.get_user(user_id)
+
     return {
         "profile": profile,
         "hero_count": len(heroes),
+        "owned_heroes": len(heroes),
+        "total_heroes": total_heroes,
         "profile_count": len(profiles),
-        "furnace_level": profile.get("furnace_level", 1),
+        "furnace_level": furnace_level,
+        "furnace_display": furnace_display,
         "spending_profile": profile.get("spending_profile", "f2p"),
+        "generation": generation,
+        "server_age_days": server_age_days,
+        "username": user.get("username", "") if user else "",
         "announcements": announcements,
     }
 
@@ -54,6 +93,19 @@ def get_events():
     return {"events": data.get("events", data) if isinstance(data, dict) else data}
 
 
+@app.get("/api/events/guide")
+def get_events_guide():
+    """Return full events guide data for the frontend events page."""
+    events_path = os.path.join(Config.DATA_DIR, "events.json")
+    if not os.path.exists(events_path):
+        return {"events": {}, "cost_categories": {}, "priority_tiers": {}}
+
+    with open(events_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    return data
+
+
 # --- Inbox / Notifications ---
 
 @app.get("/api/inbox")
@@ -69,7 +121,21 @@ def get_inbox():
         },
         ScanIndexForward=False,
     )
-    notifications = resp.get("Items", [])
+    raw_notifications = resp.get("Items", [])
+
+    # Transform DynamoDB items into the shape the frontend expects
+    notifications = []
+    for item in raw_notifications:
+        sk = item.get("SK", "")
+        notif_id = sk.replace("NOTIF#", "") if sk.startswith("NOTIF#") else sk
+        notifications.append({
+            "id": notif_id,
+            "title": item.get("title", ""),
+            "message": item.get("message", ""),
+            "type": item.get("type", "info"),
+            "is_read": bool(item.get("is_read") or item.get("dismissed")),
+            "created_at": item.get("created_at", ""),
+        })
 
     # Also include active announcements as inbox items
     announcements = admin_repo.get_announcements(active_only=True)
@@ -111,7 +177,7 @@ def submit_feedback():
     if not description:
         raise ValidationError("Description is required")
 
-    if category not in ("bug", "feature", "bad_recommendation", "general", "other"):
+    if category not in ("bug", "feature", "bad_recommendation", "data_error", "general", "other"):
         raise ValidationError("Invalid feedback category")
 
     feedback = admin_repo.create_feedback(
@@ -123,7 +189,210 @@ def submit_feedback():
     return {"feedback": feedback}, 201
 
 
+# --- Inbox / Notifications (additional routes) ---
+
+@app.get("/api/inbox/notifications")
+def get_notifications():
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    table = get_table("main")
+
+    resp = table.query(
+        KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
+        ExpressionAttributeValues={
+            ":pk": f"USER#{user_id}",
+            ":prefix": "NOTIF#",
+        },
+        ScanIndexForward=False,
+    )
+    raw_notifications = resp.get("Items", [])
+
+    # Transform DynamoDB items into the shape the frontend expects
+    notifications = []
+    for item in raw_notifications:
+        sk = item.get("SK", "")
+        notif_id = sk.replace("NOTIF#", "") if sk.startswith("NOTIF#") else sk
+        notifications.append({
+            "id": notif_id,
+            "title": item.get("title", ""),
+            "message": item.get("message", ""),
+            "type": item.get("type", "info"),
+            "is_read": bool(item.get("is_read") or item.get("dismissed")),
+            "created_at": item.get("created_at", ""),
+        })
+
+    # Include active announcements that should appear in inbox
+    announcements = admin_repo.get_announcements(active_only=True)
+    for a in announcements:
+        if a.get("display_type") in ("inbox", "both"):
+            sk = a.get("SK", "")
+            ann_id = sk.replace("ANNOUNCE#", "ann-") if sk.startswith("ANNOUNCE#") else f"ann-{sk}"
+            notifications.append({
+                "id": ann_id,
+                "title": a.get("title", ""),
+                "message": a.get("inbox_content") or a.get("message", ""),
+                "type": a.get("announcement_type", "info"),
+                "is_read": False,
+                "created_at": a.get("created_at", ""),
+            })
+
+    return {"notifications": notifications}
+
+
+@app.post("/api/inbox/notifications/<notificationId>/read")
+def mark_notification_read(notificationId: str):
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    table = get_table("main")
+
+    table.update_item(
+        Key={"PK": f"USER#{user_id}", "SK": f"NOTIF#{notificationId}"},
+        UpdateExpression="SET dismissed = :t, is_read = :t",
+        ExpressionAttributeValues={":t": True},
+    )
+    return {"status": "read"}
+
+
+@app.get("/api/inbox/unread-count")
+def get_unread_count():
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    table = get_table("main")
+
+    resp = table.query(
+        KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
+        ExpressionAttributeValues={
+            ":pk": f"USER#{user_id}",
+            ":prefix": "NOTIF#",
+        },
+    )
+    notifications = resp.get("Items", [])
+    unread = sum(1 for n in notifications if not n.get("dismissed") and not n.get("is_read"))
+    return {"unread_notifications": unread, "total_unread": unread}
+
+
+@app.get("/api/inbox/threads")
+def get_inbox_threads():
+    """Stub for message threads (not implemented yet)."""
+    return {"threads": []}
+
+
+@app.get("/api/inbox/threads/<threadId>/messages")
+def get_thread_messages(threadId: str):
+    """Stub for thread messages (not implemented yet)."""
+    return {"messages": []}
+
+
+@app.post("/api/inbox/threads/<threadId>/reply")
+def reply_to_thread(threadId: str):
+    """Stub for thread replies (not implemented yet)."""
+    return {"status": "sent"}
+
+
 # --- Lineups ---
+
+@app.get("/api/lineups/templates")
+def get_lineup_templates():
+    """Return lineup template metadata (no auth required)."""
+    lineup_path = os.path.join(Config.DATA_DIR, "guides", "hero_lineup_reasoning.json")
+    if not os.path.exists(lineup_path):
+        return {}
+
+    with open(lineup_path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+@app.get("/api/lineups/template/<gameMode>")
+def get_lineup_template(gameMode: str):
+    """Return specific lineup template details (no auth required)."""
+    lineup_path = os.path.join(Config.DATA_DIR, "guides", "hero_lineup_reasoning.json")
+    if not os.path.exists(lineup_path):
+        raise NotFoundError(f"No lineup template for: {gameMode}")
+
+    with open(lineup_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    template = data.get(gameMode) if isinstance(data, dict) else None
+    if not template:
+        raise NotFoundError(f"No lineup template for: {gameMode}")
+    return template
+
+
+@app.get("/api/lineups/general/<gameMode>")
+def get_general_lineup(gameMode: str):
+    """Return general lineup recommendation (no auth required)."""
+    params = app.current_event.query_string_parameters or {}
+    max_generation = int(params.get("max_generation", "14"))
+
+    try:
+        from engine.recommendation_engine import get_engine
+        engine = get_engine()
+        result = engine.lineup_builder.build_general_lineup(gameMode, max_generation=max_generation)
+        return result
+    except Exception as e:
+        logger.warning(f"General lineup failed, returning template: {e}")
+        # Fall back to template data
+        lineup_path = os.path.join(Config.DATA_DIR, "guides", "hero_lineup_reasoning.json")
+        if os.path.exists(lineup_path):
+            with open(lineup_path, encoding="utf-8") as f:
+                data = json.load(f)
+            template = data.get(gameMode, {}) if isinstance(data, dict) else {}
+            return {"game_mode": gameMode, "heroes": [], "troop_ratio": template.get("troop_ratio", {"infantry": 50, "lancer": 20, "marksman": 30}), "notes": template.get("notes", ""), "confidence": "low", "recommended_to_get": []}
+        return {"game_mode": gameMode, "heroes": [], "troop_ratio": {"infantry": 50, "lancer": 20, "marksman": 30}, "notes": "", "confidence": "low", "recommended_to_get": []}
+
+
+@app.get("/api/lineups/build/<gameMode>")
+def build_lineup_for_mode(gameMode: str):
+    """Build personalized lineup for a specific game mode (auth required)."""
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    profile = profile_repo.get_or_create_profile(user_id)
+    profile_id = profile["profile_id"]
+    heroes = hero_repo.get_heroes(profile_id)
+
+    try:
+        from engine.recommendation_engine import get_engine
+        engine = get_engine()
+        result = engine.get_lineup(gameMode, heroes=heroes, profile=profile)
+        return result
+    except Exception as e:
+        logger.warning(f"Personalized lineup failed: {e}")
+        return {"game_mode": gameMode, "heroes": [], "troop_ratio": {"infantry": 50, "lancer": 20, "marksman": 30}, "notes": "Unable to generate lineup. Add heroes to your tracker.", "confidence": "none", "recommended_to_get": []}
+
+
+@app.get("/api/lineups/build-all")
+def build_all_lineups():
+    """Build lineups for all game modes (auth required)."""
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    profile = profile_repo.get_or_create_profile(user_id)
+    profile_id = profile["profile_id"]
+    heroes = hero_repo.get_heroes(profile_id)
+
+    try:
+        from engine.recommendation_engine import get_engine
+        engine = get_engine()
+        result = engine.get_all_lineups(heroes=heroes, profile=profile)
+        return {"lineups": result}
+    except Exception as e:
+        logger.warning(f"Build all lineups failed: {e}")
+        return {"lineups": {}}
+
+
+@app.get("/api/lineups/joiner/<attackType>")
+def get_joiner_recommendation(attackType: str):
+    """Get rally joiner hero recommendation (auth required)."""
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    profile = profile_repo.get_or_create_profile(user_id)
+    profile_id = profile["profile_id"]
+    heroes = hero_repo.get_heroes(profile_id)
+
+    is_attack = attackType.lower() in ("attack", "offense")
+
+    try:
+        from engine.recommendation_engine import get_engine
+        engine = get_engine()
+        result = engine.get_joiner_recommendation(heroes=heroes, is_attack=is_attack)
+        return result
+    except Exception as e:
+        logger.warning(f"Joiner recommendation failed: {e}")
+        return {"hero": None, "status": "no_heroes", "skill_level": None, "max_skill": 5, "recommendation": "Add heroes to your tracker to get joiner recommendations.", "action": "", "critical_note": ""}
+
 
 @app.get("/api/lineups")
 def get_lineups():

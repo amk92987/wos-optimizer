@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { adminApi } from '@/lib/api';
 
 interface TableInfo {
   name: string;
@@ -37,11 +38,8 @@ export default function AdminDatabasePage() {
 
   const fetchTables = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/admin/database/tables', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setTables(Array.isArray(data) ? data : []);
+      const data = await adminApi.listTables(token!);
+      setTables(Array.isArray(data.tables) ? data.tables : Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch tables:', error);
     } finally {
@@ -51,13 +49,8 @@ export default function AdminDatabasePage() {
 
   const fetchBackups = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/admin/database/backups', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setBackups(Array.isArray(data) ? data : []);
-      }
+      const data = await adminApi.getBackups(token!);
+      setBackups(Array.isArray(data.backups) ? data.backups : Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch backups:', error);
     }
@@ -67,11 +60,8 @@ export default function AdminDatabasePage() {
     setIsLoadingData(true);
     setSelectedTable(tableName);
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/database/tables/${tableName}?limit=50`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setTableData(Array.isArray(data) ? data : []);
+      const data = await adminApi.scanTable(token!, tableName, 50);
+      setTableData(Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : []);
     } catch (error) {
       console.error('Failed to fetch table data:', error);
     } finally {
@@ -280,16 +270,9 @@ function BackupTab({
     setIsCreating(true);
     setMessage(null);
     try {
-      const res = await fetch('http://localhost:8000/api/admin/database/backup', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        setMessage({ type: 'success', text: 'Backup created successfully!' });
-        onRefresh();
-      } else {
-        setMessage({ type: 'error', text: 'Failed to create backup' });
-      }
+      await adminApi.createBackup(token);
+      setMessage({ type: 'success', text: 'Backup created successfully!' });
+      onRefresh();
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to create backup' });
     } finally {
@@ -407,17 +390,9 @@ function CleanupTab({
     setIsRunning(true);
     setMessage(null);
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/database/cleanup/${actionId}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setMessage({ type: 'success', text: data.message || 'Cleanup completed!' });
-        onRefresh();
-      } else {
-        setMessage({ type: 'error', text: 'Cleanup failed' });
-      }
+      const data: any = await adminApi.databaseCleanup(token, actionId);
+      setMessage({ type: 'success', text: data?.message || 'Cleanup completed!' });
+      onRefresh();
     } catch (error) {
       setMessage({ type: 'error', text: 'Cleanup failed' });
     } finally {
@@ -497,19 +472,11 @@ function QueryTab({ token, tables }: { token: string; tables: TableInfo[] }) {
     setError(null);
     setResults(null);
     try {
-      const res = await fetch('http://localhost:8000/api/admin/database/query', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ query }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setResults(data.results || []);
+      const data: any = await adminApi.databaseQuery(token, query);
+      if (data.error) {
+        setError(data.error);
       } else {
-        setError(data.error || 'Query failed');
+        setResults(data.results || []);
       }
     } catch (err) {
       setError('Failed to execute query');

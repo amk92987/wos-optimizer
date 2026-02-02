@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { lineupsApi } from '@/lib/api';
 
 interface LineupHero {
   hero: string;
@@ -102,10 +103,8 @@ export default function LineupsPage() {
 
   const fetchTemplates = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/lineups/templates');
-      if (res.ok) {
-        setTemplates(await res.json());
-      }
+      const data = await lineupsApi.getTemplates();
+      setTemplates(data);
     } catch (error) {
       console.error('Failed to fetch templates:', error);
     }
@@ -113,10 +112,8 @@ export default function LineupsPage() {
 
   const fetchTemplateDetails = async () => {
     try {
-      const res = await fetch(`http://localhost:8000/api/lineups/template/${selectedEvent}`);
-      if (res.ok) {
-        setTemplateDetails(await res.json());
-      }
+      const data = await lineupsApi.getTemplate(selectedEvent);
+      setTemplateDetails(data);
     } catch (error) {
       console.error('Failed to fetch template details:', error);
     }
@@ -126,12 +123,8 @@ export default function LineupsPage() {
     if (!token) return;
     setIsLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/lineups/build/${selectedEvent}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        setPersonalizedLineup(await res.json());
-      }
+      const data = await lineupsApi.buildForMode(token, selectedEvent);
+      setPersonalizedLineup(data);
     } catch (error) {
       console.error('Failed to fetch personalized lineup:', error);
     } finally {
@@ -142,12 +135,8 @@ export default function LineupsPage() {
   const fetchGeneralLineup = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(
-        `http://localhost:8000/api/lineups/general/${selectedEvent}?max_generation=${selectedGeneration}`
-      );
-      if (res.ok) {
-        setGeneralLineup(await res.json());
-      }
+      const data = await lineupsApi.getGeneral(selectedEvent, selectedGeneration);
+      setGeneralLineup(data);
     } catch (error) {
       console.error('Failed to fetch general lineup:', error);
     } finally {
@@ -158,16 +147,12 @@ export default function LineupsPage() {
   const fetchJoinerRecommendations = async () => {
     if (!token) return;
     try {
-      const [attackRes, defenseRes] = await Promise.all([
-        fetch('http://localhost:8000/api/lineups/joiner/attack', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('http://localhost:8000/api/lineups/joiner/defense', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+      const [attackData, defenseData] = await Promise.all([
+        lineupsApi.getJoiner(token, 'attack'),
+        lineupsApi.getJoiner(token, 'defense'),
       ]);
-      if (attackRes.ok) setJoinerAttack(await attackRes.json());
-      if (defenseRes.ok) setJoinerDefense(await defenseRes.json());
+      setJoinerAttack(attackData);
+      setJoinerDefense(defenseData);
     } catch (error) {
       console.error('Failed to fetch joiner recommendations:', error);
     }

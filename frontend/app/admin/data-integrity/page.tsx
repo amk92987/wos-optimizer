@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { adminApi } from '@/lib/api';
 
 interface IntegrityCheck {
   name: string;
@@ -27,11 +28,7 @@ export default function AdminDataIntegrityPage() {
   const runChecks = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/api/admin/data-integrity/check', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
+      const data = await adminApi.checkDataIntegrity(token!);
       setChecks(data.checks || []);
       setLastRun(new Date().toISOString());
     } catch (error) {

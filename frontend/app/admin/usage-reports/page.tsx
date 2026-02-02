@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { adminApi } from '@/lib/api';
 
 interface UsageStats {
   summary: {
@@ -62,13 +63,8 @@ export default function AdminUsageReportsPage() {
   const fetchStats = async () => {
     setIsLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/api/admin/usage/stats?range=${dateRange}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data);
-      }
+      const data = await adminApi.getUsageStats(token!, dateRange);
+      setStats(data);
     } catch (error) {
       console.error('Failed to fetch stats:', error);
     } finally {

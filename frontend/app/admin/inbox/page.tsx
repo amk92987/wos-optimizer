@@ -3,24 +3,23 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { adminApi } from '@/lib/api';
 
 interface FeedbackItem {
-  id: number;
-  user_id: number | null;
-  user_email: string | null;
+  id: string;
+  user_id: string | null;
   category: string;
-  message: string;
+  description: string;
   status: string;
   created_at: string;
 }
 
 interface ErrorItem {
-  id: number;
+  id: string;
   error_type: string;
   message: string;
   stack_trace: string | null;
-  user_id: number | null;
-  user_email: string | null;
+  user_id: string | null;
   page: string | null;
   created_at: string;
   resolved: boolean;
@@ -46,23 +45,15 @@ export default function AdminInboxPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [feedbackRes, errorsRes] = await Promise.all([
-        fetch('http://localhost:8000/api/admin/feedback', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('http://localhost:8000/api/admin/errors', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+      const [feedbackData, errorsData] = await Promise.all([
+        adminApi.listFeedback(token!),
+        adminApi.getErrors(token!),
       ]);
 
-      if (feedbackRes.ok) {
-        const feedbackData = await feedbackRes.json();
-        setFeedback(Array.isArray(feedbackData) ? feedbackData : []);
-      }
-      if (errorsRes.ok) {
-        const errorsData = await errorsRes.json();
-        setErrors(Array.isArray(errorsData) ? errorsData : []);
-      }
+      const fbList = feedbackData.feedback || feedbackData;
+      setFeedback(Array.isArray(fbList) ? fbList : []);
+      const errList = errorsData.errors || errorsData;
+      setErrors(Array.isArray(errList) ? errList : []);
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {
@@ -70,16 +61,9 @@ export default function AdminInboxPage() {
     }
   };
 
-  const handleUpdateFeedbackStatus = async (id: number, status: string) => {
+  const handleUpdateFeedbackStatus = async (id: string, status: string) => {
     try {
-      await fetch(`http://localhost:8000/api/admin/feedback/${id}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status }),
-      });
+      await adminApi.updateFeedback(token!, String(id), { status });
       fetchData();
       setSelectedFeedback(null);
     } catch (error) {
@@ -87,12 +71,9 @@ export default function AdminInboxPage() {
     }
   };
 
-  const handleResolveError = async (id: number) => {
+  const handleResolveError = async (id: string) => {
     try {
-      await fetch(`http://localhost:8000/api/admin/errors/${id}/resolve`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await adminApi.resolveError(token!, String(id));
       fetchData();
       setSelectedError(null);
     } catch (error) {
@@ -280,9 +261,9 @@ function FeedbackTab({
                     {item.status}
                   </span>
                 </div>
-                <p className="text-frost truncate">{item.message}</p>
+                <p className="text-frost truncate">{item.description}</p>
                 <p className="text-xs text-frost-muted mt-1">
-                  {item.user_email || 'Anonymous'} · {formatDate(item.created_at)}
+                  User: {item.user_id || 'Anonymous'} · {formatDate(item.created_at)}
                 </p>
               </div>
               <span className="text-frost-muted">→</span>
@@ -334,7 +315,7 @@ function ErrorsTab({
                 <p className="text-frost truncate">{item.message}</p>
                 <p className="text-xs text-frost-muted mt-1">
                   {item.page || 'Unknown page'} · {formatDate(item.created_at)}
-                  {item.user_email && ` · ${item.user_email}`}
+                  {item.user_id && ` · User: ${item.user_id}`}
                 </p>
               </div>
               <span className="text-frost-muted">→</span>
@@ -347,8 +328,8 @@ function ErrorsTab({
 }
 
 interface AIConversation {
-  id: number;
-  user_id: number;
+  id: string;
+  user_id: string;
   user_email: string;
   question: string;
   answer: string;
@@ -394,18 +375,14 @@ function ConversationsTab({ token }: { token: string }) {
   const fetchConversations = async () => {
     setIsLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (ratingFilter !== 'all') params.append('rating_filter', ratingFilter);
-      if (curationFilter !== 'all') params.append('curation_filter', curationFilter);
-      if (sourceFilter !== 'all') params.append('source_filter', sourceFilter);
+      const params: Record<string, string> = {};
+      if (ratingFilter !== 'all') params.rating_filter = ratingFilter;
+      if (curationFilter !== 'all') params.curation_filter = curationFilter;
+      if (sourceFilter !== 'all') params.source_filter = sourceFilter;
 
-      const res = await fetch(`http://localhost:8000/api/admin/conversations?${params}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setConversations(Array.isArray(data) ? data : []);
-      }
+      const data = await adminApi.getConversations(token, params);
+      const convList = data.conversations || data;
+      setConversations(Array.isArray(convList) ? convList : []);
     } catch (error) {
       console.error('Failed to fetch conversations:', error);
     } finally {
@@ -415,29 +392,18 @@ function ConversationsTab({ token }: { token: string }) {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/admin/conversations/stats', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        setStats(await res.json());
-      }
+      const data = await adminApi.getConversationStats(token);
+      setStats(data);
     } catch (error) {
       console.error('Failed to fetch stats:', error);
     }
   };
 
-  const handleCurate = async (id: number, isGood: boolean | null, isBad: boolean | null) => {
+  const handleCurate = async (id: string, isGood: boolean | null, isBad: boolean | null) => {
     try {
-      await fetch(`http://localhost:8000/api/admin/conversations/${id}/curate`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          is_good_example: isGood,
-          is_bad_example: isBad,
-        }),
+      await adminApi.curateConversation(token, String(id), {
+        is_good_example: isGood ?? undefined,
+        is_bad_example: isBad ?? undefined,
       });
       fetchConversations();
       fetchStats();
@@ -446,16 +412,9 @@ function ConversationsTab({ token }: { token: string }) {
     }
   };
 
-  const handleSaveNotes = async (id: number, notes: string) => {
+  const handleSaveNotes = async (id: string, notes: string) => {
     try {
-      await fetch(`http://localhost:8000/api/admin/conversations/${id}/curate`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ admin_notes: notes }),
-      });
+      await adminApi.curateConversation(token, String(id), { admin_notes: notes });
       fetchConversations();
     } catch (error) {
       console.error('Failed to save notes:', error);
@@ -632,8 +591,8 @@ function ConversationDetailModal({
 }: {
   conversation: AIConversation;
   onClose: () => void;
-  onCurate: (id: number, isGood: boolean | null, isBad: boolean | null) => void;
-  onSaveNotes: (id: number, notes: string) => void;
+  onCurate: (id: string, isGood: boolean | null, isBad: boolean | null) => void;
+  onSaveNotes: (id: string, notes: string) => void;
   formatDate: (date: string) => string;
 }) {
   const [notes, setNotes] = useState(conversation.admin_notes || '');
@@ -785,7 +744,7 @@ function FeedbackDetailModal({
 }: {
   feedback: FeedbackItem;
   onClose: () => void;
-  onUpdateStatus: (id: number, status: string) => void;
+  onUpdateStatus: (id: string, status: string) => void;
   formatDate: (date: string) => string;
 }) {
   return (
@@ -803,8 +762,8 @@ function FeedbackDetailModal({
 
         <div className="space-y-4">
           <div>
-            <label className="text-xs text-frost-muted uppercase tracking-wide">From</label>
-            <p className="text-frost">{feedback.user_email || 'Anonymous'}</p>
+            <label className="text-xs text-frost-muted uppercase tracking-wide">User</label>
+            <p className="text-frost">{feedback.user_id || 'Anonymous'}</p>
           </div>
 
           <div>
@@ -813,8 +772,8 @@ function FeedbackDetailModal({
           </div>
 
           <div>
-            <label className="text-xs text-frost-muted uppercase tracking-wide">Message</label>
-            <p className="text-frost whitespace-pre-wrap">{feedback.message}</p>
+            <label className="text-xs text-frost-muted uppercase tracking-wide">Description</label>
+            <p className="text-frost whitespace-pre-wrap">{feedback.description}</p>
           </div>
 
           <div>
@@ -881,10 +840,10 @@ function ErrorDetailModal({
             </div>
           )}
 
-          {error.user_email && (
+          {error.user_id && (
             <div>
               <label className="text-xs text-frost-muted uppercase tracking-wide">User</label>
-              <p className="text-frost">{error.user_email}</p>
+              <p className="text-frost">{error.user_id}</p>
             </div>
           )}
 

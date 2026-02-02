@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { chiefApi } from '@/lib/api';
 
 // Helper to get the gear tier image path
 function getGearImagePath(slotKey: string, color: string, subtier: string, stars: number): string {
@@ -238,16 +239,12 @@ export default function ChiefTrackerPage() {
 
   const fetchData = async () => {
     try {
-      const [gearRes, charmsRes] = await Promise.all([
-        fetch('http://localhost:8000/api/chief/gear', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch('http://localhost:8000/api/chief/charms', {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
+      const [gearData, charmsData] = await Promise.all([
+        chiefApi.getGear(token!),
+        chiefApi.getCharms(token!),
       ]);
-      if (gearRes.ok) setGear(await gearRes.json());
-      if (charmsRes.ok) setCharms(await charmsRes.json());
+      if (gearData) setGear(gearData.gear || gearData);
+      if (charmsData) setCharms(charmsData.charms || charmsData);
     } catch (error) {
       console.error('Failed to fetch chief data:', error);
     } finally {
@@ -263,14 +260,7 @@ export default function ChiefTrackerPage() {
     setIsSaving(true);
 
     try {
-      await fetch('http://localhost:8000/api/chief/gear', {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ [qualityField]: tierId }),
-      });
+      await chiefApi.updateGear(token!, { [qualityField]: tierId });
     } catch (error) {
       console.error('Failed to save gear:', error);
     } finally {
@@ -285,14 +275,7 @@ export default function ChiefTrackerPage() {
     setIsSaving(true);
 
     try {
-      await fetch('http://localhost:8000/api/chief/charms', {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ [field]: value }),
-      });
+      await chiefApi.updateCharms(token!, { [field]: value });
     } catch (error) {
       console.error('Failed to save charms:', error);
     } finally {

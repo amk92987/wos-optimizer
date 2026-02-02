@@ -7,7 +7,7 @@ from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
 from backend.common.auth import get_effective_user_id
 from backend.common.exceptions import AppError, NotFoundError, ValidationError
-from backend.common import profile_repo
+from backend.common import profile_repo, hero_repo
 
 app = APIGatewayHttpResolver()
 logger = Logger()
@@ -36,6 +36,27 @@ def create_profile():
         is_farm_account=is_farm,
     )
     return {"profile": profile}, 201
+
+
+# --- Static routes BEFORE parameterized <profileId> routes ---
+
+
+@app.get("/api/profiles/current")
+def get_current_profile():
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    profile = profile_repo.get_or_create_profile(user_id)
+    return {"profile": profile}
+
+
+@app.get("/api/profiles/deleted")
+def get_deleted_profiles():
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    profiles = profile_repo.get_profiles(user_id, include_deleted=True)
+    deleted_profiles = [p for p in profiles if p.get("deleted_at") is not None]
+    return {"profiles": deleted_profiles}
+
+
+# --- Parameterized <profileId> routes ---
 
 
 @app.get("/api/profiles/<profileId>")
@@ -86,6 +107,23 @@ def delete_profile(profileId: str):
     return result
 
 
+@app.post("/api/profiles/<profileId>/duplicate")
+def duplicate_profile(profileId: str):
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    body = app.current_event.json_body or {}
+    name = body.get("name")
+
+    new_profile = profile_repo.duplicate_profile(user_id, profileId, name)
+    return {"profile": new_profile}, 201
+
+
+@app.post("/api/profiles/<profileId>/restore")
+def restore_profile(profileId: str):
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    profile_repo.restore_profile(user_id, profileId)
+    return {"status": "restored", "profile_id": profileId}
+
+
 @app.post("/api/profiles/<profileId>/switch")
 def switch_profile(profileId: str):
     user_id = get_effective_user_id(app.current_event.raw_event)
@@ -96,6 +134,27 @@ def switch_profile(profileId: str):
 
     profile_repo.activate_profile(user_id, profileId)
     return {"status": "switched", "profile_id": profileId}
+
+
+@app.get("/api/profiles/<profileId>/preview")
+def preview_profile(profileId: str):
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    profile = profile_repo.get_profile(user_id, profileId)
+    if not profile:
+        raise NotFoundError("Profile not found")
+
+    heroes = hero_repo.get_heroes(profileId)
+    hero_summary = [
+        {
+            "name": h.get("hero_name"),
+            "level": h.get("level", 1),
+            "stars": h.get("stars", 0),
+            "generation": h.get("generation", 1),
+            "hero_class": h.get("hero_class", ""),
+        }
+        for h in heroes
+    ]
+    return {"profile": profile, "heroes": hero_summary}
 
 
 def lambda_handler(event, context):

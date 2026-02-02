@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import Sidebar from './Sidebar';
 import { useAuth } from '@/lib/auth';
+import { feedbackApi } from '@/lib/api';
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -239,28 +240,15 @@ function FeedbackModal({ token, onClose }: { token: string; onClose: () => void 
     setError(null);
 
     try {
-      const res = await fetch('http://localhost:8000/api/feedback', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          category,
-          description: description.trim(),
-          page: window.location.pathname,
-        }),
+      await feedbackApi.submit(token, {
+        category,
+        description: description.trim(),
+        page: window.location.pathname,
       });
-
-      if (res.ok) {
-        setSuccess(true);
-        setTimeout(() => {
-          onClose();
-        }, 2000);
-      } else {
-        const data = await res.json();
-        setError(data.detail || 'Failed to submit feedback');
-      }
+      setSuccess(true);
+      setTimeout(() => {
+        onClose();
+      }, 2000);
     } catch (err) {
       setError('Failed to submit feedback. Please try again.');
     } finally {
@@ -370,7 +358,7 @@ function FeedbackModal({ token, onClose }: { token: string; onClose: () => void 
 export default function AppShell({ children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, isImpersonating } = useAuth();
 
   // Close sidebar on route change
   useEffect(() => {
@@ -419,7 +407,7 @@ export default function AppShell({ children }: AppShellProps) {
           </div>
 
           {/* Impersonation banner */}
-          {user?.impersonating && (
+          {isImpersonating && (
             <ImpersonationBanner email={user.email} />
           )}
         </header>

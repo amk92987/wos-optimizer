@@ -7,6 +7,7 @@ import Image from 'next/image';
 import AppShell from '@/components/AppShell';
 import { useAuth } from '@/lib/auth';
 import { MetricCard } from '@/components/ui';
+import { dashboardApi } from '@/lib/api';
 
 // Generation thresholds for server age estimation
 const GEN_THRESHOLDS = [
@@ -89,10 +90,7 @@ export default function HomePage() {
   // Fetch dashboard stats
   useEffect(() => {
     if (token) {
-      fetch('http://localhost:8000/api/dashboard/stats', {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-        .then((res) => res.json())
+      dashboardApi.getStats(token)
         .then(setStats)
         .catch(console.error);
     }

@@ -4,13 +4,14 @@ import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { advisorApi, feedbackApi } from '@/lib/api';
 
 interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   source?: 'rules' | 'ai';
-  conversationId?: number;
+  conversationId?: string;
   timestamp: Date;
   rated?: 'up' | 'down' | null;
   showFeedbackForm?: boolean;
@@ -18,10 +19,11 @@ interface Message {
 }
 
 interface ChatHistory {
-  id: number;
+  SK: string;
+  conversation_id: string;
   question: string;
   answer: string;
-  source: string;
+  routed_to: string;
   created_at: string;
   is_favorite: boolean;
 }
@@ -88,13 +90,8 @@ export default function AIAdvisorPage() {
   const fetchChatHistory = async () => {
     if (!token) return;
     try {
-      const res = await fetch('http://localhost:8000/api/advisor/history?limit=10', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setChatHistory(Array.isArray(data) ? data : []);
-      }
+      const data = await advisorApi.getHistory(token, 10);
+      setChatHistory(Array.isArray(data.conversations) ? data.conversations : []);
     } catch (error) {
       console.error('Failed to fetch chat history:', error);
     }
@@ -103,63 +100,42 @@ export default function AIAdvisorPage() {
   const fetchFavorites = async () => {
     if (!token) return;
     try {
-      const res = await fetch('http://localhost:8000/api/advisor/favorites?limit=20', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setFavorites(Array.isArray(data) ? data : []);
-      }
+      const data = await advisorApi.getFavorites(token, 20);
+      setFavorites(Array.isArray(data.favorites) ? data.favorites : []);
     } catch (error) {
       console.error('Failed to fetch favorites:', error);
     }
   };
 
   const toggleFavorite = async (chat: ChatHistory, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent loading the chat when clicking favorite
+    e.stopPropagation();
     if (!token) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/api/advisor/favorite/${chat.id}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        // Update local state
-        setChatHistory((prev) =>
-          prev.map((c) =>
-            c.id === chat.id ? { ...c, is_favorite: data.is_favorite } : c
-          )
-        );
-        // Refresh favorites list
-        fetchFavorites();
-      }
+      const data = await advisorApi.toggleFavorite(token, chat.SK);
+      setChatHistory((prev) =>
+        prev.map((c) =>
+          c.SK === chat.SK ? { ...c, is_favorite: data.is_favorite } : c
+        )
+      );
+      fetchFavorites();
     } catch (error) {
       console.error('Failed to toggle favorite:', error);
     }
   };
 
-  const toggleMessageFavorite = async (messageId: string, conversationId: number) => {
+  const toggleMessageFavorite = async (messageId: string, conversationId: string) => {
     if (!token) return;
 
     try {
-      const res = await fetch(`http://localhost:8000/api/advisor/favorite/${conversationId}`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        // Update message state
-        setMessages((prev) =>
-          prev.map((m) =>
-            m.id === messageId ? { ...m, isFavorite: data.is_favorite } : m
-          )
-        );
-        // Refresh history and favorites
-        fetchChatHistory();
-        fetchFavorites();
-      }
+      const data = await advisorApi.toggleFavorite(token, conversationId);
+      setMessages((prev) =>
+        prev.map((m) =>
+          m.id === messageId ? { ...m, isFavorite: data.is_favorite } : m
+        )
+      );
+      fetchChatHistory();
+      fetchFavorites();
     } catch (error) {
       console.error('Failed to toggle favorite:', error);
     }
@@ -168,17 +144,17 @@ export default function AIAdvisorPage() {
   const loadChatFromHistory = (chat: ChatHistory, continueChat: boolean = false) => {
     // Load a past conversation into the chat
     const userMsg: Message = {
-      id: `hist-user-${chat.id}`,
+      id: `hist-user-${chat.conversation_id}`,
       role: 'user',
       content: chat.question,
       timestamp: new Date(chat.created_at),
     };
     const assistantMsg: Message = {
-      id: `hist-asst-${chat.id}`,
+      id: `hist-asst-${chat.conversation_id}`,
       role: 'assistant',
       content: chat.answer,
-      source: chat.source as 'rules' | 'ai',
-      conversationId: chat.id,
+      source: chat.routed_to as 'rules' | 'ai',
+      conversationId: chat.SK,
       timestamp: new Date(chat.created_at),
       rated: null, // Allow re-rating from history
       isFavorite: chat.is_favorite,
@@ -198,25 +174,16 @@ export default function AIAdvisorPage() {
     if (!feedbackMessage.trim()) return;
     setFeedbackSubmitting(true);
     try {
-      const res = await fetch('http://localhost:8000/api/feedback', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          type: feedbackType,
-          message: feedbackMessage,
-        }),
+      await feedbackApi.submit(token!, {
+        category: feedbackType,
+        description: feedbackMessage,
       });
-      if (res.ok) {
-        setFeedbackSuccess(true);
-        setFeedbackMessage('');
-        setTimeout(() => {
-          setShowFeedback(false);
-          setFeedbackSuccess(false);
-        }, 2000);
-      }
+      setFeedbackSuccess(true);
+      setFeedbackMessage('');
+      setTimeout(() => {
+        setShowFeedback(false);
+        setFeedbackSuccess(false);
+      }, 2000);
     } catch (error) {
       console.error('Failed to submit feedback:', error);
     } finally {
@@ -240,16 +207,7 @@ export default function AIAdvisorPage() {
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8000/api/advisor/ask', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ question: userMessage.content }),
-      });
-
-      const data = await res.json();
+      const data = await advisorApi.ask(token!, userMessage.content);
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -284,7 +242,7 @@ export default function AIAdvisorPage() {
     localStorage.removeItem(CHAT_STORAGE_KEY);
   };
 
-  const handleRating = async (messageId: string, conversationId: number | undefined, isHelpful: boolean) => {
+  const handleRating = async (messageId: string, conversationId: string | undefined, isHelpful: boolean) => {
     if (!conversationId) return;
 
     if (isHelpful) {
@@ -296,14 +254,7 @@ export default function AIAdvisorPage() {
       );
 
       try {
-        await fetch('http://localhost:8000/api/advisor/rate', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ conversation_id: conversationId, is_helpful: true }),
-        });
+        await advisorApi.rate(token!, conversationId, { is_helpful: true });
       } catch (error) {
         console.error('Failed to submit rating:', error);
       }
@@ -314,7 +265,7 @@ export default function AIAdvisorPage() {
     }
   };
 
-  const submitInlineFeedback = async (messageId: string, conversationId: number) => {
+  const submitInlineFeedback = async (messageId: string, conversationId: string) => {
     if (!inlineFeedbackText.trim()) return;
 
     // Update local state to show rating
@@ -325,17 +276,9 @@ export default function AIAdvisorPage() {
     );
 
     try {
-      await fetch('http://localhost:8000/api/advisor/rate', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          conversation_id: conversationId,
-          is_helpful: false,
-          user_feedback: inlineFeedbackText,
-        }),
+      await advisorApi.rate(token!, conversationId, {
+        is_helpful: false,
+        user_feedback: inlineFeedbackText,
       });
     } catch (error) {
       console.error('Failed to submit feedback:', error);
@@ -483,7 +426,7 @@ export default function AIAdvisorPage() {
                   <div className="space-y-1">
                     {chatHistory.map((chat) => (
                       <div
-                        key={chat.id}
+                        key={chat.SK}
                         className="group flex items-start gap-2 p-2 rounded hover:bg-surface transition-colors"
                       >
                         <button
@@ -492,7 +435,7 @@ export default function AIAdvisorPage() {
                         >
                           <p className="text-sm text-frost truncate">{chat.question}</p>
                           <p className="text-xs text-frost-muted">
-                            {chat.source === 'rules' ? '(Rules)' : '(AI)'} ·{' '}
+                            {chat.routed_to === 'rules' ? '(Rules)' : '(AI)'} ·{' '}
                             {new Date(chat.created_at).toLocaleDateString()}
                           </p>
                         </button>
@@ -534,7 +477,7 @@ export default function AIAdvisorPage() {
                   <div className="space-y-1">
                     {favorites.map((chat) => (
                       <div
-                        key={chat.id}
+                        key={chat.SK}
                         className="group flex items-start gap-2 p-2 rounded hover:bg-surface transition-colors"
                       >
                         <button
@@ -543,7 +486,7 @@ export default function AIAdvisorPage() {
                         >
                           <p className="text-sm text-frost truncate">{chat.question}</p>
                           <p className="text-xs text-frost-muted">
-                            {chat.source === 'rules' ? '(Rules)' : '(AI)'} ·{' '}
+                            {chat.routed_to === 'rules' ? '(Rules)' : '(AI)'} ·{' '}
                             {new Date(chat.created_at).toLocaleDateString()}
                           </p>
                         </button>

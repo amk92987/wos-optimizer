@@ -3,9 +3,10 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { profileApi } from '@/lib/api';
 
 interface Profile {
-  id: number;
+  profile_id: string;
   name: string | null;
   state_number: number | null;
   server_age_days: number;
@@ -16,23 +17,25 @@ interface Profile {
   hero_count: number;
   is_farm_account: boolean;
   is_active: boolean;
-  linked_main_profile_id: number | null;
+  linked_main_profile_id: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
 }
 
 interface PreviewData {
-  id: number;
-  name: string | null;
-  state_number: number | null;
-  server_age_days: number;
-  furnace_level: number;
-  furnace_fc_level: string | null;
-  spending_profile: string;
-  alliance_role: string;
-  is_farm_account: boolean;
-  linked_main_profile_id: number | null;
+  profile: {
+    profile_id: string;
+    name: string | null;
+    state_number: number | null;
+    server_age_days: number;
+    furnace_level: number;
+    furnace_fc_level: string | null;
+    spending_profile: string;
+    alliance_role: string;
+    is_farm_account: boolean;
+    linked_main_profile_id: string | null;
+  };
   heroes: Array<{
     name: string;
     level: number;
@@ -64,13 +67,8 @@ export default function ProfilesPage() {
 
   const fetchProfiles = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/profiles/all', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setProfiles(Array.isArray(data) ? data : []);
-      }
+      const data = await profileApi.list(token!);
+      setProfiles(Array.isArray(data.profiles) ? data.profiles : []);
     } catch (error) {
       console.error('Failed to fetch profiles:', error);
     } finally {
@@ -80,13 +78,8 @@ export default function ProfilesPage() {
 
   const fetchDeletedProfiles = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/profiles/deleted', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setDeletedProfiles(Array.isArray(data) ? data : []);
-      }
+      const data = await profileApi.getDeleted(token!);
+      setDeletedProfiles(Array.isArray(data.profiles) ? data.profiles : []);
     } catch (error) {
       console.error('Failed to fetch deleted profiles:', error);
     }
@@ -94,10 +87,7 @@ export default function ProfilesPage() {
 
   const handleLoadProfile = async (profileId: number) => {
     try {
-      await fetch(`http://localhost:8000/api/profiles/${profileId}/activate`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await profileApi.switch(token!, String(profileId));
       fetchProfiles();
     } catch (error) {
       console.error('Failed to load profile:', error);
@@ -106,15 +96,10 @@ export default function ProfilesPage() {
 
   const handleDeleteProfile = async (profileId: number) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/profiles/${profileId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        setConfirmDeleteId(null);
-        fetchProfiles();
-        fetchDeletedProfiles();
-      }
+      await profileApi.delete(token!, String(profileId));
+      setConfirmDeleteId(null);
+      fetchProfiles();
+      fetchDeletedProfiles();
     } catch (error) {
       console.error('Failed to delete profile:', error);
     }
@@ -122,14 +107,9 @@ export default function ProfilesPage() {
 
   const handlePermanentDelete = async (profileId: number) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/profiles/${profileId}?hard=true`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        setConfirmPermDeleteId(null);
-        fetchDeletedProfiles();
-      }
+      await profileApi.delete(token!, String(profileId), true);
+      setConfirmPermDeleteId(null);
+      fetchDeletedProfiles();
     } catch (error) {
       console.error('Failed to permanently delete profile:', error);
     }
@@ -137,14 +117,9 @@ export default function ProfilesPage() {
 
   const handleRestoreProfile = async (profileId: number) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/profiles/${profileId}/restore`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        fetchProfiles();
-        fetchDeletedProfiles();
-      }
+      await profileApi.restore(token!, String(profileId));
+      fetchProfiles();
+      fetchDeletedProfiles();
     } catch (error) {
       console.error('Failed to restore profile:', error);
     }
@@ -152,14 +127,7 @@ export default function ProfilesPage() {
 
   const handleToggleFarm = async (profile: Profile) => {
     try {
-      await fetch(`http://localhost:8000/api/profiles/${profile.id}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ is_farm_account: !profile.is_farm_account }),
-      });
+      await profileApi.update(token!, String(profile.profile_id), { is_farm_account: !profile.is_farm_account } as any);
       fetchProfiles();
     } catch (error) {
       console.error('Failed to update profile:', error);
@@ -173,14 +141,9 @@ export default function ProfilesPage() {
       return;
     }
     try {
-      const res = await fetch(`http://localhost:8000/api/profiles/${profileId}/preview`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setPreviewData(data);
-        setPreviewId(profileId);
-      }
+      const data = await profileApi.preview(token!, String(profileId));
+      setPreviewData(data as any);
+      setPreviewId(profileId);
     } catch (error) {
       console.error('Failed to fetch preview:', error);
     }
@@ -306,7 +269,7 @@ export default function ProfilesPage() {
                 You have {profiles.length} profile(s).
               </p>
               {profiles.map((profile) => (
-                <div key={profile.id}>
+                <div key={profile.profile_id}>
                   <div
                     className={`card ${
                       profile.is_active ? 'border-2 border-ice bg-ice/5' : ''
@@ -318,7 +281,7 @@ export default function ProfilesPage() {
                         <div className="flex items-center gap-2 mb-1">
                           {profile.is_active && <span className="text-ice">✓</span>}
                           <h3 className="font-medium text-frost truncate">
-                            {profile.name || `Profile ${profile.id}`}
+                            {profile.name || `Profile ${profile.profile_id}`}
                           </h3>
                           {profile.is_farm_account && (
                             <span className="badge-warning text-xs">🌾 Farm</span>
@@ -333,7 +296,7 @@ export default function ProfilesPage() {
                       <div className="flex flex-wrap items-center gap-2">
                         {!profile.is_active && (
                           <button
-                            onClick={() => handleLoadProfile(profile.id)}
+                            onClick={() => handleLoadProfile(profile.profile_id)}
                             className="btn-primary text-sm"
                           >
                             Switch
@@ -343,10 +306,10 @@ export default function ProfilesPage() {
                           <span className="text-xs text-frost-muted px-2">(current)</span>
                         )}
                         <button
-                          onClick={() => handlePreview(profile.id)}
+                          onClick={() => handlePreview(profile.profile_id)}
                           className="btn-secondary text-sm"
                         >
-                          {previewId === profile.id ? 'Hide' : 'Preview'}
+                          {previewId === profile.profile_id ? 'Hide' : 'Preview'}
                         </button>
                         <button
                           onClick={() => handleToggleFarm(profile)}
@@ -360,7 +323,7 @@ export default function ProfilesPage() {
                         </button>
                         <button
                           onClick={() => {
-                            setEditingId(profile.id);
+                            setEditingId(profile.profile_id);
                             setDuplicatingId(null);
                             setConfirmDeleteId(null);
                           }}
@@ -370,7 +333,7 @@ export default function ProfilesPage() {
                         </button>
                         <button
                           onClick={() => {
-                            setDuplicatingId(profile.id);
+                            setDuplicatingId(profile.profile_id);
                             setEditingId(null);
                             setConfirmDeleteId(null);
                           }}
@@ -380,7 +343,7 @@ export default function ProfilesPage() {
                         </button>
                         <button
                           onClick={() => {
-                            setConfirmDeleteId(profile.id);
+                            setConfirmDeleteId(profile.profile_id);
                             setEditingId(null);
                             setDuplicatingId(null);
                           }}
@@ -392,7 +355,7 @@ export default function ProfilesPage() {
                     </div>
 
                     {/* Edit Form */}
-                    {editingId === profile.id && (
+                    {editingId === profile.profile_id && (
                       <EditProfileForm
                         profile={profile}
                         token={token || ''}
@@ -405,7 +368,7 @@ export default function ProfilesPage() {
                     )}
 
                     {/* Duplicate Form */}
-                    {duplicatingId === profile.id && (
+                    {duplicatingId === profile.profile_id && (
                       <DuplicateProfileForm
                         profile={profile}
                         token={token || ''}
@@ -418,7 +381,7 @@ export default function ProfilesPage() {
                     )}
 
                     {/* Delete Confirmation */}
-                    {confirmDeleteId === profile.id && (
+                    {confirmDeleteId === profile.profile_id && (
                       <div className="mt-4 pt-4 border-t border-surface-border">
                         {profile.is_active ? (
                           <div className="flex items-center justify-between">
@@ -445,7 +408,7 @@ export default function ProfilesPage() {
                                 Cancel
                               </button>
                               <button
-                                onClick={() => handleDeleteProfile(profile.id)}
+                                onClick={() => handleDeleteProfile(profile.profile_id)}
                                 className="btn-danger text-sm"
                               >
                                 Delete
@@ -457,19 +420,19 @@ export default function ProfilesPage() {
                     )}
 
                     {/* Preview Panel */}
-                    {previewId === profile.id && previewData && (
+                    {previewId === profile.profile_id && previewData && (
                       <div className="mt-4 pt-4 border-t border-surface-border">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <h4 className="text-sm font-medium text-frost mb-2">Profile Settings</h4>
                             <ul className="text-sm text-frost-muted space-y-1">
-                              <li>Name: {previewData.name || 'N/A'}</li>
-                              <li>State: {previewData.state_number || 'N/A'}</li>
-                              <li>Server Age: Day {previewData.server_age_days}</li>
-                              <li>Furnace: {previewData.furnace_fc_level || `Lv.${previewData.furnace_level}`}</li>
-                              <li>Farm Account: {previewData.is_farm_account ? 'Yes' : 'No'}</li>
-                              <li>Spending: {spendingLabels[previewData.spending_profile] || previewData.spending_profile}</li>
-                              <li>Alliance Role: {previewData.alliance_role}</li>
+                              <li>Name: {previewData.profile.name || 'N/A'}</li>
+                              <li>State: {previewData.profile.state_number || 'N/A'}</li>
+                              <li>Server Age: Day {previewData.profile.server_age_days}</li>
+                              <li>Furnace: {previewData.profile.furnace_fc_level || `Lv.${previewData.profile.furnace_level}`}</li>
+                              <li>Farm Account: {previewData.profile.is_farm_account ? 'Yes' : 'No'}</li>
+                              <li>Spending: {spendingLabels[previewData.profile.spending_profile] || previewData.profile.spending_profile}</li>
+                              <li>Alliance Role: {previewData.profile.alliance_role}</li>
                             </ul>
                           </div>
                           <div>
@@ -527,11 +490,11 @@ export default function ProfilesPage() {
                 const daysLeft = getDaysRemaining(profile.deleted_at!);
                 return (
                   <div
-                    key={profile.id}
+                    key={profile.profile_id}
                     className="flex items-center justify-between p-3 bg-surface rounded-lg"
                   >
                     <div>
-                      <p className="text-frost line-through">{profile.name || `Profile ${profile.id}`}</p>
+                      <p className="text-frost line-through">{profile.name || `Profile ${profile.profile_id}`}</p>
                       <p className="text-xs text-frost-muted">
                         {daysLeft > 0 ? (
                           <span>⏱️ {daysLeft} days left to restore</span>
@@ -542,19 +505,19 @@ export default function ProfilesPage() {
                     </div>
                     <div className="flex gap-2">
                       <button
-                        onClick={() => handleRestoreProfile(profile.id)}
+                        onClick={() => handleRestoreProfile(profile.profile_id)}
                         className="btn-secondary text-sm"
                       >
                         Restore
                       </button>
                       <button
-                        onClick={() => setConfirmPermDeleteId(profile.id)}
+                        onClick={() => setConfirmPermDeleteId(profile.profile_id)}
                         className="px-3 py-1.5 text-sm text-error hover:bg-error/10 rounded transition-colors"
                       >
                         Delete Now
                       </button>
                     </div>
-                    {confirmPermDeleteId === profile.id && (
+                    {confirmPermDeleteId === profile.profile_id && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center rounded-lg">
                         <div className="bg-surface p-4 rounded-lg max-w-xs">
                           <p className="text-sm text-frost mb-3">
@@ -568,7 +531,7 @@ export default function ProfilesPage() {
                               Cancel
                             </button>
                             <button
-                              onClick={() => handlePermanentDelete(profile.id)}
+                              onClick={() => handlePermanentDelete(profile.profile_id)}
                               className="btn-danger text-sm"
                             >
                               Delete Forever
@@ -643,21 +606,11 @@ function EditProfileForm({
     setIsLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:8000/api/profiles/${profile.id}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name || null,
-          state_number: stateNumber ? parseInt(stateNumber) : null,
-        }),
-      });
-
-      if (res.ok) {
-        onSaved();
-      }
+      await profileApi.update(token, String(profile.profile_id), {
+        name: name || null,
+        state_number: stateNumber ? parseInt(stateNumber) : null,
+      } as any);
+      onSaved();
     } catch (error) {
       console.error('Failed to update profile:', error);
     } finally {
@@ -726,24 +679,11 @@ function DuplicateProfileForm({
     setError('');
 
     try {
-      const res = await fetch(`http://localhost:8000/api/profiles/${profile.id}/duplicate`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name: name.trim() }),
-      });
-
-      if (res.ok) {
-        onDuplicated();
-      } else {
-        const data = await res.json();
-        setError(data.detail || 'Failed to duplicate');
-      }
-    } catch (error) {
+      await profileApi.duplicate(token, String(profile.profile_id), name.trim());
+      onDuplicated();
+    } catch (error: any) {
       console.error('Failed to duplicate profile:', error);
-      setError('Failed to duplicate profile');
+      setError(error.message || 'Failed to duplicate profile');
     } finally {
       setIsLoading(false);
     }
@@ -787,26 +727,19 @@ function FarmLinkingSelect({
   token: string;
   onLinked: () => void;
 }) {
-  const [selectedId, setSelectedId] = useState<number | ''>(
+  const [selectedId, setSelectedId] = useState<string>(
     profile.linked_main_profile_id || ''
   );
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleChange = async (newValue: number | '') => {
+  const handleChange = async (newValue: string) => {
     setSelectedId(newValue);
     setIsLoading(true);
 
     try {
-      await fetch(`http://localhost:8000/api/profiles/${profile.id}`, {
-        method: 'PUT',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          linked_main_profile_id: newValue || null,
-        }),
-      });
+      await profileApi.update(token, String(profile.profile_id), {
+        linked_main_profile_id: newValue || null,
+      } as any);
       onLinked();
     } catch (error) {
       console.error('Failed to link profile:', error);
@@ -818,14 +751,14 @@ function FarmLinkingSelect({
   return (
     <select
       value={selectedId}
-      onChange={(e) => handleChange(e.target.value ? parseInt(e.target.value) : '')}
+      onChange={(e) => handleChange(e.target.value || '')}
       disabled={isLoading}
       className="input"
     >
       <option value="">-- Not linked --</option>
       {mainProfiles.map((p) => (
-        <option key={p.id} value={p.id}>
-          {p.name || `Profile ${p.id}`} (State {p.state_number || '?'})
+        <option key={p.profile_id} value={p.profile_id}>
+          {p.name || `Profile ${p.profile_id}`} (State {p.state_number || '?'})
         </option>
       ))}
     </select>
@@ -853,24 +786,11 @@ function CreateProfileModal({
     setIsLoading(true);
 
     try {
-      const res = await fetch('http://localhost:8000/api/profiles', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          name: name || null,
-          state_number: stateNumber ? parseInt(stateNumber) : null,
-          is_farm_account: isFarm,
-        }),
+      await profileApi.create(token, {
+        name: name || undefined,
+        state_number: stateNumber ? parseInt(stateNumber) : undefined,
+        is_farm_account: isFarm,
       });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || 'Failed to create profile');
-      }
-
       onCreated();
     } catch (err: any) {
       setError(err.message);

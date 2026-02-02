@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
+import { api, API_BASE } from '@/lib/api';
 
 interface ExportOption {
   id: string;
@@ -72,7 +73,7 @@ export default function AdminExportPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:8000/api/admin/export/${selectedExport}?format=${selectedFormat.toLowerCase()}`,
+        `${API_BASE}/api/admin/export/${selectedFormat.toLowerCase()}?table=${selectedExport}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

@@ -3,7 +3,7 @@
  * Connects to API Gateway (Lambda) with Cognito token auth
  */
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 // Debug: log API base on load
 if (typeof window !== 'undefined') {
@@ -180,6 +180,12 @@ export const profileApi = {
   get: (token: string, profileId: string) =>
     api<{ profile: Profile }>(`/api/profiles/${profileId}`, { token }),
 
+  getCurrent: (token: string) =>
+    api<{ profile: Profile }>('/api/profiles/current', { token }),
+
+  getDeleted: (token: string) =>
+    api<{ profiles: Profile[] }>('/api/profiles/deleted', { token }),
+
   create: (token: string, data: { name?: string; state_number?: number; is_farm_account?: boolean }) =>
     api<{ profile: Profile }>('/api/profiles', { method: 'POST', body: data, token }),
 
@@ -191,6 +197,15 @@ export const profileApi = {
 
   switch: (token: string, profileId: string) =>
     api(`/api/profiles/${profileId}/switch`, { method: 'POST', token }),
+
+  duplicate: (token: string, profileId: string, name: string) =>
+    api<{ profile: Profile }>(`/api/profiles/${profileId}/duplicate`, { method: 'POST', body: { name }, token }),
+
+  restore: (token: string, profileId: string) =>
+    api(`/api/profiles/${profileId}/restore`, { method: 'POST', token }),
+
+  preview: (token: string, profileId: string) =>
+    api<ProfilePreview>(`/api/profiles/${profileId}/preview`, { token }),
 };
 
 // Dashboard API
@@ -221,6 +236,12 @@ export const recommendationsApi = {
 
   getInvestments: (token: string) =>
     api<{ investments: Investment[] }>('/api/recommendations/investments', { token }),
+
+  getPhase: (token: string) =>
+    api<{ phase: PhaseInfo }>('/api/recommendations/phase', { token }),
+
+  getGearPriority: (token: string) =>
+    api<{ gear_priority: GearPriority[] }>('/api/recommendations/gear-priority', { token }),
 };
 
 // AI Advisor API
@@ -247,6 +268,15 @@ export const advisorApi = {
 
   getThreadMessages: (token: string, threadId: string) =>
     api<{ thread_id: string; messages: Conversation[] }>(`/api/advisor/threads/${threadId}`, { token }),
+
+  getFavorites: (token: string, limit = 20) =>
+    api<{ favorites: Conversation[] }>(`/api/advisor/favorites?limit=${limit}`, { token }),
+
+  toggleFavorite: (token: string, convSk: string) =>
+    api<{ is_favorite: boolean }>(`/api/advisor/favorite/${convSk}`, { method: 'POST', token }),
+
+  getStatus: (token: string) =>
+    api<AdvisorStatus>('/api/advisor/status', { token }),
 };
 
 // Lineups API
@@ -256,6 +286,24 @@ export const lineupsApi = {
 
   getForEvent: (token: string, eventType: string) =>
     api<{ event_type: string; lineup: any; owned_heroes: string[] }>(`/api/lineups/${eventType}`, { token }),
+
+  getTemplates: () =>
+    api<Record<string, LineupTemplate>>('/api/lineups/templates'),
+
+  getTemplate: (gameMode: string) =>
+    api<LineupTemplate>(`/api/lineups/template/${gameMode}`),
+
+  buildForMode: (token: string, gameMode: string) =>
+    api<LineupResponse>(`/api/lineups/build/${gameMode}`, { token }),
+
+  buildAll: (token: string) =>
+    api<{ lineups: Record<string, LineupResponse> }>('/api/lineups/build-all', { token }),
+
+  getGeneral: (gameMode: string, maxGeneration = 14) =>
+    api<LineupResponse>(`/api/lineups/general/${gameMode}?max_generation=${maxGeneration}`),
+
+  getJoiner: (token: string, attackType: string) =>
+    api<JoinerRecommendation>(`/api/lineups/joiner/${attackType}`, { token }),
 };
 
 // Admin API
@@ -344,6 +392,105 @@ export const adminApi = {
   // Impersonation
   impersonateUser: (token: string, userId: string) =>
     api<{ user: User; profiles: Profile[]; impersonating: boolean }>(`/api/admin/impersonate/${userId}`, { method: 'POST', token }),
+
+  // Stats (richer than metrics)
+  getStats: (token: string) =>
+    api<any>('/api/admin/stats', { token }),
+
+  // Usage Reports
+  getUsageStats: (token: string, range = '7d') =>
+    api<any>(`/api/admin/usage/stats?range=${range}`, { token }),
+
+  // Feature Flags (additional)
+  createFeatureFlag: (token: string, data: { name: string; description?: string; is_enabled?: boolean }) =>
+    api<{ flag: FeatureFlag }>('/api/admin/flags', { method: 'POST', body: data, token }),
+
+  deleteFeatureFlag: (token: string, name: string) =>
+    api('/api/admin/flags/' + name, { method: 'DELETE', token }),
+
+  bulkFlagAction: (token: string, action: string) =>
+    api('/api/admin/flags/bulk', { method: 'POST', body: { action }, token }),
+
+  // Errors
+  getErrors: (token: string) =>
+    api<{ errors: any[] }>('/api/admin/errors', { token }),
+
+  resolveError: (token: string, errorId: string) =>
+    api('/api/admin/errors/' + errorId + '/resolve', { method: 'POST', token }),
+
+  // Admin Conversations
+  getConversations: (token: string, params: Record<string, string> = {}) => {
+    const qs = new URLSearchParams(params);
+    return api<{ conversations: Conversation[] }>(`/api/admin/conversations?${qs}`, { token });
+  },
+
+  curateConversation: (token: string, id: string, data: { is_good_example?: boolean; is_bad_example?: boolean; admin_notes?: string }) =>
+    api(`/api/admin/conversations/${id}/curate`, { method: 'PUT', body: data, token }),
+
+  getConversationStats: (token: string) =>
+    api<ConversationStats>('/api/admin/conversations/stats', { token }),
+
+  exportConversations: (token: string, format = 'jsonl', filter?: string) => {
+    const params = new URLSearchParams({ format });
+    if (filter) params.append('filter', filter);
+    return api<any>(`/api/admin/conversations/export?${params}`, { token });
+  },
+
+  // Data Integrity
+  checkDataIntegrity: (token: string) =>
+    api<IntegrityCheck>('/api/admin/data-integrity/check', { token }),
+
+  // Game Data
+  getGameDataFiles: (token: string) =>
+    api<{ files: DataFile[] }>('/api/admin/game-data/files', { token }),
+
+  getGameDataFile: (token: string, path: string) =>
+    api<{ path: string; content: any }>(`/api/admin/game-data/file?path=${encodeURIComponent(path)}`, { token }),
+
+  // Database (additional)
+  getBackups: (token: string) =>
+    api<{ backups: any[] }>('/api/admin/database/backups', { token }),
+
+  createBackup: (token: string) =>
+    api('/api/admin/database/backup', { method: 'POST', token }),
+
+  databaseCleanup: (token: string, action: string) =>
+    api(`/api/admin/database/cleanup/${action}`, { method: 'POST', token }),
+
+  databaseQuery: (token: string, query: string) =>
+    api('/api/admin/database/query', { method: 'POST', body: { query }, token }),
+};
+
+// Inbox API
+export const inboxApi = {
+  getNotifications: (token: string) =>
+    api<{ notifications: any[] }>('/api/inbox/notifications', { token }),
+
+  markRead: (token: string, notificationId: string) =>
+    api('/api/inbox/notifications/' + notificationId + '/read', { method: 'POST', token }),
+
+  getUnreadCount: (token: string) =>
+    api<{ unread_notifications: number; total_unread: number }>('/api/inbox/unread-count', { token }),
+
+  getThreads: (token: string) =>
+    api<{ threads: any[] }>('/api/inbox/threads', { token }),
+
+  getThreadMessages: (token: string, threadId: string) =>
+    api<{ messages: any[] }>(`/api/inbox/threads/${threadId}/messages`, { token }),
+
+  replyToThread: (token: string, threadId: string, content: string) =>
+    api(`/api/inbox/threads/${threadId}/reply`, { method: 'POST', body: { content }, token }),
+};
+
+// Feedback API
+export const feedbackApi = {
+  submit: (token: string, data: { category: string; description: string; page?: string }) =>
+    api('/api/feedback', { method: 'POST', body: data, token }),
+};
+
+export const eventsApi = {
+  getGuide: () =>
+    api<any>('/api/events/guide'),
 };
 
 // Types
@@ -465,6 +612,12 @@ export interface Profile {
 }
 
 export interface DashboardStats {
+  generation: number;
+  server_age_days: number;
+  furnace_display: string;
+  owned_heroes: number;
+  total_heroes: number;
+  username: string;
   profile: Profile;
   hero_count: number;
   profile_count: number;
@@ -648,4 +801,106 @@ export interface FeedbackItem {
   status: string;
   admin_notes: string | null;
   created_at: string;
+}
+
+// Profile Preview
+export interface ProfilePreview {
+  profile: Profile;
+  heroes: Array<{
+    name: string;
+    level: number;
+    stars: number;
+    generation: number;
+    hero_class: string;
+  }>;
+}
+
+// Phase & Gear
+export interface PhaseInfo {
+  name: string;
+  furnace_level: number;
+}
+
+export interface GearPriority {
+  gear: string;
+  priority: number;
+  reason: string;
+}
+
+// Advisor Status
+export interface AdvisorStatus {
+  ai_enabled: boolean;
+  mode: string;
+  daily_limit: number;
+  requests_today: number;
+  requests_remaining: number;
+  primary_provider: string;
+}
+
+// Lineup Types
+export interface LineupHero {
+  hero: string;
+  hero_class: string;
+  slot: string;
+  role: string;
+  is_lead: boolean;
+  status: string;
+  power: number;
+}
+
+export interface LineupResponse {
+  game_mode: string;
+  heroes: LineupHero[];
+  troop_ratio: { infantry: number; lancer: number; marksman: number };
+  notes: string;
+  confidence: string;
+  recommended_to_get: Array<{ hero: string; reason: string }>;
+}
+
+export interface LineupTemplate {
+  name: string;
+  troop_ratio: { infantry: number; lancer: number; marksman: number };
+  notes: string;
+  key_heroes: string[];
+  ratio_explanation: string;
+  hero_explanations?: Record<string, string>;
+}
+
+export interface JoinerRecommendation {
+  hero: string | null;
+  status: string;
+  skill_level: number | null;
+  max_skill: number;
+  recommendation: string;
+  action: string;
+  critical_note: string;
+}
+
+// Admin Types (additional)
+export interface ConversationStats {
+  total: number;
+  ai: number;
+  rules: number;
+  ai_percentage: number;
+  rated: number;
+  helpful: number;
+  good_examples: number;
+  bad_examples: number;
+}
+
+export interface DataFile {
+  path: string;
+  name: string;
+  size_bytes: number;
+}
+
+export interface IntegrityCheck {
+  checks: Array<{
+    file: string;
+    exists: boolean;
+    valid_json: boolean;
+    size_bytes: number;
+  }>;
+  total: number;
+  passing: number;
 }
