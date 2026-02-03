@@ -88,8 +88,10 @@ Resources:
         - Name: is_test_account
           AttributeDataType: String
           Mutable: true
-      LambdaConfig:
-        UserMigration: !GetAtt UserMigrationFunction.Arn
+      # NOTE: LambdaConfig.UserMigration removed to break circular dependency.
+      # UserPool -> UserMigrationFunction -> HttpApi (via Globals env) -> UserPool.
+      # To enable user migration later, add it via a separate CloudFormation stack
+      # update after initial deployment, or use a CustomResource.
       EmailConfiguration:
         EmailSendingAccount: COGNITO_DEFAULT
 
