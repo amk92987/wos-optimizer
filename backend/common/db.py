@@ -15,7 +15,7 @@ import boto3
 from boto3.dynamodb.conditions import Key
 from botocore.exceptions import ClientError
 
-from backend.common.config import Config
+from common.config import Config
 
 logger = logging.getLogger(__name__)
 

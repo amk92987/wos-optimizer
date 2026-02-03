@@ -11,10 +11,10 @@ import os
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver, Response
 
-from backend.common.auth import get_effective_user_id
-from backend.common.config import Config
-from backend.common.exceptions import AppError, NotFoundError, ValidationError
-from backend.common.hero_repo import (
+from common.auth import get_effective_user_id
+from common.config import Config
+from common.exceptions import AppError, NotFoundError, ValidationError
+from common.hero_repo import (
     batch_update_heroes,
     delete_hero,
     get_all_heroes_reference,
@@ -23,7 +23,7 @@ from backend.common.hero_repo import (
     update_hero,
     put_hero,
 )
-from backend.common.profile_repo import get_or_create_profile
+from common.profile_repo import get_or_create_profile
 
 app = APIGatewayHttpResolver()
 logger = Logger()

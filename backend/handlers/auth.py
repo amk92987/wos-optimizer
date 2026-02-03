@@ -17,10 +17,10 @@ from aws_lambda_powertools.event_handler.exceptions import (
     UnauthorizedError,
 )
 
-from backend.common.auth import get_user_id, get_user_email, get_effective_user_id
-from backend.common.config import Config
-from backend.common.exceptions import AppError, ValidationError, ConflictError
-from backend.common.user_repo import (
+from common.auth import get_user_id, get_user_email, get_effective_user_id
+from common.config import Config
+from common.exceptions import AppError, ValidationError, ConflictError
+from common.user_repo import (
     get_user,
     create_user,
     update_user,

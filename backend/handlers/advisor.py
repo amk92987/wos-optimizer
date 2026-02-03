@@ -6,9 +6,9 @@ import time
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
-from backend.common.auth import get_effective_user_id
-from backend.common.exceptions import AppError, ValidationError, RateLimitError
-from backend.common import ai_repo, profile_repo, hero_repo, user_repo
+from common.auth import get_effective_user_id
+from common.exceptions import AppError, ValidationError, RateLimitError
+from common import ai_repo, profile_repo, hero_repo, user_repo
 
 app = APIGatewayHttpResolver()
 logger = Logger()

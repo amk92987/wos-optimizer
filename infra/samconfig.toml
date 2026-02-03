@@ -1,3 +1,6 @@
+# SAM deployment configuration
+# Usage: cd infra && sam deploy
+
 version = 0.1
 
 [default.deploy.parameters]
@@ -8,13 +11,11 @@ region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
 parameter_overrides = "Stage=dev"
-tags = "project=wos environment=dev"
+tags = "Project=WoS Environment=dev"
 
 [default.build.parameters]
-use_container = false
-
-[default.local_start_api.parameters]
-warm_containers = "EAGER"
+cached = true
+parallel = true
 
 [live.deploy.parameters]
 stack_name = "wos-live"
@@ -24,4 +25,4 @@ region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
 parameter_overrides = "Stage=live"
-tags = "project=wos environment=live"
+tags = "Project=WoS Environment=live"

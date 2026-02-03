@@ -1,0 +1,4 @@
+# CommonLayer dependencies
+# boto3 and botocore are provided by the Lambda runtime - do not include
+aws-lambda-powertools>=2.0.0
+pydantic[email]>=2.0.0

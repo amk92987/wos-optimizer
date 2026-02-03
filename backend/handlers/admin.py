@@ -8,11 +8,11 @@ from datetime import datetime, timezone
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
-from backend.common.auth import get_effective_user_id, require_admin, is_admin, get_user_id
-from backend.common.exceptions import AppError, NotFoundError, ValidationError
-from backend.common.config import Config
-from backend.common import admin_repo, user_repo, ai_repo, profile_repo, hero_repo
-from backend.common.db import get_table
+from common.auth import get_effective_user_id, require_admin, is_admin, get_user_id
+from common.exceptions import AppError, NotFoundError, ValidationError
+from common.config import Config
+from common import admin_repo, user_repo, ai_repo, profile_repo, hero_repo
+from common.db import get_table
 
 app = APIGatewayHttpResolver()
 logger = Logger()

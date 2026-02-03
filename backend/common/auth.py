@@ -9,7 +9,7 @@ Claims path: event['requestContext']['authorizer']['jwt']['claims']
 
 from typing import Optional
 
-from backend.common.exceptions import AuthenticationError, AuthorizationError
+from common.exceptions import AuthenticationError, AuthorizationError
 
 
 def get_user_claims(event: dict) -> dict:

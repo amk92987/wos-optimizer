@@ -10,7 +10,7 @@ Globals:
     Timeout: 30
     MemorySize: 256
     Architectures:
-      - arm64
+      - x86_64
     Environment:
       Variables:
         STAGE: !Ref Stage
@@ -292,7 +292,7 @@ Resources:
       CompatibleRuntimes:
         - python3.13
       CompatibleArchitectures:
-        - arm64
+        - x86_64
     Metadata:
       BuildMethod: python3.13
 

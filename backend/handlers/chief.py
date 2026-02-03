@@ -5,9 +5,9 @@ import json
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
-from backend.common.auth import get_effective_user_id
-from backend.common.exceptions import AppError, ValidationError
-from backend.common import chief_repo, profile_repo
+from common.auth import get_effective_user_id
+from common.exceptions import AppError, ValidationError
+from common import chief_repo, profile_repo
 
 app = APIGatewayHttpResolver()
 logger = Logger()
