@@ -270,20 +270,141 @@ def get_unread_count():
 
 @app.get("/api/inbox/threads")
 def get_inbox_threads():
-    """Stub for message threads (not implemented yet)."""
-    return {"threads": []}
+    """Get message threads for the current user."""
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    admin_table = get_table("admin")
+
+    # Query all threads - filter by user_id
+    resp = admin_table.query(
+        KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
+        ExpressionAttributeValues={
+            ":pk": "THREADS",
+            ":prefix": "THREAD#",
+        },
+        ScanIndexForward=False,
+    )
+    all_threads = resp.get("Items", [])
+
+    # Filter to only this user's threads
+    user_threads = [t for t in all_threads if t.get("user_id") == user_id]
+
+    # Transform for frontend
+    threads = []
+    for t in user_threads:
+        sk = t.get("SK", "")
+        thread_id = sk.replace("THREAD#", "") if sk.startswith("THREAD#") else sk
+        threads.append({
+            "id": thread_id,
+            "subject": t.get("subject", ""),
+            "last_message": t.get("last_message", ""),
+            "has_unread": not t.get("is_read_by_user", True),
+            "message_count": t.get("message_count", 0),
+            "status": t.get("status", "open"),
+            "updated_at": t.get("updated_at", t.get("created_at", "")),
+        })
+
+    threads.sort(key=lambda t: t.get("updated_at", ""), reverse=True)
+    return {"threads": threads}
 
 
 @app.get("/api/inbox/threads/<threadId>/messages")
 def get_thread_messages(threadId: str):
-    """Stub for thread messages (not implemented yet)."""
-    return {"messages": []}
+    """Get messages in a thread for the current user."""
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    admin_table = get_table("admin")
+
+    # Verify the thread belongs to this user
+    thread_resp = admin_table.get_item(Key={"PK": "THREADS", "SK": f"THREAD#{threadId}"})
+    thread = thread_resp.get("Item")
+    if not thread or thread.get("user_id") != user_id:
+        return {"messages": []}
+
+    # Get messages
+    msg_resp = admin_table.query(
+        KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
+        ExpressionAttributeValues={
+            ":pk": f"THREAD#{threadId}",
+            ":prefix": "MSG#",
+        },
+        ScanIndexForward=True,
+    )
+    messages = msg_resp.get("Items", [])
+
+    # Mark thread as read by user
+    if not thread.get("is_read_by_user"):
+        admin_table.update_item(
+            Key={"PK": "THREADS", "SK": f"THREAD#{threadId}"},
+            UpdateExpression="SET is_read_by_user = :t",
+            ExpressionAttributeValues={":t": True},
+        )
+
+    result = []
+    for msg in messages:
+        result.append({
+            "id": msg.get("message_id", ""),
+            "is_from_admin": msg.get("is_from_admin", False),
+            "content": msg.get("content", ""),
+            "created_at": msg.get("created_at", ""),
+        })
+
+    return {"messages": result}
 
 
 @app.post("/api/inbox/threads/<threadId>/reply")
 def reply_to_thread(threadId: str):
-    """Stub for thread replies (not implemented yet)."""
-    return {"status": "sent"}
+    """User replies to a thread."""
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    body = app.current_event.json_body or {}
+    content = body.get("content", "").strip()
+
+    if not content:
+        return {"error": "content is required"}, 400
+
+    admin_table = get_table("admin")
+
+    # Verify the thread belongs to this user and is open
+    thread_resp = admin_table.get_item(Key={"PK": "THREADS", "SK": f"THREAD#{threadId}"})
+    thread = thread_resp.get("Item")
+    if not thread or thread.get("user_id") != user_id:
+        return {"error": "Thread not found"}, 404
+
+    if thread.get("status") == "closed":
+        return {"error": "Thread is closed"}, 400
+
+    import uuid
+    from datetime import datetime as dt, timezone as tz
+    now = dt.now(tz.utc).isoformat()
+    message_id = str(uuid.uuid4())
+
+    # Create message
+    msg_item = {
+        "PK": f"THREAD#{threadId}",
+        "SK": f"MSG#{now}#{message_id}",
+        "message_id": message_id,
+        "thread_id": threadId,
+        "sender_id": user_id,
+        "is_from_admin": False,
+        "content": content,
+        "created_at": now,
+    }
+    admin_table.put_item(Item=msg_item)
+
+    # Update thread metadata
+    current_count = thread.get("message_count", 0)
+    admin_table.update_item(
+        Key={"PK": "THREADS", "SK": f"THREAD#{threadId}"},
+        UpdateExpression="SET updated_at = :now, last_message = :msg, last_sender = :sender, message_count = :count, is_read_by_user = :t, is_read_by_admin = :f",
+        ExpressionAttributeValues={
+            ":now": now,
+            ":msg": content[:200],
+            ":sender": "user",
+            ":count": current_count + 1,
+            ":t": True,
+            ":f": False,
+        },
+    )
+
+    return {"status": "sent", "message_id": message_id}
 
 
 # --- Lineups ---

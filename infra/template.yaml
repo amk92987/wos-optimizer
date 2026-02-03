@@ -798,6 +798,18 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/admin/export/{format}
             Method: GET
+        ExportReport:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/export/report
+            Method: GET
+        ExportReportDownload:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/export/report/download
+            Method: GET
         AdminStats:
           Type: HttpApi
           Properties:
@@ -924,6 +936,84 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/admin/database/query
             Method: POST
+        AdminThreads:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/threads
+            Method: GET
+        AdminCreateThread:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/threads
+            Method: POST
+        AdminThreadMessages:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/threads/{threadId}/messages
+            Method: GET
+        AdminThreadReply:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/threads/{threadId}/reply
+            Method: POST
+        AdminUpdateThread:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/threads/{threadId}
+            Method: PUT
+        AdminListHeroes:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/heroes
+            Method: GET
+        AdminCreateHero:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/heroes
+            Method: POST
+        AdminUpdateHero:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/heroes/{heroName}
+            Method: PUT
+        AdminDeleteHero:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/heroes/{heroName}
+            Method: DELETE
+        AdminListItems:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/items
+            Method: GET
+        AdminCreateItem:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/items
+            Method: POST
+        AdminUpdateItem:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/items/{itemName}
+            Method: PUT
+        AdminDeleteItem:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/items/{itemName}
+            Method: DELETE
 
   GeneralFunction:
     Type: AWS::Serverless::Function

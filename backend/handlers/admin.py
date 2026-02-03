@@ -371,6 +371,15 @@ def bulk_feedback_action():
         admin_repo.log_audit(admin_id, "admin", "empty_feedback_archive", details=f"Deleted {len(feedback)} archived items")
         return {"status": "ok", "count": len(feedback)}
 
+    elif action == "delete_all":
+        feedback = admin_repo.get_feedback()
+        table = get_table("admin")
+        for item in feedback:
+            sk = item.get("SK") or f"FEEDBACK#{item.get('feedback_id', '')}"
+            table.delete_item(Key={"PK": "FEEDBACK", "SK": sk})
+        admin_repo.log_audit(admin_id, "admin", "delete_all_feedback", details=f"Deleted {len(feedback)} feedback items")
+        return {"status": "ok", "count": len(feedback), "message": f"Deleted {len(feedback)} feedback items"}
+
     return {"error": "Unknown action"}, 400
 
 
@@ -1306,6 +1315,798 @@ def export_data(format: str):
     admin_repo.log_audit(admin_id, "admin", "export_data", "table", actual_name, details=f"format={format}")
 
     return {"csv": "\n".join(lines), "count": len(items)}
+
+
+# --- Admin Message Threads ---
+
+@app.get("/api/admin/threads")
+def list_admin_threads():
+    """List all message threads (admin sees all users' threads)."""
+    _require_admin()
+    params = app.current_event.query_string_parameters or {}
+    limit = int(params.get("limit", "50"))
+
+    table = get_table("admin")
+    resp = table.query(
+        KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
+        ExpressionAttributeValues={
+            ":pk": "THREADS",
+            ":prefix": "THREAD#",
+        },
+        ScanIndexForward=False,
+    )
+    threads = resp.get("Items", [])
+
+    # Enrich threads with username
+    for t in threads:
+        uid = t.get("user_id")
+        if uid:
+            u = user_repo.get_user(uid)
+            t["username"] = u.get("username") or u.get("email", "Unknown") if u else "Unknown"
+        else:
+            t["username"] = "Unknown"
+        # Extract thread_id from SK
+        sk = t.get("SK", "")
+        t["thread_id"] = sk.replace("THREAD#", "") if sk.startswith("THREAD#") else sk
+
+    # Sort by updated_at descending
+    threads.sort(key=lambda t: t.get("updated_at", t.get("created_at", "")), reverse=True)
+
+    return {"threads": threads[:limit]}
+
+
+@app.post("/api/admin/threads")
+def create_admin_thread():
+    """Create a new message thread from admin to a user."""
+    _require_admin()
+    body = app.current_event.json_body or {}
+
+    user_id = body.get("user_id")
+    subject = body.get("subject", "").strip()
+    message = body.get("message", "").strip()
+
+    if not user_id:
+        raise ValidationError("user_id is required")
+    if not subject:
+        raise ValidationError("subject is required")
+    if not message:
+        raise ValidationError("message is required")
+
+    # Verify user exists
+    user = user_repo.get_user(user_id)
+    if not user:
+        raise NotFoundError("User not found")
+
+    import uuid
+    now = datetime.now(timezone.utc).isoformat()
+    thread_id = str(uuid.uuid4())
+    message_id = str(uuid.uuid4())
+    admin_id = get_user_id(app.current_event.raw_event)
+
+    table = get_table("admin")
+
+    # Create thread record
+    thread_item = {
+        "PK": "THREADS",
+        "SK": f"THREAD#{thread_id}",
+        "thread_id": thread_id,
+        "user_id": user_id,
+        "subject": subject,
+        "status": "open",
+        "is_read_by_admin": True,
+        "is_read_by_user": False,
+        "message_count": 1,
+        "last_message": message[:200],
+        "last_sender": "admin",
+        "created_at": now,
+        "updated_at": now,
+        "created_by": admin_id,
+    }
+    table.put_item(Item=thread_item)
+
+    # Create first message
+    msg_item = {
+        "PK": f"THREAD#{thread_id}",
+        "SK": f"MSG#{now}#{message_id}",
+        "message_id": message_id,
+        "thread_id": thread_id,
+        "sender_id": admin_id,
+        "is_from_admin": True,
+        "content": message,
+        "created_at": now,
+    }
+    table.put_item(Item=msg_item)
+
+    # Create a notification for the user in the main table
+    main_table = get_table("main")
+    notif_id = str(uuid.uuid4())
+    main_table.put_item(Item={
+        "PK": f"USER#{user_id}",
+        "SK": f"NOTIF#{notif_id}",
+        "title": f"New message: {subject}",
+        "message": message[:200],
+        "type": "message",
+        "is_read": False,
+        "dismissed": False,
+        "thread_id": thread_id,
+        "created_at": now,
+    })
+
+    admin_repo.log_audit(admin_id, "admin", "create_thread", "thread", thread_id, user.get("username", ""), f"Subject: {subject}")
+
+    thread_item["username"] = user.get("username") or user.get("email", "Unknown")
+    return {"thread": thread_item}, 201
+
+
+@app.get("/api/admin/threads/<threadId>/messages")
+def get_admin_thread_messages(threadId: str):
+    """Get all messages in a thread (admin view)."""
+    _require_admin()
+    table = get_table("admin")
+
+    # Get the thread metadata
+    thread_resp = table.get_item(Key={"PK": "THREADS", "SK": f"THREAD#{threadId}"})
+    thread = thread_resp.get("Item")
+    if not thread:
+        raise NotFoundError("Thread not found")
+
+    # Get messages
+    msg_resp = table.query(
+        KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
+        ExpressionAttributeValues={
+            ":pk": f"THREAD#{threadId}",
+            ":prefix": "MSG#",
+        },
+        ScanIndexForward=True,
+    )
+    messages = msg_resp.get("Items", [])
+
+    # Mark thread as read by admin
+    if not thread.get("is_read_by_admin"):
+        table.update_item(
+            Key={"PK": "THREADS", "SK": f"THREAD#{threadId}"},
+            UpdateExpression="SET is_read_by_admin = :t",
+            ExpressionAttributeValues={":t": True},
+        )
+
+    # Transform messages
+    result_messages = []
+    for msg in messages:
+        result_messages.append({
+            "id": msg.get("message_id", ""),
+            "thread_id": threadId,
+            "sender_id": msg.get("sender_id", ""),
+            "is_from_admin": msg.get("is_from_admin", False),
+            "content": msg.get("content", ""),
+            "created_at": msg.get("created_at", ""),
+        })
+
+    return {
+        "thread": {
+            "thread_id": threadId,
+            "subject": thread.get("subject", ""),
+            "status": thread.get("status", "open"),
+            "user_id": thread.get("user_id", ""),
+        },
+        "messages": result_messages,
+    }
+
+
+@app.post("/api/admin/threads/<threadId>/reply")
+def admin_reply_to_thread(threadId: str):
+    """Admin sends a reply to an existing thread."""
+    _require_admin()
+    body = app.current_event.json_body or {}
+    content = body.get("content", "").strip()
+
+    if not content:
+        raise ValidationError("content is required")
+
+    table = get_table("admin")
+
+    # Verify thread exists
+    thread_resp = table.get_item(Key={"PK": "THREADS", "SK": f"THREAD#{threadId}"})
+    thread = thread_resp.get("Item")
+    if not thread:
+        raise NotFoundError("Thread not found")
+
+    import uuid
+    now = datetime.now(timezone.utc).isoformat()
+    message_id = str(uuid.uuid4())
+    admin_id = get_user_id(app.current_event.raw_event)
+
+    # Create message
+    msg_item = {
+        "PK": f"THREAD#{threadId}",
+        "SK": f"MSG#{now}#{message_id}",
+        "message_id": message_id,
+        "thread_id": threadId,
+        "sender_id": admin_id,
+        "is_from_admin": True,
+        "content": content,
+        "created_at": now,
+    }
+    table.put_item(Item=msg_item)
+
+    # Update thread metadata
+    current_count = thread.get("message_count", 0)
+    table.update_item(
+        Key={"PK": "THREADS", "SK": f"THREAD#{threadId}"},
+        UpdateExpression="SET updated_at = :now, last_message = :msg, last_sender = :sender, message_count = :count, is_read_by_admin = :t, is_read_by_user = :f",
+        ExpressionAttributeValues={
+            ":now": now,
+            ":msg": content[:200],
+            ":sender": "admin",
+            ":count": current_count + 1,
+            ":t": True,
+            ":f": False,
+        },
+    )
+
+    # Create notification for user
+    user_id = thread.get("user_id")
+    if user_id:
+        main_table = get_table("main")
+        notif_id = str(uuid.uuid4())
+        main_table.put_item(Item={
+            "PK": f"USER#{user_id}",
+            "SK": f"NOTIF#{notif_id}",
+            "title": f"Reply: {thread.get('subject', 'Message')}",
+            "message": content[:200],
+            "type": "message",
+            "is_read": False,
+            "dismissed": False,
+            "thread_id": threadId,
+            "created_at": now,
+        })
+
+    return {"status": "sent", "message_id": message_id}
+
+
+@app.put("/api/admin/threads/<threadId>")
+def update_admin_thread(threadId: str):
+    """Update thread status (close/reopen, mark read/unread)."""
+    _require_admin()
+    body = app.current_event.json_body or {}
+
+    table = get_table("admin")
+
+    # Verify thread exists
+    thread_resp = table.get_item(Key={"PK": "THREADS", "SK": f"THREAD#{threadId}"})
+    thread = thread_resp.get("Item")
+    if not thread:
+        raise NotFoundError("Thread not found")
+
+    update_parts = []
+    attr_names = {}
+    attr_values = {}
+
+    if "status" in body:
+        status = body["status"]
+        if status not in ("open", "closed"):
+            raise ValidationError("Status must be 'open' or 'closed'")
+        update_parts.append("#s = :status")
+        attr_names["#s"] = "status"
+        attr_values[":status"] = status
+
+    if "is_read_by_admin" in body:
+        update_parts.append("is_read_by_admin = :read")
+        attr_values[":read"] = bool(body["is_read_by_admin"])
+
+    now = datetime.now(timezone.utc).isoformat()
+    update_parts.append("updated_at = :now")
+    attr_values[":now"] = now
+
+    if update_parts:
+        expr = "SET " + ", ".join(update_parts)
+        kwargs = {
+            "Key": {"PK": "THREADS", "SK": f"THREAD#{threadId}"},
+            "UpdateExpression": expr,
+            "ExpressionAttributeValues": attr_values,
+        }
+        if attr_names:
+            kwargs["ExpressionAttributeNames"] = attr_names
+        table.update_item(**kwargs)
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "update_thread", "thread", threadId, details=json.dumps(body))
+
+    return {"status": "updated"}
+
+
+# --- Custom Reports ---
+
+@app.get("/api/admin/export/report")
+def generate_report():
+    """Generate a custom report with aggregated data."""
+    _require_admin()
+    params = app.current_event.query_string_parameters or {}
+    report_type = params.get("type")
+    start_date = params.get("start_date")
+    end_date = params.get("end_date")
+
+    if not report_type:
+        raise ValidationError("Report type is required")
+
+    valid_types = ("user_summary", "activity", "content_stats", "hero_usage", "growth")
+    if report_type not in valid_types:
+        raise ValidationError(f"Invalid report type. Must be one of: {', '.join(valid_types)}")
+
+    rows = _build_report(report_type, start_date, end_date)
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "generate_report", details=f"type={report_type}")
+
+    return {"rows": rows, "type": report_type, "count": len(rows)}
+
+
+@app.get("/api/admin/export/report/download")
+def download_report():
+    """Download a custom report as CSV."""
+    _require_admin()
+    params = app.current_event.query_string_parameters or {}
+    report_type = params.get("type")
+    start_date = params.get("start_date")
+    end_date = params.get("end_date")
+    fmt = params.get("format", "csv")
+
+    if not report_type:
+        raise ValidationError("Report type is required")
+
+    valid_types = ("user_summary", "activity", "content_stats", "hero_usage", "growth")
+    if report_type not in valid_types:
+        raise ValidationError(f"Invalid report type. Must be one of: {', '.join(valid_types)}")
+
+    rows = _build_report(report_type, start_date, end_date)
+
+    if not rows:
+        return {"csv": "", "count": 0}
+
+    headers = list(rows[0].keys()) if rows else []
+    lines = [",".join(headers)]
+    for row in rows:
+        line = [str(row.get(h, "")).replace(",", ";").replace("\n", " ").replace("\r", "") for h in headers]
+        lines.append(",".join(line))
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "download_report", details=f"type={report_type}, format={fmt}")
+
+    return {"csv": "\n".join(lines), "count": len(rows), "filename": f"{report_type}_report.csv"}
+
+
+def _build_report(report_type: str, start_date: str = None, end_date: str = None) -> list:
+    """Build report rows based on type."""
+    if report_type == "user_summary":
+        return _report_user_summary()
+    elif report_type == "activity":
+        return _report_activity()
+    elif report_type == "content_stats":
+        return _report_content_stats()
+    elif report_type == "hero_usage":
+        return _report_hero_usage()
+    elif report_type == "growth":
+        return _report_growth(start_date, end_date)
+    return []
+
+
+def _report_user_summary() -> list:
+    """User Summary report."""
+    users = user_repo.list_users(limit=1000)
+    rows = []
+
+    for u in users:
+        uid = u.get("user_id")
+        profiles = []
+        try:
+            profiles = profile_repo.get_profiles(uid) if uid else []
+        except Exception:
+            pass
+
+        if not profiles:
+            rows.append({
+                "Username": u.get("username", ""),
+                "Email": u.get("email", ""),
+                "Role": u.get("role", "user"),
+                "State": "",
+                "Is Active": str(u.get("is_active", True)),
+                "Created": u.get("created_at", "")[:10],
+                "Last Login": (u.get("last_login") or "")[:10],
+                "Profile Name": "",
+                "Heroes Tracked": 0,
+            })
+        else:
+            for p in profiles:
+                profile_id = p.get("SK", "").replace("PROFILE#", "") or p.get("profile_id", "")
+                hero_count = 0
+                if profile_id:
+                    try:
+                        hero_count = len(hero_repo.get_heroes(profile_id))
+                    except Exception:
+                        pass
+                rows.append({
+                    "Username": u.get("username", ""),
+                    "Email": u.get("email", ""),
+                    "Role": u.get("role", "user"),
+                    "State": str(p.get("state_number", "")),
+                    "Is Active": str(u.get("is_active", True)),
+                    "Created": u.get("created_at", "")[:10],
+                    "Last Login": (u.get("last_login") or "")[:10],
+                    "Profile Name": p.get("name", ""),
+                    "Heroes Tracked": hero_count,
+                })
+
+    return rows
+
+
+def _report_activity() -> list:
+    """Activity Report."""
+    users = user_repo.list_users(limit=1000)
+    now = datetime.now(timezone.utc)
+    rows = []
+
+    for u in users:
+        last_login = u.get("last_login")
+        days_since = None
+        status = "Never"
+
+        if last_login:
+            try:
+                last = datetime.fromisoformat(last_login.replace("Z", "+00:00"))
+                days_since = (now - last).days
+                if days_since == 0:
+                    status = "Active Today"
+                elif days_since <= 7:
+                    status = "Active This Week"
+                elif days_since <= 30:
+                    status = "Active This Month"
+                else:
+                    status = "Inactive"
+            except Exception:
+                status = "Never"
+
+        rows.append({
+            "Username": u.get("username", ""),
+            "Status": status,
+            "Last Login": (last_login or "")[:10],
+            "Days Since Login": days_since if days_since is not None else "",
+            "Account Created": u.get("created_at", "")[:10],
+        })
+
+    return rows
+
+
+def _report_content_stats() -> list:
+    """Content Statistics report."""
+    users = user_repo.list_users(limit=1000)
+    rows = []
+
+    for u in users:
+        uid = u.get("user_id")
+        try:
+            profiles = profile_repo.get_profiles(uid) if uid else []
+        except Exception:
+            profiles = []
+
+        for p in profiles:
+            profile_id = p.get("SK", "").replace("PROFILE#", "") or p.get("profile_id", "")
+            hero_count = 0
+            if profile_id:
+                try:
+                    hero_count = len(hero_repo.get_heroes(profile_id))
+                except Exception:
+                    pass
+
+            rows.append({
+                "Profile Name": p.get("name", ""),
+                "Username": u.get("username", ""),
+                "State": str(p.get("state_number", "")),
+                "Server Age": p.get("server_age_days", ""),
+                "Furnace Level": p.get("furnace_level", ""),
+                "Spending Profile": p.get("spending_profile", ""),
+                "Alliance Role": p.get("alliance_role", ""),
+                "Heroes Tracked": hero_count,
+                "Inventory Items": 0,
+            })
+
+    return rows
+
+
+def _report_hero_usage() -> list:
+    """Hero Usage report."""
+    users = user_repo.list_users(limit=1000)
+    hero_counter = Counter()
+
+    hero_ref = {}
+    try:
+        ref_heroes = hero_repo.get_all_heroes_reference()
+        for h in ref_heroes:
+            hero_ref[h.get("name", "")] = h
+    except Exception:
+        pass
+
+    for u in users:
+        uid = u.get("user_id")
+        try:
+            profiles = profile_repo.get_profiles(uid) if uid else []
+        except Exception:
+            continue
+
+        for p in profiles:
+            profile_id = p.get("SK", "").replace("PROFILE#", "") or p.get("profile_id", "")
+            if profile_id:
+                try:
+                    heroes = hero_repo.get_heroes(profile_id)
+                    for h in heroes:
+                        hname = h.get("hero_name") or h.get("SK", "").replace("HERO#", "")
+                        if hname:
+                            hero_counter[hname] += 1
+                except Exception:
+                    pass
+
+    rows = []
+    for hero_name, count in hero_counter.most_common():
+        ref = hero_ref.get(hero_name, {})
+        rows.append({
+            "Hero": hero_name,
+            "Class": ref.get("hero_class", ""),
+            "Rarity": ref.get("rarity", ""),
+            "Generation": ref.get("generation", ""),
+            "Users Tracking": count,
+        })
+
+    return rows
+
+
+def _report_growth(start_date: str = None, end_date: str = None) -> list:
+    """Growth Metrics report."""
+    from datetime import timedelta
+
+    if not start_date:
+        start_date = (datetime.now(timezone.utc) - timedelta(days=30)).strftime("%Y-%m-%d")
+    if not end_date:
+        end_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    metrics = admin_repo.get_metrics_history(days=90)
+
+    rows = []
+    for m in metrics:
+        date = m.get("date", "")
+        if date < start_date or date > end_date:
+            continue
+        rows.append({
+            "Date": date,
+            "Total Users": m.get("total_users", 0),
+            "New Users": m.get("new_users", 0),
+            "Active Users": m.get("active_users", 0),
+            "Total Profiles": m.get("total_profiles", 0),
+            "Heroes Tracked": m.get("total_heroes", 0),
+            "Inventory Items": m.get("total_inventory", 0),
+        })
+
+    return rows
+
+
+# --- Admin Hero CRUD ---
+
+@app.get("/api/admin/heroes")
+def admin_list_heroes():
+    _require_admin()
+    heroes = hero_repo.get_all_heroes_reference()
+    return {"heroes": heroes}
+
+
+@app.post("/api/admin/heroes")
+def admin_create_hero():
+    _require_admin()
+    body = app.current_event.json_body or {}
+
+    name = body.get("name")
+    if not name:
+        raise ValidationError("Hero name is required")
+
+    hero_class = body.get("hero_class", "Infantry")
+    rarity = body.get("rarity", "Epic")
+    generation = body.get("generation", 1)
+    tier_overall = body.get("tier_overall")
+
+    # Check if hero already exists
+    existing = hero_repo.get_hero_reference(name)
+    if existing:
+        raise ValidationError(f"Hero '{name}' already exists")
+
+    # Add to heroes.json
+    heroes_path = os.path.join(Config.DATA_DIR, "heroes.json")
+    with open(heroes_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    new_hero = {
+        "name": name,
+        "hero_class": hero_class,
+        "rarity": rarity,
+        "generation": generation,
+        "tier_overall": tier_overall,
+    }
+    data["heroes"].append(new_hero)
+
+    with open(heroes_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    # Clear the in-memory cache
+    hero_repo._heroes_cache = None
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "create_hero", "hero", name)
+
+    return {"hero": new_hero}, 201
+
+
+@app.put("/api/admin/heroes/<heroName>")
+def admin_update_hero(heroName: str):
+    _require_admin()
+    body = app.current_event.json_body or {}
+
+    heroes_path = os.path.join(Config.DATA_DIR, "heroes.json")
+    with open(heroes_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    hero_idx = None
+    for i, h in enumerate(data["heroes"]):
+        if h["name"] == heroName:
+            hero_idx = i
+            break
+
+    if hero_idx is None:
+        raise NotFoundError(f"Hero '{heroName}' not found")
+
+    allowed = {"name", "hero_class", "rarity", "generation", "tier_overall", "tier_expedition", "tier_exploration"}
+    for k, v in body.items():
+        if k in allowed:
+            data["heroes"][hero_idx][k] = v
+
+    with open(heroes_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    hero_repo._heroes_cache = None
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "update_hero", "hero", heroName, details=json.dumps(body))
+
+    return {"hero": data["heroes"][hero_idx]}
+
+
+@app.delete("/api/admin/heroes/<heroName>")
+def admin_delete_hero(heroName: str):
+    _require_admin()
+
+    heroes_path = os.path.join(Config.DATA_DIR, "heroes.json")
+    with open(heroes_path, encoding="utf-8") as f:
+        data = json.load(f)
+
+    original_count = len(data["heroes"])
+    data["heroes"] = [h for h in data["heroes"] if h["name"] != heroName]
+
+    if len(data["heroes"]) == original_count:
+        raise NotFoundError(f"Hero '{heroName}' not found")
+
+    with open(heroes_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
+    hero_repo._heroes_cache = None
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "delete_hero", "hero", heroName)
+
+    return {"status": "deleted"}
+
+
+# --- Admin Item CRUD ---
+
+def _load_items() -> list:
+    """Load items from ReferenceTable."""
+    table = get_table("reference")
+    resp = table.query(
+        KeyConditionExpression="PK = :pk",
+        ExpressionAttributeValues={":pk": "ITEM"},
+    )
+    return resp.get("Items", [])
+
+
+@app.get("/api/admin/items")
+def admin_list_items():
+    _require_admin()
+    items = _load_items()
+    return {"items": items}
+
+
+@app.post("/api/admin/items")
+def admin_create_item():
+    _require_admin()
+    body = app.current_event.json_body or {}
+
+    name = body.get("name")
+    if not name:
+        raise ValidationError("Item name is required")
+
+    category = body.get("category", "")
+    subcategory = body.get("subcategory")
+    rarity = body.get("rarity")
+
+    # Check if item already exists
+    table = get_table("reference")
+    resp = table.get_item(Key={"PK": "ITEM", "SK": name})
+    if resp.get("Item"):
+        raise ValidationError(f"Item '{name}' already exists")
+
+    item = {
+        "PK": "ITEM",
+        "SK": name,
+        "entity_type": "Item",
+        "name": name,
+        "category": category,
+        "rarity": rarity,
+    }
+    if subcategory:
+        item["subcategory"] = subcategory
+
+    table.put_item(Item={k: v for k, v in item.items() if v is not None})
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "create_item", "item", name)
+
+    return {"item": item}, 201
+
+
+@app.put("/api/admin/items/<itemName>")
+def admin_update_item(itemName: str):
+    _require_admin()
+    body = app.current_event.json_body or {}
+
+    table = get_table("reference")
+    resp = table.get_item(Key={"PK": "ITEM", "SK": itemName})
+    if not resp.get("Item"):
+        raise NotFoundError(f"Item '{itemName}' not found")
+
+    allowed = {"name", "category", "subcategory", "rarity"}
+    update_parts = []
+    attr_names = {}
+    attr_values = {}
+
+    for i, (k, v) in enumerate(body.items()):
+        if k in allowed:
+            update_parts.append(f"#k{i} = :v{i}")
+            attr_names[f"#k{i}"] = k
+            attr_values[f":v{i}"] = v
+
+    if update_parts:
+        table.update_item(
+            Key={"PK": "ITEM", "SK": itemName},
+            UpdateExpression="SET " + ", ".join(update_parts),
+            ExpressionAttributeNames=attr_names,
+            ExpressionAttributeValues=attr_values,
+        )
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "update_item", "item", itemName, details=json.dumps(body))
+
+    updated = table.get_item(Key={"PK": "ITEM", "SK": itemName})
+    return {"item": updated.get("Item", {})}
+
+
+@app.delete("/api/admin/items/<itemName>")
+def admin_delete_item(itemName: str):
+    _require_admin()
+
+    table = get_table("reference")
+    resp = table.get_item(Key={"PK": "ITEM", "SK": itemName})
+    if not resp.get("Item"):
+        raise NotFoundError(f"Item '{itemName}' not found")
+
+    table.delete_item(Key={"PK": "ITEM", "SK": itemName})
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "delete_item", "item", itemName)
+
+    return {"status": "deleted"}
 
 
 def lambda_handler(event, context):

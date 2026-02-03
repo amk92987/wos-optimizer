@@ -517,6 +517,8 @@ function CleanupTab({
   const [isRunning, setIsRunning] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  const [confirmDangerous, setConfirmDangerous] = useState<string | null>(null);
+
   const cleanupActions = [
     {
       id: 'orphaned_sessions',
@@ -542,13 +544,25 @@ function CleanupTab({
       description: 'Reclaim disk space and optimize database',
       dangerous: false,
     },
+    {
+      id: 'clear_feedback',
+      name: 'Clear All Feedback',
+      description: 'Delete all feedback entries from the database',
+      dangerous: true,
+    },
   ];
 
   const handleCleanup = async (actionId: string) => {
     setIsRunning(true);
     setMessage(null);
+    setConfirmDangerous(null);
     try {
-      const data: any = await adminApi.databaseCleanup(token, actionId);
+      let data: any;
+      if (actionId === 'clear_feedback') {
+        data = await adminApi.bulkFeedbackAction(token, 'delete_all');
+      } else {
+        data = await adminApi.databaseCleanup(token, actionId);
+      }
       setMessage({ type: 'success', text: data?.message || 'Cleanup completed!' });
       onRefresh();
     } catch (error) {
@@ -580,13 +594,34 @@ function CleanupTab({
           >
             <h3 className="font-medium text-frost mb-2">{action.name}</h3>
             <p className="text-sm text-frost-muted mb-4">{action.description}</p>
-            <button
-              onClick={() => handleCleanup(action.id)}
-              disabled={isRunning}
-              className={action.dangerous ? 'btn-primary bg-error hover:bg-error/80' : 'btn-secondary'}
-            >
-              {isRunning ? 'Running...' : 'Run'}
-            </button>
+            {confirmDangerous === action.id ? (
+              <div>
+                <p className="text-sm text-warning mb-3">Are you sure? This action cannot be undone.</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleCleanup(action.id)}
+                    disabled={isRunning}
+                    className="btn-primary bg-error hover:bg-error/80"
+                  >
+                    {isRunning ? 'Running...' : 'Confirm'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmDangerous(null)}
+                    className="btn-secondary"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => action.dangerous ? setConfirmDangerous(action.id) : handleCleanup(action.id)}
+                disabled={isRunning}
+                className={action.dangerous ? 'btn-primary bg-error hover:bg-error/80' : 'btn-secondary'}
+              >
+                {isRunning ? 'Running...' : 'Run'}
+              </button>
+            )}
           </div>
         ))}
       </div>
@@ -624,8 +659,22 @@ function QueryTab({ token, tables }: { token: string; tables: TableInfo[] }) {
   const [results, setResults] = useState<any[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [showDestructiveWarning, setShowDestructiveWarning] = useState(false);
+
+  const DESTRUCTIVE_KEYWORDS = /\b(drop|delete|update|truncate|alter|insert)\b/i;
+
+  const isDestructiveQuery = (q: string): boolean => {
+    return DESTRUCTIVE_KEYWORDS.test(q);
+  };
 
   const handleRunQuery = async () => {
+    // Check for destructive keywords
+    if (isDestructiveQuery(query) && !showDestructiveWarning) {
+      setShowDestructiveWarning(true);
+      return;
+    }
+
+    setShowDestructiveWarning(false);
     setIsRunning(true);
     setError(null);
     setResults(null);
@@ -640,6 +689,14 @@ function QueryTab({ token, tables }: { token: string; tables: TableInfo[] }) {
       setError('Failed to execute query');
     } finally {
       setIsRunning(false);
+    }
+  };
+
+  const handleQueryChange = (value: string) => {
+    setQuery(value);
+    // Reset the warning when the query changes
+    if (showDestructiveWarning) {
+      setShowDestructiveWarning(false);
     }
   };
 
@@ -661,26 +718,55 @@ function QueryTab({ token, tables }: { token: string; tables: TableInfo[] }) {
         <div className="mb-4">
           <textarea
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => handleQueryChange(e.target.value)}
             className="input font-mono text-sm"
             rows={5}
             placeholder="SELECT * FROM users LIMIT 10;"
           />
         </div>
-        <div className="flex gap-4">
-          <button
-            onClick={handleRunQuery}
-            disabled={isRunning || !query.trim()}
-            className="btn-primary"
-          >
-            {isRunning ? 'Running...' : 'Run Query'}
-          </button>
-          <div className="flex-1">
-            <p className="text-xs text-frost-muted">
-              Available tables: {tables.map((t) => t.name).join(', ')}
+
+        {/* Destructive query warning */}
+        {showDestructiveWarning && (
+          <div className="mb-4 p-4 rounded-lg border border-error/30 bg-error/5">
+            <p className="text-warning font-medium mb-2">Destructive Query Detected</p>
+            <p className="text-sm text-frost-muted mb-3">
+              This query contains potentially destructive keywords (DROP, DELETE, UPDATE, TRUNCATE, ALTER, INSERT).
+              Are you sure you want to execute it?
             </p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleRunQuery}
+                disabled={isRunning}
+                className="btn-primary bg-error hover:bg-error/80"
+              >
+                {isRunning ? 'Running...' : 'Confirm Execute'}
+              </button>
+              <button
+                onClick={() => setShowDestructiveWarning(false)}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
-        </div>
+        )}
+
+        {!showDestructiveWarning && (
+          <div className="flex gap-4">
+            <button
+              onClick={handleRunQuery}
+              disabled={isRunning || !query.trim()}
+              className="btn-primary"
+            >
+              {isRunning ? 'Running...' : 'Run Query'}
+            </button>
+            <div className="flex-1">
+              <p className="text-xs text-frost-muted">
+                Available tables: {tables.map((t) => t.name).join(', ')}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Results */}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
-import { adminApi } from '@/lib/api';
+import { adminApi, AdminThread, AdminThreadMessage, AdminUser } from '@/lib/api';
 
 interface FeedbackItem {
   id: string;
@@ -33,13 +33,14 @@ interface ErrorItem {
   resolved: boolean;
 }
 
-type TabType = 'feedback' | 'errors' | 'conversations';
+type TabType = 'feedback' | 'errors' | 'conversations' | 'messages';
 
 export default function AdminInboxPage() {
   const { token, user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('feedback');
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [errors, setErrors] = useState<ErrorItem[]>([]);
+  const [threads, setThreads] = useState<AdminThread[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -51,15 +52,18 @@ export default function AdminInboxPage() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [feedbackData, errorsData] = await Promise.all([
+      const [feedbackData, errorsData, threadsData] = await Promise.all([
         adminApi.listFeedback(token!),
         adminApi.getErrors(token!),
+        adminApi.listThreads(token!),
       ]);
 
       const fbList = feedbackData.feedback || feedbackData;
       setFeedback(Array.isArray(fbList) ? fbList : []);
       const errList = errorsData.errors || errorsData;
       setErrors(Array.isArray(errList) ? errList : []);
+      const thList = threadsData.threads || threadsData;
+      setThreads(Array.isArray(thList) ? thList : []);
     } catch (error) {
       console.error('Failed to fetch data:', error);
     } finally {
@@ -78,6 +82,7 @@ export default function AdminInboxPage() {
 
   const pendingFeedback = feedback.filter((f) => f.status === 'new' || f.status === 'pending_fix' || f.status === 'pending_update');
   const unresolvedErrors = errors.filter((e) => !e.resolved && e.status !== 'fixed' && e.status !== 'ignored');
+  const unreadThreads = threads.filter((t) => !t.is_read_by_admin);
 
   // Redirect non-admins
   if (user && user.role !== 'admin') {
@@ -97,7 +102,7 @@ export default function AdminInboxPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-frost">Inbox</h1>
-          <p className="text-frost-muted mt-1">User feedback, errors, and conversations</p>
+          <p className="text-frost-muted mt-1">User feedback, errors, conversations, and messages</p>
         </div>
 
         {/* Tabs */}
@@ -129,6 +134,21 @@ export default function AdminInboxPage() {
             {unresolvedErrors.length > 0 && (
               <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-error/20 text-error">
                 {unresolvedErrors.length}
+              </span>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('messages')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === 'messages'
+                ? 'bg-ice/20 text-ice'
+                : 'text-frost-muted hover:text-frost hover:bg-surface'
+            }`}
+          >
+            Messages
+            {unreadThreads.length > 0 && (
+              <span className="ml-2 px-2 py-0.5 text-xs rounded-full bg-ice/20 text-ice">
+                {unreadThreads.length}
               </span>
             )}
           </button>
@@ -166,6 +186,13 @@ export default function AdminInboxPage() {
         ) : activeTab === 'errors' ? (
           <ErrorsTab
             errors={errors}
+            token={token || ''}
+            onRefresh={fetchData}
+            formatDate={formatDate}
+          />
+        ) : activeTab === 'messages' ? (
+          <MessagesTab
+            threads={threads}
             token={token || ''}
             onRefresh={fetchData}
             formatDate={formatDate}
@@ -917,6 +944,483 @@ function ErrorsTab({
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// =============================================================
+// MESSAGES TAB - Admin-to-user conversation threads
+// =============================================================
+
+function MessagesTab({
+  threads,
+  token,
+  onRefresh,
+  formatDate,
+}: {
+  threads: AdminThread[];
+  token: string;
+  onRefresh: () => void;
+  formatDate: (date: string) => string;
+}) {
+  const [selectedThread, setSelectedThread] = useState<AdminThread | null>(null);
+  const [showNewMessage, setShowNewMessage] = useState(false);
+
+  const openCount = threads.filter((t) => t.status === 'open').length;
+  const closedCount = threads.filter((t) => t.status === 'closed').length;
+  const unreadCount = threads.filter((t) => !t.is_read_by_admin).length;
+
+  return (
+    <div className="space-y-6">
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-ice">{threads.length}</div>
+          <div className="text-xs text-frost-muted mt-1">Total</div>
+        </div>
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-sky-400">{openCount}</div>
+          <div className="text-xs text-frost-muted mt-1">Open</div>
+        </div>
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-amber-400">{unreadCount}</div>
+          <div className="text-xs text-frost-muted mt-1">Unread</div>
+        </div>
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-gray-400">{closedCount}</div>
+          <div className="text-xs text-frost-muted mt-1">Closed</div>
+        </div>
+      </div>
+
+      {/* New Message Button */}
+      <div>
+        <button
+          onClick={() => setShowNewMessage(true)}
+          className="btn-primary text-sm"
+        >
+          New Message
+        </button>
+      </div>
+
+      {/* Thread List */}
+      {threads.length === 0 ? (
+        <div className="card text-center py-12">
+          <div className="text-4xl mb-4">💬</div>
+          <p className="text-frost-muted">No message threads yet</p>
+          <p className="text-sm text-frost-muted mt-2">
+            Click "New Message" to start a conversation with a user
+          </p>
+        </div>
+      ) : (
+        <div className="card">
+          <div className="space-y-2">
+            {threads.map((thread) => (
+              <button
+                key={thread.thread_id}
+                onClick={() => setSelectedThread(thread)}
+                className={`w-full p-4 rounded-lg text-left transition-colors ${
+                  !thread.is_read_by_admin
+                    ? 'bg-surface hover:bg-surface-hover'
+                    : 'bg-surface/50 hover:bg-surface'
+                }`}
+              >
+                <div className="flex items-start gap-3">
+                  {!thread.is_read_by_admin && (
+                    <span className="w-2 h-2 mt-2 rounded-full bg-ice flex-shrink-0" />
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <h3 className={`font-medium truncate ${
+                          !thread.is_read_by_admin ? 'text-frost' : 'text-frost-muted'
+                        }`}>
+                          {thread.subject}
+                        </h3>
+                        {thread.status === 'closed' && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-500/20 text-gray-400 flex-shrink-0">
+                            Closed
+                          </span>
+                        )}
+                        {!thread.is_read_by_admin && thread.last_sender === 'user' && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-ice/20 text-ice flex-shrink-0">
+                            New Reply
+                          </span>
+                        )}
+                      </div>
+                      <span className="text-xs text-frost-muted flex-shrink-0">
+                        {formatDate(thread.updated_at || thread.created_at)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="text-xs text-frost-muted">
+                        To: {thread.username}
+                      </span>
+                      <span className="text-xs text-frost-muted">
+                        {thread.message_count} {thread.message_count === 1 ? 'message' : 'messages'}
+                      </span>
+                    </div>
+                    <p className="text-sm text-frost-muted truncate mt-1">{thread.last_message}</p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* New Message Modal */}
+      {showNewMessage && (
+        <NewMessageModal
+          token={token}
+          onClose={() => setShowNewMessage(false)}
+          onSent={() => {
+            setShowNewMessage(false);
+            onRefresh();
+          }}
+        />
+      )}
+
+      {/* Thread Detail Modal */}
+      {selectedThread && (
+        <AdminThreadModal
+          thread={selectedThread}
+          token={token}
+          onClose={() => {
+            setSelectedThread(null);
+            onRefresh();
+          }}
+          formatDate={formatDate}
+        />
+      )}
+    </div>
+  );
+}
+
+function NewMessageModal({
+  token,
+  onClose,
+  onSent,
+}: {
+  token: string;
+  onClose: () => void;
+  onSent: () => void;
+}) {
+  const [users, setUsers] = useState<AdminUser[]>([]);
+  const [selectedUserId, setSelectedUserId] = useState('');
+  const [subject, setSubject] = useState('');
+  const [message, setMessage] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const data = await adminApi.listUsers(token, 200);
+      const userList = data.users || [];
+      // Sort by username
+      userList.sort((a, b) => (a.username || a.email || '').localeCompare(b.username || b.email || ''));
+      setUsers(userList);
+    } catch (err) {
+      console.error('Failed to fetch users:', err);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  };
+
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!selectedUserId) {
+      setError('Please select a user');
+      return;
+    }
+    if (!subject.trim()) {
+      setError('Please enter a subject');
+      return;
+    }
+    if (!message.trim()) {
+      setError('Please enter a message');
+      return;
+    }
+
+    setIsSending(true);
+    try {
+      await adminApi.createThread(token, {
+        user_id: selectedUserId,
+        subject: subject.trim(),
+        message: message.trim(),
+      });
+      onSent();
+    } catch (err: any) {
+      setError(err.message || 'Failed to send message');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-surface rounded-xl border border-surface-border max-w-lg w-full p-6 animate-fadeIn">
+        <div className="flex items-start justify-between mb-4">
+          <h2 className="text-xl font-bold text-frost">New Message</h2>
+          <button onClick={onClose} className="text-frost-muted hover:text-frost text-xl">
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSend} className="space-y-4">
+          {/* User Select */}
+          <div>
+            <label className="text-xs text-frost-muted uppercase tracking-wide block mb-1">To</label>
+            {isLoadingUsers ? (
+              <div className="input py-2 text-frost-muted">Loading users...</div>
+            ) : (
+              <select
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value)}
+                className="input w-full"
+              >
+                <option value="">Select a user...</option>
+                {users.filter((u) => u.role !== 'admin').map((u) => (
+                  <option key={u.user_id} value={u.user_id}>
+                    {u.username || u.email}
+                    {u.is_test_account ? ' (TEST)' : ''}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          {/* Subject */}
+          <div>
+            <label className="text-xs text-frost-muted uppercase tracking-wide block mb-1">Subject</label>
+            <input
+              type="text"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+              placeholder="Message subject..."
+              className="input w-full"
+              maxLength={200}
+            />
+          </div>
+
+          {/* Message */}
+          <div>
+            <label className="text-xs text-frost-muted uppercase tracking-wide block mb-1">Message</label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Type your message..."
+              className="input w-full h-32 resize-none"
+            />
+          </div>
+
+          {error && (
+            <p className="text-sm text-error">{error}</p>
+          )}
+
+          <div className="flex justify-end gap-2">
+            <button type="button" onClick={onClose} className="btn-secondary">
+              Cancel
+            </button>
+            <button type="submit" disabled={isSending} className="btn-primary">
+              {isSending ? 'Sending...' : 'Send'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function AdminThreadModal({
+  thread,
+  token,
+  onClose,
+  formatDate,
+}: {
+  thread: AdminThread;
+  token: string;
+  onClose: () => void;
+  formatDate: (date: string) => string;
+}) {
+  const [messages, setMessages] = useState<AdminThreadMessage[]>([]);
+  const [reply, setReply] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSending, setIsSending] = useState(false);
+  const [threadStatus, setThreadStatus] = useState(thread.status);
+  const [isReadByAdmin, setIsReadByAdmin] = useState(thread.is_read_by_admin);
+
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+
+  const fetchMessages = async () => {
+    try {
+      const data = await adminApi.getThreadMessages(token, thread.thread_id);
+      setMessages(data.messages || []);
+      // Thread was marked read by the backend when we fetched messages
+      setIsReadByAdmin(true);
+    } catch (error) {
+      console.error('Failed to fetch messages:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSendReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reply.trim()) return;
+
+    setIsSending(true);
+    try {
+      await adminApi.replyToThread(token, thread.thread_id, reply.trim());
+      setReply('');
+      fetchMessages();
+    } catch (error) {
+      console.error('Failed to send reply:', error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleToggleStatus = async () => {
+    const newStatus = threadStatus === 'open' ? 'closed' : 'open';
+    try {
+      await adminApi.updateThread(token, thread.thread_id, { status: newStatus });
+      setThreadStatus(newStatus);
+    } catch (error) {
+      console.error('Failed to update thread status:', error);
+    }
+  };
+
+  const handleToggleRead = async () => {
+    const newRead = !isReadByAdmin;
+    try {
+      await adminApi.updateThread(token, thread.thread_id, { is_read_by_admin: newRead });
+      setIsReadByAdmin(newRead);
+    } catch (error) {
+      console.error('Failed to toggle read status:', error);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-surface rounded-xl border border-surface-border max-w-2xl w-full max-h-[85vh] flex flex-col animate-fadeIn">
+        {/* Header */}
+        <div className="p-4 border-b border-surface-border">
+          <div className="flex items-start justify-between">
+            <div>
+              <h2 className="font-bold text-frost text-lg">{thread.subject}</h2>
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-xs text-frost-muted">To: {thread.username}</span>
+                <span className={`text-xs px-2 py-0.5 rounded-full ${
+                  threadStatus === 'open'
+                    ? 'bg-sky-500/20 text-sky-400'
+                    : 'bg-gray-500/20 text-gray-400'
+                }`}>
+                  {threadStatus === 'open' ? 'Open' : 'Closed'}
+                </span>
+              </div>
+            </div>
+            <button onClick={onClose} className="text-frost-muted hover:text-frost text-xl">
+              ✕
+            </button>
+          </div>
+
+          {/* Thread Actions */}
+          <div className="flex items-center gap-2 mt-3">
+            <button
+              onClick={handleToggleRead}
+              className="px-3 py-1 rounded text-xs font-medium bg-surface-hover text-frost-muted hover:text-frost transition-colors"
+            >
+              {isReadByAdmin ? 'Mark Unread' : 'Mark Read'}
+            </button>
+            <button
+              onClick={handleToggleStatus}
+              className={`px-3 py-1 rounded text-xs font-medium transition-colors ${
+                threadStatus === 'open'
+                  ? 'bg-gray-500/15 text-gray-400 hover:bg-gray-500/25'
+                  : 'bg-sky-500/15 text-sky-400 hover:bg-sky-500/25'
+              }`}
+            >
+              {threadStatus === 'open' ? 'Close Thread' : 'Reopen Thread'}
+            </button>
+          </div>
+        </div>
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {isLoading ? (
+            <div className="text-center py-4">
+              <p className="text-frost-muted">Loading messages...</p>
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="text-center py-4">
+              <p className="text-frost-muted">No messages yet</p>
+            </div>
+          ) : (
+            messages.map((msg) => (
+              <div
+                key={msg.id}
+                className={`flex ${msg.is_from_admin ? 'justify-end' : 'justify-start'}`}
+              >
+                <div
+                  className={`max-w-[80%] p-3 rounded-lg ${
+                    msg.is_from_admin
+                      ? 'bg-ice/10 border border-ice/20'
+                      : 'bg-emerald-500/10 border border-emerald-500/20'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`text-xs font-medium ${
+                      msg.is_from_admin ? 'text-ice' : 'text-emerald-400'
+                    }`}>
+                      {msg.is_from_admin ? 'Admin' : thread.username}
+                    </span>
+                    <span className="text-xs text-frost-muted">
+                      {new Date(msg.created_at).toLocaleString()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-frost whitespace-pre-wrap">{msg.content}</p>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Reply Form (only if thread is open) */}
+        {threadStatus === 'open' ? (
+          <form onSubmit={handleSendReply} className="p-4 border-t border-surface-border">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={reply}
+                onChange={(e) => setReply(e.target.value)}
+                placeholder="Type your reply..."
+                className="input flex-1"
+                disabled={isSending}
+              />
+              <button
+                type="submit"
+                disabled={!reply.trim() || isSending}
+                className="btn-primary"
+              >
+                {isSending ? '...' : 'Send'}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <div className="p-4 border-t border-surface-border text-center">
+            <p className="text-sm text-frost-muted">This thread is closed. Reopen it to reply.</p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

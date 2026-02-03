@@ -451,6 +451,39 @@ export const adminApi = {
     return api<any>(`/api/admin/conversations/export?${params}`, { token });
   },
 
+  // Admin Message Threads
+  listThreads: (token: string, limit = 50) =>
+    api<{ threads: AdminThread[] }>(`/api/admin/threads?limit=${limit}`, { token }),
+
+  createThread: (token: string, data: { user_id: string; subject: string; message: string }) =>
+    api<{ thread: AdminThread }>('/api/admin/threads', { method: 'POST', body: data, token }),
+
+  getThreadMessages: (token: string, threadId: string) =>
+    api<{ thread: { thread_id: string; subject: string; status: string; user_id: string }; messages: AdminThreadMessage[] }>(
+      `/api/admin/threads/${threadId}/messages`, { token }
+    ),
+
+  replyToThread: (token: string, threadId: string, content: string) =>
+    api<{ status: string; message_id: string }>(
+      `/api/admin/threads/${threadId}/reply`, { method: 'POST', body: { content }, token }
+    ),
+
+  updateThread: (token: string, threadId: string, data: { status?: string; is_read_by_admin?: boolean }) =>
+    api<{ status: string }>(
+      `/api/admin/threads/${threadId}`, { method: 'PUT', body: data, token }
+    ),
+
+  // Reports
+  generateReport: (token: string, type: string, startDate: string, endDate: string) => {
+    const params = new URLSearchParams({ type, start_date: startDate, end_date: endDate });
+    return api<{ rows: Record<string, any>[]; type: string; count: number }>(`/api/admin/export/report?${params}`, { token });
+  },
+
+  downloadReportCsv: (token: string, type: string, startDate: string, endDate: string) => {
+    const params = new URLSearchParams({ type, start_date: startDate, end_date: endDate, format: 'csv' });
+    return api<{ csv: string; count: number; filename: string }>(`/api/admin/export/report/download?${params}`, { token });
+  },
+
   // Data Integrity
   checkDataIntegrity: (token: string) =>
     api<IntegrityCheck>('/api/admin/data-integrity/check', { token }),
@@ -467,6 +500,32 @@ export const adminApi = {
 
   saveGameDataFile: (token: string, path: string, content: string) =>
     api('/api/admin/game-data/file', { method: 'PUT', body: { path, content }, token }),
+
+  // Admin Hero CRUD
+  listAdminHeroes: (token: string) =>
+    api<{ heroes: Hero[] }>('/api/admin/heroes', { token }),
+
+  createAdminHero: (token: string, data: { name: string; hero_class: string; rarity: string; generation: number; tier_overall?: string }) =>
+    api<{ hero: Hero }>('/api/admin/heroes', { method: 'POST', body: data, token }),
+
+  updateAdminHero: (token: string, heroName: string, data: Partial<Hero>) =>
+    api<{ hero: Hero }>(`/api/admin/heroes/${encodeURIComponent(heroName)}`, { method: 'PUT', body: data, token }),
+
+  deleteAdminHero: (token: string, heroName: string) =>
+    api(`/api/admin/heroes/${encodeURIComponent(heroName)}`, { method: 'DELETE', token }),
+
+  // Admin Item CRUD
+  listAdminItems: (token: string) =>
+    api<{ items: AdminItem[] }>('/api/admin/items', { token }),
+
+  createAdminItem: (token: string, data: { name: string; category: string; subcategory?: string; rarity?: string }) =>
+    api<{ item: AdminItem }>('/api/admin/items', { method: 'POST', body: data, token }),
+
+  updateAdminItem: (token: string, itemName: string, data: Partial<AdminItem>) =>
+    api<{ item: AdminItem }>(`/api/admin/items/${encodeURIComponent(itemName)}`, { method: 'PUT', body: data, token }),
+
+  deleteAdminItem: (token: string, itemName: string) =>
+    api(`/api/admin/items/${encodeURIComponent(itemName)}`, { method: 'DELETE', token }),
 
   // Database (additional)
   getBackups: (token: string) =>
@@ -929,6 +988,37 @@ export interface DataFile {
   path: string;
   name: string;
   size_bytes: number;
+}
+
+export interface AdminItem {
+  name: string;
+  category: string;
+  subcategory?: string;
+  rarity?: string;
+}
+
+export interface AdminThread {
+  thread_id: string;
+  user_id: string;
+  username: string;
+  subject: string;
+  status: string;
+  is_read_by_admin: boolean;
+  is_read_by_user: boolean;
+  message_count: number;
+  last_message: string;
+  last_sender: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AdminThreadMessage {
+  id: string;
+  thread_id: string;
+  sender_id: string;
+  is_from_admin: boolean;
+  content: string;
+  created_at: string;
 }
 
 export interface IntegrityCheck {
