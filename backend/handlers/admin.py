@@ -1154,6 +1154,64 @@ def get_game_data_file():
     return {"path": rel_path, "content": content}
 
 
+@app.put("/api/admin/game-data/file")
+def save_game_data_file():
+    _require_admin()
+    body = app.current_event.json_body or {}
+    rel_path = body.get("path")
+    content = body.get("content")
+
+    if not rel_path:
+        raise ValidationError("path is required")
+    if content is None:
+        raise ValidationError("content is required")
+
+    data_dir = Config.DATA_DIR
+    full_path = os.path.normpath(os.path.join(data_dir, rel_path))
+    if not full_path.startswith(os.path.normpath(data_dir)):
+        raise ValidationError("Invalid file path")
+
+    if not os.path.exists(full_path):
+        raise NotFoundError(f"File not found: {rel_path}")
+
+    with open(full_path, "w", encoding="utf-8") as f:
+        json.dump(content, f, indent=2, ensure_ascii=False)
+
+    # Clear hero cache if heroes.json was modified
+    if "heroes.json" in rel_path:
+        hero_repo._heroes_cache = None
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "save_game_data", details=f"path={rel_path}")
+
+    return {"status": "saved", "path": rel_path}
+
+
+@app.post("/api/admin/data-integrity/fix/<action>")
+def fix_integrity_issue(action: str):
+    _require_admin()
+
+    valid_actions = ("rebuild_hero_cache", "fix_orphaned_heroes", "fix_missing_profiles")
+    if action not in valid_actions:
+        raise ValidationError(f"Invalid action. Must be one of: {', '.join(valid_actions)}")
+
+    fixed = 0
+    if action == "rebuild_hero_cache":
+        hero_repo._heroes_cache = None
+        fixed = 1
+    elif action == "fix_orphaned_heroes":
+        # Stub - would scan for heroes without valid profiles
+        fixed = 0
+    elif action == "fix_missing_profiles":
+        # Stub - would create default profiles for users without one
+        fixed = 0
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", f"integrity_fix_{action}", details=f"fixed={fixed}")
+
+    return {"message": f"Action '{action}' completed", "fixed": fixed}
+
+
 # --- Database (stubs for DynamoDB) ---
 
 @app.get("/api/admin/database/backups")

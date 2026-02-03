@@ -3,15 +3,7 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
-import { adminApi, Hero, AdminItem } from '@/lib/api';
-
-interface DataFile {
-  name: string;
-  path: string;
-  size_bytes: number;
-  modified_at: string;
-  category: string;
-}
+import { adminApi, Hero, AdminItem, DataFile } from '@/lib/api';
 
 type TabType = 'heroes' | 'items' | 'json';
 

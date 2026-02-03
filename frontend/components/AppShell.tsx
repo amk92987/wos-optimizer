@@ -568,7 +568,7 @@ export default function AppShell({ children }: AppShellProps) {
   }, [token]);
 
   const handleDismissAnnouncement = (id: string) => {
-    setDismissedIds((prev) => new Set([...prev, id]));
+    setDismissedIds((prev) => new Set([...Array.from(prev), id]));
   };
 
   // Filter out dismissed announcements
@@ -623,7 +623,7 @@ export default function AppShell({ children }: AppShellProps) {
           </div>
 
           {/* Impersonation banner */}
-          {isImpersonating && (
+          {isImpersonating && user && (
             <ImpersonationBanner email={user.email} />
           )}
 

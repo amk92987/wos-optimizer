@@ -705,6 +705,10 @@ export interface Profile {
   is_farm_account: boolean;
   is_active: boolean;
   created_at: string;
+  hero_count?: number;
+  linked_main_profile_id?: string | null;
+  updated_at?: string;
+  deleted_at?: string | null;
 }
 
 export interface DashboardStats {
@@ -795,9 +799,11 @@ export interface AdvisorResponse {
 
 export interface Conversation {
   conversation_id: string;
+  SK: string;
   question: string;
   answer: string;
   source: string;
+  routed_to: string | null;
   provider: string | null;
   model: string | null;
   created_at: string;
@@ -806,18 +812,32 @@ export interface Conversation {
   user_feedback: string | null;
   is_favorite: boolean;
   thread_id: string | null;
+  // Admin-visible fields
+  id?: string;
+  user_id?: string;
+  user_email?: string;
+  is_good_example?: boolean;
+  is_bad_example?: boolean;
+  admin_notes?: string | null;
 }
 
 // Admin Types
 export interface AdminUser {
   user_id: string;
+  id: string;
   email: string;
   username: string;
   role: string;
   is_active: boolean;
   is_test_account: boolean;
+  ai_access_level: 'off' | 'limited' | 'unlimited';
+  ai_daily_limit: number | null;
+  ai_requests_today: number;
   created_at: string;
   last_login: string | null;
+  profile_count: number;
+  states: number[];
+  usage_7d: number;
 }
 
 export interface CreateUserRequest {
@@ -859,8 +879,11 @@ export interface CreateAnnouncementRequest {
 
 export interface FeatureFlag {
   flag_name: string;
+  id: string;
+  name: string;
   is_enabled: boolean;
   description: string | null;
+  updated_at: string | null;
 }
 
 export interface AISettings {
@@ -890,6 +913,7 @@ export interface AdminStats {
 
 export interface FeedbackItem {
   feedback_id: string;
+  id: string;
   user_id: string;
   category: string;
   description: string;
@@ -977,9 +1001,12 @@ export interface ConversationStats {
   total: number;
   ai: number;
   rules: number;
+  ai_routed?: number;
+  rules_routed?: number;
   ai_percentage: number;
   rated: number;
   helpful: number;
+  unhelpful?: number;
   good_examples: number;
   bad_examples: number;
 }
@@ -988,6 +1015,8 @@ export interface DataFile {
   path: string;
   name: string;
   size_bytes: number;
+  modified_at: string;
+  category: string;
 }
 
 export interface AdminItem {

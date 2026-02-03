@@ -4,24 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
-import { adminApi } from '@/lib/api';
-
-interface AdminUser {
-  id: string;
-  email: string;
-  username: string;
-  role: string;
-  is_active: boolean;
-  is_test_account: boolean;
-  ai_access_level: 'off' | 'limited' | 'unlimited';
-  ai_daily_limit: number | null;
-  ai_requests_today: number;
-  created_at: string;
-  last_login: string | null;
-  profile_count: number;
-  states: number[];
-  usage_7d: number;
-}
+import { adminApi, AdminUser } from '@/lib/api';
 
 function AdminUsersContent() {
   const { token, user } = useAuth();

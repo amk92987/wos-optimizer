@@ -3,25 +3,7 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
-import { profileApi } from '@/lib/api';
-
-interface Profile {
-  profile_id: string;
-  name: string | null;
-  state_number: number | null;
-  server_age_days: number;
-  furnace_level: number;
-  furnace_fc_level: string | null;
-  spending_profile: string;
-  alliance_role: string;
-  hero_count: number;
-  is_farm_account: boolean;
-  is_active: boolean;
-  linked_main_profile_id: string | null;
-  created_at: string;
-  updated_at: string;
-  deleted_at: string | null;
-}
+import { profileApi, Profile } from '@/lib/api';
 
 interface PreviewData {
   profile: {
@@ -51,12 +33,12 @@ export default function ProfilesPage() {
   const [deletedProfiles, setDeletedProfiles] = useState<Profile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [duplicatingId, setDuplicatingId] = useState<number | null>(null);
-  const [previewId, setPreviewId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
-  const [confirmPermDeleteId, setConfirmPermDeleteId] = useState<number | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [confirmPermDeleteId, setConfirmPermDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     if (token) {
@@ -85,18 +67,18 @@ export default function ProfilesPage() {
     }
   };
 
-  const handleLoadProfile = async (profileId: number) => {
+  const handleLoadProfile = async (profileId: string) => {
     try {
-      await profileApi.switch(token!, String(profileId));
+      await profileApi.switch(token!, profileId);
       fetchProfiles();
     } catch (error) {
       console.error('Failed to load profile:', error);
     }
   };
 
-  const handleDeleteProfile = async (profileId: number) => {
+  const handleDeleteProfile = async (profileId: string) => {
     try {
-      await profileApi.delete(token!, String(profileId));
+      await profileApi.delete(token!, profileId);
       setConfirmDeleteId(null);
       fetchProfiles();
       fetchDeletedProfiles();
@@ -105,9 +87,9 @@ export default function ProfilesPage() {
     }
   };
 
-  const handlePermanentDelete = async (profileId: number) => {
+  const handlePermanentDelete = async (profileId: string) => {
     try {
-      await profileApi.delete(token!, String(profileId), true);
+      await profileApi.delete(token!, profileId, true);
       setConfirmPermDeleteId(null);
       fetchDeletedProfiles();
     } catch (error) {
@@ -115,9 +97,9 @@ export default function ProfilesPage() {
     }
   };
 
-  const handleRestoreProfile = async (profileId: number) => {
+  const handleRestoreProfile = async (profileId: string) => {
     try {
-      await profileApi.restore(token!, String(profileId));
+      await profileApi.restore(token!, profileId);
       fetchProfiles();
       fetchDeletedProfiles();
     } catch (error) {
@@ -127,21 +109,21 @@ export default function ProfilesPage() {
 
   const handleToggleFarm = async (profile: Profile) => {
     try {
-      await profileApi.update(token!, String(profile.profile_id), { is_farm_account: !profile.is_farm_account } as any);
+      await profileApi.update(token!, profile.profile_id, { is_farm_account: !profile.is_farm_account } as any);
       fetchProfiles();
     } catch (error) {
       console.error('Failed to update profile:', error);
     }
   };
 
-  const handlePreview = async (profileId: number) => {
+  const handlePreview = async (profileId: string) => {
     if (previewId === profileId) {
       setPreviewId(null);
       setPreviewData(null);
       return;
     }
     try {
-      const data = await profileApi.preview(token!, String(profileId));
+      const data = await profileApi.preview(token!, profileId);
       setPreviewData(data as any);
       setPreviewId(profileId);
     } catch (error) {
@@ -606,7 +588,7 @@ function EditProfileForm({
     setIsLoading(true);
 
     try {
-      await profileApi.update(token, String(profile.profile_id), {
+      await profileApi.update(token, profile.profile_id, {
         name: name || null,
         state_number: stateNumber ? parseInt(stateNumber) : null,
       } as any);
@@ -679,7 +661,7 @@ function DuplicateProfileForm({
     setError('');
 
     try {
-      await profileApi.duplicate(token, String(profile.profile_id), name.trim());
+      await profileApi.duplicate(token, profile.profile_id, name.trim());
       onDuplicated();
     } catch (error: any) {
       console.error('Failed to duplicate profile:', error);

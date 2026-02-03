@@ -3,19 +3,7 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
-import { adminApi, AdminThread, AdminThreadMessage, AdminUser } from '@/lib/api';
-
-interface FeedbackItem {
-  id: string;
-  feedback_id?: string;
-  user_id: string | null;
-  category: string;
-  description: string;
-  page: string | null;
-  status: string;
-  admin_notes: string | null;
-  created_at: string;
-}
+import { adminApi, AdminThread, AdminThreadMessage, AdminUser, FeedbackItem, Conversation, ConversationStats } from '@/lib/api';
 
 interface ErrorItem {
   id: string;
@@ -1429,40 +1417,13 @@ function AdminThreadModal({
 // CONVERSATIONS TAB - unchanged from original
 // =============================================================
 
-interface AIConversation {
-  id: string;
-  user_id: string;
-  user_email: string;
-  question: string;
-  answer: string;
-  provider: string;
-  model: string;
-  routed_to: string | null;
-  is_helpful: boolean | null;
-  rating: number | null;
-  user_feedback: string | null;
-  is_good_example: boolean;
-  is_bad_example: boolean;
-  admin_notes: string | null;
-  created_at: string;
-}
-
-interface ConversationStats {
-  total: number;
-  ai_routed: number;
-  rules_routed: number;
-  ai_percentage: number;
-  good_examples: number;
-  bad_examples: number;
-  helpful: number;
-  unhelpful: number;
-}
+type AIConversation = Conversation;
 
 function ConversationsTab({ token }: { token: string }) {
-  const [conversations, setConversations] = useState<AIConversation[]>([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [stats, setStats] = useState<ConversationStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedConversation, setSelectedConversation] = useState<AIConversation | null>(null);
+  const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
 
   // Filters
   const [ratingFilter, setRatingFilter] = useState('all');
@@ -1781,7 +1742,7 @@ function ConversationDetailModal({
             </label>
             <div className="flex gap-2">
               <button
-                onClick={() => onCurate(conversation.id, true, false)}
+                onClick={() => onCurate((conversation.id || conversation.conversation_id), true, false)}
                 disabled={conversation.is_good_example}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   conversation.is_good_example
@@ -1792,7 +1753,7 @@ function ConversationDetailModal({
                 Good Example
               </button>
               <button
-                onClick={() => onCurate(conversation.id, false, true)}
+                onClick={() => onCurate((conversation.id || conversation.conversation_id), false, true)}
                 disabled={conversation.is_bad_example}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   conversation.is_bad_example
@@ -1803,7 +1764,7 @@ function ConversationDetailModal({
                 Bad Example
               </button>
               <button
-                onClick={() => onCurate(conversation.id, false, false)}
+                onClick={() => onCurate((conversation.id || conversation.conversation_id), false, false)}
                 disabled={!conversation.is_good_example && !conversation.is_bad_example}
                 className="px-4 py-2 rounded-lg text-sm font-medium bg-surface-hover text-frost-muted hover:text-frost transition-colors"
               >
@@ -1825,7 +1786,7 @@ function ConversationDetailModal({
             />
             {notes !== (conversation.admin_notes || '') && (
               <button
-                onClick={() => onSaveNotes(conversation.id, notes)}
+                onClick={() => onSaveNotes((conversation.id || conversation.conversation_id), notes)}
                 className="btn-primary text-sm mt-2"
               >
                 Save Notes

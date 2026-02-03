@@ -77,7 +77,7 @@ export default function AdminAIPage() {
       const result = await adminApi.getAISettings(token!);
       const data = result.settings || result;
       setSettings({
-        mode: data.mode || 'on',
+        mode: (data.mode || 'on') as 'off' | 'on' | 'unlimited',
         primary_provider: data.primary_provider || 'openai',
         fallback_provider: (data as any).fallback_provider || 'anthropic',
         primary_model: data.primary_model || 'gpt-4o-mini',

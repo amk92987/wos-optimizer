@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
-import { advisorApi, feedbackApi } from '@/lib/api';
+import { advisorApi, feedbackApi, Conversation } from '@/lib/api';
 import type { AdvisorStatus } from '@/lib/api';
 
 interface Message {
@@ -19,16 +19,7 @@ interface Message {
   isFavorite?: boolean;
 }
 
-interface ChatHistory {
-  SK: string;
-  conversation_id: string;
-  question: string;
-  answer: string;
-  routed_to: string;
-  created_at: string;
-  is_favorite: boolean;
-  thread_id?: string | null;
-}
+type ChatHistory = Conversation;
 
 interface ThreadGroup {
   thread_id: string;
@@ -395,9 +386,9 @@ export default function AIAdvisorPage() {
       }
     }
 
-    for (const [threadId, convos] of threadMap) {
+    for (const [threadId, convos] of Array.from(threadMap)) {
       // Sort conversations within thread by date
-      convos.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      convos.sort((a: ChatHistory, b: ChatHistory) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
       const firstQ = convos[0].question;
       const title = firstQ.length > 40 ? firstQ.substring(0, 40) + '...' : firstQ;
       threads.push({

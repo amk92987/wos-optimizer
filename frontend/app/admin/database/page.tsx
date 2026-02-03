@@ -44,7 +44,7 @@ export default function AdminDatabasePage() {
   const fetchTables = async () => {
     try {
       const data = await adminApi.listTables(token!);
-      setTables(Array.isArray(data.tables) ? data.tables : Array.isArray(data) ? data : []);
+      setTables(Array.isArray(data.tables) ? data.tables as unknown as TableInfo[] : Array.isArray(data) ? data as unknown as TableInfo[] : []);
     } catch (error) {
       console.error('Failed to fetch tables:', error);
     } finally {

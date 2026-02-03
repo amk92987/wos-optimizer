@@ -774,6 +774,18 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/admin/feedback/{feedbackId}
             Method: PUT
+        DeleteFeedback:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/feedback/{feedbackId}
+            Method: DELETE
+        BulkFeedback:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/feedback/bulk
+            Method: POST
         AIConversations:
           Type: HttpApi
           Properties:
@@ -864,6 +876,24 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/admin/errors/{errorId}/resolve
             Method: POST
+        UpdateError:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/errors/{errorId}
+            Method: PUT
+        DeleteError:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/errors/{errorId}
+            Method: DELETE
+        BulkErrors:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/errors/bulk
+            Method: POST
         AdminConversations:
           Type: HttpApi
           Properties:
@@ -912,6 +942,18 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/admin/game-data/file
             Method: GET
+        SaveGameDataFile:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/game-data/file
+            Method: PUT
+        FixIntegrity:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/admin/data-integrity/fix/{action}
+            Method: POST
         DatabaseBackups:
           Type: HttpApi
           Properties:

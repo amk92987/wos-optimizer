@@ -3,20 +3,11 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
-import { adminApi } from '@/lib/api';
+import { adminApi, Announcement as ApiAnnouncement } from '@/lib/api';
 
-interface Announcement {
+interface Announcement extends ApiAnnouncement {
   id: string;
-  title: string;
-  message: string;
-  display_type: string;
-  type: string; // info, warning, success, error
-  is_active: boolean;
   priority: number;
-  created_at: string;
-  show_from: string | null;
-  show_until: string | null;
-  inbox_content: string | null;
 }
 
 const TYPE_STYLES: Record<string, { color: string; icon: string; bgClass: string }> = {
@@ -43,7 +34,7 @@ export default function AdminAnnouncementsPage() {
     try {
       const data = await adminApi.listAnnouncements(token!);
       const list = data.announcements || data;
-      setAnnouncements(Array.isArray(list) ? list : []);
+      setAnnouncements(Array.isArray(list) ? list as Announcement[] : []);
     } catch (error) {
       console.error('Failed to fetch announcements:', error);
     } finally {

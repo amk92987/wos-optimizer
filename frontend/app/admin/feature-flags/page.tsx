@@ -3,15 +3,7 @@
 import { useEffect, useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
-import { adminApi } from '@/lib/api';
-
-interface FeatureFlag {
-  id: string;
-  name: string;
-  description: string;
-  is_enabled: boolean;
-  updated_at: string | null;
-}
+import { adminApi, FeatureFlag } from '@/lib/api';
 
 interface FlagMetadata {
   display_name: string;
