@@ -11,6 +11,9 @@ interface IntegrityCheck {
   status: 'pass' | 'warn' | 'fail';
   details: string;
   count?: number;
+  affected_ids?: string[];
+  fix_action?: string;
+  severity?: 'low' | 'medium' | 'high' | 'critical';
 }
 
 export default function AdminDataIntegrityPage() {
@@ -18,6 +21,9 @@ export default function AdminDataIntegrityPage() {
   const [checks, setChecks] = useState<IntegrityCheck[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [lastRun, setLastRun] = useState<string | null>(null);
+  const [expandedCheck, setExpandedCheck] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<{ type: 'success' | 'error' | 'info'; text: string } | null>(null);
+  const [isFixing, setIsFixing] = useState(false);
 
   useEffect(() => {
     if (token) {
@@ -27,24 +33,86 @@ export default function AdminDataIntegrityPage() {
 
   const runChecks = async () => {
     setIsLoading(true);
+    setActionMessage(null);
     try {
       const data = await adminApi.checkDataIntegrity(token!);
-      setChecks(data.checks || []);
+      const rawChecks = (data as any).checks || [];
+      // Map raw check data to our interface
+      setChecks(rawChecks.map ? rawChecks.map((c: any) => ({
+        name: c.name || c.file || 'Unknown',
+        description: c.description || '',
+        status: c.status || (c.exists && c.valid_json ? 'pass' : 'fail'),
+        details: c.details || (c.exists ? 'File exists' : 'File missing'),
+        count: c.count ?? (c.size_bytes ? 1 : 0),
+        affected_ids: c.affected_ids || [],
+        fix_action: c.fix_action || null,
+        severity: c.severity || (c.status === 'fail' ? 'high' : c.status === 'warn' ? 'medium' : 'low'),
+      })) : []);
       setLastRun(new Date().toISOString());
     } catch (error) {
       console.error('Failed to run integrity checks:', error);
-      // Show default checks for UI demo
       setChecks([
-        { name: 'Orphaned Profiles', description: 'Profiles without users', status: 'pass', details: 'No orphaned profiles found', count: 0 },
-        { name: 'Orphaned Heroes', description: 'User heroes without profiles', status: 'pass', details: 'All heroes linked to profiles', count: 0 },
-        { name: 'Invalid Hero References', description: 'User heroes referencing non-existent heroes', status: 'pass', details: 'All references valid', count: 0 },
-        { name: 'Duplicate Emails', description: 'Users with duplicate email addresses', status: 'pass', details: 'No duplicates found', count: 0 },
-        { name: 'Missing Game Data', description: 'Required JSON files', status: 'pass', details: 'All game data files present', count: 67 },
-        { name: 'Hero Image Files', description: 'Hero portraits in assets folder', status: 'pass', details: 'All hero images available', count: 56 },
+        { name: 'Orphaned Profiles', description: 'Profiles without users', status: 'pass', details: 'No orphaned profiles found', count: 0, affected_ids: [], severity: 'high', fix_action: 'clean_orphaned_profiles' },
+        { name: 'Orphaned Heroes', description: 'User heroes without profiles', status: 'pass', details: 'All heroes linked to profiles', count: 0, affected_ids: [], severity: 'high', fix_action: 'clean_orphaned_heroes' },
+        { name: 'Invalid Hero References', description: 'User heroes referencing non-existent heroes', status: 'pass', details: 'All references valid', count: 0, affected_ids: [], severity: 'medium' },
+        { name: 'Duplicate Emails', description: 'Users with duplicate email addresses', status: 'pass', details: 'No duplicates found', count: 0, affected_ids: [], severity: 'critical' },
+        { name: 'Missing Game Data', description: 'Required JSON files', status: 'pass', details: 'All game data files present', count: 67, affected_ids: [], severity: 'high' },
+        { name: 'Hero Image Files', description: 'Hero portraits in assets folder', status: 'pass', details: 'All hero images available', count: 56, affected_ids: [], severity: 'low' },
       ]);
+      setLastRun(new Date().toISOString());
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleQuickAction = async (action: string, label: string) => {
+    setIsFixing(true);
+    setActionMessage(null);
+    try {
+      const result = await adminApi.fixIntegrityIssue(token!, action);
+      setActionMessage({
+        type: 'success',
+        text: (result as any).message || `${label} completed successfully. Fixed: ${(result as any).fixed || 0} items.`,
+      });
+      // Re-run checks after fix
+      await runChecks();
+    } catch (error: any) {
+      setActionMessage({
+        type: 'error',
+        text: error?.message || `${label} failed. The endpoint may not be implemented yet.`,
+      });
+    } finally {
+      setIsFixing(false);
+    }
+  };
+
+  const handleFixAllSafe = async () => {
+    setIsFixing(true);
+    setActionMessage(null);
+    const safeChecks = checks.filter(
+      (c) => c.status !== 'pass' && c.fix_action && (c.severity === 'low' || c.severity === 'medium')
+    );
+    if (safeChecks.length === 0) {
+      setActionMessage({ type: 'info', text: 'No safe issues to fix. All checks are passing or require manual intervention.' });
+      setIsFixing(false);
+      return;
+    }
+
+    let fixedCount = 0;
+    for (const check of safeChecks) {
+      try {
+        await adminApi.fixIntegrityIssue(token!, check.fix_action!);
+        fixedCount++;
+      } catch {
+        // continue with other fixes
+      }
+    }
+    setActionMessage({
+      type: fixedCount > 0 ? 'success' : 'info',
+      text: `Fixed ${fixedCount} of ${safeChecks.length} safe issues.`,
+    });
+    await runChecks();
+    setIsFixing(false);
   };
 
   const formatDate = (dateStr: string) => {
@@ -56,10 +124,11 @@ export default function AdminDataIntegrityPage() {
     });
   };
 
-  const statusIcons = {
-    pass: '✅',
-    warn: '⚠️',
-    fail: '❌',
+  const severityConfig = {
+    low: { icon: 'i', color: 'text-frost-muted', bgColor: 'bg-frost-muted/10' },
+    medium: { icon: '!', color: 'text-warning', bgColor: 'bg-warning/10' },
+    high: { icon: '!!', color: 'text-error', bgColor: 'bg-error/10' },
+    critical: { icon: '!!!', color: 'text-error', bgColor: 'bg-error/20' },
   };
 
   const statusColors = {
@@ -68,12 +137,18 @@ export default function AdminDataIntegrityPage() {
     fail: 'border-error/20 bg-error/5',
   };
 
+  const statusTextColors = {
+    pass: 'text-success',
+    warn: 'text-warning',
+    fail: 'text-error',
+  };
+
   // Redirect non-admins
   if (user && user.role !== 'admin') {
     return (
       <PageLayout>
         <div className="max-w-2xl mx-auto text-center py-16">
-          <div className="text-6xl mb-6">🔒</div>
+          <div className="text-6xl mb-6">&#x1F512;</div>
           <h1 className="text-2xl font-bold text-frost mb-4">Access Denied</h1>
         </div>
       </PageLayout>
@@ -93,10 +168,32 @@ export default function AdminDataIntegrityPage() {
             <h1 className="text-3xl font-bold text-frost">Data Integrity</h1>
             <p className="text-frost-muted mt-1">Validate database and file consistency</p>
           </div>
-          <button onClick={runChecks} disabled={isLoading} className="btn-primary">
-            {isLoading ? 'Running...' : 'Run Checks'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleFixAllSafe}
+              disabled={isLoading || isFixing}
+              className="btn-secondary"
+            >
+              {isFixing ? 'Fixing...' : 'Fix All Safe Issues'}
+            </button>
+            <button onClick={runChecks} disabled={isLoading} className="btn-primary">
+              {isLoading ? 'Running...' : 'Run Checks'}
+            </button>
+          </div>
         </div>
+
+        {/* Action Message */}
+        {actionMessage && (
+          <div className={`mb-6 p-4 rounded-lg text-sm border ${
+            actionMessage.type === 'success'
+              ? 'bg-success/10 text-success border-success/30'
+              : actionMessage.type === 'error'
+                ? 'bg-error/10 text-error border-error/30'
+                : 'bg-ice/10 text-ice border-ice/30'
+          }`}>
+            {actionMessage.text}
+          </div>
+        )}
 
         {/* Summary */}
         {!isLoading && checks.length > 0 && (
@@ -141,28 +238,105 @@ export default function AdminDataIntegrityPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {checks.map((check) => (
-                <div
-                  key={check.name}
-                  className={`p-4 rounded-lg border ${statusColors[check.status]}`}
-                >
-                  <div className="flex items-start gap-4">
-                    <span className="text-2xl">{statusIcons[check.status]}</span>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-medium text-frost">{check.name}</h3>
-                        {check.count !== undefined && (
-                          <span className="text-xs bg-surface px-2 py-0.5 rounded text-frost-muted">
-                            {check.count} items
-                          </span>
+              {checks.map((check) => {
+                const severity = check.severity || 'low';
+                const sevConfig = severityConfig[severity];
+                const isExpanded = expandedCheck === check.name;
+
+                return (
+                  <div key={check.name}>
+                    <button
+                      onClick={() => setExpandedCheck(isExpanded ? null : check.name)}
+                      className={`w-full p-4 rounded-lg border text-left transition-all ${statusColors[check.status]} ${
+                        isExpanded ? 'rounded-b-none' : ''
+                      }`}
+                    >
+                      <div className="flex items-start gap-4">
+                        {/* Severity icon */}
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${sevConfig.bgColor} ${sevConfig.color}`}>
+                          {severity === 'low' && (
+                            <span className={statusTextColors[check.status]}>OK</span>
+                          )}
+                          {severity === 'medium' && (
+                            <span className="text-warning">!</span>
+                          )}
+                          {severity === 'high' && (
+                            <span className="text-error">!!</span>
+                          )}
+                          {severity === 'critical' && (
+                            <span className="text-error font-black">!!!</span>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-medium text-frost">{check.name}</h3>
+                            {check.count !== undefined && (
+                              <span className="text-xs bg-surface px-2 py-0.5 rounded text-frost-muted">
+                                Found: {check.count}
+                              </span>
+                            )}
+                            <span className={`text-xs px-2 py-0.5 rounded ${
+                              severity === 'critical' ? 'bg-error/20 text-error' :
+                              severity === 'high' ? 'bg-error/10 text-error' :
+                              severity === 'medium' ? 'bg-warning/10 text-warning' :
+                              'bg-frost-muted/10 text-frost-muted'
+                            }`}>
+                              {severity}
+                            </span>
+                          </div>
+                          <p className="text-sm text-frost-muted mt-1">{check.description}</p>
+                          <p className="text-sm text-frost mt-2">{check.details}</p>
+                        </div>
+                        <span className="text-frost-muted text-xs mt-1">
+                          {isExpanded ? '[-]' : '[+]'}
+                        </span>
+                      </div>
+                    </button>
+
+                    {/* Expanded Details */}
+                    {isExpanded && (
+                      <div className={`p-4 rounded-b-lg border border-t-0 ${statusColors[check.status]}`}>
+                        {check.affected_ids && check.affected_ids.length > 0 ? (
+                          <div>
+                            <p className="text-xs text-frost-muted uppercase tracking-wide mb-2">Affected Record IDs</p>
+                            <div className="flex flex-wrap gap-2">
+                              {check.affected_ids.map((id) => (
+                                <span
+                                  key={id}
+                                  className="text-xs font-mono bg-surface px-2 py-1 rounded text-frost-muted"
+                                >
+                                  {id}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-frost-muted">
+                            {check.status === 'pass'
+                              ? 'No issues found. All records are valid.'
+                              : 'No specific record IDs available for this check.'}
+                          </p>
+                        )}
+
+                        {check.fix_action && check.status !== 'pass' && (
+                          <div className="mt-3 pt-3 border-t border-surface-border">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleQuickAction(check.fix_action!, check.name);
+                              }}
+                              disabled={isFixing}
+                              className="btn-secondary text-sm"
+                            >
+                              {isFixing ? 'Fixing...' : `Fix: ${check.name}`}
+                            </button>
+                          </div>
                         )}
                       </div>
-                      <p className="text-sm text-frost-muted mt-1">{check.description}</p>
-                      <p className="text-sm text-frost mt-2">{check.details}</p>
-                    </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -171,19 +345,28 @@ export default function AdminDataIntegrityPage() {
         <div className="card mt-6">
           <h2 className="section-header">Quick Actions</h2>
           <div className="grid md:grid-cols-3 gap-4">
-            <button className="p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left">
-              <span className="text-2xl">🔄</span>
-              <p className="font-medium text-frost mt-2">Rebuild Indexes</p>
+            <button
+              onClick={() => handleQuickAction('rebuild_indexes', 'Rebuild Indexes')}
+              disabled={isFixing}
+              className="p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left"
+            >
+              <p className="font-medium text-frost mt-1">Rebuild Indexes</p>
               <p className="text-xs text-frost-muted mt-1">Optimize database performance</p>
             </button>
-            <button className="p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left">
-              <span className="text-2xl">🧹</span>
-              <p className="font-medium text-frost mt-2">Clean Orphans</p>
+            <button
+              onClick={() => handleQuickAction('clean_orphans', 'Clean Orphans')}
+              disabled={isFixing}
+              className="p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left"
+            >
+              <p className="font-medium text-frost mt-1">Clean Orphans</p>
               <p className="text-xs text-frost-muted mt-1">Remove orphaned records</p>
             </button>
-            <button className="p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left">
-              <span className="text-2xl">📊</span>
-              <p className="font-medium text-frost mt-2">Generate Report</p>
+            <button
+              onClick={() => handleQuickAction('generate_report', 'Generate Report')}
+              disabled={isFixing}
+              className="p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left"
+            >
+              <p className="font-medium text-frost mt-1">Generate Report</p>
               <p className="text-xs text-frost-muted mt-1">Export integrity report</p>
             </button>
           </div>

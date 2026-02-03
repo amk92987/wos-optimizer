@@ -7,7 +7,7 @@ import HeroCard from '@/components/HeroCard';
 import HeroRoleBadges from '@/components/HeroRoleBadges';
 import HeroDetailModal from '@/components/HeroDetailModal';
 import { useAuth } from '@/lib/auth';
-import { heroesApi, UserHero, Hero } from '@/lib/api';
+import { heroesApi, profileApi, UserHero, Hero } from '@/lib/api';
 
 type Tab = 'owned' | 'all';
 type FilterClass = 'all' | 'infantry' | 'lancer' | 'marksman';
@@ -52,6 +52,28 @@ export default function HeroesPage() {
 
   const ownedHeroNames = new Set(ownedHeroes.map(h => h.hero_name));
 
+  // Generation day ranges: [start, end] for each gen 1-14
+  const GEN_DAY_RANGES: Record<number, [number, number]> = {
+    1: [0, 39], 2: [40, 119], 3: [120, 199], 4: [200, 279],
+    5: [280, 359], 6: [360, 439], 7: [440, 519], 8: [520, 599],
+    9: [600, 679], 10: [680, 759], 11: [760, 839], 12: [840, 919],
+    13: [920, 999], 14: [1000, 1080],
+  };
+
+  const getGenMidpointDays = (gen: number): number => {
+    const range = GEN_DAY_RANGES[gen];
+    if (!range) return 0;
+    return Math.floor((range[0] + range[1]) / 2);
+  };
+
+  const getCurrentGenFromDays = (days: number): number => {
+    const thresholds = [40, 120, 200, 280, 360, 440, 520, 600, 680, 760, 840, 920, 1000];
+    for (let i = 0; i < thresholds.length; i++) {
+      if (days < thresholds[i]) return i + 1;
+    }
+    return 14;
+  };
+
   const refreshOwnedHeroes = async () => {
     if (!token) return;
     try {
@@ -73,6 +95,23 @@ export default function HeroesPage() {
       await heroesApi.addHero(token, heroName);
       const data = await heroesApi.getOwned(token);
       setOwnedHeroes(data.heroes || []);
+
+      // Auto-update profile generation if hero is from a newer generation
+      const addedHero = allHeroes.find(h => h.name === heroName);
+      if (addedHero) {
+        try {
+          const profileData = await profileApi.getCurrent(token);
+          const profile = profileData.profile;
+          const currentGen = getCurrentGenFromDays(profile.server_age_days);
+          if (addedHero.generation > currentGen) {
+            const newDays = getGenMidpointDays(addedHero.generation);
+            await profileApi.update(token, profile.profile_id, { server_age_days: newDays });
+          }
+        } catch (profileError) {
+          // Non-critical: don't block hero add if profile update fails
+          console.warn('Could not auto-update profile generation:', profileError);
+        }
+      }
 
       // Show success message
       setAddSuccess(`${heroName} added to your collection!`);
@@ -104,6 +143,8 @@ export default function HeroesPage() {
     }
   };
 
+  const tierOrder: Record<string, number> = { 'S+': 0, 'S': 1, 'A': 2, 'B': 3, 'C': 4, 'D': 5 };
+
   // Filter and sort owned heroes
   const filteredOwnedHeroes = ownedHeroes
     .filter(h => {
@@ -127,13 +168,19 @@ export default function HeroesPage() {
           return a.name.localeCompare(b.name);
         case 'level':
           return b.level - a.level;
-        case 'generation':
-          return a.generation - b.generation;
-        case 'tier':
-          const tierOrder: Record<string, number> = { 'S+': 0, 'S': 1, 'A': 2, 'B': 3, 'C': 4, 'D': 5 };
+        case 'generation': {
+          // Sort by generation first, then tier, then name within generation
+          if (a.generation !== b.generation) return a.generation - b.generation;
+          const aTier = tierOrder[a.tier_overall || 'D'] ?? 5;
+          const bTier = tierOrder[b.tier_overall || 'D'] ?? 5;
+          if (aTier !== bTier) return aTier - bTier;
+          return a.name.localeCompare(b.name);
+        }
+        case 'tier': {
           const aTier = tierOrder[a.tier_overall || 'D'] ?? 5;
           const bTier = tierOrder[b.tier_overall || 'D'] ?? 5;
           return aTier - bTier;
+        }
         default:
           return 0;
       }
@@ -162,11 +209,11 @@ export default function HeroesPage() {
           return a.name.localeCompare(b.name);
         case 'generation':
           return a.generation - b.generation;
-        case 'tier':
-          const tierOrder: Record<string, number> = { 'S+': 0, 'S': 1, 'A': 2, 'B': 3, 'C': 4, 'D': 5 };
+        case 'tier': {
           const aTier = tierOrder[a.tier_overall || 'D'] ?? 5;
           const bTier = tierOrder[b.tier_overall || 'D'] ?? 5;
           return aTier - bTier;
+        }
         default:
           return a.generation - b.generation;
       }
@@ -185,6 +232,15 @@ export default function HeroesPage() {
       case 'lancer': return 'text-green-400 border-green-500/30';
       case 'marksman': return 'text-blue-400 border-blue-500/30';
       default: return 'text-zinc-400 border-zinc-500/30';
+    }
+  };
+
+  const getRarityBorderClass = (rarity: string | null) => {
+    switch (rarity?.toLowerCase()) {
+      case 'legendary': return 'rarity-legendary';
+      case 'epic': return 'rarity-epic';
+      case 'rare': return 'rarity-rare';
+      default: return 'rarity-common';
     }
   };
 
@@ -390,15 +446,53 @@ export default function HeroesPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {filteredOwnedHeroes.map((hero) => (
-                  <HeroCard
-                    key={hero.hero_name}
-                    hero={hero}
-                    token={token}
-                    onSaved={refreshOwnedHeroes}
-                    onRemove={() => handleRemoveHero(hero.hero_name)}
-                  />
-                ))}
+                {sortBy === 'generation' ? (
+                  // Group by generation with section headers
+                  (() => {
+                    const generationGroups: Record<number, UserHero[]> = {};
+                    filteredOwnedHeroes.forEach(hero => {
+                      const gen = hero.generation;
+                      if (!generationGroups[gen]) generationGroups[gen] = [];
+                      generationGroups[gen].push(hero);
+                    });
+                    return Object.keys(generationGroups)
+                      .map(Number)
+                      .sort((a, b) => a - b)
+                      .map(gen => (
+                        <div key={`gen-${gen}`}>
+                          <div className="flex items-center gap-3 mt-4 mb-2 first:mt-0">
+                            <h3 className="text-sm font-semibold text-frost-muted uppercase tracking-wider whitespace-nowrap">
+                              Generation {gen}
+                            </h3>
+                            <div className="flex-1 border-t border-surface-border" />
+                            <span className="text-xs text-zinc-500">
+                              {generationGroups[gen].length} {generationGroups[gen].length === 1 ? 'hero' : 'heroes'}
+                            </span>
+                          </div>
+                          {generationGroups[gen].map(hero => (
+                            <HeroCard
+                              key={hero.hero_name}
+                              hero={hero}
+                              token={token}
+                              onSaved={refreshOwnedHeroes}
+                              onRemove={() => handleRemoveHero(hero.hero_name)}
+                            />
+                          ))}
+                        </div>
+                      ));
+                  })()
+                ) : (
+                  // Flat list for other sort modes
+                  filteredOwnedHeroes.map((hero) => (
+                    <HeroCard
+                      key={hero.hero_name}
+                      hero={hero}
+                      token={token}
+                      onSaved={refreshOwnedHeroes}
+                      onRemove={() => handleRemoveHero(hero.hero_name)}
+                    />
+                  ))
+                )}
               </div>
             )}
 
@@ -406,7 +500,7 @@ export default function HeroesPage() {
             {ownedHeroes.length > 0 && (
               <div className="card mt-6">
                 <h3 className="text-sm font-medium text-zinc-400 mb-3">Collection Summary</h3>
-                <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-5 gap-4 text-center">
                   <div>
                     <p className="text-2xl font-bold text-red-400">
                       {ownedHeroes.filter(h => h.hero_class.toLowerCase() === 'infantry').length}
@@ -424,6 +518,18 @@ export default function HeroesPage() {
                       {ownedHeroes.filter(h => h.hero_class.toLowerCase() === 'marksman').length}
                     </p>
                     <p className="text-xs text-zinc-500">Marksman</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-amber-400">
+                      {(ownedHeroes.reduce((sum, h) => sum + h.level, 0) / ownedHeroes.length).toFixed(1)}
+                    </p>
+                    <p className="text-xs text-zinc-500">Avg Level</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-yellow-400">
+                      {ownedHeroes.reduce((sum, h) => sum + h.stars, 0)}
+                    </p>
+                    <p className="text-xs text-zinc-500">Total Stars</p>
                   </div>
                 </div>
               </div>
@@ -471,7 +577,7 @@ export default function HeroesPage() {
                       onClick={() => setSelectedHero(hero)}
                     >
                       {/* Hero Image */}
-                      <div className={`w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 ${getClassColor(hero.hero_class)}`}>
+                      <div className={`w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 ${getRarityBorderClass(hero.rarity)}`}>
                         {hero.image_base64 ? (
                           <img
                             src={hero.image_base64}

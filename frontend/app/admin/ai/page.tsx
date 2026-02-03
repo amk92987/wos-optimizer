@@ -17,11 +17,14 @@ interface AISettings {
 }
 
 interface AIStats {
-  total_requests_today: number;
-  total_requests_week: number;
-  avg_response_time_ms: number;
-  rules_handled_percent: number;
-  ai_handled_percent: number;
+  total_requests: number;
+  total_tokens: number;
+  total_conversations: number;
+  avg_rating: number | null;
+  good_examples: number;
+  bad_examples: number;
+  helpful_count: number;
+  not_helpful_count: number;
 }
 
 interface AIConversation {
@@ -35,6 +38,7 @@ interface AIConversation {
   response_time_ms: number;
   rating: number | null;
   is_helpful: boolean | null;
+  user_feedback: string | null;
   is_good_example: boolean;
   is_bad_example: boolean;
   admin_notes: string | null;
@@ -51,11 +55,22 @@ export default function AdminAIPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('settings');
 
+  // Conversation filters
+  const [ratingFilter, setRatingFilter] = useState<'all' | 'rated' | 'unrated'>('all');
+  const [curationFilter, setCurationFilter] = useState<'all' | 'good' | 'bad'>('all');
+  const [resultLimit, setResultLimit] = useState<number>(50);
+
   useEffect(() => {
     if (token) {
       fetchData();
     }
   }, [token]);
+
+  useEffect(() => {
+    if (token && activeTab === 'conversations') {
+      fetchConversations();
+    }
+  }, [token, ratingFilter, curationFilter, resultLimit, activeTab]);
 
   const fetchData = async () => {
     try {
@@ -64,28 +79,43 @@ export default function AdminAIPage() {
       setSettings({
         mode: data.mode || 'on',
         primary_provider: data.primary_provider || 'openai',
-        fallback_provider: data.fallback_provider || 'anthropic',
+        fallback_provider: (data as any).fallback_provider || 'anthropic',
         primary_model: data.primary_model || 'gpt-4o-mini',
-        fallback_model: data.fallback_model || 'claude-3-haiku',
+        fallback_model: (data as any).fallback_model || 'claude-3-haiku',
         daily_limit_free: data.daily_limit_free || 10,
         daily_limit_admin: data.daily_limit_admin || 1000,
         cooldown_seconds: data.cooldown_seconds || 30,
       });
 
-      // Stats endpoint doesn't exist yet - use placeholder
-      setStats({
-        total_requests_today: 0,
-        total_requests_week: 0,
-        avg_response_time_ms: 0,
-        rules_handled_percent: 92,
-        ai_handled_percent: 8,
-      });
+      // Fetch conversation stats
+      try {
+        const statsData = await adminApi.getConversationStats(token!);
+        setStats({
+          total_requests: statsData.total || 0,
+          total_tokens: (statsData as any).total_tokens || 0,
+          total_conversations: statsData.total || 0,
+          avg_rating: (statsData as any).avg_rating || null,
+          good_examples: statsData.good_examples || 0,
+          bad_examples: statsData.bad_examples || 0,
+          helpful_count: statsData.helpful || 0,
+          not_helpful_count: (statsData as any).not_helpful || 0,
+        });
+      } catch {
+        setStats({
+          total_requests: 0,
+          total_tokens: 0,
+          total_conversations: 0,
+          avg_rating: null,
+          good_examples: 0,
+          bad_examples: 0,
+          helpful_count: 0,
+          not_helpful_count: 0,
+        });
+      }
 
-      // Conversations endpoint doesn't exist yet - leave empty
-      setConversations([]);
+      await fetchConversations();
     } catch (error) {
       console.error('Failed to fetch AI data:', error);
-      // Set defaults on error
       setSettings({
         mode: 'on',
         primary_provider: 'openai',
@@ -98,6 +128,35 @@ export default function AdminAIPage() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchConversations = async () => {
+    try {
+      const params: Record<string, string> = { limit: String(resultLimit) };
+      if (ratingFilter !== 'all') params.rating = ratingFilter;
+      if (curationFilter !== 'all') params.curation = curationFilter;
+      const data = await adminApi.getConversations(token!, params);
+      const convs = data.conversations || [];
+      setConversations(convs.map((c: any) => ({
+        id: c.conversation_id || c.id,
+        user_email: c.user_email || '',
+        question: c.question || '',
+        answer: c.answer || '',
+        provider: c.provider || '',
+        model: c.model || '',
+        tokens_used: c.tokens_used || 0,
+        response_time_ms: c.response_time_ms || 0,
+        rating: c.rating,
+        is_helpful: c.is_helpful,
+        user_feedback: c.user_feedback || null,
+        is_good_example: c.is_good_example || false,
+        is_bad_example: c.is_bad_example || false,
+        admin_notes: c.admin_notes || null,
+        created_at: c.created_at || '',
+      })));
+    } catch {
+      setConversations([]);
     }
   };
 
@@ -118,6 +177,17 @@ export default function AdminAIPage() {
       );
     } catch (error) {
       console.error('Failed to update conversation:', error);
+    }
+  };
+
+  const handleSaveAdminNotes = async (id: string, admin_notes: string) => {
+    try {
+      await adminApi.curateConversation(token!, String(id), { admin_notes });
+      setConversations((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, admin_notes } : c))
+      );
+    } catch (error) {
+      console.error('Failed to save admin notes:', error);
     }
   };
 
@@ -185,28 +255,42 @@ export default function AdminAIPage() {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats - 8 metrics */}
         {stats && (
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
             <div className="card text-center">
-              <p className="text-2xl font-bold text-ice">{stats.total_requests_today}</p>
-              <p className="text-xs text-frost-muted">Today</p>
+              <p className="text-2xl font-bold text-ice">{stats.total_requests}</p>
+              <p className="text-xs text-frost-muted">Total Requests</p>
             </div>
             <div className="card text-center">
-              <p className="text-2xl font-bold text-frost">{stats.total_requests_week}</p>
-              <p className="text-xs text-frost-muted">This Week</p>
+              <p className="text-2xl font-bold text-frost">{stats.total_tokens.toLocaleString()}</p>
+              <p className="text-xs text-frost-muted">Total Tokens</p>
             </div>
             <div className="card text-center">
-              <p className="text-2xl font-bold text-success">{stats.avg_response_time_ms}ms</p>
-              <p className="text-xs text-frost-muted">Avg Response</p>
+              <p className="text-2xl font-bold text-purple-400">{stats.total_conversations}</p>
+              <p className="text-xs text-frost-muted">Conversations</p>
             </div>
             <div className="card text-center">
-              <p className="text-2xl font-bold text-warning">{stats.rules_handled_percent}%</p>
-              <p className="text-xs text-frost-muted">Rules Engine</p>
+              <p className="text-2xl font-bold text-warning">
+                {stats.avg_rating !== null ? stats.avg_rating.toFixed(1) : '--'}
+              </p>
+              <p className="text-xs text-frost-muted">Avg Rating</p>
             </div>
             <div className="card text-center">
-              <p className="text-2xl font-bold text-purple-400">{stats.ai_handled_percent}%</p>
-              <p className="text-xs text-frost-muted">AI Provider</p>
+              <p className="text-2xl font-bold text-success">{stats.good_examples}</p>
+              <p className="text-xs text-frost-muted">Good Examples</p>
+            </div>
+            <div className="card text-center">
+              <p className="text-2xl font-bold text-error">{stats.bad_examples}</p>
+              <p className="text-xs text-frost-muted">Bad Examples</p>
+            </div>
+            <div className="card text-center">
+              <p className="text-2xl font-bold text-success">{stats.helpful_count}</p>
+              <p className="text-xs text-frost-muted">Helpful</p>
+            </div>
+            <div className="card text-center">
+              <p className="text-2xl font-bold text-error">{stats.not_helpful_count}</p>
+              <p className="text-xs text-frost-muted">Not Helpful</p>
             </div>
           </div>
         )}
@@ -243,12 +327,20 @@ export default function AdminAIPage() {
             formatDate={formatDate}
             isLoading={isLoading}
             onMarkExample={handleMarkExample}
+            onSaveAdminNotes={handleSaveAdminNotes}
+            ratingFilter={ratingFilter}
+            setRatingFilter={setRatingFilter}
+            curationFilter={curationFilter}
+            setCurationFilter={setCurationFilter}
+            resultLimit={resultLimit}
+            setResultLimit={setResultLimit}
           />
         )}
         {activeTab === 'training' && (
           <TrainingDataTab
             goodExamples={goodExamples}
             badExamples={badExamples}
+            allConversations={conversations}
             formatDate={formatDate}
             onMarkExample={handleMarkExample}
           />
@@ -341,8 +433,8 @@ function SettingsTab({
         <h3 className="section-header">Rate Limits</h3>
         <p className="text-sm text-frost-muted mb-4">
           These limits control how many AI-powered questions users can ask per day.
-          Questions handled by the rules engine (92%+) don't count against limits.
-          Per-user limits can be customized in Admin → Users.
+          Questions handled by the rules engine (92%+) don&apos;t count against limits.
+          Per-user limits can be customized in Admin &rarr; Users.
         </p>
         <div className="grid md:grid-cols-3 gap-4">
           <div>
@@ -389,13 +481,33 @@ function ConversationsTab({
   formatDate,
   isLoading,
   onMarkExample,
+  onSaveAdminNotes,
+  ratingFilter,
+  setRatingFilter,
+  curationFilter,
+  setCurationFilter,
+  resultLimit,
+  setResultLimit,
 }: {
   conversations: AIConversation[];
   formatDate: (date: string) => string;
   isLoading: boolean;
   onMarkExample: (id: string, field: 'is_good_example' | 'is_bad_example', value: boolean) => void;
+  onSaveAdminNotes: (id: string, notes: string) => void;
+  ratingFilter: 'all' | 'rated' | 'unrated';
+  setRatingFilter: (v: 'all' | 'rated' | 'unrated') => void;
+  curationFilter: 'all' | 'good' | 'bad';
+  setCurationFilter: (v: 'all' | 'good' | 'bad') => void;
+  resultLimit: number;
+  setResultLimit: (v: number) => void;
 }) {
   const [selected, setSelected] = useState<AIConversation | null>(null);
+  const [notesInput, setNotesInput] = useState('');
+
+  const handleSelectConversation = (conv: AIConversation) => {
+    setSelected(conv);
+    setNotesInput(conv.admin_notes || '');
+  };
 
   if (isLoading) {
     return (
@@ -409,54 +521,92 @@ function ConversationsTab({
     );
   }
 
-  if (conversations.length === 0) {
-    return (
-      <div className="card text-center py-12">
-        <div className="text-4xl mb-4">💬</div>
-        <p className="text-frost-muted">No AI conversations yet</p>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="card">
-        <div className="space-y-3">
-          {conversations.map((conv) => (
-            <button
-              key={conv.id}
-              onClick={() => setSelected(conv)}
-              className="w-full p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-frost truncate">{conv.question}</p>
-                    {conv.is_good_example && <span className="text-success text-xs">✓ Good</span>}
-                    {conv.is_bad_example && <span className="text-error text-xs">✗ Bad</span>}
-                  </div>
-                  <div className="flex items-center gap-3 mt-2 text-xs text-frost-muted">
-                    <span>{conv.user_email}</span>
-                    <span>·</span>
-                    <span>{conv.provider}/{conv.model}</span>
-                    <span>·</span>
-                    <span>{conv.tokens_used} tokens</span>
-                    <span>·</span>
-                    <span>{conv.response_time_ms}ms</span>
-                    {conv.is_helpful !== null && (
-                      <>
-                        <span>·</span>
-                        <span>{conv.is_helpful ? '👍' : '👎'}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-                <span className="text-xs text-frost-muted">{formatDate(conv.created_at)}</span>
-              </div>
-            </button>
-          ))}
+      {/* Filters */}
+      <div className="card mb-4">
+        <div className="flex flex-wrap items-end gap-4">
+          <div>
+            <label className="block text-xs font-medium text-frost-muted mb-1">Rating</label>
+            <select value={ratingFilter} onChange={(e) => setRatingFilter(e.target.value as any)} className="input text-sm py-1.5">
+              <option value="all">All</option>
+              <option value="rated">Rated</option>
+              <option value="unrated">Unrated</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-frost-muted mb-1">Curation</label>
+            <select value={curationFilter} onChange={(e) => setCurationFilter(e.target.value as any)} className="input text-sm py-1.5">
+              <option value="all">All</option>
+              <option value="good">Good Examples</option>
+              <option value="bad">Bad Examples</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-frost-muted mb-1">Limit</label>
+            <select value={resultLimit} onChange={(e) => setResultLimit(Number(e.target.value))} className="input text-sm py-1.5">
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+              <option value={200}>200</option>
+            </select>
+          </div>
+          <div className="text-sm text-frost-muted pb-1.5">
+            Showing {conversations.length} conversation{conversations.length !== 1 ? 's' : ''}
+          </div>
         </div>
       </div>
+
+      {conversations.length === 0 ? (
+        <div className="card text-center py-12">
+          <div className="text-4xl mb-4">&#x1F4AC;</div>
+          <p className="text-frost-muted">No AI conversations match these filters</p>
+        </div>
+      ) : (
+        <div className="card">
+          <div className="space-y-3">
+            {conversations.map((conv) => (
+              <button
+                key={conv.id}
+                onClick={() => handleSelectConversation(conv)}
+                className="w-full p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-frost truncate">{conv.question}</p>
+                      {conv.is_good_example && <span className="text-success text-xs font-medium">Good</span>}
+                      {conv.is_bad_example && <span className="text-error text-xs font-medium">Bad</span>}
+                    </div>
+                    <div className="flex items-center gap-3 mt-2 text-xs text-frost-muted">
+                      <span>{conv.user_email}</span>
+                      <span>&middot;</span>
+                      <span>{conv.provider}/{conv.model}</span>
+                      <span>&middot;</span>
+                      <span>{conv.tokens_used} tokens</span>
+                      <span>&middot;</span>
+                      <span>{conv.response_time_ms}ms</span>
+                      {conv.rating !== null && (
+                        <>
+                          <span>&middot;</span>
+                          <span className="text-warning">{conv.rating}/5</span>
+                        </>
+                      )}
+                      {conv.is_helpful !== null && (
+                        <>
+                          <span>&middot;</span>
+                          <span>{conv.is_helpful ? 'Helpful' : 'Not Helpful'}</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <span className="text-xs text-frost-muted">{formatDate(conv.created_at)}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Detail Modal */}
       {selected && (
@@ -467,8 +617,8 @@ function ConversationsTab({
                 <h2 className="text-xl font-bold text-frost">Conversation</h2>
                 <p className="text-sm text-frost-muted">{formatDate(selected.created_at)}</p>
               </div>
-              <button onClick={() => setSelected(null)} className="text-frost-muted hover:text-frost">
-                ✕
+              <button onClick={() => setSelected(null)} className="text-frost-muted hover:text-frost text-xl">
+                &times;
               </button>
             </div>
 
@@ -500,9 +650,49 @@ function ConversationsTab({
                 </div>
                 <div>
                   <p className="text-lg font-bold text-frost">
-                    {selected.is_helpful === true ? '👍' : selected.is_helpful === false ? '👎' : '—'}
+                    {selected.rating !== null ? `${selected.rating}/5` : '--'}
                   </p>
-                  <p className="text-xs text-frost-muted">Feedback</p>
+                  <p className="text-xs text-frost-muted">Rating</p>
+                </div>
+              </div>
+
+              {/* User Feedback */}
+              <div className="p-3 rounded-lg bg-surface border border-surface-border">
+                <label className="text-xs text-frost-muted uppercase tracking-wide">User Feedback</label>
+                <div className="flex items-center gap-3 mt-2">
+                  <span className="text-sm text-frost">
+                    {selected.is_helpful === true
+                      ? 'Marked as helpful'
+                      : selected.is_helpful === false
+                        ? 'Marked as not helpful'
+                        : 'No feedback'}
+                  </span>
+                  {selected.user_feedback && (
+                    <span className="text-sm text-frost-muted italic">&mdash; &quot;{selected.user_feedback}&quot;</span>
+                  )}
+                </div>
+              </div>
+
+              {/* Admin Notes */}
+              <div>
+                <label className="text-xs text-frost-muted uppercase tracking-wide">Admin Notes</label>
+                <div className="flex gap-2 mt-1">
+                  <input
+                    type="text"
+                    value={notesInput}
+                    onChange={(e) => setNotesInput(e.target.value)}
+                    placeholder="Add admin notes..."
+                    className="input flex-1 text-sm"
+                  />
+                  <button
+                    onClick={() => {
+                      onSaveAdminNotes(selected.id, notesInput);
+                      setSelected({ ...selected, admin_notes: notesInput });
+                    }}
+                    className="btn-secondary text-sm"
+                  >
+                    Save
+                  </button>
                 </div>
               </div>
 
@@ -519,7 +709,7 @@ function ConversationsTab({
                       : 'bg-surface hover:bg-surface-hover text-frost-muted'
                   }`}
                 >
-                  {selected.is_good_example ? '✓ Good Example' : 'Mark as Good'}
+                  {selected.is_good_example ? 'Good Example' : 'Mark as Good'}
                 </button>
                 <button
                   onClick={() => {
@@ -532,7 +722,7 @@ function ConversationsTab({
                       : 'bg-surface hover:bg-surface-hover text-frost-muted'
                   }`}
                 >
-                  {selected.is_bad_example ? '✗ Bad Example' : 'Mark as Bad'}
+                  {selected.is_bad_example ? 'Bad Example' : 'Mark as Bad'}
                 </button>
               </div>
             </div>
@@ -546,23 +736,26 @@ function ConversationsTab({
 function TrainingDataTab({
   goodExamples,
   badExamples,
+  allConversations,
   formatDate,
   onMarkExample,
 }: {
   goodExamples: AIConversation[];
   badExamples: AIConversation[];
+  allConversations: AIConversation[];
   formatDate: (date: string) => string;
   onMarkExample: (id: string, field: 'is_good_example' | 'is_bad_example', value: boolean) => void;
 }) {
-  const [subTab, setSubTab] = useState<'good' | 'bad'>('good');
+  const [subTab, setSubTab] = useState<'good' | 'bad' | 'preview'>('good');
 
-  const examples = subTab === 'good' ? goodExamples : badExamples;
+  const examples = subTab === 'good' ? goodExamples : subTab === 'bad' ? badExamples : [];
+  const previewData = goodExamples.slice(0, 10);
 
   return (
     <div className="space-y-6">
       <div className="card">
         <h3 className="section-header">Training Data Overview</h3>
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-3 gap-4">
           <button
             onClick={() => setSubTab('good')}
             className={`p-4 rounded-lg border-2 text-left transition-all ${
@@ -573,7 +766,7 @@ function TrainingDataTab({
           >
             <p className="text-2xl font-bold text-success">{goodExamples.length}</p>
             <p className="text-sm text-frost-muted">Good Examples</p>
-            <p className="text-xs text-frost-muted mt-1">High quality Q&A pairs for fine-tuning</p>
+            <p className="text-xs text-frost-muted mt-1">High quality Q&amp;A pairs for fine-tuning</p>
           </button>
           <button
             onClick={() => setSubTab('bad')}
@@ -587,40 +780,90 @@ function TrainingDataTab({
             <p className="text-sm text-frost-muted">Bad Examples</p>
             <p className="text-xs text-frost-muted mt-1">Examples to avoid in training</p>
           </button>
+          <button
+            onClick={() => setSubTab('preview')}
+            className={`p-4 rounded-lg border-2 text-left transition-all ${
+              subTab === 'preview'
+                ? 'bg-ice/10 border-ice/30'
+                : 'bg-surface border-surface-border hover:border-frost-muted/50'
+            }`}
+          >
+            <p className="text-2xl font-bold text-ice">{previewData.length}</p>
+            <p className="text-sm text-frost-muted">Training Preview</p>
+            <p className="text-xs text-frost-muted mt-1">Sample Q&amp;A pairs from good examples</p>
+          </button>
         </div>
       </div>
 
-      <div className="card">
-        <h3 className="section-header">{subTab === 'good' ? 'Good' : 'Bad'} Examples</h3>
-        {examples.length === 0 ? (
-          <div className="text-center py-8">
-            <div className="text-4xl mb-4">{subTab === 'good' ? '✓' : '✗'}</div>
-            <p className="text-frost-muted">
-              No {subTab} examples marked yet. Browse conversations and mark examples.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {examples.map((ex) => (
-              <div key={ex.id} className="p-4 rounded-lg bg-surface">
-                <div className="flex items-start justify-between gap-4 mb-2">
-                  <p className="text-frost font-medium">{ex.question}</p>
-                  <button
-                    onClick={() =>
-                      onMarkExample(ex.id, subTab === 'good' ? 'is_good_example' : 'is_bad_example', false)
-                    }
-                    className="text-xs text-frost-muted hover:text-error"
-                  >
-                    Remove
-                  </button>
+      {subTab === 'preview' ? (
+        <div className="card">
+          <h3 className="section-header">Training Data Preview (Top 10 Good Examples)</h3>
+          {previewData.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-frost-muted">No good examples to preview. Mark conversations as good examples first.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {previewData.map((ex, idx) => (
+                <div key={ex.id} className="p-4 rounded-lg bg-surface border border-surface-border">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xs font-mono text-frost-muted bg-surface-hover px-2 py-0.5 rounded">
+                      #{idx + 1}
+                    </span>
+                    <span className="text-xs text-frost-muted">{formatDate(ex.created_at)}</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <span className="text-xs font-medium text-ice uppercase">Q:</span>
+                      <p className="text-sm text-frost mt-0.5">{ex.question}</p>
+                    </div>
+                    <div>
+                      <span className="text-xs font-medium text-success uppercase">A:</span>
+                      <p className="text-sm text-frost-muted mt-0.5 line-clamp-4 whitespace-pre-wrap">{ex.answer}</p>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-sm text-frost-muted line-clamp-2">{ex.answer}</p>
-                <p className="text-xs text-frost-muted mt-2">{formatDate(ex.created_at)}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="card">
+          <h3 className="section-header">{subTab === 'good' ? 'Good' : 'Bad'} Examples</h3>
+          {examples.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-frost-muted">
+                No {subTab} examples marked yet. Browse conversations and mark examples.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {examples.map((ex) => (
+                <div key={ex.id} className="p-4 rounded-lg bg-surface">
+                  <div className="flex items-start justify-between gap-4 mb-2">
+                    <p className="text-frost font-medium">{ex.question}</p>
+                    <button
+                      onClick={() =>
+                        onMarkExample(ex.id, subTab === 'good' ? 'is_good_example' : 'is_bad_example', false)
+                      }
+                      className="text-xs text-frost-muted hover:text-error"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                  <p className="text-sm text-frost-muted line-clamp-2">{ex.answer}</p>
+                  <div className="flex items-center gap-3 mt-2">
+                    <p className="text-xs text-frost-muted">{formatDate(ex.created_at)}</p>
+                    {ex.admin_notes && (
+                      <p className="text-xs text-ice italic">Note: {ex.admin_notes}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -754,19 +997,19 @@ function ExportTab({
         <h3 className="section-header">Fine-Tuning Tips</h3>
         <ul className="space-y-2 text-sm text-frost-muted">
           <li className="flex items-start gap-2">
-            <span className="text-ice">•</span>
+            <span className="text-ice">&bull;</span>
             <span>Use JSONL format for OpenAI and Claude fine-tuning APIs</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-ice">•</span>
+            <span className="text-ice">&bull;</span>
             <span>Aim for at least 50 good examples for effective fine-tuning</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-ice">•</span>
+            <span className="text-ice">&bull;</span>
             <span>Review bad examples to understand common failure modes</span>
           </li>
           <li className="flex items-start gap-2">
-            <span className="text-ice">•</span>
+            <span className="text-ice">&bull;</span>
             <span>Include diverse question types for better generalization</span>
           </li>
         </ul>

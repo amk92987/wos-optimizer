@@ -374,6 +374,12 @@ export const adminApi = {
   updateFeedback: (token: string, feedbackId: string, data: { status?: string; admin_notes?: string }) =>
     api<{ feedback: FeedbackItem }>(`/api/admin/feedback/${feedbackId}`, { method: 'PUT', body: data, token }),
 
+  deleteFeedback: (token: string, feedbackId: string) =>
+    api(`/api/admin/feedback/${feedbackId}`, { method: 'DELETE', token }),
+
+  bulkFeedbackAction: (token: string, action: string) =>
+    api(`/api/admin/feedback/bulk`, { method: 'POST', body: { action }, token }),
+
   // AI Conversations (admin view)
   listAIConversations: (token: string, limit = 50) =>
     api<{ conversations: Conversation[] }>(`/api/admin/ai-conversations?limit=${limit}`, { token }),
@@ -418,6 +424,15 @@ export const adminApi = {
   resolveError: (token: string, errorId: string) =>
     api('/api/admin/errors/' + errorId + '/resolve', { method: 'POST', token }),
 
+  updateError: (token: string, errorId: string, data: { status?: string; fix_notes?: string }) =>
+    api(`/api/admin/errors/${errorId}`, { method: 'PUT', body: data, token }),
+
+  deleteError: (token: string, errorId: string) =>
+    api(`/api/admin/errors/${errorId}`, { method: 'DELETE', token }),
+
+  bulkErrorAction: (token: string, action: string) =>
+    api('/api/admin/errors/bulk', { method: 'POST', body: { action }, token }),
+
   // Admin Conversations
   getConversations: (token: string, params: Record<string, string> = {}) => {
     const qs = new URLSearchParams(params);
@@ -440,12 +455,18 @@ export const adminApi = {
   checkDataIntegrity: (token: string) =>
     api<IntegrityCheck>('/api/admin/data-integrity/check', { token }),
 
+  fixIntegrityIssue: (token: string, action: string) =>
+    api<{ message: string; fixed: number }>(`/api/admin/data-integrity/fix/${action}`, { method: 'POST', token }),
+
   // Game Data
   getGameDataFiles: (token: string) =>
     api<{ files: DataFile[] }>('/api/admin/game-data/files', { token }),
 
   getGameDataFile: (token: string, path: string) =>
     api<{ path: string; content: any }>(`/api/admin/game-data/file?path=${encodeURIComponent(path)}`, { token }),
+
+  saveGameDataFile: (token: string, path: string, content: string) =>
+    api('/api/admin/game-data/file', { method: 'PUT', body: { path, content }, token }),
 
   // Database (additional)
   getBackups: (token: string) =>
@@ -480,6 +501,21 @@ export const inboxApi = {
 
   replyToThread: (token: string, threadId: string, content: string) =>
     api(`/api/inbox/threads/${threadId}/reply`, { method: 'POST', body: { content }, token }),
+};
+
+// Feature Flags API (public - read-only)
+export const flagsApi = {
+  getAll: (token: string) =>
+    api<{ flags: FeatureFlag[] }>('/api/flags', { token }),
+
+  get: (token: string, name: string) =>
+    api<{ flag: FeatureFlag }>(`/api/flags/${name}`, { token }),
+};
+
+// Announcements API (public - active announcements for current user)
+export const announcementsApi = {
+  getActive: (token: string) =>
+    api<{ announcements: Announcement[] }>('/api/announcements', { token }),
 };
 
 // Feedback API
@@ -541,6 +577,7 @@ export interface UserHero {
   name: string;
   generation: number;
   hero_class: string;
+  rarity: string | null;
   tier_overall: string | null;
   level: number;
   stars: number;

@@ -29,6 +29,11 @@ export default function AdminDatabasePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingData, setIsLoadingData] = useState(false);
 
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [totalRowCount, setTotalRowCount] = useState(0);
+
   useEffect(() => {
     if (token) {
       fetchTables();
@@ -56,12 +61,17 @@ export default function AdminDatabasePage() {
     }
   };
 
-  const fetchTableData = async (tableName: string) => {
+  const fetchTableData = async (tableName: string, limit?: number) => {
     setIsLoadingData(true);
     setSelectedTable(tableName);
+    setCurrentPage(1);
+    const fetchLimit = limit || rowsPerPage;
     try {
-      const data = await adminApi.scanTable(token!, tableName, 50);
-      setTableData(Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : []);
+      const data = await adminApi.scanTable(token!, tableName, 1000); // fetch all, paginate client-side
+      const items = Array.isArray(data.items) ? data.items : Array.isArray(data) ? data : [];
+      setTableData(items);
+      const tableInfo = tables.find((t) => t.name === tableName);
+      setTotalRowCount(tableInfo?.row_count || items.length);
     } catch (error) {
       console.error('Failed to fetch table data:', error);
     } finally {
@@ -69,12 +79,43 @@ export default function AdminDatabasePage() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!selectedTable || tableData.length === 0) return;
+
+    const pageData = paginatedData;
+    const headers = Object.keys(pageData[0]);
+    const csvRows = [
+      headers.join(','),
+      ...pageData.map((row) =>
+        headers.map((h) => {
+          const val = row[h];
+          if (val === null || val === undefined) return '';
+          const str = typeof val === 'object' ? JSON.stringify(val) : String(val);
+          // Escape commas and quotes
+          return str.includes(',') || str.includes('"') || str.includes('\n')
+            ? `"${str.replace(/"/g, '""')}"`
+            : str;
+        }).join(',')
+      ),
+    ];
+    const csv = csvRows.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${selectedTable}_export.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  };
+
   // Redirect non-admins
   if (user && user.role !== 'admin') {
     return (
       <PageLayout>
         <div className="max-w-2xl mx-auto text-center py-16">
-          <div className="text-6xl mb-6">🔒</div>
+          <div className="text-6xl mb-6">&#x1F512;</div>
           <h1 className="text-2xl font-bold text-frost mb-4">Access Denied</h1>
         </div>
       </PageLayout>
@@ -82,6 +123,14 @@ export default function AdminDatabasePage() {
   }
 
   const selectedTableInfo = tables.find((t) => t.name === selectedTable);
+  const totalTableCount = tables.length;
+  const totalItems = tables.reduce((sum, t) => sum + (t.row_count || 0), 0);
+
+  // Pagination calculations
+  const totalPages = Math.max(1, Math.ceil(tableData.length / rowsPerPage));
+  const startIdx = (currentPage - 1) * rowsPerPage;
+  const endIdx = startIdx + rowsPerPage;
+  const paginatedData = tableData.slice(startIdx, endIdx);
 
   return (
     <PageLayout>
@@ -90,6 +139,18 @@ export default function AdminDatabasePage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-frost">Database Browser</h1>
           <p className="text-frost-muted mt-1">View tables, manage backups, and run maintenance</p>
+        </div>
+
+        {/* DB Info Metrics */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="card text-center">
+            <p className="text-2xl font-bold text-ice">{totalTableCount}</p>
+            <p className="text-xs text-frost-muted">Tables</p>
+          </div>
+          <div className="card text-center">
+            <p className="text-2xl font-bold text-frost">{totalItems.toLocaleString()}</p>
+            <p className="text-xs text-frost-muted">Total Items</p>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -119,11 +180,24 @@ export default function AdminDatabasePage() {
           <TablesTab
             tables={tables}
             selectedTable={selectedTable}
-            tableData={tableData}
+            tableData={paginatedData}
+            allTableData={tableData}
             selectedTableInfo={selectedTableInfo}
             isLoading={isLoading}
             isLoadingData={isLoadingData}
             onSelectTable={fetchTableData}
+            onExportCSV={handleExportCSV}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            rowsPerPage={rowsPerPage}
+            totalRowCount={tableData.length}
+            startIdx={startIdx}
+            endIdx={Math.min(endIdx, tableData.length)}
+            onPageChange={setCurrentPage}
+            onRowsPerPageChange={(val) => {
+              setRowsPerPage(val);
+              setCurrentPage(1);
+            }}
           />
         )}
         {activeTab === 'backup' && (
@@ -142,18 +216,38 @@ function TablesTab({
   tables,
   selectedTable,
   tableData,
+  allTableData,
   selectedTableInfo,
   isLoading,
   isLoadingData,
   onSelectTable,
+  onExportCSV,
+  currentPage,
+  totalPages,
+  rowsPerPage,
+  totalRowCount,
+  startIdx,
+  endIdx,
+  onPageChange,
+  onRowsPerPageChange,
 }: {
   tables: TableInfo[];
   selectedTable: string | null;
   tableData: any[];
+  allTableData: any[];
   selectedTableInfo: TableInfo | undefined;
   isLoading: boolean;
   isLoadingData: boolean;
   onSelectTable: (name: string) => void;
+  onExportCSV: () => void;
+  currentPage: number;
+  totalPages: number;
+  rowsPerPage: number;
+  totalRowCount: number;
+  startIdx: number;
+  endIdx: number;
+  onPageChange: (page: number) => void;
+  onRowsPerPageChange: (val: number) => void;
 }) {
   return (
     <div className="grid md:grid-cols-4 gap-6">
@@ -190,7 +284,7 @@ function TablesTab({
       <div className="card md:col-span-3">
         {!selectedTable ? (
           <div className="text-center py-16">
-            <div className="text-4xl mb-4">🗄️</div>
+            <div className="text-4xl mb-4">&#x1F5C4;&#xFE0F;</div>
             <p className="text-frost-muted">Select a table to view its data</p>
           </div>
         ) : isLoadingData ? (
@@ -202,9 +296,16 @@ function TablesTab({
           <>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-bold text-frost">{selectedTable}</h2>
-              <span className="text-sm text-frost-muted">
-                Showing {tableData.length} of {selectedTableInfo?.row_count} rows
-              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-frost-muted">
+                  {totalRowCount > 0
+                    ? `Showing ${startIdx + 1}-${endIdx} of ${totalRowCount} rows`
+                    : 'No rows'}
+                </span>
+                <button onClick={onExportCSV} className="btn-secondary text-sm" disabled={allTableData.length === 0}>
+                  Export CSV
+                </button>
+              </div>
             </div>
 
             {tableData.length === 0 ? (
@@ -212,40 +313,97 @@ function TablesTab({
                 <p className="text-frost-muted">No data in this table</p>
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-surface-border">
-                      {Object.keys(tableData[0]).map((col) => (
-                        <th key={col} className="text-left p-2 text-frost-muted font-medium whitespace-nowrap">
-                          {col}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tableData.map((row, i) => (
-                      <tr key={i} className="border-b border-surface-border/50 hover:bg-surface/50">
-                        {Object.values(row).map((val: any, j) => (
-                          <td key={j} className="p-2 text-frost max-w-[200px] truncate">
-                            {val === null ? (
-                              <span className="text-frost-muted italic">null</span>
-                            ) : typeof val === 'boolean' ? (
-                              <span className={val ? 'text-success' : 'text-error'}>
-                                {val.toString()}
-                              </span>
-                            ) : typeof val === 'object' ? (
-                              <span className="text-frost-muted">{JSON.stringify(val)}</span>
-                            ) : (
-                              String(val)
-                            )}
-                          </td>
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-surface-border">
+                        {Object.keys(tableData[0]).map((col) => (
+                          <th key={col} className="text-left p-2 text-frost-muted font-medium whitespace-nowrap">
+                            {col}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {tableData.map((row, i) => (
+                        <tr key={i} className="border-b border-surface-border/50 hover:bg-surface/50">
+                          {Object.values(row).map((val: any, j) => (
+                            <td key={j} className="p-2 text-frost max-w-[200px] truncate">
+                              {val === null ? (
+                                <span className="text-frost-muted italic">null</span>
+                              ) : typeof val === 'boolean' ? (
+                                <span className={val ? 'text-success' : 'text-error'}>
+                                  {val.toString()}
+                                </span>
+                              ) : typeof val === 'object' ? (
+                                <span className="text-frost-muted">{JSON.stringify(val)}</span>
+                              ) : (
+                                String(val)
+                              )}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="flex items-center justify-between mt-4 pt-4 border-t border-surface-border">
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-frost-muted">Rows per page:</label>
+                    <select
+                      value={rowsPerPage}
+                      onChange={(e) => onRowsPerPageChange(Number(e.target.value))}
+                      className="input text-sm py-1 w-20"
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => onPageChange(1)}
+                      disabled={currentPage <= 1}
+                      className="px-2 py-1 rounded text-sm text-frost-muted hover:text-frost hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="First page"
+                    >
+                      First
+                    </button>
+                    <button
+                      onClick={() => onPageChange(currentPage - 1)}
+                      disabled={currentPage <= 1}
+                      className="px-2 py-1 rounded text-sm text-frost-muted hover:text-frost hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Previous page"
+                    >
+                      Prev
+                    </button>
+                    <span className="px-3 py-1 text-sm text-frost">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <button
+                      onClick={() => onPageChange(currentPage + 1)}
+                      disabled={currentPage >= totalPages}
+                      className="px-2 py-1 rounded text-sm text-frost-muted hover:text-frost hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Next page"
+                    >
+                      Next
+                    </button>
+                    <button
+                      onClick={() => onPageChange(totalPages)}
+                      disabled={currentPage >= totalPages}
+                      className="px-2 py-1 rounded text-sm text-frost-muted hover:text-frost hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Last page"
+                    >
+                      Last
+                    </button>
+                  </div>
+                </div>
+              </>
             )}
           </>
         )}
@@ -321,7 +479,7 @@ function BackupTab({
         <h2 className="section-header">Existing Backups</h2>
         {backups.length === 0 ? (
           <div className="text-center py-8">
-            <div className="text-4xl mb-4">📦</div>
+            <div className="text-4xl mb-4">&#x1F4E6;</div>
             <p className="text-frost-muted">No backups found</p>
           </div>
         ) : (
@@ -334,7 +492,7 @@ function BackupTab({
                 <div>
                   <p className="font-medium text-frost">{backup.filename}</p>
                   <p className="text-xs text-frost-muted mt-1">
-                    {formatDate(backup.created_at)} · {formatSize(backup.size_bytes)}
+                    {formatDate(backup.created_at)} &middot; {formatSize(backup.size_bytes)}
                   </p>
                 </div>
                 <button className="text-sm text-ice hover:underline">Download</button>
@@ -448,11 +606,11 @@ function CleanupTab({
             <p className="text-xs text-frost-muted">Total Rows</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-success">—</p>
+            <p className="text-2xl font-bold text-success">&mdash;</p>
             <p className="text-xs text-frost-muted">Database Size</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-bold text-warning">—</p>
+            <p className="text-2xl font-bold text-warning">&mdash;</p>
             <p className="text-xs text-frost-muted">Last Vacuum</p>
           </div>
         </div>
@@ -489,7 +647,6 @@ function QueryTab({ token, tables }: { token: string; tables: TableInfo[] }) {
     <div className="space-y-6">
       <div className="card border-warning/30 bg-warning/5">
         <div className="flex gap-3">
-          <span className="text-2xl">⚠️</span>
           <div>
             <h3 className="font-medium text-frost">Read-Only Queries</h3>
             <p className="text-sm text-frost-muted mt-1">

@@ -7,10 +7,13 @@ import { adminApi } from '@/lib/api';
 
 interface FeedbackItem {
   id: string;
+  feedback_id?: string;
   user_id: string | null;
   category: string;
   description: string;
+  page: string | null;
   status: string;
+  admin_notes: string | null;
   created_at: string;
 }
 
@@ -18,9 +21,14 @@ interface ErrorItem {
   id: string;
   error_type: string;
   message: string;
+  error_message?: string;
   stack_trace: string | null;
   user_id: string | null;
   page: string | null;
+  environment: string | null;
+  status: string;
+  fix_notes: string | null;
+  extra_context: string | null;
   created_at: string;
   resolved: boolean;
 }
@@ -33,8 +41,6 @@ export default function AdminInboxPage() {
   const [feedback, setFeedback] = useState<FeedbackItem[]>([]);
   const [errors, setErrors] = useState<ErrorItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(null);
-  const [selectedError, setSelectedError] = useState<ErrorItem | null>(null);
 
   useEffect(() => {
     if (token) {
@@ -61,26 +67,6 @@ export default function AdminInboxPage() {
     }
   };
 
-  const handleUpdateFeedbackStatus = async (id: string, status: string) => {
-    try {
-      await adminApi.updateFeedback(token!, String(id), { status });
-      fetchData();
-      setSelectedFeedback(null);
-    } catch (error) {
-      console.error('Failed to update feedback:', error);
-    }
-  };
-
-  const handleResolveError = async (id: string) => {
-    try {
-      await adminApi.resolveError(token!, String(id));
-      fetchData();
-      setSelectedError(null);
-    } catch (error) {
-      console.error('Failed to resolve error:', error);
-    }
-  };
-
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', {
       month: 'short',
@@ -90,8 +76,8 @@ export default function AdminInboxPage() {
     });
   };
 
-  const pendingFeedback = feedback.filter((f) => f.status === 'new' || f.status === 'pending');
-  const unresolvedErrors = errors.filter((e) => !e.resolved);
+  const pendingFeedback = feedback.filter((f) => f.status === 'new' || f.status === 'pending_fix' || f.status === 'pending_update');
+  const unresolvedErrors = errors.filter((e) => !e.resolved && e.status !== 'fixed' && e.status !== 'ignored');
 
   // Redirect non-admins
   if (user && user.role !== 'admin') {
@@ -173,159 +159,771 @@ export default function AdminInboxPage() {
         ) : activeTab === 'feedback' ? (
           <FeedbackTab
             feedback={feedback}
-            onSelect={setSelectedFeedback}
+            token={token || ''}
+            onRefresh={fetchData}
             formatDate={formatDate}
           />
         ) : activeTab === 'errors' ? (
           <ErrorsTab
             errors={errors}
-            onSelect={setSelectedError}
+            token={token || ''}
+            onRefresh={fetchData}
             formatDate={formatDate}
           />
         ) : (
           <ConversationsTab token={token || ''} />
-        )}
-
-        {/* Feedback Detail Modal */}
-        {selectedFeedback && (
-          <FeedbackDetailModal
-            feedback={selectedFeedback}
-            onClose={() => setSelectedFeedback(null)}
-            onUpdateStatus={handleUpdateFeedbackStatus}
-            formatDate={formatDate}
-          />
-        )}
-
-        {/* Error Detail Modal */}
-        {selectedError && (
-          <ErrorDetailModal
-            error={selectedError}
-            onClose={() => setSelectedError(null)}
-            onResolve={() => handleResolveError(selectedError.id)}
-            formatDate={formatDate}
-          />
         )}
       </div>
     </PageLayout>
   );
 }
 
+// =============================================================
+// FEEDBACK TAB - Enhanced with stats, sub-tabs, smart routing
+// =============================================================
+
+type FeedbackSubTab = 'new_bugs' | 'new_features' | 'pending_fix' | 'pending_update' | 'completed' | 'archive';
+
 function FeedbackTab({
   feedback,
-  onSelect,
+  token,
+  onRefresh,
   formatDate,
 }: {
   feedback: FeedbackItem[];
-  onSelect: (item: FeedbackItem) => void;
+  token: string;
+  onRefresh: () => void;
   formatDate: (date: string) => string;
 }) {
+  const [activeSubTab, setActiveSubTab] = useState<FeedbackSubTab>('new_bugs');
+  const [selectedFeedback, setSelectedFeedback] = useState<FeedbackItem | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmBulk, setConfirmBulk] = useState<string | null>(null);
+
+  // Compute stats
+  const newCount = feedback.filter((f) => f.status === 'new').length;
+  const pendingFixCount = feedback.filter((f) => f.status === 'pending_fix').length;
+  const pendingUpdateCount = feedback.filter((f) => f.status === 'pending_update').length;
+  const completedCount = feedback.filter((f) => f.status === 'completed').length;
+  const archiveCount = feedback.filter((f) => f.status === 'archive').length;
+  const totalCount = feedback.length;
+
+  // Sub-tab filtered data
+  const getFilteredFeedback = (): FeedbackItem[] => {
+    switch (activeSubTab) {
+      case 'new_bugs':
+        return feedback.filter((f) => f.category === 'bug' && f.status === 'new');
+      case 'new_features':
+        return feedback.filter((f) => f.category === 'feature' && f.status === 'new');
+      case 'pending_fix':
+        return feedback.filter((f) => f.status === 'pending_fix');
+      case 'pending_update':
+        return feedback.filter((f) => f.status === 'pending_update');
+      case 'completed':
+        return feedback.filter((f) => f.status === 'completed');
+      case 'archive':
+        return feedback.filter((f) => f.status === 'archive');
+      default:
+        return [];
+    }
+  };
+
+  const handleUpdateStatus = async (id: string, status: string) => {
+    try {
+      const feedbackId = id;
+      await adminApi.updateFeedback(token, String(feedbackId), { status });
+      onRefresh();
+      setSelectedFeedback(null);
+    } catch (error) {
+      console.error('Failed to update feedback:', error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await adminApi.deleteFeedback(token, String(id));
+      setConfirmDelete(null);
+      onRefresh();
+    } catch (error) {
+      console.error('Failed to delete feedback:', error);
+    }
+  };
+
+  const handleBulkAction = async (action: string) => {
+    try {
+      await adminApi.bulkFeedbackAction(token, action);
+      setConfirmBulk(null);
+      onRefresh();
+    } catch (error) {
+      console.error('Failed to perform bulk action:', error);
+    }
+  };
+
   const statusColors: Record<string, string> = {
-    new: 'badge-warning',
-    pending: 'badge-info',
-    completed: 'badge-success',
-    archived: 'badge-secondary',
+    new: 'bg-sky-500/20 text-sky-400',
+    pending_fix: 'bg-red-500/20 text-red-400',
+    pending_update: 'bg-purple-500/20 text-purple-400',
+    completed: 'bg-emerald-500/20 text-emerald-400',
+    archive: 'bg-gray-500/20 text-gray-400',
   };
 
-  const categoryColors: Record<string, string> = {
-    bug: 'text-error',
-    feature: 'text-ice',
-    question: 'text-warning',
-    other: 'text-frost-muted',
+  const categoryConfig: Record<string, { color: string; icon: string; label: string }> = {
+    bug: { color: 'text-red-400', icon: '!', label: 'Bug' },
+    feature: { color: 'text-purple-400', icon: '+', label: 'Feature' },
+    data_error: { color: 'text-yellow-400', icon: '~', label: 'Data Error' },
+    other: { color: 'text-frost-muted', icon: '?', label: 'Other' },
   };
 
-  if (feedback.length === 0) {
-    return (
-      <div className="card text-center py-12">
-        <div className="text-4xl mb-4">📬</div>
-        <p className="text-frost-muted">No feedback yet</p>
-      </div>
-    );
-  }
+  const subTabs: { key: FeedbackSubTab; label: string; count: number }[] = [
+    { key: 'new_bugs', label: 'New Bugs', count: feedback.filter((f) => f.category === 'bug' && f.status === 'new').length },
+    { key: 'new_features', label: 'New Features', count: feedback.filter((f) => f.category === 'feature' && f.status === 'new').length },
+    { key: 'pending_fix', label: 'Pending Fix', count: pendingFixCount },
+    { key: 'pending_update', label: 'Pending Update', count: pendingUpdateCount },
+    { key: 'completed', label: 'Completed', count: completedCount },
+    { key: 'archive', label: 'Archive', count: archiveCount },
+  ];
+
+  const filtered = getFilteredFeedback();
 
   return (
-    <div className="card">
-      <div className="space-y-3">
-        {feedback.map((item) => (
+    <div className="space-y-6">
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-sky-400">{newCount}</div>
+          <div className="text-xs text-frost-muted mt-1">New</div>
+        </div>
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-red-400">{pendingFixCount}</div>
+          <div className="text-xs text-frost-muted mt-1">Pending Fix</div>
+        </div>
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-purple-400">{pendingUpdateCount}</div>
+          <div className="text-xs text-frost-muted mt-1">Pending Update</div>
+        </div>
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-emerald-400">{completedCount}</div>
+          <div className="text-xs text-frost-muted mt-1">Completed</div>
+        </div>
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-frost">{totalCount}</div>
+          <div className="text-xs text-frost-muted mt-1">Total</div>
+        </div>
+      </div>
+
+      {/* Sub-tabs */}
+      <div className="flex flex-wrap gap-1 bg-surface/50 rounded-lg p-1">
+        {subTabs.map((tab) => (
           <button
-            key={item.id}
-            onClick={() => onSelect(item)}
-            className="w-full p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left"
+            key={tab.key}
+            onClick={() => setActiveSubTab(tab.key)}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              activeSubTab === tab.key
+                ? 'bg-ice/20 text-ice'
+                : 'text-frost-muted hover:text-frost hover:bg-surface-hover'
+            }`}
           >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`text-sm font-medium ${categoryColors[item.category] || categoryColors.other}`}>
-                    [{item.category}]
-                  </span>
-                  <span className={`badge text-xs ${statusColors[item.status] || statusColors.new}`}>
-                    {item.status}
-                  </span>
-                </div>
-                <p className="text-frost truncate">{item.description}</p>
-                <p className="text-xs text-frost-muted mt-1">
-                  User: {item.user_id || 'Anonymous'} · {formatDate(item.created_at)}
-                </p>
-              </div>
-              <span className="text-frost-muted">→</span>
-            </div>
+            {tab.label}
+            <span className="ml-1.5 text-[10px] opacity-70">({tab.count})</span>
           </button>
         ))}
       </div>
+
+      {/* Bulk Actions */}
+      {activeSubTab === 'completed' && completedCount > 0 && (
+        <div className="flex gap-2">
+          {confirmBulk === 'archive_completed' ? (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
+              <span className="text-sm text-warning">Archive all {completedCount} completed items?</span>
+              <button
+                onClick={() => handleBulkAction('archive_completed')}
+                className="px-3 py-1 rounded text-xs font-medium bg-warning/20 text-warning hover:bg-warning/30 transition-colors"
+              >
+                Yes, Archive
+              </button>
+              <button
+                onClick={() => setConfirmBulk(null)}
+                className="px-3 py-1 rounded text-xs font-medium text-frost-muted hover:text-frost transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmBulk('archive_completed')}
+              className="btn-secondary text-xs"
+            >
+              Archive All Completed
+            </button>
+          )}
+        </div>
+      )}
+      {activeSubTab === 'archive' && archiveCount > 0 && (
+        <div className="flex gap-2">
+          {confirmBulk === 'empty_archive' ? (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-error/10 border border-error/20">
+              <span className="text-sm text-error">Permanently delete all {archiveCount} archived items?</span>
+              <button
+                onClick={() => handleBulkAction('empty_archive')}
+                className="px-3 py-1 rounded text-xs font-medium bg-error/20 text-error hover:bg-error/30 transition-colors"
+              >
+                Yes, Delete All
+              </button>
+              <button
+                onClick={() => setConfirmBulk(null)}
+                className="px-3 py-1 rounded text-xs font-medium text-frost-muted hover:text-frost transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmBulk('empty_archive')}
+              className="btn-danger text-xs"
+            >
+              Empty Archive
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Feedback Items */}
+      {filtered.length === 0 ? (
+        <div className="card text-center py-12">
+          <div className="text-4xl mb-4">
+            {activeSubTab === 'archive' ? '📦' : activeSubTab === 'completed' ? '✅' : '📬'}
+          </div>
+          <p className="text-frost-muted">
+            {activeSubTab === 'new_bugs' ? 'No new bugs to review' :
+             activeSubTab === 'new_features' ? 'No new feature requests' :
+             activeSubTab === 'pending_fix' ? 'No bugs pending fix' :
+             activeSubTab === 'pending_update' ? 'No features pending update' :
+             activeSubTab === 'completed' ? 'No completed items' :
+             'Archive is empty'}
+          </p>
+        </div>
+      ) : (
+        <div className="card">
+          <div className="space-y-3">
+            {filtered.map((item) => {
+              const itemId = item.feedback_id || item.id;
+              const cat = categoryConfig[item.category] || categoryConfig.other;
+
+              return (
+                <div
+                  key={itemId}
+                  className="p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      {/* Header: Category + Page + Status */}
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                        <span className={`text-sm font-semibold ${cat.color}`}>
+                          [{cat.label}]
+                        </span>
+                        {item.page && (
+                          <span className="text-xs px-2 py-0.5 rounded bg-surface-hover text-frost-muted">
+                            {item.page}
+                          </span>
+                        )}
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[item.status] || 'bg-gray-500/20 text-gray-400'}`}>
+                          {item.status.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+
+                      {/* Description */}
+                      <p className="text-frost text-sm">{item.description}</p>
+
+                      {/* Footer */}
+                      <p className="text-xs text-frost-muted mt-2">
+                        User: {item.user_id || 'Anonymous'} &middot; {formatDate(item.created_at)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-surface-border/50">
+                    {/* Smart routing buttons for new items */}
+                    {item.status === 'new' && item.category === 'bug' && (
+                      <button
+                        onClick={() => handleUpdateStatus(itemId, 'pending_fix')}
+                        className="px-3 py-1 rounded text-xs font-medium bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-colors"
+                      >
+                        To Fix
+                      </button>
+                    )}
+                    {item.status === 'new' && item.category === 'feature' && (
+                      <button
+                        onClick={() => handleUpdateStatus(itemId, 'pending_update')}
+                        className="px-3 py-1 rounded text-xs font-medium bg-purple-500/15 text-purple-400 hover:bg-purple-500/25 transition-colors"
+                      >
+                        To Update
+                      </button>
+                    )}
+                    {item.status === 'new' && item.category !== 'bug' && item.category !== 'feature' && (
+                      <>
+                        <button
+                          onClick={() => handleUpdateStatus(itemId, 'pending_fix')}
+                          className="px-3 py-1 rounded text-xs font-medium bg-red-500/15 text-red-400 hover:bg-red-500/25 transition-colors"
+                        >
+                          To Fix
+                        </button>
+                        <button
+                          onClick={() => handleUpdateStatus(itemId, 'pending_update')}
+                          className="px-3 py-1 rounded text-xs font-medium bg-purple-500/15 text-purple-400 hover:bg-purple-500/25 transition-colors"
+                        >
+                          To Update
+                        </button>
+                      </>
+                    )}
+
+                    {/* Archive for non-archived items */}
+                    {item.status !== 'archive' && (
+                      <button
+                        onClick={() => handleUpdateStatus(itemId, 'archive')}
+                        className="px-3 py-1 rounded text-xs font-medium bg-surface-hover text-frost-muted hover:text-frost transition-colors"
+                      >
+                        Archive
+                      </button>
+                    )}
+
+                    {/* Restore for archived items */}
+                    {item.status === 'archive' && (
+                      <button
+                        onClick={() => handleUpdateStatus(itemId, 'new')}
+                        className="px-3 py-1 rounded text-xs font-medium bg-sky-500/15 text-sky-400 hover:bg-sky-500/25 transition-colors"
+                      >
+                        Restore
+                      </button>
+                    )}
+
+                    {/* Delete with confirmation */}
+                    {confirmDelete === itemId ? (
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        <span className="text-xs text-warning">Delete?</span>
+                        <button
+                          onClick={() => handleDelete(itemId)}
+                          className="px-2 py-1 rounded text-xs font-medium bg-error/20 text-error hover:bg-error/30 transition-colors"
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={() => setConfirmDelete(null)}
+                          className="px-2 py-1 rounded text-xs font-medium text-frost-muted hover:text-frost transition-colors"
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDelete(itemId)}
+                        className="px-2 py-1 rounded text-xs text-frost-muted hover:text-error transition-colors ml-auto"
+                        title="Delete"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Feedback Detail Modal */}
+      {selectedFeedback && (
+        <FeedbackDetailModal
+          feedback={selectedFeedback}
+          onClose={() => setSelectedFeedback(null)}
+          onUpdateStatus={handleUpdateStatus}
+          formatDate={formatDate}
+        />
+      )}
     </div>
   );
 }
+
+// =============================================================
+// ERRORS TAB - Enhanced with stats, sub-tabs, workflow buttons
+// =============================================================
+
+type ErrorSubTab = 'new' | 'reviewed' | 'fixed' | 'ignored';
 
 function ErrorsTab({
   errors,
-  onSelect,
+  token,
+  onRefresh,
   formatDate,
 }: {
   errors: ErrorItem[];
-  onSelect: (item: ErrorItem) => void;
+  token: string;
+  onRefresh: () => void;
   formatDate: (date: string) => string;
 }) {
-  if (errors.length === 0) {
-    return (
-      <div className="card text-center py-12">
-        <div className="text-4xl mb-4">✅</div>
-        <p className="text-frost-muted">No errors logged</p>
-      </div>
-    );
-  }
+  const [activeSubTab, setActiveSubTab] = useState<ErrorSubTab>('new');
+  const [expandedTrace, setExpandedTrace] = useState<string | null>(null);
+  const [fixNotesInput, setFixNotesInput] = useState<Record<string, string>>({});
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmBulk, setConfirmBulk] = useState<string | null>(null);
+
+  // Compute stats
+  const now = new Date();
+  const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const newCount = errors.filter((e) => e.status === 'new' || (!e.status && !e.resolved)).length;
+  const reviewedCount = errors.filter((e) => e.status === 'reviewed').length;
+  const fixedCount = errors.filter((e) => e.status === 'fixed' || e.status === 'resolved' || (e.resolved && !e.status)).length;
+  const ignoredCount = errors.filter((e) => e.status === 'ignored').length;
+  const last24hCount = errors.filter((e) => new Date(e.created_at) >= twentyFourHoursAgo).length;
+
+  // Filtered errors by sub-tab
+  const getFilteredErrors = (): ErrorItem[] => {
+    switch (activeSubTab) {
+      case 'new':
+        return errors.filter((e) => e.status === 'new' || (!e.status && !e.resolved));
+      case 'reviewed':
+        return errors.filter((e) => e.status === 'reviewed');
+      case 'fixed':
+        return errors.filter((e) => e.status === 'fixed' || e.status === 'resolved' || (e.resolved && !e.status));
+      case 'ignored':
+        return errors.filter((e) => e.status === 'ignored');
+      default:
+        return [];
+    }
+  };
+
+  const handleUpdateError = async (id: string, status: string) => {
+    try {
+      await adminApi.updateError(token, String(id), { status });
+      onRefresh();
+    } catch (error) {
+      console.error('Failed to update error:', error);
+    }
+  };
+
+  const handleSaveFixNotes = async (id: string) => {
+    try {
+      await adminApi.updateError(token, String(id), { fix_notes: fixNotesInput[id] || '' });
+      setFixNotesInput((prev) => ({ ...prev, [id]: '' }));
+      onRefresh();
+    } catch (error) {
+      console.error('Failed to save fix notes:', error);
+    }
+  };
+
+  const handleDeleteError = async (id: string) => {
+    try {
+      await adminApi.deleteError(token, String(id));
+      setConfirmDelete(null);
+      onRefresh();
+    } catch (error) {
+      console.error('Failed to delete error:', error);
+    }
+  };
+
+  const handleBulkAction = async (action: string) => {
+    try {
+      await adminApi.bulkErrorAction(token, action);
+      setConfirmBulk(null);
+      onRefresh();
+    } catch (error) {
+      console.error('Failed to perform bulk action:', error);
+    }
+  };
+
+  const subTabs: { key: ErrorSubTab; label: string; count: number }[] = [
+    { key: 'new', label: 'New', count: newCount },
+    { key: 'reviewed', label: 'Reviewed', count: reviewedCount },
+    { key: 'fixed', label: 'Fixed', count: fixedCount },
+    { key: 'ignored', label: 'Ignored', count: ignoredCount },
+  ];
+
+  const filtered = getFilteredErrors();
+
+  const envBadgeColor = (env: string | null) => {
+    if (!env) return 'bg-gray-500/20 text-gray-400';
+    if (env === 'production' || env === 'prod') return 'bg-emerald-500/20 text-emerald-400';
+    return 'bg-sky-500/20 text-sky-400';
+  };
+
+  // Contextual workflow buttons based on current status
+  const renderWorkflowButtons = (item: ErrorItem) => {
+    const id = item.id;
+    const currentStatus = item.status || (item.resolved ? 'fixed' : 'new');
+
+    const buttons: JSX.Element[] = [];
+
+    if (currentStatus === 'new') {
+      buttons.push(
+        <button key="reviewed" onClick={() => handleUpdateError(id, 'reviewed')}
+          className="px-3 py-1 rounded text-xs font-medium bg-amber-500/15 text-amber-400 hover:bg-amber-500/25 transition-colors">
+          Reviewed
+        </button>,
+        <button key="fixed" onClick={() => handleUpdateError(id, 'fixed')}
+          className="px-3 py-1 rounded text-xs font-medium bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition-colors">
+          Fixed
+        </button>,
+        <button key="ignore" onClick={() => handleUpdateError(id, 'ignored')}
+          className="px-3 py-1 rounded text-xs font-medium bg-gray-500/15 text-gray-400 hover:bg-gray-500/25 transition-colors">
+          Ignore
+        </button>
+      );
+    } else if (currentStatus === 'reviewed') {
+      buttons.push(
+        <button key="fixed" onClick={() => handleUpdateError(id, 'fixed')}
+          className="px-3 py-1 rounded text-xs font-medium bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 transition-colors">
+          Fixed
+        </button>,
+        <button key="ignore" onClick={() => handleUpdateError(id, 'ignored')}
+          className="px-3 py-1 rounded text-xs font-medium bg-gray-500/15 text-gray-400 hover:bg-gray-500/25 transition-colors">
+          Ignore
+        </button>,
+        <button key="reopen" onClick={() => handleUpdateError(id, 'new')}
+          className="px-3 py-1 rounded text-xs font-medium bg-sky-500/15 text-sky-400 hover:bg-sky-500/25 transition-colors">
+          Reopen
+        </button>
+      );
+    } else if (currentStatus === 'fixed' || currentStatus === 'resolved') {
+      buttons.push(
+        <button key="reopen" onClick={() => handleUpdateError(id, 'new')}
+          className="px-3 py-1 rounded text-xs font-medium bg-sky-500/15 text-sky-400 hover:bg-sky-500/25 transition-colors">
+          Reopen
+        </button>
+      );
+    } else if (currentStatus === 'ignored') {
+      buttons.push(
+        <button key="reopen" onClick={() => handleUpdateError(id, 'new')}
+          className="px-3 py-1 rounded text-xs font-medium bg-sky-500/15 text-sky-400 hover:bg-sky-500/25 transition-colors">
+          Reopen
+        </button>
+      );
+    }
+
+    return buttons;
+  };
 
   return (
-    <div className="card">
-      <div className="space-y-3">
-        {errors.map((item) => (
+    <div className="space-y-6">
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-red-400">{newCount}</div>
+          <div className="text-xs text-frost-muted mt-1">New</div>
+        </div>
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-amber-400">{reviewedCount}</div>
+          <div className="text-xs text-frost-muted mt-1">Reviewed</div>
+        </div>
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-emerald-400">{fixedCount}</div>
+          <div className="text-xs text-frost-muted mt-1">Fixed</div>
+        </div>
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-gray-400">{ignoredCount}</div>
+          <div className="text-xs text-frost-muted mt-1">Ignored</div>
+        </div>
+        <div className="card text-center py-3">
+          <div className="text-2xl font-bold text-ice">{last24hCount}</div>
+          <div className="text-xs text-frost-muted mt-1">Last 24h</div>
+        </div>
+      </div>
+
+      {/* Sub-tabs */}
+      <div className="flex flex-wrap gap-1 bg-surface/50 rounded-lg p-1">
+        {subTabs.map((tab) => (
           <button
-            key={item.id}
-            onClick={() => onSelect(item)}
-            className={`w-full p-4 rounded-lg transition-colors text-left ${
-              item.resolved
-                ? 'bg-surface/50 opacity-60'
-                : 'bg-error/5 border border-error/20 hover:bg-error/10'
+            key={tab.key}
+            onClick={() => setActiveSubTab(tab.key)}
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-colors ${
+              activeSubTab === tab.key
+                ? 'bg-ice/20 text-ice'
+                : 'text-frost-muted hover:text-frost hover:bg-surface-hover'
             }`}
           >
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium text-error">{item.error_type}</span>
-                  {item.resolved && <span className="badge badge-success text-xs">Resolved</span>}
-                </div>
-                <p className="text-frost truncate">{item.message}</p>
-                <p className="text-xs text-frost-muted mt-1">
-                  {item.page || 'Unknown page'} · {formatDate(item.created_at)}
-                  {item.user_id && ` · User: ${item.user_id}`}
-                </p>
-              </div>
-              <span className="text-frost-muted">→</span>
-            </div>
+            {tab.label}
+            <span className="ml-1.5 text-[10px] opacity-70">({tab.count})</span>
           </button>
         ))}
       </div>
+
+      {/* Bulk Action: Delete All Ignored */}
+      {activeSubTab === 'ignored' && ignoredCount > 0 && (
+        <div className="flex gap-2">
+          {confirmBulk === 'delete_ignored' ? (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-error/10 border border-error/20">
+              <span className="text-sm text-error">Permanently delete all {ignoredCount} ignored errors?</span>
+              <button
+                onClick={() => handleBulkAction('delete_ignored')}
+                className="px-3 py-1 rounded text-xs font-medium bg-error/20 text-error hover:bg-error/30 transition-colors"
+              >
+                Yes, Delete All
+              </button>
+              <button
+                onClick={() => setConfirmBulk(null)}
+                className="px-3 py-1 rounded text-xs font-medium text-frost-muted hover:text-frost transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmBulk('delete_ignored')}
+              className="btn-danger text-xs"
+            >
+              Delete All Ignored
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Error Items */}
+      {filtered.length === 0 ? (
+        <div className="card text-center py-12">
+          <div className="text-4xl mb-4">
+            {activeSubTab === 'new' ? '✅' : activeSubTab === 'fixed' ? '🔧' : '📋'}
+          </div>
+          <p className="text-frost-muted">
+            {activeSubTab === 'new' ? 'No new errors - the system is running smoothly!' :
+             activeSubTab === 'reviewed' ? 'No errors awaiting fix' :
+             activeSubTab === 'fixed' ? 'No fixed errors' :
+             'No ignored errors'}
+          </p>
+        </div>
+      ) : (
+        <div className="card">
+          <div className="space-y-3">
+            {filtered.map((item) => {
+              const errorMsg = item.error_message || item.message || '';
+              const isTraceExpanded = expandedTrace === item.id;
+
+              return (
+                <div
+                  key={item.id}
+                  className={`p-4 rounded-lg transition-colors ${
+                    (item.status === 'new' || (!item.status && !item.resolved))
+                      ? 'bg-error/5 border border-error/20'
+                      : 'bg-surface'
+                  }`}
+                >
+                  {/* Header: Error type + Page + Environment + Status */}
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                        <span className="text-sm font-semibold text-error">{item.error_type}</span>
+                        {item.page && (
+                          <span className="text-xs px-2 py-0.5 rounded bg-surface-hover text-frost-muted">
+                            {item.page}
+                          </span>
+                        )}
+                        {item.environment && (
+                          <span className={`text-xs px-2 py-0.5 rounded ${envBadgeColor(item.environment)}`}>
+                            {item.environment}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Error Message */}
+                      <div className="p-2.5 rounded bg-error/5 border-l-2 border-error/40 mb-2">
+                        <p className="text-frost text-sm font-mono">{errorMsg.slice(0, 500)}</p>
+                      </div>
+
+                      {/* Stack Trace (expandable) */}
+                      {item.stack_trace && (
+                        <div className="mb-2">
+                          <button
+                            onClick={() => setExpandedTrace(isTraceExpanded ? null : item.id)}
+                            className="text-xs text-ice hover:text-frost transition-colors"
+                          >
+                            {isTraceExpanded ? 'Hide Stack Trace' : 'Show Stack Trace'}
+                          </button>
+                          {isTraceExpanded && (
+                            <pre className="mt-2 p-3 rounded-lg bg-background text-xs text-frost-muted overflow-x-auto max-h-64 overflow-y-auto border border-surface-border">
+                              {item.stack_trace}
+                            </pre>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Fix Notes Display */}
+                      {item.fix_notes && (
+                        <div className="p-2.5 rounded bg-emerald-500/10 border-l-2 border-emerald-500/40 mb-2">
+                          <p className="text-xs text-frost-muted uppercase tracking-wide mb-0.5">Fix Notes</p>
+                          <p className="text-sm text-frost">{item.fix_notes}</p>
+                        </div>
+                      )}
+
+                      {/* Footer */}
+                      <p className="text-xs text-frost-muted mt-2">
+                        {item.user_id ? `User: ${item.user_id} \u00b7 ` : ''}{formatDate(item.created_at)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Fix Notes Input */}
+                  <div className="mt-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="Add fix notes..."
+                        value={fixNotesInput[item.id] || ''}
+                        onChange={(e) => setFixNotesInput((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                        className="input text-xs py-1 flex-1"
+                      />
+                      {fixNotesInput[item.id] && (
+                        <button
+                          onClick={() => handleSaveFixNotes(item.id)}
+                          className="px-3 py-1 rounded text-xs font-medium bg-ice/20 text-ice hover:bg-ice/30 transition-colors"
+                        >
+                          Save
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Workflow Buttons */}
+                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-surface-border/50">
+                    {renderWorkflowButtons(item)}
+
+                    {/* Delete with confirmation */}
+                    {confirmDelete === item.id ? (
+                      <div className="flex items-center gap-1.5 ml-auto">
+                        <span className="text-xs text-warning">Delete?</span>
+                        <button
+                          onClick={() => handleDeleteError(item.id)}
+                          className="px-2 py-1 rounded text-xs font-medium bg-error/20 text-error hover:bg-error/30 transition-colors"
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={() => setConfirmDelete(null)}
+                          className="px-2 py-1 rounded text-xs font-medium text-frost-muted hover:text-frost transition-colors"
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDelete(item.id)}
+                        className="px-2 py-1 rounded text-xs text-frost-muted hover:text-error transition-colors ml-auto"
+                        title="Delete"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+
+// =============================================================
+// CONVERSATIONS TAB - unchanged from original
+// =============================================================
 
 interface AIConversation {
   id: string;
@@ -614,7 +1212,7 @@ function ConversationDetailModal({
               <span className="text-sm text-frost-muted">{formatDate(conversation.created_at)}</span>
             </div>
           </div>
-          <button onClick={onClose} className="text-frost-muted hover:text-frost">
+          <button onClick={onClose} className="text-frost-muted hover:text-frost text-xl">
             ✕
           </button>
         </div>
@@ -747,6 +1345,8 @@ function FeedbackDetailModal({
   onUpdateStatus: (id: string, status: string) => void;
   formatDate: (date: string) => string;
 }) {
+  const feedbackId = feedback.feedback_id || feedback.id;
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-surface rounded-xl border border-surface-border max-w-lg w-full p-6 animate-fadeIn">
@@ -755,7 +1355,7 @@ function FeedbackDetailModal({
             <h2 className="text-xl font-bold text-frost">Feedback Details</h2>
             <p className="text-sm text-frost-muted mt-1">{formatDate(feedback.created_at)}</p>
           </div>
-          <button onClick={onClose} className="text-frost-muted hover:text-frost">
+          <button onClick={onClose} className="text-frost-muted hover:text-frost text-xl">
             ✕
           </button>
         </div>
@@ -771,6 +1371,13 @@ function FeedbackDetailModal({
             <p className="text-frost capitalize">{feedback.category || 'Other'}</p>
           </div>
 
+          {feedback.page && (
+            <div>
+              <label className="text-xs text-frost-muted uppercase tracking-wide">Page</label>
+              <p className="text-frost">{feedback.page}</p>
+            </div>
+          )}
+
           <div>
             <label className="text-xs text-frost-muted uppercase tracking-wide">Description</label>
             <p className="text-frost whitespace-pre-wrap">{feedback.description}</p>
@@ -780,87 +1387,23 @@ function FeedbackDetailModal({
             <label className="text-xs text-frost-muted uppercase tracking-wide block mb-2">
               Update Status
             </label>
-            <div className="flex gap-2">
-              {['pending', 'completed', 'archived'].map((status) => (
+            <div className="flex flex-wrap gap-2">
+              {['new', 'pending_fix', 'pending_update', 'completed', 'archive'].map((status) => (
                 <button
                   key={status}
-                  onClick={() => onUpdateStatus(feedback.id, status)}
+                  onClick={() => onUpdateStatus(feedbackId, status)}
                   disabled={feedback.status === status}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                     feedback.status === status
                       ? 'bg-ice/20 text-ice cursor-default'
                       : 'bg-surface-hover text-frost-muted hover:text-frost'
                   }`}
                 >
-                  {status}
+                  {status.replace(/_/g, ' ')}
                 </button>
               ))}
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function ErrorDetailModal({
-  error,
-  onClose,
-  onResolve,
-  formatDate,
-}: {
-  error: ErrorItem;
-  onClose: () => void;
-  onResolve: () => void;
-  formatDate: (date: string) => string;
-}) {
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-surface rounded-xl border border-surface-border max-w-2xl w-full p-6 animate-fadeIn max-h-[80vh] overflow-y-auto">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h2 className="text-xl font-bold text-error">{error.error_type}</h2>
-            <p className="text-sm text-frost-muted mt-1">{formatDate(error.created_at)}</p>
-          </div>
-          <button onClick={onClose} className="text-frost-muted hover:text-frost">
-            ✕
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="text-xs text-frost-muted uppercase tracking-wide">Message</label>
-            <p className="text-frost">{error.message}</p>
-          </div>
-
-          {error.page && (
-            <div>
-              <label className="text-xs text-frost-muted uppercase tracking-wide">Page</label>
-              <p className="text-frost">{error.page}</p>
-            </div>
-          )}
-
-          {error.user_id && (
-            <div>
-              <label className="text-xs text-frost-muted uppercase tracking-wide">User</label>
-              <p className="text-frost">{error.user_id}</p>
-            </div>
-          )}
-
-          {error.stack_trace && (
-            <div>
-              <label className="text-xs text-frost-muted uppercase tracking-wide">Stack Trace</label>
-              <pre className="mt-2 p-4 rounded-lg bg-background text-xs text-frost-muted overflow-x-auto">
-                {error.stack_trace}
-              </pre>
-            </div>
-          )}
-
-          {!error.resolved && (
-            <button onClick={onResolve} className="btn-success w-full">
-              Mark as Resolved
-            </button>
-          )}
         </div>
       </div>
     </div>

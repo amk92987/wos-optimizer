@@ -22,6 +22,16 @@ export default function AdminGameDataPage() {
   const [isLoadingContent, setIsLoadingContent] = useState(false);
   const [filterCategory, setFilterCategory] = useState('');
 
+  // Edit mode state
+  const [editMode, setEditMode] = useState(false);
+  const [editContent, setEditContent] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Stats
+  const [heroCount, setHeroCount] = useState(0);
+  const [itemCount, setItemCount] = useState(0);
+
   useEffect(() => {
     if (token) {
       fetchFiles();
@@ -31,10 +41,41 @@ export default function AdminGameDataPage() {
   const fetchFiles = async () => {
     try {
       const data = await adminApi.getGameDataFiles(token!);
-      setFiles(Array.isArray(data.files) ? data.files : Array.isArray(data) ? data : []);
+      const fileList = Array.isArray(data.files) ? data.files : Array.isArray(data) ? data : [];
+      setFiles(fileList);
+
+      // Calculate stats from file data
+      const heroFile = fileList.find((f: DataFile) => f.name === 'heroes.json');
+      const itemFile = fileList.find((f: DataFile) => f.name === 'items.json');
+
+      // Try to get hero count from the heroes.json content
+      if (heroFile) {
+        try {
+          const heroData = await adminApi.getGameDataFile(token!, heroFile.path);
+          const content = heroData.content || heroData;
+          if (content?.heroes) {
+            setHeroCount(content.heroes.length);
+          }
+        } catch {
+          setHeroCount(56); // fallback
+        }
+      }
+
+      if (itemFile) {
+        try {
+          const itemData = await adminApi.getGameDataFile(token!, itemFile.path);
+          const content = itemData.content || itemData;
+          if (Array.isArray(content)) {
+            setItemCount(content.length);
+          } else if (content?.items) {
+            setItemCount(content.items.length);
+          }
+        } catch {
+          setItemCount(0);
+        }
+      }
     } catch (error) {
       console.error('Failed to fetch files:', error);
-      // Demo data
       setFiles([
         { name: 'heroes.json', path: 'data/heroes.json', size_bytes: 43000, modified_at: new Date().toISOString(), category: 'core' },
         { name: 'chief_gear.json', path: 'data/chief_gear.json', size_bytes: 15000, modified_at: new Date().toISOString(), category: 'core' },
@@ -44,6 +85,7 @@ export default function AdminGameDataPage() {
         { name: 'buildings.edges.json', path: 'data/upgrades/buildings.edges.json', size_bytes: 25000, modified_at: new Date().toISOString(), category: 'upgrades' },
         { name: 'war_academy.steps.json', path: 'data/upgrades/war_academy.steps.json', size_bytes: 8000, modified_at: new Date().toISOString(), category: 'upgrades' },
       ]);
+      setHeroCount(56);
     } finally {
       setIsLoading(false);
     }
@@ -52,14 +94,46 @@ export default function AdminGameDataPage() {
   const fetchFileContent = async (file: DataFile) => {
     setIsLoadingContent(true);
     setSelectedFile(file);
+    setEditMode(false);
+    setSaveMessage(null);
     try {
       const data = await adminApi.getGameDataFile(token!, file.path);
-      setFileContent(data);
+      setFileContent(data.content || data);
     } catch (error) {
       console.error('Failed to fetch file content:', error);
       setFileContent({ error: 'Failed to load file content' });
     } finally {
       setIsLoadingContent(false);
+    }
+  };
+
+  const handleToggleEdit = () => {
+    if (!editMode && fileContent) {
+      setEditContent(JSON.stringify(fileContent, null, 2));
+    }
+    setEditMode(!editMode);
+    setSaveMessage(null);
+  };
+
+  const handleSaveFile = async () => {
+    if (!selectedFile) return;
+    setIsSaving(true);
+    setSaveMessage(null);
+    try {
+      // Validate JSON
+      JSON.parse(editContent);
+      await adminApi.saveGameDataFile(token!, selectedFile.path, editContent);
+      setFileContent(JSON.parse(editContent));
+      setEditMode(false);
+      setSaveMessage({ type: 'success', text: 'File saved successfully' });
+    } catch (error: any) {
+      if (error instanceof SyntaxError) {
+        setSaveMessage({ type: 'error', text: 'Invalid JSON syntax' });
+      } else {
+        setSaveMessage({ type: 'error', text: 'Failed to save file' });
+      }
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -90,7 +164,7 @@ export default function AdminGameDataPage() {
     return (
       <PageLayout>
         <div className="max-w-2xl mx-auto text-center py-16">
-          <div className="text-6xl mb-6">🔒</div>
+          <div className="text-6xl mb-6">&#x1F512;</div>
           <h1 className="text-2xl font-bold text-frost mb-4">Access Denied</h1>
         </div>
       </PageLayout>
@@ -112,7 +186,23 @@ export default function AdminGameDataPage() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-frost">Game Data</h1>
-          <p className="text-frost-muted mt-1">View and manage game data files (67 JSON files)</p>
+          <p className="text-frost-muted mt-1">View and manage game data files</p>
+        </div>
+
+        {/* Stat Cards */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="card text-center">
+            <p className="text-2xl font-bold text-ice">{heroCount}</p>
+            <p className="text-xs text-frost-muted">Heroes</p>
+          </div>
+          <div className="card text-center">
+            <p className="text-2xl font-bold text-success">{itemCount || '--'}</p>
+            <p className="text-xs text-frost-muted">Items</p>
+          </div>
+          <div className="card text-center">
+            <p className="text-2xl font-bold text-warning">{files.length}</p>
+            <p className="text-xs text-frost-muted">Data Files</p>
+          </div>
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
@@ -157,8 +247,9 @@ export default function AdminGameDataPage() {
                         {file.category}
                       </span>
                     </div>
-                    <div className="text-xs text-frost-muted mt-1">
-                      {formatSize(file.size_bytes)} · {formatDate(file.modified_at)}
+                    <div className="text-xs text-frost-muted mt-1 flex items-center justify-between">
+                      <span>{formatDate(file.modified_at)}</span>
+                      <span className="font-mono">{formatSize(file.size_bytes)}</span>
                     </div>
                   </button>
                 ))}
@@ -170,7 +261,7 @@ export default function AdminGameDataPage() {
           <div className="card md:col-span-2">
             {!selectedFile ? (
               <div className="text-center py-16">
-                <div className="text-4xl mb-4">📁</div>
+                <div className="text-4xl mb-4">&#x1F4C1;</div>
                 <p className="text-frost-muted">Select a file to view its contents</p>
               </div>
             ) : isLoadingContent ? (
@@ -183,14 +274,52 @@ export default function AdminGameDataPage() {
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h2 className="text-lg font-bold text-frost">{selectedFile.name}</h2>
-                    <p className="text-xs text-frost-muted">{selectedFile.path}</p>
+                    <p className="text-xs text-frost-muted">
+                      {selectedFile.path} &middot; {formatSize(selectedFile.size_bytes)}
+                    </p>
                   </div>
-                  <button className="btn-secondary text-sm">Edit</button>
+                  <button
+                    onClick={handleToggleEdit}
+                    className={`text-sm ${editMode ? 'btn-secondary' : 'btn-secondary'}`}
+                  >
+                    {editMode ? 'Cancel Edit' : 'Edit Mode'}
+                  </button>
                 </div>
 
-                <pre className="p-4 rounded-lg bg-background text-sm text-frost-muted overflow-auto max-h-[60vh] font-mono">
-                  {JSON.stringify(fileContent, null, 2)}
-                </pre>
+                {saveMessage && (
+                  <div className={`mb-4 p-3 rounded-lg text-sm ${
+                    saveMessage.type === 'success'
+                      ? 'bg-success/10 text-success border border-success/30'
+                      : 'bg-error/10 text-error border border-error/30'
+                  }`}>
+                    {saveMessage.text}
+                  </div>
+                )}
+
+                {editMode ? (
+                  <div>
+                    <textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      className="w-full p-4 rounded-lg bg-background text-sm text-frost font-mono border border-surface-border focus:outline-none focus:border-ice/50"
+                      style={{ minHeight: '60vh' }}
+                      spellCheck={false}
+                    />
+                    <div className="flex justify-end mt-4">
+                      <button
+                        onClick={handleSaveFile}
+                        disabled={isSaving}
+                        className="btn-primary"
+                      >
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <pre className="p-4 rounded-lg bg-background text-sm text-frost-muted overflow-auto max-h-[60vh] font-mono">
+                    {JSON.stringify(fileContent, null, 2)}
+                  </pre>
+                )}
               </>
             )}
           </div>

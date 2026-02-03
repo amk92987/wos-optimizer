@@ -331,6 +331,49 @@ def update_feedback(feedbackId: str):
     return {"feedback": result}
 
 
+@app.delete("/api/admin/feedback/<feedbackId>")
+def delete_feedback(feedbackId: str):
+    _require_admin()
+    table = get_table("admin")
+    table.delete_item(Key={"PK": "FEEDBACK", "SK": f"FEEDBACK#{feedbackId}"})
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "delete_feedback", "feedback", feedbackId)
+    return {"status": "deleted"}
+
+
+@app.post("/api/admin/feedback/bulk")
+def bulk_feedback_action():
+    _require_admin()
+    body = app.current_event.json_body or {}
+    action = body.get("action")
+    admin_id = get_user_id(app.current_event.raw_event)
+
+    if action == "archive_completed":
+        feedback = admin_repo.get_feedback(status_filter="completed")
+        table = get_table("admin")
+        for item in feedback:
+            sk = item.get("SK") or f"FEEDBACK#{item.get('feedback_id', '')}"
+            table.update_item(
+                Key={"PK": "FEEDBACK", "SK": sk},
+                UpdateExpression="SET #s = :status",
+                ExpressionAttributeNames={"#s": "status"},
+                ExpressionAttributeValues={":status": "archive"},
+            )
+        admin_repo.log_audit(admin_id, "admin", "bulk_archive_feedback", details=f"Archived {len(feedback)} completed items")
+        return {"status": "ok", "count": len(feedback)}
+
+    elif action == "empty_archive":
+        feedback = admin_repo.get_feedback(status_filter="archive")
+        table = get_table("admin")
+        for item in feedback:
+            sk = item.get("SK") or f"FEEDBACK#{item.get('feedback_id', '')}"
+            table.delete_item(Key={"PK": "FEEDBACK", "SK": sk})
+        admin_repo.log_audit(admin_id, "admin", "empty_feedback_archive", details=f"Deleted {len(feedback)} archived items")
+        return {"status": "ok", "count": len(feedback)}
+
+    return {"error": "Unknown action"}, 400
+
+
 # --- Stats (richer than metrics) ---
 
 @app.get("/api/admin/stats")
@@ -701,6 +744,77 @@ def resolve_error(errorId: str):
     admin_id = get_user_id(app.current_event.raw_event)
     admin_repo.log_audit(admin_id, "admin", "resolve_error", "error", errorId)
     return {"status": "resolved", "resolved": True}
+
+
+@app.put("/api/admin/errors/<errorId>")
+def update_error(errorId: str):
+    _require_admin()
+    body = app.current_event.json_body or {}
+    table = get_table("admin")
+
+    update_parts = []
+    names = {}
+    values = {}
+
+    if "status" in body:
+        update_parts.append("#s = :status")
+        names["#s"] = "status"
+        values[":status"] = body["status"]
+        if body["status"] == "resolved":
+            values[":true_val"] = True
+            update_parts.append("#r = :true_val")
+            names["#r"] = "resolved"
+
+    if "fix_notes" in body:
+        update_parts.append("#fn = :fix_notes")
+        names["#fn"] = "fix_notes"
+        values[":fix_notes"] = body["fix_notes"]
+
+    if update_parts:
+        table.update_item(
+            Key={"PK": "ERRORS", "SK": f"ERROR#{errorId}"},
+            UpdateExpression="SET " + ", ".join(update_parts),
+            ExpressionAttributeNames=names,
+            ExpressionAttributeValues=values,
+        )
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "update_error", "error", errorId, details=json.dumps(body))
+    return {"status": "updated"}
+
+
+@app.delete("/api/admin/errors/<errorId>")
+def delete_error(errorId: str):
+    _require_admin()
+    table = get_table("admin")
+    table.delete_item(Key={"PK": "ERRORS", "SK": f"ERROR#{errorId}"})
+    admin_id = get_user_id(app.current_event.raw_event)
+    admin_repo.log_audit(admin_id, "admin", "delete_error", "error", errorId)
+    return {"status": "deleted"}
+
+
+@app.post("/api/admin/errors/bulk")
+def bulk_error_action():
+    _require_admin()
+    body = app.current_event.json_body or {}
+    action = body.get("action")
+    admin_id = get_user_id(app.current_event.raw_event)
+
+    if action == "delete_ignored":
+        table = get_table("admin")
+        resp = table.query(
+            KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
+            ExpressionAttributeValues={":pk": "ERRORS", ":prefix": "ERROR#"},
+        )
+        count = 0
+        for item in resp.get("Items", []):
+            if item.get("status") == "ignored":
+                table.delete_item(Key={"PK": item["PK"], "SK": item["SK"]})
+                count += 1
+        admin_repo.log_audit(admin_id, "admin", "bulk_delete_ignored_errors", details=f"Deleted {count} ignored errors")
+        return {"status": "ok", "count": count}
+
+    return {"error": "Unknown action"}, 400
 
 
 # --- AI Conversations (admin) ---

@@ -40,6 +40,25 @@ interface Event {
   notes?: string;
   wave_mechanics?: Record<string, string>;
   phases?: Record<string, any>;
+  mechanics?: Record<string, string>;
+  intel_strategy?: any;
+  spending_priority?: any;
+  daily_stages?: any;
+  victory_points?: any;
+  star_system?: any;
+  tundra_trade_route?: any;
+  medal_system?: any;
+  f2p_strategy?: any;
+  fuel_management?: any;
+  phase_strategy?: Record<string, string>;
+  scoring?: any;
+  structure?: any;
+  stamina_costs?: any;
+  stat_bonuses?: any;
+  alternative_ratios?: any[];
+  eligibility?: any;
+  zones?: string[];
+  ranking_tiers?: any;
 }
 
 interface EventsGuide {
@@ -75,6 +94,310 @@ const EVENT_CATEGORIES = {
 };
 
 const PRIORITY_ORDER: Record<string, number> = { 'S': 0, 'A': 1, 'B': 2, 'C': 3, 'D': 4 };
+
+// --- Collapsible Section Component ---
+function Expander({ title, defaultOpen = false, children }: { title: string; defaultOpen?: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border border-surface-border rounded-lg overflow-hidden">
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between p-3 bg-surface hover:bg-surface-hover transition-colors text-left"
+      >
+        <span className="font-medium text-frost text-sm">{title}</span>
+        <svg className={`w-4 h-4 text-frost-muted transition-transform ${open ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && <div className="p-3 border-t border-surface-border">{children}</div>}
+    </div>
+  );
+}
+
+// --- Helper: get event name from ID ---
+function getEventName(eventId: string, eventsGuide: EventsGuide | null): string {
+  if (eventsGuide?.events?.[eventId]?.name) return eventsGuide.events[eventId].name;
+  return eventId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+// --- Intel Strategy Timeline (Flame and Fang) ---
+function IntelStrategyTimeline({ intelStrategy }: { intelStrategy: any }) {
+  const timeline = intelStrategy.timeline || [];
+  const normalTotal = intelStrategy.normal_total || 168;
+  const trickTotal = intelStrategy.with_trick_total || 184;
+  const refreshTimes = intelStrategy.refresh_times || [];
+
+  const getStepStyles = (type: string) => {
+    switch (type) {
+      case 'warning': return { border: 'border-2 border-red-500 bg-red-500/10', timeColor: 'text-red-400', actionColor: 'text-red-400 font-bold' };
+      case 'claim': return { border: 'border-2 border-green-500 bg-green-500/10', timeColor: 'text-green-400', actionColor: 'text-green-400 font-bold' };
+      case 'final': return { border: 'border-2 border-amber-400 bg-amber-400/10', timeColor: 'text-amber-400', actionColor: 'text-amber-400 font-bold' };
+      default: return { border: 'border-l-4 border-l-blue-500 bg-blue-500/5', timeColor: 'text-blue-400', actionColor: 'text-frost-muted' };
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      {/* Header comparison */}
+      <div className="p-5 rounded-xl border-2 border-amber-500 bg-gradient-to-r from-red-500/10 to-green-500/10">
+        <h4 className="text-center text-amber-400 font-bold text-lg mb-2">The Extra 16 Cores Trick</h4>
+        <p className="text-center text-frost-muted text-sm mb-4">
+          Intel refreshes at: <span className="text-blue-400 font-bold">{refreshTimes.join(' | ')}</span> server time
+        </p>
+        <div className="flex justify-center items-center gap-8">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-zinc-400">{normalTotal}</div>
+            <div className="text-xs text-zinc-400">Normal</div>
+          </div>
+          <div className="text-2xl text-amber-500 font-bold">vs</div>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-green-400">{trickTotal}</div>
+            <div className="text-xs text-green-400">With Trick</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Timeline steps */}
+      <h4 className="text-sm font-medium text-frost">Claiming Timeline</h4>
+      <div className="space-y-2">
+        {timeline.map((step: any, i: number) => {
+          const styles = getStepStyles(step.type || 'normal');
+          return (
+            <div key={i} className={`${styles.border} p-3 rounded-lg flex items-center gap-4`}>
+              <div className="min-w-[60px] text-center">
+                <div className={`text-xl font-bold ${styles.timeColor}`}>{step.time}</div>
+              </div>
+              <div className="flex-1">
+                <div className="text-xs text-frost-muted">{step.day}</div>
+                <div className={`text-sm mt-0.5 ${styles.actionColor}`}>{step.action}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// --- Spending Priority (Flame and Fang) ---
+function SpendingPriority({ spendingPriority }: { spendingPriority: any }) {
+  const order = spendingPriority.order || [];
+  const avoid = spendingPriority.avoid || [];
+  const warning = spendingPriority.warning || '';
+
+  return (
+    <div className="space-y-3">
+      {order.map((item: any, i: number) => {
+        const color = item.priority <= 2 ? 'bg-green-500' : item.priority === 3 ? 'bg-amber-500' : 'bg-zinc-500';
+        return (
+          <div key={i} className="flex items-center gap-3">
+            <div className={`${color} text-black w-7 h-7 rounded-full flex items-center justify-center font-bold text-sm`}>
+              {item.priority}
+            </div>
+            <div>
+              <span className="text-frost font-bold">{item.item}</span>
+              <span className="text-frost-muted text-xs ml-2">({item.note})</span>
+            </div>
+          </div>
+        );
+      })}
+
+      {avoid.length > 0 && (
+        <div className="p-3 rounded bg-red-500/10 border-l-4 border-l-red-500 mt-3">
+          <span className="text-red-400 font-bold">AVOID: </span>
+          <span className="text-frost">{avoid.join(', ')}</span>
+        </div>
+      )}
+
+      {warning && (
+        <div className="p-3 rounded-lg bg-amber-500/10 border-2 border-amber-400 text-center mt-3">
+          <span className="text-amber-400 font-bold">{warning}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- Daily Stages (Hall of Chiefs / King of Icefield) ---
+function DailyStages({ dailyStages }: { dailyStages: any }) {
+  // Hall of Chiefs format: gen_1_season_1 / gen_2_season_2_plus
+  const isHoC = dailyStages.gen_1_season_1 || dailyStages.gen_2_season_2_plus;
+
+  if (isHoC) {
+    return (
+      <div className="space-y-3">
+        {Object.entries(dailyStages).map(([seasonKey, seasonData]: [string, any]) => {
+          if (!seasonKey.startsWith('gen_')) return null;
+          const hero = seasonData.featured_hero || '';
+          const duration = seasonData.duration || '';
+          const stages = seasonData.stages || [];
+          const isDefault = seasonKey === 'gen_2_season_2_plus';
+
+          return (
+            <Expander key={seasonKey} title={`${hero} Season (${duration})`} defaultOpen={isDefault}>
+              <div className="space-y-2">
+                {stages.map((stage: any, i: number) => (
+                  <div key={i} className="p-3 rounded bg-blue-500/5 border-l-4 border-l-blue-500">
+                    <div className="flex items-center gap-2">
+                      <span className="text-amber-400 font-bold">Day {stage.day}:</span>
+                      <span className="text-frost font-bold">{stage.focus}</span>
+                    </div>
+                    <div className="text-frost-muted text-sm mt-1">{stage.activities}</div>
+                  </div>
+                ))}
+              </div>
+            </Expander>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // King of Icefield format: description + stages array
+  const desc = dailyStages.description || '';
+  const stages = dailyStages.stages || [];
+
+  return (
+    <div className="space-y-2">
+      {desc && <p className="text-frost-muted text-sm mb-2">{desc}</p>}
+      {stages.map((stage: any, i: number) => {
+        const isGold = stage.reward && stage.reward.includes('Shards');
+        return (
+          <div key={i} className={`p-3 rounded border-l-4 ${isGold ? 'border-l-amber-400 bg-amber-500/5' : 'border-l-blue-500 bg-blue-500/5'}`}>
+            <div className="flex items-center justify-between">
+              <span className="text-amber-400 font-bold">Day {stage.day}: {stage.focus}</span>
+              {stage.reward && (
+                <span className={`text-xs ${isGold ? 'text-amber-400' : 'text-blue-400'}`}>Reward: {stage.reward}</span>
+              )}
+            </div>
+            <div className="text-frost-muted text-sm mt-1">{stage.activities}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// --- Victory Points (Alliance Showdown) ---
+function VictoryPoints({ victoryPoints }: { victoryPoints: any }) {
+  const desc = victoryPoints.description || '';
+  const breakdown = victoryPoints.breakdown || [];
+  const strategy = victoryPoints.strategy || '';
+
+  return (
+    <div className="space-y-3">
+      {desc && <div className="p-3 rounded bg-blue-500/10 border border-blue-500/30 text-sm text-blue-300">{desc}</div>}
+
+      {breakdown.length > 0 && (
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+          {breakdown.map((day: any, i: number) => {
+            const isCritical = day.points >= 4;
+            return (
+              <div key={i} className={`p-2 rounded-lg border-2 text-center ${isCritical ? 'border-red-500 bg-red-500/10' : 'border-blue-500/50 bg-blue-500/5'}`}>
+                <div className="text-xs text-frost-muted">Day {day.day}</div>
+                <div className={`text-2xl font-bold ${isCritical ? 'text-red-400' : 'text-blue-400'}`}>{day.points}</div>
+                <div className="text-[10px] text-frost-muted">VP</div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {strategy && (
+        <div className="p-3 rounded bg-green-500/10 border border-green-500/30">
+          <span className="text-green-400 font-medium text-sm">Strategy: </span>
+          <span className="text-frost text-sm">{strategy}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- Scoring Section (Foundry Battle, Hall of Chiefs, King of Icefield) ---
+function ScoringSection({ scoring }: { scoring: any }) {
+  const combatPts = scoring.combat_points || {};
+  const buildingPts = scoring.building_points || {};
+  const lootMechanic = scoring.loot_mechanic || '';
+
+  // Flat key-value scoring (Hall of Chiefs, King of Icefield)
+  const flatEntries = Object.entries(scoring).filter(
+    ([k]) => !['combat_points', 'building_points', 'loot_mechanic'].includes(k)
+  );
+
+  return (
+    <div className="space-y-3">
+      {/* Flat scoring entries (Hall of Chiefs/KoI style) */}
+      {flatEntries.length > 0 && Object.keys(combatPts).length === 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-frost-muted border-b border-surface-border">
+                <th className="text-left py-1.5 pr-3">Item</th>
+                <th className="text-right py-1.5">Points</th>
+              </tr>
+            </thead>
+            <tbody className="text-frost">
+              {flatEntries.map(([key, value]) => (
+                <tr key={key} className="border-b border-surface-border/30">
+                  <td className="py-1.5 pr-3">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
+                  <td className="py-1.5 text-right text-amber-400 font-medium">{String(value)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Combat points (Foundry Battle) */}
+      {Object.keys(combatPts).length > 0 && (
+        <div>
+          <h4 className="text-xs font-semibold text-frost-muted uppercase tracking-wide mb-2">Combat Points</h4>
+          <div className="space-y-1">
+            {Object.entries(combatPts).map(([action, pts]) => (
+              <div key={action} className="flex justify-between text-sm">
+                <span className="text-frost">{action.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                <span className="text-amber-400 font-medium">{String(pts)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Building points (Foundry Battle) */}
+      {Object.keys(buildingPts).length > 0 && (
+        <div>
+          <h4 className="text-xs font-semibold text-frost-muted uppercase tracking-wide mb-2 mt-3">Building Points</h4>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-frost-muted border-b border-surface-border">
+                  <th className="text-left py-1.5">Building</th>
+                  <th className="text-right py-1.5">First Capture</th>
+                  <th className="text-right py-1.5">Per Min</th>
+                </tr>
+              </thead>
+              <tbody className="text-frost">
+                {Object.entries(buildingPts).map(([building, data]: [string, any]) => (
+                  <tr key={building} className="border-b border-surface-border/30">
+                    <td className="py-1.5 font-medium">{building.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</td>
+                    <td className="py-1.5 text-right text-amber-400">{typeof data.first_capture === 'number' ? data.first_capture.toLocaleString() : data.first_capture}</td>
+                    <td className="py-1.5 text-right text-frost-muted">{typeof data.per_minute === 'number' ? data.per_minute.toLocaleString() : data.per_minute}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {lootMechanic && (
+        <div className="p-3 rounded bg-blue-500/10 border border-blue-500/30 text-sm text-blue-300 mt-2">
+          <span className="font-medium">Loot Mechanic: </span>{lootMechanic}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function EventsPage() {
   const [eventsGuide, setEventsGuide] = useState<EventsGuide | null>(null);
@@ -198,6 +521,38 @@ export default function EventsPage() {
           </div>
         </div>
 
+        {/* Resource Saving Guide */}
+        {eventsGuide?.resource_saving_guide && (
+          <div className="mb-6">
+            <Expander title="What to Save & When" defaultOpen={true}>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-frost-muted border-b border-surface-border">
+                      <th className="text-left py-2 pr-3 w-1/5">Resource</th>
+                      <th className="text-left py-2 pr-3 w-1/4">Save For</th>
+                      <th className="text-left py-2">Tip</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(eventsGuide.resource_saving_guide).map(([resource, data]) => (
+                      <tr key={resource} className="border-b border-surface-border/30 hover:bg-surface-hover/30">
+                        <td className="py-2 pr-3 font-bold text-frost">
+                          {resource.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        </td>
+                        <td className="py-2 pr-3 text-amber-400 text-xs">
+                          {data.save_for.map((id: string) => getEventName(id, eventsGuide)).join(', ')}
+                        </td>
+                        <td className="py-2 text-frost-muted text-xs">{data.tip}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Expander>
+          </div>
+        )}
+
         {/* Category Tabs */}
         <div className="flex flex-wrap gap-2 mb-4">
           {Object.entries(EVENT_CATEGORIES).map(([key, cat]) => (
@@ -258,13 +613,12 @@ export default function EventsPage() {
           </div>
         ) : !eventsGuide ? (
           <div className="card text-center py-12">
-            <div className="text-4xl mb-4">⚠️</div>
+            <div className="text-4xl mb-4">Warning</div>
             <h3 className="text-lg font-medium text-frost mb-2">Unable to load events</h3>
             <p className="text-frost-muted">Make sure the API server is running</p>
           </div>
         ) : filteredEvents.length === 0 ? (
           <div className="card text-center py-12">
-            <div className="text-4xl mb-4">📅</div>
             <h3 className="text-lg font-medium text-frost mb-2">No events match your filters</h3>
             <p className="text-frost-muted">Try adjusting your filters</p>
           </div>
@@ -299,11 +653,11 @@ export default function EventsPage() {
                       <p className="text-sm text-frost-muted line-clamp-2">{event.description}</p>
                       <div className="flex items-center gap-3 mt-2 text-xs text-frost-muted">
                         <span>{event.type.charAt(0).toUpperCase() + event.type.slice(1)}</span>
-                        <span>•</span>
+                        <span>-</span>
                         <span>{event.frequency}</span>
                         {event.duration && (
                           <>
-                            <span>•</span>
+                            <span>-</span>
                             <span>{event.duration}</span>
                           </>
                         )}
@@ -313,7 +667,7 @@ export default function EventsPage() {
                       <span className={`px-2 py-1 rounded text-xs ${getCostColor(event.cost_category)}`}>
                         {getCostLabel(event.cost_category)}
                       </span>
-                      <span className="text-xs text-ice">Details →</span>
+                      <span className="text-xs text-ice">Details &rarr;</span>
                     </div>
                   </div>
                 </button>
@@ -322,12 +676,33 @@ export default function EventsPage() {
           </div>
         )}
 
+        {/* Cost Categories Legend */}
+        {eventsGuide && (
+          <div className="mt-6">
+            <Expander title="Cost Categories Explained" defaultOpen={false}>
+              <div className="space-y-2">
+                {Object.entries(eventsGuide.cost_categories).map(([catId, catData]) => (
+                  <div key={catId} className="flex items-center gap-3">
+                    <span className={`px-2 py-1 rounded text-xs whitespace-nowrap ${getCostColor(catId)}`}>
+                      {catData.label}
+                    </span>
+                    <span className="text-frost-muted text-sm">{catData.description}</span>
+                  </div>
+                ))}
+              </div>
+            </Expander>
+          </div>
+        )}
+
         {/* Event Detail Modal */}
         {selectedEvent && (
-          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={(e) => { if (e.target === e.currentTarget) setSelectedEvent(null); }}
+          >
             <div className="bg-surface rounded-xl border border-surface-border max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fadeIn">
               {/* Modal Header */}
-              <div className="sticky top-0 bg-surface border-b border-surface-border/50 p-4 flex items-start justify-between">
+              <div className="sticky top-0 bg-surface border-b border-surface-border/50 p-4 flex items-start justify-between z-10">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <h2 className="text-xl font-bold text-frost">{selectedEvent.event.name}</h2>
@@ -336,15 +711,15 @@ export default function EventsPage() {
                     </span>
                   </div>
                   <p className="text-sm text-frost-muted">
-                    {selectedEvent.event.type.charAt(0).toUpperCase() + selectedEvent.event.type.slice(1)} • {selectedEvent.event.frequency}
-                    {selectedEvent.event.duration && ` • ${selectedEvent.event.duration}`}
+                    {selectedEvent.event.type.charAt(0).toUpperCase() + selectedEvent.event.type.slice(1)} - {selectedEvent.event.frequency}
+                    {selectedEvent.event.duration && ` - ${selectedEvent.event.duration}`}
                   </p>
                 </div>
                 <button
                   onClick={() => setSelectedEvent(null)}
                   className="text-frost-muted hover:text-frost text-xl leading-none p-1"
                 >
-                  ×
+                  x
                 </button>
               </div>
 
@@ -373,6 +748,21 @@ export default function EventsPage() {
                   })()}
                 </div>
 
+                {/* Eligibility (Alliance Showdown) */}
+                {selectedEvent.event.eligibility && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-2">Eligibility</h3>
+                    <div className="space-y-1">
+                      {Object.entries(selectedEvent.event.eligibility).map(([key, value]) => (
+                        <div key={key} className="text-sm">
+                          <span className="text-frost font-medium">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: </span>
+                          <span className="text-frost-muted">{String(value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Rewards */}
                 {selectedEvent.event.rewards && (
                   <div className="card bg-background">
@@ -384,9 +774,28 @@ export default function EventsPage() {
                         </span>
                       ))}
                     </div>
-                    {selectedEvent.event.rewards.backpack_items && (
+                    {selectedEvent.event.rewards.backpack_items && selectedEvent.event.rewards.backpack_items.length > 0 && (
                       <p className="text-xs text-frost-muted mt-2">
                         Backpack: {selectedEvent.event.rewards.backpack_items.join(', ')}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Key Heroes */}
+                {selectedEvent.event.preparation?.key_heroes && selectedEvent.event.preparation.key_heroes.length > 0 && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-2">Key Heroes</h3>
+                    <div className="flex flex-wrap gap-1">
+                      {selectedEvent.event.preparation.key_heroes.map((hero, i) => (
+                        <span key={i} className="px-2 py-1 bg-purple-500/10 text-purple-400 text-xs rounded border border-purple-500/30">
+                          {hero}
+                        </span>
+                      ))}
+                    </div>
+                    {selectedEvent.event.preparation.heroes_needed && selectedEvent.event.preparation.heroes_needed !== 'none' && (
+                      <p className="text-xs text-frost-muted mt-2">
+                        Uses <span className="text-ice">{selectedEvent.event.preparation.heroes_needed}</span> skills
                       </p>
                     )}
                   </div>
@@ -446,27 +855,55 @@ export default function EventsPage() {
                         <p className="text-xs text-frost-muted">{(selectedEvent.event.troop_ratio as TroopRatio).reasoning}</p>
                       </div>
                     )}
+
+                    {/* Alternative ratios (Alliance Championship) */}
+                    {selectedEvent.event.alternative_ratios && (
+                      <div className="mt-3 space-y-1">
+                        <h4 className="text-xs font-semibold text-frost-muted uppercase tracking-wide">Alternative Ratios</h4>
+                        {selectedEvent.event.alternative_ratios.map((alt: any, i: number) => (
+                          <div key={i} className="flex items-center gap-2 text-sm">
+                            <span className="text-ice font-mono font-bold">{alt.ratio}</span>
+                            <span className="text-frost-muted">- {alt.note}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
 
-                {/* Wave Mechanics */}
+                {/* Wave Mechanics (Crazy Joe) */}
                 {selectedEvent.event.wave_mechanics && (
                   <div className="card bg-background">
-                    <h3 className="text-sm font-medium text-frost mb-3">Wave Mechanics</h3>
+                    <h3 className="text-sm font-medium text-frost mb-3">Wave Breakdown</h3>
+
+                    {/* Key waves callout */}
+                    {(selectedEvent.event.wave_mechanics.online_waves || selectedEvent.event.wave_mechanics.high_value_waves) && (
+                      <div className="p-3 rounded-lg bg-amber-500/10 border-2 border-amber-400/50 mb-3">
+                        <div className="text-amber-400 font-bold text-sm mb-1">Key Waves</div>
+                        {selectedEvent.event.wave_mechanics.online_waves && (
+                          <div className="text-frost text-sm">{selectedEvent.event.wave_mechanics.online_waves}</div>
+                        )}
+                        {selectedEvent.event.wave_mechanics.high_value_waves && (
+                          <div className="text-green-400 text-sm mt-1">{selectedEvent.event.wave_mechanics.high_value_waves}</div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Wave list */}
                     <div className="space-y-2">
-                      {Object.entries(selectedEvent.event.wave_mechanics).map(([key, value]) => {
-                        const isHighlight = key.includes('online') || key.includes('high_value');
+                      {['waves_1_9', 'wave_10', 'waves_11_19', 'wave_20', 'wave_21'].map((waveKey) => {
+                        const desc = selectedEvent.event.wave_mechanics?.[waveKey];
+                        if (!desc) return null;
+                        const isHQ = desc.includes('HQ');
                         return (
                           <div
-                            key={key}
-                            className={`p-2 rounded text-sm ${
-                              isHighlight ? 'bg-amber-500/10 border border-amber-500/30' : 'bg-surface'
-                            }`}
+                            key={waveKey}
+                            className={`p-2 rounded text-sm border-l-4 ${isHQ ? 'border-l-red-500 bg-red-500/5' : 'border-l-blue-500 bg-blue-500/5'}`}
                           >
-                            <span className={`font-medium ${isHighlight ? 'text-amber-400' : 'text-frost'}`}>
-                              {key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
+                            <span className="font-medium text-frost">
+                              {waveKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}:
                             </span>{' '}
-                            <span className="text-frost-muted">{value}</span>
+                            <span className="text-frost-muted">{desc}</span>
                           </div>
                         );
                       })}
@@ -474,29 +911,55 @@ export default function EventsPage() {
                   </div>
                 )}
 
+                {/* Battle Mechanics (SvS Battle) */}
+                {selectedEvent.event.mechanics && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-3">Battle Mechanics</h3>
+                    <div className="space-y-2">
+                      {Object.entries(selectedEvent.event.mechanics).map(([key, value]) => (
+                        <div key={key} className="text-sm">
+                          <span className="text-frost font-medium">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: </span>
+                          <span className="text-frost-muted">{String(value)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Intel Strategy Timeline (Flame and Fang) */}
+                {selectedEvent.event.intel_strategy && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-3">Intel Strategy</h3>
+                    <IntelStrategyTimeline intelStrategy={selectedEvent.event.intel_strategy} />
+                  </div>
+                )}
+
+                {/* Spending Priority (Flame and Fang) */}
+                {selectedEvent.event.spending_priority && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-3">Spending Priority</h3>
+                    <SpendingPriority spendingPriority={selectedEvent.event.spending_priority} />
+                  </div>
+                )}
+
                 {/* Phases (SvS Prep days etc.) */}
                 {selectedEvent.event.phases && (
                   <div className="card bg-background">
-                    <h3 className="text-sm font-medium text-frost mb-3">Phase Breakdown</h3>
+                    <h3 className="text-sm font-medium text-frost mb-3">Day-by-Day Breakdown</h3>
                     <div className="space-y-3">
                       {Object.entries(selectedEvent.event.phases).map(([phaseKey, phase]: [string, any]) => (
-                        <details key={phaseKey} className="group">
-                          <summary className="cursor-pointer p-3 rounded-lg bg-surface hover:bg-surface-hover transition-colors flex items-center justify-between">
-                            <div>
-                              <span className="font-medium text-frost">{phase.name || phaseKey}</span>
-                              {phase.focus && <span className="text-xs text-frost-muted ml-2">- {phase.focus}</span>}
-                            </div>
-                            <svg className="w-4 h-4 text-frost-muted group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </summary>
-                          <div className="mt-2 pl-3 space-y-2">
+                        <Expander key={phaseKey} title={phase.name || phaseKey}>
+                          <div className="space-y-3">
+                            {phase.focus && (
+                              <p className="text-sm"><span className="text-frost font-medium">Focus: </span><span className="text-frost-muted">{phase.focus}</span></p>
+                            )}
+
                             {/* Best value tasks */}
                             {phase.best_value_tasks && (
                               <div className="overflow-x-auto">
                                 <table className="w-full text-sm">
                                   <thead>
-                                    <tr className="text-frost-muted border-b border-border">
+                                    <tr className="text-frost-muted border-b border-surface-border">
                                       <th className="text-left py-1 pr-3">Task</th>
                                       <th className="text-right py-1 pr-3">Points</th>
                                       <th className="text-right py-1">Per</th>
@@ -504,9 +967,9 @@ export default function EventsPage() {
                                   </thead>
                                   <tbody className="text-frost">
                                     {phase.best_value_tasks.map((task: any, i: number) => (
-                                      <tr key={i} className="border-b border-border/30">
+                                      <tr key={i} className="border-b border-surface-border/30">
                                         <td className="py-1 pr-3">{task.task}</td>
-                                        <td className="py-1 pr-3 text-right font-medium text-amber">{typeof task.points === 'number' ? task.points.toLocaleString() : task.points}</td>
+                                        <td className="py-1 pr-3 text-right font-medium text-amber-400">{typeof task.points === 'number' ? task.points.toLocaleString() : task.points}</td>
                                         <td className="py-1 text-right text-frost-muted">{task.per}</td>
                                       </tr>
                                     ))}
@@ -528,7 +991,7 @@ export default function EventsPage() {
                                   </div>
                                 )}
                                 {phase.hunting_strategy.auto_hunt_strategy?.important && (
-                                  <p className="text-sm text-amber p-2 rounded bg-amber/10 border border-amber/30">
+                                  <p className="text-sm text-amber-400 p-2 rounded bg-amber-500/10 border border-amber-500/30">
                                     {phase.hunting_strategy.auto_hunt_strategy.important}
                                   </p>
                                 )}
@@ -551,13 +1014,32 @@ export default function EventsPage() {
                             {/* Day 4 efficiency analysis */}
                             {phase.efficiency_analysis && (
                               <div className="space-y-2 mt-2">
-                                <h4 className="text-xs font-semibold text-amber uppercase tracking-wide">Speedup vs Promotion Analysis</h4>
+                                <h4 className="text-xs font-semibold text-amber-400 uppercase tracking-wide">Speedup vs Promotion Analysis</h4>
                                 <p className="text-sm text-frost-muted">{phase.efficiency_analysis.description}</p>
+
+                                {/* Promotion rates */}
+                                {phase.efficiency_analysis.promotion_rates && (
+                                  <div className="space-y-1">
+                                    {Object.entries(phase.efficiency_analysis.promotion_rates).map(([tier, rate]) => (
+                                      <div key={tier} className="flex justify-between text-xs px-2 py-1 rounded bg-surface">
+                                        <span className="text-frost">{tier.replace(/_/g, ' ').toUpperCase()}</span>
+                                        <span className="text-amber-400 font-medium">{String(rate)}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+
+                                {phase.efficiency_analysis.conclusion && (
+                                  <p className="text-sm text-green-400 font-medium p-2 rounded bg-green-500/10 border border-green-500/30">
+                                    {phase.efficiency_analysis.conclusion}
+                                  </p>
+                                )}
+
                                 {phase.efficiency_analysis.optimal_strategy && (
                                   <ul className="space-y-1">
                                     {phase.efficiency_analysis.optimal_strategy.map((step: string, i: number) => (
                                       <li key={i} className="flex items-start gap-2 text-sm text-frost-muted">
-                                        <span className="text-amber mt-0.5">{i+1}.</span>
+                                        <span className="text-amber-400 mt-0.5">{i+1}.</span>
                                         <span>{step}</span>
                                       </li>
                                     ))}
@@ -569,32 +1051,282 @@ export default function EventsPage() {
                             {/* Save for this day */}
                             {phase.save_for_this_day && (
                               <div className="flex flex-wrap gap-1 mt-1">
-                                <span className="text-xs text-fire font-medium">Save:</span>
+                                <span className="text-xs text-red-400 font-medium">Save:</span>
                                 {phase.save_for_this_day.map((item: string, i: number) => (
-                                  <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-fire/10 text-fire/80">{item}</span>
+                                  <span key={i} className="text-xs px-1.5 py-0.5 rounded bg-red-500/10 text-red-400/80">{item}</span>
                                 ))}
                               </div>
                             )}
 
                             {/* Note */}
                             {phase.note && (
-                              <p className="text-xs text-amber mt-1">{phase.note}</p>
+                              <p className="text-xs text-amber-400 mt-1 p-2 rounded bg-amber-500/10">{phase.note}</p>
                             )}
                           </div>
-                        </details>
+                        </Expander>
                       ))}
                     </div>
                   </div>
                 )}
 
+                {/* Daily Stages (Hall of Chiefs, King of Icefield) */}
+                {selectedEvent.event.daily_stages && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-3">Daily Stages</h3>
+                    <DailyStages dailyStages={selectedEvent.event.daily_stages} />
+                  </div>
+                )}
+
+                {/* Victory Points (Alliance Showdown) */}
+                {selectedEvent.event.victory_points && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-3">Victory Points</h3>
+                    <VictoryPoints victoryPoints={selectedEvent.event.victory_points} />
+                  </div>
+                )}
+
+                {/* Star Rating System (Alliance Showdown) */}
+                {selectedEvent.event.star_system && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-3">Star Rating System</h3>
+                    {selectedEvent.event.star_system.description && (
+                      <p className="text-frost-muted text-sm mb-2">{selectedEvent.event.star_system.description}</p>
+                    )}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="text-sm">
+                        <span className="text-green-400 font-medium">Win: </span>
+                        <span className="text-frost-muted">{selectedEvent.event.star_system.win_effect}</span>
+                      </div>
+                      <div className="text-sm">
+                        <span className="text-red-400 font-medium">Lose: </span>
+                        <span className="text-frost-muted">{selectedEvent.event.star_system.loss_effect}</span>
+                      </div>
+                    </div>
+                    {selectedEvent.event.star_system.star_rewards && (
+                      <p className="text-sm text-amber-400 mt-2">Rewards: {selectedEvent.event.star_system.star_rewards}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* Tundra Trade Route (Alliance Showdown companion) */}
+                {selectedEvent.event.tundra_trade_route && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-2">Tundra Trade Route (Concurrent Event)</h3>
+                    {selectedEvent.event.tundra_trade_route.description && (
+                      <p className="text-frost-muted text-sm mb-2">{selectedEvent.event.tundra_trade_route.description}</p>
+                    )}
+                    {selectedEvent.event.tundra_trade_route.tips && (
+                      <ul className="space-y-1">
+                        {selectedEvent.event.tundra_trade_route.tips.map((tip: string, i: number) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-frost-muted">
+                            <span className="text-ice mt-0.5">-</span>
+                            <span>{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {/* Medal System (King of Icefield) */}
+                {selectedEvent.event.medal_system && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-2">Medal System</h3>
+                    {selectedEvent.event.medal_system.description && (
+                      <p className="text-frost-muted text-sm mb-2">{selectedEvent.event.medal_system.description}</p>
+                    )}
+                    <div className="space-y-1 text-sm">
+                      <p><span className="text-frost font-medium">Medals per day: </span><span className="text-amber-400">{selectedEvent.event.medal_system.medals_per_day}</span></p>
+                      <p><span className="text-frost font-medium">Medal Shop: </span><span className="text-frost-muted">{selectedEvent.event.medal_system.medal_shop}</span></p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Ranking Tiers (King of Icefield) */}
+                {selectedEvent.event.ranking_tiers && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-2">Rankings</h3>
+                    <div className="space-y-1 text-sm">
+                      {Object.entries(selectedEvent.event.ranking_tiers).map(([key, value]) => (
+                        <p key={key}>
+                          <span className="text-frost font-medium">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: </span>
+                          <span className="text-frost-muted">{String(value)}</span>
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Scoring (Foundry Battle, Hall of Chiefs, King of Icefield) */}
+                {selectedEvent.event.scoring && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-3">Scoring</h3>
+                    <ScoringSection scoring={selectedEvent.event.scoring} />
+                  </div>
+                )}
+
+                {/* Phase Strategy (Canyon Clash, Foundry Battle) */}
+                {selectedEvent.event.phase_strategy && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-3">Phase Strategy</h3>
+                    <div className="space-y-2">
+                      {Object.entries(selectedEvent.event.phase_strategy).map(([phaseKey, phaseDesc]) => {
+                        const isCritical = String(phaseDesc).toUpperCase().includes('CITADEL') || String(phaseDesc).toUpperCase().includes('FOUNDRY') || String(phaseDesc).toUpperCase().includes('IMPERIAL');
+                        return (
+                          <div
+                            key={phaseKey}
+                            className={`p-3 rounded text-sm border-l-4 ${isCritical ? 'border-l-amber-400 bg-amber-500/5' : 'border-l-blue-500 bg-blue-500/5'}`}
+                          >
+                            <span className="text-frost font-bold">
+                              {phaseKey.replace(/_/g, ' ').replace(/\bphase\b/gi, 'Phase').replace(/\b\w/g, l => l.toUpperCase())}:
+                            </span>{' '}
+                            <span className="text-frost-muted">{String(phaseDesc)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Fuel Management (Canyon Clash) */}
+                {selectedEvent.event.fuel_management && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-3">Fuel Management</h3>
+                    {selectedEvent.event.fuel_management.critical_rule && (
+                      <div className="p-3 rounded bg-amber-500/10 border-2 border-amber-400/50 mb-3">
+                        <span className="text-amber-400 font-bold">CRITICAL: </span>
+                        <span className="text-frost">{selectedEvent.event.fuel_management.critical_rule}</span>
+                      </div>
+                    )}
+                    {selectedEvent.event.fuel_management.tips && (
+                      <ul className="space-y-1">
+                        {selectedEvent.event.fuel_management.tips.map((tip: string, i: number) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-frost-muted">
+                            <span className="text-ice mt-0.5">-</span>
+                            <span>{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {/* Structure (Mercenary Prestige) */}
+                {selectedEvent.event.structure && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-3">Event Structure</h3>
+                    <div className="space-y-3">
+                      {selectedEvent.event.structure.personal_challenge && (
+                        <div className="p-3 rounded bg-blue-500/5 border-l-4 border-l-blue-500">
+                          <div className="text-blue-400 font-medium text-sm mb-1">Personal Challenge</div>
+                          <div className="space-y-1 text-sm text-frost-muted">
+                            {Object.entries(selectedEvent.event.structure.personal_challenge).map(([key, value]) => (
+                              <p key={key}>
+                                <span className="text-frost font-medium">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: </span>
+                                {String(value)}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {selectedEvent.event.structure.alliance_challenge && (
+                        <div className="p-3 rounded bg-purple-500/5 border-l-4 border-l-purple-500">
+                          <div className="text-purple-400 font-medium text-sm mb-1">
+                            {selectedEvent.event.structure.alliance_challenge.name || 'Alliance Challenge'}
+                          </div>
+                          <div className="space-y-1 text-sm text-frost-muted">
+                            {Object.entries(selectedEvent.event.structure.alliance_challenge).filter(([k]) => k !== 'name').map(([key, value]) => (
+                              <p key={key}>
+                                <span className="text-frost font-medium">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: </span>
+                                {String(value)}
+                              </p>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Stamina Costs (Mercenary Prestige) */}
+                {selectedEvent.event.stamina_costs && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-2">Stamina Costs</h3>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                      {Object.entries(selectedEvent.event.stamina_costs).map(([key, value]) => (
+                        <div key={key} className="p-2 rounded bg-surface">
+                          <span className="text-frost-muted text-xs">{key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}</span>
+                          <div className="text-frost font-medium">{String(value)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Zones (Labyrinth) */}
+                {selectedEvent.event.zones && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-2">Zones</h3>
+                    <div className="flex flex-wrap gap-1">
+                      {selectedEvent.event.zones.map((zone: string, i: number) => (
+                        <span key={i} className="px-2 py-1 bg-purple-500/10 text-purple-300 text-xs rounded border border-purple-500/20">
+                          {zone}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Stat Bonuses (Tundra Album) */}
+                {selectedEvent.event.stat_bonuses && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-2">Stat Bonuses</h3>
+                    {selectedEvent.event.stat_bonuses.types && (
+                      <div className="flex flex-wrap gap-1 mb-2">
+                        {selectedEvent.event.stat_bonuses.types.map((type: string, i: number) => (
+                          <span key={i} className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded">
+                            {type}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    {selectedEvent.event.stat_bonuses.note && (
+                      <p className="text-frost-muted text-xs">{selectedEvent.event.stat_bonuses.note}</p>
+                    )}
+                  </div>
+                )}
+
+                {/* F2P Strategy */}
+                {selectedEvent.event.f2p_strategy && (
+                  <div className="card bg-background">
+                    <h3 className="text-sm font-medium text-frost mb-2">F2P Strategy</h3>
+                    {selectedEvent.event.f2p_strategy.focus_stages && (
+                      <p className="text-sm mb-2">
+                        <span className="text-frost font-medium">Focus on: </span>
+                        <span className="text-green-400">{selectedEvent.event.f2p_strategy.focus_stages.join(', ')}</span>
+                      </p>
+                    )}
+                    {selectedEvent.event.f2p_strategy.tips && (
+                      <ul className="space-y-1">
+                        {selectedEvent.event.f2p_strategy.tips.map((tip: string, i: number) => (
+                          <li key={i} className="flex items-start gap-2 text-sm text-frost-muted">
+                            <span className="text-green-400 mt-0.5">-</span>
+                            <span>{tip}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
                 {/* Preparation Tips */}
-                {selectedEvent.event.preparation?.tips && (
+                {selectedEvent.event.preparation?.tips && selectedEvent.event.preparation.tips.length > 0 && (
                   <div className="card bg-background">
                     <h3 className="text-sm font-medium text-frost mb-2">Tips</h3>
                     <ul className="space-y-1">
                       {selectedEvent.event.preparation.tips.map((tip, i) => (
                         <li key={i} className="flex items-start gap-2 text-sm text-frost-muted">
-                          <span className="text-ice mt-0.5">•</span>
+                          <span className="text-ice mt-0.5">-</span>
                           <span>{tip}</span>
                         </li>
                       ))}
@@ -603,9 +1335,9 @@ export default function EventsPage() {
                 )}
 
                 {/* What to Save */}
-                {selectedEvent.event.preparation?.save_before && (
-                  <div className="p-3 rounded-lg bg-fire/10 border border-fire/30">
-                    <span className="text-fire font-medium text-sm">Save Before: </span>
+                {selectedEvent.event.preparation?.save_before && selectedEvent.event.preparation.save_before.length > 0 && (
+                  <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                    <span className="text-red-400 font-medium text-sm">Save Before: </span>
                     <span className="text-frost-muted text-sm">
                       {selectedEvent.event.preparation.save_before.join(', ')}
                     </span>

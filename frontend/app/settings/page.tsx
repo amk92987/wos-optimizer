@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import PageLayout from '@/components/PageLayout';
 import Expander from '@/components/Expander';
 import { useAuth } from '@/lib/auth';
-import { profileApi, Profile } from '@/lib/api';
+import { api, profileApi, heroesApi, Profile } from '@/lib/api';
 
 const GEN_SERVER_DAYS: Record<number, { min: number; max: number | null }> = {
   1:  { min: 0,    max: 40 },
@@ -23,6 +24,14 @@ const GEN_SERVER_DAYS: Record<number, { min: number; max: number | null }> = {
   14: { min: 1000, max: null },
 };
 
+const MILESTONE_UNLOCKS = [
+  { furnace: 9, label: 'F9 Research' },
+  { furnace: 18, label: 'F18 Pets' },
+  { furnace: 19, label: 'F19 Daybreak' },
+  { furnace: 25, label: 'F25 Charms' },
+  { furnace: 30, label: 'F30 FC' },
+];
+
 function estimateGenFromDays(days: number): number {
   for (let gen = 14; gen >= 1; gen--) {
     if (days >= GEN_SERVER_DAYS[gen].min) return gen;
@@ -30,12 +39,149 @@ function estimateGenFromDays(days: number): number {
   return 1;
 }
 
-export default function SettingsPage() {
+function getGamePhase(furnaceLevel: number, fcLevel: string | null): {
+  id: string; name: string; focus: string; color: string;
+} {
+  if (furnaceLevel < 19) {
+    return { id: 'early_game', name: 'Early Game', focus: 'Rush to F19 for Daybreak Island', color: 'blue' };
+  }
+  if (furnaceLevel < 30) {
+    return { id: 'mid_game', name: 'Mid Game', focus: 'Rush to F30 for FC', color: 'green' };
+  }
+  // FC5+ = endgame
+  if (fcLevel) {
+    const match = fcLevel.match(/^FC(\d+)/);
+    if (match && parseInt(match[1]) >= 5) {
+      return { id: 'endgame', name: 'Endgame', focus: 'FC10 completion', color: 'purple' };
+    }
+  }
+  return { id: 'late_game', name: 'Late Game', focus: 'FC progression', color: 'orange' };
+}
+
+function getEffectiveFurnaceLevel(profile: Profile): number {
+  if (profile.furnace_fc_level) {
+    return 30;
+  }
+  return profile.furnace_level;
+}
+
+function getDaysUntilNextGen(serverAgeDays: number): { daysLeft: number; nextGen: number } | null {
+  const currentGen = estimateGenFromDays(serverAgeDays);
+  if (currentGen >= 14) return null;
+  const nextGen = currentGen + 1;
+  const nextMin = GEN_SERVER_DAYS[nextGen].min;
+  return { daysLeft: nextMin - serverAgeDays, nextGen };
+}
+
+const PHASE_COLORS: Record<string, { bg: string; border: string; text: string }> = {
+  blue:   { bg: 'bg-blue-500/15',   border: 'border-blue-500/40',   text: 'text-blue-400' },
+  green:  { bg: 'bg-green-500/15',  border: 'border-green-500/40',  text: 'text-green-400' },
+  orange: { bg: 'bg-amber-500/15',  border: 'border-amber-500/40',  text: 'text-amber-400' },
+  purple: { bg: 'bg-purple-500/15', border: 'border-purple-500/40', text: 'text-purple-400' },
+};
+
+function SettingsContent() {
   const { token, user } = useAuth();
+  const searchParams = useSearchParams();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [currentGen, setCurrentGen] = useState(1);
+  const [useManualDays, setUseManualDays] = useState(false);
+  const [manualDays, setManualDays] = useState<number | null>(null);
+  const [confirmClearHeroes, setConfirmClearHeroes] = useState(false);
+  const [clearingHeroes, setClearingHeroes] = useState(false);
+  const [resetMessage, setResetMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  // Security section state
+  const securityRef = useRef<HTMLDivElement>(null);
+  const tabParam = searchParams.get('tab');
+  const [securityOpen, setSecurityOpen] = useState(tabParam === 'password' || tabParam === 'email');
+
+  // Password change
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordSuccess, setPasswordSuccess] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
+  // Email change
+  const [newEmail, setNewEmail] = useState('');
+  const [emailPassword, setEmailPassword] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [emailSuccess, setEmailSuccess] = useState('');
+  const [emailLoading, setEmailLoading] = useState(false);
+
+  // Auto-scroll to security section when tab param present
+  useEffect(() => {
+    if ((tabParam === 'password' || tabParam === 'email') && securityRef.current) {
+      setSecurityOpen(true);
+      setTimeout(() => {
+        securityRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    }
+  }, [tabParam]);
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordError('');
+    setPasswordSuccess('');
+
+    if (newPassword.length < 8) {
+      setPasswordError('New password must be at least 8 characters.');
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setPasswordError('New passwords do not match.');
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      await api('/api/auth/change-password', {
+        method: 'PUT',
+        body: { current_password: currentPassword, new_password: newPassword },
+        token: token || undefined,
+      });
+      setPasswordSuccess('Password changed successfully.');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+    } catch (err: any) {
+      setPasswordError(err.message || 'Failed to change password.');
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
+  const handleEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setEmailError('');
+    setEmailSuccess('');
+
+    if (!newEmail) {
+      setEmailError('Please enter a new email address.');
+      return;
+    }
+
+    setEmailLoading(true);
+    try {
+      await api('/api/auth/change-email', {
+        method: 'POST',
+        body: { new_email: newEmail, password: emailPassword },
+        token: token || undefined,
+      });
+      setEmailSuccess('Verification email sent to your new address. Please check your inbox to confirm the change.');
+      setNewEmail('');
+      setEmailPassword('');
+    } catch (err: any) {
+      setEmailError(err.message || 'Failed to initiate email change.');
+    } finally {
+      setEmailLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (token) {
@@ -104,6 +250,15 @@ export default function SettingsPage() {
     );
   }
 
+  const effectiveFurnace = profile ? getEffectiveFurnaceLevel(profile) : 1;
+  const phase = profile ? getGamePhase(profile.furnace_level, profile.furnace_fc_level) : null;
+  const phaseStyle = phase ? PHASE_COLORS[phase.color] : null;
+  const serverDays = useManualDays && manualDays !== null ? manualDays : profile?.server_age_days || 0;
+  const nextGenInfo = getDaysUntilNextGen(serverDays);
+  const furnaceDisplay = profile?.furnace_fc_level || `Lv.${profile?.furnace_level || 1}`;
+  const stateDisplay = profile?.state_number ? `State ${profile.state_number}` : 'State N/A';
+  const chiefName = profile?.name || 'Chief';
+
   return (
     <PageLayout>
       <div className="max-w-3xl mx-auto animate-fadeIn">
@@ -112,6 +267,19 @@ export default function SettingsPage() {
           <h1 className="text-3xl font-bold text-zinc-100">Settings</h1>
           <p className="text-zinc-400 mt-2">Configure your profile and priorities</p>
         </div>
+
+        {/* Feature 6: Profile Summary Banner */}
+        {profile && (
+          <div className="mb-6 p-3 rounded-lg bg-frost/10 border border-frost/20 flex items-center gap-3 text-sm">
+            <span className="text-frost font-semibold">{chiefName}</span>
+            <span className="text-zinc-500">|</span>
+            <span className="text-zinc-300">{stateDisplay}</span>
+            <span className="text-zinc-500">|</span>
+            <span className="text-zinc-300">{furnaceDisplay}</span>
+            <span className="text-zinc-500">|</span>
+            <span className="text-zinc-300">Day {serverDays}</span>
+          </div>
+        )}
 
         {/* Account Info */}
         <div className="card mb-6">
@@ -149,11 +317,12 @@ export default function SettingsPage() {
                 onChange={(e) => {
                   const gen = parseInt(e.target.value);
                   setCurrentGen(gen);
-                  const range = GEN_SERVER_DAYS[gen];
-                  if (range) {
-                    // Save midpoint as server age estimate
-                    const midpoint = range.max ? Math.round((range.min + range.max) / 2) : range.min;
-                    handleSave({ server_age_days: midpoint });
+                  if (!useManualDays) {
+                    const range = GEN_SERVER_DAYS[gen];
+                    if (range) {
+                      const midpoint = range.max ? Math.round((range.min + range.max) / 2) : range.min;
+                      handleSave({ server_age_days: midpoint });
+                    }
                   }
                 }}
                 className="select"
@@ -171,6 +340,60 @@ export default function SettingsPage() {
                   return range.max ? `${range.min}-${range.max} days` : `${range.min}+ days`;
                 })()}
               </p>
+
+              {/* Feature 4: Manual Day Count Override */}
+              <label className="flex items-center gap-2 mt-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={useManualDays}
+                  onChange={(e) => {
+                    setUseManualDays(e.target.checked);
+                    if (!e.target.checked && profile) {
+                      // Revert to generation midpoint estimate
+                      const range = GEN_SERVER_DAYS[currentGen];
+                      if (range) {
+                        const midpoint = range.max ? Math.round((range.min + range.max) / 2) : range.min;
+                        setManualDays(null);
+                        handleSave({ server_age_days: midpoint });
+                      }
+                    } else if (e.target.checked && profile) {
+                      setManualDays(profile.server_age_days);
+                    }
+                  }}
+                  className="rounded border-zinc-600 bg-surface text-frost focus:ring-frost/50"
+                />
+                <span className="text-xs text-zinc-400">Enter exact day count</span>
+              </label>
+              {useManualDays && (
+                <div className="mt-2">
+                  <input
+                    type="number"
+                    min={0}
+                    max={2000}
+                    value={manualDays ?? profile?.server_age_days ?? 0}
+                    onChange={(e) => {
+                      const days = parseInt(e.target.value) || 0;
+                      setManualDays(days);
+                      setCurrentGen(estimateGenFromDays(days));
+                      handleSave({ server_age_days: days });
+                    }}
+                    className="input"
+                    placeholder="Days since server started"
+                  />
+                  <p className="text-xs text-frost-muted mt-1">Precise server age in days</p>
+                </div>
+              )}
+
+              {/* Feature 3: Days Until Next Generation */}
+              {nextGenInfo ? (
+                <p className="text-xs text-amber mt-2">
+                  {nextGenInfo.daysLeft} days until Gen {nextGenInfo.nextGen}
+                </p>
+              ) : (
+                <p className="text-xs text-purple-400 mt-2">
+                  Latest generation reached
+                </p>
+              )}
             </div>
             <div>
               <label className="text-sm text-zinc-400 block mb-2">State Number</label>
@@ -225,6 +448,33 @@ export default function SettingsPage() {
               <p className="text-xs text-frost-muted mt-1">
                 Levels 30 and FC have sub-steps (30-1, 30-2, 30-3, then FC1, FC1-1, etc.)
               </p>
+
+              {/* Feature 1: Game Phase Indicator */}
+              {phase && phaseStyle && (
+                <div className={`mt-3 px-3 py-2 rounded-lg border-l-4 ${phaseStyle.bg} ${phaseStyle.border}`}>
+                  <span className={`font-semibold text-sm ${phaseStyle.text}`}>{phase.name}</span>
+                  <span className="text-xs text-zinc-400 ml-2">{phase.focus}</span>
+                </div>
+              )}
+
+              {/* Feature 2: Key Milestone Unlocks */}
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {MILESTONE_UNLOCKS.map((m) => {
+                  const unlocked = effectiveFurnace >= m.furnace;
+                  return (
+                    <span
+                      key={m.furnace}
+                      className={`text-xs px-2 py-0.5 rounded-full border ${
+                        unlocked
+                          ? 'bg-green-500/15 border-green-500/30 text-green-400'
+                          : 'bg-zinc-800/50 border-zinc-700/50 text-zinc-500'
+                      }`}
+                    >
+                      {unlocked ? '\u2713' : '\u2022'} {m.label}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </Expander>
@@ -344,6 +594,249 @@ export default function SettingsPage() {
           </div>
         </Expander>
 
+        {/* Security */}
+        <div ref={securityRef}>
+          <Expander
+            title={
+              <div>
+                <h2 className="text-lg font-semibold text-zinc-100">Security</h2>
+                <p className="text-sm text-zinc-500">Change password or email</p>
+              </div>
+            }
+            defaultOpen={securityOpen}
+            className="mb-4"
+          >
+            <div className="space-y-8">
+              {/* Password Change */}
+              <div>
+                <h3 className="text-base font-medium text-zinc-200 mb-4">Change Password</h3>
+
+                {passwordSuccess && (
+                  <div className="mb-4 p-3 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400 text-sm">
+                    {passwordSuccess}
+                  </div>
+                )}
+                {passwordError && (
+                  <div className="mb-4 p-3 rounded-lg bg-error/20 border border-error/30 text-error text-sm">
+                    {passwordError}
+                  </div>
+                )}
+
+                <form onSubmit={handlePasswordChange} className="space-y-3">
+                  <div>
+                    <label className="text-sm text-zinc-400 block mb-1">Current Password</label>
+                    <input
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="input"
+                      placeholder="Enter current password"
+                      required
+                      autoComplete="current-password"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-zinc-400 block mb-1">New Password</label>
+                    <input
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="input"
+                      placeholder="At least 8 characters"
+                      required
+                      minLength={8}
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-zinc-400 block mb-1">Confirm New Password</label>
+                    <input
+                      type="password"
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      className="input"
+                      placeholder="Re-enter new password"
+                      required
+                      minLength={8}
+                      autoComplete="new-password"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={passwordLoading}
+                    className="btn-primary py-2 px-4"
+                  >
+                    {passwordLoading ? 'Changing...' : 'Change Password'}
+                  </button>
+                </form>
+              </div>
+
+              {/* Divider */}
+              <div className="border-t border-border"></div>
+
+              {/* Email Change */}
+              <div>
+                <h3 className="text-base font-medium text-zinc-200 mb-4">Change Email</h3>
+
+                {emailSuccess && (
+                  <div className="mb-4 p-3 rounded-lg bg-green-500/20 border border-green-500/30 text-green-400 text-sm">
+                    {emailSuccess}
+                  </div>
+                )}
+                {emailError && (
+                  <div className="mb-4 p-3 rounded-lg bg-error/20 border border-error/30 text-error text-sm">
+                    {emailError}
+                  </div>
+                )}
+
+                <form onSubmit={handleEmailChange} className="space-y-3">
+                  <div>
+                    <label className="text-sm text-zinc-400 block mb-1">New Email Address</label>
+                    <input
+                      type="email"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      className="input"
+                      placeholder="new@email.com"
+                      required
+                      autoComplete="email"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm text-zinc-400 block mb-1">Current Password</label>
+                    <input
+                      type="password"
+                      value={emailPassword}
+                      onChange={(e) => setEmailPassword(e.target.value)}
+                      className="input"
+                      placeholder="Confirm with your password"
+                      required
+                      autoComplete="current-password"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={emailLoading}
+                    className="btn-primary py-2 px-4"
+                  >
+                    {emailLoading ? 'Sending...' : 'Change Email'}
+                  </button>
+                  <p className="text-xs text-zinc-500 mt-1">
+                    A verification email will be sent to your new address. The change takes effect after you confirm.
+                  </p>
+                </form>
+              </div>
+            </div>
+          </Expander>
+        </div>
+
+        {/* Feature 5: Reset Options */}
+        <Expander
+          title={
+            <div>
+              <h2 className="text-lg font-semibold text-zinc-100">Reset Options</h2>
+              <p className="text-sm text-zinc-500">Reset priorities or clear hero data</p>
+            </div>
+          }
+          className="mb-4"
+        >
+          <div className="space-y-4">
+            {/* Status message */}
+            {resetMessage && (
+              <div className={`p-3 rounded-lg text-sm ${
+                resetMessage.type === 'success'
+                  ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                  : 'bg-error/20 border border-error/30 text-error'
+              }`}>
+                {resetMessage.text}
+              </div>
+            )}
+
+            {/* Reset Priorities */}
+            <div className="p-4 rounded-lg bg-surface border border-border">
+              <h3 className="text-sm font-medium text-zinc-200 mb-2">Reset Priorities to Default</h3>
+              <p className="text-xs text-zinc-500 mb-3">
+                Sets all 5 combat priorities back to 3, spending to F2P, focus to Balanced Growth, and role to Filler.
+              </p>
+              <button
+                onClick={async () => {
+                  setResetMessage(null);
+                  try {
+                    await handleSave({
+                      priority_svs: 3,
+                      priority_rally: 3,
+                      priority_castle_battle: 3,
+                      priority_exploration: 3,
+                      priority_gathering: 3,
+                    });
+                    setResetMessage({ type: 'success', text: 'Priorities reset to defaults.' });
+                  } catch {
+                    setResetMessage({ type: 'error', text: 'Failed to reset priorities.' });
+                  }
+                }}
+                className="btn-primary py-2 px-4 text-sm"
+              >
+                Reset Priorities
+              </button>
+            </div>
+
+            {/* Clear All Hero Data */}
+            <div className="p-4 rounded-lg bg-surface border border-error/20">
+              <h3 className="text-sm font-medium text-zinc-200 mb-2">Clear All Hero Data</h3>
+              <p className="text-xs text-zinc-500 mb-3">
+                This will permanently delete all your saved heroes and their gear data. This cannot be undone.
+              </p>
+              {!confirmClearHeroes ? (
+                <button
+                  onClick={() => setConfirmClearHeroes(true)}
+                  className="py-2 px-4 text-sm rounded-lg bg-error/20 border border-error/30 text-error hover:bg-error/30 transition-colors"
+                >
+                  Clear All Hero Data
+                </button>
+              ) : (
+                <div className="space-y-2">
+                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs">
+                    Are you sure? This will delete ALL your saved heroes!
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      disabled={clearingHeroes}
+                      onClick={async () => {
+                        if (!token) return;
+                        setClearingHeroes(true);
+                        setResetMessage(null);
+                        try {
+                          // Get all owned heroes and delete each
+                          const data = await heroesApi.getOwned(token);
+                          const heroes = data.heroes || [];
+                          for (const hero of heroes) {
+                            await heroesApi.removeHero(token, hero.name);
+                          }
+                          setConfirmClearHeroes(false);
+                          setResetMessage({ type: 'success', text: `Cleared ${heroes.length} heroes.` });
+                        } catch {
+                          setResetMessage({ type: 'error', text: 'Failed to clear hero data.' });
+                        } finally {
+                          setClearingHeroes(false);
+                        }
+                      }}
+                      className="py-2 px-4 text-sm rounded-lg bg-error text-white hover:bg-error/80 transition-colors disabled:opacity-50"
+                    >
+                      {clearingHeroes ? 'Clearing...' : 'Yes, Clear Everything'}
+                    </button>
+                    <button
+                      onClick={() => setConfirmClearHeroes(false)}
+                      className="py-2 px-4 text-sm rounded-lg bg-surface border border-border text-zinc-400 hover:text-zinc-100 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </Expander>
+
         {/* Saving indicator */}
         {isSaving && (
           <div className="fixed bottom-4 right-4 bg-surface border border-border px-4 py-2 rounded-lg shadow-lg">
@@ -352,5 +845,13 @@ export default function SettingsPage() {
         )}
       </div>
     </PageLayout>
+  );
+}
+
+export default function SettingsPage() {
+  return (
+    <Suspense>
+      <SettingsContent />
+    </Suspense>
   );
 }

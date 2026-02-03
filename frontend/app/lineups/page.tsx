@@ -64,7 +64,7 @@ const eventTypes: EventType[] = [
   { id: 'rally_defense', name: 'Garrison Support', icon: '🛡️' },
 ];
 
-type TabType = 'optimal' | 'joiner' | 'reference';
+type TabType = 'optimal' | 'joiner' | 'exploration' | 'reference';
 
 export default function LineupsPage() {
   const { token, user } = useAuth();
@@ -187,6 +187,22 @@ export default function LineupsPage() {
           )}
         </div>
 
+        {/* Default Troop Ratio Callout */}
+        <div className="card mb-6 border-fire/30 bg-fire/10">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">📊</span>
+            <div>
+              <p className="text-frost font-bold">Default Troop Ratio: 50/20/30 (Infantry/Lancer/Marksman)</p>
+              <p className="text-sm text-frost-muted mt-1">
+                This works for most situations. See event-specific recommendations below for optimal ratios.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* PvE vs PvP Expandable */}
+        <PvePvpExplanation />
+
         {/* Login prompt for personalized recommendations */}
         {!token && (
           <div className="card mb-6 border-ice/30 bg-ice/5">
@@ -207,6 +223,7 @@ export default function LineupsPage() {
           {[
             { id: 'optimal' as const, label: 'Optimal Lineups' },
             { id: 'joiner' as const, label: 'Rally Joiner Guide' },
+            { id: 'exploration' as const, label: 'Exploration' },
             { id: 'reference' as const, label: 'Quick Reference' },
           ].map((tab) => (
             <button
@@ -242,9 +259,59 @@ export default function LineupsPage() {
             joinerDefense={joinerDefense}
           />
         )}
+        {activeTab === 'exploration' && <ExplorationTab />}
         {activeTab === 'reference' && <ReferenceTab templates={templates} />}
       </div>
     </PageLayout>
+  );
+}
+
+function PvePvpExplanation() {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="card mb-6">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="flex items-center justify-between w-full text-left"
+      >
+        <h2 className="text-sm font-medium text-ice">Understanding PvE vs PvP Content</h2>
+        <span className="text-frost-muted text-sm">{expanded ? '▼' : '▶'}</span>
+      </button>
+      {expanded && (
+        <div className="mt-4 space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="p-4 rounded-lg bg-success/10 border border-success/20">
+              <h3 className="font-medium text-success mb-2">PvE - Exploration Skills (Left Side)</h3>
+              <p className="text-sm text-frost-muted mb-2">Fighting against the game:</p>
+              <ul className="text-sm text-frost-muted space-y-1">
+                <li>- Bear Trap, Crazy Joe</li>
+                <li>- Labyrinth, Exploration</li>
+                <li>- Uses left-side skills on hero card</li>
+                <li>- Upgraded with Exploration Manuals</li>
+              </ul>
+            </div>
+            <div className="p-4 rounded-lg bg-fire/10 border border-fire/20">
+              <h3 className="font-medium text-fire mb-2">PvP - Expedition Skills (Right Side)</h3>
+              <p className="text-sm text-frost-muted mb-2">Fighting other players:</p>
+              <ul className="text-sm text-frost-muted space-y-1">
+                <li>- Rally Leader/Joiner, Garrison</li>
+                <li>- SvS, Arena, Brothers in Arms</li>
+                <li>- Uses right-side skills on hero card</li>
+                <li>- Upgraded with Expedition Manuals</li>
+              </ul>
+            </div>
+          </div>
+          <div className="p-3 rounded-lg bg-ice/10 border border-ice/20">
+            <p className="text-sm text-frost">
+              <strong>Why this matters:</strong> A hero with S-tier exploration skills might only be B-tier for expedition content (and vice versa).
+              Always check which skill type is used for the content you are building a lineup for. Lineup composition differs because
+              PvE fights are against predictable AI patterns, while PvP fights require countering real player strategies.
+            </p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -268,6 +335,56 @@ function OptimalLineupsTab({
   const [showExplanation, setShowExplanation] = useState(false);
 
   const troopRatio = lineup?.troop_ratio || template?.troop_ratio || { infantry: 50, lancer: 20, marksman: 30 };
+
+  // Build personalized explanation text based on user's actual heroes
+  const getPersonalizedExplanations = (): { heroLines: Array<{ name: string; text: string }>; ratioText: string | null } => {
+    const heroLines: Array<{ name: string; text: string }> = [];
+    const templateExplanations = template?.hero_explanations || {};
+
+    if (isPersonalized && lineup?.heroes && lineup.heroes.length > 0) {
+      // Show explanations mentioning the user's actual heroes by name and level
+      for (const hero of lineup.heroes) {
+        const templateExp = templateExplanations[hero.hero];
+        if (templateExp) {
+          const statusNote = hero.status ? ` (${hero.status})` : '';
+          heroLines.push({
+            name: hero.hero,
+            text: `${templateExp}${statusNote}`,
+          });
+        } else {
+          // Generate a contextual explanation from available data
+          const roleNote = hero.is_lead ? 'Your lead hero for this event.' : `${hero.hero_class} slot.`;
+          const statusNote = hero.status ? ` Currently ${hero.status}.` : '';
+          heroLines.push({
+            name: hero.hero,
+            text: `${roleNote}${statusNote} ${hero.hero_class === 'Infantry' ? 'Provides frontline durability.' : hero.hero_class === 'Lancer' ? 'Provides healing and support.' : 'Provides ranged damage output.'}`,
+          });
+        }
+      }
+
+      // Check if any template key heroes are NOT in the user's lineup (potential upgrades)
+      const userHeroNames = new Set(lineup.heroes.map(h => h.hero));
+      const keyHeroes = template?.key_heroes || [];
+      for (const keyHero of keyHeroes) {
+        if (!userHeroNames.has(keyHero) && templateExplanations[keyHero]) {
+          heroLines.push({
+            name: keyHero,
+            text: `(Not in your lineup) ${templateExplanations[keyHero]}. Consider unlocking or leveling this hero.`,
+          });
+        }
+      }
+    } else {
+      // Not personalized - show general template explanations
+      for (const [hero, explanation] of Object.entries(templateExplanations)) {
+        heroLines.push({ name: hero, text: explanation });
+      }
+    }
+
+    return {
+      heroLines,
+      ratioText: template?.ratio_explanation || null,
+    };
+  };
 
   return (
     <>
@@ -399,8 +516,8 @@ function OptimalLineupsTab({
           <p className="text-sm text-frost">💡 {lineup?.notes || template?.notes || 'Select an event to see recommendations.'}</p>
         </div>
 
-        {/* Why This Lineup - Expandable */}
-        {template?.hero_explanations && Object.keys(template.hero_explanations).length > 0 && (
+        {/* Why This Lineup - Expandable with personalized explanations */}
+        {(template?.hero_explanations && Object.keys(template.hero_explanations).length > 0) || (isPersonalized && lineup?.heroes && lineup.heroes.length > 0) ? (
           <div className="mt-4">
             <button
               onClick={() => setShowExplanation(!showExplanation)}
@@ -409,26 +526,32 @@ function OptimalLineupsTab({
               <span>{showExplanation ? '▼' : '▶'}</span>
               Why This Lineup?
             </button>
-            {showExplanation && (
-              <div className="mt-3 p-4 rounded-lg bg-surface">
-                <h4 className="text-sm font-medium text-frost mb-2">Hero Explanations</h4>
-                <ul className="space-y-2 text-sm text-frost-muted">
-                  {Object.entries(template.hero_explanations).map(([hero, explanation]) => (
-                    <li key={hero}>
-                      <strong className="text-frost">{hero}:</strong> {explanation}
-                    </li>
-                  ))}
-                </ul>
-                {template.ratio_explanation && (
-                  <>
-                    <h4 className="text-sm font-medium text-frost mt-4 mb-2">Troop Ratio</h4>
-                    <p className="text-sm text-frost-muted">{template.ratio_explanation}</p>
-                  </>
-                )}
-              </div>
-            )}
+            {showExplanation && (() => {
+              const { heroLines, ratioText } = getPersonalizedExplanations();
+              return (
+                <div className="mt-3 p-4 rounded-lg bg-surface">
+                  {isPersonalized && lineup?.heroes && lineup.heroes.length > 0 && (
+                    <p className="text-xs text-ice mb-3">Personalized based on your hero roster</p>
+                  )}
+                  <h4 className="text-sm font-medium text-frost mb-2">Hero Explanations</h4>
+                  <ul className="space-y-2 text-sm text-frost-muted">
+                    {heroLines.map((line) => (
+                      <li key={line.name}>
+                        <strong className="text-frost">{line.name}:</strong> {line.text}
+                      </li>
+                    ))}
+                  </ul>
+                  {ratioText && (
+                    <>
+                      <h4 className="text-sm font-medium text-frost mt-4 mb-2">Troop Ratio</h4>
+                      <p className="text-sm text-frost-muted">{ratioText}</p>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
           </div>
-        )}
+        ) : null}
 
         {/* Recommended to Get */}
         {lineup?.recommended_to_get && lineup.recommended_to_get.length > 0 && (
@@ -620,6 +743,143 @@ function RallyJoinerGuideTab({
   );
 }
 
+function ExplorationTab() {
+  return (
+    <div className="space-y-6">
+      <div className="card">
+        <h2 className="section-header">Exploration (5-Hero PvE Lineup)</h2>
+        <p className="text-sm text-frost-muted mb-4">
+          Exploration is the <strong className="text-frost">only common mode</strong> that uses 5 heroes.
+          It uses <strong className="text-ice">Exploration skills (left side)</strong>, not Expedition skills.
+        </p>
+
+        <div className="p-3 rounded-lg bg-ice/10 border border-ice/20 mb-6">
+          <p className="text-sm text-frost">
+            <strong>Tip:</strong> Exploration skills are upgraded with Exploration Manuals.
+            Heroes with great PvP skills may have weak PvE skills -- always check the left side.
+          </p>
+        </div>
+
+        <div className="overflow-x-auto mb-6">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left p-2 text-frost-muted">Slot</th>
+                <th className="text-left p-2 text-frost-muted">Class</th>
+                <th className="text-left p-2 text-frost-muted">Role</th>
+                <th className="text-left p-2 text-frost-muted">Best Heroes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">1</td>
+                <td className="p-2">
+                  <span className="flex items-center gap-1 text-frost">🛡️ Infantry</span>
+                </td>
+                <td className="p-2 text-frost">Primary Tank</td>
+                <td className="p-2 text-frost-muted">Natalia, Jeronimo, Wu Ming</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">2</td>
+                <td className="p-2">
+                  <span className="flex items-center gap-1 text-frost">🛡️ Infantry</span>
+                </td>
+                <td className="p-2 text-frost">Secondary Tank</td>
+                <td className="p-2 text-frost-muted">Flint, Logan, Hector</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">3</td>
+                <td className="p-2">
+                  <span className="flex items-center gap-1 text-frost">⚔️ Lancer</span>
+                </td>
+                <td className="p-2 text-frost">Healer / Support</td>
+                <td className="p-2 text-frost-muted">Molly, Philly, Norah</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">4</td>
+                <td className="p-2">
+                  <span className="flex items-center gap-1 text-frost">🏹 Marksman</span>
+                </td>
+                <td className="p-2 text-frost">Main DPS</td>
+                <td className="p-2 text-frost-muted">Alonso, Zinman, Greg</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">5</td>
+                <td className="p-2">
+                  <span className="flex items-center gap-1 text-frost">🏹/⚔️ Flex</span>
+                </td>
+                <td className="p-2 text-frost">Support / Off-DPS</td>
+                <td className="p-2 text-frost-muted">Seo-yoon, Mia, Gwen</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div className="p-3 rounded-lg bg-surface mb-4">
+          <p className="text-sm text-frost">
+            <strong>Why 2 Infantry?</strong> Double frontline survives longer in multi-wave PvE content.
+            The first tank absorbs initial burst while the second provides backup when the first weakens.
+          </p>
+        </div>
+
+        {/* Troop Ratio */}
+        <div>
+          <h3 className="text-sm font-medium text-frost-muted mb-3">Exploration Troop Ratio</h3>
+          <div className="flex gap-1 h-8 rounded-lg overflow-hidden">
+            <div className="bg-red-500 flex items-center justify-center text-xs font-bold text-white" style={{ width: '40%' }}>
+              40%
+            </div>
+            <div className="bg-green-500 flex items-center justify-center text-xs font-bold text-white" style={{ width: '30%' }}>
+              30%
+            </div>
+            <div className="bg-blue-500 flex items-center justify-center text-xs font-bold text-white" style={{ width: '30%' }}>
+              30%
+            </div>
+          </div>
+          <div className="flex justify-center gap-4 mt-2 text-xs text-frost-muted">
+            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-red-500 rounded" /> Infantry</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-green-500 rounded" /> Lancer</span>
+            <span className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-500 rounded" /> Marksman</span>
+          </div>
+          <p className="text-xs text-frost-muted text-center mt-2">Balanced for multi-wave survival</p>
+        </div>
+      </div>
+
+      <div className="card">
+        <h2 className="section-header">Key PvE Heroes</h2>
+        <p className="text-sm text-frost-muted mb-4">
+          These heroes have strong <strong className="text-frost">exploration skills</strong> that make them
+          excel in PvE content regardless of their PvP tier rating.
+        </p>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">Tanks (Infantry)</h3>
+            <ul className="space-y-2 text-sm text-frost-muted">
+              <li><strong className="text-frost">Natalia (Gen 1)</strong> -- Essential tank with self-sustain and shields. Always slot 1.</li>
+              <li><strong className="text-frost">Flint (Gen 2)</strong> -- Strong secondary tank with defender attack boost.</li>
+              <li><strong className="text-frost">Logan (Gen 3)</strong> -- 25% troop health boost, great for difficult stages.</li>
+            </ul>
+          </div>
+          <div className="p-4 rounded-lg bg-surface">
+            <h3 className="font-medium text-frost mb-2">Healers and DPS</h3>
+            <ul className="space-y-2 text-sm text-frost-muted">
+              <li><strong className="text-frost">Molly (Gen 1)</strong> -- Primary healer, keeps the team alive through waves.</li>
+              <li><strong className="text-frost">Alonso (Gen 2)</strong> -- Consistent sustained DPS, strong exploration skills.</li>
+              <li><strong className="text-frost">Philly (Gen 2)</strong> -- Backup healer for difficult stages (double healer strategy).</li>
+            </ul>
+          </div>
+        </div>
+        <div className="mt-4 p-3 rounded-lg bg-warning/10 border border-warning/30">
+          <p className="text-sm text-frost">
+            <strong>For difficult stages:</strong> Use double healer (Molly + Philly) instead of the flex DPS slot.
+            Survival matters more than speed in hard content.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ReferenceTab({ templates }: { templates: Record<string, LineupTemplate> }) {
   return (
     <div className="space-y-6">
@@ -671,6 +931,20 @@ function ReferenceTab({ templates }: { templates: Record<string, LineupTemplate>
                 <td className="p-2 text-center">20%</td>
                 <td className="p-2 text-center">30%</td>
                 <td className="p-2 text-frost-muted">Standard</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">Labyrinth 2v2</td>
+                <td className="p-2 text-center">52%</td>
+                <td className="p-2 text-center">13%</td>
+                <td className="p-2 text-center">35%</td>
+                <td className="p-2 text-frost-muted">Multi-round survival</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="p-2 text-frost font-medium">Floor 10</td>
+                <td className="p-2 text-center">40%</td>
+                <td className="p-2 text-center">15%</td>
+                <td className="p-2 text-center">45%</td>
+                <td className="p-2 text-frost-muted">Counter Infantry-heavy AI</td>
               </tr>
             </tbody>
           </table>
@@ -754,6 +1028,117 @@ function ReferenceTab({ templates }: { templates: Record<string, LineupTemplate>
               <li>Garrison, SvS, Arena</li>
               <li>Uses right-side skills</li>
             </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Generation Advice */}
+      <div className="card">
+        <h2 className="section-header">Generation Advice</h2>
+        <p className="text-sm text-frost-muted mb-4">
+          Hero generations unlock over time as your server ages. Knowing which heroes to save for
+          and which remain strong helps you invest wisely.
+        </p>
+
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-frost mb-3">Evergreen Heroes (Strong at All Stages)</h3>
+          <div className="grid md:grid-cols-3 gap-3">
+            <div className="p-3 rounded-lg bg-success/10 border border-success/20">
+              <p className="text-sm font-medium text-frost">Natalia (Gen 1)</p>
+              <p className="text-xs text-frost-muted">Top Infantry tank from day 1 through endgame. Always worth maxing.</p>
+            </div>
+            <div className="p-3 rounded-lg bg-success/10 border border-success/20">
+              <p className="text-sm font-medium text-frost">Molly (Gen 1)</p>
+              <p className="text-xs text-frost-muted">Essential healer. No replacement exists -- she stays in every lineup.</p>
+            </div>
+            <div className="p-3 rounded-lg bg-success/10 border border-success/20">
+              <p className="text-sm font-medium text-frost">Jessie (Gen 1)</p>
+              <p className="text-xs text-frost-muted">Best attack joiner skill. Only need expedition skill leveled.</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-frost mb-3">Heroes Worth Saving For</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-surface-border">
+                  <th className="text-left p-2 text-frost-muted">Gen</th>
+                  <th className="text-left p-2 text-frost-muted">Hero</th>
+                  <th className="text-left p-2 text-frost-muted">Class</th>
+                  <th className="text-left p-2 text-frost-muted">Why Save</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-surface-border/50">
+                  <td className="p-2 text-frost">3</td>
+                  <td className="p-2 text-frost font-medium">Logan</td>
+                  <td className="p-2 text-frost-muted">Infantry</td>
+                  <td className="p-2 text-frost-muted">Best defensive tank, 25% troop health boost. Essential for garrison.</td>
+                </tr>
+                <tr className="border-b border-surface-border/50">
+                  <td className="p-2 text-frost">5</td>
+                  <td className="p-2 text-frost font-medium">Hector</td>
+                  <td className="p-2 text-frost-muted">Infantry</td>
+                  <td className="p-2 text-frost-muted">F2P rally leader option. Replaces Flint for Bear Trap.</td>
+                </tr>
+                <tr className="border-b border-surface-border/50">
+                  <td className="p-2 text-frost">6</td>
+                  <td className="p-2 text-frost font-medium">Wu Ming</td>
+                  <td className="p-2 text-frost-muted">Infantry</td>
+                  <td className="p-2 text-frost-muted">Sustain Infantry with self-healing. Great for extended fights.</td>
+                </tr>
+                <tr className="border-b border-surface-border/50">
+                  <td className="p-2 text-frost">8</td>
+                  <td className="p-2 text-frost font-medium">Gatot</td>
+                  <td className="p-2 text-frost-muted">Infantry</td>
+                  <td className="p-2 text-frost-muted">Top Infantry hero. Major power spike when unlocked.</td>
+                </tr>
+                <tr className="border-b border-surface-border/50">
+                  <td className="p-2 text-frost">10</td>
+                  <td className="p-2 text-frost font-medium">Blanchette</td>
+                  <td className="p-2 text-frost-muted">Marksman</td>
+                  <td className="p-2 text-frost-muted">Best F2P Marksman damage dealer. Strong exploration skills.</td>
+                </tr>
+                <tr className="border-b border-surface-border/50">
+                  <td className="p-2 text-frost">12</td>
+                  <td className="p-2 text-frost font-medium">Hervor</td>
+                  <td className="p-2 text-frost-muted">Infantry</td>
+                  <td className="p-2 text-frost-muted">Top-tier Infantry. Also provides Jessie-equivalent joiner skill.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-medium text-frost mb-3">General Investment Advice</h3>
+          <div className="space-y-3">
+            <div className="p-3 rounded-lg bg-surface">
+              <p className="text-sm text-frost-muted">
+                <strong className="text-frost">Gen 1-2 heroes are your foundation.</strong> Natalia, Molly, Alonso, and Jessie will
+                carry you from day 1 through endgame. Never regret investing in them early.
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-surface">
+              <p className="text-sm text-frost-muted">
+                <strong className="text-frost">Newer generation heroes are generally stronger</strong>, but take longer to max out.
+                A maxed Gen 3 hero often outperforms a half-built Gen 8 hero. Focus on completion over collection.
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-surface">
+              <p className="text-sm text-frost-muted">
+                <strong className="text-frost">Save shards and resources</strong> when a new generation is 1-2 weeks away.
+                The headline hero of each generation is usually the best investment for that cycle.
+              </p>
+            </div>
+            <div className="p-3 rounded-lg bg-warning/10 border border-warning/30">
+              <p className="text-sm text-frost">
+                <strong>Avoid spreading thin.</strong> Three maxed heroes beat six half-built ones in every game mode.
+                Only expand your roster when your core 3-4 heroes are near maximum for your generation.
+              </p>
+            </div>
           </div>
         </div>
       </div>

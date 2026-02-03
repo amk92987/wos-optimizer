@@ -80,12 +80,12 @@ export default function HeroCard({ hero, token, onSaved, onRemove }: HeroCardPro
     return 'tier-d';
   };
 
-  const getRarityClass = (tier: string | null) => {
-    if (!tier) return 'rarity-common';
-    const t = tier.toLowerCase();
-    if (t === 's+') return 'rarity-legendary';
-    if (t.includes('s')) return 'rarity-epic';
-    if (t.includes('a')) return 'rarity-rare';
+  const getRarityClass = (rarity: string | null) => {
+    if (!rarity) return 'rarity-common';
+    const r = rarity.toLowerCase();
+    if (r === 'legendary') return 'rarity-legendary';
+    if (r === 'epic') return 'rarity-epic';
+    if (r === 'rare') return 'rarity-rare';
     return 'rarity-common';
   };
 
@@ -130,7 +130,7 @@ export default function HeroCard({ hero, token, onSaved, onRemove }: HeroCardPro
   const heroHeader = (
     <div className="flex items-center gap-4 w-full">
       {/* Hero Image */}
-      <div className={`w-16 h-16 rounded-xl overflow-hidden bg-surface-hover flex-shrink-0 border-2 ${getRarityClass(hero.tier_overall)}`}>
+      <div className={`w-16 h-16 rounded-xl overflow-hidden bg-surface-hover flex-shrink-0 border-2 ${getRarityClass(hero.rarity)}`}>
         {hero.image_base64 ? (
           <img src={hero.image_base64} alt={hero.name} className="w-full h-full object-cover" />
         ) : (
