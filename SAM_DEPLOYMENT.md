@@ -297,7 +297,16 @@ After deployment, access logs and metrics at:
 | S3 | ~$1 | Static hosting |
 | CloudFront | ~$0 | Free tier: 1TB |
 | Cognito | ~$0 | Free tier: 50K MAU |
-| **Total** | **~$1-5/month** | Mostly free tier eligible |
+| Secrets Manager | ~$0.40 | 1 secret @ $0.40/month |
+| **Total** | **~$1-2/month** | Mostly free tier eligible |
+
+### Cost Optimizations Applied
+
+- **DynamoDB**: PAY_PER_REQUEST (on-demand) - no idle cost
+- **CloudFront**: PriceClass_100 (cheapest - US/Canada/Europe only)
+- **Lambda**: No provisioned concurrency - only pay for invocations
+- **Scheduled Jobs**: Once per day (not hourly)
+- **Lambda Memory**: Minimal sizes (128-512MB based on need)
 
 ## Frontend Deployment
 
