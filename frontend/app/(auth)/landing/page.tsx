@@ -207,7 +207,7 @@ export default function LandingPage() {
             {features.map((feature, i) => (
               <div
                 key={i}
-                className="card-glass p-6 hover:scale-105 hover:border-ice/40 transition-all duration-300"
+                className="card-glass p-6 text-center hover:scale-105 hover:border-ice/40 transition-all duration-300"
               >
                 <div className="text-3xl mb-4">{feature.emoji}</div>
                 <h3 className="text-lg font-semibold text-frost mb-2">{feature.title}</h3>

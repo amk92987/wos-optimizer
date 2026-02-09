@@ -107,6 +107,14 @@ def login():
         logger.error("No sub claim in Cognito user attributes")
         raise BadRequestError("Authentication failed")
 
+    # Fetch full user record from DynamoDB (must happen before update_user
+    # which would create a bare METADATA record via update_item)
+    user = get_user(sub)
+    if not user:
+        logger.warning("Cognito user has no DynamoDB record", user_id=sub, email=email)
+        # Create a minimal record so the app still works
+        user = create_user(user_id=sub, email=email, username=email)
+
     # Record login activity
     try:
         record_daily_login(sub)
@@ -119,13 +127,6 @@ def login():
         update_user(sub, {"last_login": datetime.now(timezone.utc).isoformat()})
     except Exception:
         pass
-
-    # Fetch full user record from DynamoDB
-    user = get_user(sub)
-    if not user:
-        logger.warning("Cognito user has no DynamoDB record", user_id=sub, email=email)
-        # Create a minimal record so the app still works
-        user = create_user(user_id=sub, email=email, username=email)
 
     return {
         **tokens,

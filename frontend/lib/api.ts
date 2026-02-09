@@ -3,7 +3,7 @@
  * Connects to API Gateway (Lambda) with Cognito token auth
  */
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+export const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 // Debug: log API base on load
 if (typeof window !== 'undefined') {
