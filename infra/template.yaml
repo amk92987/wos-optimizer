@@ -17,8 +17,8 @@ Globals:
         MAIN_TABLE: !Ref MainTable
         ADMIN_TABLE: !Ref AdminTable
         REFERENCE_TABLE: !Ref ReferenceTable
-        USER_POOL_ID: !Ref UserPool
-        USER_POOL_CLIENT_ID: !Ref UserPoolClient
+        USER_POOL_ID: !If [CreateUserPool, !Ref UserPool, !Ref ExistingUserPoolId]
+        USER_POOL_CLIENT_ID: !If [CreateUserPool, !Ref UserPoolClient, !Ref ExistingUserPoolClientId]
         SECRETS_ARN: !Ref AppSecrets
         SES_FROM_EMAIL: !Sub "noreply@${DomainName}"
         POWERTOOLS_SERVICE_NAME: wos
@@ -46,10 +46,19 @@ Parameters:
     Type: String
     Description: ACM certificate ARN for custom domains (us-east-1)
     Default: ""
+  ExistingUserPoolId:
+    Type: String
+    Description: Use an existing Cognito User Pool instead of creating one
+    Default: ""
+  ExistingUserPoolClientId:
+    Type: String
+    Description: Use an existing Cognito User Pool Client instead of creating one
+    Default: ""
 
 Conditions:
   IsLive: !Equals [!Ref Stage, "live"]
   HasCertificate: !Not [!Equals [!Ref CertificateArn, ""]]
+  CreateUserPool: !Equals [!Ref ExistingUserPoolId, ""]
 
 Resources:
 
@@ -59,6 +68,7 @@ Resources:
 
   UserPool:
     Type: AWS::Cognito::UserPool
+    Condition: CreateUserPool
     Properties:
       UserPoolName: !Sub "wos-users-${Stage}"
       UsernameAttributes:
@@ -99,6 +109,7 @@ Resources:
 
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient
+    Condition: CreateUserPool
     Properties:
       ClientName: !Sub "wos-client-${Stage}"
       UserPoolId: !Ref UserPool
@@ -118,6 +129,7 @@ Resources:
 
   UserMigrationFunction:
     Type: AWS::Serverless::Function
+    Condition: CreateUserPool
     Properties:
       FunctionName: !Sub "wos-user-migration-${Stage}"
       Handler: handlers/auth.user_migration_handler
@@ -130,6 +142,7 @@ Resources:
 
   UserMigrationPermission:
     Type: AWS::Lambda::Permission
+    Condition: CreateUserPool
     Properties:
       FunctionName: !GetAtt UserMigrationFunction.Arn
       Principal: cognito-idp.amazonaws.com
@@ -167,9 +180,11 @@ Resources:
           CognitoAuthorizer:
             IdentitySource: $request.header.Authorization
             JwtConfiguration:
-              issuer: !Sub "https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}"
+              issuer: !Sub
+                - "https://cognito-idp.${AWS::Region}.amazonaws.com/${PoolId}"
+                - PoolId: !If [CreateUserPool, !Ref UserPool, !Ref ExistingUserPoolId]
               audience:
-                - !Ref UserPoolClient
+                - !If [CreateUserPool, !Ref UserPoolClient, !Ref ExistingUserPoolClientId]
 
   # ============================================================
   # DynamoDB Tables
@@ -308,7 +323,10 @@ Resources:
                 - cognito-idp:SignUp
                 - cognito-idp:InitiateAuth
                 - cognito-idp:ForgotPassword
-              Resource: !GetAtt UserPool.Arn
+              Resource: !If
+                - CreateUserPool
+                - !GetAtt UserPool.Arn
+                - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${ExistingUserPoolId}"
         - Statement:
             - Effect: Allow
               Action: dynamodb:PutItem
@@ -712,7 +730,10 @@ Resources:
                 - cognito-idp:AdminGetUser
                 - cognito-idp:AdminUpdateUserAttributes
                 - cognito-idp:ListUsers
-              Resource: !GetAtt UserPool.Arn
+              Resource: !If
+                - CreateUserPool
+                - !GetAtt UserPool.Arn
+                - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${ExistingUserPoolId}"
         - Statement:
             - Effect: Allow
               Action: secretsmanager:GetSecretValue
@@ -1080,10 +1101,12 @@ Outputs:
     Value: !Ref FrontendBucket
 
   UserPoolId:
+    Condition: CreateUserPool
     Description: Cognito User Pool ID
     Value: !Ref UserPool
 
   UserPoolClientId:
+    Condition: CreateUserPool
     Description: Cognito User Pool Client ID
     Value: !Ref UserPoolClient
 

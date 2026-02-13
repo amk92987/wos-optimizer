@@ -24,5 +24,5 @@ s3_prefix = "wos-live"
 region = "us-east-1"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM CAPABILITY_AUTO_EXPAND"
-parameter_overrides = "Stage=live"
+parameter_overrides = "Stage=live CertificateArn=arn:aws:acm:us-east-1:561893854848:certificate/b188665f-fa56-4a14-a0e3-3b50a4b126e2"
 tags = "Project=WoS Environment=live"

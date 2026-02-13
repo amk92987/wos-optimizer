@@ -150,7 +150,10 @@ def _rekey_legacy_user(legacy_user: dict, new_sub: str) -> dict:
 @app.post("/api/auth/login")
 def login():
     """Authenticate user and return tokens + user info."""
-    body = app.current_event.json_body or {}
+    try:
+        body = app.current_event.json_body or {}
+    except (json.JSONDecodeError, ValueError):
+        raise BadRequestError("Invalid JSON in request body")
     email = body.get("email", "").strip().lower()
     password = body.get("password", "")
 
@@ -221,7 +224,10 @@ def login():
 @app.post("/api/auth/register")
 def register():
     """Create a new user account."""
-    body = app.current_event.json_body or {}
+    try:
+        body = app.current_event.json_body or {}
+    except (json.JSONDecodeError, ValueError):
+        raise BadRequestError("Invalid JSON in request body")
     email = body.get("email", "").strip().lower()
     password = body.get("password", "")
 
@@ -288,7 +294,10 @@ def register():
 @app.post("/api/auth/forgot-password")
 def forgot_password():
     """Initiate Cognito forgot-password flow (sends code via email)."""
-    body = app.current_event.json_body or {}
+    try:
+        body = app.current_event.json_body or {}
+    except (json.JSONDecodeError, ValueError):
+        raise BadRequestError("Invalid JSON in request body")
     email = body.get("email", "").strip().lower()
 
     if not email:
@@ -312,7 +321,10 @@ def forgot_password():
 @app.post("/api/auth/confirm-reset")
 def confirm_reset():
     """Confirm a password reset with the code from email."""
-    body = app.current_event.json_body or {}
+    try:
+        body = app.current_event.json_body or {}
+    except (json.JSONDecodeError, ValueError):
+        raise BadRequestError("Invalid JSON in request body")
     email = body.get("email", "").strip().lower()
     code = body.get("code", "").strip()
     new_password = body.get("new_password", "")
@@ -362,7 +374,10 @@ def me():
 @app.post("/api/auth/refresh")
 def refresh_token():
     """Refresh Cognito tokens using a refresh_token."""
-    body = app.current_event.json_body or {}
+    try:
+        body = app.current_event.json_body or {}
+    except (json.JSONDecodeError, ValueError):
+        raise BadRequestError("Invalid JSON in request body")
     refresh_tok = body.get("refresh_token", "")
 
     if not refresh_tok:
@@ -408,7 +423,10 @@ def refresh_token():
 @app.post("/api/auth/change-password")
 def change_password():
     """Change password for the currently authenticated user."""
-    body = app.current_event.json_body or {}
+    try:
+        body = app.current_event.json_body or {}
+    except (json.JSONDecodeError, ValueError):
+        raise BadRequestError("Invalid JSON in request body")
     access_token = body.get("access_token", "")
     old_password = body.get("old_password", "")
     new_password = body.get("new_password", "")
