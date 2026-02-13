@@ -4,56 +4,68 @@
 
 **Path:** `"C:\Program Files\Amazon\AWSCLIV2\aws.exe"`
 
-**SSH Key:** `C:\Users\adam\.ssh\lightsail-key.pem` (for legacy Lightsail instances)
-
 ## Architecture Overview
 
-The app is migrating from Streamlit on Lightsail to a **serverless stack** (SAM/CloudFormation):
+Fully serverless stack deployed via SAM/CloudFormation:
 
 | Layer | Service | Details |
 |-------|---------|---------|
 | Frontend | S3 + CloudFront | Next.js static export |
 | API | API Gateway (HTTP) | Routes to Lambda functions |
 | Backend | Lambda (Python 3.13) | 10 functions (Auth, Heroes, Profiles, Chief, Recommend, Advisor, Admin, General, Cleanup, UserMigration) |
-| Database | DynamoDB | 3 tables (main, admin, reference) |
+| Database | DynamoDB | 3 tables per environment (main, admin, reference) |
 | Auth | Cognito | Email-based user pool |
 | Secrets | Secrets Manager | API keys and sensitive config |
-| Email | SES | Transactional emails |
+| Email | SES | Transactional emails (sandbox mode) |
 
 ## Environments
 
-| Name | Type | URL | Database | Cost |
-|------|------|-----|----------|------|
-| **Local** | Your machine (localhost:3000) | N/A | Local/SQLite | Free |
-| **Dev** | Serverless (SAM stack `wos-dev`) | wosdev.randomchaoslabs.com | DynamoDB | ~$0 at low traffic |
-| **Live (Streamlit)** | Lightsail `wos-live-micro` | wos.randomchaoslabs.com | PostgreSQL | $7/mo |
-| **Live (Serverless)** | SAM stack `wos-live` (not yet deployed) | wos.randomchaoslabs.com | DynamoDB | ~$0 at low traffic |
+| Name | Stack | URL | Database | Cost |
+|------|-------|-----|----------|------|
+| **Local** | Your machine (localhost:3000) | N/A | N/A | Free |
+| **Dev** | SAM `wos-dev` | wosdev.randomchaoslabs.com | DynamoDB (dev tables) | ~$0 at low traffic |
+| **Live** | SAM `wos-live` | wos.randomchaoslabs.com | DynamoDB (live tables) | ~$0 at low traffic |
 | **Landing** | Lightsail `randomchaoslabs-server` | www.randomchaoslabs.com | N/A | $5/mo |
 
-**Migration plan:** Dev serverless is live. Once verified, deploy `wos-live` stack and point `wos.randomchaoslabs.com` to it, then shut down `wos-live-micro` Lightsail.
+## Dev Stack (`wos-dev`)
 
-## Serverless Stack (Dev)
-
-**Stack name:** `wos-dev`
 **Region:** `us-east-1`
-**Created:** 2026-02-03
-**Branch:** `feature/aws-serverless`
+**SAM config:** `infra/samconfig.toml` (default profile)
 
 ### Stack Outputs
 
 | Key | Value |
 |-----|-------|
-| ApiUrl | `https://qro6iih6oe.execute-api.us-east-1.amazonaws.com/dev` |
-| CloudFrontUrl | `https://d3q6j2q80oj6gu.cloudfront.net` |
-| CloudFrontDistributionId | `E1CU7UPD2I54BY` |
+| ApiUrl | `https://iofrdh7vgl.execute-api.us-east-1.amazonaws.com/dev` |
+| CloudFrontUrl | `https://dzgkcezaf1dfv.cloudfront.net` |
+| CloudFrontDistributionId | `EWE2LGBUHCEI1` |
 | FrontendBucketName | `wos-frontend-dev-561893854848` |
-| UserPoolId | `us-east-1_KvZMywYFF` |
-| UserPoolClientId | `52393513i04q1pe1rk61eqq5oh` |
+| UserPoolId | `us-east-1_KIijngrGa` |
+| UserPoolClientId | `10tkk4i6kfjmpjbvvctahugguf` |
 | MainTableName | `wos-main-dev` |
 | AdminTableName | `wos-admin-dev` |
 | ReferenceTableName | `wos-reference-dev` |
 
-### Lambda Functions
+## Live Stack (`wos-live`)
+
+**Region:** `us-east-1`
+**SAM config:** `infra/samconfig.toml` (`live` profile)
+
+### Stack Outputs
+
+| Key | Value |
+|-----|-------|
+| ApiUrl | `https://jbz4lfpfm5.execute-api.us-east-1.amazonaws.com/live` |
+| CloudFrontUrl | `https://d28ng7lebb6pxf.cloudfront.net` |
+| CloudFrontDistributionId | `E1AJ7LCWTU8ZMH` |
+| FrontendBucketName | `wos-frontend-live-561893854848` |
+| UserPoolId | `us-east-1_RmBIg1Flh` |
+| UserPoolClientId | `76u9b76r2bbat6ve1e9g0qfolv` |
+| MainTableName | `wos-main-live` |
+| AdminTableName | `wos-admin-live` |
+| ReferenceTableName | `wos-reference-live` |
+
+## Lambda Functions
 
 | Function | Purpose |
 |----------|---------|
@@ -64,16 +76,15 @@ The app is migrating from Streamlit on Lightsail to a **serverless stack** (SAM/
 | RecommendFunction | Upgrade recommendations engine |
 | AdvisorFunction | AI-powered advisor (Claude/OpenAI) |
 | AdminFunction | Admin dashboard, user management, feature flags |
-| GeneralFunction | Events, lineups, tips, combat guides, packs |
-| ScheduledCleanupFunction | Periodic data cleanup |
+| GeneralFunction | Events, lineups, tips, combat guides, packs, inbox |
+| ScheduledCleanupFunction | Daily data cleanup |
 | UserMigrationFunction | Cognito user migration trigger |
 
-### SSL Certificate
+## SSL Certificate
 
 **ACM ARN:** `arn:aws:acm:us-east-1:561893854848:certificate/b188665f-fa56-4a14-a0e3-3b50a4b126e2`
 **Domains:** `*.randomchaoslabs.com`, `randomchaoslabs.com`
 **Validation:** DNS (auto-validated via Route 53)
-**Note:** Wildcard cert covers both `wosdev` and `wos` subdomains for future live cutover.
 
 ## DNS (Route 53)
 
@@ -83,26 +94,10 @@ The app is migrating from Streamlit on Lightsail to a **serverless stack** (SAM/
 |--------|------|-----------|---------|
 | randomchaoslabs.com | A | 52.20.89.13 | Landing page (Lightsail) |
 | www.randomchaoslabs.com | A | 52.20.89.13 | Landing page (Lightsail) |
-| wos.randomchaoslabs.com | A | 52.55.47.124 | Live Streamlit app (Lightsail) |
-| wosapp.randomchaoslabs.com | A | 52.55.47.124 | Live Streamlit app alias (Lightsail) |
-| wosdev.randomchaoslabs.com | A (Alias) | d3q6j2q80oj6gu.cloudfront.net | Dev serverless app (CloudFront) |
+| wos.randomchaoslabs.com | A (Alias) | d28ng7lebb6pxf.cloudfront.net | Live app (CloudFront) |
+| wosdev.randomchaoslabs.com | A (Alias) | dzgkcezaf1dfv.cloudfront.net | Dev app (CloudFront) |
 
-### Update DNS Record (Static IP)
-```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" route53 change-resource-record-sets --hosted-zone-id Z072351926TTPYOWDY0N3 --change-batch "{\"Changes\":[{\"Action\":\"UPSERT\",\"ResourceRecordSet\":{\"Name\":\"<subdomain>.randomchaoslabs.com\",\"Type\":\"A\",\"TTL\":300,\"ResourceRecords\":[{\"Value\":\"<ip-address>\"}]}}]}"
-```
-
-### Update DNS Record (CloudFront Alias)
-```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" route53 change-resource-record-sets --hosted-zone-id Z072351926TTPYOWDY0N3 --change-batch "{\"Changes\":[{\"Action\":\"UPSERT\",\"ResourceRecordSet\":{\"Name\":\"<subdomain>.randomchaoslabs.com\",\"Type\":\"A\",\"AliasTarget\":{\"HostedZoneId\":\"Z2FDTNDATAQYW2\",\"DNSName\":\"<cloudfront-domain>.cloudfront.net\",\"EvaluateTargetHealth\":false}}}]}"
-```
-
-### List All DNS Records
-```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" route53 list-resource-record-sets --hosted-zone-id Z072351926TTPYOWDY0N3 --output table
-```
-
-## Serverless Deployment Commands
+## Deployment Commands
 
 ### Prerequisites
 - AWS SAM CLI installed
@@ -110,171 +105,139 @@ The app is migrating from Streamlit on Lightsail to a **serverless stack** (SAM/
 - Python 3.13+
 - Node.js (for frontend build)
 
-### Deploy Backend (SAM)
+### Deploy to Dev
 ```bash
+# Build and deploy backend
 cd infra
-
-# Build Lambda functions
 sam build
+sam deploy --no-confirm-changeset
 
-# Deploy to dev (default profile)
-sam deploy
-
-# Deploy to live
-sam deploy --config-env live
+# Build and deploy frontend
+cd ../frontend
+npm run build
+aws s3 sync out s3://wos-frontend-dev-561893854848 --delete
+aws cloudfront create-invalidation --distribution-id EWE2LGBUHCEI1 --paths "/*"
 ```
 
-### Deploy Frontend
+### Deploy to Live
 ```bash
-cd frontend
+# Build and deploy backend
+cd infra
+sam build
+sam deploy --config-env live --no-confirm-changeset
 
-# Install dependencies
-npm install
-
-# Build static export
+# Build and deploy frontend
+cd ../frontend
 npm run build
-
-# Upload to S3
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" s3 sync out/ s3://wos-frontend-dev-561893854848/ --delete
-
-# Invalidate CloudFront cache
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" cloudfront create-invalidation --distribution-id E1CU7UPD2I54BY --paths "/*"
+aws s3 sync out s3://wos-frontend-live-561893854848 --delete
+aws cloudfront create-invalidation --distribution-id E1AJ7LCWTU8ZMH --paths "/*"
 ```
 
 ### View Lambda Logs
 ```bash
-# Tail logs for a specific function (e.g., AuthFunction)
+# Tail logs for a specific function
 sam logs -n AuthFunction --stack-name wos-dev --tail
 
 # Or via CloudWatch
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" logs tail /aws/lambda/wos-dev-AuthFunction --follow
+aws logs tail /aws/lambda/wos-auth-dev --follow
 ```
 
 ### Check Stack Status
 ```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" cloudformation describe-stacks --stack-name wos-dev --query "Stacks[0].{Status:StackStatus,Outputs:Outputs[*].{Key:OutputKey,Value:OutputValue}}" --output table
-```
-
-### List Stack Resources
-```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" cloudformation list-stack-resources --stack-name wos-dev --query "StackResourceSummaries[*].{LogicalId:LogicalResourceId,Type:ResourceType,Status:ResourceStatus}" --output table
+aws cloudformation describe-stacks --stack-name wos-dev --query "Stacks[0].{Status:StackStatus,Outputs:Outputs[*].{Key:OutputKey,Value:OutputValue}}" --output table
 ```
 
 ## DynamoDB
 
-### Tables
+### Tables (per environment)
 | Table | Purpose |
 |-------|---------|
-| wos-main-dev | Users, profiles, heroes, inventory |
-| wos-admin-dev | Feature flags, announcements, feedback, AI conversations |
-| wos-reference-dev | Static game data (heroes, events, guides) |
+| wos-main-{stage} | Users, profiles, heroes, inventory |
+| wos-admin-{stage} | Feature flags, announcements, feedback, AI conversations |
+| wos-reference-{stage} | Static game data (heroes) |
 
 ### Scan a Table
 ```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" dynamodb scan --table-name wos-main-dev --max-items 10 --output json
+aws dynamodb scan --table-name wos-main-dev --max-items 10 --output json
 ```
 
 ### Query by Partition Key
 ```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" dynamodb query --table-name wos-main-dev --key-condition-expression "PK = :pk" --expression-attribute-values "{\":pk\":{\"S\":\"USER#<user-id>\"}}" --output json
+aws dynamodb query --table-name wos-main-dev --key-condition-expression "PK = :pk" --expression-attribute-values '{":pk":{"S":"USER#<user-id>"}}' --output json
 ```
 
 ## Cognito
 
-### User Pool: `us-east-1_KvZMywYFF`
-
 ### List Users
 ```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" cognito-idp list-users --user-pool-id us-east-1_KvZMywYFF --output table
+aws cognito-idp list-users --user-pool-id <pool-id> --output table
 ```
 
-### Create Admin User
+### Create Admin User (after fresh deploy)
 ```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" cognito-idp admin-create-user --user-pool-id us-east-1_KvZMywYFF --username admin@randomchaoslabs.com --user-attributes Name=email,Value=admin@randomchaoslabs.com Name=email_verified,Value=true --temporary-password <password>
+python scripts/create_admin.py --stage dev --email adamkirschner@outlook.com
+python scripts/create_admin.py --stage live --email adamkirschner@outlook.com
 ```
 
-### Disable/Enable User
+## Seed Reference Data (after fresh deploy)
 ```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" cognito-idp admin-disable-user --user-pool-id us-east-1_KvZMywYFF --username <email>
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" cognito-idp admin-enable-user --user-pool-id us-east-1_KvZMywYFF --username <email>
+python scripts/seed_reference_data.py --stage dev
+python scripts/seed_reference_data.py --stage live
+```
+
+## Secrets Manager
+
+API keys for AI providers are stored in Secrets Manager:
+- Dev: `wos/api-keys/dev`
+- Live: `wos/api-keys/live`
+
+```bash
+# View current secrets
+aws secretsmanager get-secret-value --secret-id wos/api-keys/dev --query SecretString --output text
+
+# Update secrets
+aws secretsmanager update-secret --secret-id wos/api-keys/live --secret-string '{"ANTHROPIC_API_KEY":"","OPENAI_API_KEY":"sk-..."}'
 ```
 
 ## CloudFront
 
-### Distribution: `E1CU7UPD2I54BY`
-
 ### Invalidate Cache (after frontend deploy)
 ```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" cloudfront create-invalidation --distribution-id E1CU7UPD2I54BY --paths "/*"
-```
+# Dev
+aws cloudfront create-invalidation --distribution-id EWE2LGBUHCEI1 --paths "/*"
 
-### Check Distribution Status
-```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" cloudfront get-distribution --id E1CU7UPD2I54BY --query "Distribution.{Status:Status,Domain:DomainName,Aliases:DistributionConfig.Aliases.Items}" --output json
-```
-
-## Legacy Lightsail (Streamlit)
-
-**Note:** The dev Lightsail instance (`wos-dev-micro`) was shut down on 2026-02-09. A final snapshot exists: `wos-dev-final-backup-20260208`. The live Streamlit instance remains until serverless goes live.
-
-### Remaining Instances
-
-| Instance | Bundle | RAM | Static IP | Status |
-|----------|--------|-----|-----------|--------|
-| wos-live-micro | micro_3_0 | 1 GB | wos-live-ip (52.55.47.124) | Running (Streamlit production) |
-| randomchaoslabs-server | nano_3_0 | 0.5 GB | randomchaoslabs-ip (52.20.89.13) | Running (Landing page) |
-
-### Deploy to Live (Streamlit)
-```bash
-ssh -i "C:\Users\adam\.ssh\lightsail-key.pem" ubuntu@52.55.47.124 "cd /home/ubuntu/wos-app && git pull && sudo systemctl restart streamlit"
-```
-
-### View Logs (Live Streamlit)
-```bash
-ssh -i "C:\Users\adam\.ssh\lightsail-key.pem" ubuntu@52.55.47.124 "sudo journalctl -u streamlit -f"
-```
-
-### SSH to Live
-```bash
-ssh -i "C:\Users\adam\.ssh\lightsail-key.pem" ubuntu@52.55.47.124
+# Live
+aws cloudfront create-invalidation --distribution-id E1AJ7LCWTU8ZMH --paths "/*"
 ```
 
 ## Email (AWS SES)
-
-Email is configured via AWS SES. DKIM records are set up in Route 53.
 
 **Status:** Sandbox mode (can only send to verified emails)
 
 SPF record: `"v=spf1 include:spf.improvmx.com include:amazonses.com ~all"`
 
-### Verify an Email Address (for sandbox testing)
 ```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" ses verify-email-identity --email-address user@example.com
+# Verify an email for sandbox testing
+aws ses verify-email-identity --email-address user@example.com
+
+# List verified emails
+aws ses list-identities --identity-type EmailAddress
+
+# Check sending limits
+aws ses get-send-quota
 ```
 
-### List Verified Emails
-```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" ses list-identities --identity-type EmailAddress
-```
+To send to any email: request production access via AWS Console → SES → Account dashboard.
 
-### Check SES Sending Limits
-```bash
-"C:\Program Files\Amazon\AWSCLIV2\aws.exe" ses get-send-quota
-```
+## Fresh Deploy Checklist
 
-### Request Production Access
-To send to any email address, request production access via AWS Console:
-SES → Account dashboard → Request production access
+After deploying a new stack from scratch:
 
-## Going Live Checklist
-
-When ready to cut over `wos.randomchaoslabs.com` to serverless:
-
-1. Deploy live SAM stack: `cd infra && sam deploy --config-env live`
-2. Build and upload frontend to live S3 bucket
-3. Add `wos.randomchaoslabs.com` as alternate domain on live CloudFront distribution (ACM cert already covers it)
-4. Migrate user data from PostgreSQL to DynamoDB (use `scripts/migrate_data.py`)
-5. Update Route 53: change `wos.randomchaoslabs.com` from A record (52.55.47.124) to CloudFront alias
-6. Verify everything works
-7. Snapshot and delete `wos-live-micro` Lightsail instance (saves $7/mo)
-8. Release `wos-live-ip` static IP
+1. `sam build && sam deploy` (or `--config-env live`)
+2. `python scripts/seed_reference_data.py --stage <stage>` (load heroes)
+3. `python scripts/create_admin.py --stage <stage> --email <email>` (bootstrap admin)
+4. Build and deploy frontend to S3
+5. Invalidate CloudFront cache
+6. Set API keys in Secrets Manager
+7. Update DNS in Route 53 if needed
+8. Feature flags and AI settings auto-seed on first admin API call

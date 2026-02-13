@@ -7,50 +7,53 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Whiteout Survival Optimizer - A comprehensive web-based tool to help Whiteout Survival players track their heroes, analyze resources, and get personalized upgrade recommendations optimized for SvS (State vs State) and combat.
 
 **Key Stats:**
-- 12 Streamlit pages with 5,100+ lines of application code
+- 37 Next.js pages (static export) with serverless API backend
 - 56 hero portraits downloaded from wiki
 - 67 JSON data files covering all game systems
-- SQLite database with 6 primary tables
+- DynamoDB with 3 tables (main, admin, reference) per environment
+- 10 Lambda functions behind API Gateway + CloudFront
 - 9 Claude Code skills for domain-specific tasks
 
 ## Development Environment
 
-- Python 3.13+
-- Virtual environment: `.venv/`
-- Framework: Streamlit
-- Database: SQLite with SQLAlchemy ORM
-- AI: Claude (Anthropic) or OpenAI API for AI-powered recommendations
-- OCR: EasyOCR (optional, for screenshot parsing)
+- Python 3.13+ (backend Lambda functions)
+- Node.js / Next.js 14 (frontend static export)
+- Virtual environment: `.venv/` (for local scripts)
+- Infrastructure: AWS SAM (CloudFormation)
+- Database: DynamoDB (serverless)
+- Auth: AWS Cognito (email-based)
+- AI: OpenAI API (gpt-4o-mini) for AI-powered recommendations
+- Secrets: AWS Secrets Manager
 
 ## Environments (IMPORTANT)
 
-| Name | Instance | IP | URL | Database | Purpose |
-|------|----------|-----|-----|----------|---------|
-| **Local** | Your machine | localhost:8501 | N/A | SQLite (wos.db) | Development |
-| **Dev** | wos-dev-micro | 98.87.57.79 | wosdev.randomchaoslabs.com | PostgreSQL | Testing changes |
-| **Live** | wos-live-micro | 52.55.47.124 | wos.randomchaoslabs.com | PostgreSQL | Production users |
+| Name | Stack | URL | Database | Purpose |
+|------|-------|-----|----------|---------|
+| **Local** | Your machine (localhost:3000) | N/A | N/A | Frontend dev |
+| **Dev** | SAM `wos-dev` | wosdev.randomchaoslabs.com | DynamoDB (dev tables) | Testing changes |
+| **Live** | SAM `wos-live` | wos.randomchaoslabs.com | DynamoDB (live tables) | Production users |
 
 **Naming Convention:**
 - "Local" = your development machine
-- "Dev" = AWS Lightsail dev instance for testing (formerly called "sandbox")
-- "Live" = AWS Lightsail production instance (also called "production" or "prod")
+- "Dev" = AWS serverless dev stack for testing
+- "Live" = AWS serverless production stack (also called "production" or "prod")
 
 **Deployment Commands:**
 ```bash
-# Deploy to Dev
-ssh -i ~/.ssh/lightsail-key.pem ubuntu@98.87.57.79 "cd ~/wos-app && git pull origin master && sudo systemctl restart streamlit"
+# Deploy to Dev (backend + frontend)
+cd infra && sam build && sam deploy --no-confirm-changeset
+cd ../frontend && npm run build && aws s3 sync out s3://wos-frontend-dev-561893854848 --delete
+aws cloudfront create-invalidation --distribution-id EWE2LGBUHCEI1 --paths "/*"
 
 # Deploy to Live (be careful!)
-ssh -i ~/.ssh/lightsail-key.pem ubuntu@52.55.47.124 "cd ~/wos-app && git pull origin master && sudo systemctl restart streamlit"
-
-# Check service status
-ssh -i ~/.ssh/lightsail-key.pem ubuntu@<IP> "sudo systemctl status streamlit"
+cd infra && sam build && sam deploy --config-env live --no-confirm-changeset
+cd ../frontend && npm run build && aws s3 sync out s3://wos-frontend-live-561893854848 --delete
+aws cloudfront create-invalidation --distribution-id E1AJ7LCWTU8ZMH --paths "/*"
 ```
 
 **Email Configuration:**
-- Local: Debug mode (logs to console)
-- Dev: SMTP configured for testing
-- Live: SMTP configured for real emails
+- SES configured (sandbox mode - verified emails only)
+- SPF record includes amazonses.com
 
 ## Commands
 
