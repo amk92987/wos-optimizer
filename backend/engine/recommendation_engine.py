@@ -74,11 +74,20 @@ class RecommendationEngine:
         self._ai_recommender = None
 
     def _load_json(self, filename: str) -> dict:
-        """Load a JSON file from the data directory."""
+        """Load a JSON file from the data directory, with DynamoDB fallback for heroes."""
         path = self.data_dir / filename
         if path.exists():
             with open(path, 'r', encoding='utf-8') as f:
                 return json.load(f)
+        # Lambda fallback: load heroes from DynamoDB reference table
+        if filename == "heroes.json":
+            try:
+                from common.hero_repo import get_all_reference_heroes_from_db
+                heroes = get_all_reference_heroes_from_db()
+                if heroes:
+                    return {"heroes": heroes}
+            except Exception:
+                pass
         return {}
 
     def _get_hero_info_from_question(self, question: str) -> Optional[Dict[str, Any]]:

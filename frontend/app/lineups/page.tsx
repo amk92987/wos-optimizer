@@ -59,7 +59,7 @@ const eventTypes: EventType[] = [
   { id: 'bear_trap', name: 'Bear Trap', icon: '🐻' },
   { id: 'crazy_joe', name: 'Crazy Joe', icon: '🤪' },
   { id: 'garrison', name: 'Garrison Leader', icon: '🏰' },
-  { id: 'svs_attack', name: 'SvS March', icon: '⚔️' },
+  { id: 'svs_attack', name: 'Rally Leader', icon: '⚔️' },
   { id: 'rally_attack', name: 'Rally Joiner', icon: '🎯' },
   { id: 'rally_defense', name: 'Garrison Joiner', icon: '🛡️' },
 ];
@@ -434,13 +434,19 @@ function OptimalLineupsTab({
   return (
     <>
       {/* Event Selection */}
-      <div className="card mb-6">
+      <div id="event-selection" className="card mb-6">
         <h2 className="section-header">Select Event Type</h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {eventTypes.map((event: EventType) => (
             <button
               key={event.id}
-              onClick={() => setSelectedEvent(event.id)}
+              onClick={() => {
+                setSelectedEvent(event.id);
+                // Prevent page shift when scrolled by anchoring to event selection
+                setTimeout(() => {
+                  document.getElementById('event-selection')?.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+                }, 0);
+              }}
               className={`p-4 rounded-lg text-center transition-all ${
                 selectedEvent === event.id
                   ? 'bg-ice/20 border-2 border-ice text-ice'

@@ -15,7 +15,7 @@ _HERO_METADATA_CACHE = None
 
 def load_hero_metadata() -> Dict[str, Dict[str, Any]]:
     """
-    Load hero metadata from heroes.json.
+    Load hero metadata from heroes.json, falling back to DynamoDB.
 
     This is the single source of truth for hero data.
     Returns dict mapping hero_name -> {class, gen, tier, role}
@@ -31,25 +31,31 @@ def load_hero_metadata() -> Dict[str, Dict[str, Any]]:
     heroes_file = project_root / "data" / "heroes.json"
 
     metadata = {}
+    heroes_list = []
 
     try:
         with open(heroes_file, encoding='utf-8') as f:
             data = json.load(f)
-
-        for hero in data.get('heroes', []):
-            name = hero.get('name', '')
-            if name:
-                metadata[name] = {
-                    'class': hero.get('hero_class', 'Unknown'),
-                    'gen': hero.get('generation', 1),
-                    'tier': hero.get('tier_overall', 'C'),
-                    'tier_expedition': hero.get('tier_expedition', 'C'),
-                    'role': hero.get('best_use', 'Unknown')[:30] if hero.get('best_use') else 'Unknown',
-                    'rarity': hero.get('rarity', 'Rare'),
-                }
+        heroes_list = data.get('heroes', [])
     except FileNotFoundError:
-        # Fallback to empty dict - will use defaults
-        pass
+        # Lambda doesn't have heroes.json - fall back to DynamoDB
+        try:
+            from common.hero_repo import get_all_reference_heroes_from_db
+            heroes_list = get_all_reference_heroes_from_db()
+        except Exception:
+            pass
+
+    for hero in heroes_list:
+        name = hero.get('name', '')
+        if name:
+            metadata[name] = {
+                'class': hero.get('hero_class', 'Unknown'),
+                'gen': hero.get('generation', 1),
+                'tier': hero.get('tier_overall', 'C'),
+                'tier_expedition': hero.get('tier_expedition', 'C'),
+                'role': hero.get('best_use', 'Unknown')[:30] if hero.get('best_use') else 'Unknown',
+                'rarity': hero.get('rarity', 'Rare'),
+            }
 
     _HERO_METADATA_CACHE = metadata
     return metadata
