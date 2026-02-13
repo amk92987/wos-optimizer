@@ -88,10 +88,12 @@ Resources:
         - Name: is_test_account
           AttributeDataType: String
           Mutable: true
-      # NOTE: LambdaConfig.UserMigration removed to break circular dependency.
-      # UserPool -> UserMigrationFunction -> HttpApi (via Globals env) -> UserPool.
-      # To enable user migration later, add it via a separate CloudFormation stack
-      # update after initial deployment, or use a CustomResource.
+      # NOTE: LambdaConfig.UserMigration cannot be set here (circular dep:
+      # UserPool -> UserMigrationFunction -> HttpApi -> UserPool).
+      # After every fresh `sam deploy`, attach it via CLI:
+      #   aws cognito-idp update-user-pool --user-pool-id <POOL_ID> \
+      #     --lambda-config UserMigration=<UserMigrationFunction ARN>
+      # This enables legacy bcrypt users to authenticate through Cognito.
       EmailConfiguration:
         EmailSendingAccount: COGNITO_DEFAULT
 
@@ -302,8 +304,10 @@ Resources:
                 - cognito-idp:AdminInitiateAuth
                 - cognito-idp:AdminGetUser
                 - cognito-idp:AdminUpdateUserAttributes
+                - cognito-idp:AdminConfirmSignUp
                 - cognito-idp:SignUp
                 - cognito-idp:InitiateAuth
+                - cognito-idp:ForgotPassword
               Resource: !GetAtt UserPool.Arn
         - Statement:
             - Effect: Allow

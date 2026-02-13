@@ -34,7 +34,7 @@ def list_users():
     _require_admin()
     params = app.current_event.query_string_parameters or {}
     test_only = params.get("test_only", "false").lower() == "true"
-    limit = int(params.get("limit", "50"))
+    limit = int(params.get("limit", "500"))
 
     users = user_repo.list_users(test_only=test_only, limit=limit)
 

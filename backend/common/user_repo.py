@@ -215,8 +215,12 @@ def get_login_count_last_n_days(user_id: str, days: int = 7) -> int:
     return resp.get("Count", 0)
 
 
-def list_users(test_only: bool = False, limit: int = 50) -> list:
-    """List all users via GSI4-AdminUserList."""
+def list_users(test_only: bool = False, limit: int = 500) -> list:
+    """List all users via GSI4-AdminUserList.
+
+    Paginates through all DynamoDB result pages to ensure FilterExpression
+    doesn't cause missing results, then truncates to `limit` in Python.
+    """
     table = get_table("main")
 
     params = {
@@ -224,15 +228,21 @@ def list_users(test_only: bool = False, limit: int = 50) -> list:
         "KeyConditionExpression": "entity_type = :et",
         "ExpressionAttributeValues": {":et": "USER"},
         "ScanIndexForward": False,
-        "Limit": limit,
     }
 
     if test_only:
         params["FilterExpression"] = "is_test_account = :t"
         params["ExpressionAttributeValues"][":t"] = True
 
-    resp = table.query(**params)
-    return resp.get("Items", [])
+    items = []
+    while True:
+        resp = table.query(**params)
+        items.extend(resp.get("Items", []))
+        if len(items) >= limit or "LastEvaluatedKey" not in resp:
+            break
+        params["ExclusiveStartKey"] = resp["LastEvaluatedKey"]
+
+    return items[:limit]
 
 
 def increment_ai_requests(user_id: str) -> dict:

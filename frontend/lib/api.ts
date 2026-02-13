@@ -325,7 +325,7 @@ export const lineupsApi = {
 // Admin API
 export const adminApi = {
   // Users
-  listUsers: (token: string, limit = 50, testOnly = false) =>
+  listUsers: (token: string, limit = 500, testOnly = false) =>
     api<{ users: AdminUser[] }>(`/api/admin/users?limit=${limit}&test_only=${testOnly}`, { token }),
 
   getUser: (token: string, userId: string) =>

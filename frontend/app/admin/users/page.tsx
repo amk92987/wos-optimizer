@@ -15,6 +15,8 @@ function AdminUsersContent() {
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterState, setFilterState] = useState('All States');
   const [filterTest, setFilterTest] = useState(searchParams.get('filter') === 'test');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(25);
   const [activeTab, setActiveTab] = useState<'list' | 'create'>(searchParams.get('tab') === 'create' ? 'create' : 'list');
   const defaultTestAccount = searchParams.get('test') === 'true';
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
@@ -24,6 +26,11 @@ function AdminUsersContent() {
       fetchUsers();
     }
   }, [token]);
+
+  // Reset to page 1 when any filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterStatus, filterState, filterTest]);
 
   const fetchUsers = async () => {
     try {
@@ -126,6 +133,18 @@ function AdminUsersContent() {
       if (!b.last_login) return -1;
       return new Date(b.last_login).getTime() - new Date(a.last_login).getTime();
     });
+
+  // Pagination
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / pageSize));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIdx = (safePage - 1) * pageSize;
+  const endIdx = startIdx + pageSize;
+  const paginatedUsers = filteredUsers.slice(startIdx, endIdx);
+
+  // Clamp currentPage when it exceeds totalPages (e.g. after deletion on last page)
+  useEffect(() => {
+    if (currentPage > totalPages) setCurrentPage(totalPages);
+  }, [currentPage, totalPages]);
 
   const formatLastLogin = (dateStr: string | null) => {
     if (!dateStr) return 'Never';
@@ -272,7 +291,11 @@ function AdminUsersContent() {
               </div>
             </div>
 
-            <p className="text-sm text-frost-muted mb-2">Showing {filteredUsers.length} users</p>
+            <p className="text-sm text-frost-muted mb-2">
+              {filteredUsers.length === 0
+                ? 'Showing 0 users'
+                : `Showing ${startIdx + 1}-${Math.min(endIdx, filteredUsers.length)} of ${filteredUsers.length} users`}
+            </p>
 
             {/* Users Table */}
             <div className="card overflow-hidden">
@@ -310,7 +333,7 @@ function AdminUsersContent() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredUsers.map((u) => {
+                      {paginatedUsers.map((u) => {
                         const status = getStatusInfo(u);
                         const isSelf = u.id === user?.id;
                         return (
@@ -433,6 +456,57 @@ function AdminUsersContent() {
                 </div>
               )}
             </div>
+
+            {/* Pagination Controls */}
+            {filteredUsers.length > pageSize && (
+              <div className="flex flex-wrap items-center justify-between gap-3 mt-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-frost-muted">Rows:</span>
+                  <select
+                    value={pageSize}
+                    onChange={(e) => { setPageSize(Number(e.target.value)); setCurrentPage(1); }}
+                    className="input w-auto text-xs py-1 px-2"
+                  >
+                    <option value={10}>10</option>
+                    <option value={25}>25</option>
+                    <option value={50}>50</option>
+                  </select>
+                </div>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setCurrentPage(1)}
+                    disabled={safePage <= 1}
+                    className="px-2 py-1 text-xs rounded text-frost-muted hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    First
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={safePage <= 1}
+                    className="px-2 py-1 text-xs rounded text-frost-muted hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    Prev
+                  </button>
+                  <span className="px-3 py-1 text-xs text-frost">
+                    Page {safePage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={safePage >= totalPages}
+                    className="px-2 py-1 text-xs rounded text-frost-muted hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                  <button
+                    onClick={() => setCurrentPage(totalPages)}
+                    disabled={safePage >= totalPages}
+                    className="px-2 py-1 text-xs rounded text-frost-muted hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
+                  >
+                    Last
+                  </button>
+                </div>
+              </div>
+            )}
           </>
         ) : (
           <CreateUserForm token={token || ''} onCreated={() => { setActiveTab('list'); fetchUsers(); }} defaultTest={defaultTestAccount} />
