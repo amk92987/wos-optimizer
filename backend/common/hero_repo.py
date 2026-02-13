@@ -222,15 +222,21 @@ def load_heroes_json() -> dict:
 
 
 def get_all_heroes_reference() -> list:
-    """Get all hero reference data from heroes.json."""
+    """Get all hero reference data from heroes.json, falling back to DynamoDB."""
     heroes_map = load_heroes_json()
-    return list(heroes_map.values())
+    if heroes_map:
+        return list(heroes_map.values())
+    # Fallback: Lambda doesn't have heroes.json, read from DynamoDB
+    return get_all_reference_heroes_from_db()
 
 
 def get_hero_reference(hero_name: str) -> Optional[dict]:
-    """Get reference data for a specific hero from heroes.json."""
+    """Get reference data for a specific hero from heroes.json, falling back to DynamoDB."""
     heroes_map = load_heroes_json()
-    return heroes_map.get(hero_name)
+    if heroes_map:
+        return heroes_map.get(hero_name)
+    # Fallback: Lambda doesn't have heroes.json, read from DynamoDB
+    return get_reference_hero_from_db(hero_name)
 
 
 def get_reference_hero_from_db(hero_name: str) -> Optional[dict]:
