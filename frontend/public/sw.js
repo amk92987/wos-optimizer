@@ -3,9 +3,9 @@
  * Provides offline caching for static assets and API responses
  */
 
-const CACHE_NAME = 'bears-den-v1';
-const STATIC_CACHE = 'bears-den-static-v1';
-const API_CACHE = 'bears-den-api-v1';
+const CACHE_NAME = 'bears-den-v2';
+const STATIC_CACHE = 'bears-den-static-v2';
+const API_CACHE = 'bears-den-api-v2';
 
 // Static assets to cache on install
 const STATIC_ASSETS = [
@@ -67,11 +67,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // For static assets, use cache first
-  if (request.destination === 'image' ||
-      request.destination === 'font' ||
-      url.pathname.endsWith('.css') ||
-      url.pathname.endsWith('.js')) {
+  // For immutable hashed assets (_next/static), use cache first
+  // These filenames change on every build so stale cache is impossible
+  if (url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(cacheFirstThenNetwork(request, STATIC_CACHE));
+    return;
+  }
+
+  // For other static assets (images, fonts), use cache first
+  if (request.destination === 'image' || request.destination === 'font') {
     event.respondWith(cacheFirstThenNetwork(request, STATIC_CACHE));
     return;
   }

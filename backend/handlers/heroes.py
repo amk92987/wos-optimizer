@@ -9,7 +9,7 @@ import json
 import os
 
 from aws_lambda_powertools import Logger
-from aws_lambda_powertools.event_handler import APIGatewayHttpResolver, Response
+from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
 from common.auth import get_effective_user_id
 from common.config import Config
@@ -18,6 +18,7 @@ from common.hero_repo import (
     batch_update_heroes,
     delete_hero,
     get_all_heroes_reference,
+    get_hero,
     get_hero_reference,
     get_heroes,
     update_hero,
@@ -137,13 +138,13 @@ def _merge_reference(user_hero: dict) -> dict:
     return merged
 
 
-def _error_response(exc: AppError) -> Response:
+def _error_response(exc: AppError) -> dict:
     """Build a JSON error response from an AppError."""
-    return Response(
-        status_code=exc.status_code,
-        content_type="application/json",
-        body=json.dumps({"error": exc.message}),
-    )
+    return {
+        "statusCode": exc.status_code,
+        "headers": {"Content-Type": "application/json"},
+        "body": json.dumps({"error": exc.message}),
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -228,19 +229,17 @@ def update_single_hero(hero_name: str):
     profile_id = _get_profile_id_from_current_event()
     body = app.current_event.json_body or {}
 
-    if not body:
-        raise ValidationError("Request body must not be empty")
-
     # Validate hero_name exists in reference data
     ref = get_hero_reference(hero_name)
     if not ref:
         raise NotFoundError(f"Unknown hero: {hero_name}")
 
-    result = update_hero(profile_id, hero_name, body)
-
-    # If update_hero returned empty (no fields to update), fall back to put
-    if not result:
+    # If no fields provided or hero doesn't exist yet, use put (creates with defaults)
+    existing = get_hero(profile_id, hero_name)
+    if not body or not existing:
         result = put_hero(profile_id, hero_name, body)
+    else:
+        result = update_hero(profile_id, hero_name, body)
 
     return {"hero": result}
 
@@ -269,10 +268,8 @@ def lambda_handler(event: dict, context):
     except AppError as exc:
         logger.warning("Application error", extra={"error": exc.message, "status": exc.status_code})
         return _error_response(exc)
-    except Exception:
+    except Exception as exc:
         logger.exception("Unhandled error in heroes handler")
-        return Response(
-            status_code=500,
-            content_type="application/json",
-            body=json.dumps({"error": "Internal server error"}),
-        )
+        from common.error_capture import capture_error
+        capture_error("heroes", event, exc, logger)
+        return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

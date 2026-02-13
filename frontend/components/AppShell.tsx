@@ -134,6 +134,7 @@ function UserMenu({ unreadCount = 0 }: { unreadCount?: number }) {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [switchingProfile, setSwitchingProfile] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
   const { user, token, logout } = useAuth();
 
   // Close menu when clicking outside
@@ -323,18 +324,29 @@ function UserMenu({ unreadCount = 0 }: { unreadCount?: number }) {
               <span>Change Email</span>
             </Link>
 
-            {/* Admin Panel - only for admins */}
+            {/* Admin / User Panel toggle - only for admins */}
             {isAdmin && (
               <>
                 <div className="my-2 border-t border-surface-border/50" />
-                <Link
-                  href="/admin"
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-fire hover:bg-surface-hover transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <span>⚙️</span>
-                  <span>Admin Panel</span>
-                </Link>
+                {pathname?.startsWith('/admin') ? (
+                  <Link
+                    href="/"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-ice hover:bg-surface-hover transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <span>🏠</span>
+                    <span>User Panel</span>
+                  </Link>
+                ) : (
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-fire hover:bg-surface-hover transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <span>⚙️</span>
+                    <span>Admin Panel</span>
+                  </Link>
+                )}
               </>
             )}
 

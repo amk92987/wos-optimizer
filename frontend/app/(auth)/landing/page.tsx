@@ -88,7 +88,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-landing overflow-hidden relative">
+    <div className="min-h-screen overflow-hidden relative" style={{ background: 'linear-gradient(180deg, #0A1628 0%, #0F2847 45%, #1A4B6E 70%, #2E7DA8 88%, #5AADD6 96%, #7DD3FC 100%)', backgroundAttachment: 'fixed' }}>
       {/* Snowflakes */}
       {snowflakes.map((flake) => (
         <Snowflake key={flake.id} style={flake.style} char={flake.char} />

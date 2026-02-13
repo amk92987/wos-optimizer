@@ -34,25 +34,27 @@ function CastleBattlesTab() {
     <div className="space-y-6">
       <div className="card bg-gradient-to-r from-fire/10 to-transparent border-fire/30">
         <p className="text-frost">
-          Castle Battles are coordinated alliance events where timing and target selection matter more than raw power.
-          <strong className="text-fire ml-1">Communication is everything.</strong>
+          Castle Battles are coordinated alliance events where each player has <strong className="text-fire">one castle</strong> to attack and defend.
+          Timing, garrison management, and communication are everything.
         </p>
       </div>
 
       {/* Attack Tactics */}
       <div className="card">
         <h2 className="section-header text-fire">Attack Tactics</h2>
-        <p className="text-frost-muted mb-4">Priority order for attacking enemy castles:</p>
+        <p className="text-frost-muted mb-4">How to take and hold enemy castles:</p>
 
         <div className="space-y-3">
           {[
-            { priority: 'critical', title: 'Scout Before Attacking', desc: 'Always scout target to see troop composition and garrison strength. Adjust your composition to counter.' },
-            { priority: 'critical', title: 'Coordinate Rally Timing', desc: 'Don\'t launch random rallies. Coordinate with alliance for simultaneous multi-rally attacks.' },
-            { priority: 'high', title: 'Target Selection', desc: 'Hit the weakest defended castles first to build momentum and reduce enemy reinforcement pools.' },
+            { priority: 'critical', title: 'Scout Before Attacking', desc: 'Always scout the target castle to see troop composition and garrison strength. Adjust your composition to counter.' },
+            { priority: 'critical', title: 'Coordinate Rally Timing', desc: 'Don\'t launch random rallies. Coordinate with alliance for simultaneous attacks to overwhelm the garrison.' },
+            { priority: 'critical', title: 'Refill Garrison Immediately After Capture', desc: 'The garrison is depleted after the assault. Send a full squad of troops as soon as you take control to prevent easy recapture.' },
+            { priority: 'high', title: 'Swap to Sergey After Capture', desc: 'Once you take the castle, send a Sergey-led squad and recall the current garrison at the last second. Sergey\'s Defenders\' Edge (-20% DMG taken) makes holding much easier.' },
             { priority: 'high', title: 'Fill Rallies Completely', desc: 'A 75% full rally is often worse than waiting for 100%. Patience wins battles.' },
+            { priority: 'high', title: 'Continuously Refill Garrison', desc: 'Don\'t just take the castle and forget it. Keep sending squads to maintain full garrison strength.' },
             { priority: 'medium', title: 'Rally Leader Composition', desc: 'Rally leader should use highest power heroes. Put best expedition skill heroes in slot 1.' },
             { priority: 'medium', title: 'Joiner Strategy', desc: 'Jessie FIRST for attack joiners (+25% DMG at max skill). Only first hero\'s top-right skill applies.' },
-            { priority: 'low', title: 'Fake Rallies', desc: 'Start a rally, draw reinforcements, cancel, then hit a different target. Use sparingly - wastes rally timer.' },
+            { priority: 'low', title: 'Fake Rallies', desc: 'Start a rally to draw reinforcements, cancel, then hit the actual target. Use sparingly - wastes rally timer.' },
           ].map((item, i) => {
             const colors = priorityColors[item.priority];
             return (
@@ -73,17 +75,16 @@ function CastleBattlesTab() {
       {/* Defense Tactics */}
       <div className="card">
         <h2 className="section-header text-ice">Defense Tactics</h2>
-        <p className="text-frost-muted mb-4">Priority order for defending your castles:</p>
+        <p className="text-frost-muted mb-4">How to hold your castle against coordinated attacks:</p>
 
         <div className="space-y-3">
           {[
-            { priority: 'critical', title: 'Reinforce Before Rally Launches', desc: 'Once a rally starts, you have limited time. Reinforce immediately when you see rally starting.' },
+            { priority: 'critical', title: 'Reinforce Before Rally Launches', desc: 'Once a rally starts, you have limited time. Reinforce immediately when you see a rally forming.' },
             { priority: 'critical', title: 'Sergey First for Defense', desc: 'Put Sergey in slot 1 of garrison. Defenders\' Edge reduces ALL incoming damage (-20% at max skill).' },
+            { priority: 'critical', title: 'Time Reinforcements Between Enemy Rallies', desc: 'Enemy alliances will coordinate rallies as close together as possible. Send garrison reinforcements to arrive between their attacks so troops are refilled before the next wave hits.' },
             { priority: 'high', title: 'Infantry-Heavy Garrison', desc: 'Use 60/25/15 ratio (Infantry/Lancer/Marksman). Infantry survives longer under sustained attacks.' },
             { priority: 'high', title: 'Fill All Hero Slots', desc: 'Empty hero slots = wasted stats. Put any hero rather than leaving slots empty.' },
-            { priority: 'medium', title: 'Shield After Defense', desc: 'If you took significant losses, shield immediately. Don\'t let them follow up while you\'re weakened.' },
-            { priority: 'medium', title: 'Anti-Scout Shields', desc: 'If you\'re being scouted repeatedly, put up a shield. They\'re planning an attack.' },
-            { priority: 'low', title: 'Bait and Switch', desc: 'Show weak garrison, wait for rally, then swap in strong garrison at last second. Risky but effective.' },
+            { priority: 'medium', title: 'Bait and Switch', desc: 'Show weak garrison, wait for rally, then swap in strong garrison at last second. Risky but effective.' },
           ].map((item, i) => {
             const colors = priorityColors[item.priority];
             return (
@@ -144,21 +145,20 @@ function CastleBattlesTab() {
           <div>
             <h3 className="font-medium text-fire mb-2">Attackers</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>☐ Troops fully healed</li>
-              <li>☐ Heroes assigned to march slots</li>
-              <li>☐ Rally speedups ready</li>
-              <li>☐ Shields ready for after attack</li>
-              <li>☐ Comms channel open</li>
+              <li>• Troops fully healed</li>
+              <li>• Heroes assigned to march slots</li>
+              <li>• Rally speedups ready</li>
+              <li>• Sergey squad ready to swap in after capture</li>
+              <li>• Comms channel open</li>
             </ul>
           </div>
           <div>
             <h3 className="font-medium text-ice mb-2">Defenders</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>☐ Garrison heroes set (Sergey slot 1)</li>
-              <li>☐ Troop ratio configured</li>
-              <li>☐ Reinforcement troops ready</li>
-              <li>☐ Shields in inventory</li>
-              <li>☐ Hospital capacity available</li>
+              <li>• Garrison heroes set (Sergey slot 1)</li>
+              <li>• Troop ratio configured (60/25/15)</li>
+              <li>• Reinforcement troops ready to send between enemy rallies</li>
+              <li>• Hospital capacity available</li>
             </ul>
           </div>
         </div>
@@ -173,7 +173,7 @@ function BearTrapTab() {
       <div className="card bg-gradient-to-r from-orange-500/10 to-transparent border-orange-500/30">
         <p className="text-frost">
           Bear Trap is a <strong className="text-orange-400">weekly rally boss event</strong> where your alliance works together to defeat increasingly difficult bears.
-          The bear is slow-moving, making <span className={troopColors.marksman}>Marksman-heavy</span> compositions optimal.
+          The bear is slow-moving, making <span className={troopColors.marksman}>Marksman-heavy</span> compositions optimal for DPS.
         </p>
       </div>
 
@@ -188,8 +188,9 @@ function BearTrapTab() {
               <li>• Rally leader sets the march and starts rally</li>
               <li>• Alliance members join with troops</li>
               <li>• Only <strong className="text-frost">top 4 expedition skill LEVELS</strong> from all joiners apply</li>
-              <li>• First hero's top-right expedition skill is what counts</li>
+              <li>• Only each joiner{"'"}s <strong className="text-frost">first hero{"'"}s top-right expedition skill</strong> counts</li>
               <li>• Higher level bear = better rewards</li>
+              <li>• Hero class doesn{"'"}t need to match troop type - <strong className="text-frost">skill level matters most</strong></li>
             </ul>
           </div>
           <div className="p-4 rounded-lg bg-surface">
@@ -216,103 +217,81 @@ function BearTrapTab() {
         </div>
       </div>
 
-      {/* Jeronimo vs Natalia Decision Box */}
+      {/* Key Concept: Hero Class vs Skill */}
       <div className="card border-yellow-500/30">
-        <h2 className="section-header text-yellow-400">Should I Use Jeronimo?</h2>
+        <h2 className="section-header text-yellow-400">Hero Class Doesn{"'"}t Matter for Joining</h2>
         <p className="text-frost-muted mb-4">
-          Common question: Jeronimo is S+ tier infantry but Bear Trap uses marksman. Here's when to use him:
+          Common misconception: you need marksman heroes for Bear Trap. In reality, <strong className="text-frost">Jessie (a Lancer)</strong> is the #1 attack joiner because her expedition skill buffs ALL troop damage.
         </p>
 
         <div className="grid md:grid-cols-2 gap-4">
           <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
-            <h3 className="font-medium text-green-400 mb-2">Use Jeronimo When:</h3>
+            <h3 className="font-medium text-green-400 mb-2">What Matters (Joiners)</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• His expedition skill level is higher than alternatives</li>
-              <li>• You don't have leveled marksman heroes</li>
-              <li>• Rally leader specifically requests infantry lead</li>
-              <li>• You're the rally leader with high Jeronimo gear</li>
+              <li>• <strong className="text-frost">Expedition skill level</strong> - higher = better</li>
+              <li>• <strong className="text-frost">Skill effect</strong> - damage buffs are best</li>
+              <li>• Only the first hero{"'"}s top-right skill is used</li>
+              <li>• Top 4 highest skill LEVELS from all joiners apply</li>
             </ul>
           </div>
           <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
-            <h3 className="font-medium text-red-400 mb-2">Don't Use Jeronimo When:</h3>
+            <h3 className="font-medium text-red-400 mb-2">What Doesn{"'"}t Matter (Joiners)</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• You have Molly/Natalia with same or higher skill</li>
-              <li>• Rally is already marksman-heavy</li>
-              <li>• His expedition skill is lower than your marksman heroes</li>
-              <li>• You're joining (not leading) the rally</li>
+              <li>• Hero class (Infantry/Lancer/Marksman)</li>
+              <li>• Hero power or level</li>
+              <li>• Hero gear (only rally leader{"'"}s gear matters)</li>
+              <li>• Your troop composition (rally leader sets it)</li>
             </ul>
           </div>
         </div>
 
         <div className="mt-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
           <p className="text-sm text-frost">
-            <strong className="text-yellow-400">Bottom Line:</strong> For joiners, expedition skill LEVEL matters most.
-            Put your highest skill-level hero first regardless of class. The rally leader sets the troop composition.
+            <strong className="text-yellow-400">Bottom Line:</strong> Put your hero with the highest expedition skill level first,
+            regardless of their class. Jessie the Lancer is the best attack joiner in the game.
           </p>
         </div>
       </div>
 
-      {/* Hero Recommendations by Generation */}
+      {/* Best Attack Joiner Heroes */}
       <div className="card">
-        <h2 className="section-header">Hero Selection by Generation</h2>
-        <p className="text-frost-muted mb-4">Best heroes to put first when joining Bear Trap rallies:</p>
+        <h2 className="section-header">Best Attack Joiner Heroes</h2>
+        <p className="text-frost-muted mb-4">Heroes with the best top-right expedition skills for boosting rally damage:</p>
 
-        <div className="space-y-4">
+        <div className="space-y-2">
           {[
-            {
-              gen: 'Gen 1-3',
-              days: '0-200 days',
-              heroes: [
-                { name: 'Jessie', class: 'Marksman', skill: 'Stand of Arms', effect: '+5-25% DMG dealt', priority: 'critical' },
-                { name: 'Molly', class: 'Marksman', skill: 'Precise Shot', effect: 'Marksman ATK buff', priority: 'high' },
-                { name: 'Natalia', class: 'Marksman', skill: 'Swift Stride', effect: 'March speed + damage', priority: 'high' },
-              ],
-            },
-            {
-              gen: 'Gen 4-6',
-              days: '200-440 days',
-              heroes: [
-                { name: 'Jessie', class: 'Marksman', skill: 'Stand of Arms', effect: '+25% DMG at level 5', priority: 'critical' },
-                { name: 'Wu Ming', class: 'Infantry', skill: 'Tactical Edge', effect: 'Strong buff if high level', priority: 'medium' },
-                { name: 'Lynn', class: 'Marksman', skill: 'Eagle Eye', effect: 'Crit rate buff', priority: 'medium' },
-              ],
-            },
-            {
-              gen: 'Gen 7+',
-              days: '440+ days',
-              heroes: [
-                { name: 'Jessie', class: 'Marksman', skill: 'Stand of Arms', effect: 'Still best attack joiner', priority: 'critical' },
-                { name: 'Gatot', class: 'Infantry', skill: 'War Cry', effect: 'Team ATK buff', priority: 'high' },
-                { name: 'Sonya', class: 'Lancer', skill: 'Battle Fury', effect: 'High damage buff', priority: 'high' },
-              ],
-            },
-          ].map((tier, i) => (
-            <div key={i} className="p-4 rounded-lg bg-surface">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="font-medium text-frost">{tier.gen}</h3>
-                <span className="text-xs text-frost-muted">{tier.days}</span>
+            { name: 'Jessie', gen: 1, class: 'Lancer', skill: 'Stand of Arms', effect: '+5-25% DMG dealt (ALL troops)', priority: 'critical' },
+            { name: 'Jasser', gen: 1, class: 'Marksman', skill: 'Tactical Genius', effect: '+5-25% DMG dealt (ALL troops)', priority: 'critical' },
+            { name: 'Seo-yoon', gen: 1, class: 'Marksman', skill: 'Rallying Beat', effect: '+5-25% ATK (ALL troops)', priority: 'critical' },
+            { name: 'Hervor', gen: 12, class: 'Infantry', skill: 'Call For Blood', effect: '+5-25% DMG dealt (ALL troops)', priority: 'high' },
+            { name: 'Hendrik', gen: 8, class: 'Marksman', skill: "Worm's Ravage", effect: '-5-25% enemy DEF (ALL enemies)', priority: 'high' },
+            { name: 'Sonya', gen: 8, class: 'Lancer', skill: 'Treasure Hunter', effect: '+4-20% DMG (ALL troops)', priority: 'medium' },
+            { name: 'Lynn', gen: 4, class: 'Marksman', skill: 'Song of Lion', effect: '40% chance +10-50% DMG dealt', priority: 'medium' },
+          ].map((hero, i) => {
+            const colors = priorityColors[hero.priority];
+            const classColor = troopColors[hero.class.toLowerCase() as keyof typeof troopColors] || 'text-frost';
+            return (
+              <div key={i} className={`p-3 rounded ${colors.bg} border ${colors.border}`}>
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs font-bold uppercase ${colors.text} w-6`}>#{i + 1}</span>
+                    <span className="font-medium text-frost">{hero.name}</span>
+                    <span className={`text-xs ${classColor}`}>({hero.class})</span>
+                    <span className="text-xs text-frost-muted">Gen {hero.gen}</span>
+                  </div>
+                  <span className="text-xs text-frost-muted">{hero.effect}</span>
+                </div>
+                <p className="text-xs text-frost-muted mt-1 ml-8">Skill: {hero.skill}</p>
               </div>
-              <div className="space-y-2">
-                {tier.heroes.map((hero, j) => {
-                  const colors = priorityColors[hero.priority];
-                  const classColor = troopColors[hero.class.toLowerCase() as keyof typeof troopColors] || 'text-frost';
-                  return (
-                    <div key={j} className={`p-2 rounded ${colors.bg} border ${colors.border}`}>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs font-bold uppercase ${colors.text}`}>{hero.priority === 'critical' ? '1st' : hero.priority === 'high' ? '2nd' : '3rd'}</span>
-                          <span className="font-medium text-frost">{hero.name}</span>
-                          <span className={`text-xs ${classColor}`}>({hero.class})</span>
-                        </div>
-                        <span className="text-xs text-frost-muted">{hero.effect}</span>
-                      </div>
-                      <p className="text-xs text-frost-muted mt-1">Skill: {hero.skill}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
+            );
+          })}
+        </div>
+
+        <div className="mt-4 p-3 rounded-lg bg-ice/10 border border-ice/30">
+          <p className="text-sm text-frost">
+            <strong className="text-ice">For garrison defense:</strong> Use <strong>Sergey</strong> (Gen 1, Infantry) first - his
+            Defender{"'"}s Edge skill reduces ALL damage taken by up to 20%.
+          </p>
         </div>
       </div>
 
@@ -332,21 +311,33 @@ function BearTrapTab() {
             <tbody className="text-frost">
               <tr className="border-b border-surface-border/50">
                 <td className="py-2">Rally Leader</td>
-                <td className="py-2">Highest power marksman</td>
+                <td className="py-2">Highest power hero</td>
                 <td className="py-2">0/10/90</td>
                 <td className="py-2 text-frost-muted">You set the composition</td>
               </tr>
               <tr className="border-b border-surface-border/50">
-                <td className="py-2">Joiner (Optimal)</td>
-                <td className="py-2 text-green-400">Jessie</td>
+                <td className="py-2">Joiner (Best)</td>
+                <td className="py-2 text-green-400">Jessie (Lancer)</td>
                 <td className="py-2">0/10/90</td>
-                <td className="py-2 text-frost-muted">+25% DMG at skill 5</td>
+                <td className="py-2 text-frost-muted">Stand of Arms: +25% DMG at skill 5</td>
               </tr>
               <tr className="border-b border-surface-border/50">
                 <td className="py-2">Joiner (Alt)</td>
-                <td className="py-2">Highest skill level hero</td>
+                <td className="py-2">Jasser / Seo-yoon</td>
                 <td className="py-2">0/10/90</td>
-                <td className="py-2 text-frost-muted">If Jessie skill is low</td>
+                <td className="py-2 text-frost-muted">Same +25% buff as Jessie (all Gen 1)</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="py-2">Joiner (Fallback)</td>
+                <td className="py-2">Highest combat skill hero</td>
+                <td className="py-2">0/10/90</td>
+                <td className="py-2 text-frost-muted">Any hero with offensive expedition skill</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="py-2 text-red-400">AVOID</td>
+                <td className="py-2 text-frost-muted">No hero (troops only)</td>
+                <td className="py-2">0/10/90</td>
+                <td className="py-2 text-frost-muted">Better than a non-combat skill (gathering, building speed)</td>
               </tr>
             </tbody>
           </table>
@@ -366,18 +357,38 @@ function CanyonClashTab() {
         </p>
       </div>
 
-      {/* Arena Map Image */}
+      {/* Arena Map Layout */}
       <div className="card">
         <h2 className="section-header">Arena Map</h2>
-        <div className="flex justify-center">
-          <img
-            src="/Screenshots/canyon-clash-guides-whiteout-survival-v0-8fsabubt2jyd1.png"
-            alt="Canyon Clash Arena Map"
-            className="max-w-full rounded-lg border border-surface-border"
-            style={{ maxHeight: '400px' }}
-          />
+        <div className="max-w-md mx-auto py-6">
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-24 h-24 rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center text-center">
+              <span className="text-xs text-amber-400 font-bold leading-tight">Frozen<br/>Citadel</span>
+            </div>
+            <div className="flex items-center gap-1 text-frost-muted text-xs">
+              <span className="w-8 border-t border-dashed border-frost-muted"></span>
+              <span>bridges</span>
+              <span className="w-8 border-t border-dashed border-frost-muted"></span>
+            </div>
+            <div className="grid grid-cols-3 gap-8 w-full">
+              {['Alliance 1', 'Alliance 2', 'Alliance 3'].map((name, i) => (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <div className={`w-16 h-16 rounded-lg flex items-center justify-center text-center ${
+                    i === 0 ? 'bg-red-500/20 border border-red-500/50' :
+                    i === 1 ? 'bg-blue-500/20 border border-blue-500/50' :
+                    'bg-green-500/20 border border-green-500/50'
+                  }`}>
+                    <span className={`text-[10px] font-medium ${
+                      i === 0 ? 'text-red-400' : i === 1 ? 'text-blue-400' : 'text-green-400'
+                    }`}>{name}</span>
+                  </div>
+                  <span className="text-[10px] text-frost-muted">Island {i + 1}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <p className="text-xs text-frost-muted text-center mt-2">
+        <p className="text-xs text-frost-muted text-center">
           Three alliances start on separate islands, connected by bridges to the central Frozen Citadel
         </p>
       </div>
@@ -582,7 +593,7 @@ function FoundryTab() {
             src="https://cdn-www.bluestacks.com/bs-images/WhiteoutSurvival_Guide_FoundryBattleGuide_EN2.jpg"
             alt="Foundry Battle Map"
             className="max-w-full rounded-lg border border-surface-border"
-            style={{ maxHeight: '350px' }}
+            style={{ maxHeight: '350px', imageRendering: 'auto', filter: 'contrast(1.15) brightness(1.02) saturate(1.1)' }}
           />
         </div>
         <p className="text-xs text-frost-muted text-center mt-2">
@@ -1077,180 +1088,202 @@ Don't forget:
 
 function LabyrinthTab() {
   const zones = [
-    { zone: 'Crystal Caverns', troops: '50/25/25', difficulty: 'Easy', reward: 'Crystals', tip: 'Good for beginners' },
-    { zone: 'Magma Chamber', troops: '30/20/50', difficulty: 'Medium', reward: 'Fire Essence', tip: 'Marksman-heavy for range' },
-    { zone: 'Frost Halls', troops: '40/40/20', difficulty: 'Medium', reward: 'Ice Shards', tip: 'Balanced composition' },
-    { zone: 'Shadow Depths', troops: '60/20/20', difficulty: 'Hard', reward: 'Shadow Cores', tip: 'Tank-heavy, slow push' },
-    { zone: 'Void Nexus', troops: '35/35/30', difficulty: 'Very Hard', reward: 'Void Essence', tip: 'All heroes maxed' },
-    { zone: 'Ancient Ruins', troops: '45/30/25', difficulty: 'Hard', reward: 'Ancient Relics', tip: 'Mixed strategy' },
+    { zone: 'Land of the Brave', days: 'Mon - Tue', statSource: 'Heroes, Hero Gear, Exclusive Gear', unlock: 'Furnace 19', color: 'red' },
+    { zone: 'Cave of Monsters', days: 'Wed - Thu', statSource: 'Pets & Pet Skills', unlock: 'Furnace 19 + Pets (~55 days)', color: 'green' },
+    { zone: 'Glowstone Mine', days: 'Wed - Thu', statSource: 'Chief Charms', unlock: 'Furnace 25', color: 'purple' },
+    { zone: 'Earthlab', days: 'Fri - Sat', statSource: 'Research & War Academy Tech', unlock: 'Furnace 19', color: 'blue' },
+    { zone: 'Dark Forge', days: 'Fri - Sat', statSource: 'Chief Gear', unlock: 'Furnace 22', color: 'amber' },
+    { zone: 'Gaia Heart', days: 'Sunday', statSource: 'ALL stats (heroes, gear, pets, charms, research, chief gear)', unlock: 'Furnace 19', color: 'yellow' },
   ];
+
+  const colorMap: Record<string, { bg: string; border: string; text: string }> = {
+    red: { bg: 'bg-red-500/10', border: 'border-red-500/30', text: 'text-red-400' },
+    green: { bg: 'bg-green-500/10', border: 'border-green-500/30', text: 'text-green-400' },
+    purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-400' },
+    blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400' },
+    amber: { bg: 'bg-amber-500/10', border: 'border-amber-500/30', text: 'text-amber-400' },
+    yellow: { bg: 'bg-yellow-500/10', border: 'border-yellow-500/30', text: 'text-yellow-400' },
+  };
 
   return (
     <div className="space-y-6">
       <div className="card bg-gradient-to-r from-indigo-500/10 to-transparent border-indigo-500/30">
         <p className="text-frost">
-          Labyrinth is a <strong className="text-indigo-400">dungeon exploration mode</strong> with multiple zones, each requiring different strategies.
-          Clear zones for valuable rewards and progression.
+          Labyrinth is a <strong className="text-indigo-400">weekly combat challenge</strong> with 6 zones.
+          Each zone only uses <strong className="text-frost">specific stat sources</strong> - your other upgrades don{"'"}t count!
+          Unlocks at <strong className="text-frost">Furnace 19</strong>. 5 attempts per zone per day. Stages reset weekly on Monday.
         </p>
       </div>
 
-      {/* Zone Summary Table */}
+      {/* Key Mechanic */}
+      <div className="card border-fire/30">
+        <h2 className="section-header text-fire">Critical: Each Zone Uses Different Stats!</h2>
+        <p className="text-frost-muted mb-4">
+          Unlike other events, the Labyrinth <strong className="text-frost">only reads specific stat sources per zone</strong>.
+          Your hero levels might be maxed, but in Cave of Monsters only your Pet stats matter.
+        </p>
+        <div className="p-3 rounded-lg bg-fire/10 border border-fire/30">
+          <p className="text-sm text-frost">
+            <strong className="text-fire">Weekday zones (Mon-Sat):</strong> The game provides <strong>Level 10 troops</strong> for you - your own troop levels don{"'"}t matter.
+          </p>
+          <p className="text-sm text-frost mt-1">
+            <strong className="text-yellow-400">Sunday (Gaia Heart):</strong> You use <strong>your own troops</strong> (but no casualties), and ALL stat sources apply.
+          </p>
+        </div>
+      </div>
+
+      {/* Zone Schedule Table */}
       <div className="card">
-        <h2 className="section-header">Zone Summary</h2>
+        <h2 className="section-header">Zone Schedule</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-surface-border">
                 <th className="text-left py-2 text-frost-muted">Zone</th>
-                <th className="text-center py-2 text-frost-muted">Troop Ratio</th>
-                <th className="text-center py-2 text-frost-muted">Difficulty</th>
-                <th className="text-left py-2 text-frost-muted">Reward</th>
-                <th className="text-left py-2 text-frost-muted">Tip</th>
+                <th className="text-center py-2 text-frost-muted">Days</th>
+                <th className="text-left py-2 text-frost-muted">Stats That Matter</th>
+                <th className="text-left py-2 text-frost-muted">Unlock</th>
               </tr>
             </thead>
             <tbody className="text-frost">
               {zones.map((zone, i) => {
-                const diffColor = zone.difficulty === 'Easy' ? 'text-green-400' :
-                  zone.difficulty === 'Medium' ? 'text-yellow-400' :
-                  zone.difficulty === 'Hard' ? 'text-orange-400' : 'text-red-400';
+                const colors = colorMap[zone.color];
                 return (
                   <tr key={i} className="border-b border-surface-border/50">
-                    <td className="py-2 font-medium">{zone.zone}</td>
-                    <td className="text-center py-2">
-                      <span className={troopColors.infantry}>{zone.troops.split('/')[0]}</span>/
-                      <span className={troopColors.lancer}>{zone.troops.split('/')[1]}</span>/
-                      <span className={troopColors.marksman}>{zone.troops.split('/')[2]}</span>
-                    </td>
-                    <td className={`text-center py-2 ${diffColor}`}>{zone.difficulty}</td>
-                    <td className="py-2 text-frost-muted">{zone.reward}</td>
-                    <td className="py-2 text-frost-muted text-xs">{zone.tip}</td>
+                    <td className={`py-2 font-medium ${colors.text}`}>{zone.zone}</td>
+                    <td className="text-center py-2 text-frost-muted">{zone.days}</td>
+                    <td className="py-2 text-frost-muted text-xs">{zone.statSource}</td>
+                    <td className="py-2 text-frost-muted text-xs">{zone.unlock}</td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
         </div>
-        <p className="text-xs text-frost-muted mt-3">
-          Troop ratios shown as <span className={troopColors.infantry}>Infantry</span>/
-          <span className={troopColors.lancer}>Lancer</span>/
-          <span className={troopColors.marksman}>Marksman</span>
-        </p>
       </div>
 
-      {/* Detailed Zone Strategies */}
+      {/* Zone Details */}
       <div className="card">
-        <h2 className="section-header">Zone Strategies</h2>
-
+        <h2 className="section-header">Zone Details</h2>
         <div className="space-y-4">
-          <details className="group">
-            <summary className="cursor-pointer p-3 rounded-lg bg-green-500/10 border border-green-500/30 hover:bg-green-500/15">
-              <span className="font-medium text-green-400">Crystal Caverns (Easy)</span>
-            </summary>
-            <div className="mt-2 p-4 rounded-lg bg-surface">
-              <ul className="text-sm text-frost-muted space-y-2">
-                <li><strong className="text-frost">Composition:</strong> 50/25/25 - Balanced with infantry lead</li>
-                <li><strong className="text-frost">Key mechanic:</strong> Crystal nodes that heal enemies - destroy first</li>
-                <li><strong className="text-frost">Boss:</strong> Crystal Golem - avoid AoE attacks, focus body</li>
-                <li><strong className="text-frost">Rewards:</strong> Basic crystals for crafting and upgrades</li>
-              </ul>
-            </div>
-          </details>
-
-          <details className="group">
-            <summary className="cursor-pointer p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30 hover:bg-yellow-500/15">
-              <span className="font-medium text-yellow-400">Magma Chamber (Medium)</span>
-            </summary>
-            <div className="mt-2 p-4 rounded-lg bg-surface">
-              <ul className="text-sm text-frost-muted space-y-2">
-                <li><strong className="text-frost">Composition:</strong> 30/20/50 - Marksman-heavy for range advantage</li>
-                <li><strong className="text-frost">Key mechanic:</strong> Lava pools deal damage over time - stay mobile</li>
-                <li><strong className="text-frost">Boss:</strong> Magma Elemental - kite around arena, avoid eruptions</li>
-                <li><strong className="text-frost">Rewards:</strong> Fire Essence for hero skill upgrades</li>
-              </ul>
-            </div>
-          </details>
-
-          <details className="group">
-            <summary className="cursor-pointer p-3 rounded-lg bg-cyan-500/10 border border-cyan-500/30 hover:bg-cyan-500/15">
-              <span className="font-medium text-cyan-400">Frost Halls (Medium)</span>
-            </summary>
-            <div className="mt-2 p-4 rounded-lg bg-surface">
-              <ul className="text-sm text-frost-muted space-y-2">
-                <li><strong className="text-frost">Composition:</strong> 40/40/20 - Balanced, lancers for mobility</li>
-                <li><strong className="text-frost">Key mechanic:</strong> Freeze traps slow movement - bring speed buffs</li>
-                <li><strong className="text-frost">Boss:</strong> Frost Warden - burst damage phases, heal between</li>
-                <li><strong className="text-frost">Rewards:</strong> Ice Shards for equipment enhancement</li>
-              </ul>
-            </div>
-          </details>
-
-          <details className="group">
-            <summary className="cursor-pointer p-3 rounded-lg bg-purple-500/10 border border-purple-500/30 hover:bg-purple-500/15">
-              <span className="font-medium text-purple-400">Shadow Depths (Hard)</span>
-            </summary>
-            <div className="mt-2 p-4 rounded-lg bg-surface">
-              <ul className="text-sm text-frost-muted space-y-2">
-                <li><strong className="text-frost">Composition:</strong> 60/20/20 - Tank-heavy for survivability</li>
-                <li><strong className="text-frost">Key mechanic:</strong> Darkness reduces vision - stick together</li>
-                <li><strong className="text-frost">Boss:</strong> Shadow Lord - phases with adds, AoE cleanse needed</li>
-                <li><strong className="text-frost">Rewards:</strong> Shadow Cores for advanced crafting</li>
-              </ul>
-            </div>
-          </details>
-
-          <details className="group">
-            <summary className="cursor-pointer p-3 rounded-lg bg-red-500/10 border border-red-500/30 hover:bg-red-500/15">
-              <span className="font-medium text-red-400">Void Nexus (Very Hard)</span>
-            </summary>
-            <div className="mt-2 p-4 rounded-lg bg-surface">
-              <ul className="text-sm text-frost-muted space-y-2">
-                <li><strong className="text-frost">Composition:</strong> 35/35/30 - Perfectly balanced, all maxed</li>
-                <li><strong className="text-frost">Key mechanic:</strong> Void rifts teleport troops randomly - adapt quickly</li>
-                <li><strong className="text-frost">Boss:</strong> Void Harbinger - multiple phases, enrage timer</li>
-                <li><strong className="text-frost">Rewards:</strong> Void Essence for top-tier equipment</li>
-                <li><strong className="text-frost text-yellow-400">Note:</strong> Requires all heroes at max level with legendary gear</li>
-              </ul>
-            </div>
-          </details>
-
-          <details className="group">
-            <summary className="cursor-pointer p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/15">
-              <span className="font-medium text-amber-400">Ancient Ruins (Hard)</span>
-            </summary>
-            <div className="mt-2 p-4 rounded-lg bg-surface">
-              <ul className="text-sm text-frost-muted space-y-2">
-                <li><strong className="text-frost">Composition:</strong> 45/30/25 - Infantry lead with lancer support</li>
-                <li><strong className="text-frost">Key mechanic:</strong> Puzzle elements - solve to progress</li>
-                <li><strong className="text-frost">Boss:</strong> Ancient Guardian - mechanical patterns, learn timing</li>
-                <li><strong className="text-frost">Rewards:</strong> Ancient Relics for special hero abilities</li>
-              </ul>
-            </div>
-          </details>
+          {zones.map((zone, i) => {
+            const colors = colorMap[zone.color];
+            const details: Record<string, string[]> = {
+              'Land of the Brave': [
+                'Only hero levels, stars, ascension, skills, hero gear, and exclusive gear matter',
+                'Pets, research, chief gear, and charms are all irrelevant here',
+                'Players who invested heavily in hero gear and exclusive gear excel',
+                'Hero skill levels (both exploration and expedition) contribute',
+              ],
+              'Cave of Monsters': [
+                'Only pet levels and pet skills matter',
+                'Requires pets to be unlocked (Furnace 18 + ~55 days server age)',
+                'Hero levels, gear, research etc. do NOT factor in',
+                'High-level pets with leveled skills dominate this zone',
+              ],
+              'Glowstone Mine': [
+                'Only Chief Charms matter (unlocks at Furnace 25)',
+                'Charm slot levels (up to level 16 with sub-levels) determine your power',
+                'One of the harder zones for F2P players due to charm investment required',
+                'Focus on leveling charm slots evenly across all gear pieces',
+              ],
+              'Earthlab': [
+                'Only Research Center and War Academy technologies matter',
+                'War Academy unlocks at Furnace 30 - pre-FC players rely on Research only',
+                'Players who prioritized combat research perform best',
+                'Good zone for older accounts with lots of research done',
+              ],
+              'Dark Forge': [
+                'Only Chief Gear quality, level, and mastery matter',
+                'Requires Furnace 22 to unlock Chief Gear',
+                'High-quality, high-level chief gear (coat, pants, hat, watch, belt, weapon) dominates',
+                'Mastery levels (Furnace 30+) give significant advantage',
+              ],
+              'Gaia Heart': [
+                'ALL stat sources apply (heroes, hero gear, pets, charms, research, War Academy, chief gear)',
+                'EXCEPTION: Castle buffs, alliance tech/territory, gem buffs, and facilities do NOT work',
+                'You use YOUR OWN TROOPS (not provided Level 10) - troop tier matters!',
+                'No casualties - troops are safe. This is the "ultimate test" zone',
+              ],
+            };
+            return (
+              <details key={i} className="group">
+                <summary className={`cursor-pointer p-3 rounded-lg ${colors.bg} border ${colors.border} hover:opacity-80`}>
+                  <span className={`font-medium ${colors.text}`}>{zone.zone}</span>
+                  <span className="text-frost-muted text-sm ml-2">({zone.days})</span>
+                </summary>
+                <div className="mt-2 p-4 rounded-lg bg-surface">
+                  <ul className="text-sm text-frost-muted space-y-2">
+                    {(details[zone.zone] || []).map((detail, j) => (
+                      <li key={j}>{detail}</li>
+                    ))}
+                  </ul>
+                </div>
+              </details>
+            );
+          })}
         </div>
       </div>
 
-      {/* General Tips */}
+      {/* Troop Composition */}
       <div className="card">
-        <h2 className="section-header">General Labyrinth Tips</h2>
+        <h2 className="section-header">Troop Composition</h2>
+        <p className="text-frost-muted mb-4">
+          For weekday zones (Mon-Sat), the game provides Level 10 troops. Use a balanced composition for all stages:
+        </p>
+
+        <div className="p-4 rounded-lg bg-surface mb-4">
+          <h3 className="font-medium text-frost mb-3">Recommended Ratio (All Stages)</h3>
+          <div className="flex items-center justify-center gap-8">
+            <div className="text-center">
+              <p className={`text-3xl font-bold ${troopColors.infantry}`}>50%</p>
+              <p className="text-xs text-frost-muted">Infantry</p>
+            </div>
+            <div className="text-center">
+              <p className={`text-3xl font-bold ${troopColors.lancer}`}>20%</p>
+              <p className="text-xs text-frost-muted">Lancer</p>
+            </div>
+            <div className="text-center">
+              <p className={`text-3xl font-bold ${troopColors.marksman}`}>30%</p>
+              <p className="text-xs text-frost-muted">Marksman</p>
+            </div>
+          </div>
+          <p className="text-sm text-frost-muted text-center mt-3">
+            This balanced ratio works consistently across all zones and stages 1-10.
+            Infantry-heavy front absorbs damage while marksmen deal sustained DPS.
+          </p>
+        </div>
+      </div>
+
+      {/* Raid and Progression */}
+      <div className="card">
+        <h2 className="section-header">Progression Tips</h2>
         <div className="grid md:grid-cols-2 gap-4">
           <div className="p-4 rounded-lg bg-surface">
-            <h3 className="font-medium text-frost mb-2">Progression</h3>
+            <h3 className="font-medium text-frost mb-2">Stage Clearing</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Complete Easy zones first for resources</li>
-              <li>• Upgrade heroes before attempting Hard</li>
-              <li>• Save stamina for event bonuses</li>
-              <li>• Daily attempts reset at server time</li>
+              <li>• 10 stages per zone, increasing difficulty</li>
+              <li>• <strong className="text-frost">Raid unlocks after clearing Stage 10</strong> - instant rewards on future weeks</li>
+              <li>• 5 attempts per zone per day, reset at 00:00 UTC</li>
+              <li>• Stages reset every Monday</li>
             </ul>
           </div>
           <div className="p-4 rounded-lg bg-surface">
-            <h3 className="font-medium text-frost mb-2">Combat</h3>
+            <h3 className="font-medium text-frost mb-2">Reward Priorities</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Learn boss patterns before going all-in</li>
-              <li>• Retreat is better than wipe</li>
-              <li>• Use hero skills at right moments</li>
-              <li>• AoE heroes valuable for trash waves</li>
+              <li>• Exchange Labyrinth currency for <strong className="text-frost">Mithril</strong> and <strong className="text-frost">FC Shards</strong> first</li>
+              <li>• Treasure chests from stage clears</li>
+              <li>• Milestone rewards via Labyrinth Cores</li>
+              <li>• Decorations: Luminari Citadel, Hero{"'"}s Sanctum</li>
             </ul>
           </div>
+        </div>
+
+        <div className="mt-4 p-3 rounded-lg bg-ice/10 border border-ice/30">
+          <p className="text-sm text-frost">
+            <strong className="text-ice">Pro Tip:</strong> Align your upgrade priorities with the weekly schedule.
+            If you{"'"}re upgrading hero gear, push Land of the Brave (Mon-Tue) right after upgrading for immediate benefit.
+          </p>
         </div>
       </div>
     </div>

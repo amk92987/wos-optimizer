@@ -21,15 +21,27 @@ export default function HeroesPage() {
   const [ownedHeroes, setOwnedHeroes] = useState<UserHero[]>([]);
   const [allHeroes, setAllHeroes] = useState<Hero[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [allHeroesLoading, setAllHeroesLoading] = useState(false);
+  const [allHeroesError, setAllHeroesError] = useState<string | null>(null);
   const [filterClass, setFilterClass] = useState<FilterClass>('all');
   const [filterTier, setFilterTier] = useState<FilterTier>('all');
   const [filterGeneration, setFilterGeneration] = useState<FilterGeneration>('all');
   const [sortBy, setSortBy] = useState<SortBy>('generation');
   const [searchQuery, setSearchQuery] = useState('');
-  const [addingHeroName, setAddingHeroName] = useState<string | null>(null);
   const [addError, setAddError] = useState<string | null>(null);
-  const [addSuccess, setAddSuccess] = useState<string | null>(null);
+  const [justAdded, setJustAdded] = useState<string | null>(null);
   const [selectedHero, setSelectedHero] = useState<Hero | null>(null);
+
+  // Bulk update mode
+  const [isBulkMode, setIsBulkMode] = useState(false);
+  const [selectedForBulk, setSelectedForBulk] = useState<Set<string>>(new Set());
+  const [bulkLevel, setBulkLevel] = useState<number | null>(null);
+  const [bulkStars, setBulkStars] = useState<number | null>(null);
+  const [bulkAscension, setBulkAscension] = useState<number | null>(null);
+  const [bulkExplorationSkills, setBulkExplorationSkills] = useState<number | null>(null);
+  const [bulkExpeditionSkills, setBulkExpeditionSkills] = useState<number | null>(null);
+  const [isBulkApplying, setIsBulkApplying] = useState(false);
+  const [bulkMessage, setBulkMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Load owned heroes
   useEffect(() => {
@@ -43,10 +55,16 @@ export default function HeroesPage() {
 
   // Load all heroes when tab switches
   useEffect(() => {
-    if (token && activeTab === 'all' && allHeroes.length === 0) {
-      heroesApi.getAll(token, true)
+    if (token && activeTab === 'all' && allHeroes.length === 0 && !allHeroesLoading) {
+      setAllHeroesLoading(true);
+      setAllHeroesError(null);
+      heroesApi.getAll(token, false)
         .then(data => setAllHeroes(data.heroes || []))
-        .catch(console.error);
+        .catch(err => {
+          console.error('Failed to load all heroes:', err);
+          setAllHeroesError('Failed to load heroes. Please try again.');
+        })
+        .finally(() => setAllHeroesLoading(false));
     }
   }, [token, activeTab, allHeroes.length]);
 
@@ -84,41 +102,74 @@ export default function HeroesPage() {
     }
   };
 
+  // Build a UserHero from reference data with defaults for optimistic UI
+  const buildOptimisticUserHero = (hero: Hero): UserHero => ({
+    hero_name: hero.name,
+    name: hero.name,
+    generation: hero.generation,
+    hero_class: hero.hero_class,
+    rarity: hero.rarity,
+    tier_overall: hero.tier_overall,
+    level: 1,
+    stars: 0,
+    ascension: 0,
+    exploration_skill_1: 1, exploration_skill_2: 1, exploration_skill_3: 1,
+    expedition_skill_1: 1, expedition_skill_2: 1, expedition_skill_3: 1,
+    exploration_skill_1_name: hero.exploration_skill_1,
+    exploration_skill_2_name: hero.exploration_skill_2,
+    exploration_skill_3_name: hero.exploration_skill_3,
+    expedition_skill_1_name: hero.expedition_skill_1,
+    expedition_skill_2_name: hero.expedition_skill_2,
+    expedition_skill_3_name: hero.expedition_skill_3,
+    exploration_skill_1_desc: hero.exploration_skill_1_desc,
+    exploration_skill_2_desc: hero.exploration_skill_2_desc,
+    exploration_skill_3_desc: hero.exploration_skill_3_desc,
+    expedition_skill_1_desc: hero.expedition_skill_1_desc,
+    expedition_skill_2_desc: hero.expedition_skill_2_desc,
+    expedition_skill_3_desc: hero.expedition_skill_3_desc,
+    gear_slot1_quality: 0, gear_slot1_level: 0, gear_slot1_mastery: 0,
+    gear_slot2_quality: 0, gear_slot2_level: 0, gear_slot2_mastery: 0,
+    gear_slot3_quality: 0, gear_slot3_level: 0, gear_slot3_mastery: 0,
+    gear_slot4_quality: 0, gear_slot4_level: 0, gear_slot4_mastery: 0,
+    mythic_gear_name: hero.mythic_gear,
+    mythic_gear_unlocked: false, mythic_gear_quality: 0, mythic_gear_level: 0, mythic_gear_mastery: 0,
+    exclusive_gear_skill_level: 0,
+    image_filename: hero.image_filename,
+    image_base64: hero.image_base64,
+  });
+
   const handleAddHero = async (heroName: string) => {
     if (!token) return;
 
-    setAddingHeroName(heroName);
+    const heroRef = allHeroes.find(h => h.name === heroName);
+    if (!heroRef) return;
+
     setAddError(null);
-    setAddSuccess(null);
 
-    try {
-      await heroesApi.addHero(token, heroName);
-      const data = await heroesApi.getOwned(token);
-      setOwnedHeroes(data.heroes || []);
+    // Optimistic: instantly add to owned list
+    const optimisticHero = buildOptimisticUserHero(heroRef);
+    setOwnedHeroes(prev => [...prev, optimisticHero]);
 
-      // Auto-update profile generation if hero is from a newer generation
-      const addedHero = allHeroes.find(h => h.name === heroName);
-      if (addedHero) {
-        try {
-          const profileData = await profileApi.getCurrent(token);
-          const profile = profileData.profile;
-          const currentGen = getCurrentGenFromDays(profile.server_age_days);
-          if (addedHero.generation > currentGen) {
-            const newDays = getGenMidpointDays(addedHero.generation);
-            await profileApi.update(token, profile.profile_id, { server_age_days: newDays });
-          }
-        } catch (profileError) {
-          // Non-critical: don't block hero add if profile update fails
-          console.warn('Could not auto-update profile generation:', profileError);
+    // Brief "just added" highlight on the Owned badge
+    setJustAdded(heroName);
+    setTimeout(() => setJustAdded(null), 1500);
+
+    // Fire backend call in background
+    heroesApi.addHero(token, heroName).then(() => {
+
+      // Auto-update profile generation in background (non-blocking)
+      profileApi.getCurrent(token).then(profileData => {
+        const profile = profileData.profile;
+        const currentGen = getCurrentGenFromDays(profile.server_age_days);
+        if (heroRef.generation > currentGen) {
+          const newDays = getGenMidpointDays(heroRef.generation);
+          profileApi.update(token, profile.profile_id, { server_age_days: newDays }).catch(() => {});
         }
-      }
+      }).catch(() => {});
+    }).catch((error: any) => {
+      // Revert optimistic add
+      setOwnedHeroes(prev => prev.filter(h => h.hero_name !== heroName));
 
-      // Show success message
-      setAddSuccess(`${heroName} added to your collection!`);
-      setTimeout(() => setAddSuccess(null), 3000);
-    } catch (error: any) {
-      console.error('Failed to add hero:', error);
-      // Show user-friendly error message
       const message = error?.message || 'Failed to add hero. Please try again.';
       if (message.includes('No profile found')) {
         setAddError('Please set up your profile in Settings first.');
@@ -126,24 +177,99 @@ export default function HeroesPage() {
         setAddError(message);
       }
       setTimeout(() => setAddError(null), 5000);
-    } finally {
-      setAddingHeroName(null);
-    }
+    });
   };
 
   const handleRemoveHero = async (heroName: string) => {
     if (!token) return;
 
+    // Optimistic: instantly remove from owned list
+    const previousHeroes = ownedHeroes;
+    setOwnedHeroes(prev => prev.filter(h => h.hero_name !== heroName));
+
     try {
       await heroesApi.removeHero(token, heroName);
-      const data = await heroesApi.getOwned(token);
-      setOwnedHeroes(data.heroes || []);
     } catch (error) {
+      // Revert on failure
+      setOwnedHeroes(previousHeroes);
       console.error('Failed to remove hero:', error);
     }
   };
 
   const tierOrder: Record<string, number> = { 'S+': 0, 'S': 1, 'A': 2, 'B': 3, 'C': 4, 'D': 5 };
+
+  // Bulk mode helpers
+  const toggleBulkSelect = (heroName: string) => {
+    setSelectedForBulk(prev => {
+      const next = new Set(prev);
+      if (next.has(heroName)) next.delete(heroName);
+      else next.add(heroName);
+      return next;
+    });
+  };
+
+  const selectAllFiltered = () => {
+    setSelectedForBulk(new Set(filteredOwnedHeroes.map(h => h.hero_name)));
+  };
+
+  const deselectAll = () => {
+    setSelectedForBulk(new Set());
+  };
+
+  const exitBulkMode = () => {
+    setIsBulkMode(false);
+    setSelectedForBulk(new Set());
+    setBulkLevel(null);
+    setBulkStars(null);
+    setBulkAscension(null);
+    setBulkExplorationSkills(null);
+    setBulkExpeditionSkills(null);
+    setBulkMessage(null);
+  };
+
+  const handleBulkApply = async () => {
+    if (!token || selectedForBulk.size === 0) return;
+
+    // Build update payload - only include non-null values
+    const updates: Record<string, any> = {};
+    if (bulkLevel !== null) updates.level = bulkLevel;
+    if (bulkStars !== null) updates.stars = bulkStars;
+    if (bulkAscension !== null) updates.ascension = bulkAscension;
+    if (bulkExplorationSkills !== null) {
+      updates.exploration_skill_1 = bulkExplorationSkills;
+      updates.exploration_skill_2 = bulkExplorationSkills;
+      updates.exploration_skill_3 = bulkExplorationSkills;
+    }
+    if (bulkExpeditionSkills !== null) {
+      updates.expedition_skill_1 = bulkExpeditionSkills;
+      updates.expedition_skill_2 = bulkExpeditionSkills;
+      updates.expedition_skill_3 = bulkExpeditionSkills;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      setBulkMessage({ type: 'error', text: 'Set at least one value to apply.' });
+      return;
+    }
+
+    setIsBulkApplying(true);
+    setBulkMessage(null);
+
+    const heroesPayload = Array.from(selectedForBulk).map(heroName => ({
+      name: heroName,
+      ...updates,
+    }));
+
+    try {
+      await heroesApi.batchUpdate(token, heroesPayload);
+      setBulkMessage({ type: 'success', text: `Updated ${heroesPayload.length} heroes.` });
+      // Refresh hero list
+      await refreshOwnedHeroes();
+    } catch (error: any) {
+      setBulkMessage({ type: 'error', text: error?.message || 'Bulk update failed.' });
+    } finally {
+      setIsBulkApplying(false);
+    }
+  };
 
   // Filter and sort owned heroes
   const filteredOwnedHeroes = ownedHeroes
@@ -267,7 +393,7 @@ export default function HeroesPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex items-center gap-2 mb-6">
           <button
             onClick={() => setActiveTab('owned')}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -288,17 +414,25 @@ export default function HeroesPage() {
           >
             All Heroes
           </button>
+          {activeTab === 'owned' && ownedHeroes.length > 0 && !isBulkMode && (
+            <button
+              onClick={() => setIsBulkMode(true)}
+              className="ml-auto px-3 py-2 rounded-lg text-sm font-medium bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover transition-colors"
+            >
+              Bulk Update
+            </button>
+          )}
+          {isBulkMode && (
+            <button
+              onClick={exitBulkMode}
+              className="ml-auto px-3 py-2 rounded-lg text-sm font-medium bg-error/20 text-error hover:bg-error/30 transition-colors"
+            >
+              Exit Bulk Mode
+            </button>
+          )}
         </div>
 
-        {/* Success/Error Messages */}
-        {addSuccess && (
-          <div className="mb-4 p-3 rounded-lg bg-success/20 border border-success/30 text-success text-sm flex items-center gap-2 animate-fadeIn">
-            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            {addSuccess}
-          </div>
-        )}
+        {/* Error Message */}
         {addError && (
           <div className="mb-4 p-3 rounded-lg bg-error/20 border border-error/30 text-error text-sm flex items-center gap-2 animate-fadeIn">
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -406,6 +540,116 @@ export default function HeroesPage() {
           </div>
         </div>
 
+        {/* Bulk Update Bar */}
+        {isBulkMode && activeTab === 'owned' && (
+          <div className="card mb-6 border-ice/30 bg-ice/5">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <h3 className="text-sm font-medium text-ice">Bulk Update</h3>
+                <span className="text-xs text-frost-muted">
+                  {selectedForBulk.size} of {filteredOwnedHeroes.length} selected
+                </span>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={selectedForBulk.size === filteredOwnedHeroes.length ? deselectAll : selectAllFiltered}
+                  className="px-3 py-1 rounded text-xs font-medium bg-surface text-frost-muted hover:text-frost transition-colors"
+                >
+                  {selectedForBulk.size === filteredOwnedHeroes.length ? 'Deselect All' : 'Select All'}
+                </button>
+              </div>
+            </div>
+
+            {/* Bulk value inputs */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-4">
+              <div>
+                <label className="text-xs text-frost-muted block mb-1">Level</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={80}
+                  placeholder="--"
+                  value={bulkLevel ?? ''}
+                  onChange={(e) => setBulkLevel(e.target.value ? Number(e.target.value) : null)}
+                  className="input text-sm py-1.5 w-full"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-frost-muted block mb-1">Stars</label>
+                <select
+                  value={bulkStars ?? ''}
+                  onChange={(e) => setBulkStars(e.target.value ? Number(e.target.value) : null)}
+                  className="input text-sm py-1.5 w-full"
+                >
+                  <option value="">--</option>
+                  {[0, 1, 2, 3, 4, 5].map(v => (
+                    <option key={v} value={v}>{v} {v === 1 ? 'star' : 'stars'}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-frost-muted block mb-1">Ascension</label>
+                <select
+                  value={bulkAscension ?? ''}
+                  onChange={(e) => setBulkAscension(e.target.value ? Number(e.target.value) : null)}
+                  className="input text-sm py-1.5 w-full"
+                >
+                  <option value="">--</option>
+                  {[0, 1, 2, 3, 4, 5].map(v => (
+                    <option key={v} value={v}>{v}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-frost-muted block mb-1">Exploration Skills</label>
+                <select
+                  value={bulkExplorationSkills ?? ''}
+                  onChange={(e) => setBulkExplorationSkills(e.target.value ? Number(e.target.value) : null)}
+                  className="input text-sm py-1.5 w-full"
+                >
+                  <option value="">--</option>
+                  {[1, 2, 3, 4, 5].map(v => (
+                    <option key={v} value={v}>All to {v}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="text-xs text-frost-muted block mb-1">Expedition Skills</label>
+                <select
+                  value={bulkExpeditionSkills ?? ''}
+                  onChange={(e) => setBulkExpeditionSkills(e.target.value ? Number(e.target.value) : null)}
+                  className="input text-sm py-1.5 w-full"
+                >
+                  <option value="">--</option>
+                  {[1, 2, 3, 4, 5].map(v => (
+                    <option key={v} value={v}>All to {v}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Bulk message */}
+            {bulkMessage && (
+              <div className={`mb-3 p-2 rounded text-xs ${
+                bulkMessage.type === 'success' ? 'bg-success/20 text-success' : 'bg-error/20 text-error'
+              }`}>
+                {bulkMessage.text}
+              </div>
+            )}
+
+            {/* Apply button */}
+            <button
+              onClick={handleBulkApply}
+              disabled={selectedForBulk.size === 0 || isBulkApplying}
+              className="btn-primary text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {isBulkApplying
+                ? 'Applying...'
+                : `Apply to ${selectedForBulk.size} Selected`}
+            </button>
+          </div>
+        )}
+
         {/* Content */}
         {activeTab === 'owned' ? (
           // Owned Heroes Tab
@@ -470,13 +714,26 @@ export default function HeroesPage() {
                             </span>
                           </div>
                           {generationGroups[gen].map(hero => (
-                            <HeroCard
-                              key={hero.hero_name}
-                              hero={hero}
-                              token={token}
-                              onSaved={refreshOwnedHeroes}
-                              onRemove={() => handleRemoveHero(hero.hero_name)}
-                            />
+                            <div key={hero.hero_name} className="flex items-start gap-2">
+                              {isBulkMode && (
+                                <label className="flex items-center mt-5 cursor-pointer flex-shrink-0">
+                                  <input
+                                    type="checkbox"
+                                    checked={selectedForBulk.has(hero.hero_name)}
+                                    onChange={() => toggleBulkSelect(hero.hero_name)}
+                                    className="w-5 h-5 rounded border-zinc-600 bg-surface text-ice focus:ring-ice/50 cursor-pointer"
+                                  />
+                                </label>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <HeroCard
+                                  hero={hero}
+                                  token={token}
+                                  onSaved={refreshOwnedHeroes}
+                                  onRemove={() => handleRemoveHero(hero.hero_name)}
+                                />
+                              </div>
+                            </div>
                           ))}
                         </div>
                       ));
@@ -484,13 +741,26 @@ export default function HeroesPage() {
                 ) : (
                   // Flat list for other sort modes
                   filteredOwnedHeroes.map((hero) => (
-                    <HeroCard
-                      key={hero.hero_name}
-                      hero={hero}
-                      token={token}
-                      onSaved={refreshOwnedHeroes}
-                      onRemove={() => handleRemoveHero(hero.hero_name)}
-                    />
+                    <div key={hero.hero_name} className="flex items-start gap-2">
+                      {isBulkMode && (
+                        <label className="flex items-center mt-5 cursor-pointer flex-shrink-0">
+                          <input
+                            type="checkbox"
+                            checked={selectedForBulk.has(hero.hero_name)}
+                            onChange={() => toggleBulkSelect(hero.hero_name)}
+                            className="w-5 h-5 rounded border-zinc-600 bg-surface text-ice focus:ring-ice/50 cursor-pointer"
+                          />
+                        </label>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <HeroCard
+                          hero={hero}
+                          token={token}
+                          onSaved={refreshOwnedHeroes}
+                          onRemove={() => handleRemoveHero(hero.hero_name)}
+                        />
+                      </div>
+                    </div>
                   ))
                 )}
               </div>
@@ -538,7 +808,20 @@ export default function HeroesPage() {
         ) : (
           // All Heroes Tab
           <>
-            {allHeroes.length === 0 ? (
+            {allHeroesError ? (
+              <div className="card text-center py-12">
+                <div className="text-4xl mb-4">⚠️</div>
+                <h3 className="text-lg font-medium text-zinc-100 mb-2">
+                  {allHeroesError}
+                </h3>
+                <button
+                  onClick={() => { setAllHeroesError(null); setAllHeroes([]); }}
+                  className="mt-4 px-4 py-2 bg-ice/20 text-ice rounded-lg hover:bg-ice/30 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            ) : allHeroesLoading || allHeroes.length === 0 ? (
               <div className="space-y-3">
                 {[...Array(5)].map((_, i) => (
                   <div key={i} className="card animate-pulse">
@@ -566,7 +849,6 @@ export default function HeroesPage() {
               <div className="grid gap-3 md:grid-cols-2">
                 {filteredAllHeroes.map((hero) => {
                   const isOwned = ownedHeroNames.has(hero.name);
-                  const isAdding = addingHeroName === hero.name;
 
                   return (
                     <div
@@ -578,15 +860,15 @@ export default function HeroesPage() {
                     >
                       {/* Hero Image */}
                       <div className={`w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 border-2 ${getRarityBorderClass(hero.rarity)}`}>
-                        {hero.image_base64 ? (
+                        {hero.image_base64 || hero.image_filename ? (
                           <img
-                            src={hero.image_base64}
+                            src={hero.image_base64 || `/images/heroes/${hero.image_filename}`}
                             alt={hero.name}
                             className="w-full h-full object-cover"
                           />
                         ) : (
                           <div className="w-full h-full bg-surface flex items-center justify-center text-2xl">
-                            🦸
+                            ?
                           </div>
                         )}
                       </div>
@@ -611,11 +893,13 @@ export default function HeroesPage() {
 
                       {/* Add/Owned Button */}
                       {isOwned ? (
-                        <span className="px-3 py-1.5 bg-ice/20 text-ice rounded-lg text-sm font-medium flex items-center gap-1">
+                        <span className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 transition-colors duration-500 ${
+                          justAdded === hero.name ? 'bg-success/30 text-success' : 'bg-ice/20 text-ice'
+                        }`}>
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                           </svg>
-                          Owned
+                          {justAdded === hero.name ? 'Added!' : 'Owned'}
                         </span>
                       ) : (
                         <button
@@ -623,25 +907,15 @@ export default function HeroesPage() {
                             e.stopPropagation();
                             handleAddHero(hero.name);
                           }}
-                          disabled={isAdding}
                           className="px-3 py-1.5 bg-success/20 text-success hover:bg-success/30
-                                     rounded-lg text-sm font-medium transition-colors disabled:opacity-50 flex-shrink-0"
+                                     rounded-lg text-sm font-medium transition-colors flex-shrink-0"
                         >
-                          {isAdding ? (
-                            <span className="flex items-center gap-1">
-                              <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                              </svg>
-                              Adding...
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                              </svg>
-                              Add
-                            </span>
-                          )}
+                          <span className="flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add
+                          </span>
                         </button>
                       )}
                     </div>

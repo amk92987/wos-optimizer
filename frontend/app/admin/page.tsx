@@ -211,6 +211,8 @@ export default function AdminDashboard() {
   const [errors, setErrors] = useState<ErrorSummary>({ new: 0, last_24h: 0, fixed: 0 });
   const [errorsLoading, setErrorsLoading] = useState(true);
   const [impersonating, setImpersonating] = useState<string | null>(null);
+  const [seedingAccounts, setSeedingAccounts] = useState(false);
+  const [seedResult, setSeedResult] = useState<{ message: string; password?: string; error?: boolean } | null>(null);
 
   // Fetch stats
   useEffect(() => {
@@ -335,14 +337,6 @@ export default function AdminDashboard() {
     { label: 'Announcements', value: stats?.active_announcements ?? '-', icon: '\uD83D\uDCE2', color: 'text-ice', href: '/admin/announcements' },
   ];
 
-  const quickActions = [
-    { label: 'Manage Users', href: '/admin/users', icon: '\uD83D\uDC65', description: 'Create, edit, or suspend users' },
-    { label: 'View Feedback', href: '/admin/inbox', icon: '\uD83D\uDCEC', description: 'Review user feedback and errors' },
-    { label: 'Announcements', href: '/admin/announcements', icon: '\uD83D\uDCE2', description: 'Create system announcements' },
-    { label: 'Feature Flags', href: '/admin/feature-flags', icon: '\uD83D\uDEA9', description: 'Toggle features on/off' },
-    { label: 'AI Settings', href: '/admin/ai', icon: '\uD83E\uDD16', description: 'Configure AI behavior' },
-    { label: 'Usage Reports', href: '/admin/usage-reports', icon: '\uD83D\uDCC8', description: 'View analytics and trends' },
-  ];
 
   return (
     <PageLayout>
@@ -504,30 +498,6 @@ export default function AdminDashboard() {
         </div>
 
         {/* ============================================ */}
-        {/* Quick Actions */}
-        {/* ============================================ */}
-        <div className="card mb-8">
-          <h2 className="section-header">Quick Actions</h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            {quickActions.map((action) => (
-              <Link
-                key={action.label}
-                href={action.href}
-                className="flex items-start gap-4 p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors group"
-              >
-                <div className="text-2xl">{action.icon}</div>
-                <div>
-                  <p className="font-medium text-frost group-hover:text-ice transition-colors">
-                    {action.label}
-                  </p>
-                  <p className="text-sm text-frost-muted">{action.description}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* ============================================ */}
         {/* Recent Users + System Health + Errors */}
         {/* ============================================ */}
         <div className="grid md:grid-cols-2 gap-6 mb-8">
@@ -619,7 +589,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex items-center justify-between p-2">
                   <span className="text-frost-muted">Email Service</span>
-                  <span className="badge-warning">Debug Mode</span>
+                  <span className="text-xs text-frost-muted">Not Configured</span>
                 </div>
                 {stats?.db_size_mb !== undefined && (
                   <div className="flex items-center justify-between p-2">
@@ -694,13 +664,44 @@ export default function AdminDashboard() {
             {/* Create Test Accounts */}
             <div className="rounded-lg border border-purple-400/20 bg-purple-400/5 p-4">
               <h3 className="font-medium text-frost mb-1">Test Accounts</h3>
-              <p className="text-xs text-frost-muted mb-4">Create/reset test users for QA testing</p>
-              <Link
-                href="/admin/users"
-                className="btn-secondary text-sm w-full block text-center"
+              <p className="text-xs text-frost-muted mb-4">Create/reset 3 test users with profiles & heroes</p>
+              <button
+                onClick={async () => {
+                  if (!token) return;
+                  setSeedingAccounts(true);
+                  setSeedResult(null);
+                  try {
+                    const res = await adminApi.seedTestAccounts(token);
+                    const created = res.results.filter((r: any) => r.status === 'created').length;
+                    const reset = res.results.filter((r: any) => r.status === 'reset').length;
+                    const failed = res.results.filter((r: any) => r.status === 'error').length;
+                    let msg = '';
+                    if (created > 0) msg += `${created} created`;
+                    if (reset > 0) msg += `${msg ? ', ' : ''}${reset} reset`;
+                    if (failed > 0) msg += `${msg ? ', ' : ''}${failed} failed`;
+                    setSeedResult({ message: msg || res.message, password: res.password });
+                  } catch (err) {
+                    setSeedResult({ message: err instanceof Error ? err.message : 'Failed', error: true });
+                  } finally {
+                    setSeedingAccounts(false);
+                  }
+                }}
+                disabled={seedingAccounts}
+                className="btn-secondary text-sm w-full"
               >
-                Create Test Accounts
-              </Link>
+                {seedingAccounts ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span className="inline-block w-4 h-4 border-2 border-frost border-t-transparent rounded-full animate-spin" />
+                    Creating...
+                  </span>
+                ) : 'Seed Test Accounts'}
+              </button>
+              {seedResult && (
+                <p className={`text-xs mt-2 ${seedResult.error ? 'text-error' : 'text-success'}`}>
+                  {seedResult.message}
+                  {seedResult.password && <span className="text-frost-muted"> (pw: {seedResult.password})</span>}
+                </p>
+              )}
             </div>
 
             {/* Run Data Audit */}

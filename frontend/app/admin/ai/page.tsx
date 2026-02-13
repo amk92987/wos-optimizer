@@ -367,6 +367,42 @@ function SettingsTab({
   onUpdate: (updates: Partial<AISettings>) => void;
   isLoading: boolean;
 }) {
+  const [localLimits, setLocalLimits] = useState({
+    daily_limit_free: '',
+    daily_limit_admin: '',
+    cooldown_seconds: '',
+    primary_model: '',
+    fallback_model: '',
+  });
+  const [initialized, setInitialized] = useState(false);
+
+  // Sync local state when settings load
+  useEffect(() => {
+    if (settings && !initialized) {
+      setLocalLimits({
+        daily_limit_free: String(settings.daily_limit_free),
+        daily_limit_admin: String(settings.daily_limit_admin),
+        cooldown_seconds: String(settings.cooldown_seconds),
+        primary_model: settings.primary_model,
+        fallback_model: settings.fallback_model,
+      });
+      setInitialized(true);
+    }
+  }, [settings, initialized]);
+
+  const handleBlur = (field: keyof AISettings, value: string) => {
+    if (field === 'primary_model' || field === 'fallback_model') {
+      if (value !== (settings as any)?.[field]) {
+        onUpdate({ [field]: value });
+      }
+    } else {
+      const numValue = parseInt(value) || 0;
+      if (numValue !== (settings as any)?.[field]) {
+        onUpdate({ [field]: numValue });
+      }
+    }
+  };
+
   if (isLoading || !settings) {
     return (
       <div className="card animate-pulse">
@@ -400,8 +436,9 @@ function SettingsTab({
             <label className="block text-sm font-medium text-frost-muted mb-2">Primary Model</label>
             <input
               type="text"
-              value={settings.primary_model}
-              onChange={(e) => onUpdate({ primary_model: e.target.value })}
+              value={localLimits.primary_model}
+              onChange={(e) => setLocalLimits(prev => ({ ...prev, primary_model: e.target.value }))}
+              onBlur={(e) => handleBlur('primary_model', e.target.value)}
               className="input"
             />
           </div>
@@ -420,8 +457,9 @@ function SettingsTab({
             <label className="block text-sm font-medium text-frost-muted mb-2">Fallback Model</label>
             <input
               type="text"
-              value={settings.fallback_model}
-              onChange={(e) => onUpdate({ fallback_model: e.target.value })}
+              value={localLimits.fallback_model}
+              onChange={(e) => setLocalLimits(prev => ({ ...prev, fallback_model: e.target.value }))}
+              onBlur={(e) => handleBlur('fallback_model', e.target.value)}
               className="input"
             />
           </div>
@@ -441,8 +479,9 @@ function SettingsTab({
             <label className="block text-sm font-medium text-frost-muted mb-2">Daily Limit (Free Users)</label>
             <input
               type="number"
-              value={settings.daily_limit_free}
-              onChange={(e) => onUpdate({ daily_limit_free: parseInt(e.target.value) || 0 })}
+              value={localLimits.daily_limit_free}
+              onChange={(e) => setLocalLimits(prev => ({ ...prev, daily_limit_free: e.target.value }))}
+              onBlur={(e) => handleBlur('daily_limit_free', e.target.value)}
               className="input"
               min={0}
             />
@@ -452,8 +491,9 @@ function SettingsTab({
             <label className="block text-sm font-medium text-frost-muted mb-2">Daily Limit (Admin)</label>
             <input
               type="number"
-              value={settings.daily_limit_admin}
-              onChange={(e) => onUpdate({ daily_limit_admin: parseInt(e.target.value) || 0 })}
+              value={localLimits.daily_limit_admin}
+              onChange={(e) => setLocalLimits(prev => ({ ...prev, daily_limit_admin: e.target.value }))}
+              onBlur={(e) => handleBlur('daily_limit_admin', e.target.value)}
               className="input"
               min={0}
             />
@@ -463,8 +503,9 @@ function SettingsTab({
             <label className="block text-sm font-medium text-frost-muted mb-2">Cooldown (seconds)</label>
             <input
               type="number"
-              value={settings.cooldown_seconds}
-              onChange={(e) => onUpdate({ cooldown_seconds: parseInt(e.target.value) || 0 })}
+              value={localLimits.cooldown_seconds}
+              onChange={(e) => setLocalLimits(prev => ({ ...prev, cooldown_seconds: e.target.value }))}
+              onBlur={(e) => handleBlur('cooldown_seconds', e.target.value)}
               className="input"
               min={0}
             />

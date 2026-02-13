@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import PageLayout from '@/components/PageLayout';
 
 // Item data organized by category
@@ -179,14 +178,16 @@ export default function ItemGuidePage() {
                 {getFilteredItems(ITEM_DATA[activeTab]).map((item) => (
                   <tr key={item.id} className="hover:bg-surface/30 transition-colors">
                     <td className="px-4 py-3">
-                      <div className="relative w-8 h-8">
-                        <Image
+                      <div className="w-8 h-8 rounded bg-surface-hover flex items-center justify-center overflow-hidden">
+                        <img
                           src={`/images/items/${item.image}`}
                           alt={item.name}
-                          fill
-                          className="object-contain rounded"
+                          width={32}
+                          height={32}
+                          className="object-contain"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).parentElement!.innerHTML = `<span class="text-xs font-bold text-ice">${item.name.charAt(0)}</span>`;
                           }}
                         />
                       </div>

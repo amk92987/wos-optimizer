@@ -447,7 +447,8 @@ export default function EventsPage() {
   };
 
   const getCostLabel = (category: string) => {
-    return eventsGuide?.cost_categories[category]?.label || category.replace('_', ' ');
+    if (!category) return 'Unknown';
+    return eventsGuide?.cost_categories[category]?.label || category.replace(/_/g, ' ');
   };
 
   const getF2PBadge = (f2p: boolean | string) => {

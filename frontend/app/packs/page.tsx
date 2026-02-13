@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import Image from 'next/image';
 import PageLayout from '@/components/PageLayout';
 
 // Hide number input spinners
@@ -180,15 +179,15 @@ const PACK_ITEMS: Record<string, { label: string; items: PackItem[]; isSpeedupGr
       { id: 'speed_gen_3h', name: 'General 3h', image: 'speedup_general.png', fsValue: 42, tier: 'A', desc: 'General speedup - 3 hours', category: 'speedups', type: 'general', duration: '3h' },
       { id: 'speed_gen_8h', name: 'General 8h', image: 'speedup_general.png', fsValue: 112, tier: 'A', desc: 'General speedup - 8 hours', category: 'speedups', type: 'general', duration: '8h' },
       { id: 'speed_gen_24h', name: 'General 24h', image: 'speedup_general.png', fsValue: 336, tier: 'S', desc: 'General speedup - 24 hours', category: 'speedups', type: 'general', duration: '24h' },
-      // Build speedups
-      { id: 'speed_build_1m', name: 'Build 1m', image: 'speedup_build.png', fsValue: 0.24, tier: 'C', desc: 'Build speedup - 1 min', category: 'speedups', type: 'build', duration: '1m' },
-      { id: 'speed_build_5m', name: 'Build 5m', image: 'speedup_build.png', fsValue: 1.2, tier: 'C', desc: 'Build speedup - 5 min', category: 'speedups', type: 'build', duration: '5m' },
-      { id: 'speed_build_10m', name: 'Build 10m', image: 'speedup_build.png', fsValue: 2.4, tier: 'C', desc: 'Build speedup - 10 min', category: 'speedups', type: 'build', duration: '10m' },
-      { id: 'speed_build_30m', name: 'Build 30m', image: 'speedup_build.png', fsValue: 7, tier: 'B', desc: 'Build speedup - 30 min', category: 'speedups', type: 'build', duration: '30m' },
-      { id: 'speed_build_1h', name: 'Build 1h', image: 'speedup_build.png', fsValue: 14, tier: 'B', desc: 'Build speedup - 1 hour', category: 'speedups', type: 'build', duration: '1h' },
-      { id: 'speed_build_3h', name: 'Build 3h', image: 'speedup_build.png', fsValue: 42, tier: 'A', desc: 'Build speedup - 3 hours', category: 'speedups', type: 'build', duration: '3h' },
-      { id: 'speed_build_8h', name: 'Build 8h', image: 'speedup_build.png', fsValue: 112, tier: 'A', desc: 'Build speedup - 8 hours', category: 'speedups', type: 'build', duration: '8h' },
-      { id: 'speed_build_24h', name: 'Build 24h', image: 'speedup_build.png', fsValue: 336, tier: 'S', desc: 'Build speedup - 24 hours', category: 'speedups', type: 'build', duration: '24h' },
+      // Construction speedups
+      { id: 'speed_build_1m', name: 'Construction 1m', image: 'speedup_construction.png', fsValue: 0.24, tier: 'C', desc: 'Construction speedup - 1 min', category: 'speedups', type: 'construction', duration: '1m' },
+      { id: 'speed_build_5m', name: 'Construction 5m', image: 'speedup_construction.png', fsValue: 1.2, tier: 'C', desc: 'Construction speedup - 5 min', category: 'speedups', type: 'construction', duration: '5m' },
+      { id: 'speed_build_10m', name: 'Construction 10m', image: 'speedup_construction.png', fsValue: 2.4, tier: 'C', desc: 'Construction speedup - 10 min', category: 'speedups', type: 'construction', duration: '10m' },
+      { id: 'speed_build_30m', name: 'Construction 30m', image: 'speedup_construction.png', fsValue: 7, tier: 'B', desc: 'Construction speedup - 30 min', category: 'speedups', type: 'construction', duration: '30m' },
+      { id: 'speed_build_1h', name: 'Construction 1h', image: 'speedup_construction.png', fsValue: 14, tier: 'B', desc: 'Construction speedup - 1 hour', category: 'speedups', type: 'construction', duration: '1h' },
+      { id: 'speed_build_3h', name: 'Construction 3h', image: 'speedup_construction.png', fsValue: 42, tier: 'A', desc: 'Construction speedup - 3 hours', category: 'speedups', type: 'construction', duration: '3h' },
+      { id: 'speed_build_8h', name: 'Construction 8h', image: 'speedup_construction.png', fsValue: 112, tier: 'A', desc: 'Construction speedup - 8 hours', category: 'speedups', type: 'construction', duration: '8h' },
+      { id: 'speed_build_24h', name: 'Construction 24h', image: 'speedup_construction.png', fsValue: 336, tier: 'S', desc: 'Construction speedup - 24 hours', category: 'speedups', type: 'construction', duration: '24h' },
       // Research speedups
       { id: 'speed_research_1m', name: 'Research 1m', image: 'speedup_research.png', fsValue: 0.24, tier: 'C', desc: 'Research speedup - 1 min', category: 'speedups', type: 'research', duration: '1m' },
       { id: 'speed_research_5m', name: 'Research 5m', image: 'speedup_research.png', fsValue: 1.2, tier: 'C', desc: 'Research speedup - 5 min', category: 'speedups', type: 'research', duration: '5m' },
@@ -266,7 +265,7 @@ const PACK_ITEMS: Record<string, { label: string; items: PackItem[]; isSpeedupGr
   },
 };
 
-const SPEEDUP_TYPES = ['general', 'build', 'research', 'training', 'healing'];
+const SPEEDUP_TYPES = ['general', 'construction', 'research', 'training', 'healing'];
 const SPEEDUP_DURATIONS = ['1m', '5m', '10m', '30m', '1h', '3h', '8h', '24h'];
 const RESOURCE_TYPES = ['meat', 'wood', 'coal', 'iron', 'steel'];
 const RESOURCE_DENOMS = ['100', '1k', '10k', '100k', '1m'];
@@ -368,18 +367,19 @@ export default function PackAnalyzerPage() {
     return lookup;
   }, []);
 
+  const renderItemImage = (item: { image?: string; emoji?: string; name: string }, size: number = 40) => {
+    if (item.image) {
+      return <img src={`/images/items/${item.image}`} alt={item.name} width={size} height={size} className="object-contain" />;
+    }
+    return <span className="text-3xl">{item.emoji || '📦'}</span>;
+  };
+
   const renderItemGrid = (items: PackItem[]) => (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
       {items.map(item => (
         <div key={item.id} className="text-center">
-          <div className="mb-2 h-12 flex items-center justify-center">
-            {item.image ? (
-              <div className="relative w-10 h-10">
-                <Image src={`/images/items/${item.image}`} alt={item.name} fill className="object-contain" title={item.desc} />
-              </div>
-            ) : (
-              <span className="text-3xl" title={item.desc}>{item.emoji || '📦'}</span>
-            )}
+          <div className="mb-2 h-12 flex items-center justify-center" title={item.desc}>
+            {renderItemImage(item)}
           </div>
           <p className="text-[10px] text-frost-muted mb-1 truncate px-1" title={item.name}>{item.name}</p>
           <input
@@ -398,16 +398,17 @@ export default function PackAnalyzerPage() {
         <thead>
           <tr>
             <th className="text-left p-2 text-frost-muted font-medium">Duration</th>
-            {SPEEDUP_TYPES.map(type => (
-              <th key={type} className="p-2 text-center">
-                <div className="flex flex-col items-center gap-1">
-                  <div className="relative w-6 h-6">
-                    <Image src={`/images/items/speedup_${type}.png`} alt={type} fill className="object-contain" />
+            {SPEEDUP_TYPES.map(type => {
+              const imgMap: Record<string, string> = { general: 'speedup_general.png', construction: 'speedup_construction.png', research: 'speedup_research.png', training: 'speedup_training.png', healing: 'speedup_healing.png' };
+              return (
+                <th key={type} className="p-2 text-center">
+                  <div className="flex flex-col items-center gap-1">
+                    <img src={`/images/items/${imgMap[type]}`} alt={type} width={24} height={24} className="object-contain" />
+                    <span className="text-[10px] text-frost-muted capitalize">{type}</span>
                   </div>
-                  <span className="text-[10px] text-frost-muted capitalize">{type}</span>
-                </div>
-              </th>
-            ))}
+                </th>
+              );
+            })}
           </tr>
         </thead>
         <tbody>
@@ -445,9 +446,7 @@ export default function PackAnalyzerPage() {
             {RESOURCE_TYPES.map(type => (
               <th key={type} className="p-2 text-center">
                 <div className="flex flex-col items-center gap-1">
-                  <div className="relative w-6 h-6">
-                    <Image src={`/images/items/${type}.png`} alt={type} fill className="object-contain" />
-                  </div>
+                  <img src={`/images/items/${type}.png`} alt={type} width={24} height={24} className="object-contain" />
                   <span className="text-[10px] text-frost-muted capitalize">{type}</span>
                 </div>
               </th>
@@ -575,9 +574,7 @@ export default function PackAnalyzerPage() {
                     return (
                       <div key={i} className="flex items-center justify-between p-2 rounded bg-surface/50" style={{ borderLeft: `3px solid ${tierColor}` }}>
                         <div className="flex items-center gap-2">
-                          {item.image ? (
-                            <div className="relative w-5 h-5"><Image src={`/images/items/${item.image}`} alt={item.name} fill className="object-contain" /></div>
-                          ) : <span className="text-sm">{item.emoji || '📦'}</span>}
+                          <span className="text-sm flex-shrink-0">{item.image ? <img src={`/images/items/${item.image}`} alt={item.name} width={20} height={20} className="object-contain inline-block" /> : (item.emoji || '📦')}</span>
                           <span className="text-sm text-frost">{item.name}</span>
                         </div>
                         <div className="text-sm">

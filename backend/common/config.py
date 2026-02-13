@@ -1,6 +1,29 @@
 """Environment configuration for Lambda functions."""
 
+import json
 import os
+
+
+def _load_secrets():
+    """Load API keys from AWS Secrets Manager if available."""
+    arn = os.environ.get("SECRETS_ARN", "")
+    if not arn:
+        return {}
+    try:
+        import boto3
+        client = boto3.client("secretsmanager", region_name=os.environ.get("AWS_REGION", "us-east-1"))
+        resp = client.get_secret_value(SecretId=arn)
+        return json.loads(resp["SecretString"])
+    except Exception:
+        return {}
+
+
+# Load secrets once at module import (Lambda cold start)
+# Inject into os.environ so all code (including ai_recommender) can find them
+_secrets = _load_secrets()
+for _key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY"):
+    if _secrets.get(_key) and not os.environ.get(_key):
+        os.environ[_key] = _secrets[_key]
 
 
 class Config:
@@ -21,9 +44,9 @@ class Config:
     # Secrets Manager
     SECRETS_ARN = os.environ.get("SECRETS_ARN", "")
 
-    # AI providers
-    ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-    OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
+    # AI providers (env vars first, then Secrets Manager)
+    ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "") or _secrets.get("ANTHROPIC_API_KEY", "")
+    OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "") or _secrets.get("OPENAI_API_KEY", "")
 
     # SES
     SES_FROM_EMAIL = os.environ.get("SES_FROM_EMAIL", "noreply@randomchaoslabs.com")

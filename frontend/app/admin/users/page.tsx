@@ -15,7 +15,8 @@ function AdminUsersContent() {
   const [filterStatus, setFilterStatus] = useState('All');
   const [filterState, setFilterState] = useState('All States');
   const [filterTest, setFilterTest] = useState(searchParams.get('filter') === 'test');
-  const [activeTab, setActiveTab] = useState<'list' | 'create'>('list');
+  const [activeTab, setActiveTab] = useState<'list' | 'create'>(searchParams.get('tab') === 'create' ? 'create' : 'list');
+  const defaultTestAccount = searchParams.get('test') === 'true';
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
 
   useEffect(() => {
@@ -81,13 +82,14 @@ function AdminUsersContent() {
     }
   };
 
-  // Calculate stats
-  const regularUsers = users.filter(u => u.role !== 'admin');
-  const adminUsers = users.filter(u => u.role === 'admin');
-  const activeIn7d = regularUsers.filter(u => u.usage_7d > 0).length;
-  const uniqueStates = Array.from(new Set(users.flatMap(u => u.states || []))).sort((a, b) => a - b);
-  const suspendedCount = users.filter(u => !u.is_active).length;
+  // Calculate stats (exclude test accounts from everything except testCount)
   const testCount = users.filter(u => u.is_test_account).length;
+  const realUsers = users.filter(u => !u.is_test_account);
+  const regularUsers = realUsers.filter(u => u.role !== 'admin');
+  const adminUsers = realUsers.filter(u => u.role === 'admin');
+  const activeIn7d = regularUsers.filter(u => u.usage_7d > 0).length;
+  const uniqueStates = Array.from(new Set(realUsers.flatMap(u => u.states || []))).sort((a, b) => a - b);
+  const suspendedCount = realUsers.filter(u => !u.is_active).length;
 
   // Filter users
   const filteredUsers = users
@@ -173,7 +175,7 @@ function AdminUsersContent() {
         <h1 className="text-3xl font-bold text-frost mb-6">👥 User Management</h1>
 
         {/* Stats Row */}
-        <div className="grid grid-cols-6 gap-3 mb-6">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
           <div className="card text-center py-3">
             <p className="text-2xl font-bold text-frost">{regularUsers.length}</p>
             <p className="text-xs text-frost-muted">Total Users</p>
@@ -210,7 +212,7 @@ function AdminUsersContent() {
                 : 'text-frost-muted hover:text-frost hover:bg-surface'
             }`}
           >
-            📋 User Database
+            All Users
           </button>
           <button
             onClick={() => setActiveTab('create')}
@@ -298,12 +300,12 @@ function AdminUsersContent() {
                       <tr className="border-b border-surface-border">
                         <th className="text-center p-2 text-xs font-medium text-frost-muted w-10">Role</th>
                         <th className="text-center p-2 text-xs font-medium text-frost-muted">User</th>
-                        <th className="text-center p-2 text-xs font-medium text-frost-muted w-16">Profiles</th>
-                        <th className="text-center p-2 text-xs font-medium text-frost-muted w-20">State(s)</th>
+                        <th className="text-center p-2 text-xs font-medium text-frost-muted w-16 hidden md:table-cell">Profiles</th>
+                        <th className="text-center p-2 text-xs font-medium text-frost-muted w-20 hidden md:table-cell">State(s)</th>
                         <th className="text-center p-2 text-xs font-medium text-frost-muted w-20">Status</th>
-                        <th className="text-center p-2 text-xs font-medium text-frost-muted w-16">Usage</th>
-                        <th className="text-center p-2 text-xs font-medium text-frost-muted w-20">Last</th>
-                        <th className="text-center p-2 text-xs font-medium text-frost-muted w-12">AI</th>
+                        <th className="text-center p-2 text-xs font-medium text-frost-muted w-16 hidden lg:table-cell">Usage</th>
+                        <th className="text-center p-2 text-xs font-medium text-frost-muted w-20 hidden md:table-cell">Last</th>
+                        <th className="text-center p-2 text-xs font-medium text-frost-muted w-12 hidden md:table-cell">AI</th>
                         <th className="text-center p-2 text-xs font-medium text-frost-muted">Actions</th>
                       </tr>
                     </thead>
@@ -332,11 +334,11 @@ function AdminUsersContent() {
                               </div>
                             </td>
                             {/* Profiles */}
-                            <td className="p-2 text-center text-frost-muted text-xs">
+                            <td className="p-2 text-center text-frost-muted text-xs hidden md:table-cell">
                               {u.profile_count || 0}
                             </td>
                             {/* States */}
-                            <td className="p-2 text-center text-frost-muted text-xs">
+                            <td className="p-2 text-center text-frost-muted text-xs hidden md:table-cell">
                               {u.states?.length > 0 ? u.states.join(', ') : '—'}
                             </td>
                             {/* Status */}
@@ -344,7 +346,7 @@ function AdminUsersContent() {
                               {status.label}
                             </td>
                             {/* Usage */}
-                            <td className="p-2">
+                            <td className="p-2 hidden lg:table-cell">
                               <div className="flex items-center justify-center gap-0.5">
                                 {[...Array(7)].map((_, i) => (
                                   <div
@@ -357,11 +359,11 @@ function AdminUsersContent() {
                               </div>
                             </td>
                             {/* Last Login */}
-                            <td className="p-2 text-center text-frost-muted text-xs">
+                            <td className="p-2 text-center text-frost-muted text-xs hidden md:table-cell">
                               {formatLastLogin(u.last_login)}
                             </td>
                             {/* AI */}
-                            <td className="p-2 text-center">
+                            <td className="p-2 text-center hidden md:table-cell">
                               {u.role !== 'admin' ? (
                                 <div className="flex flex-col items-center gap-0.5">
                                   <button
@@ -376,12 +378,14 @@ function AdminUsersContent() {
                                      u.ai_access_level === 'unlimited' ? 'Unl' :
                                      u.ai_daily_limit ? 'Custom' : 'Ltd'}
                                   </button>
-                                  {u.ai_access_level === 'limited' && u.ai_daily_limit && (
-                                    <span className="text-[9px] text-ice">{u.ai_requests_today}/{u.ai_daily_limit}</span>
+                                  {u.ai_access_level !== 'off' && u.ai_access_level !== 'unlimited' && (
+                                    <span className="text-[9px] text-frost-muted">
+                                      {u.ai_requests_today || 0}/{u.ai_daily_limit || 10}/day
+                                    </span>
                                   )}
                                 </div>
                               ) : (
-                                <span className="text-frost-muted text-xs">—</span>
+                                <span className="text-[9px] text-frost-muted">Admin</span>
                               )}
                             </td>
                             {/* Actions */}
@@ -431,7 +435,7 @@ function AdminUsersContent() {
             </div>
           </>
         ) : (
-          <CreateUserForm token={token || ''} onCreated={() => { setActiveTab('list'); fetchUsers(); }} />
+          <CreateUserForm token={token || ''} onCreated={() => { setActiveTab('list'); fetchUsers(); }} defaultTest={defaultTestAccount} />
         )}
 
         {/* Edit User Modal */}
@@ -452,11 +456,11 @@ function AdminUsersContent() {
 }
 
 // Create User Form Component
-function CreateUserForm({ token, onCreated }: { token: string; onCreated: () => void }) {
+function CreateUserForm({ token, onCreated, defaultTest = false }: { token: string; onCreated: () => void; defaultTest?: boolean }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('user');
-  const [isTestAccount, setIsTestAccount] = useState(false);
+  const [isTestAccount, setIsTestAccount] = useState(defaultTest);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');

@@ -69,6 +69,79 @@ def _user_response(user: dict) -> dict:
     }
 
 
+def _rekey_legacy_user(legacy_user: dict, new_sub: str) -> dict:
+    """Re-key a legacy migrated user to their new Cognito sub.
+
+    When a user migrates via the Cognito User Migration Trigger, their
+    DynamoDB records still use the old legacy UUID as PK. This function
+    copies all records to the new Cognito sub PK and cleans up the old ones.
+    """
+    from common.db import get_table
+
+    table = get_table("main")
+    old_id = legacy_user["user_id"]
+    now = datetime.now(timezone.utc).isoformat()
+
+    # 1. Create new USER METADATA with the Cognito sub
+    new_user = {k: v for k, v in legacy_user.items()}
+    new_user["PK"] = f"USER#{new_sub}"
+    new_user["SK"] = "METADATA"
+    new_user["user_id"] = new_sub
+    new_user["updated_at"] = now
+    # Remove password_hash - no longer needed after Cognito migration
+    new_user.pop("password_hash", None)
+    new_user.pop("legacy_user_id", None)
+    table.put_item(Item=new_user)
+
+    # 2. Query all items under old USER# PK (profiles, logins, etc.)
+    old_items = table.query(
+        KeyConditionExpression="PK = :pk",
+        ExpressionAttributeValues={":pk": f"USER#{old_id}"},
+    ).get("Items", [])
+
+    for item in old_items:
+        sk = item["SK"]
+        if sk == "METADATA":
+            continue  # Already handled above
+
+        # Copy to new PK
+        new_item = {k: v for k, v in item.items()}
+        new_item["PK"] = f"USER#{new_sub}"
+        if "user_id" in new_item:
+            new_item["user_id"] = new_sub
+        table.put_item(Item=new_item)
+
+    # 3. Update email/username uniqueness guards
+    email = legacy_user.get("email", "").lower()
+    username = legacy_user.get("username", "").lower()
+
+    if email:
+        table.put_item(Item={
+            "PK": "UNIQUE#EMAIL",
+            "SK": email,
+            "user_id": new_sub,
+        })
+
+    if username:
+        table.put_item(Item={
+            "PK": "UNIQUE#USERNAME",
+            "SK": username,
+            "user_id": new_sub,
+        })
+
+    # 4. Delete all old USER# items
+    for item in old_items:
+        table.delete_item(Key={"PK": item["PK"], "SK": item["SK"]})
+    # Delete old METADATA
+    table.delete_item(Key={"PK": f"USER#{old_id}", "SK": "METADATA"})
+
+    logger.info("Legacy user re-keyed successfully",
+                email=email, old_id=old_id, new_id=new_sub,
+                items_moved=len(old_items))
+
+    return new_user
+
+
 # ---------------------------------------------------------------------------
 # Public routes (no auth required)
 # ---------------------------------------------------------------------------
@@ -111,9 +184,20 @@ def login():
     # which would create a bare METADATA record via update_item)
     user = get_user(sub)
     if not user:
-        logger.warning("Cognito user has no DynamoDB record", user_id=sub, email=email)
-        # Create a minimal record so the app still works
-        user = create_user(user_id=sub, email=email, username=email)
+        # Check if this is a migrated legacy user (has DynamoDB record with
+        # a different PK that needs to be re-keyed to the Cognito sub)
+        legacy_user = get_user_by_email(email)
+        if legacy_user and legacy_user.get("password_hash"):
+            logger.info("Re-keying legacy user to Cognito sub", email=email, old_id=legacy_user["user_id"], new_id=sub)
+            user = _rekey_legacy_user(legacy_user, sub)
+        else:
+            logger.warning("Cognito user has no DynamoDB record", user_id=sub, email=email)
+            # Create a minimal record so the app still works
+            user = create_user(user_id=sub, email=email, username=email)
+
+    # Block suspended accounts
+    if not user.get("is_active", True):
+        raise UnauthorizedError("Your account has been suspended. Please contact support.")
 
     # Record login activity
     try:
@@ -370,7 +454,13 @@ def handle_app_error(ex: AppError):
 
 def lambda_handler(event, context):
     """Main Lambda handler -- routes via Powertools resolver."""
-    return app.resolve(event, context)
+    try:
+        return app.resolve(event, context)
+    except Exception as exc:
+        logger.exception("Unhandled error in auth handler")
+        from common.error_capture import capture_error
+        capture_error("auth", event, exc, logger)
+        return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}
 
 
 # ---------------------------------------------------------------------------

@@ -383,8 +383,9 @@ def log_error(
     month = now.strftime("%Y-%m")
 
     item = strip_none({
-        "PK": f"ERROR#{month}",
+        "PK": "ERRORS",
         "SK": f"{now.isoformat()}#{ulid}",
+        "error_id": ulid,
         "error_type": error_type,
         "error_message": error_message,
         "stack_trace": stack_trace,
@@ -397,7 +398,93 @@ def log_error(
     })
 
     table.put_item(Item=item)
+
+    # Send email notification (rate-limited)
+    try:
+        send_error_notification(item)
+    except Exception:
+        pass  # Never break error logging
+
     return item
+
+
+def get_errors(limit: int = 100) -> list:
+    """Get error logs, newest first."""
+    table = get_table("admin")
+    resp = table.query(
+        KeyConditionExpression="PK = :pk",
+        ExpressionAttributeValues={":pk": "ERRORS"},
+        ScanIndexForward=False,
+        Limit=limit,
+    )
+    items = resp.get("Items", [])
+    # Add 'id' field for frontend (use error_id which is URL-safe)
+    for item in items:
+        item["id"] = item.get("error_id", item.get("SK", ""))
+    return items
+
+
+def _find_error_by_id(error_id: str) -> dict | None:
+    """Find an error item by its error_id (ULID). Returns the item or None."""
+    table = get_table("admin")
+    resp = table.query(
+        KeyConditionExpression="PK = :pk",
+        FilterExpression="error_id = :eid",
+        ExpressionAttributeValues={":pk": "ERRORS", ":eid": error_id},
+    )
+    items = resp.get("Items", [])
+    return items[0] if items else None
+
+
+# Module-level rate limiter for error emails
+_last_error_email_time: float = 0
+
+
+def send_error_notification(error_item: dict) -> None:
+    """Send SES email for new error. Rate limited: max 1 per 5 minutes per Lambda instance."""
+    import boto3
+    global _last_error_email_time
+
+    now = time.time()
+    if now - _last_error_email_time < 300:  # 5 minutes
+        return
+    _last_error_email_time = now
+
+    from .config import Config
+    if Config.IS_LOCAL:
+        return
+
+    try:
+        ses = boto3.client("ses", region_name=Config.REGION)
+
+        stage = Config.STAGE.upper()
+        domain = "wosdev.randomchaoslabs.com" if Config.STAGE == "dev" else "wos.randomchaoslabs.com"
+        admin_url = f"https://{domain}/admin/inbox"
+
+        body = f"""New Error in {stage} environment
+
+Type: {error_item.get('error_type', 'Unknown')}
+Message: {error_item.get('error_message', 'No message')[:500]}
+Handler: {error_item.get('page', 'Unknown')}
+User: {error_item.get('user_id', 'N/A')}
+Time: {error_item.get('created_at', 'Unknown')}
+
+Stack Trace:
+{error_item.get('stack_trace', 'No stack trace')[:2000]}
+
+View in Admin Panel: {admin_url}
+"""
+
+        ses.send_email(
+            Source=Config.SES_FROM_EMAIL,
+            Destination={"ToAddresses": ["wos@randomchaoslabs.com"]},
+            Message={
+                "Subject": {"Data": f"[WoS {stage}] Error: {error_item.get('error_type', 'Unknown')}"},
+                "Body": {"Text": {"Data": body}},
+            },
+        )
+    except Exception:
+        pass  # Never let email failure break error logging
 
 
 # --- Admin Metrics ---

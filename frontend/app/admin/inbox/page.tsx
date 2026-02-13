@@ -19,6 +19,8 @@ interface ErrorItem {
   extra_context: string | null;
   created_at: string;
   resolved: boolean;
+  ai_diagnosis?: string | null;
+  diagnosed_at?: string | null;
 }
 
 type TabType = 'feedback' | 'errors' | 'conversations' | 'messages';
@@ -581,6 +583,8 @@ function ErrorsTab({
   const [fixNotesInput, setFixNotesInput] = useState<Record<string, string>>({});
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [confirmBulk, setConfirmBulk] = useState<string | null>(null);
+  const [diagnosing, setDiagnosing] = useState<string | null>(null);
+  const [expandedDiagnosis, setExpandedDiagnosis] = useState<string | null>(null);
 
   // Compute stats
   const now = new Date();
@@ -633,6 +637,23 @@ function ErrorsTab({
       onRefresh();
     } catch (error) {
       console.error('Failed to delete error:', error);
+    }
+  };
+
+  const handleDiagnose = async (id: string) => {
+    setDiagnosing(id);
+    try {
+      const result = await adminApi.diagnoseError(token, String(id));
+      // Update the error in the local list with the diagnosis
+      const idx = errors.findIndex((e) => e.id === id);
+      if (idx !== -1) {
+        errors[idx] = { ...errors[idx], ai_diagnosis: result.diagnosis, diagnosed_at: result.diagnosed_at };
+      }
+      setExpandedDiagnosis(id);
+    } catch (error) {
+      console.error('Failed to diagnose error:', error);
+    } finally {
+      setDiagnosing(null);
     }
   };
 
@@ -867,6 +888,27 @@ function ErrorsTab({
                         </div>
                       )}
 
+                      {/* AI Diagnosis */}
+                      {item.ai_diagnosis && (
+                        <div className="mb-2">
+                          <button
+                            onClick={() => setExpandedDiagnosis(expandedDiagnosis === item.id ? null : item.id)}
+                            className="text-xs text-purple-400 hover:text-purple-300 transition-colors"
+                          >
+                            {expandedDiagnosis === item.id ? 'Hide AI Diagnosis' : 'Show AI Diagnosis'}
+                            {item.diagnosed_at && (
+                              <span className="text-frost-muted ml-1">({formatDate(item.diagnosed_at)})</span>
+                            )}
+                          </button>
+                          {expandedDiagnosis === item.id && (
+                            <div className="mt-2 p-3 rounded-lg bg-purple-500/5 border border-purple-500/20">
+                              <p className="text-xs text-purple-400 uppercase tracking-wide mb-1.5">AI Diagnosis</p>
+                              <pre className="text-sm text-frost whitespace-pre-wrap font-sans">{item.ai_diagnosis}</pre>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       {/* Footer */}
                       <p className="text-xs text-frost-muted mt-2">
                         {item.user_id ? `User: ${item.user_id} \u00b7 ` : ''}{formatDate(item.created_at)}
@@ -898,6 +940,15 @@ function ErrorsTab({
                   {/* Workflow Buttons */}
                   <div className="flex items-center gap-2 mt-3 pt-3 border-t border-surface-border/50">
                     {renderWorkflowButtons(item)}
+
+                    {/* Diagnose with AI */}
+                    <button
+                      onClick={() => handleDiagnose(item.id)}
+                      disabled={diagnosing === item.id}
+                      className="px-2.5 py-1 rounded text-xs font-medium bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition-colors disabled:opacity-50"
+                    >
+                      {diagnosing === item.id ? 'Diagnosing...' : item.ai_diagnosis ? 'Re-diagnose' : 'Diagnose with AI'}
+                    </button>
 
                     {/* Delete with confirmation */}
                     {confirmDelete === item.id ? (

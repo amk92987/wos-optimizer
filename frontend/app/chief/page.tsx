@@ -1,19 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
 import { chiefApi } from '@/lib/api';
-
-// Helper to get the gear tier image path
-function getGearImagePath(slotKey: string, color: string, subtier: string, stars: number): string {
-  // Map subtier to tier number (Base=0, T1=1, T2=2, T3=3)
-  const tierNum = subtier === 'Base' ? 0 : parseInt(subtier.replace('T', ''));
-  // Color names in images are lowercase
-  const colorLower = color.toLowerCase();
-  return `/images/chief_gear/tiers/${slotKey}_${colorLower}_t${tierNum}_${stars}star.png`;
-}
 
 interface GearSlot {
   id: string;
@@ -130,10 +120,18 @@ function parseTierToSelections(tierId: number): { color: string; subtier: string
   return { color, subtier, stars };
 }
 
-// Charm level options with sub-levels (4-0 through 4-3, 5-0 through 5-3, etc.)
+// Build the path to the tier image: /images/chief_gear/tiers/{slot}_{color}_t{n}_{stars}star.png
+function getTierImagePath(slotImageKey: string, color: string, subtier: string, stars: number): string {
+  const colorLower = color.toLowerCase();
+  const tierNum = subtier === 'Base' ? '0' : subtier.replace('T', '');
+  return `/images/chief_gear/tiers/${slotImageKey}_${colorLower}_t${tierNum}_${stars}star.png`;
+}
+
+// Charm level options with sub-levels (4-1 through 4-3, 5-1 through 5-3, etc.)
+// Note: X-0 is omitted because it has the same bonus as (X-1)-3
 const charmLevels = ['1', '2', '3'];
 for (let level = 4; level <= 16; level++) {
-  charmLevels.push(`${level}-0`, `${level}-1`, `${level}-2`, `${level}-3`);
+  charmLevels.push(`${level}-1`, `${level}-2`, `${level}-3`);
 }
 
 // Charm stats by completed level (bonus achieved when you finish this level)
@@ -445,15 +443,17 @@ function GearTab({
               return (
                 <div key={slot.id} className={`card border ${typeColors[slot.type]}`}>
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="relative w-16 h-16 flex-shrink-0">
-                      <Image
-                        src={getGearImagePath(slot.charmKey, color, subtier, stars)}
+                    <div
+                      className="w-16 h-16 flex-shrink-0 rounded-lg flex items-center justify-center overflow-hidden"
+                      style={{ backgroundColor: tier.color + '22', border: `2px solid ${tier.color}44` }}
+                    >
+                      <img
+                        src={getTierImagePath(slot.charmKey, color, subtier, stars)}
                         alt={`${slot.displayName} ${tier.name}`}
-                        fill
-                        className="object-contain"
+                        className="w-14 h-14 object-contain"
                         onError={(e) => {
-                          // Fallback to emoji if image fails
                           (e.target as HTMLImageElement).style.display = 'none';
+                          (e.target as HTMLImageElement).parentElement!.innerHTML = `<span class="text-3xl">${slot.icon}</span>`;
                         }}
                       />
                     </div>
@@ -652,20 +652,20 @@ function CharmsTab({
                 return (
                   <div key={slot.id} className={`card border ${info.borderColor}`}>
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="relative w-14 h-14 flex-shrink-0">
-                        <Image
-                          src={getGearImagePath(slot.charmKey, gearColor, gearSubtier, gearStars)}
-                          alt={`${slot.displayName}`}
-                          fill
-                          className="object-contain"
+                      <div className="w-14 h-14 flex-shrink-0 rounded-lg flex items-center justify-center overflow-hidden bg-surface border border-surface-border">
+                        <img
+                          src={getTierImagePath(slot.charmKey, gearColor, gearSubtier, gearStars)}
+                          alt={slot.displayName}
+                          className="w-12 h-12 object-contain"
                           onError={(e) => {
                             (e.target as HTMLImageElement).style.display = 'none';
+                            (e.target as HTMLImageElement).parentElement!.innerHTML = `<span class="text-2xl">${slot.icon}</span>`;
                           }}
                         />
                       </div>
                       <div>
                         <h3 className="font-medium text-frost">{slot.displayName}</h3>
-                        <p className={`text-sm ${info.color}`}>3× {info.name} Charms</p>
+                        <p className={`text-sm ${info.color}`}>3x {info.name} Charms</p>
                       </div>
                     </div>
 

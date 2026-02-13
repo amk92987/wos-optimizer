@@ -566,6 +566,7 @@ function SettingsContent() {
               <p className="text-sm text-zinc-500">Higher values = more weight in recommendations</p>
             </div>
           }
+          defaultOpen={true}
           className="mb-4"
         >
           <div className="space-y-4">
@@ -606,7 +607,7 @@ function SettingsContent() {
             defaultOpen={securityOpen}
             className="mb-4"
           >
-            <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Password Change */}
               <div>
                 <h3 className="text-base font-medium text-zinc-200 mb-4">Change Password</h3>
@@ -671,9 +672,6 @@ function SettingsContent() {
                 </form>
               </div>
 
-              {/* Divider */}
-              <div className="border-t border-border"></div>
-
               {/* Email Change */}
               <div>
                 <h3 className="text-base font-medium text-zinc-200 mb-4">Change Email</h3>
@@ -729,113 +727,6 @@ function SettingsContent() {
             </div>
           </Expander>
         </div>
-
-        {/* Feature 5: Reset Options */}
-        <Expander
-          title={
-            <div>
-              <h2 className="text-lg font-semibold text-zinc-100">Reset Options</h2>
-              <p className="text-sm text-zinc-500">Reset priorities or clear hero data</p>
-            </div>
-          }
-          className="mb-4"
-        >
-          <div className="space-y-4">
-            {/* Status message */}
-            {resetMessage && (
-              <div className={`p-3 rounded-lg text-sm ${
-                resetMessage.type === 'success'
-                  ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                  : 'bg-error/20 border border-error/30 text-error'
-              }`}>
-                {resetMessage.text}
-              </div>
-            )}
-
-            {/* Reset Priorities */}
-            <div className="p-4 rounded-lg bg-surface border border-border">
-              <h3 className="text-sm font-medium text-zinc-200 mb-2">Reset Priorities to Default</h3>
-              <p className="text-xs text-zinc-500 mb-3">
-                Sets all 5 combat priorities back to 3, spending to F2P, focus to Balanced Growth, and role to Filler.
-              </p>
-              <button
-                onClick={async () => {
-                  setResetMessage(null);
-                  try {
-                    await handleSave({
-                      priority_svs: 3,
-                      priority_rally: 3,
-                      priority_castle_battle: 3,
-                      priority_exploration: 3,
-                      priority_gathering: 3,
-                    });
-                    setResetMessage({ type: 'success', text: 'Priorities reset to defaults.' });
-                  } catch {
-                    setResetMessage({ type: 'error', text: 'Failed to reset priorities.' });
-                  }
-                }}
-                className="btn-primary py-2 px-4 text-sm"
-              >
-                Reset Priorities
-              </button>
-            </div>
-
-            {/* Clear All Hero Data */}
-            <div className="p-4 rounded-lg bg-surface border border-error/20">
-              <h3 className="text-sm font-medium text-zinc-200 mb-2">Clear All Hero Data</h3>
-              <p className="text-xs text-zinc-500 mb-3">
-                This will permanently delete all your saved heroes and their gear data. This cannot be undone.
-              </p>
-              {!confirmClearHeroes ? (
-                <button
-                  onClick={() => setConfirmClearHeroes(true)}
-                  className="py-2 px-4 text-sm rounded-lg bg-error/20 border border-error/30 text-error hover:bg-error/30 transition-colors"
-                >
-                  Clear All Hero Data
-                </button>
-              ) : (
-                <div className="space-y-2">
-                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs">
-                    Are you sure? This will delete ALL your saved heroes!
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      disabled={clearingHeroes}
-                      onClick={async () => {
-                        if (!token) return;
-                        setClearingHeroes(true);
-                        setResetMessage(null);
-                        try {
-                          // Get all owned heroes and delete each
-                          const data = await heroesApi.getOwned(token);
-                          const heroes = data.heroes || [];
-                          for (const hero of heroes) {
-                            await heroesApi.removeHero(token, hero.name);
-                          }
-                          setConfirmClearHeroes(false);
-                          setResetMessage({ type: 'success', text: `Cleared ${heroes.length} heroes.` });
-                        } catch {
-                          setResetMessage({ type: 'error', text: 'Failed to clear hero data.' });
-                        } finally {
-                          setClearingHeroes(false);
-                        }
-                      }}
-                      className="py-2 px-4 text-sm rounded-lg bg-error text-white hover:bg-error/80 transition-colors disabled:opacity-50"
-                    >
-                      {clearingHeroes ? 'Clearing...' : 'Yes, Clear Everything'}
-                    </button>
-                    <button
-                      onClick={() => setConfirmClearHeroes(false)}
-                      className="py-2 px-4 text-sm rounded-lg bg-surface border border-border text-zinc-400 hover:text-zinc-100 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </Expander>
 
         {/* Saving indicator */}
         {isSaving && (

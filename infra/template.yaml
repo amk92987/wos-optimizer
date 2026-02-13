@@ -280,6 +280,8 @@ Resources:
           KeyType: HASH
         - AttributeName: SK
           KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: !If [IsLive, true, false]
 
   # ============================================================
   # Lambda Layer (shared code)
@@ -323,6 +325,14 @@ Resources:
                 - cognito-idp:SignUp
                 - cognito-idp:InitiateAuth
               Resource: !GetAtt UserPool.Arn
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:PutItem
+              Resource: !GetAtt AdminTable.Arn
+        - Statement:
+            - Effect: Allow
+              Action: ses:SendEmail
+              Resource: "*"
       Events:
         Login:
           Type: HttpApi
@@ -388,6 +398,14 @@ Resources:
             TableName: !Ref MainTable
         - DynamoDBReadPolicy:
             TableName: !Ref ReferenceTable
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:PutItem
+              Resource: !GetAtt AdminTable.Arn
+        - Statement:
+            - Effect: Allow
+              Action: ses:SendEmail
+              Resource: "*"
       Events:
         GetAll:
           Type: HttpApi
@@ -429,6 +447,14 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MainTable
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:PutItem
+              Resource: !GetAtt AdminTable.Arn
+        - Statement:
+            - Effect: Allow
+              Action: ses:SendEmail
+              Resource: "*"
       Events:
         ListProfiles:
           Type: HttpApi
@@ -506,6 +532,14 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref MainTable
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:PutItem
+              Resource: !GetAtt AdminTable.Arn
+        - Statement:
+            - Effect: Allow
+              Action: ses:SendEmail
+              Resource: "*"
       Events:
         GetGear:
           Type: HttpApi
@@ -545,6 +579,14 @@ Resources:
             TableName: !Ref MainTable
         - DynamoDBReadPolicy:
             TableName: !Ref ReferenceTable
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:PutItem
+              Resource: !GetAtt AdminTable.Arn
+        - Statement:
+            - Effect: Allow
+              Action: ses:SendEmail
+              Resource: "*"
       Events:
         GetRecommendations:
           Type: HttpApi
@@ -591,6 +633,14 @@ Resources:
               Action:
                 - secretsmanager:GetSecretValue
               Resource: !Ref AppSecrets
+        - Statement:
+            - Effect: Allow
+              Action: dynamodb:PutItem
+              Resource: !GetAtt AdminTable.Arn
+        - Statement:
+            - Effect: Allow
+              Action: ses:SendEmail
+              Resource: "*"
       Events:
         Ask:
           Type: HttpApi
@@ -604,6 +654,18 @@ Resources:
             ApiId: !Ref HttpApi
             Path: /api/advisor/history
             Method: GET
+        ClearHistory:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/advisor/history
+            Method: DELETE
+        DeleteConversation:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref HttpApi
+            Path: /api/advisor/delete
+            Method: POST
         Rate:
           Type: HttpApi
           Properties:
@@ -632,7 +694,7 @@ Resources:
           Type: HttpApi
           Properties:
             ApiId: !Ref HttpApi
-            Path: /api/advisor/favorite/{convSk}
+            Path: /api/advisor/favorite
             Method: POST
         AdvisorStatus:
           Type: HttpApi
@@ -667,6 +729,14 @@ Resources:
                 - cognito-idp:AdminUpdateUserAttributes
                 - cognito-idp:ListUsers
               Resource: !GetAtt UserPool.Arn
+        - Statement:
+            - Effect: Allow
+              Action: secretsmanager:GetSecretValue
+              Resource: !Ref AppSecrets
+        - Statement:
+            - Effect: Allow
+              Action: ses:SendEmail
+              Resource: "*"
       Events:
         # Using catch-all routes to avoid Lambda resource policy size limit (20KB)
         # The handler uses APIGatewayHttpResolver for internal routing
@@ -905,6 +975,35 @@ Resources:
               StringEquals:
                 AWS:SourceArn: !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CloudFrontDistribution}"
 
+  UrlRewriteFunction:
+    Type: AWS::CloudFront::Function
+    Properties:
+      Name: !Sub "wos-url-rewrite-${Stage}"
+      AutoPublish: true
+      FunctionConfig:
+        Comment: "Append .html to clean URLs for Next.js static export"
+        Runtime: cloudfront-js-2.0
+      FunctionCode: |
+        function handler(event) {
+          var request = event.request;
+          var uri = request.uri;
+          // Don't rewrite API, static assets, or files with extensions
+          if (uri.startsWith('/api/') || uri.startsWith('/_next/') || uri.includes('.')) {
+            return request;
+          }
+          // Don't rewrite root
+          if (uri === '/') {
+            return request;
+          }
+          // Remove trailing slash
+          if (uri.endsWith('/')) {
+            uri = uri.slice(0, -1);
+          }
+          // Append .html
+          request.uri = uri + '.html';
+          return request;
+        }
+
   CloudFrontOAC:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
@@ -922,6 +1021,21 @@ Resources:
         Comment: !Sub "WoS Frontend - ${Stage}"
         DefaultRootObject: index.html
         PriceClass: PriceClass_100
+        Aliases:
+          !If
+            - HasCertificate
+            - - !If
+                  - IsLive
+                  - !Sub "${FrontendDomainPrefix}.${DomainName}"
+                  - !Sub "${FrontendDomainPrefix}${Stage}.${DomainName}"
+            - !Ref "AWS::NoValue"
+        ViewerCertificate:
+          !If
+            - HasCertificate
+            - AcmCertificateArn: !Ref CertificateArn
+              SslSupportMethod: sni-only
+              MinimumProtocolVersion: TLSv1.2_2021
+            - CloudFrontDefaultCertificate: true
         Origins:
           - Id: S3Origin
             DomainName: !GetAtt FrontendBucket.RegionalDomainName
@@ -930,6 +1044,7 @@ Resources:
               OriginAccessIdentity: ""
           - Id: ApiOrigin
             DomainName: !Sub "${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+            OriginPath: !Sub "/${Stage}"
             CustomOriginConfig:
               HTTPSPort: 443
               OriginProtocolPolicy: https-only
@@ -938,6 +1053,9 @@ Resources:
           ViewerProtocolPolicy: redirect-to-https
           CachePolicyId: 658327ea-f89d-4fab-a63d-7e88639e58f6  # CachingOptimized
           Compress: true
+          FunctionAssociations:
+            - EventType: viewer-request
+              FunctionARN: !GetAtt UrlRewriteFunction.FunctionARN
         CacheBehaviors:
           - PathPattern: "/api/*"
             TargetOriginId: ApiOrigin
@@ -952,15 +1070,9 @@ Resources:
               - POST
               - PATCH
               - DELETE
-        CustomErrorResponses:
-          - ErrorCode: 403
-            ResponseCode: 200
-            ResponsePagePath: /index.html
-            ErrorCachingMinTTL: 0
-          - ErrorCode: 404
-            ResponseCode: 200
-            ResponsePagePath: /index.html
-            ErrorCachingMinTTL: 0
+        # NOTE: No CustomErrorResponses - the UrlRewriteFunction handles SPA routing
+        # by appending .html to clean URLs. CustomErrorResponses would intercept
+        # API Gateway 401/403/404 responses and return HTML instead of JSON.
 
 # ============================================================
 # Outputs

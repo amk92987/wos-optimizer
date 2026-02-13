@@ -46,9 +46,9 @@ const userNavigation = [
   {
     label: 'Account',
     items: [
-      { href: '/profiles', label: 'Save/Load', icon: '💾' },
-      { href: '/settings', label: 'Settings', icon: '⚙️' },
       { href: '/inbox', label: 'Inbox', icon: '📬' },
+      { href: '/profiles', label: 'Profiles', icon: '💾' },
+      { href: '/settings', label: 'Settings', icon: '⚙️' },
     ],
   },
 ];
@@ -97,14 +97,16 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
   const pathname = usePathname();
   const { user, token } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [userUnreadCount, setUserUnreadCount] = useState(0);
+  const [adminUnreadCount, setAdminUnreadCount] = useState(0);
 
   // Fetch unread notification count
   const fetchUnreadCount = useCallback(async () => {
     if (!token) return;
     try {
       const data = await inboxApi.getUnreadCount(token);
-      setUnreadCount(data.total_unread);
+      setUserUnreadCount(data.unread_notifications);
+      setAdminUnreadCount(data.error_count || 0);
     } catch (error) {
       console.error('Failed to fetch unread count:', error);
     }
@@ -214,8 +216,10 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
               <ul className="space-y-0.5">
                 {group.items.map((item) => {
                   const isActive = pathname === item.href;
-                  const isInbox = item.href === '/inbox' || item.href === '/admin/inbox';
-                  const showBadge = isInbox && unreadCount > 0;
+                  const isUserInbox = item.href === '/inbox';
+                  const isAdminInbox = item.href === '/admin/inbox';
+                  const badgeCount = isUserInbox ? userUnreadCount : isAdminInbox ? (userUnreadCount + adminUnreadCount) : 0;
+                  const showBadge = badgeCount > 0;
 
                   return (
                     <li key={item.href}>
@@ -238,7 +242,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                           {item.icon}
                           {showBadge && isCollapsed && (
                             <span className="absolute -top-1 -right-1 w-4 h-4 bg-error text-white text-[10px] font-bold rounded-full flex items-center justify-center">
-                              {unreadCount > 9 ? '9+' : unreadCount}
+                              {badgeCount > 9 ? '9+' : badgeCount}
                             </span>
                           )}
                         </span>
@@ -247,7 +251,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                             <span className="font-medium flex-1">{item.label}</span>
                             {showBadge && (
                               <span className="w-5 h-5 bg-error text-white text-xs font-bold rounded-full flex items-center justify-center">
-                                {unreadCount > 9 ? '9+' : unreadCount}
+                                {badgeCount > 9 ? '9+' : badgeCount}
                               </span>
                             )}
                           </>

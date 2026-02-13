@@ -56,15 +56,15 @@ export default function HeroDetailModal({ hero, isOwned, onClose, onAdd }: HeroD
         <div className="sticky top-0 bg-surface border-b border-surface-border p-4 flex items-start gap-4">
           {/* Hero Image */}
           <div className={`w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 border-2 ${getClassColor(hero.hero_class)}`}>
-            {hero.image_base64 ? (
+            {hero.image_base64 || hero.image_filename ? (
               <img
-                src={hero.image_base64}
+                src={hero.image_base64 || `/images/heroes/${hero.image_filename}`}
                 alt={hero.name}
                 className="w-full h-full object-cover"
               />
             ) : (
               <div className="w-full h-full bg-surface-hover flex items-center justify-center text-3xl">
-                🦸
+                ?
               </div>
             )}
           </div>

@@ -17,6 +17,11 @@ logger = Logger()
 def get_profiles():
     user_id = get_effective_user_id(app.current_event.raw_event)
     profiles = profile_repo.get_profiles(user_id)
+    # Enrich each profile with hero count
+    for p in profiles:
+        pid = p.get("profile_id") or p.get("SK", "").replace("PROFILE#", "")
+        if pid:
+            p["hero_count"] = profile_repo.get_hero_count(pid)
     return {"profiles": profiles}
 
 
@@ -158,4 +163,13 @@ def preview_profile(profileId: str):
 
 
 def lambda_handler(event, context):
-    return app.resolve(event, context)
+    try:
+        return app.resolve(event, context)
+    except AppError as exc:
+        logger.warning("Application error", extra={"error": exc.message, "status": exc.status_code})
+        return {"statusCode": exc.status_code, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": exc.message})}
+    except Exception as exc:
+        logger.exception("Unhandled error in profiles handler")
+        from common.error_capture import capture_error
+        capture_error("profiles", event, exc, logger)
+        return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

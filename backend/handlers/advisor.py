@@ -42,11 +42,19 @@ def ask_advisor():
     engine = get_engine()
 
     start_ms = int(time.time() * 1000)
-    result = engine.ask(question=question, profile=profile, heroes=heroes)
+    result = engine.ask(profile=profile, user_heroes=heroes, question=question)
     elapsed_ms = int(time.time() * 1000) - start_ms
 
     source = result.get("source", "rules")
     answer = result.get("answer", "")
+    logger.info("Advisor response", extra={
+        "question": question[:100],
+        "source": source,
+        "elapsed_ms": elapsed_ms,
+        "answer_preview": answer[:100] if answer else "",
+        "hero_count": len(heroes),
+        "profile_furnace": profile.get("furnace_level") if isinstance(profile, dict) else None,
+    })
     provider = result.get("provider", "rules")
     model = result.get("model", "rule_engine")
     tokens_in = result.get("tokens_input", 0)
@@ -90,6 +98,30 @@ def get_history():
     return {"conversations": conversations}
 
 
+@app.delete("/api/advisor/history")
+def clear_history():
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    count = ai_repo.delete_conversation_history(user_id)
+    return {"deleted": count}
+
+
+@app.post("/api/advisor/delete")
+def delete_conversation():
+    user_id = get_effective_user_id(app.current_event.raw_event)
+    body = app.current_event.json_body or {}
+
+    thread_id = body.get("thread_id")
+    if thread_id:
+        count = ai_repo.delete_thread(user_id, thread_id)
+        return {"deleted": count}
+
+    conv_sk = body.get("conversation_sk")
+    if not conv_sk:
+        raise ValidationError("conversation_sk or thread_id is required")
+    ai_repo.delete_conversation(user_id, conv_sk)
+    return {"deleted": 1}
+
+
 @app.post("/api/advisor/rate")
 def rate_conversation():
     user_id = get_effective_user_id(app.current_event.raw_event)
@@ -120,16 +152,20 @@ def get_favorites():
     return {"favorites": favorites}
 
 
-@app.post("/api/advisor/favorite/<convSk>")
-def toggle_favorite(convSk: str):
+@app.post("/api/advisor/favorite")
+def toggle_favorite():
     user_id = get_effective_user_id(app.current_event.raw_event)
+    body = app.current_event.json_body or {}
+    conv_sk = body.get("conversation_sk")
+    if not conv_sk:
+        raise ValidationError("conversation_sk is required")
 
     # Get current state and toggle
     conversations = ai_repo.get_conversation_history(user_id, limit=200)
-    current = next((c for c in conversations if c.get("conversation_id") == convSk or c.get("SK") == convSk), None)
+    current = next((c for c in conversations if c.get("conversation_id") == conv_sk or c.get("SK") == conv_sk), None)
     new_state = not (current.get("is_favorite", False) if current else False)
 
-    sk = convSk if convSk.startswith("AICONV#") else f"AICONV#{convSk}"
+    sk = conv_sk if conv_sk.startswith("AICONV#") else f"AICONV#{conv_sk}"
     ai_repo.rate_conversation(user_id, sk, {"is_favorite": new_state})
     return {"is_favorite": new_state}
 
@@ -192,4 +228,13 @@ def get_thread_messages(threadId: str):
 
 
 def lambda_handler(event, context):
-    return app.resolve(event, context)
+    try:
+        return app.resolve(event, context)
+    except AppError as exc:
+        logger.warning("Application error", extra={"error": exc.message, "status": exc.status_code})
+        return {"statusCode": exc.status_code, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": exc.message})}
+    except Exception as exc:
+        logger.exception("Unhandled error in advisor handler")
+        from common.error_capture import capture_error
+        capture_error("advisor", event, exc, logger)
+        return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

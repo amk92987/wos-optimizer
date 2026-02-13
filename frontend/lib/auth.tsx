@@ -103,10 +103,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     const response = await adminApi.impersonateUser(token, userId);
     // Impersonation doesn't change auth tokens (admin stays authenticated).
-    // We just swap the displayed user to the target user.
+    // We swap the displayed user and store the target ID so API calls
+    // include the X-Impersonate-User header for backend routing.
     setUser(response.user);
     setIsImpersonating(true);
     localStorage.setItem('impersonating', 'true');
+    localStorage.setItem('impersonate_user_id', userId);
   };
 
   const switchBack = () => {
@@ -117,6 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     setIsImpersonating(false);
     localStorage.removeItem('impersonating');
+    localStorage.removeItem('impersonate_user_id');
   };
 
   return (

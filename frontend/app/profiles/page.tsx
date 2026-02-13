@@ -223,7 +223,7 @@ export default function ProfilesPage() {
               </div>
               <div className="text-center">
                 <p className="text-xs text-frost-muted mb-1">Heroes</p>
-                <p className="font-medium text-frost">{activeProfile.hero_count}</p>
+                <p className="font-medium text-frost">{activeProfile.hero_count || 0}</p>
               </div>
               <div className="text-center">
                 <p className="text-xs text-frost-muted mb-1">Furnace</p>
@@ -270,7 +270,7 @@ export default function ProfilesPage() {
                           )}
                         </div>
                         <p className="text-sm text-frost-muted">
-                          State {profile.state_number || 'N/A'} | {getFurnaceDisplay(profile)} | {profile.hero_count} heroes
+                          State {profile.state_number || 'N/A'} | {getFurnaceDisplay(profile)} | {profile.hero_count || 0} heroes
                         </p>
                       </div>
 

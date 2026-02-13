@@ -62,6 +62,12 @@ export async function api<T>(endpoint: string, options: ApiOptions = {}): Promis
     headers['Authorization'] = `Bearer ${authToken}`;
   }
 
+  // Include impersonation header when admin is viewing as another user
+  const impersonateUserId = typeof window !== 'undefined' ? localStorage.getItem('impersonate_user_id') : null;
+  if (impersonateUserId) {
+    headers['X-Impersonate-User'] = impersonateUserId;
+  }
+
   const response = await fetch(`${API_BASE}${endpoint}`, {
     method,
     headers,
@@ -76,6 +82,7 @@ export async function api<T>(endpoint: string, options: ApiOptions = {}): Promis
         const retryHeaders: HeadersInit = {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${newToken}`,
+          ...(impersonateUserId ? { 'X-Impersonate-User': impersonateUserId } : {}),
         };
         const retryResponse = await fetch(`${API_BASE}${endpoint}`, {
           method,
@@ -256,6 +263,15 @@ export const advisorApi = {
   getHistory: (token: string, limit = 10) =>
     api<{ conversations: Conversation[] }>(`/api/advisor/history?limit=${limit}`, { token }),
 
+  clearHistory: (token: string) =>
+    api<{ deleted: number }>('/api/advisor/history', { method: 'DELETE', token }),
+
+  deleteConversation: (token: string, convSk: string) =>
+    api<{ deleted: number }>('/api/advisor/delete', { method: 'POST', body: { conversation_sk: convSk }, token }),
+
+  deleteThread: (token: string, threadId: string) =>
+    api<{ deleted: number }>('/api/advisor/delete', { method: 'POST', body: { thread_id: threadId }, token }),
+
   rate: (token: string, conversationSk: string, data: { rating?: number; is_helpful?: boolean; user_feedback?: string; is_favorite?: boolean }) =>
     api<{ conversation: Conversation }>('/api/advisor/rate', {
       method: 'POST',
@@ -273,7 +289,7 @@ export const advisorApi = {
     api<{ favorites: Conversation[] }>(`/api/advisor/favorites?limit=${limit}`, { token }),
 
   toggleFavorite: (token: string, convSk: string) =>
-    api<{ is_favorite: boolean }>(`/api/advisor/favorite/${convSk}`, { method: 'POST', token }),
+    api<{ is_favorite: boolean }>('/api/advisor/favorite', { method: 'POST', body: { conversation_sk: convSk }, token }),
 
   getStatus: (token: string) =>
     api<AdvisorStatus>('/api/advisor/status', { token }),
@@ -323,6 +339,9 @@ export const adminApi = {
 
   deleteUser: (token: string, userId: string) =>
     api(`/api/admin/users/${userId}`, { method: 'DELETE', token }),
+
+  seedTestAccounts: (token: string) =>
+    api<{ results: any[]; password: string; message: string }>('/api/admin/seed-test-accounts', { method: 'POST', token }),
 
   // Announcements
   listAnnouncements: (token: string) =>
@@ -384,7 +403,14 @@ export const adminApi = {
   listAIConversations: (token: string, limit = 50) =>
     api<{ conversations: Conversation[] }>(`/api/admin/ai-conversations?limit=${limit}`, { token }),
 
-  // Database Browser
+  // Data Browser
+  listEntities: (token: string) =>
+    api<{ entities: { id: string; label: string; table: string; row_count: number; columns: string[] }[] }>('/api/admin/database/entities', { token }),
+
+  browseEntity: (token: string, entityId: string, limit = 100) =>
+    api<{ entity: string; label: string; columns: string[]; items: any[]; count: number }>(`/api/admin/database/entities/${entityId}?limit=${limit}`, { token }),
+
+  // Legacy table browser
   listTables: (token: string) =>
     api<{ tables: { name: string; alias: string }[] }>('/api/admin/database/tables', { token }),
 
@@ -527,18 +553,9 @@ export const adminApi = {
   deleteAdminItem: (token: string, itemName: string) =>
     api(`/api/admin/items/${encodeURIComponent(itemName)}`, { method: 'DELETE', token }),
 
-  // Database (additional)
-  getBackups: (token: string) =>
-    api<{ backups: any[] }>('/api/admin/database/backups', { token }),
-
-  createBackup: (token: string) =>
-    api('/api/admin/database/backup', { method: 'POST', token }),
-
-  databaseCleanup: (token: string, action: string) =>
-    api(`/api/admin/database/cleanup/${action}`, { method: 'POST', token }),
-
-  databaseQuery: (token: string, query: string) =>
-    api('/api/admin/database/query', { method: 'POST', body: { query }, token }),
+  // AI Error Diagnosis
+  diagnoseError: (token: string, errorId: string) =>
+    api<{ diagnosis: string; diagnosed_at: string }>(`/api/admin/errors/${errorId}/diagnose`, { method: 'POST', token }),
 };
 
 // Inbox API
@@ -550,7 +567,7 @@ export const inboxApi = {
     api('/api/inbox/notifications/' + notificationId + '/read', { method: 'POST', token }),
 
   getUnreadCount: (token: string) =>
-    api<{ unread_notifications: number; total_unread: number }>('/api/inbox/unread-count', { token }),
+    api<{ unread_notifications: number; error_count: number; total_unread: number }>('/api/inbox/unread-count', { token }),
 
   getThreads: (token: string) =>
     api<{ threads: any[] }>('/api/inbox/threads', { token }),
@@ -683,6 +700,7 @@ export interface UserHero {
   mythic_gear_mastery: number;
   exclusive_gear_skill_level: number;
   // Image
+  image_filename: string | null;
   image_base64: string | null;
 }
 

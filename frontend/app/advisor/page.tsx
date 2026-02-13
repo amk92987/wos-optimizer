@@ -49,7 +49,6 @@ export default function AIAdvisorPage() {
   const [inlineFeedbackText, setInlineFeedbackText] = useState('');
   const [aiStatus, setAiStatus] = useState<AdvisorStatus | null>(null);
   const [currentThreadId, setCurrentThreadId] = useState<string | null>(null);
-  const [expandedThreads, setExpandedThreads] = useState<Set<string>>(new Set());
   const [bearPawLoaded, setBearPawLoaded] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -136,6 +135,18 @@ export default function AIAdvisorPage() {
       fetchFavorites();
     } catch (error) {
       console.error('Failed to toggle favorite:', error);
+    }
+  };
+
+  const deleteConversation = async (chat: ChatHistory, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!token) return;
+    try {
+      await advisorApi.deleteConversation(token, chat.SK);
+      setChatHistory((prev) => prev.filter((c) => c.SK !== chat.SK));
+      setFavorites((prev) => prev.filter((c) => c.SK !== chat.SK));
+    } catch (error) {
+      console.error('Failed to delete conversation:', error);
     }
   };
 
@@ -269,12 +280,18 @@ export default function AIAdvisorPage() {
       timestamp: new Date(),
     };
 
+    // Ensure we have a thread_id so all messages in this session get grouped
+    const threadId = currentThreadId || crypto.randomUUID();
+    if (!currentThreadId) {
+      setCurrentThreadId(threadId);
+    }
+
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     try {
-      const data = await advisorApi.ask(token!, userMessage.content, currentThreadId || undefined);
+      const data = await advisorApi.ask(token!, userMessage.content, threadId);
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -298,12 +315,13 @@ export default function AIAdvisorPage() {
       fetchAiStatus();
     } catch (error) {
       console.error('Failed to get response:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Something went wrong';
       setMessages((prev) => [
         ...prev,
         {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
-          content: 'Sorry, something went wrong. Please try again.',
+          content: errorMsg,
           timestamp: new Date(),
         },
       ]);
@@ -314,7 +332,7 @@ export default function AIAdvisorPage() {
 
   const handleNewChat = () => {
     setMessages([]);
-    setCurrentThreadId(null);
+    setCurrentThreadId(crypto.randomUUID());
     localStorage.removeItem(CHAT_STORAGE_KEY);
   };
 
@@ -376,6 +394,9 @@ export default function AIAdvisorPage() {
     const threadMap = new Map<string, ChatHistory[]>();
 
     for (const chat of chatHistory) {
+      // Skip entries with no question text
+      if (!chat.question || !chat.question.trim()) continue;
+
       if (chat.thread_id) {
         if (!threadMap.has(chat.thread_id)) {
           threadMap.set(chat.thread_id, []);
@@ -404,18 +425,6 @@ export default function AIAdvisorPage() {
 
     return { threads, standalone };
   })();
-
-  const toggleThreadExpanded = (threadId: string) => {
-    setExpandedThreads((prev) => {
-      const next = new Set(prev);
-      if (next.has(threadId)) {
-        next.delete(threadId);
-      } else {
-        next.add(threadId);
-      }
-      return next;
-    });
-  };
 
   // Determine if current chat is favorited
   const currentChatIsFavorite = (() => {
@@ -591,7 +600,7 @@ export default function AIAdvisorPage() {
         {showHistory && (
           <div className="card mb-4 max-h-80 overflow-hidden flex flex-col">
             {/* Tabs */}
-            <div className="flex gap-2 mb-3 border-b border-surface-border pb-2">
+            <div className="flex gap-2 mb-3 border-b border-surface-border pb-2 items-center">
               <button
                 onClick={() => setHistoryTab('recent')}
                 className={`text-sm font-medium px-3 py-1 rounded transition-colors ${
@@ -612,6 +621,24 @@ export default function AIAdvisorPage() {
               >
                 Favorites {favorites.length > 0 && `(${favorites.length})`}
               </button>
+              {historyTab === 'recent' && chatHistory.length > 0 && (
+                <button
+                  onClick={async () => {
+                    if (!token) return;
+                    if (!confirm('Clear all chat history? This cannot be undone.')) return;
+                    try {
+                      await advisorApi.clearHistory(token);
+                      setChatHistory([]);
+                      setFavorites([]);
+                    } catch (error) {
+                      console.error('Failed to clear history:', error);
+                    }
+                  }}
+                  className="ml-auto text-xs text-frost-muted hover:text-fire transition-colors"
+                >
+                  Clear All
+                </button>
+              )}
             </div>
 
             {/* Content */}
@@ -622,96 +649,84 @@ export default function AIAdvisorPage() {
                 ) : (
                   <div className="space-y-1">
                     {/* Threaded conversations */}
-                    {groupedHistory.threads.map((threadGroup) => (
-                      <div key={threadGroup.thread_id} className="border-b border-surface-border/30 pb-1 mb-1">
-                        {/* Thread header */}
-                        <button
-                          onClick={() => toggleThreadExpanded(threadGroup.thread_id)}
-                          className="w-full flex items-center gap-2 p-2 rounded hover:bg-surface transition-colors text-left"
+                    {groupedHistory.threads.map((threadGroup) => {
+                      const threadHasFavorite = threadGroup.conversations.some((c) => c.is_favorite);
+                      return (
+                        <div
+                          key={threadGroup.thread_id}
+                          className="group flex items-center gap-2 p-2 rounded hover:bg-surface transition-colors"
                         >
-                          <span className="text-frost-muted text-xs">
-                            {expandedThreads.has(threadGroup.thread_id) ? '\u25BC' : '\u25B6'}
-                          </span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-frost truncate font-medium">{threadGroup.title}</p>
+                          <button
+                            onClick={() => loadThreadFromHistory(threadGroup)}
+                            className="flex-1 text-left min-w-0"
+                          >
+                            <p className="text-sm text-frost truncate">{threadGroup.title}</p>
                             <p className="text-xs text-frost-muted">
                               {threadGroup.conversations.length} messages &middot;{' '}
                               {new Date(threadGroup.last_date).toLocaleDateString()}
                             </p>
-                          </div>
-                          <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
+                          </button>
+                          <div className="flex gap-1 items-center">
                             <button
-                              onClick={() => loadThreadFromHistory(threadGroup)}
-                              className="px-2 py-0.5 text-xs text-ice hover:bg-ice/10 rounded transition-colors"
-                              title="Load entire thread"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                // Toggle favorite on the first conversation in the thread
+                                toggleFavorite(threadGroup.conversations[0], e);
+                              }}
+                              className={`p-1 rounded transition-colors text-lg ${
+                                threadHasFavorite
+                                  ? 'text-fire'
+                                  : 'text-frost-muted opacity-0 group-hover:opacity-100 hover:text-fire'
+                              }`}
+                              title={threadHasFavorite ? 'Remove from favorites' : 'Add to favorites'}
                             >
-                              Load All
+                              {threadHasFavorite ? '\u2605' : '\u2606'}
+                            </button>
+                            <button
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                if (!token) return;
+                                try {
+                                  await advisorApi.deleteThread(token, threadGroup.thread_id);
+                                  setChatHistory((prev) =>
+                                    prev.filter((c) => c.thread_id !== threadGroup.thread_id)
+                                  );
+                                } catch (error) {
+                                  console.error('Failed to delete thread:', error);
+                                }
+                              }}
+                              className="p-1 rounded transition-colors text-frost-muted opacity-0 group-hover:opacity-100 hover:text-fire text-sm"
+                              title="Delete this conversation"
+                            >
+                              {'\u2715'}
                             </button>
                           </div>
-                        </button>
-
-                        {/* Expanded thread conversations */}
-                        {expandedThreads.has(threadGroup.thread_id) && (
-                          <div className="pl-6 space-y-0.5">
-                            {threadGroup.conversations.map((chat) => (
-                              <div
-                                key={chat.SK}
-                                className="group flex items-start gap-2 p-1.5 rounded hover:bg-surface transition-colors"
-                              >
-                                <button
-                                  onClick={() => loadChatFromHistory(chat)}
-                                  className="flex-1 text-left min-w-0"
-                                >
-                                  <p className="text-xs text-frost truncate">{chat.question}</p>
-                                  <p className="text-xs text-frost-muted">
-                                    {chat.routed_to === 'rules' ? '(Rules)' : '(AI)'}
-                                  </p>
-                                </button>
-                                <button
-                                  onClick={(e) => toggleFavorite(chat, e)}
-                                  className={`p-1 rounded transition-colors text-xs ${
-                                    chat.is_favorite
-                                      ? 'text-fire'
-                                      : 'text-frost-muted opacity-0 group-hover:opacity-100 hover:text-fire'
-                                  }`}
-                                  title={chat.is_favorite ? 'Remove from favorites' : 'Add to favorites'}
-                                >
-                                  {chat.is_favorite ? '\u2605' : '\u2606'}
-                                </button>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                        </div>
+                      );
+                    })}
 
                     {/* Standalone conversations */}
-                    {groupedHistory.standalone.length > 0 && groupedHistory.threads.length > 0 && (
-                      <div className="px-2 py-1">
-                        <p className="text-xs text-frost-muted font-medium uppercase tracking-wider">
-                          Individual
-                        </p>
-                      </div>
-                    )}
                     {groupedHistory.standalone.map((chat) => (
                       <div
                         key={chat.SK}
-                        className="group flex items-start gap-2 p-2 rounded hover:bg-surface transition-colors"
+                        className="group flex items-center gap-2 p-2 rounded hover:bg-surface transition-colors"
                       >
                         <button
                           onClick={() => loadChatFromHistory(chat)}
-                          className="flex-1 text-left"
+                          className="flex-1 text-left min-w-0"
                         >
                           <p className="text-sm text-frost truncate">{chat.question}</p>
                           <p className="text-xs text-frost-muted">
-                            {chat.routed_to === 'rules' ? '(Rules)' : '(AI)'} &middot;{' '}
-                            {new Date(chat.created_at).toLocaleDateString()}
+                            {(() => {
+                              const d = chat.created_at ? new Date(chat.created_at).toLocaleDateString() : '';
+                              return d && d !== 'Invalid Date' ? d : '';
+                            })()}
                           </p>
                         </button>
-                        <div className="flex gap-1">
+                        <div className="flex gap-1 items-center">
                           <button
                             onClick={(e) => toggleFavorite(chat, e)}
-                            className={`p-1 rounded transition-colors ${
+                            className={`p-1 rounded transition-colors text-lg ${
                               chat.is_favorite
                                 ? 'text-fire'
                                 : 'text-frost-muted opacity-0 group-hover:opacity-100 hover:text-fire'
@@ -720,15 +735,13 @@ export default function AIAdvisorPage() {
                           >
                             {chat.is_favorite ? '\u2605' : '\u2606'}
                           </button>
-                          {messages.length > 0 && (
-                            <button
-                              onClick={() => loadChatFromHistory(chat, true)}
-                              className="p-1 text-frost-muted opacity-0 group-hover:opacity-100 hover:text-ice transition-colors text-xs"
-                              title="Add to current chat"
-                            >
-                              +
-                            </button>
-                          )}
+                          <button
+                            onClick={(e) => deleteConversation(chat, e)}
+                            className="p-1 rounded transition-colors text-frost-muted opacity-0 group-hover:opacity-100 hover:text-fire text-sm"
+                            title="Delete this conversation"
+                          >
+                            {'\u2715'}
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -744,30 +757,36 @@ export default function AIAdvisorPage() {
                   </div>
                 ) : (
                   <div className="space-y-1">
-                    {favorites.map((chat) => (
-                      <div
-                        key={chat.SK}
-                        className="group flex items-start gap-2 p-2 rounded hover:bg-surface transition-colors"
-                      >
-                        <button
-                          onClick={() => loadChatFromHistory(chat as any)}
-                          className="flex-1 text-left"
+                    {favorites.map((chat) => {
+                      const dateStr = chat.created_at ? new Date(chat.created_at).toLocaleDateString() : '';
+                      const validDate = dateStr && dateStr !== 'Invalid Date' ? dateStr : '';
+                      return (
+                        <div
+                          key={chat.SK}
+                          className="group flex items-start gap-2 p-2 rounded hover:bg-surface transition-colors"
                         >
-                          <p className="text-sm text-frost truncate">{chat.question}</p>
-                          <p className="text-xs text-frost-muted">
-                            {(chat as any).routed_to === 'rules' ? '(Rules)' : '(AI)'} &middot;{' '}
-                            {new Date(chat.created_at).toLocaleDateString()}
-                          </p>
-                        </button>
-                        <button
-                          onClick={(e) => toggleFavorite(chat as any, e)}
-                          className="p-1 text-fire transition-colors"
-                          title="Remove from favorites"
-                        >
-                          {'\u2605'}
-                        </button>
-                      </div>
-                    ))}
+                          <button
+                            onClick={() => loadChatFromHistory(chat as any)}
+                            className="flex-1 text-left"
+                          >
+                            <p className="text-sm text-frost truncate">{chat.question || 'Saved conversation'}</p>
+                            {chat.answer && (
+                              <p className="text-xs text-frost-muted truncate mt-0.5">{chat.answer.substring(0, 80)}</p>
+                            )}
+                            {validDate && (
+                              <p className="text-xs text-frost-muted mt-0.5">{validDate}</p>
+                            )}
+                          </button>
+                          <button
+                            onClick={(e) => toggleFavorite(chat as any, e)}
+                            className="p-1 text-fire transition-colors text-lg"
+                            title="Remove from favorites"
+                          >
+                            {'\u2605'}
+                          </button>
+                        </div>
+                      );
+                    })}
                   </div>
                 )
               )}
@@ -841,23 +860,8 @@ export default function AIAdvisorPage() {
                   <p className="whitespace-pre-wrap">{msg.content}</p>
                   {msg.role === 'assistant' && (
                     <>
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-surface-border/50">
-                        <span className="text-xs text-frost-muted">
-                          {msg.source === 'rules' ? '(Rules)' : msg.source === 'ai' ? '(AI)' : ''}
-                        </span>
+                      <div className="flex items-center justify-end mt-3 pt-3 border-t border-surface-border/50">
                         <div className="flex items-center gap-3">
-                          {/* Favorite toggle */}
-                          {msg.conversationId && (
-                            <button
-                              onClick={() => toggleMessageFavorite(msg.id, msg.conversationId!)}
-                              className={`text-lg hover:scale-110 transition-all ${
-                                msg.isFavorite ? 'text-fire' : 'text-frost-muted hover:text-fire'
-                              }`}
-                              title={msg.isFavorite ? 'Remove from favorites' : 'Save to favorites'}
-                            >
-                              {msg.isFavorite ? '\u2605' : '\u2606'}
-                            </button>
-                          )}
                           {/* Rating buttons */}
                           {msg.rated ? (
                             <span className="text-xs text-frost-muted">

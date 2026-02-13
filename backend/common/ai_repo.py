@@ -204,10 +204,6 @@ def get_favorites(user_id: str, limit: int = 20) -> list:
     table = get_table("main")
     resp = table.query(
         KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
-        ExpressionAttributeValues={
-            ":pk": f"USER#{user_id}",
-            ":prefix": "AICONV#",
-        },
         FilterExpression="is_favorite = :t",
         ExpressionAttributeValues={
             ":pk": f"USER#{user_id}",
@@ -248,6 +244,48 @@ def rate_conversation(user_id: str, conversation_sk: str, updates: dict) -> dict
         ReturnValues="ALL_NEW",
     )
     return resp.get("Attributes", {})
+
+
+def delete_conversation(user_id: str, conversation_sk: str) -> bool:
+    """Delete a single AI conversation. Returns True if deleted."""
+    table = get_table("main")
+    sk = conversation_sk if conversation_sk.startswith("AICONV#") else f"AICONV#{conversation_sk}"
+    table.delete_item(Key={"PK": f"USER#{user_id}", "SK": sk})
+    return True
+
+
+def delete_thread(user_id: str, thread_id: str) -> int:
+    """Delete all conversations in a thread. Returns count deleted."""
+    table = get_table("main")
+    conversations = get_conversation_history(user_id, limit=200)
+    count = 0
+    with table.batch_writer() as batch:
+        for conv in conversations:
+            if conv.get("thread_id") == thread_id:
+                batch.delete_item(Key={"PK": conv["PK"], "SK": conv["SK"]})
+                count += 1
+    return count
+
+
+def delete_conversation_history(user_id: str) -> int:
+    """Delete all AI conversations for a user. Returns count deleted."""
+    table = get_table("main")
+    # Query all AICONV items
+    resp = table.query(
+        KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
+        ExpressionAttributeValues={
+            ":pk": f"USER#{user_id}",
+            ":prefix": "AICONV#",
+        },
+        ProjectionExpression="PK, SK",
+    )
+    items = resp.get("Items", [])
+    count = 0
+    with table.batch_writer() as batch:
+        for item in items:
+            batch.delete_item(Key={"PK": item["PK"], "SK": item["SK"]})
+            count += 1
+    return count
 
 
 def toggle_favorite(user_id: str, conversation_sk: str) -> bool:

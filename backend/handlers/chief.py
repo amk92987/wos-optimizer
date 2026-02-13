@@ -79,4 +79,13 @@ def update_charms():
 
 
 def lambda_handler(event, context):
-    return app.resolve(event, context)
+    try:
+        return app.resolve(event, context)
+    except AppError as exc:
+        logger.warning("Application error", extra={"error": exc.message, "status": exc.status_code})
+        return {"statusCode": exc.status_code, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": exc.message})}
+    except Exception as exc:
+        logger.exception("Unhandled error in chief handler")
+        from common.error_capture import capture_error
+        capture_error("chief", event, exc, logger)
+        return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

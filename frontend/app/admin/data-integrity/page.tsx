@@ -51,15 +51,8 @@ export default function AdminDataIntegrityPage() {
       setLastRun(new Date().toISOString());
     } catch (error) {
       console.error('Failed to run integrity checks:', error);
-      setChecks([
-        { name: 'Orphaned Profiles', description: 'Profiles without users', status: 'pass', details: 'No orphaned profiles found', count: 0, affected_ids: [], severity: 'high', fix_action: 'clean_orphaned_profiles' },
-        { name: 'Orphaned Heroes', description: 'User heroes without profiles', status: 'pass', details: 'All heroes linked to profiles', count: 0, affected_ids: [], severity: 'high', fix_action: 'clean_orphaned_heroes' },
-        { name: 'Invalid Hero References', description: 'User heroes referencing non-existent heroes', status: 'pass', details: 'All references valid', count: 0, affected_ids: [], severity: 'medium' },
-        { name: 'Duplicate Emails', description: 'Users with duplicate email addresses', status: 'pass', details: 'No duplicates found', count: 0, affected_ids: [], severity: 'critical' },
-        { name: 'Missing Game Data', description: 'Required JSON files', status: 'pass', details: 'All game data files present', count: 67, affected_ids: [], severity: 'high' },
-        { name: 'Hero Image Files', description: 'Hero portraits in assets folder', status: 'pass', details: 'All hero images available', count: 56, affected_ids: [], severity: 'low' },
-      ]);
-      setLastRun(new Date().toISOString());
+      setChecks([]);
+      setActionMessage({ type: 'error', text: 'Failed to run integrity checks. The backend may be unavailable.' });
     } finally {
       setIsLoading(false);
     }
@@ -341,36 +334,6 @@ export default function AdminDataIntegrityPage() {
           )}
         </div>
 
-        {/* Quick Actions */}
-        <div className="card mt-6">
-          <h2 className="section-header">Quick Actions</h2>
-          <div className="grid md:grid-cols-3 gap-4">
-            <button
-              onClick={() => handleQuickAction('rebuild_indexes', 'Rebuild Indexes')}
-              disabled={isFixing}
-              className="p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left"
-            >
-              <p className="font-medium text-frost mt-1">Rebuild Indexes</p>
-              <p className="text-xs text-frost-muted mt-1">Optimize database performance</p>
-            </button>
-            <button
-              onClick={() => handleQuickAction('clean_orphans', 'Clean Orphans')}
-              disabled={isFixing}
-              className="p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left"
-            >
-              <p className="font-medium text-frost mt-1">Clean Orphans</p>
-              <p className="text-xs text-frost-muted mt-1">Remove orphaned records</p>
-            </button>
-            <button
-              onClick={() => handleQuickAction('generate_report', 'Generate Report')}
-              disabled={isFixing}
-              className="p-4 rounded-lg bg-surface hover:bg-surface-hover transition-colors text-left"
-            >
-              <p className="font-medium text-frost mt-1">Generate Report</p>
-              <p className="text-xs text-frost-muted mt-1">Export integrity report</p>
-            </button>
-          </div>
-        </div>
       </div>
     </PageLayout>
   );

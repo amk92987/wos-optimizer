@@ -96,6 +96,13 @@ def get_events():
 @app.get("/api/events/guide")
 def get_events_guide():
     """Return full events guide data for the frontend events page."""
+    # Use the dedicated guide file which matches the frontend's expected format
+    guide_path = os.path.join(Config.DATA_DIR, "events_guide.json")
+    if os.path.exists(guide_path):
+        with open(guide_path, encoding="utf-8") as f:
+            return json.load(f)
+
+    # Fallback to events.json (old format, may not work with frontend)
     events_path = os.path.join(Config.DATA_DIR, "events.json")
     if not os.path.exists(events_path):
         return {"events": {}, "cost_categories": {}, "priority_tiers": {}}
@@ -265,7 +272,25 @@ def get_unread_count():
     )
     notifications = resp.get("Items", [])
     unread = sum(1 for n in notifications if not n.get("dismissed") and not n.get("is_read"))
-    return {"unread_notifications": unread, "total_unread": unread}
+
+    # For admins, include unresolved error count
+    error_count = 0
+    try:
+        from common.auth import is_admin
+        if is_admin(app.current_event.raw_event):
+            admin_table = get_table("admin")
+            error_resp = admin_table.query(
+                KeyConditionExpression="PK = :pk",
+                FilterExpression="attribute_not_exists(#s) OR #s = :new",
+                ExpressionAttributeNames={"#s": "status"},
+                ExpressionAttributeValues={":pk": "ERRORS", ":new": "new"},
+                Select="COUNT",
+            )
+            error_count = error_resp.get("Count", 0)
+    except Exception:
+        pass  # Don't break unread count if error query fails
+
+    return {"unread_notifications": unread, "error_count": error_count, "total_unread": unread + error_count}
 
 
 @app.get("/api/inbox/threads")
@@ -430,7 +455,15 @@ def get_lineup_template(gameMode: str):
     with open(lineup_path, encoding="utf-8") as f:
         data = json.load(f)
 
-    template = data.get(gameMode) if isinstance(data, dict) else None
+    # Templates live under lineup_scenarios; try exact match then prefix match
+    scenarios = data.get("lineup_scenarios", {}) if isinstance(data, dict) else {}
+    template = scenarios.get(gameMode)
+    if not template:
+        # Try prefix match (e.g. "bear_trap" matches "bear_trap_crazy_joe")
+        for key, value in scenarios.items():
+            if key.startswith(gameMode) or gameMode.startswith(key):
+                template = value
+                break
     if not template:
         raise NotFoundError(f"No lineup template for: {gameMode}")
     return template
@@ -454,8 +487,14 @@ def get_general_lineup(gameMode: str):
         if os.path.exists(lineup_path):
             with open(lineup_path, encoding="utf-8") as f:
                 data = json.load(f)
-            template = data.get(gameMode, {}) if isinstance(data, dict) else {}
-            return {"game_mode": gameMode, "heroes": [], "troop_ratio": template.get("troop_ratio", {"infantry": 50, "lancer": 20, "marksman": 30}), "notes": template.get("notes", ""), "confidence": "low", "recommended_to_get": []}
+            scenarios = data.get("lineup_scenarios", {}) if isinstance(data, dict) else {}
+            template = scenarios.get(gameMode, {})
+            if not template:
+                for key, value in scenarios.items():
+                    if key.startswith(gameMode) or gameMode.startswith(key):
+                        template = value
+                        break
+            return {"game_mode": gameMode, "heroes": [], "troop_ratio": template.get("troop_ratio", {"infantry": 50, "lancer": 20, "marksman": 30}), "notes": template.get("notes", template.get("goal", "")), "confidence": "low", "recommended_to_get": []}
         return {"game_mode": gameMode, "heroes": [], "troop_ratio": {"infantry": 50, "lancer": 20, "marksman": 30}, "notes": "", "confidence": "low", "recommended_to_get": []}
 
 
@@ -552,16 +591,15 @@ def get_lineup_for_event(eventType: str):
     with open(lineup_path, encoding="utf-8") as f:
         lineups = json.load(f)
 
-    # Find the matching event type lineup
-    event_lineup = None
-    if isinstance(lineups, dict):
-        event_lineup = lineups.get(eventType)
-    elif isinstance(lineups, list):
-        for entry in lineups:
-            if entry.get("event_type") == eventType:
-                event_lineup = entry
+    # Find the matching event type lineup (data is under lineup_scenarios)
+    scenarios = lineups.get("lineup_scenarios", {}) if isinstance(lineups, dict) else {}
+    event_lineup = scenarios.get(eventType)
+    if not event_lineup:
+        # Try prefix match (e.g. "bear_trap" matches "bear_trap_crazy_joe")
+        for key, value in scenarios.items():
+            if key.startswith(eventType) or eventType.startswith(key):
+                event_lineup = value
                 break
-
     if not event_lineup:
         raise NotFoundError(f"No lineup found for event type: {eventType}")
 
@@ -611,4 +649,13 @@ def cleanup_handler(event, context):
 
 
 def lambda_handler(event, context):
-    return app.resolve(event, context)
+    try:
+        return app.resolve(event, context)
+    except AppError as exc:
+        logger.warning("Application error", extra={"error": exc.message, "status": exc.status_code})
+        return {"statusCode": exc.status_code, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": exc.message})}
+    except Exception as exc:
+        logger.exception("Unhandled error in general handler")
+        from common.error_capture import capture_error
+        capture_error("general", event, exc, logger)
+        return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

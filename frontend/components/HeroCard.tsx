@@ -131,10 +131,10 @@ export default function HeroCard({ hero, token, onSaved, onRemove }: HeroCardPro
     <div className="flex items-center gap-4 w-full">
       {/* Hero Image */}
       <div className={`w-16 h-16 rounded-xl overflow-hidden bg-surface-hover flex-shrink-0 border-2 ${getRarityClass(hero.rarity)}`}>
-        {hero.image_base64 ? (
-          <img src={hero.image_base64} alt={hero.name} className="w-full h-full object-cover" />
+        {hero.image_base64 || hero.image_filename ? (
+          <img src={hero.image_base64 || `/images/heroes/${hero.image_filename}`} alt={hero.name} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-2xl">🦸</div>
+          <div className="w-full h-full flex items-center justify-center text-2xl">?</div>
         )}
       </div>
 

@@ -5,6 +5,7 @@ import os
 from collections import Counter
 from datetime import datetime, timezone
 
+import boto3
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
@@ -13,6 +14,8 @@ from common.exceptions import AppError, NotFoundError, ValidationError
 from common.config import Config
 from common import admin_repo, user_repo, ai_repo, profile_repo, hero_repo
 from common.db import get_table
+
+cognito = boto3.client("cognito-idp", region_name=Config.REGION)
 
 app = APIGatewayHttpResolver()
 logger = Logger()
@@ -34,9 +37,10 @@ def list_users():
 
     users = user_repo.list_users(test_only=test_only, limit=limit)
 
-    # Enrich each user with profile_count, states, usage_7d
+    # Enrich each user with id, profile_count, states, usage_7d
     for u in users:
         uid = u.get("user_id")
+        u["id"] = uid  # Frontend expects both 'id' and 'user_id'
         try:
             profiles = profile_repo.get_profiles(uid) if uid else []
             u["profile_count"] = len(profiles)
@@ -75,6 +79,7 @@ def create_user():
         is_test_account=is_test,
         password_hash=password_hash,
     )
+    user["id"] = user.get("user_id")
 
     admin_id = get_user_id(app.current_event.raw_event)
     admin_repo.log_audit(admin_id, "admin", "create_user", "user", user_id, username)
@@ -88,6 +93,7 @@ def get_user(userId: str):
     user = user_repo.get_user(userId)
     if not user:
         raise NotFoundError("User not found")
+    user["id"] = user.get("user_id")
 
     profiles = profile_repo.get_profiles(userId, include_deleted=True)
     return {"user": user, "profiles": profiles}
@@ -109,6 +115,7 @@ def update_user(userId: str):
         raise ValidationError("No valid fields to update")
 
     updated = user_repo.update_user(userId, updates)
+    updated["id"] = updated.get("user_id", userId)
 
     admin_id = get_user_id(app.current_event.raw_event)
     admin_repo.log_audit(admin_id, "admin", "update_user", "user", userId, user.get("username"), json.dumps(updates))
@@ -146,6 +153,288 @@ def impersonate_user(userId: str):
         "user": user,
         "profiles": profiles,
         "impersonating": True,
+    }
+
+
+# --- Seed Test Accounts ---
+
+# Hero data for each test account archetype
+_TEST_ACCOUNTS = [
+    {
+        "email": "test_dolphin@test.com",
+        "label": "Dolphin (FC5, Day 700)",
+        "profile": {
+            "name": "Dolphin Main",
+            "state_number": 456,
+            "server_age_days": 700,
+            "furnace_level": 30,
+            "furnace_fc_level": 5,
+            "spending_profile": "dolphin",
+            "priority_focus": "svs_combat",
+            "alliance_role": "filler",
+            "priority_svs": 5,
+            "priority_rally": 4,
+            "priority_castle_battle": 4,
+            "priority_exploration": 3,
+            "priority_gathering": 2,
+        },
+        "heroes": [
+            # Gen 1 maxed
+            {"name": "Jeronimo",  "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
+            {"name": "Natalia",   "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
+            {"name": "Molly",     "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
+            {"name": "Sergey",    "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
+            {"name": "Jessie",    "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
+            # Gen 2-4 strong
+            {"name": "Flint",     "level": 75, "stars": 5, "ascension": 4, "skills": 4, "gear": 4},
+            {"name": "Alonso",    "level": 75, "stars": 5, "ascension": 4, "skills": 4, "gear": 4},
+            {"name": "Logan",     "level": 70, "stars": 5, "ascension": 3, "skills": 4, "gear": 3},
+            {"name": "Ahmose",    "level": 70, "stars": 5, "ascension": 3, "skills": 4, "gear": 3},
+            # Gen 5-6
+            {"name": "Hector",    "level": 75, "stars": 5, "ascension": 4, "skills": 4, "gear": 4},
+            {"name": "Wu Ming",   "level": 75, "stars": 5, "ascension": 4, "skills": 4, "gear": 4},
+            # Gen 7-8 developing
+            {"name": "Gatot",     "level": 65, "stars": 3, "ascension": 2, "skills": 3, "gear": 2},
+            {"name": "Gordon",    "level": 60, "stars": 3, "ascension": 2, "skills": 3, "gear": 2},
+            {"name": "Hendrik",   "level": 60, "stars": 3, "ascension": 1, "skills": 3, "gear": 2},
+            {"name": "Bahiti",    "level": 70, "stars": 5, "ascension": 3, "skills": 4, "gear": 3},
+        ],
+    },
+    {
+        "email": "test_f2p@test.com",
+        "label": "F2P (FC27, Day 240)",
+        "profile": {
+            "name": "F2P Account",
+            "state_number": 789,
+            "server_age_days": 240,
+            "furnace_level": 27,
+            "spending_profile": "f2p",
+            "priority_focus": "balanced_growth",
+            "alliance_role": "filler",
+            "priority_svs": 4,
+            "priority_rally": 3,
+            "priority_castle_battle": 3,
+            "priority_exploration": 4,
+            "priority_gathering": 3,
+        },
+        "heroes": [
+            # Gen 1 core
+            {"name": "Jeronimo",  "level": 60, "stars": 4, "ascension": 3, "skills": 4, "gear": 3},
+            {"name": "Natalia",   "level": 55, "stars": 4, "ascension": 3, "skills": 3, "gear": 3},
+            {"name": "Molly",     "level": 55, "stars": 4, "ascension": 3, "skills": 3, "gear": 3},
+            {"name": "Sergey",    "level": 50, "stars": 3, "ascension": 2, "skills": 3, "gear": 2},
+            {"name": "Jessie",    "level": 45, "stars": 3, "ascension": 2, "skills": 3, "gear": 2},
+            # Gen 2
+            {"name": "Flint",     "level": 50, "stars": 3, "ascension": 2, "skills": 2, "gear": 2},
+            {"name": "Alonso",    "level": 45, "stars": 3, "ascension": 2, "skills": 2, "gear": 2},
+            # Gen 3
+            {"name": "Logan",     "level": 35, "stars": 2, "ascension": 1, "skills": 2, "gear": 1},
+        ],
+    },
+    {
+        "email": "test_whale@test.com",
+        "label": "Whale (FC25, Day 80)",
+        "profile": {
+            "name": "Whale Main",
+            "state_number": 999,
+            "server_age_days": 80,
+            "furnace_level": 25,
+            "spending_profile": "whale",
+            "priority_focus": "svs_combat",
+            "alliance_role": "rally_lead",
+            "priority_svs": 5,
+            "priority_rally": 5,
+            "priority_castle_battle": 4,
+            "priority_exploration": 2,
+            "priority_gathering": 1,
+        },
+        "heroes": [
+            # Gen 1 maxed fast
+            {"name": "Jeronimo",  "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
+            {"name": "Natalia",   "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
+            {"name": "Molly",     "level": 75, "stars": 5, "ascension": 4, "skills": 5, "gear": 5},
+            {"name": "Sergey",    "level": 75, "stars": 5, "ascension": 4, "skills": 5, "gear": 4},
+            {"name": "Jessie",    "level": 75, "stars": 5, "ascension": 4, "skills": 5, "gear": 4},
+            {"name": "Bahiti",    "level": 70, "stars": 4, "ascension": 3, "skills": 4, "gear": 4},
+            # Gen 2 high
+            {"name": "Flint",     "level": 70, "stars": 4, "ascension": 3, "skills": 4, "gear": 4},
+            {"name": "Philly",    "level": 65, "stars": 4, "ascension": 3, "skills": 3, "gear": 3},
+            {"name": "Alonso",    "level": 75, "stars": 4, "ascension": 4, "skills": 4, "gear": 4},
+            # Gen 3 early
+            {"name": "Logan",     "level": 40, "stars": 2, "ascension": 1, "skills": 2, "gear": 1},
+        ],
+    },
+]
+
+_TEST_PASSWORD = "Test1234!"
+
+
+def _build_hero_data(h: dict) -> dict:
+    """Convert shorthand hero definition to full put_hero data dict."""
+    skill_level = h.get("skills", 1)
+    gear_quality = h.get("gear", 0)
+    # Map gear shorthand (1-5) to quality enum values:
+    # 0=None, 1=Common(Green), 2=Uncommon(Blue), 3=Rare(Purple), 4=Epic(Orange), 5=Legendary(Gold)
+    gear_level = gear_quality * 20 if gear_quality > 0 else 0  # rough: quality 5 → level 100
+    return {
+        "level": h.get("level", 1),
+        "stars": h.get("stars", 0),
+        "ascension": h.get("ascension", 0),
+        "exploration_skill_1": skill_level,
+        "exploration_skill_2": skill_level,
+        "exploration_skill_3": skill_level,
+        "expedition_skill_1": skill_level,
+        "expedition_skill_2": skill_level,
+        "expedition_skill_3": skill_level,
+        "gear_slot1_quality": gear_quality,
+        "gear_slot1_level": gear_level,
+        "gear_slot2_quality": gear_quality,
+        "gear_slot2_level": gear_level,
+        "gear_slot3_quality": gear_quality,
+        "gear_slot3_level": gear_level,
+        "gear_slot4_quality": gear_quality,
+        "gear_slot4_level": gear_level,
+    }
+
+
+def _get_or_create_cognito_user(email: str) -> str:
+    """Create a Cognito user or get existing sub. Returns cognito sub."""
+    try:
+        cognito.admin_create_user(
+            UserPoolId=Config.USER_POOL_ID,
+            Username=email,
+            UserAttributes=[
+                {"Name": "email", "Value": email},
+                {"Name": "email_verified", "Value": "true"},
+            ],
+            MessageAction="SUPPRESS",
+        )
+        cognito.admin_set_user_password(
+            UserPoolId=Config.USER_POOL_ID,
+            Username=email,
+            Password=_TEST_PASSWORD,
+            Permanent=True,
+        )
+    except cognito.exceptions.UsernameExistsException:
+        pass  # User already exists, that's fine
+
+    # Look up the sub
+    resp = cognito.admin_get_user(
+        UserPoolId=Config.USER_POOL_ID,
+        Username=email,
+    )
+    sub = None
+    for attr in resp.get("UserAttributes", []):
+        if attr["Name"] == "sub":
+            sub = attr["Value"]
+            break
+    if not sub:
+        raise ValidationError(f"Could not find sub for {email}")
+    return sub
+
+
+@app.post("/api/admin/seed-test-accounts")
+def seed_test_accounts():
+    """Create test accounts with profiles and heroes for testing."""
+    _require_admin()
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    results = []
+
+    for acct in _TEST_ACCOUNTS:
+        email = acct["email"]
+        label = acct["label"]
+        status = "created"
+
+        try:
+            # 1. Create Cognito user (or get existing)
+            cognito_sub = _get_or_create_cognito_user(email)
+
+            # 2. Create or update DynamoDB user record directly
+            #    (bypass transactional create_user to avoid uniqueness guard issues)
+            now = datetime.now(timezone.utc).isoformat()
+            existing_user = user_repo.get_user(cognito_sub)
+            if existing_user:
+                status = "reset"
+                # Ensure test flag is set
+                if not existing_user.get("is_test_account"):
+                    user_repo.update_user(cognito_sub, {"is_test_account": True})
+            else:
+                table = get_table("main")
+                table.put_item(Item={
+                    "PK": f"USER#{cognito_sub}",
+                    "SK": "METADATA",
+                    "entity_type": "USER",
+                    "user_id": cognito_sub,
+                    "email": email,
+                    "username": email,
+                    "role": "user",
+                    "is_active": True,
+                    "is_verified": False,
+                    "is_test_account": True,
+                    "ai_requests_today": 0,
+                    "ai_access_level": "limited",
+                    "theme": "dark",
+                    "created_at": now,
+                    "updated_at": now,
+                })
+
+            # 3. Delete existing profiles + heroes to reset data
+            existing_profiles = profile_repo.get_profiles(cognito_sub)
+            for ep in existing_profiles:
+                pid = ep.get("profile_id") or ep["SK"].replace("PROFILE#", "")
+                profile_repo.delete_profile(cognito_sub, pid, hard=True)
+
+            # 4. Create fresh profile
+            profile = profile_repo.create_profile(
+                user_id=cognito_sub,
+                name=acct["profile"]["name"],
+                state_number=acct["profile"].get("state_number"),
+            )
+            profile_id = profile["profile_id"]
+
+            # 5. Update profile settings
+            profile_settings = {k: v for k, v in acct["profile"].items()
+                                if k not in ("name", "state_number")}
+            if profile_settings:
+                profile_repo.update_profile(cognito_sub, profile_id, profile_settings)
+
+            # 6. Activate profile
+            profile_repo.activate_profile(cognito_sub, profile_id)
+
+            # 7. Add heroes
+            heroes_added = 0
+            for h in acct["heroes"]:
+                hero_data = _build_hero_data(h)
+                hero_repo.put_hero(profile_id, h["name"], hero_data)
+                heroes_added += 1
+
+            results.append({
+                "email": email,
+                "label": label,
+                "status": status,
+                "user_id": cognito_sub,
+                "heroes": heroes_added,
+            })
+
+        except Exception as e:
+            logger.error("Failed to create test account", email=email, error=str(e))
+            results.append({
+                "email": email,
+                "label": label,
+                "status": "error",
+                "error": str(e),
+            })
+
+    admin_repo.log_audit(
+        admin_id, "admin", "seed_test_accounts",
+        details=json.dumps({"accounts": len(results), "password": _TEST_PASSWORD}),
+    )
+
+    return {
+        "results": results,
+        "password": _TEST_PASSWORD,
+        "message": f"Processed {len(results)} test accounts",
     }
 
 
@@ -228,15 +517,15 @@ def get_metrics():
     _require_admin()
 
     users = user_repo.list_users(limit=1000)
-    total_users = len(users)
-    test_accounts = sum(1 for u in users if u.get("is_test_account"))
-    active_users = sum(1 for u in users if u.get("is_active"))
+    real_users = [u for u in users if not u.get("is_test_account")]
+    test_accounts = len(users) - len(real_users)
+    active_users = sum(1 for u in real_users if u.get("is_active"))
 
     ai_settings = ai_repo.get_ai_settings()
     feedback = admin_repo.get_feedback()
 
     return {
-        "total_users": total_users,
+        "total_users": len(real_users),
         "test_accounts": test_accounts,
         "active_users": active_users,
         "ai_mode": ai_settings.get("mode", "off"),
@@ -389,19 +678,19 @@ def bulk_feedback_action():
 def get_admin_stats():
     _require_admin()
     users = user_repo.list_users(limit=1000)
-    total_users = len(users)
-    test_accounts = sum(1 for u in users if u.get("is_test_account"))
-    active_users = sum(1 for u in users if u.get("is_active"))
+    real_users = [u for u in users if not u.get("is_test_account")]
+    test_accounts = len(users) - len(real_users)
+    active_users = sum(1 for u in real_users if u.get("is_active"))
 
     ai_settings = ai_repo.get_ai_settings()
     feedback = admin_repo.get_feedback()
     announcements = admin_repo.get_announcements(active_only=True)
 
-    # Count profiles and heroes
+    # Count profiles and heroes (exclude test accounts)
     total_profiles = 0
     total_heroes = 0
     ai_requests_today = 0
-    for u in users:
+    for u in real_users:
         ai_requests_today += u.get("ai_requests_today", 0)
         try:
             profiles = profile_repo.get_profiles(u["user_id"])
@@ -418,7 +707,7 @@ def get_admin_stats():
             pass
 
     return {
-        "total_users": total_users,
+        "total_users": len(real_users),
         "active_users": active_users,
         "test_accounts": test_accounts,
         "total_profiles": total_profiles,
@@ -440,7 +729,8 @@ def get_usage_stats():
 
     days = {"7d": 7, "30d": 30, "90d": 90}.get(date_range, 7)
 
-    users = user_repo.list_users(limit=1000)
+    all_users = user_repo.list_users(limit=1000)
+    users = [u for u in all_users if not u.get("is_test_account")]
     total_users = len(users)
     active_users = sum(1 for u in users if u.get("is_active"))
     now = datetime.now(timezone.utc)
@@ -598,20 +888,59 @@ def get_usage_stats():
     # Activity rate
     activity_rate = round((active_users / total_users * 100) if total_users else 0, 1)
 
-    # Historical data from metrics
-    historical = []
-    try:
-        metrics_history = admin_repo.get_metrics_history(days=days)
-        for m in metrics_history:
-            historical.append({
-                "date": m.get("date", ""),
-                "total_users": m.get("total_users", 0),
-                "active_users": m.get("active_users", 0),
-                "new_users": m.get("new_users", 0),
-                "heroes_tracked": m.get("total_heroes", 0),
-            })
-    except Exception:
-        pass
+    # Build data_points from user created_at / last_login timestamps
+    from datetime import timedelta
+
+    created_dates: dict[str, int] = {}  # date -> new users
+    login_dates: dict[str, int] = {}    # date -> active users
+
+    for u in users:
+        ca = u.get("created_at")
+        if ca:
+            try:
+                d = datetime.fromisoformat(ca.replace("Z", "+00:00")).strftime("%Y-%m-%d")
+                created_dates[d] = created_dates.get(d, 0) + 1
+            except Exception:
+                pass
+        ll = u.get("last_login")
+        if ll:
+            try:
+                d = datetime.fromisoformat(ll.replace("Z", "+00:00")).strftime("%Y-%m-%d")
+                login_dates[d] = login_dates.get(d, 0) + 1
+            except Exception:
+                pass
+
+    data_points = []
+    cumulative = 0
+    # Count users created before the range start
+    start_dt = now - timedelta(days=days)
+    for u in users:
+        ca = u.get("created_at")
+        if ca:
+            try:
+                created = datetime.fromisoformat(ca.replace("Z", "+00:00"))
+                if created < start_dt:
+                    cumulative += 1
+            except Exception:
+                pass
+
+    for i in range(days):
+        day = (start_dt + timedelta(days=i + 1))
+        day_str = day.strftime("%Y-%m-%d")
+        new_on_day = created_dates.get(day_str, 0)
+        cumulative += new_on_day
+        data_points.append({
+            "date": day_str,
+            "total_users": cumulative,
+            "active_users": login_dates.get(day_str, 0),
+            "new_users": new_on_day,
+        })
+
+    # Extract daily_active_users as simple number array for the DAU chart
+    daily_active_users = [dp["active_users"] for dp in data_points]
+
+    # Add heroes_tracked to each data point for the historical view
+    historical = [{**dp, "heroes_tracked": 0} for dp in data_points]
 
     return {
         "summary": {
@@ -641,9 +970,9 @@ def get_usage_stats():
             "users_with_state": users_with_state,
             "users_without_state": users_without_state,
         },
-        "daily_active_users": [],  # Would need daily snapshots to populate
-        "ai_usage": [],  # Would need per-day AI request tracking
+        "daily_active_users": daily_active_users,
         "historical": historical,
+        "ai_usage": [],
         "user_activity": user_activity_list,
     }
 
@@ -726,25 +1055,19 @@ def bulk_flag_action_alias():
 @app.get("/api/admin/errors")
 def get_errors():
     _require_admin()
-    table = get_table("admin")
-    resp = table.query(
-        KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
-        ExpressionAttributeValues={
-            ":pk": "ERRORS",
-            ":prefix": "ERROR#",
-        },
-        ScanIndexForward=False,
-    )
-    errors = resp.get("Items", [])
+    errors = admin_repo.get_errors(limit=200)
     return {"errors": errors}
 
 
 @app.post("/api/admin/errors/<errorId>/resolve")
 def resolve_error(errorId: str):
     _require_admin()
+    item = admin_repo._find_error_by_id(errorId)
+    if not item:
+        raise NotFoundError(f"Error {errorId} not found")
     table = get_table("admin")
     table.update_item(
-        Key={"PK": "ERRORS", "SK": f"ERROR#{errorId}"},
+        Key={"PK": "ERRORS", "SK": item["SK"]},
         UpdateExpression="SET #s = :resolved, #r = :true_val",
         ExpressionAttributeNames={"#s": "status", "#r": "resolved"},
         ExpressionAttributeValues={":resolved": "resolved", ":true_val": True},
@@ -759,6 +1082,9 @@ def resolve_error(errorId: str):
 def update_error(errorId: str):
     _require_admin()
     body = app.current_event.json_body or {}
+    item = admin_repo._find_error_by_id(errorId)
+    if not item:
+        raise NotFoundError(f"Error {errorId} not found")
     table = get_table("admin")
 
     update_parts = []
@@ -781,7 +1107,7 @@ def update_error(errorId: str):
 
     if update_parts:
         table.update_item(
-            Key={"PK": "ERRORS", "SK": f"ERROR#{errorId}"},
+            Key={"PK": "ERRORS", "SK": item["SK"]},
             UpdateExpression="SET " + ", ".join(update_parts),
             ExpressionAttributeNames=names,
             ExpressionAttributeValues=values,
@@ -795,11 +1121,85 @@ def update_error(errorId: str):
 @app.delete("/api/admin/errors/<errorId>")
 def delete_error(errorId: str):
     _require_admin()
+    item = admin_repo._find_error_by_id(errorId)
+    if not item:
+        raise NotFoundError(f"Error {errorId} not found")
     table = get_table("admin")
-    table.delete_item(Key={"PK": "ERRORS", "SK": f"ERROR#{errorId}"})
+    table.delete_item(Key={"PK": "ERRORS", "SK": item["SK"]})
     admin_id = get_user_id(app.current_event.raw_event)
     admin_repo.log_audit(admin_id, "admin", "delete_error", "error", errorId)
     return {"status": "deleted"}
+
+
+@app.post("/api/admin/errors/<errorId>/diagnose")
+def diagnose_error(errorId: str):
+    """Use AI to diagnose an error."""
+    _require_admin()
+    item = admin_repo._find_error_by_id(errorId)
+    if not item:
+        raise NotFoundError(f"Error {errorId} not found")
+
+    error_type = item.get("error_type", "Unknown")
+    error_message = item.get("error_message", "No message")
+    stack_trace = item.get("stack_trace", "No stack trace")
+    handler = item.get("page", item.get("function", "unknown"))
+
+    prompt = f"""Analyze this application error and provide a diagnosis with suggested fix.
+
+Error Type: {error_type}
+Error Message: {error_message}
+Handler/Function: {handler}
+Environment: {item.get('environment', 'unknown')}
+
+Stack Trace:
+{stack_trace}
+
+Provide:
+1. Root cause analysis (1-2 sentences)
+2. Suggested fix (specific code change if possible)
+3. Severity assessment (low/medium/high/critical)
+4. Whether this is likely a one-time issue or recurring"""
+
+    diagnosis = None
+    try:
+        from engine.ai_recommender import AIRecommender
+        recommender = AIRecommender(provider="auto")
+        if recommender.openai_client:
+            response = recommender.openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are a senior software engineer diagnosing production errors in a Python/AWS Lambda application using DynamoDB, API Gateway, and Cognito."},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.3,
+                max_tokens=800,
+            )
+            diagnosis = response.choices[0].message.content.strip()
+        elif recommender.anthropic_client:
+            response = recommender.anthropic_client.messages.create(
+                model="claude-sonnet-4-5-20250929",
+                max_tokens=800,
+                system="You are a senior software engineer diagnosing production errors in a Python/AWS Lambda application using DynamoDB, API Gateway, and Cognito.",
+                messages=[{"role": "user", "content": prompt}],
+            )
+            diagnosis = response.content[0].text.strip()
+    except Exception as e:
+        logger.warning(f"AI diagnosis failed: {e}")
+        diagnosis = f"AI diagnosis unavailable: {e}"
+
+    if not diagnosis:
+        diagnosis = "No AI provider available. Check API keys in Secrets Manager."
+
+    # Store diagnosis in the error record
+    now = datetime.now(timezone.utc).isoformat()
+    table = get_table("admin")
+    table.update_item(
+        Key={"PK": "ERRORS", "SK": item["SK"]},
+        UpdateExpression="SET ai_diagnosis = :d, diagnosed_at = :t",
+        ExpressionAttributeValues={":d": diagnosis, ":t": now},
+    )
+
+    return {"diagnosis": diagnosis, "diagnosed_at": now}
 
 
 @app.post("/api/admin/errors/bulk")
@@ -812,8 +1212,8 @@ def bulk_error_action():
     if action == "delete_ignored":
         table = get_table("admin")
         resp = table.query(
-            KeyConditionExpression="PK = :pk AND begins_with(SK, :prefix)",
-            ExpressionAttributeValues={":pk": "ERRORS", ":prefix": "ERROR#"},
+            KeyConditionExpression="PK = :pk",
+            ExpressionAttributeValues={":pk": "ERRORS"},
         )
         count = 0
         for item in resp.get("Items", []):
@@ -1025,71 +1425,166 @@ def ai_export_alias():
 def check_data_integrity():
     _require_admin()
     results = []
-    data_dir = Config.DATA_DIR
+    table = get_table("main")
 
-    # Check core data files
-    core_files = [
-        ("heroes.json", "Hero Data", "Core hero definitions and stats"),
-        ("events.json", "Event Data", "Event calendar and mechanics"),
-        ("chief_gear.json", "Chief Gear Data", "Chief gear stats and progression"),
-        ("vip_system.json", "VIP System Data", "VIP levels and buffs"),
-    ]
-    for fname, check_name, description in core_files:
-        fpath = os.path.join(data_dir, fname)
-        exists = os.path.exists(fpath)
-        valid = False
-        size = 0
-        if exists:
-            size = os.path.getsize(fpath)
-            try:
-                with open(fpath, encoding="utf-8") as f:
-                    json.load(f)
-                valid = True
-            except Exception:
-                pass
+    # 1. Orphaned Profiles - profiles whose user has no METADATA
+    try:
+        profile_resp = table.scan(
+            FilterExpression="begins_with(SK, :prof)",
+            ExpressionAttributeValues={":prof": "PROFILE#"},
+        )
+        orphaned_profiles = []
+        for item in profile_resp.get("Items", []):
+            user_pk = item["PK"]
+            meta = table.get_item(Key={"PK": user_pk, "SK": "METADATA"}).get("Item")
+            if not meta:
+                orphaned_profiles.append(f"{user_pk}/{item['SK']}")
+        count = len(orphaned_profiles)
+        results.append({
+            "name": "Orphaned Profiles",
+            "description": "Profiles without a matching user record",
+            "status": "fail" if count > 0 else "pass",
+            "details": f"{count} orphaned profile(s) found" if count else "All profiles have valid users",
+            "count": count,
+            "affected_ids": orphaned_profiles[:20],
+            "severity": "high",
+            "fix_action": "clean_orphaned_profiles",
+        })
+    except Exception as e:
+        results.append({"name": "Orphaned Profiles", "description": "Profiles without a matching user record",
+                        "status": "warn", "details": f"Check failed: {e}", "count": 0, "severity": "high"})
 
-        if not exists:
+    # 2. Users Without Profiles
+    try:
+        user_resp = table.scan(
+            FilterExpression="SK = :meta AND begins_with(PK, :u)",
+            ExpressionAttributeValues={":meta": "METADATA", ":u": "USER#"},
+        )
+        no_profile = []
+        for item in user_resp.get("Items", []):
+            user_pk = item["PK"]
+            prof = table.query(
+                KeyConditionExpression="PK = :pk AND begins_with(SK, :prof)",
+                ExpressionAttributeValues={":pk": user_pk, ":prof": "PROFILE#"},
+                Limit=1,
+            )
+            if not prof.get("Items"):
+                no_profile.append(item.get("email", user_pk))
+        count = len(no_profile)
+        results.append({
+            "name": "Users Without Profiles",
+            "description": "Users who have no profile record",
+            "status": "warn" if count > 0 else "pass",
+            "details": f"{count} user(s) without profiles" if count else "All users have profiles",
+            "count": count,
+            "affected_ids": no_profile[:20],
+            "severity": "medium",
+        })
+    except Exception as e:
+        results.append({"name": "Users Without Profiles", "description": "Users who have no profile record",
+                        "status": "warn", "details": f"Check failed: {e}", "count": 0, "severity": "medium"})
+
+    # 3. Invalid Hero References - heroes with names not in heroes.json
+    try:
+        valid_heroes = set()
+        heroes_data = hero_repo.get_all_heroes()
+        for h in heroes_data:
+            valid_heroes.add(h.get("name", "").lower())
+
+        hero_resp = table.scan(
+            FilterExpression="begins_with(PK, :prof) AND begins_with(SK, :hero)",
+            ExpressionAttributeValues={":prof": "PROFILE#", ":hero": "HERO#"},
+        )
+        invalid_refs = []
+        for item in hero_resp.get("Items", []):
+            hero_name = item.get("hero_name", item.get("name", ""))
+            if hero_name and hero_name.lower() not in valid_heroes:
+                invalid_refs.append(f"{hero_name} ({item['PK']})")
+        count = len(invalid_refs)
+        results.append({
+            "name": "Invalid Hero References",
+            "description": "User heroes referencing names not in heroes.json",
+            "status": "fail" if count > 0 else "pass",
+            "details": f"{count} invalid hero reference(s)" if count else "All hero references are valid",
+            "count": count,
+            "affected_ids": invalid_refs[:20],
+            "severity": "high",
+        })
+    except Exception as e:
+        results.append({"name": "Invalid Hero References", "description": "User heroes referencing names not in heroes.json",
+                        "status": "warn", "details": f"Check failed: {e}", "count": 0, "severity": "high"})
+
+    # 4. Hero Values Out of Range
+    try:
+        hero_resp = table.scan(
+            FilterExpression="begins_with(PK, :prof) AND begins_with(SK, :hero)",
+            ExpressionAttributeValues={":prof": "PROFILE#", ":hero": "HERO#"},
+        )
+        out_of_range = []
+        for item in hero_resp.get("Items", []):
+            issues = []
+            if item.get("level", 0) > 80:
+                issues.append(f"level={item['level']}")
+            if item.get("stars", 0) > 5:
+                issues.append(f"stars={item['stars']}")
+            for sk in ["exploration_skill_1", "exploration_skill_2", "exploration_skill_3",
+                        "expedition_skill_1", "expedition_skill_2", "expedition_skill_3"]:
+                if item.get(sk, 0) > 5:
+                    issues.append(f"{sk}={item[sk]}")
+            for gq in ["gear_slot_1_quality", "gear_slot_2_quality", "gear_slot_3_quality", "gear_slot_4_quality"]:
+                if item.get(gq, 0) > 7:
+                    issues.append(f"{gq}={item[gq]}")
+            if issues:
+                hero_name = item.get("hero_name", item.get("name", "unknown"))
+                out_of_range.append(f"{hero_name}: {', '.join(issues)}")
+        count = len(out_of_range)
+        results.append({
+            "name": "Hero Values Out of Range",
+            "description": "Heroes with stats exceeding valid maximums",
+            "status": "warn" if count > 0 else "pass",
+            "details": f"{count} hero(es) with out-of-range values" if count else "All hero values within valid ranges",
+            "count": count,
+            "affected_ids": out_of_range[:20],
+            "severity": "medium",
+            "fix_action": "fix_hero_ranges",
+        })
+    except Exception as e:
+        results.append({"name": "Hero Values Out of Range", "description": "Heroes with stats exceeding valid maximums",
+                        "status": "warn", "details": f"Check failed: {e}", "count": 0, "severity": "medium"})
+
+    # 5. Game Data Files on Lambda filesystem
+    try:
+        data_dir = Config.DATA_DIR
+        json_count = 0
+        missing_core = []
+        core_files = ["heroes.json", "events.json", "chief_gear.json", "vip_system.json"]
+        for fname in core_files:
+            fpath = os.path.join(data_dir, fname)
+            if not os.path.exists(fpath):
+                missing_core.append(fname)
+        for root, dirs, filenames in os.walk(data_dir):
+            json_count += sum(1 for f in filenames if f.endswith(".json"))
+        if missing_core:
             status = "fail"
-            details = f"File {fname} is missing"
-        elif not valid:
-            status = "fail"
-            details = f"File {fname} exists but contains invalid JSON"
+            details = f"Missing core files: {', '.join(missing_core)}. {json_count} total JSON files."
+        elif json_count < 10:
+            status = "warn"
+            details = f"Only {json_count} JSON files found (expected 10+)"
         else:
             status = "pass"
-            details = f"File {fname} is valid ({size:,} bytes)"
-
+            details = f"{json_count} JSON data files present, all core files found"
         results.append({
-            "name": check_name,
-            "description": description,
+            "name": "Game Data Files",
+            "description": "Core JSON data files on Lambda filesystem",
             "status": status,
             "details": details,
-            "count": size,
+            "count": json_count,
+            "affected_ids": missing_core,
+            "severity": "low",
         })
-
-    # Count all JSON data files
-    json_count = 0
-    for root, dirs, filenames in os.walk(data_dir):
-        json_count += sum(1 for f in filenames if f.endswith(".json"))
-    results.append({
-        "name": "Game Data Files",
-        "description": "Required JSON data files",
-        "status": "pass" if json_count >= 10 else "warn",
-        "details": f"{json_count} JSON files found in data directory",
-        "count": json_count,
-    })
-
-    # Check hero images
-    assets_dir = os.path.join(os.path.dirname(data_dir), "assets", "heroes")
-    img_count = 0
-    if os.path.isdir(assets_dir):
-        img_count = sum(1 for f in os.listdir(assets_dir) if f.endswith((".png", ".jpg", ".jpeg")))
-    results.append({
-        "name": "Hero Image Files",
-        "description": "Hero portraits in assets folder",
-        "status": "pass" if img_count >= 40 else "warn" if img_count > 0 else "fail",
-        "details": f"{img_count} hero images available",
-        "count": img_count,
-    })
+    except Exception as e:
+        results.append({"name": "Game Data Files", "description": "Core JSON data files on Lambda filesystem",
+                        "status": "warn", "details": f"Check failed: {e}", "count": 0, "severity": "low"})
 
     return {"checks": results, "total": len(results), "passing": sum(1 for r in results if r["status"] == "pass")}
 
@@ -1191,20 +1686,77 @@ def save_game_data_file():
 def fix_integrity_issue(action: str):
     _require_admin()
 
-    valid_actions = ("rebuild_hero_cache", "fix_orphaned_heroes", "fix_missing_profiles")
+    valid_actions = ("rebuild_hero_cache", "clean_orphaned_profiles", "clean_orphaned_heroes", "fix_hero_ranges")
     if action not in valid_actions:
         raise ValidationError(f"Invalid action. Must be one of: {', '.join(valid_actions)}")
 
     fixed = 0
+    table = get_table("main")
+
     if action == "rebuild_hero_cache":
         hero_repo._heroes_cache = None
         fixed = 1
-    elif action == "fix_orphaned_heroes":
-        # Stub - would scan for heroes without valid profiles
-        fixed = 0
-    elif action == "fix_missing_profiles":
-        # Stub - would create default profiles for users without one
-        fixed = 0
+
+    elif action == "clean_orphaned_profiles":
+        # Find profiles whose user doesn't exist
+        resp = table.scan(
+            FilterExpression="begins_with(SK, :prof)",
+            ExpressionAttributeValues={":prof": "PROFILE#"},
+        )
+        for item in resp.get("Items", []):
+            user_pk = item["PK"]  # USER#xxx
+            meta = table.get_item(Key={"PK": user_pk, "SK": "METADATA"}).get("Item")
+            if not meta:
+                table.delete_item(Key={"PK": item["PK"], "SK": item["SK"]})
+                fixed += 1
+
+    elif action == "clean_orphaned_heroes":
+        # Find heroes whose profile doesn't exist
+        resp = table.scan(
+            FilterExpression="begins_with(PK, :prof) AND begins_with(SK, :hero)",
+            ExpressionAttributeValues={":prof": "PROFILE#", ":hero": "HERO#"},
+        )
+        for item in resp.get("Items", []):
+            profile_pk = item["PK"]  # PROFILE#xxx
+            profile_id = profile_pk.replace("PROFILE#", "")
+            # Check if any user has this profile
+            user_resp = table.scan(
+                FilterExpression="begins_with(SK, :prefix) AND profile_id = :pid",
+                ExpressionAttributeValues={":prefix": "PROFILE#", ":pid": profile_id},
+                Limit=1,
+            )
+            if not user_resp.get("Items"):
+                table.delete_item(Key={"PK": item["PK"], "SK": item["SK"]})
+                fixed += 1
+
+    elif action == "fix_hero_ranges":
+        # Clamp out-of-range hero values
+        resp = table.scan(
+            FilterExpression="begins_with(PK, :prof) AND begins_with(SK, :hero)",
+            ExpressionAttributeValues={":prof": "PROFILE#", ":hero": "HERO#"},
+        )
+        for item in resp.get("Items", []):
+            updates = {}
+            if item.get("level", 0) > 80:
+                updates["level"] = 80
+            if item.get("stars", 0) > 5:
+                updates["stars"] = 5
+            for skill_key in ["exploration_skill_1", "exploration_skill_2", "exploration_skill_3",
+                              "expedition_skill_1", "expedition_skill_2", "expedition_skill_3"]:
+                if item.get(skill_key, 0) > 5:
+                    updates[skill_key] = 5
+            for gq_key in ["gear_slot_1_quality", "gear_slot_2_quality", "gear_slot_3_quality", "gear_slot_4_quality"]:
+                if item.get(gq_key, 0) > 7:
+                    updates[gq_key] = 7
+            if updates:
+                expr_parts = [f"#{k} = :{k}" for k in updates]
+                table.update_item(
+                    Key={"PK": item["PK"], "SK": item["SK"]},
+                    UpdateExpression="SET " + ", ".join(expr_parts),
+                    ExpressionAttributeNames={f"#{k}": k for k in updates},
+                    ExpressionAttributeValues={f":{k}": v for k, v in updates.items()},
+                )
+                fixed += 1
 
     admin_id = get_user_id(app.current_event.raw_event)
     admin_repo.log_audit(admin_id, "admin", f"integrity_fix_{action}", details=f"fixed={fixed}")
@@ -1212,36 +1764,164 @@ def fix_integrity_issue(action: str):
     return {"message": f"Action '{action}' completed", "fixed": fixed}
 
 
-# --- Database (stubs for DynamoDB) ---
+# --- Data Browser ---
 
-@app.get("/api/admin/database/backups")
-def list_backups():
+# Entity type definitions: maps entity name -> (table_alias, pk_pattern, sk_pattern, display_columns)
+ENTITY_TYPES = {
+    "users": {
+        "table": "main", "pk_prefix": "USER#", "sk_value": "METADATA",
+        "columns": ["email", "role", "is_active", "created_at", "last_login", "ai_requests_today"],
+        "label": "Users",
+    },
+    "profiles": {
+        "table": "main", "pk_prefix": "USER#", "sk_prefix": "PROFILE#",
+        "columns": ["profile_id", "name", "state_number", "furnace_level", "spending_profile", "alliance_role"],
+        "label": "Profiles",
+    },
+    "heroes": {
+        "table": "main", "pk_prefix": "PROFILE#", "sk_prefix": "HERO#",
+        "columns": ["hero_name", "level", "stars", "ascension", "gear_slot_1_quality", "gear_slot_2_quality"],
+        "label": "Heroes",
+    },
+    "ai_conversations": {
+        "table": "main", "pk_prefix": "USER#", "sk_prefix": "AICONV#",
+        "columns": ["question", "source", "provider", "model", "created_at"],
+        "label": "AI Conversations",
+    },
+    "feedback": {
+        "table": "admin", "pk_value": "FEEDBACK", "sk_prefix": "",
+        "columns": ["category", "description", "status", "user_email", "created_at"],
+        "label": "Feedback",
+    },
+    "errors": {
+        "table": "admin", "pk_value": "ERRORS", "sk_prefix": "",
+        "columns": ["error_type", "error_message", "status", "page", "created_at"],
+        "label": "Errors",
+    },
+    "feature_flags": {
+        "table": "admin", "pk_value": "FLAG", "sk_prefix": "",
+        "columns": ["name", "is_enabled", "description", "updated_at"],
+        "label": "Feature Flags",
+    },
+    "audit_log": {
+        "table": "admin", "pk_prefix": "AUDIT#", "sk_prefix": "",
+        "columns": ["action", "admin_username", "target", "details", "created_at"],
+        "label": "Audit Log",
+    },
+}
+
+
+@app.get("/api/admin/database/entities")
+def list_entities():
+    """List all entity types with row counts."""
     _require_admin()
-    return {"backups": []}
+    entities = []
+    for key, cfg in ENTITY_TYPES.items():
+        try:
+            count = _count_entity(cfg)
+        except Exception:
+            count = -1
+        entities.append({
+            "id": key,
+            "label": cfg["label"],
+            "table": cfg["table"],
+            "row_count": count,
+            "columns": cfg["columns"],
+        })
+    return {"entities": entities}
 
 
-@app.post("/api/admin/database/backup")
-def create_backup():
+def _count_entity(cfg: dict) -> int:
+    """Count items matching an entity type's PK/SK pattern."""
+    table = get_table(cfg["table"])
+    if "pk_value" in cfg:
+        resp = table.query(
+            KeyConditionExpression="PK = :pk",
+            ExpressionAttributeValues={":pk": cfg["pk_value"]},
+            Select="COUNT",
+        )
+        return resp.get("Count", 0)
+    # For prefix-based patterns, use scan with filter
+    filter_parts = []
+    expr_vals = {}
+    if "pk_prefix" in cfg:
+        filter_parts.append("begins_with(PK, :pkp)")
+        expr_vals[":pkp"] = cfg["pk_prefix"]
+    if cfg.get("sk_value"):
+        filter_parts.append("SK = :skv")
+        expr_vals[":skv"] = cfg["sk_value"]
+    elif cfg.get("sk_prefix"):
+        filter_parts.append("begins_with(SK, :skp)")
+        expr_vals[":skp"] = cfg["sk_prefix"]
+    resp = table.scan(
+        FilterExpression=" AND ".join(filter_parts),
+        ExpressionAttributeValues=expr_vals,
+        Select="COUNT",
+    )
+    return resp.get("Count", 0)
+
+
+@app.get("/api/admin/database/entities/<entityId>")
+def browse_entity(entityId: str):
+    """Browse items of a specific entity type with human-readable columns."""
     _require_admin()
-    return {"message": "DynamoDB uses point-in-time recovery. No manual backups needed."}
+    if entityId not in ENTITY_TYPES:
+        raise ValidationError(f"Unknown entity: {entityId}")
+
+    cfg = ENTITY_TYPES[entityId]
+    params = app.current_event.query_string_parameters or {}
+    limit = int(params.get("limit", "100"))
+
+    table = get_table(cfg["table"])
+    items = _query_entity(table, cfg, limit)
+
+    # Project to display columns only (plus PK/SK for identification)
+    display_cols = cfg["columns"]
+    rows = []
+    for item in items:
+        row = {"_pk": item.get("PK", ""), "_sk": item.get("SK", "")}
+        for col in display_cols:
+            val = item.get(col)
+            if col == "question" and isinstance(val, str) and len(val) > 120:
+                val = val[:120] + "..."
+            if col == "error_message" and isinstance(val, str) and len(val) > 200:
+                val = val[:200] + "..."
+            row[col] = val
+        rows.append(row)
+
+    return {"entity": entityId, "label": cfg["label"], "columns": display_cols, "items": rows, "count": len(rows)}
 
 
-@app.post("/api/admin/database/cleanup/<action>")
-def database_cleanup(action: str):
-    _require_admin()
-    admin_id = get_user_id(app.current_event.raw_event)
-    admin_repo.log_audit(admin_id, "admin", "database_cleanup", details=action)
-    return {"status": "ok", "action": action, "message": f"Cleanup action '{action}' processed."}
+def _query_entity(table, cfg: dict, limit: int) -> list:
+    """Query items matching an entity type's PK/SK pattern."""
+    if "pk_value" in cfg:
+        resp = table.query(
+            KeyConditionExpression="PK = :pk",
+            ExpressionAttributeValues={":pk": cfg["pk_value"]},
+            ScanIndexForward=False,
+            Limit=limit,
+        )
+        return resp.get("Items", [])
+    filter_parts = []
+    expr_vals = {}
+    if "pk_prefix" in cfg:
+        filter_parts.append("begins_with(PK, :pkp)")
+        expr_vals[":pkp"] = cfg["pk_prefix"]
+    if cfg.get("sk_value"):
+        filter_parts.append("SK = :skv")
+        expr_vals[":skv"] = cfg["sk_value"]
+    elif cfg.get("sk_prefix"):
+        filter_parts.append("begins_with(SK, :skp)")
+        expr_vals[":skp"] = cfg["sk_prefix"]
+    resp = table.scan(
+        FilterExpression=" AND ".join(filter_parts),
+        ExpressionAttributeValues=expr_vals,
+        Limit=limit,
+    )
+    return resp.get("Items", [])
 
 
-@app.post("/api/admin/database/query")
-def database_query():
-    _require_admin()
-    return {"error": "SQL queries not supported with DynamoDB. Use the Database Browser to scan tables."}
-
-
-# --- Database Browser ---
-
+# Keep legacy endpoints for backwards compat during transition
 @app.get("/api/admin/database/tables")
 def list_tables():
     _require_admin()
@@ -1260,15 +1940,8 @@ def scan_table(tableName: str):
     params = app.current_event.query_string_parameters or {}
     limit = int(params.get("limit", "25"))
 
-    # Map alias to actual table name
-    alias_map = {
-        "main": Config.MAIN_TABLE,
-        "admin": Config.ADMIN_TABLE,
-        "reference": Config.REFERENCE_TABLE,
-    }
+    alias_map = {"main": Config.MAIN_TABLE, "admin": Config.ADMIN_TABLE, "reference": Config.REFERENCE_TABLE}
     actual_name = alias_map.get(tableName, tableName)
-
-    # Verify table name is one of ours
     valid_tables = {Config.MAIN_TABLE, Config.ADMIN_TABLE, Config.REFERENCE_TABLE}
     if actual_name not in valid_tables:
         raise ValidationError(f"Unknown table: {tableName}")
@@ -2168,4 +2841,13 @@ def admin_delete_item(itemName: str):
 
 
 def lambda_handler(event, context):
-    return app.resolve(event, context)
+    try:
+        return app.resolve(event, context)
+    except AppError as exc:
+        logger.warning("Application error", extra={"error": exc.message, "status": exc.status_code})
+        return {"statusCode": exc.status_code, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": exc.message})}
+    except Exception as exc:
+        logger.exception("Unhandled error in admin handler")
+        from common.error_capture import capture_error
+        capture_error("admin", event, exc, logger)
+        return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

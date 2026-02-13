@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
-import { lineupsApi } from '@/lib/api';
+import { lineupsApi, profileApi } from '@/lib/api';
 
 interface LineupHero {
   hero: string;
@@ -78,11 +78,27 @@ export default function LineupsPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [joinerAttack, setJoinerAttack] = useState<JoinerRecommendation | null>(null);
   const [joinerDefense, setJoinerDefense] = useState<JoinerRecommendation | null>(null);
+  const [hasHeroes, setHasHeroes] = useState<boolean | null>(null);
+  const [usingGeneralFallback, setUsingGeneralFallback] = useState(false);
 
-  // Fetch templates on mount
+  // Fetch templates and profile gen on mount
   useEffect(() => {
     fetchTemplates();
-  }, []);
+    if (token) {
+      profileApi.getCurrent(token).then(data => {
+        if (data?.profile?.server_age_days) {
+          const days = data.profile.server_age_days;
+          // Estimate generation from server age
+          let gen = 1;
+          const genDays = [0, 40, 120, 200, 280, 360, 440, 520, 600, 680, 760, 840, 920, 1000];
+          for (let i = genDays.length - 1; i >= 0; i--) {
+            if (days >= genDays[i]) { gen = i + 1; break; }
+          }
+          setSelectedGeneration(gen);
+        }
+      }).catch(() => {});
+    }
+  }, [token]);
 
   // Fetch lineup when event changes
   useEffect(() => {
@@ -125,6 +141,16 @@ export default function LineupsPage() {
     try {
       const data = await lineupsApi.buildForMode(token, selectedEvent);
       setPersonalizedLineup(data);
+      const heroesExist = data?.heroes && data.heroes.length > 0;
+      setHasHeroes(heroesExist);
+      if (!heroesExist) {
+        // Fall back to general lineup with estimated generation
+        setUsingGeneralFallback(true);
+        const generalData = await lineupsApi.getGeneral(selectedEvent, selectedGeneration);
+        setGeneralLineup(generalData);
+      } else {
+        setUsingGeneralFallback(false);
+      }
     } catch (error) {
       console.error('Failed to fetch personalized lineup:', error);
     } finally {
@@ -158,7 +184,7 @@ export default function LineupsPage() {
     }
   };
 
-  const currentLineup = token ? personalizedLineup : generalLineup;
+  const currentLineup = (token && !usingGeneralFallback) ? personalizedLineup : generalLineup;
 
   return (
     <PageLayout>
@@ -169,7 +195,7 @@ export default function LineupsPage() {
             <h1 className="text-3xl font-bold text-frost">Lineup Builder</h1>
             <p className="text-frost-muted mt-2">Optimal hero compositions for every event</p>
           </div>
-          {!token && (
+          {(!token || usingGeneralFallback) && (
             <div>
               <label className="text-xs text-frost-muted block mb-1">Your Generation</label>
               <select
@@ -203,8 +229,8 @@ export default function LineupsPage() {
         {/* PvE vs PvP Expandable */}
         <PvePvpExplanation />
 
-        {/* Login prompt for personalized recommendations */}
-        {!token && (
+        {/* Login/hero prompt */}
+        {!token ? (
           <div className="card mb-6 border-ice/30 bg-ice/5">
             <div className="flex items-center gap-3">
               <span className="text-2xl">💡</span>
@@ -216,7 +242,21 @@ export default function LineupsPage() {
               </div>
             </div>
           </div>
-        )}
+        ) : usingGeneralFallback ? (
+          <div className="card mb-6 border-amber-500/30 bg-amber-500/5">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">📊</span>
+              <div>
+                <p className="text-frost">Showing general estimates for <strong className="text-ice">Gen {selectedGeneration}</strong></p>
+                <p className="text-sm text-frost-muted mt-1">
+                  Add your heroes in the <a href="/heroes" className="text-ice hover:underline">Hero Tracker</a> for
+                  personalized lineup recommendations based on your actual roster.
+                  Generation is estimated from your server age in <a href="/settings" className="text-ice hover:underline">Settings</a>.
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 border-b border-surface-border pb-2 overflow-x-auto">
@@ -249,7 +289,7 @@ export default function LineupsPage() {
             lineup={currentLineup}
             template={templateDetails}
             isLoading={isLoading}
-            isPersonalized={!!token}
+            isPersonalized={!!token && !usingGeneralFallback}
           />
         )}
         {activeTab === 'joiner' && (
@@ -674,14 +714,24 @@ function RallyJoinerGuideTab({
             <div className="space-y-3">
               <div className="p-3 rounded bg-surface">
                 <p className="font-medium text-frost">Sergey (Gen 1)</p>
-                <p className="text-xs text-frost-muted">Defenders' Edge: -4-20% DMG taken</p>
-                <p className="text-xs text-ice mt-1">Essential for all garrison defense</p>
+                <p className="text-xs text-frost-muted">Defenders&apos; Edge: -4-20% DMG taken</p>
+                <p className="text-xs text-ice mt-1">Best for multi-wave defense - reduces all incoming damage</p>
+              </div>
+              <div className="p-3 rounded bg-surface">
+                <p className="font-medium text-frost">Patrick (Gen 1)</p>
+                <p className="text-xs text-frost-muted">Health boost: +25% HP to garrison troops</p>
+                <p className="text-xs text-frost-muted mt-1">Alternative to Sergey - some leaders prefer raw HP over damage reduction</p>
               </div>
               <div className="p-3 rounded bg-surface">
                 <p className="font-medium text-frost">Karol (Gen 12)</p>
                 <p className="text-xs text-frost-muted">In the Wings: -4-20% DMG taken</p>
                 <p className="text-xs text-frost-muted mt-1">Equivalent to Sergey - use higher skill level</p>
               </div>
+            </div>
+            <div className="mt-3 p-2 rounded bg-ice/5 border border-ice/10">
+              <p className="text-xs text-frost-muted">
+                <strong className="text-frost">Sergey vs Patrick:</strong> Sergey&apos;s -20% damage reduction is mathematically better against multiple attack waves (compounds over each hit). Patrick&apos;s +25% HP is a one-time buffer - better for surviving a single massive hit but less effective long-term.
+              </p>
             </div>
           </div>
         </div>

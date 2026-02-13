@@ -10,6 +10,7 @@ Claims path: event['requestContext']['authorizer']['jwt']['claims']
 from typing import Optional
 
 from common.exceptions import AuthenticationError, AuthorizationError
+from common.user_repo import get_user
 
 
 def get_user_claims(event: dict) -> dict:
@@ -65,24 +66,33 @@ def get_user_email(event: dict) -> str:
 def is_admin(event: dict) -> bool:
     """Check if current user has admin role.
 
-    Reads the custom:role claim set during Cognito sign-up or
-    by an admin trigger.
+    Looks up the user's role from DynamoDB since Cognito access
+    tokens don't include custom attributes.
 
     Returns:
         True if the user's role is 'admin', False otherwise.
     """
-    claims = get_user_claims(event)
-    return claims.get("custom:role") == "admin"
+    user_id = get_user_id(event)
+    user = get_user(user_id)
+    if not user:
+        return False
+    return user.get("role") == "admin"
 
 
 def is_test_account(event: dict) -> bool:
     """Check if current user is a test account.
 
+    Looks up the user's test flag from DynamoDB since Cognito access
+    tokens don't include custom attributes.
+
     Returns:
-        True if custom:is_test_account is 'true'.
+        True if the user is a test account.
     """
-    claims = get_user_claims(event)
-    return claims.get("custom:is_test_account") == "true"
+    user_id = get_user_id(event)
+    user = get_user(user_id)
+    if not user:
+        return False
+    return user.get("is_test_account", False) is True
 
 
 def require_admin(event: dict) -> None:
