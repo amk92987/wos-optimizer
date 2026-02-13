@@ -3,6 +3,17 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, authApi, adminApi, getStoredToken, storeTokens, clearTokens } from './api';
 
+interface ImpersonateUserResponse {
+  id?: string;
+  user_id?: string;
+  email?: string;
+  username?: string;
+  role?: string;
+  is_active?: boolean;
+  is_test_account?: boolean;
+  created_at?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   token: string | null;
@@ -120,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // include the X-Impersonate-User header for backend routing.
     // The backend returns the raw DynamoDB user item which may have
     // 'user_id' instead of 'id', so we normalize to the User interface.
-    const raw = response.user as any;
+    const raw = response.user as ImpersonateUserResponse;
     const impersonatedUser: User = {
       id: raw.id || raw.user_id || userId,
       email: raw.email || raw.username || userId,

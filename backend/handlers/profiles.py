@@ -6,6 +6,7 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
 from common.auth import get_effective_user_id
+from common.error_capture import capture_error
 from common.exceptions import AppError, NotFoundError, ValidationError
 from common import profile_repo, hero_repo
 
@@ -170,6 +171,5 @@ def lambda_handler(event, context):
         return {"statusCode": exc.status_code, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": exc.message})}
     except Exception as exc:
         logger.exception("Unhandled error in profiles handler")
-        from common.error_capture import capture_error
         capture_error("profiles", event, exc, logger)
         return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

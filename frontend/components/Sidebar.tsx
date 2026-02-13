@@ -121,16 +121,24 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
   // Persist collapsed state
   useEffect(() => {
-    const saved = localStorage.getItem('sidebar-collapsed');
-    if (saved) {
-      setIsCollapsed(saved === 'true');
+    try {
+      const saved = localStorage.getItem('sidebar-collapsed');
+      if (saved) {
+        setIsCollapsed(saved === 'true');
+      }
+    } catch (error) {
+      console.error('Failed to access localStorage:', error);
     }
   }, []);
 
   const toggleCollapse = () => {
     const newState = !isCollapsed;
     setIsCollapsed(newState);
-    localStorage.setItem('sidebar-collapsed', String(newState));
+    try {
+      localStorage.setItem('sidebar-collapsed', String(newState));
+    } catch (error) {
+      console.error('Failed to save to localStorage:', error);
+    }
   };
 
   const isAdmin = user?.role === 'admin';
@@ -237,6 +245,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                           }
                         `}
                         title={isCollapsed ? item.label : undefined}
+                        aria-current={isActive ? 'page' : undefined}
                       >
                         <span className={`${isCollapsed ? 'text-lg' : 'text-base'} relative`}>
                           {item.icon}

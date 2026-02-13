@@ -598,7 +598,7 @@ export default function AppShell({ children }: AppShellProps) {
   // Check if running as standalone PWA
   const isStandalone = typeof window !== 'undefined' &&
     (window.matchMedia('(display-mode: standalone)').matches ||
-     (window.navigator as any).standalone);
+     ('standalone' in window.navigator && (window.navigator as Navigator & { standalone?: boolean }).standalone));
 
   return (
     <div className="flex min-h-screen min-h-[100dvh]">

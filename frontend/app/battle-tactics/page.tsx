@@ -1,13 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageLayout from '@/components/PageLayout';
+import { useAuth } from '@/lib/auth';
+import { lineupsApi, heroesApi, LineupResponse, UserHero } from '@/lib/api';
 
-type TabKey = 'castle-battles' | 'bear-trap' | 'canyon-clash' | 'foundry' | 'frostfire' | 'labyrinth';
+type TabKey = 'castle-battles' | 'bear-trap' | 'arena' | 'canyon-clash' | 'foundry' | 'frostfire' | 'labyrinth';
 
 const tabs: { key: TabKey; label: string; icon: string }[] = [
   { key: 'castle-battles', label: 'Castle Battles', icon: '🏰' },
   { key: 'bear-trap', label: 'Bear Trap', icon: '🐻' },
+  { key: 'arena', label: 'Arena', icon: '🏟️' },
   { key: 'canyon-clash', label: 'Canyon Clash', icon: '⚔️' },
   { key: 'foundry', label: 'Foundry', icon: '🏭' },
   { key: 'frostfire', label: 'Frostfire Mine', icon: '🔥' },
@@ -167,7 +170,51 @@ function CastleBattlesTab() {
   );
 }
 
+// Bear trap expert heroes - those with exploration skills that have huge damage multipliers
+// Bear trap is PvE, so the rally leader's heroes' EXPLORATION skills matter for combat
+const BEAR_EXPERTS = [
+  { name: 'Mia', gen: 3, class: 'Lancer', skill: 'Bad Omen', why: 'Exploration skill deals fluctuating damage from 5% to 600% of base value. When it rolls high, Mia hits harder than any other hero in the game. No other hero has a damage multiplier this extreme.' },
+];
+
+// Best joiner heroes ranked by attack skill value
+const BEST_JOINERS = [
+  { name: 'Jessie', gen: 1, class: 'Lancer', skill: 'Stand of Arms', effect: '+5-25% DMG dealt (ALL troops)', priority: 'critical' as const },
+  { name: 'Jasser', gen: 1, class: 'Marksman', skill: 'Tactical Genius', effect: '+5-25% DMG dealt (ALL troops)', priority: 'critical' as const },
+  { name: 'Seo-yoon', gen: 1, class: 'Marksman', skill: 'Rallying Beat', effect: '+5-25% ATK (ALL troops)', priority: 'critical' as const },
+  { name: 'Hervor', gen: 12, class: 'Infantry', skill: 'Call For Blood', effect: '+5-25% DMG dealt (ALL troops)', priority: 'high' as const },
+  { name: 'Hendrik', gen: 8, class: 'Marksman', skill: "Worm's Ravage", effect: '-5-25% enemy DEF (ALL enemies)', priority: 'high' as const },
+  { name: 'Sonya', gen: 8, class: 'Lancer', skill: 'Treasure Hunter', effect: '+4-20% DMG (ALL troops)', priority: 'medium' as const },
+  { name: 'Lynn', gen: 4, class: 'Marksman', skill: 'Song of Lion', effect: '40% chance +10-50% DMG dealt', priority: 'medium' as const },
+];
+
 function BearTrapTab() {
+  const { token } = useAuth();
+  const [lineup, setLineup] = useState<LineupResponse | null>(null);
+  const [ownedHeroes, setOwnedHeroes] = useState<UserHero[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (token) {
+      setIsLoading(true);
+      Promise.all([
+        lineupsApi.buildForMode(token, 'bear_trap').catch(() => null),
+        heroesApi.getOwned(token).catch(() => ({ heroes: [] })),
+      ]).then(([lineupData, heroData]) => {
+        if (lineupData) setLineup(lineupData);
+        setOwnedHeroes(heroData.heroes || []);
+      }).finally(() => setIsLoading(false));
+    }
+  }, [token]);
+
+  const ownedNames = new Set(ownedHeroes.map(h => h.hero_name || h.name));
+
+  // Find which recommended joiners the user owns
+  const ownedJoiners = BEST_JOINERS.filter(j => ownedNames.has(j.name));
+  const hasGoodJoiner = ownedJoiners.length > 0;
+
+  // Find owned bear experts
+  const ownedExperts = BEAR_EXPERTS.filter(e => ownedNames.has(e.name));
+
   return (
     <div className="space-y-6">
       <div className="card bg-gradient-to-r from-orange-500/10 to-transparent border-orange-500/30">
@@ -177,23 +224,65 @@ function BearTrapTab() {
         </p>
       </div>
 
-      {/* Rally Mechanics */}
-      <div className="card">
-        <h2 className="section-header">Rally Mechanics</h2>
+      {/* Rally Leader - Your Top 3 */}
+      <div className="card border-orange-500/30">
+        <h2 className="section-header text-orange-400">Leading Your Own Rally</h2>
+        <p className="text-frost-muted mb-4">
+          As rally leader, you set the troops and your <strong className="text-frost">top 3 heroes</strong> lead the march.
+          Your hero gear, levels, and skills all matter. Pick 2 Marksman + 1 Infantry buffer.
+        </p>
 
-        <div className="grid md:grid-cols-2 gap-4 mb-4">
-          <div className="p-4 rounded-lg bg-surface">
-            <h3 className="font-medium text-frost mb-2">How Bear Trap Works</h3>
+        {isLoading ? (
+          <div className="p-4 animate-pulse">
+            <div className="h-16 bg-surface rounded" />
+          </div>
+        ) : lineup && lineup.heroes.length > 0 ? (
+          <div className="space-y-2 mb-4">
+            <h3 className="text-sm font-medium text-ice">Your Recommended Lineup</h3>
+            {lineup.heroes.map((hero, i) => {
+              const classColor = troopColors[hero.hero_class.toLowerCase() as keyof typeof troopColors] || 'text-frost';
+              const owned = hero.status === 'owned';
+              return (
+                <div key={i} className={`p-3 rounded-lg border ${owned ? 'border-green-500/30' : 'border-surface-border'}`}>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-frost-muted w-5">#{i + 1}</span>
+                    <span className={`font-medium ${owned ? 'text-frost' : 'text-frost-muted'}`}>{hero.hero}</span>
+                    <span className={`text-xs ${classColor}`}>({hero.hero_class})</span>
+                    <span className="text-xs text-frost-muted">{hero.role}</span>
+                    {hero.is_lead && <span className="text-xs bg-orange-500/20 text-orange-400 px-1.5 py-0.5 rounded">Lead</span>}
+                    {owned ? (
+                      <span className="text-xs text-green-400 ml-auto">Owned</span>
+                    ) : (
+                      <span className="text-xs text-frost-muted ml-auto italic">Not owned</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            {lineup.notes && (
+              <p className="text-xs text-frost-muted mt-2">{lineup.notes}</p>
+            )}
+          </div>
+        ) : token ? (
+          <p className="text-sm text-frost-muted mb-4 italic">
+            Add heroes to your tracker to see your personalized bear trap lineup.
+          </p>
+        ) : (
+          <p className="text-sm text-frost-muted mb-4 italic">
+            Log in to see your personalized bear trap lineup.
+          </p>
+        )}
+
+        <div className="grid md:grid-cols-2 gap-4">
+          <div>
+            <h3 className="font-medium text-frost mb-2">Ideal Rally Leader Composition</h3>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Rally leader sets the march and starts rally</li>
-              <li>• Alliance members join with troops</li>
-              <li>• Only <strong className="text-frost">top 4 expedition skill LEVELS</strong> from all joiners apply</li>
-              <li>• Only each joiner{"'"}s <strong className="text-frost">first hero{"'"}s top-right expedition skill</strong> counts</li>
-              <li>• Higher level bear = better rewards</li>
-              <li>• Hero class doesn{"'"}t need to match troop type - <strong className="text-frost">skill level matters most</strong></li>
+              <li>• <strong className="text-frost">Slot 1:</strong> Best Marksman (Vulcanus, Blanchette, Cara)</li>
+              <li>• <strong className="text-frost">Slot 2:</strong> Second Marksman (DPS)</li>
+              <li>• <strong className="text-frost">Slot 3:</strong> Infantry buffer (Jeronimo, Wu Ming) for ATK buffs that boost ALL troops</li>
             </ul>
           </div>
-          <div className="p-4 rounded-lg bg-surface">
+          <div>
             <h3 className="font-medium text-frost mb-2">Optimal Troop Ratio</h3>
             <div className="flex items-center gap-4 mt-2">
               <div className="text-center">
@@ -210,21 +299,101 @@ function BearTrapTab() {
               </div>
             </div>
             <p className="text-sm text-frost-muted mt-3">
-              Bear is slow - marksmen can attack from range without taking damage.
+              Bear is slow - marksmen attack from range without taking damage.
               10% lancers for minimal tanking if needed.
             </p>
           </div>
         </div>
       </div>
 
-      {/* Key Concept: Hero Class vs Skill */}
-      <div className="card border-yellow-500/30">
-        <h2 className="section-header text-yellow-400">Hero Class Doesn{"'"}t Matter for Joining</h2>
+      {/* Bear Trap Expert Heroes */}
+      <div className="card border-purple-500/30">
+        <h2 className="section-header text-purple-400">Bear Trap Experts</h2>
         <p className="text-frost-muted mb-4">
-          Common misconception: you need marksman heroes for Bear Trap. In reality, <strong className="text-frost">Jessie (a Lancer)</strong> is the #1 attack joiner because her expedition skill buffs ALL troop damage.
+          Bear trap is PvE, so the rally leader{"'"}s heroes use their <strong className="text-frost">exploration skills</strong> in combat.
+          Heroes with massive random damage multipliers can one-shot bear phases when they roll high:
+        </p>
+        <div className="space-y-2">
+          {BEAR_EXPERTS.map((expert, i) => {
+            const owned = ownedNames.has(expert.name);
+            const heroData = ownedHeroes.find(h => (h.hero_name || h.name) === expert.name);
+            const classColor = troopColors[expert.class.toLowerCase() as keyof typeof troopColors] || 'text-frost';
+            return (
+              <div key={i} className={`p-3 rounded-lg ${owned ? 'bg-purple-500/10 border border-purple-500/30' : 'bg-surface border border-surface-border'}`}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-medium text-frost">{expert.name}</span>
+                  <span className={`text-xs ${classColor}`}>({expert.class})</span>
+                  <span className="text-xs text-frost-muted">Gen {expert.gen}</span>
+                  <span className="text-xs bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded">{expert.skill}</span>
+                  {owned && heroData && (
+                    <span className="text-xs text-purple-400 ml-auto">Lv.{heroData.level} / Expl Skills: {heroData.exploration_skill_1}-{heroData.exploration_skill_2}-{heroData.exploration_skill_3}</span>
+                  )}
+                  {!owned && <span className="text-xs text-frost-muted ml-auto italic">Not owned</span>}
+                </div>
+                <p className="text-xs text-frost-muted">{expert.why}</p>
+              </div>
+            );
+          })}
+        </div>
+        <div className="mt-3 p-3 rounded-lg bg-purple-500/10 border border-purple-500/20">
+          <p className="text-sm text-frost">
+            <strong className="text-purple-400">Why Mia?</strong> Bad Omen{"'"}s 600% max multiplier is unique in the game.
+            Any hero with a similar high-variance damage skill is worth using as rally leader for bear trap.
+            Level up Mia{"'"}s exploration skills to maximize the base damage her Bad Omen scales from.
+          </p>
+        </div>
+      </div>
+
+      {/* Joining Rallies */}
+      <div className="card border-yellow-500/30">
+        <h2 className="section-header text-yellow-400">Joining Rallies</h2>
+        <p className="text-frost-muted mb-4">
+          When joining someone else{"'"}s rally, only your <strong className="text-frost">first hero{"'"}s top-right expedition skill</strong> matters. Hero class, level, and gear are irrelevant for joiners.
         </p>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        {/* Personalized joiner status */}
+        {token && ownedHeroes.length > 0 && (
+          <div className={`p-3 rounded-lg mb-4 ${hasGoodJoiner ? 'bg-green-500/10 border border-green-500/30' : 'bg-yellow-500/10 border border-yellow-500/30'}`}>
+            {hasGoodJoiner ? (
+              <div>
+                <p className="text-sm text-green-400 font-medium mb-1">Your Best Joiner: {ownedJoiners[0].name}</p>
+                <p className="text-xs text-frost-muted">
+                  Put {ownedJoiners[0].name} in slot 1 when joining bear trap rallies. Skill: {ownedJoiners[0].skill} ({ownedJoiners[0].effect})
+                </p>
+              </div>
+            ) : (
+              <div>
+                <p className="text-sm text-yellow-400 font-medium mb-1">No recommended joiner heroes found</p>
+                <p className="text-xs text-frost-muted">
+                  You{"'"}re better off joining with <strong className="text-frost">no heroes at all</strong> (troops only) rather than using a hero whose expedition skill doesn{"'"}t boost damage.
+                  Non-combat skills (gathering, building speed) actually waste a slot.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="p-4 rounded-lg bg-surface mb-4">
+          <h3 className="font-medium text-frost mb-2">Joiner Troop Ratios</h3>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <span className="text-xs font-bold text-green-400 mt-0.5 shrink-0">OPTIMAL</span>
+              <div>
+                <p className="text-sm text-frost"><strong>0/10/90</strong> (same as leader)</p>
+                <p className="text-xs text-frost-muted">Maximum DPS. Use this if you have enough marksman troops to fill all your rallies.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <span className="text-xs font-bold text-ice mt-0.5 shrink-0">PRACTICAL</span>
+              <div>
+                <p className="text-sm text-frost"><strong>20/20/60</strong></p>
+                <p className="text-xs text-frost-muted">Still marksman-heavy but spreads your troops across 6-7 rallies (1 lead + 5-6 joins) without running out of marksmen.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
           <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
             <h3 className="font-medium text-green-400 mb-2">What Matters (Joiners)</h3>
             <ul className="text-sm text-frost-muted space-y-1">
@@ -232,6 +401,7 @@ function BearTrapTab() {
               <li>• <strong className="text-frost">Skill effect</strong> - damage buffs are best</li>
               <li>• Only the first hero{"'"}s top-right skill is used</li>
               <li>• Top 4 highest skill LEVELS from all joiners apply</li>
+              <li>• <strong className="text-frost">Troop ratio</strong> - marksman-heavy for more DPS</li>
             </ul>
           </div>
           <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/30">
@@ -240,15 +410,14 @@ function BearTrapTab() {
               <li>• Hero class (Infantry/Lancer/Marksman)</li>
               <li>• Hero power or level</li>
               <li>• Hero gear (only rally leader{"'"}s gear matters)</li>
-              <li>• Your troop composition (rally leader sets it)</li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-4 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+        <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
           <p className="text-sm text-frost">
-            <strong className="text-yellow-400">Bottom Line:</strong> Put your hero with the highest expedition skill level first,
-            regardless of their class. Jessie the Lancer is the best attack joiner in the game.
+            <strong className="text-yellow-400">No good joiner?</strong> Join with <strong>no heroes</strong> (troops only).
+            A hero with a non-combat expedition skill (gathering speed, construction speed) does nothing and wastes a slot that could go to someone with a real damage skill.
           </p>
         </div>
       </div>
@@ -259,17 +428,10 @@ function BearTrapTab() {
         <p className="text-frost-muted mb-4">Heroes with the best top-right expedition skills for boosting rally damage:</p>
 
         <div className="space-y-2">
-          {[
-            { name: 'Jessie', gen: 1, class: 'Lancer', skill: 'Stand of Arms', effect: '+5-25% DMG dealt (ALL troops)', priority: 'critical' },
-            { name: 'Jasser', gen: 1, class: 'Marksman', skill: 'Tactical Genius', effect: '+5-25% DMG dealt (ALL troops)', priority: 'critical' },
-            { name: 'Seo-yoon', gen: 1, class: 'Marksman', skill: 'Rallying Beat', effect: '+5-25% ATK (ALL troops)', priority: 'critical' },
-            { name: 'Hervor', gen: 12, class: 'Infantry', skill: 'Call For Blood', effect: '+5-25% DMG dealt (ALL troops)', priority: 'high' },
-            { name: 'Hendrik', gen: 8, class: 'Marksman', skill: "Worm's Ravage", effect: '-5-25% enemy DEF (ALL enemies)', priority: 'high' },
-            { name: 'Sonya', gen: 8, class: 'Lancer', skill: 'Treasure Hunter', effect: '+4-20% DMG (ALL troops)', priority: 'medium' },
-            { name: 'Lynn', gen: 4, class: 'Marksman', skill: 'Song of Lion', effect: '40% chance +10-50% DMG dealt', priority: 'medium' },
-          ].map((hero, i) => {
+          {BEST_JOINERS.map((hero, i) => {
             const colors = priorityColors[hero.priority];
             const classColor = troopColors[hero.class.toLowerCase() as keyof typeof troopColors] || 'text-frost';
+            const owned = ownedNames.has(hero.name);
             return (
               <div key={i} className={`p-3 rounded ${colors.bg} border ${colors.border}`}>
                 <div className="flex items-center justify-between flex-wrap gap-2">
@@ -278,6 +440,7 @@ function BearTrapTab() {
                     <span className="font-medium text-frost">{hero.name}</span>
                     <span className={`text-xs ${classColor}`}>({hero.class})</span>
                     <span className="text-xs text-frost-muted">Gen {hero.gen}</span>
+                    {owned && <span className="text-xs text-green-400">Owned</span>}
                   </div>
                   <span className="text-xs text-frost-muted">{hero.effect}</span>
                 </div>
@@ -285,13 +448,6 @@ function BearTrapTab() {
               </div>
             );
           })}
-        </div>
-
-        <div className="mt-4 p-3 rounded-lg bg-ice/10 border border-ice/30">
-          <p className="text-sm text-frost">
-            <strong className="text-ice">For garrison defense:</strong> Use <strong>Sergey</strong> (Gen 1, Infantry) first - his
-            Defender{"'"}s Edge skill reduces ALL damage taken by up to 20%.
-          </p>
         </div>
       </div>
 
@@ -303,41 +459,490 @@ function BearTrapTab() {
             <thead>
               <tr className="border-b border-surface-border">
                 <th className="text-left py-2 text-frost-muted">Role</th>
-                <th className="text-left py-2 text-frost-muted">First Hero</th>
-                <th className="text-left py-2 text-frost-muted">Troop Ratio</th>
+                <th className="text-left py-2 text-frost-muted">Heroes</th>
+                <th className="text-left py-2 text-frost-muted">Troops</th>
                 <th className="text-left py-2 text-frost-muted">Notes</th>
               </tr>
             </thead>
             <tbody className="text-frost">
               <tr className="border-b border-surface-border/50">
-                <td className="py-2">Rally Leader</td>
-                <td className="py-2">Highest power hero</td>
+                <td className="py-2 font-medium text-orange-400">Rally Leader</td>
+                <td className="py-2">Your top 3 (2 Marksman + 1 Infantry)</td>
                 <td className="py-2">0/10/90</td>
-                <td className="py-2 text-frost-muted">You set the composition</td>
+                <td className="py-2 text-frost-muted">Your gear, hero levels, and all 3 heroes matter</td>
               </tr>
               <tr className="border-b border-surface-border/50">
                 <td className="py-2">Joiner (Best)</td>
-                <td className="py-2 text-green-400">Jessie (Lancer)</td>
-                <td className="py-2">0/10/90</td>
-                <td className="py-2 text-frost-muted">Stand of Arms: +25% DMG at skill 5</td>
+                <td className="py-2 text-green-400">Jessie / Jasser / Seo-yoon</td>
+                <td className="py-2">0/10/90 or 20/20/60</td>
+                <td className="py-2 text-frost-muted">+25% DMG at skill 5 (all Gen 1)</td>
               </tr>
               <tr className="border-b border-surface-border/50">
-                <td className="py-2">Joiner (Alt)</td>
-                <td className="py-2">Jasser / Seo-yoon</td>
-                <td className="py-2">0/10/90</td>
-                <td className="py-2 text-frost-muted">Same +25% buff as Jessie (all Gen 1)</td>
+                <td className="py-2">Joiner (Good)</td>
+                <td className="py-2">Hervor / Hendrik / Sonya</td>
+                <td className="py-2">0/10/90 or 20/20/60</td>
+                <td className="py-2 text-frost-muted">Strong damage/debuff skills, later gen</td>
+              </tr>
+              <tr className="border-b border-surface-border/50 bg-yellow-500/5">
+                <td className="py-2 text-yellow-400">No Good Joiner</td>
+                <td className="py-2 text-frost-muted">Send troops with NO hero</td>
+                <td className="py-2">0/10/90 or 20/20/60</td>
+                <td className="py-2 text-frost-muted">Better than wasting a slot with a non-combat skill</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Arena hero tiers - AoE heroes ranked for arena specifically
+const ARENA_AOE_HEROES = [
+  { name: 'Gwen', gen: 5, class: 'Marksman', tier: 'S+', skill: 'Salvo', desc: 'ALL attacks deal AoE damage. 180-252% AoE + reduces enemy attack speed by 50%. Can wipe entire backlines.' },
+  { name: 'Bradley', gen: 7, class: 'Marksman', tier: 'S+', desc: 'Unmatched splash damage. F2P accessible via Lucky Wheel. AoE on every attack rotation.' },
+  { name: 'Natalia', gen: 1, class: 'Infantry', tier: 'S', skill: 'Wild Bash', desc: 'Fast AoE stun can win fights before enemy skills activate. Excellent frontline.' },
+  { name: 'Jeronimo', gen: 1, class: 'Infantry', tier: 'S', skill: 'Combo Slash', desc: 'Multi-stage AoE attacks with massive damage multiplier. Strongest Gen 1 hero.' },
+  { name: 'Molly', gen: 1, class: 'Lancer', tier: 'S', skill: 'Super Snowball', desc: '180-252% AoE damage + 1.5s freeze. Core team DPS with long-term value.' },
+  { name: 'Norah', gen: 5, class: 'Lancer', tier: 'A', skill: 'Barrage', desc: '5-grenade cascade hitting random targets (heroes first). Great AoE spread.' },
+  { name: 'Hendrik', gen: 8, class: 'Marksman', tier: 'A', skill: "Song of R'lyeh", desc: '220-300% AoE + 1.5s stun to targets within range. Strong backline DPS.' },
+  { name: 'Sonya', gen: 8, class: 'Lancer', tier: 'A', skill: 'Extreme Cold', desc: '220-300% AoE + 1.5s freeze. Great crowd control + damage.' },
+  { name: 'Magnus', gen: 9, class: 'Infantry', tier: 'A', skill: 'Frozen Fury', desc: 'Continuous AoE with taunt. Draws enemy attacks while dealing damage to all nearby.' },
+  { name: 'Blanchette', gen: 10, class: 'Marksman', tier: 'A', skill: 'Triple Blunderbuss', desc: 'Cone AoE from backline. High burst damage to clustered enemies.' },
+];
+
+function ArenaTab() {
+  const { token } = useAuth();
+  const [ownedHeroes, setOwnedHeroes] = useState<UserHero[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (token) {
+      setIsLoading(true);
+      heroesApi.getOwned(token).then(data => {
+        setOwnedHeroes(data.heroes || []);
+      }).catch(() => {}).finally(() => setIsLoading(false));
+    }
+  }, [token]);
+
+  const ownedNames = new Set(ownedHeroes.map(h => h.hero_name || h.name));
+
+  // Find user's best arena heroes sorted by exploration skill total
+  const arenaReady = ownedHeroes
+    .map(h => ({
+      ...h,
+      name: h.hero_name || h.name,
+      explTotal: (h.exploration_skill_1 || 1) + (h.exploration_skill_2 || 1) + (h.exploration_skill_3 || 1),
+      isAoE: ARENA_AOE_HEROES.some(a => a.name === (h.hero_name || h.name)),
+    }))
+    .sort((a, b) => {
+      // AoE heroes first, then by exploration skill total
+      if (a.isAoE !== b.isAoE) return a.isAoE ? -1 : 1;
+      return b.explTotal - a.explTotal;
+    });
+
+  const top5 = arenaReady.slice(0, 5);
+
+  // Assign top5 heroes to slots based on class and role
+  // Slot 1 & 5 (front): Infantry tanks
+  // Slot 2 & 4 (back corners): Marksman DPS / AoE
+  // Slot 3 (back middle): Lancer
+  const assignSlots = (heroes: typeof top5) => {
+    const assigned: { hero: typeof top5[0]; slot: number; role: string }[] = [];
+    const remaining = [...heroes];
+
+    // Find infantry for front slots (1, 5)
+    const infantry = remaining.filter(h => h.hero_class === 'Infantry');
+    const frontSlots = [1, 5];
+    for (const slot of frontSlots) {
+      const inf = infantry.find(h => !assigned.some(a => a.hero.name === h.name));
+      if (inf) {
+        assigned.push({ hero: inf, slot, role: 'Tank (Front)' });
+      }
+    }
+
+    // Find lancer for slot 3 (back middle)
+    const availLancers = remaining.filter(h => h.hero_class === 'Lancer' && !assigned.some(a => a.hero.name === h.name));
+    if (availLancers.length > 0) {
+      assigned.push({ hero: availLancers[0], slot: 3, role: 'Lancer (Back Mid)' });
+    }
+
+    // Fill back corners (2, 4) with marksman/remaining — slot 4 gets the best DPS
+    const unassigned = remaining.filter(h => !assigned.some(a => a.hero.name === h.name));
+    const backSlots = [4, 2]; // 4 first (safest = best DPS)
+    for (const slot of backSlots) {
+      const pick = unassigned.shift();
+      if (pick) {
+        assigned.push({ hero: pick, slot, role: slot === 4 ? 'Main DPS (Safest)' : 'AoE / DPS (Back)' });
+      }
+    }
+
+    // Any remaining heroes that didn't get a preferred slot
+    let openSlots = [1, 5, 2, 3, 4].filter(s => !assigned.some(a => a.slot === s));
+    for (const hero of unassigned) {
+      const slot = openSlots.shift();
+      if (slot) {
+        assigned.push({ hero, slot, role: slot <= 1 || slot === 5 ? 'Front' : 'Back' });
+      }
+    }
+
+    return assigned.sort((a, b) => a.slot - b.slot);
+  };
+
+  const slotAssignments = assignSlots(top5);
+
+  return (
+    <div className="space-y-6">
+      <div className="card bg-gradient-to-r from-amber-500/10 to-transparent border-amber-500/30">
+        <p className="text-frost">
+          Arena is a <strong className="text-amber-400">5v5 hero PvP event</strong> where your top 5 heroes battle automatically.
+          Only <strong className="text-frost">Exploration Skills</strong> (left side) are active — Expedition Skills do nothing here.
+          AoE damage is king.
+        </p>
+      </div>
+
+      {/* Battle Screenshot */}
+      <div className="card">
+        <h2 className="section-header">The Arena Battlefield</h2>
+        <div className="flex justify-center py-2">
+          <img
+            src="/images/arena_battle.png"
+            alt="Arena battle showing 5v5 hero formation with frontline and backline positions"
+            className="max-w-full max-w-sm rounded-lg border border-frost-muted/30"
+          />
+        </div>
+        <p className="text-xs text-frost-muted text-center mt-2">
+          5 heroes per side in a 2-front + 3-back formation. Battles are fully automatic.
+        </p>
+      </div>
+
+      {/* Why Am I Losing? */}
+      <div className="card border-red-500/30">
+        <h2 className="section-header text-red-400">Why Am I Losing With Similar Power?</h2>
+        <p className="text-frost-muted mb-4">
+          Power is misleading in Arena. Here{"'"}s why a lower-power team can beat you:
+        </p>
+
+        <div className="space-y-3">
+          <div className="p-3 rounded-lg border border-surface-border">
+            <h3 className="text-sm font-medium text-frost mb-1">Power Includes Irrelevant Stats</h3>
+            <p className="text-xs text-frost-muted">
+              Total power counts Expedition skills, but Arena only uses <strong className="text-frost">Exploration skills</strong>.
+              A player who maxed Expedition skills has inflated power that does nothing in Arena.
+            </p>
+          </div>
+          <div className="p-3 rounded-lg border border-surface-border">
+            <h3 className="text-sm font-medium text-frost mb-1">AoE Heroes Multiply Effective Damage</h3>
+            <p className="text-xs text-frost-muted">
+              A hero hitting 3-5 enemies per skill does 3-5x effective damage. One Gwen can wipe your entire backline
+              before your heroes even use their skills. Raw power doesn{"'"}t capture this.
+            </p>
+          </div>
+          <div className="p-3 rounded-lg border border-surface-border">
+            <h3 className="text-sm font-medium text-frost mb-1">Positioning Decides Fights</h3>
+            <p className="text-xs text-frost-muted">
+              A glass-cannon Marksman in the front row dies instantly, wasting all their power.
+              The same hero in Slot 4 (back corner) survives to deal massive damage. Position matters more than stats.
+            </p>
+          </div>
+          <div className="p-3 rounded-lg border border-surface-border">
+            <h3 className="text-sm font-medium text-frost mb-1">Class Diversity</h3>
+            <p className="text-xs text-frost-muted">
+              Running all the same hero class means you lack variety in skills and roles.
+              You need frontline tanks to absorb damage AND backline AoE to deal it. A balanced team
+              with 2 Infantry (front) + 2 Marksman + 1 Lancer (back) outperforms a same-class stack.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Hero Positioning */}
+      <div className="card border-amber-500/30">
+        <h2 className="section-header text-amber-400">Hero Positioning</h2>
+        <p className="text-frost-muted mb-4">
+          Where you place each hero matters as much as which heroes you use. The battlefield has 2 front + 3 back slots:
+        </p>
+
+        {/* Visual formation diagram - 2 front + 3 back */}
+        <div className="mb-6 max-w-md mx-auto">
+          <div className="text-center text-xs text-frost-muted mb-2">--- Enemy Side ---</div>
+          {/* Front row - 2 slots centered */}
+          <div className="flex justify-center gap-3 mb-3">
+            {[
+              { slot: 1, role: 'Tank', class: 'Infantry', risk: 'HIGH', color: 'border-red-500/50 bg-red-500/10' },
+              { slot: 5, role: 'Tank', class: 'Infantry', risk: 'HIGH', color: 'border-red-500/50 bg-red-500/10' },
+            ].map(s => (
+              <div key={s.slot} className={`w-28 p-3 rounded-lg border ${s.color} text-center`}>
+                <p className="text-sm font-bold text-frost">Slot {s.slot}</p>
+                <p className="text-xs text-frost-muted">{s.role}</p>
+                <p className="text-[10px] text-red-400">{s.class}</p>
+                <p className="text-[10px] font-medium text-red-400">{s.risk} risk</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center text-[10px] text-frost-muted mb-2">▲ Frontline &nbsp;|&nbsp; Backline ▼</div>
+          {/* Back row - 3 slots centered */}
+          <div className="flex justify-center gap-3">
+            {[
+              { slot: 2, role: 'AoE / DPS', class: 'Marksman', risk: 'MED', color: 'border-amber-500/50 bg-amber-500/10' },
+              { slot: 3, role: 'Lancer', class: 'Lancer', risk: 'MED', color: 'border-amber-500/50 bg-amber-500/10' },
+              { slot: 4, role: 'Main DPS', class: 'Marksman', risk: 'LOW', color: 'border-green-500/50 bg-green-500/10' },
+            ].map(s => (
+              <div key={s.slot} className={`w-28 p-3 rounded-lg border ${s.color} text-center`}>
+                <p className="text-sm font-bold text-frost">Slot {s.slot}</p>
+                <p className="text-xs text-frost-muted">{s.role}</p>
+                <p className={`text-[10px] ${s.slot === 4 ? 'text-green-400' : 'text-amber-400'}`}>{s.class}</p>
+                <p className={`text-[10px] font-medium ${s.risk === 'LOW' ? 'text-green-400' : 'text-amber-400'}`}>{s.risk} risk</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center text-xs text-frost-muted mt-2">--- Your Side ---</div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="p-3 rounded-lg border border-red-500/30">
+            <p className="text-sm text-frost">
+              <strong className="text-red-400">Slots 1 & 5 (Front):</strong> These heroes take damage first. Place your tankiest
+              Infantry heroes here — Jeronimo, Natalia, Sergey, Wu Ming. They absorb hits so your backline survives.
+            </p>
+          </div>
+          <div className="p-3 rounded-lg border border-amber-500/30">
+            <p className="text-sm text-frost">
+              <strong className="text-amber-400">Slots 2 & 3 (Back Middle):</strong> Good for AoE Lancers and secondary DPS.
+              A Lancer in the back middle provides healing/utility while dealing splash damage.
+            </p>
+          </div>
+          <div className="p-3 rounded-lg border border-green-500/30">
+            <p className="text-sm text-frost">
+              <strong className="text-green-400">Slot 4 (Back Corner):</strong> The <strong>safest position</strong> and can potentially hit all 5 enemies.
+              Always put your best Marksman DPS here. Heroes like Alonso thrive in this spot — they{"'"}re attacked last,
+              giving them maximum time to deal damage.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <p className="text-sm text-frost">
+            <strong className="text-amber-400">Recommended Formation:</strong> 2 Infantry (front) + 1 Lancer (back middle) + 1 Marksman (back) + 1 flex (back corner).
+            Put your weakest-but-essential hero (like Alonso for DPS) in the back corner where they{"'"}re attacked last.
+          </p>
+        </div>
+      </div>
+
+      {/* AoE is King */}
+      <div className="card border-purple-500/30">
+        <h2 className="section-header text-purple-400">AoE Skills Dominate Arena</h2>
+        <p className="text-frost-muted mb-4">
+          The single most important factor in Arena is <strong className="text-frost">Area of Effect damage</strong>.
+          Heroes whose exploration skills hit multiple enemies are exponentially more effective in 5v5:
+        </p>
+
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <h3 className="font-medium text-frost mb-2">Why AoE Wins</h3>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• A skill hitting 3 enemies does <strong className="text-frost">3x effective damage</strong></li>
+              <li>• If your AoE fires first, enemies die before using their own skills</li>
+              <li>• Backline wipe = opponent loses all DPS instantly</li>
+              <li>• The <strong className="text-frost">"Area of Damage Affected"</strong> stat on skills tells you the splash radius</li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="font-medium text-frost mb-2">What to Look For</h3>
+            <ul className="text-sm text-frost-muted space-y-1">
+              <li>• Skills that say <strong className="text-frost">"AoE damage"</strong> or <strong className="text-frost">"targets within range"</strong></li>
+              <li>• Skills that <strong className="text-frost">freeze or stun</strong> multiple enemies</li>
+              <li>• Higher "Area of Damage Affected" = bigger splash = more enemies hit</li>
+              <li>• Heroes where ALL attacks deal splash (Gwen, Bradley)</li>
+            </ul>
+          </div>
+        </div>
+
+        <h3 className="text-sm font-medium text-frost mb-2">Best AoE Heroes for Arena</h3>
+        <div className="space-y-2">
+          {ARENA_AOE_HEROES.map((hero, i) => {
+            const owned = ownedNames.has(hero.name);
+            const heroData = ownedHeroes.find(h => (h.hero_name || h.name) === hero.name);
+            const classColor = troopColors[hero.class.toLowerCase() as keyof typeof troopColors] || 'text-frost';
+            const tierColor = hero.tier === 'S+' ? 'text-amber-400 bg-amber-500/20' : hero.tier === 'S' ? 'text-purple-400 bg-purple-500/20' : 'text-ice bg-ice/20';
+            return (
+              <div key={i} className={`p-3 rounded-lg border ${owned ? 'border-green-500/30' : 'border-surface-border'}`}>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${tierColor}`}>{hero.tier}</span>
+                  <span className="font-medium text-frost">{hero.name}</span>
+                  <span className={`text-xs ${classColor}`}>({hero.class})</span>
+                  <span className="text-xs text-frost-muted">Gen {hero.gen}</span>
+                  {owned && heroData && (
+                    <span className="text-xs text-green-400 ml-auto">
+                      Lv.{heroData.level} / Expl: {heroData.exploration_skill_1}-{heroData.exploration_skill_2}-{heroData.exploration_skill_3}
+                    </span>
+                  )}
+                  {!owned && <span className="text-xs text-frost-muted ml-auto italic">Not owned</span>}
+                </div>
+                <p className="text-xs text-frost-muted mt-1">{hero.desc}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Your Arena Team */}
+      {token && slotAssignments.length > 0 && (
+        <div className="card border-ice/30">
+          <h2 className="section-header text-ice">Your Arena Team</h2>
+          <p className="text-frost-muted mb-4">
+            Your top 5 heroes assigned to recommended slots based on class and AoE potential:
+          </p>
+
+          {/* Visual slot assignments */}
+          <div className="max-w-md mx-auto mb-4">
+            {/* Front row */}
+            <div className="text-center text-[10px] text-frost-muted mb-1">Frontline</div>
+            <div className="flex justify-center gap-3 mb-3">
+              {slotAssignments.filter(a => a.slot === 1 || a.slot === 5).map(a => {
+                const classColor = troopColors[a.hero.hero_class?.toLowerCase() as keyof typeof troopColors] || 'text-frost';
+                return (
+                  <div key={a.slot} className={`w-36 p-3 rounded-lg border ${a.hero.isAoE ? 'border-purple-500/40 bg-purple-500/5' : 'border-red-500/30 bg-red-500/5'} text-center`}>
+                    <p className="text-[10px] text-frost-muted">Slot {a.slot}</p>
+                    <p className="text-sm font-medium text-frost">{a.hero.name}</p>
+                    <p className={`text-xs ${classColor}`}>{a.hero.hero_class} Lv.{a.hero.level}</p>
+                    {a.hero.isAoE && <span className="text-[10px] text-purple-400">AoE</span>}
+                  </div>
+                );
+              })}
+            </div>
+            {/* Back row */}
+            <div className="text-center text-[10px] text-frost-muted mb-1">Backline</div>
+            <div className="flex justify-center gap-3">
+              {slotAssignments.filter(a => a.slot === 2 || a.slot === 3 || a.slot === 4).map(a => {
+                const classColor = troopColors[a.hero.hero_class?.toLowerCase() as keyof typeof troopColors] || 'text-frost';
+                const slotColor = a.slot === 4 ? 'border-green-500/40 bg-green-500/5' : a.hero.isAoE ? 'border-purple-500/40 bg-purple-500/5' : 'border-amber-500/30 bg-amber-500/5';
+                return (
+                  <div key={a.slot} className={`w-36 p-3 rounded-lg border ${slotColor} text-center`}>
+                    <p className="text-[10px] text-frost-muted">Slot {a.slot}{a.slot === 4 ? ' (Safest)' : ''}</p>
+                    <p className="text-sm font-medium text-frost">{a.hero.name}</p>
+                    <p className={`text-xs ${classColor}`}>{a.hero.hero_class} Lv.{a.hero.level}</p>
+                    {a.hero.isAoE && <span className="text-[10px] text-purple-400">AoE</span>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Detailed list */}
+          <div className="space-y-2">
+            {slotAssignments.map(a => {
+              const classColor = troopColors[a.hero.hero_class?.toLowerCase() as keyof typeof troopColors] || 'text-frost';
+              return (
+                <div key={a.slot} className={`p-3 rounded-lg border ${a.hero.isAoE ? 'border-purple-500/30' : 'border-surface-border'}`}>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${a.slot === 1 || a.slot === 5 ? 'bg-red-500/20 text-red-400' : a.slot === 4 ? 'bg-green-500/20 text-green-400' : 'bg-amber-500/20 text-amber-400'}`}>Slot {a.slot}</span>
+                    <span className="font-medium text-frost">{a.hero.name}</span>
+                    <span className={`text-xs ${classColor}`}>({a.hero.hero_class})</span>
+                    <span className="text-xs text-frost-muted">Lv.{a.hero.level}</span>
+                    {a.hero.isAoE && <span className="text-xs bg-purple-500/20 text-purple-400 px-1.5 py-0.5 rounded">AoE</span>}
+                    <span className="text-xs text-frost-muted ml-auto">{a.role}</span>
+                  </div>
+                  <p className="text-xs text-frost-muted mt-1">
+                    Expl Skills: {a.hero.exploration_skill_1}-{a.hero.exploration_skill_2}-{a.hero.exploration_skill_3}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+          <p className="text-xs text-frost-muted mt-3 italic">
+            Infantry → front slots (tanks). Best DPS → Slot 4 (safest). Lancer → back middle. Level up exploration skills for better Arena performance.
+          </p>
+        </div>
+      )}
+
+      {/* Exploration Skills Only */}
+      <div className="card border-yellow-500/30">
+        <h2 className="section-header text-yellow-400">Exploration Skills ONLY</h2>
+        <p className="text-frost-muted mb-3">
+          Arena is PvE-style combat. Only <strong className="text-frost">Exploration Skills (left side)</strong> are active.
+          Expedition Skills (right side) do absolutely nothing in Arena.
+        </p>
+        <div className="grid md:grid-cols-2 gap-4">
+          <div className="p-3 rounded-lg border border-green-500/30">
+            <h3 className="text-sm font-medium text-green-400 mb-1">Active in Arena</h3>
+            <ul className="text-xs text-frost-muted space-y-1">
+              <li>• Exploration Skill 1 (top left)</li>
+              <li>• Exploration Skill 2 (middle left)</li>
+              <li>• Exploration Skill 3 (bottom left)</li>
+              <li>• Hero level, stars, gear</li>
+            </ul>
+          </div>
+          <div className="p-3 rounded-lg border border-red-500/30">
+            <h3 className="text-sm font-medium text-red-400 mb-1">Inactive in Arena</h3>
+            <ul className="text-xs text-frost-muted space-y-1">
+              <li>• Expedition Skill 1 (top right)</li>
+              <li>• Expedition Skill 2 (middle right)</li>
+              <li>• Expedition Skill 3 (bottom right)</li>
+              <li>• These inflate power but do nothing here</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Quick Tips */}
+      <div className="card">
+        <h2 className="section-header">Arena Tips</h2>
+        <div className="space-y-2">
+          {[
+            { tip: 'Attack in the last few minutes before daily reset', why: 'Minimizes time for others to counterattack and push you down before rewards are calculated.' },
+            { tip: 'You lose ZERO points from failed attacks', why: 'Always attack — even if you lose, you lose nothing. Only defensive losses cost points.' },
+            { tip: 'Save Arena Tokens for Custom Mythic Gear Chest', why: '12,000 tokens (~40 days). You pick the exact Mythic gear piece you want. Best long-term value.' },
+            { tip: 'Mix your hero classes', why: 'All Infantry or all Marksman means no role diversity. You need tanks AND DPS to win consistently.' },
+            { tip: 'Level Exploration skills on your top 5', why: 'Expedition skills are wasted here. Focus Exploration Manuals on your Arena heroes for real power gains.' },
+          ].map((item, i) => (
+            <div key={i} className="p-3 rounded-lg border border-surface-border">
+              <p className="text-sm font-medium text-frost">{item.tip}</p>
+              <p className="text-xs text-frost-muted mt-1">{item.why}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick Reference */}
+      <div className="card">
+        <h2 className="section-header">Quick Reference</h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left py-2 text-frost-muted">Detail</th>
+                <th className="text-left py-2 text-frost-muted">Info</th>
+              </tr>
+            </thead>
+            <tbody className="text-frost">
+              <tr className="border-b border-surface-border/50">
+                <td className="py-2 text-frost-muted">Unlocks</td>
+                <td className="py-2">Furnace Level 8</td>
               </tr>
               <tr className="border-b border-surface-border/50">
-                <td className="py-2">Joiner (Fallback)</td>
-                <td className="py-2">Highest combat skill hero</td>
-                <td className="py-2">0/10/90</td>
-                <td className="py-2 text-frost-muted">Any hero with offensive expedition skill</td>
+                <td className="py-2 text-frost-muted">Daily Attempts</td>
+                <td className="py-2">5 free + 5 purchasable (100-800 gems each)</td>
               </tr>
               <tr className="border-b border-surface-border/50">
-                <td className="py-2 text-red-400">AVOID</td>
-                <td className="py-2 text-frost-muted">No hero (troops only)</td>
-                <td className="py-2">0/10/90</td>
-                <td className="py-2 text-frost-muted">Better than a non-combat skill (gathering, building speed)</td>
+                <td className="py-2 text-frost-muted">Skills Used</td>
+                <td className="py-2 text-green-400">Exploration only (left side)</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="py-2 text-frost-muted">Best Formation</td>
+                <td className="py-2">2 Infantry (front) + 1 Lancer + 2 Marksman (back)</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="py-2 text-frost-muted">Safest Slot</td>
+                <td className="py-2">Slot 4 (back corner) — put best DPS here</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="py-2 text-frost-muted">Top Arena Heroes</td>
+                <td className="py-2 text-amber-400">Gwen (S+), Bradley (S+), Natalia (S), Jeronimo (S)</td>
+              </tr>
+              <tr className="border-b border-surface-border/50">
+                <td className="py-2 text-frost-muted">Token Priority</td>
+                <td className="py-2">Custom Mythic Gear Chest (12,000 tokens)</td>
               </tr>
             </tbody>
           </table>
@@ -360,37 +965,13 @@ function CanyonClashTab() {
       {/* Arena Map Layout */}
       <div className="card">
         <h2 className="section-header">Arena Map</h2>
-        <div className="max-w-md mx-auto py-6">
-          <div className="flex flex-col items-center gap-2">
-            <div className="w-24 h-24 rounded-full bg-amber-500/20 border-2 border-amber-500 flex items-center justify-center text-center">
-              <span className="text-xs text-amber-400 font-bold leading-tight">Frozen<br/>Citadel</span>
-            </div>
-            <div className="flex items-center gap-1 text-frost-muted text-xs">
-              <span className="w-8 border-t border-dashed border-frost-muted"></span>
-              <span>bridges</span>
-              <span className="w-8 border-t border-dashed border-frost-muted"></span>
-            </div>
-            <div className="grid grid-cols-3 gap-8 w-full">
-              {['Alliance 1', 'Alliance 2', 'Alliance 3'].map((name, i) => (
-                <div key={i} className="flex flex-col items-center gap-1">
-                  <div className={`w-16 h-16 rounded-lg flex items-center justify-center text-center ${
-                    i === 0 ? 'bg-red-500/20 border border-red-500/50' :
-                    i === 1 ? 'bg-blue-500/20 border border-blue-500/50' :
-                    'bg-green-500/20 border border-green-500/50'
-                  }`}>
-                    <span className={`text-[10px] font-medium ${
-                      i === 0 ? 'text-red-400' : i === 1 ? 'text-blue-400' : 'text-green-400'
-                    }`}>{name}</span>
-                  </div>
-                  <span className="text-[10px] text-frost-muted">Island {i + 1}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className="flex justify-center py-4">
+          <img
+            src="/images/canyon_clash_map.png"
+            alt="Canyon Clash arena map showing three alliance islands connected by bridges to the central Frozen Citadel"
+            className="max-w-full rounded-lg border border-frost-muted/30"
+          />
         </div>
-        <p className="text-xs text-frost-muted text-center">
-          Three alliances start on separate islands, connected by bridges to the central Frozen Citadel
-        </p>
       </div>
 
       {/* How It Works */}
@@ -1299,6 +1880,8 @@ export default function BattleTacticsPage() {
         return <CastleBattlesTab />;
       case 'bear-trap':
         return <BearTrapTab />;
+      case 'arena':
+        return <ArenaTab />;
       case 'canyon-clash':
         return <CanyonClashTab />;
       case 'foundry':
@@ -1321,13 +1904,13 @@ export default function BattleTacticsPage() {
           <p className="text-frost-muted mt-2">Strategic guides for all combat events</p>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        {/* Tab Navigation - 2 rows: 4 + 3 */}
+        <div className="grid grid-cols-4 gap-2 mb-6">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
                 activeTab === tab.key
                   ? 'bg-ice text-background'
                   : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'

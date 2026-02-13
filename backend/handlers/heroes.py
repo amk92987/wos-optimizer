@@ -13,6 +13,7 @@ from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
 from common.auth import get_effective_user_id
 from common.config import Config
+from common.error_capture import capture_error
 from common.exceptions import AppError, NotFoundError, ValidationError
 from common.hero_repo import (
     batch_update_heroes,
@@ -270,6 +271,5 @@ def lambda_handler(event: dict, context):
         return _error_response(exc)
     except Exception as exc:
         logger.exception("Unhandled error in heroes handler")
-        from common.error_capture import capture_error
         capture_error("heroes", event, exc, logger)
         return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

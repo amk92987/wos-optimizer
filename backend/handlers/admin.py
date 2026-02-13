@@ -10,6 +10,7 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
 from common.auth import get_effective_user_id, require_admin, is_admin, get_user_id
+from common.error_capture import capture_error
 from common.exceptions import AppError, NotFoundError, ValidationError
 from common.config import Config
 from common import admin_repo, user_repo, ai_repo, profile_repo, hero_repo
@@ -46,6 +47,7 @@ def list_users():
             u["profile_count"] = len(profiles)
             u["states"] = [p["state_number"] for p in profiles if p.get("state_number")]
         except Exception:
+            logger.debug("Failed to enrich user %s with profiles", uid, exc_info=True)
             u["profile_count"] = 0
             u["states"] = []
         u.setdefault("usage_7d", 0)
@@ -160,108 +162,330 @@ def impersonate_user(userId: str):
 
 # Hero data for each test account archetype
 _TEST_ACCOUNTS = [
+    # --- 1. Gen 10 Dolphin (Day 700, FC5) - Main + Farm ---
     {
-        "email": "test_dolphin@test.com",
-        "label": "Dolphin (FC5, Day 700)",
-        "profile": {
-            "name": "Dolphin Main",
-            "state_number": 456,
-            "server_age_days": 700,
-            "furnace_level": 30,
-            "furnace_fc_level": 5,
-            "spending_profile": "dolphin",
-            "priority_focus": "svs_combat",
-            "alliance_role": "filler",
-            "priority_svs": 5,
-            "priority_rally": 4,
-            "priority_castle_battle": 4,
-            "priority_exploration": 3,
-            "priority_gathering": 2,
-        },
-        "heroes": [
-            # Gen 1 maxed
-            {"name": "Jeronimo",  "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
-            {"name": "Natalia",   "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
-            {"name": "Molly",     "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
-            {"name": "Sergey",    "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
-            {"name": "Jessie",    "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
-            # Gen 2-4 strong
-            {"name": "Flint",     "level": 75, "stars": 5, "ascension": 4, "skills": 4, "gear": 4},
-            {"name": "Alonso",    "level": 75, "stars": 5, "ascension": 4, "skills": 4, "gear": 4},
-            {"name": "Logan",     "level": 70, "stars": 5, "ascension": 3, "skills": 4, "gear": 3},
-            {"name": "Ahmose",    "level": 70, "stars": 5, "ascension": 3, "skills": 4, "gear": 3},
-            # Gen 5-6
-            {"name": "Hector",    "level": 75, "stars": 5, "ascension": 4, "skills": 4, "gear": 4},
-            {"name": "Wu Ming",   "level": 75, "stars": 5, "ascension": 4, "skills": 4, "gear": 4},
-            # Gen 7-8 developing
-            {"name": "Gatot",     "level": 65, "stars": 3, "ascension": 2, "skills": 3, "gear": 2},
-            {"name": "Gordon",    "level": 60, "stars": 3, "ascension": 2, "skills": 3, "gear": 2},
-            {"name": "Hendrik",   "level": 60, "stars": 3, "ascension": 1, "skills": 3, "gear": 2},
-            {"name": "Bahiti",    "level": 70, "stars": 5, "ascension": 3, "skills": 4, "gear": 3},
+        "email": "test_gen10_dolphin@test.com",
+        "label": "Gen 10 Dolphin (FC5, Day 700)",
+        "profiles": [
+            {
+                "name": "FrostKnight_560",
+                "state_number": 456,
+                "server_age_days": 700,
+                "furnace_level": 30,
+                "furnace_fc_level": 5,
+                "spending_profile": "dolphin",
+                "priority_focus": "svs_combat",
+                "alliance_role": "filler",
+                "priority_svs": 5,
+                "priority_rally": 5,
+                "priority_castle_battle": 4,
+                "priority_exploration": 2,
+                "priority_gathering": 1,
+                "heroes": [
+                    # Gen 1 - All maxed
+                    {"name": "Jeronimo",  "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Natalia",   "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Molly",     "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Sergey",    "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Jessie",    "level": 75, "stars": 5, "expl": [4,4,4], "exped": [5,5,5], "gear": 5},
+                    {"name": "Bahiti",    "level": 70, "stars": 5, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Patrick",   "level": 70, "stars": 5, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    # Gen 2-4 - All maxed
+                    {"name": "Flint",     "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Philly",    "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Alonso",    "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Logan",     "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Mia",       "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Ahmose",    "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Reina",     "level": 75, "stars": 5, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Lynn",      "level": 75, "stars": 5, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    # Gen 5-6 - Very strong
+                    {"name": "Hector",    "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Norah",     "level": 75, "stars": 5, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Gwen",      "level": 75, "stars": 5, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Wu Ming",   "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Renee",     "level": 70, "stars": 4, "ascension": 4, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    # Gen 7-8 - Good progress
+                    {"name": "Gordon",    "level": 75, "stars": 4, "ascension": 4, "expl": [4,4,4], "exped": [4,4,4], "gear": 5},
+                    {"name": "Edith",     "level": 70, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Gatot",     "level": 70, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Hendrik",   "level": 70, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Sonya",     "level": 65, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 3},
+                    # Gen 9-10 - Active investment
+                    {"name": "Magnus",    "level": 65, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 4},
+                    {"name": "Xura",      "level": 60, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 3},
+                    {"name": "Blanchette","level": 65, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 4},
+                ],
+            },
+            {
+                "name": "FrostKnight_Farm",
+                "state_number": 456,
+                "server_age_days": 700,
+                "furnace_level": 25,
+                "spending_profile": "f2p",
+                "alliance_role": "farmer",
+                "priority_svs": 1, "priority_rally": 1, "priority_castle_battle": 1,
+                "priority_exploration": 1, "priority_gathering": 5,
+                "is_farm_account": True,
+                "heroes": [
+                    {"name": "Smith",     "level": 50, "stars": 4, "expl": [4,4,1], "exped": [4,4,1], "gear": 0},
+                    {"name": "Eugene",    "level": 50, "stars": 4, "expl": [4,4,1], "exped": [4,4,1], "gear": 0},
+                    {"name": "Charlie",   "level": 50, "stars": 4, "expl": [4,4,1], "exped": [4,4,1], "gear": 0},
+                    {"name": "Cloris",    "level": 50, "stars": 4, "expl": [4,4,1], "exped": [4,4,1], "gear": 0},
+                    {"name": "Sergey",    "level": 45, "stars": 3, "expl": [3,3,1], "exped": [3,3,1], "gear": 0},
+                    {"name": "Bahiti",    "level": 40, "stars": 2, "expl": [2,2,1], "exped": [2,2,1], "gear": 0},
+                    {"name": "Jessie",    "level": 40, "stars": 2, "expl": [2,2,1], "exped": [3,3,1], "gear": 0},
+                    {"name": "Natalia",   "level": 40, "stars": 2, "expl": [2,2,1], "exped": [2,2,1], "gear": 0},
+                ],
+            },
         ],
     },
+    # --- 2. Gen 4 F2P (Day 240, F27) ---
     {
-        "email": "test_f2p@test.com",
-        "label": "F2P (FC27, Day 240)",
-        "profile": {
-            "name": "F2P Account",
-            "state_number": 789,
-            "server_age_days": 240,
-            "furnace_level": 27,
-            "spending_profile": "f2p",
-            "priority_focus": "balanced_growth",
-            "alliance_role": "filler",
-            "priority_svs": 4,
-            "priority_rally": 3,
-            "priority_castle_battle": 3,
-            "priority_exploration": 4,
-            "priority_gathering": 3,
-        },
-        "heroes": [
-            # Gen 1 core
-            {"name": "Jeronimo",  "level": 60, "stars": 4, "ascension": 3, "skills": 4, "gear": 3},
-            {"name": "Natalia",   "level": 55, "stars": 4, "ascension": 3, "skills": 3, "gear": 3},
-            {"name": "Molly",     "level": 55, "stars": 4, "ascension": 3, "skills": 3, "gear": 3},
-            {"name": "Sergey",    "level": 50, "stars": 3, "ascension": 2, "skills": 3, "gear": 2},
-            {"name": "Jessie",    "level": 45, "stars": 3, "ascension": 2, "skills": 3, "gear": 2},
-            # Gen 2
-            {"name": "Flint",     "level": 50, "stars": 3, "ascension": 2, "skills": 2, "gear": 2},
-            {"name": "Alonso",    "level": 45, "stars": 3, "ascension": 2, "skills": 2, "gear": 2},
-            # Gen 3
-            {"name": "Logan",     "level": 35, "stars": 2, "ascension": 1, "skills": 2, "gear": 1},
+        "email": "test_gen4_f2p@test.com",
+        "label": "Gen 4 F2P (F27, Day 240)",
+        "profiles": [
+            {
+                "name": "IceWarrior_240",
+                "state_number": 789,
+                "server_age_days": 240,
+                "furnace_level": 27,
+                "spending_profile": "f2p",
+                "priority_focus": "balanced_growth",
+                "alliance_role": "filler",
+                "priority_svs": 5,
+                "priority_rally": 4,
+                "priority_castle_battle": 3,
+                "priority_exploration": 3,
+                "priority_gathering": 3,
+                "heroes": [
+                    # Gen 1 core
+                    {"name": "Jeronimo",  "level": 60, "stars": 4, "ascension": 3, "expl": [4,4,3], "exped": [4,4,3], "gear": 4},
+                    {"name": "Natalia",   "level": 55, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 3},
+                    {"name": "Molly",     "level": 55, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 3},
+                    {"name": "Sergey",    "level": 50, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [4,3,3], "gear": 3},
+                    {"name": "Jessie",    "level": 45, "stars": 3, "ascension": 1, "expl": [2,2,2], "exped": [4,3,3], "gear": 3},
+                    {"name": "Bahiti",    "level": 45, "stars": 3, "ascension": 1, "expl": [3,3,3], "exped": [3,3,3], "gear": 3},
+                    {"name": "Patrick",   "level": 40, "stars": 2, "ascension": 1, "expl": [2,2,2], "exped": [2,2,2], "gear": 2},
+                    # Gen 2
+                    {"name": "Flint",     "level": 50, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 3},
+                    {"name": "Philly",    "level": 50, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 3},
+                    {"name": "Alonso",    "level": 55, "stars": 3, "ascension": 3, "expl": [4,4,3], "exped": [4,4,3], "gear": 4},
+                    # Gen 3
+                    {"name": "Logan",     "level": 40, "stars": 2, "ascension": 1, "expl": [2,2,2], "exped": [2,2,2], "gear": 2},
+                    {"name": "Mia",       "level": 40, "stars": 2, "ascension": 1, "expl": [2,2,2], "exped": [2,2,2], "gear": 2},
+                    # Gen 4 - Just unlocked
+                    {"name": "Ahmose",    "level": 35, "stars": 1, "expl": [1,1,1], "exped": [1,1,1], "gear": 0},
+                ],
+            },
         ],
     },
+    # --- 3. Gen 2 Whale (Day 80, F25) - Main + Farm ---
     {
-        "email": "test_whale@test.com",
-        "label": "Whale (FC25, Day 80)",
-        "profile": {
-            "name": "Whale Main",
-            "state_number": 999,
-            "server_age_days": 80,
-            "furnace_level": 25,
-            "spending_profile": "whale",
-            "priority_focus": "svs_combat",
-            "alliance_role": "rally_lead",
-            "priority_svs": 5,
-            "priority_rally": 5,
-            "priority_castle_battle": 4,
-            "priority_exploration": 2,
-            "priority_gathering": 1,
-        },
-        "heroes": [
-            # Gen 1 maxed fast
-            {"name": "Jeronimo",  "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
-            {"name": "Natalia",   "level": 80, "stars": 5, "ascension": 5, "skills": 5, "gear": 5},
-            {"name": "Molly",     "level": 75, "stars": 5, "ascension": 4, "skills": 5, "gear": 5},
-            {"name": "Sergey",    "level": 75, "stars": 5, "ascension": 4, "skills": 5, "gear": 4},
-            {"name": "Jessie",    "level": 75, "stars": 5, "ascension": 4, "skills": 5, "gear": 4},
-            {"name": "Bahiti",    "level": 70, "stars": 4, "ascension": 3, "skills": 4, "gear": 4},
-            # Gen 2 high
-            {"name": "Flint",     "level": 70, "stars": 4, "ascension": 3, "skills": 4, "gear": 4},
-            {"name": "Philly",    "level": 65, "stars": 4, "ascension": 3, "skills": 3, "gear": 3},
-            {"name": "Alonso",    "level": 75, "stars": 4, "ascension": 4, "skills": 4, "gear": 4},
-            # Gen 3 early
-            {"name": "Logan",     "level": 40, "stars": 2, "ascension": 1, "skills": 2, "gear": 1},
+        "email": "test_gen2_whale@test.com",
+        "label": "Gen 2 Whale (F25, Day 80)",
+        "profiles": [
+            {
+                "name": "ArcticKing_80",
+                "state_number": 999,
+                "server_age_days": 80,
+                "furnace_level": 25,
+                "spending_profile": "whale",
+                "priority_focus": "svs_combat",
+                "alliance_role": "rally_lead",
+                "priority_svs": 5,
+                "priority_rally": 5,
+                "priority_castle_battle": 5,
+                "priority_exploration": 2,
+                "priority_gathering": 1,
+                "heroes": [
+                    # Gen 1 - All maxed (whale)
+                    {"name": "Jeronimo",  "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Natalia",   "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Molly",     "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Sergey",    "level": 75, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 4},
+                    {"name": "Jessie",    "level": 70, "stars": 5, "expl": [4,4,4], "exped": [5,5,5], "gear": 3},
+                    {"name": "Bahiti",    "level": 70, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 4},
+                    {"name": "Gina",      "level": 65, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 3},
+                    {"name": "Patrick",   "level": 65, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 3},
+                    {"name": "Zinman",    "level": 60, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 3},
+                    {"name": "Ling Xue",  "level": 60, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 3},
+                    # Gen 2 - High investment
+                    {"name": "Flint",     "level": 70, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Philly",    "level": 70, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Alonso",    "level": 75, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    # Gen 3 - Early access from spending
+                    {"name": "Logan",     "level": 50, "stars": 2, "ascension": 1, "expl": [2,2,2], "exped": [2,2,2], "gear": 0},
+                    {"name": "Mia",       "level": 45, "stars": 2, "ascension": 1, "expl": [2,2,2], "exped": [2,2,2], "gear": 0},
+                ],
+            },
+            {
+                "name": "ArcticKing_Farm",
+                "state_number": 999,
+                "server_age_days": 80,
+                "furnace_level": 18,
+                "spending_profile": "f2p",
+                "alliance_role": "farmer",
+                "priority_svs": 1, "priority_rally": 1, "priority_castle_battle": 1,
+                "priority_exploration": 1, "priority_gathering": 5,
+                "is_farm_account": True,
+                "heroes": [
+                    {"name": "Smith",     "level": 40, "stars": 3, "expl": [3,3,1], "exped": [3,3,1], "gear": 0},
+                    {"name": "Eugene",    "level": 40, "stars": 3, "expl": [3,3,1], "exped": [3,3,1], "gear": 0},
+                    {"name": "Charlie",   "level": 40, "stars": 3, "expl": [3,3,1], "exped": [3,3,1], "gear": 0},
+                    {"name": "Cloris",    "level": 40, "stars": 3, "expl": [3,3,1], "exped": [3,3,1], "gear": 0},
+                    {"name": "Sergey",    "level": 30, "stars": 2, "expl": [2,2,1], "exped": [2,2,1], "gear": 0},
+                    {"name": "Bahiti",    "level": 25, "stars": 1, "expl": [1,1,1], "exped": [1,1,1], "gear": 0},
+                    {"name": "Jessie",    "level": 20, "stars": 1, "expl": [1,1,1], "exped": [2,2,1], "gear": 0},
+                    {"name": "Natalia",   "level": 20, "stars": 1, "expl": [1,1,1], "exped": [1,1,1], "gear": 0},
+                ],
+            },
+        ],
+    },
+    # --- 4. Multi-State Player (2 profiles, different states) ---
+    {
+        "email": "test_multi_state@test.com",
+        "label": "Multi-State (2 states)",
+        "profiles": [
+            {
+                "name": "State200_Main",
+                "state_number": 200,
+                "server_age_days": 500,
+                "furnace_level": 30,
+                "spending_profile": "minnow",
+                "alliance_role": "filler",
+                "priority_svs": 4, "priority_rally": 3, "priority_castle_battle": 3,
+                "priority_exploration": 3, "priority_gathering": 3,
+                "heroes": [
+                    {"name": "Jeronimo",  "level": 70, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 4},
+                    {"name": "Natalia",   "level": 65, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Molly",     "level": 65, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Jessie",    "level": 50, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [4,3,3], "gear": 3},
+                    {"name": "Sergey",    "level": 50, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [4,3,3], "gear": 3},
+                    {"name": "Flint",     "level": 60, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 3},
+                    {"name": "Alonso",    "level": 55, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 3},
+                    {"name": "Hector",    "level": 50, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 2},
+                ],
+            },
+            {
+                "name": "State850_Alt",
+                "state_number": 850,
+                "server_age_days": 100,
+                "furnace_level": 22,
+                "spending_profile": "minnow",
+                "alliance_role": "filler",
+                "priority_svs": 3, "priority_rally": 3, "priority_castle_battle": 3,
+                "priority_exploration": 4, "priority_gathering": 4,
+                "heroes": [
+                    {"name": "Jeronimo",  "level": 45, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 2},
+                    {"name": "Natalia",   "level": 40, "stars": 2, "ascension": 1, "expl": [2,2,2], "exped": [2,2,2], "gear": 2},
+                    {"name": "Molly",     "level": 40, "stars": 2, "ascension": 1, "expl": [2,2,2], "exped": [2,2,2], "gear": 2},
+                    {"name": "Jessie",    "level": 30, "stars": 1, "expl": [1,1,1], "exped": [2,1,1], "gear": 1},
+                    {"name": "Sergey",    "level": 30, "stars": 1, "expl": [1,1,1], "exped": [2,1,1], "gear": 1},
+                ],
+            },
+        ],
+    },
+    # --- 5. New Player (Day 7, F18) ---
+    {
+        "email": "test_new_player@test.com",
+        "label": "New Player (F18, Day 7)",
+        "profiles": [
+            {
+                "name": "FreshStart",
+                "state_number": 900,
+                "server_age_days": 7,
+                "furnace_level": 18,
+                "spending_profile": "f2p",
+                "priority_focus": "balanced_growth",
+                "alliance_role": "casual",
+                "priority_svs": 2, "priority_rally": 2, "priority_castle_battle": 2,
+                "priority_exploration": 4, "priority_gathering": 4,
+                "heroes": [
+                    {"name": "Jeronimo",  "level": 20, "stars": 1, "expl": [1,1,1], "exped": [1,1,1], "gear": 0},
+                    {"name": "Molly",     "level": 15, "stars": 0, "expl": [1,1,1], "exped": [1,1,1], "gear": 0},
+                    {"name": "Bahiti",    "level": 15, "stars": 0, "expl": [1,1,1], "exped": [1,1,1], "gear": 0},
+                ],
+            },
+        ],
+    },
+    # --- 6. Rally Leader (Orca, Day 350, F30) ---
+    {
+        "email": "test_rally_leader@test.com",
+        "label": "Rally Leader (Orca, F30, Day 350)",
+        "profiles": [
+            {
+                "name": "StormBringer",
+                "state_number": 350,
+                "server_age_days": 350,
+                "furnace_level": 30,
+                "spending_profile": "orca",
+                "priority_focus": "svs_combat",
+                "alliance_role": "rally_lead",
+                "priority_svs": 5, "priority_rally": 5, "priority_castle_battle": 5,
+                "priority_exploration": 2, "priority_gathering": 1,
+                "heroes": [
+                    # Gen 1 - Maxed
+                    {"name": "Jeronimo",  "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Natalia",   "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Molly",     "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Sergey",    "level": 75, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Jessie",    "level": 70, "stars": 5, "expl": [4,4,4], "exped": [5,5,5], "gear": 4},
+                    {"name": "Patrick",   "level": 65, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 3},
+                    # Gen 2-4
+                    {"name": "Flint",     "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Alonso",    "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Logan",     "level": 70, "stars": 5, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Ahmose",    "level": 70, "stars": 5, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    # Gen 5
+                    {"name": "Hector",    "level": 75, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Norah",     "level": 70, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    # Gen 6
+                    {"name": "Wu Ming",   "level": 65, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 3},
+                ],
+            },
+        ],
+    },
+    # --- 7. Gen 12 Whale (endgame) ---
+    {
+        "email": "test_gen12_whale@test.com",
+        "label": "Gen 12 Whale (FC8, Day 880)",
+        "profiles": [
+            {
+                "name": "IceTitan",
+                "state_number": 100,
+                "server_age_days": 880,
+                "furnace_level": 30,
+                "furnace_fc_level": 8,
+                "spending_profile": "whale",
+                "priority_focus": "svs_combat",
+                "alliance_role": "rally_lead",
+                "priority_svs": 5, "priority_rally": 5, "priority_castle_battle": 5,
+                "priority_exploration": 3, "priority_gathering": 1,
+                "heroes": [
+                    # Gen 1 fully maxed
+                    {"name": "Jeronimo",  "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Natalia",   "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Molly",     "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Sergey",    "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Jessie",    "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    # Gen 2-6 fully maxed
+                    {"name": "Flint",     "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Alonso",    "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Hector",    "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Wu Ming",   "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    # Gen 7-10 strong
+                    {"name": "Gatot",     "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Gordon",    "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Blanchette","level": 75, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    {"name": "Magnus",    "level": 75, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
+                    # Gen 11-12 developing
+                    {"name": "Eleonora",  "level": 70, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
+                    {"name": "Rufus",     "level": 65, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 3},
+                    {"name": "Hervor",    "level": 65, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 3},
+                    {"name": "Karol",     "level": 60, "stars": 2, "ascension": 1, "expl": [2,2,2], "exped": [2,2,2], "gear": 2},
+                ],
+            },
         ],
     },
 ]
@@ -271,21 +495,21 @@ _TEST_PASSWORD = "Test1234!"
 
 def _build_hero_data(h: dict) -> dict:
     """Convert shorthand hero definition to full put_hero data dict."""
-    skill_level = h.get("skills", 1)
+    # Support both individual skill arrays and uniform "skills" shorthand
+    expl = h.get("expl", [h.get("skills", 1)] * 3)
+    exped = h.get("exped", [h.get("skills", 1)] * 3)
     gear_quality = h.get("gear", 0)
-    # Map gear shorthand (1-5) to quality enum values:
-    # 0=None, 1=Common(Green), 2=Uncommon(Blue), 3=Rare(Purple), 4=Epic(Orange), 5=Legendary(Gold)
-    gear_level = gear_quality * 20 if gear_quality > 0 else 0  # rough: quality 5 → level 100
+    gear_level = gear_quality * 20 if gear_quality > 0 else 0
     return {
         "level": h.get("level", 1),
         "stars": h.get("stars", 0),
         "ascension": h.get("ascension", 0),
-        "exploration_skill_1": skill_level,
-        "exploration_skill_2": skill_level,
-        "exploration_skill_3": skill_level,
-        "expedition_skill_1": skill_level,
-        "expedition_skill_2": skill_level,
-        "expedition_skill_3": skill_level,
+        "exploration_skill_1": expl[0] if len(expl) > 0 else 1,
+        "exploration_skill_2": expl[1] if len(expl) > 1 else 1,
+        "exploration_skill_3": expl[2] if len(expl) > 2 else 1,
+        "expedition_skill_1": exped[0] if len(exped) > 0 else 1,
+        "expedition_skill_2": exped[1] if len(exped) > 1 else 1,
+        "expedition_skill_3": exped[2] if len(exped) > 2 else 1,
         "gear_slot1_quality": gear_quality,
         "gear_slot1_level": gear_level,
         "gear_slot2_quality": gear_quality,
@@ -351,12 +575,10 @@ def seed_test_accounts():
             cognito_sub = _get_or_create_cognito_user(email)
 
             # 2. Create or update DynamoDB user record directly
-            #    (bypass transactional create_user to avoid uniqueness guard issues)
             now = datetime.now(timezone.utc).isoformat()
             existing_user = user_repo.get_user(cognito_sub)
             if existing_user:
                 status = "reset"
-                # Ensure test flag is set
                 if not existing_user.get("is_test_account"):
                     user_repo.update_user(cognito_sub, {"is_test_account": True})
             else:
@@ -380,41 +602,53 @@ def seed_test_accounts():
                 })
 
             # 3. Delete existing profiles + heroes to reset data
-            existing_profiles = profile_repo.get_profiles(cognito_sub)
+            existing_profiles = profile_repo.get_profiles(cognito_sub, include_deleted=True)
             for ep in existing_profiles:
                 pid = ep.get("profile_id") or ep["SK"].replace("PROFILE#", "")
                 profile_repo.delete_profile(cognito_sub, pid, hard=True)
 
-            # 4. Create fresh profile
-            profile = profile_repo.create_profile(
-                user_id=cognito_sub,
-                name=acct["profile"]["name"],
-                state_number=acct["profile"].get("state_number"),
-            )
-            profile_id = profile["profile_id"]
+            # 4. Create profiles (supports multiple per account)
+            profiles_data = acct.get("profiles", [])
+            # Backwards compat: single "profile" + "heroes" format
+            if not profiles_data and "profile" in acct:
+                profiles_data = [{**acct["profile"], "heroes": acct.get("heroes", [])}]
 
-            # 5. Update profile settings
-            profile_settings = {k: v for k, v in acct["profile"].items()
-                                if k not in ("name", "state_number")}
-            if profile_settings:
-                profile_repo.update_profile(cognito_sub, profile_id, profile_settings)
+            total_heroes = 0
+            first_profile_id = None
+            for idx, prof_data in enumerate(profiles_data):
+                profile = profile_repo.create_profile(
+                    user_id=cognito_sub,
+                    name=prof_data["name"],
+                    state_number=prof_data.get("state_number"),
+                    is_farm_account=prof_data.get("is_farm_account", False),
+                )
+                profile_id = profile["profile_id"]
+                if idx == 0:
+                    first_profile_id = profile_id
 
-            # 6. Activate profile
-            profile_repo.activate_profile(cognito_sub, profile_id)
+                # Update profile settings
+                skip_keys = {"name", "state_number", "heroes", "is_farm_account"}
+                profile_settings = {k: v for k, v in prof_data.items() if k not in skip_keys}
+                if profile_settings:
+                    profile_repo.update_profile(cognito_sub, profile_id, profile_settings)
 
-            # 7. Add heroes
-            heroes_added = 0
-            for h in acct["heroes"]:
-                hero_data = _build_hero_data(h)
-                hero_repo.put_hero(profile_id, h["name"], hero_data)
-                heroes_added += 1
+                # Add heroes
+                for h in prof_data.get("heroes", []):
+                    hero_data = _build_hero_data(h)
+                    hero_repo.put_hero(profile_id, h["name"], hero_data)
+                    total_heroes += 1
+
+            # Activate first profile as default
+            if first_profile_id:
+                profile_repo.activate_profile(cognito_sub, first_profile_id)
 
             results.append({
                 "email": email,
                 "label": label,
                 "status": status,
                 "user_id": cognito_sub,
-                "heroes": heroes_added,
+                "profiles": len(profiles_data),
+                "heroes": total_heroes,
             })
 
         except Exception as e:
@@ -1487,7 +1721,7 @@ def check_data_integrity():
     # 3. Invalid Hero References - heroes with names not in heroes.json
     try:
         valid_heroes = set()
-        heroes_data = hero_repo.get_all_heroes()
+        heroes_data = hero_repo.get_all_heroes_reference()
         for h in heroes_data:
             valid_heroes.add(h.get("name", "").lower())
 
@@ -1527,11 +1761,11 @@ def check_data_integrity():
                 issues.append(f"level={item['level']}")
             if item.get("stars", 0) > 5:
                 issues.append(f"stars={item['stars']}")
-            for sk in ["exploration_skill_1", "exploration_skill_2", "exploration_skill_3",
-                        "expedition_skill_1", "expedition_skill_2", "expedition_skill_3"]:
+            for sk in ["exploration_skill_1_level", "exploration_skill_2_level", "exploration_skill_3_level",
+                        "expedition_skill_1_level", "expedition_skill_2_level", "expedition_skill_3_level"]:
                 if item.get(sk, 0) > 5:
                     issues.append(f"{sk}={item[sk]}")
-            for gq in ["gear_slot_1_quality", "gear_slot_2_quality", "gear_slot_3_quality", "gear_slot_4_quality"]:
+            for gq in ["gear_slot1_quality", "gear_slot2_quality", "gear_slot3_quality", "gear_slot4_quality"]:
                 if item.get(gq, 0) > 7:
                     issues.append(f"{gq}={item[gq]}")
             if issues:
@@ -1741,11 +1975,11 @@ def fix_integrity_issue(action: str):
                 updates["level"] = 80
             if item.get("stars", 0) > 5:
                 updates["stars"] = 5
-            for skill_key in ["exploration_skill_1", "exploration_skill_2", "exploration_skill_3",
-                              "expedition_skill_1", "expedition_skill_2", "expedition_skill_3"]:
+            for skill_key in ["exploration_skill_1_level", "exploration_skill_2_level", "exploration_skill_3_level",
+                              "expedition_skill_1_level", "expedition_skill_2_level", "expedition_skill_3_level"]:
                 if item.get(skill_key, 0) > 5:
                     updates[skill_key] = 5
-            for gq_key in ["gear_slot_1_quality", "gear_slot_2_quality", "gear_slot_3_quality", "gear_slot_4_quality"]:
+            for gq_key in ["gear_slot1_quality", "gear_slot2_quality", "gear_slot3_quality", "gear_slot4_quality"]:
                 if item.get(gq_key, 0) > 7:
                     updates[gq_key] = 7
             if updates:
@@ -2848,6 +3082,5 @@ def lambda_handler(event, context):
         return {"statusCode": exc.status_code, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": exc.message})}
     except Exception as exc:
         logger.exception("Unhandled error in admin handler")
-        from common.error_capture import capture_error
         capture_error("admin", event, exc, logger)
         return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

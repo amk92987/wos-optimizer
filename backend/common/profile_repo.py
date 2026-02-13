@@ -212,13 +212,22 @@ def duplicate_profile(user_id: str, source_profile_id: str, new_name: str) -> di
     if updates:
         update_profile(user_id, new_profile_id, updates)
 
-    # Copy heroes
-    from .hero_repo import get_heroes, put_hero
+    # Copy heroes using batch_writer for efficiency
+    from .hero_repo import get_heroes
     heroes = get_heroes(source_profile_id)
-    for hero in heroes:
-        hero_data = {k: v for k, v in hero.items() if k not in ("PK", "SK")}
-        hero_name = hero["SK"].replace("HERO#", "")
-        put_hero(new_profile_id, hero_name, hero_data)
+    if heroes:
+        table = get_table("main")
+        now = datetime.now(timezone.utc).isoformat()
+        with table.batch_writer() as batch:
+            for hero in heroes:
+                hero_name = hero["SK"].replace("HERO#", "")
+                item = {k: v for k, v in hero.items() if k not in ("PK", "SK", "created_at", "updated_at")}
+                item["PK"] = f"PROFILE#{new_profile_id}"
+                item["SK"] = f"HERO#{hero_name}"
+                item["profile_id"] = new_profile_id
+                item["created_at"] = now
+                item["updated_at"] = now
+                batch.put_item(Item=strip_none(item))
 
     return get_profile(user_id, new_profile_id)
 

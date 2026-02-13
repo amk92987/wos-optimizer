@@ -31,6 +31,11 @@ interface HeroInvestment {
 
 type TabType = 'recommendations' | 'heroes' | 'gear';
 
+/** Convert snake_case or slug text to clean Title Case */
+function formatLabel(s: string): string {
+  return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 // ── Hero Gear Cost Data (from verified game data) ──────────────────────
 // Mastery Forging: Gold gear levels 1-20, costs Essence Stones + Mythic Gear
 const MASTERY_COSTS: { essence_stones: number; mythic_gear: number }[] = [
@@ -204,9 +209,9 @@ export default function UpgradesPage() {
   });
 
   const priorityColors: Record<string, string> = {
-    high: 'border-fire/50 bg-fire/10',
-    medium: 'border-warning/50 bg-warning/10',
-    low: 'border-ice/50 bg-ice/10',
+    high: 'border-ice/60 bg-ice/10',
+    medium: 'border-ice/30 bg-ice/5',
+    low: 'border-surface-border bg-surface',
   };
 
   const tierColors: Record<string, string> = {
@@ -336,7 +341,7 @@ function RecommendationsTab({
             >
               {upgradeTypes.map((type) => (
                 <option key={type} value={type}>
-                  {type === 'all' ? 'All Categories' : type.charAt(0).toUpperCase() + type.slice(1)}
+                  {type === 'all' ? 'All Categories' : formatLabel(type)}
                 </option>
               ))}
             </select>
@@ -384,13 +389,13 @@ function RecommendationsTab({
                         <span className="font-bold text-frost">{rec.hero}</span>
                       )}
                       <span className="text-sm px-2 py-0.5 rounded bg-surface-hover text-frost-muted">
-                        {rec.category}
+                        {formatLabel(rec.category)}
                       </span>
                       {rec.relevance_tags?.length > 0 && (
                         <div className="flex gap-1">
                           {rec.relevance_tags.slice(0, 3).map((tag, j) => (
                             <span key={j} className="text-xs px-1.5 py-0.5 rounded bg-ice/10 text-ice">
-                              {tag}
+                              {formatLabel(tag)}
                             </span>
                           ))}
                         </div>
@@ -405,11 +410,11 @@ function RecommendationsTab({
                     )}
                   </div>
                   <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    level === 'high' ? 'bg-fire/20 text-fire' :
-                    level === 'medium' ? 'bg-warning/20 text-warning' :
-                    'bg-ice/20 text-ice'
+                    level === 'high' ? 'bg-ice/20 text-ice' :
+                    level === 'medium' ? 'bg-ice/10 text-ice/70' :
+                    'bg-surface-hover text-frost-muted'
                   }`}>
-                    {level}
+                    {formatLabel(level)}
                   </div>
                 </div>
               </div>

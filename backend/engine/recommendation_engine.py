@@ -582,19 +582,30 @@ class RecommendationEngine:
 
             if name:
                 # Helper to get a value from either a dict or ORM object
+                # Cast to int to handle DynamoDB Decimal types
                 def _val(key, default=1):
                     if isinstance(uh, dict):
-                        return uh.get(key, default) or default
-                    return getattr(uh, key, default) or default
+                        v = uh.get(key, default) or default
+                    else:
+                        v = getattr(uh, key, default) or default
+                    return int(v)
 
                 # Get individual skill levels
-                # DynamoDB uses expedition_skill_1, ORM uses expedition_skill_1_level
-                exp_skill_1 = _val('expedition_skill_1', 1) if isinstance(uh, dict) else (getattr(uh, 'expedition_skill_1_level', None) or getattr(uh, 'expedition_skill_1', None) or 1)
-                exp_skill_2 = _val('expedition_skill_2', 1) if isinstance(uh, dict) else (getattr(uh, 'expedition_skill_2_level', None) or getattr(uh, 'expedition_skill_2', None) or 1)
-                exp_skill_3 = _val('expedition_skill_3', 1) if isinstance(uh, dict) else (getattr(uh, 'expedition_skill_3_level', None) or getattr(uh, 'expedition_skill_3', None) or 1)
-                expl_skill_1 = _val('exploration_skill_1', 1) if isinstance(uh, dict) else (getattr(uh, 'exploration_skill_1_level', None) or getattr(uh, 'exploration_skill_1', None) or 1)
-                expl_skill_2 = _val('exploration_skill_2', 1) if isinstance(uh, dict) else (getattr(uh, 'exploration_skill_2_level', None) or getattr(uh, 'exploration_skill_2', None) or 1)
-                expl_skill_3 = _val('exploration_skill_3', 1) if isinstance(uh, dict) else (getattr(uh, 'exploration_skill_3_level', None) or getattr(uh, 'exploration_skill_3', None) or 1)
+                # DynamoDB stores as *_level suffix, ORM uses *_level attribute
+                if isinstance(uh, dict):
+                    exp_skill_1 = int(uh.get('expedition_skill_1_level', uh.get('expedition_skill_1', 1)) or 1)
+                    exp_skill_2 = int(uh.get('expedition_skill_2_level', uh.get('expedition_skill_2', 1)) or 1)
+                    exp_skill_3 = int(uh.get('expedition_skill_3_level', uh.get('expedition_skill_3', 1)) or 1)
+                    expl_skill_1 = int(uh.get('exploration_skill_1_level', uh.get('exploration_skill_1', 1)) or 1)
+                    expl_skill_2 = int(uh.get('exploration_skill_2_level', uh.get('exploration_skill_2', 1)) or 1)
+                    expl_skill_3 = int(uh.get('exploration_skill_3_level', uh.get('exploration_skill_3', 1)) or 1)
+                else:
+                    exp_skill_1 = int(getattr(uh, 'expedition_skill_1_level', None) or getattr(uh, 'expedition_skill_1', None) or 1)
+                    exp_skill_2 = int(getattr(uh, 'expedition_skill_2_level', None) or getattr(uh, 'expedition_skill_2', None) or 1)
+                    exp_skill_3 = int(getattr(uh, 'expedition_skill_3_level', None) or getattr(uh, 'expedition_skill_3', None) or 1)
+                    expl_skill_1 = int(getattr(uh, 'exploration_skill_1_level', None) or getattr(uh, 'exploration_skill_1', None) or 1)
+                    expl_skill_2 = int(getattr(uh, 'exploration_skill_2_level', None) or getattr(uh, 'exploration_skill_2', None) or 1)
+                    expl_skill_3 = int(getattr(uh, 'exploration_skill_3_level', None) or getattr(uh, 'exploration_skill_3', None) or 1)
 
                 heroes_dict[name] = {
                     'level': _val('level', 1),

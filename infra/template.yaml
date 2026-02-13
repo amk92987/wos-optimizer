@@ -185,10 +185,6 @@ Resources:
           AttributeType: S
         - AttributeName: email
           AttributeType: S
-        - AttributeName: user_id
-          AttributeType: S
-        - AttributeName: thread_id
-          AttributeType: S
         - AttributeName: entity_type
           AttributeType: S
         - AttributeName: created_at
@@ -202,22 +198,6 @@ Resources:
         - IndexName: GSI1-Email
           KeySchema:
             - AttributeName: email
-              KeyType: HASH
-            - AttributeName: SK
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-        - IndexName: GSI2-ProfileUser
-          KeySchema:
-            - AttributeName: user_id
-              KeyType: HASH
-            - AttributeName: SK
-              KeyType: RANGE
-          Projection:
-            ProjectionType: ALL
-        - IndexName: GSI3-ThreadId
-          KeySchema:
-            - AttributeName: thread_id
               KeyType: HASH
             - AttributeName: SK
               KeyType: RANGE

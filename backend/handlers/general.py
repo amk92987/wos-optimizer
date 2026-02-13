@@ -7,6 +7,7 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
 from common.auth import get_effective_user_id
+from common.error_capture import capture_error
 from common.exceptions import AppError, ValidationError, NotFoundError
 from common.config import Config
 from common import profile_repo, hero_repo, admin_repo, user_repo, ai_repo
@@ -547,7 +548,7 @@ def get_joiner_recommendation(attackType: str):
     try:
         from engine.recommendation_engine import get_engine
         engine = get_engine()
-        result = engine.get_joiner_recommendation(heroes=heroes, is_attack=is_attack)
+        result = engine.get_joiner_recommendation(user_heroes=heroes, attack=is_attack)
         return result
     except Exception as e:
         logger.warning(f"Joiner recommendation failed: {e}")
@@ -656,6 +657,5 @@ def lambda_handler(event, context):
         return {"statusCode": exc.status_code, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": exc.message})}
     except Exception as exc:
         logger.exception("Unhandled error in general handler")
-        from common.error_capture import capture_error
         capture_error("general", event, exc, logger)
         return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

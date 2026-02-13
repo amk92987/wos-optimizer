@@ -6,6 +6,7 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
 from common.auth import get_effective_user_id
+from common.error_capture import capture_error
 from common.exceptions import AppError, ValidationError
 from common import chief_repo, profile_repo
 
@@ -86,6 +87,5 @@ def lambda_handler(event, context):
         return {"statusCode": exc.status_code, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": exc.message})}
     except Exception as exc:
         logger.exception("Unhandled error in chief handler")
-        from common.error_capture import capture_error
         capture_error("chief", event, exc, logger)
         return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

@@ -20,7 +20,8 @@ def get_user_by_email(email: str) -> Optional[dict]:
     table = get_table("main")
     resp = table.query(
         IndexName="GSI1-Email",
-        KeyConditionExpression="email = :email AND SK = :sk",
+        KeyConditionExpression="#email = :email AND SK = :sk",
+        ExpressionAttributeNames={"#email": "email"},
         ExpressionAttributeValues={":email": email, ":sk": "METADATA"},
         Limit=1,
     )

@@ -189,6 +189,29 @@ HERO GEAR PRIORITY:
 - Dolphins: 3-4 heroes
 - Whales: All core field DPS heroes
 
+=== HERO GEAR COSTS ===
+Each hero has 4 gear slots (Goggles, Gauntlets, Belt, Boots). Gear is class-specific but transferable within the same class.
+
+LEGENDARY ENHANCEMENT (Red gear, levels 1-100):
+- Levels 1-19: Gear XP only (2,500-3,350 XP per level)
+- Level 20: 10 Mithril + 3 Legendary Gear Pieces (milestone)
+- Levels 21-39: Gear XP only (3,500-3,950 XP per level)
+- Level 40: 20 Mithril + 5 Legendary Gear Pieces (milestone)
+- Levels 41-59: Gear XP only (4,450-5,350 XP per level)
+- Level 60: 30 Mithril + 5 Legendary Gear Pieces (milestone)
+- Levels 61-79: Gear XP only (5,500-7,300 XP per level)
+- Level 80: 40 Mithril + 10 Legendary Gear Pieces (milestone)
+- Levels 81-99: Gear XP only (7,500-9,300 XP per level)
+- Level 100: 50 Mithril + 10 Legendary Gear Pieces (milestone)
+TOTALS per slot (1 to 100): 150 Mithril + 33 Legendary Gear Pieces + ~553,500 Gear XP
+TOTALS all 4 slots: 600 Mithril + 132 Legendary Gear Pieces + ~2,214,000 Gear XP
+
+MASTERY FORGING (Gold gear, levels 1-20):
+- Levels 1-10: 10-100 Essence Stones per level (no Mythic Gear)
+- Levels 11-20: 110-200 Essence Stones + 1-10 Mythic Gear per level
+TOTALS per slot (1 to 20): 2,100 Essence Stones + 55 Mythic Gear
+TOTALS all 4 slots: 8,400 Essence Stones + 220 Mythic Gear
+
 === TROOP RATIOS ===
 | Event | Inf/Lan/Mar | Why |
 |-------|-------------|-----|

@@ -140,15 +140,61 @@ def delete_hero(profile_id: str, hero_name: str) -> None:
 
 
 def batch_update_heroes(profile_id: str, heroes: list[dict]) -> list[dict]:
-    """Batch update multiple heroes."""
+    """Batch update multiple heroes using batch_writer for efficiency."""
+    table = get_table("main")
+    now = datetime.now(timezone.utc).isoformat()
     results = []
+
+    # Pre-fetch existing heroes to preserve created_at timestamps
+    existing = {h["SK"].replace("HERO#", ""): h for h in get_heroes(profile_id)}
+
+    items = []
     for hero_data in heroes:
         hero_name = hero_data.pop("name", hero_data.pop("hero_name", None))
         if not hero_name:
             continue
-        result = put_hero(profile_id, hero_name, hero_data)
-        results.append(result)
-    return results
+        item = strip_none({
+            "PK": f"PROFILE#{profile_id}",
+            "SK": f"HERO#{hero_name}",
+            "hero_name": hero_name,
+            "profile_id": profile_id,
+            "level": hero_data.get("level", 1),
+            "stars": hero_data.get("stars", 0),
+            "ascension_tier": hero_data.get("ascension", hero_data.get("ascension_tier", 0)),
+            "exploration_skill_1_level": hero_data.get("exploration_skill_1", hero_data.get("exploration_skill_1_level", 1)),
+            "exploration_skill_2_level": hero_data.get("exploration_skill_2", hero_data.get("exploration_skill_2_level", 1)),
+            "exploration_skill_3_level": hero_data.get("exploration_skill_3", hero_data.get("exploration_skill_3_level", 1)),
+            "expedition_skill_1_level": hero_data.get("expedition_skill_1", hero_data.get("expedition_skill_1_level", 1)),
+            "expedition_skill_2_level": hero_data.get("expedition_skill_2", hero_data.get("expedition_skill_2_level", 1)),
+            "expedition_skill_3_level": hero_data.get("expedition_skill_3", hero_data.get("expedition_skill_3_level", 1)),
+            "gear_slot1_quality": hero_data.get("gear_slot1_quality", 0),
+            "gear_slot1_level": hero_data.get("gear_slot1_level", 0),
+            "gear_slot1_mastery": hero_data.get("gear_slot1_mastery", 0),
+            "gear_slot2_quality": hero_data.get("gear_slot2_quality", 0),
+            "gear_slot2_level": hero_data.get("gear_slot2_level", 0),
+            "gear_slot2_mastery": hero_data.get("gear_slot2_mastery", 0),
+            "gear_slot3_quality": hero_data.get("gear_slot3_quality", 0),
+            "gear_slot3_level": hero_data.get("gear_slot3_level", 0),
+            "gear_slot3_mastery": hero_data.get("gear_slot3_mastery", 0),
+            "gear_slot4_quality": hero_data.get("gear_slot4_quality", 0),
+            "gear_slot4_level": hero_data.get("gear_slot4_level", 0),
+            "gear_slot4_mastery": hero_data.get("gear_slot4_mastery", 0),
+            "mythic_gear_unlocked": hero_data.get("mythic_gear_unlocked", False),
+            "mythic_gear_quality": hero_data.get("mythic_gear_quality", 0),
+            "mythic_gear_level": hero_data.get("mythic_gear_level", 0),
+            "mythic_gear_mastery": hero_data.get("mythic_gear_mastery", 0),
+            "exclusive_gear_skill_level": hero_data.get("exclusive_gear_skill_level", 0),
+            "owned": True,
+            "updated_at": now,
+            "created_at": existing[hero_name].get("created_at", now) if hero_name in existing else now,
+        })
+        items.append(item)
+
+    with table.batch_writer() as batch:
+        for item in items:
+            batch.put_item(Item=item)
+
+    return items
 
 
 # --- Reference data ---

@@ -19,6 +19,7 @@ from aws_lambda_powertools.event_handler.exceptions import (
 
 from common.auth import get_user_id, get_user_email, get_effective_user_id
 from common.config import Config
+from common.error_capture import capture_error
 from common.exceptions import AppError, ValidationError, ConflictError
 from common.user_repo import (
     get_user,
@@ -203,14 +204,13 @@ def login():
     try:
         record_daily_login(sub)
     except Exception:
-        # Daily login already recorded or DynamoDB hiccup -- non-fatal
-        pass
+        logger.debug("Daily login already recorded or DynamoDB hiccup", exc_info=True)
 
     # Update last_login timestamp
     try:
         update_user(sub, {"last_login": datetime.now(timezone.utc).isoformat()})
     except Exception:
-        pass
+        logger.debug("Failed to update last_login timestamp", exc_info=True)
 
     return {
         **tokens,
@@ -458,7 +458,6 @@ def lambda_handler(event, context):
         return app.resolve(event, context)
     except Exception as exc:
         logger.exception("Unhandled error in auth handler")
-        from common.error_capture import capture_error
         capture_error("auth", event, exc, logger)
         return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}
 

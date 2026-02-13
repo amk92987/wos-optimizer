@@ -7,6 +7,7 @@ from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
 
 from common.auth import get_effective_user_id
+from common.error_capture import capture_error
 from common.exceptions import AppError, ValidationError, RateLimitError
 from common import ai_repo, profile_repo, hero_repo, user_repo
 
@@ -178,10 +179,15 @@ def get_advisor_status():
     allowed, message, remaining = ai_repo.check_rate_limit(user or {}, settings)
 
     mode = settings.get("mode", "off")
+    # Return the actual limit for this user (admin vs free tier)
+    role = (user or {}).get("role", "user")
+    user_daily_limit = (user or {}).get("ai_daily_limit")
+    if user_daily_limit is None:
+        user_daily_limit = settings.get("daily_limit_admin", 1000) if role == "admin" else settings.get("daily_limit_free", 20)
     return {
         "ai_enabled": mode != "off",
         "mode": mode,
-        "daily_limit": settings.get("daily_limit_free", 10),
+        "daily_limit": user_daily_limit,
         "requests_today": (user or {}).get("ai_requests_today", 0),
         "requests_remaining": remaining,
         "primary_provider": settings.get("primary_provider", "openai"),
@@ -235,6 +241,5 @@ def lambda_handler(event, context):
         return {"statusCode": exc.status_code, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": exc.message})}
     except Exception as exc:
         logger.exception("Unhandled error in advisor handler")
-        from common.error_capture import capture_error
         capture_error("advisor", event, exc, logger)
         return {"statusCode": 500, "headers": {"Content-Type": "application/json"}, "body": json.dumps({"error": "Internal server error"})}

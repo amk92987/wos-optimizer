@@ -2,6 +2,7 @@
 
 import { Hero } from '@/lib/api';
 import HeroRoleBadges from './HeroRoleBadges';
+import { useEffect, useRef } from 'react';
 
 interface HeroDetailModalProps {
   hero: Hero;
@@ -42,15 +43,39 @@ const getRarityColor = (rarity: string | null) => {
 export default function HeroDetailModal({ hero, isOwned, onClose, onAdd }: HeroDetailModalProps) {
   const hasExplorationSkills = hero.exploration_skill_1 || hero.exploration_skill_2 || hero.exploration_skill_3;
   const hasExpeditionSkills = hero.expedition_skill_1 || hero.expedition_skill_2 || hero.expedition_skill_3;
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  // Handle Escape key to close modal
+  useEffect(() => {
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    }
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
+
+  // Auto-focus the modal content on mount
+  useEffect(() => {
+    if (modalRef.current) {
+      modalRef.current.focus();
+    }
+  }, []);
 
   return (
     <div
       className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="hero-modal-title"
     >
       <div
+        ref={modalRef}
         className="bg-surface rounded-xl border border-surface-border max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-fade-in"
         onClick={e => e.stopPropagation()}
+        tabIndex={-1}
       >
         {/* Header */}
         <div className="sticky top-0 bg-surface border-b border-surface-border p-4 flex items-start gap-4">
@@ -72,7 +97,7 @@ export default function HeroDetailModal({ hero, isOwned, onClose, onAdd }: HeroD
           {/* Hero Basic Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <h2 className="text-xl font-bold text-frost">{hero.name}</h2>
+              <h2 id="hero-modal-title" className="text-xl font-bold text-frost">{hero.name}</h2>
               <span className={`px-2 py-0.5 rounded text-sm font-medium border ${getTierColor(hero.tier_overall)}`}>
                 {hero.tier_overall || '?'}
               </span>

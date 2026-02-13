@@ -58,11 +58,16 @@ interface EventType {
 const eventTypes: EventType[] = [
   { id: 'bear_trap', name: 'Bear Trap', icon: '🐻' },
   { id: 'crazy_joe', name: 'Crazy Joe', icon: '🤪' },
-  { id: 'garrison', name: 'Garrison Defense', icon: '🏰' },
+  { id: 'garrison', name: 'Garrison Leader', icon: '🏰' },
   { id: 'svs_attack', name: 'SvS March', icon: '⚔️' },
-  { id: 'rally_attack', name: 'Rally Attack', icon: '🎯' },
-  { id: 'rally_defense', name: 'Garrison Support', icon: '🛡️' },
+  { id: 'rally_attack', name: 'Rally Joiner', icon: '🎯' },
+  { id: 'rally_defense', name: 'Garrison Joiner', icon: '🛡️' },
 ];
+
+/** Convert snake_case to Title Case for display */
+function formatLabel(s: string): string {
+  return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+}
 
 type TabType = 'optimal' | 'joiner' | 'exploration' | 'reference';
 
@@ -452,7 +457,7 @@ function OptimalLineupsTab({
       {/* Lineup Display */}
       <div className="card mb-6">
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <h2 className="text-xl font-bold text-frost">{template?.name || selectedEvent}</h2>
+          <h2 className="text-xl font-bold text-frost">{template?.name || formatLabel(selectedEvent)}</h2>
           <div className="flex items-center gap-2">
             {isPersonalized && (
               <span className="badge badge-success text-xs">Personalized</span>

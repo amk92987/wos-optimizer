@@ -39,6 +39,8 @@ export default function ProfilesPage() {
   const [previewData, setPreviewData] = useState<PreviewData | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [confirmPermDeleteId, setConfirmPermDeleteId] = useState<string | null>(null);
+  const [switchingId, setSwitchingId] = useState<string | null>(null);
+  const [switchSuccess, setSwitchSuccess] = useState<string | null>(null);
 
   useEffect(() => {
     if (token) {
@@ -68,11 +70,18 @@ export default function ProfilesPage() {
   };
 
   const handleLoadProfile = async (profileId: string) => {
+    setSwitchingId(profileId);
+    setSwitchSuccess(null);
     try {
       await profileApi.switch(token!, profileId);
-      fetchProfiles();
+      await fetchProfiles();
+      const switched = profiles.find((p) => p.profile_id === profileId);
+      setSwitchSuccess(switched?.name || 'Profile');
+      setTimeout(() => setSwitchSuccess(null), 3000);
     } catch (error) {
       console.error('Failed to load profile:', error);
+    } finally {
+      setSwitchingId(null);
     }
   };
 
@@ -196,13 +205,24 @@ export default function ProfilesPage() {
           </button>
         </div>
 
+        {/* Success Banner */}
+        {switchSuccess && (
+          <div className="card mb-4 bg-green-500/10 border-green-500/30 animate-fadeIn">
+            <p className="text-sm text-green-400">
+              Switched to <strong>{switchSuccess}</strong>. All pages now show this profile's data.
+            </p>
+          </div>
+        )}
+
         {/* Info Banner */}
-        <div className="card mb-6 bg-ice/5 border-ice/20">
-          <p className="text-sm text-frost">
-            Your profile data is <strong>automatically saved</strong> as you make changes.
-            Use this page to manage multiple profiles (main account, farms, etc).
-          </p>
-        </div>
+        {!switchSuccess && (
+          <div className="card mb-6 bg-ice/5 border-ice/20">
+            <p className="text-sm text-frost">
+              Your profile data is <strong>automatically saved</strong> as you make changes.
+              Use this page to manage multiple profiles (main account, farms, etc).
+            </p>
+          </div>
+        )}
 
         {/* Current Profile Summary */}
         {activeProfile && (
@@ -279,13 +299,14 @@ export default function ProfilesPage() {
                         {!profile.is_active && (
                           <button
                             onClick={() => handleLoadProfile(profile.profile_id)}
+                            disabled={switchingId === profile.profile_id}
                             className="btn-primary text-sm"
                           >
-                            Switch
+                            {switchingId === profile.profile_id ? 'Switching...' : 'Switch'}
                           </button>
                         )}
                         {profile.is_active && (
-                          <span className="text-xs text-frost-muted px-2">(current)</span>
+                          <span className="text-xs text-ice font-medium px-2">Active</span>
                         )}
                         <button
                           onClick={() => handlePreview(profile.profile_id)}
