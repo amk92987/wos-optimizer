@@ -340,11 +340,12 @@ class RecommendationEngine:
         lineup = self.lineup_builder.build_lineup(game_mode, heroes_dict, profile)
 
         return {
-            "mode": lineup.game_mode,
+            "game_mode": lineup.game_mode,
             "heroes": lineup.heroes,
             "troop_ratio": lineup.troop_ratio,
             "notes": lineup.notes,
-            "confidence": lineup.confidence
+            "confidence": lineup.confidence,
+            "recommended_to_get": lineup.recommended_to_get,
         }
 
     def get_all_lineups(self, user_heroes: list, profile=None) -> Dict[str, dict]:
@@ -354,11 +355,12 @@ class RecommendationEngine:
 
         return {
             mode: {
-                "mode": lineup.game_mode,
+                "game_mode": lineup.game_mode,
                 "heroes": lineup.heroes,
                 "troop_ratio": lineup.troop_ratio,
                 "notes": lineup.notes,
-                "confidence": lineup.confidence
+                "confidence": lineup.confidence,
+                "recommended_to_get": lineup.recommended_to_get,
             }
             for mode, lineup in lineups.items()
         }

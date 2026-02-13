@@ -55,6 +55,7 @@ def load_hero_metadata() -> Dict[str, Dict[str, Any]]:
                 'tier_expedition': hero.get('tier_expedition', 'C'),
                 'role': hero.get('best_use', 'Unknown')[:30] if hero.get('best_use') else 'Unknown',
                 'rarity': hero.get('rarity', 'Rare'),
+                'image_filename': hero.get('image_filename'),
             }
 
     _HERO_METADATA_CACHE = metadata
@@ -71,6 +72,7 @@ def get_hero_metadata(hero_name: str) -> Dict[str, Any]:
         'tier_expedition': 'C',
         'role': 'Unknown',
         'rarity': 'Rare',
+        'image_filename': None,
     })
 
 
@@ -192,8 +194,8 @@ LINEUP_TEMPLATES = {
         "name": "Bear Trap Rally",
         "slots": [
             # Marksman: S+ first (Vulcanus, Blanchette), then S (Cara, Ligeia, Rufus, Xura, Hendrik, etc.)
-            {"class": "Marksman", "role": "Main DPS Lead", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"], "is_lead": True},
-            {"class": "Marksman", "role": "Secondary DPS", "preferred": ["Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
+            {"class": "Marksman", "role": "Main DPS Lead", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso", "Bahiti", "Zinman"], "is_lead": True},
+            {"class": "Marksman", "role": "Secondary DPS", "preferred": ["Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso", "Bahiti", "Zinman"]},
             # Infantry: S+ for ATK buffs (Jeronimo, Wu Ming, Elif, Hervor, Magnus)
             {"class": "Infantry", "role": "Frontline Buffer", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Natalia", "Flint"]},
         ],
@@ -261,9 +263,9 @@ LINEUP_TEMPLATES = {
             # Infantry: S+ first for offense (Jeronimo, Wu Ming, Elif, Hervor, Magnus)
             {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Flint"], "is_lead": True},
             # Lancer: S first, then A (Molly is B-tier, should be last)
-            {"class": "Lancer", "role": "Support", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly"]},
+            {"class": "Lancer", "role": "Support", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly", "Philly"]},
             # Marksman: S+ first (Vulcanus, Blanchette), then S, then A
-            {"class": "Marksman", "role": "DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
+            {"class": "Marksman", "role": "DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso", "Bahiti", "Zinman"]},
         ],
         "troop_ratio": {"infantry": 50, "lancer": 20, "marksman": 30},
         "notes": "Rally leader setup. See Natalia vs Jeronimo tab for when to swap.",
@@ -311,9 +313,9 @@ LINEUP_TEMPLATES = {
             # Infantry: S+ first by power, sustain tip shown separately
             {"class": "Infantry", "role": "Tank Lead", "preferred": ["Elif", "Hervor", "Magnus", "Wu Ming", "Jeronimo", "Gatot", "Edith", "Natalia", "Flint", "Ahmose"], "is_lead": True},
             # Lancer: S first by power
-            {"class": "Lancer", "role": "Healer", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly"]},
+            {"class": "Lancer", "role": "Healer", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly", "Philly"]},
             # Marksman: S+ first by power
-            {"class": "Marksman", "role": "Counter DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
+            {"class": "Marksman", "role": "Counter DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso", "Bahiti", "Zinman"]},
         ],
         "troop_ratio": {"infantry": 60, "lancer": 15, "marksman": 25},
         "notes": "Defense = survival.",
@@ -379,14 +381,14 @@ LINEUP_TEMPLATES = {
             {"class": "Infantry", "role": "Filler", "preferred": ["any"]},
             {"class": "Lancer", "role": "Filler", "preferred": ["any"]},
         ],
-        "troop_ratio": {"infantry": 50, "lancer": 30, "marksman": 20},
+        "troop_ratio": {"infantry": 60, "lancer": 15, "marksman": 25},
         "notes": "ONLY slot 1 hero's TOP-RIGHT expedition skill matters! Sergey's Defenders' Edge gives -20% DMG taken for ENTIRE garrison. Patrick is an alternative with +25% HP boost.",
         "key_heroes": ["Sergey", "Patrick"],
         "hero_explanations": {
             "Sergey": "CRITICAL: Defenders' Edge expedition skill reduces damage taken by 20% for the ENTIRE garrison. His stats/level/gear are IRRELEVANT - only skill level matters. Mathematically better against multiple attack waves.",
             "Patrick": "ALTERNATIVE: Health boost expedition skill gives +25% HP to garrison troops. Some rally leaders prefer raw HP over damage reduction. Better for surviving a single massive hit."
         },
-        "ratio_explanation": "Garrison defense prioritizes survival. 50% Infantry absorbs damage, 30% Lancer provides balanced support, 20% Marksman adds counterattack without overexposure.",
+        "ratio_explanation": "Matches garrison leader ratio (60/15/25). 60% Infantry absorbs damage, 15% Lancer provides support, 25% Marksman adds counterattack DPS.",
         "joiner_warning": "If you don't have Sergey or Patrick, send troops WITHOUT heroes!",
     },
     "arena": {
@@ -630,7 +632,8 @@ class LineupBuilder:
                     "role": "Filler",
                     "is_lead": False,
                     "power": 0,
-                    "status": "Filler slot"
+                    "status": "Filler slot",
+                    "image_filename": None,
                 })
                 continue
 
@@ -687,7 +690,8 @@ class LineupBuilder:
                     "role": hero_meta.get("role", role),
                     "is_lead": is_lead,
                     "power": best_power,
-                    "status": f"Lv{level}"
+                    "status": f"Lv{level}",
+                    "image_filename": hero_meta.get("image_filename"),
                 })
                 slots_filled += 1
             else:
@@ -699,7 +703,8 @@ class LineupBuilder:
                     "role": role,
                     "is_lead": is_lead,
                     "power": 0,
-                    "status": "Not owned"
+                    "status": "Not owned",
+                    "image_filename": None,
                 })
                 # Track missing key heroes
                 for hero in preferred[:2]:  # First 2 preferred are most important
@@ -823,7 +828,8 @@ class LineupBuilder:
                     "slot": role,
                     "role": "Filler",
                     "is_lead": False,
-                    "status": "Filler slot"
+                    "status": "Filler slot",
+                    "image_filename": None,
                 })
                 continue
 
@@ -846,7 +852,8 @@ class LineupBuilder:
                     "slot": role,
                     "role": hero_meta.get("role", role),
                     "is_lead": is_lead,
-                    "status": f"Gen {hero_meta.get('gen', '?')}"
+                    "status": f"Gen {hero_meta.get('gen', '?')}",
+                    "image_filename": hero_meta.get("image_filename"),
                 })
             else:
                 lineup_heroes.append({
@@ -855,7 +862,8 @@ class LineupBuilder:
                     "slot": role,
                     "role": role,
                     "is_lead": is_lead,
-                    "status": f"Unlocks later"
+                    "status": "Unlocks later",
+                    "image_filename": None,
                 })
 
         return LineupRecommendation(

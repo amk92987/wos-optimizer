@@ -496,7 +496,7 @@ function GearCostsTab() {
   const [track, setTrack] = useState<GearTrack>('legendary');
   const [fromLevel, setFromLevel] = useState(1);
   const [toLevel, setToLevel] = useState(20);
-  const [slotCount, setSlotCount] = useState(4);
+  const [slotCount, setSlotCount] = useState(1);
 
   const maxLevel = track === 'mastery' ? 20 : 100;
 

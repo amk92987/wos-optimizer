@@ -984,6 +984,7 @@ export interface LineupHero {
   is_lead: boolean;
   status: string;
   power: number;
+  image_filename?: string | null;
 }
 
 export interface LineupResponse {

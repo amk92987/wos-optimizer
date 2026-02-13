@@ -435,36 +435,55 @@ def reply_to_thread(threadId: str):
 
 # --- Lineups ---
 
+def _get_lineup_templates_from_code():
+    """Get lineup templates from the Python LINEUP_TEMPLATES dict (Lambda fallback)."""
+    from engine.analyzers.lineup_builder import LINEUP_TEMPLATES
+    result = {}
+    for key, tmpl in LINEUP_TEMPLATES.items():
+        result[key] = {
+            "name": tmpl.get("name", key),
+            "troop_ratio": tmpl.get("troop_ratio", {}),
+            "notes": tmpl.get("notes", ""),
+            "key_heroes": tmpl.get("key_heroes", []),
+            "hero_explanations": tmpl.get("hero_explanations", {}),
+            "ratio_explanation": tmpl.get("ratio_explanation", ""),
+        }
+    return result
+
+
 @app.get("/api/lineups/templates")
 def get_lineup_templates():
     """Return lineup template metadata (no auth required)."""
     lineup_path = os.path.join(Config.DATA_DIR, "guides", "hero_lineup_reasoning.json")
-    if not os.path.exists(lineup_path):
-        return {}
-
-    with open(lineup_path, encoding="utf-8") as f:
-        return json.load(f)
+    if os.path.exists(lineup_path):
+        with open(lineup_path, encoding="utf-8") as f:
+            return json.load(f)
+    # Fallback: use LINEUP_TEMPLATES from code
+    return _get_lineup_templates_from_code()
 
 
 @app.get("/api/lineups/template/<gameMode>")
 def get_lineup_template(gameMode: str):
     """Return specific lineup template details (no auth required)."""
     lineup_path = os.path.join(Config.DATA_DIR, "guides", "hero_lineup_reasoning.json")
-    if not os.path.exists(lineup_path):
-        raise NotFoundError(f"No lineup template for: {gameMode}")
+    if os.path.exists(lineup_path):
+        with open(lineup_path, encoding="utf-8") as f:
+            data = json.load(f)
 
-    with open(lineup_path, encoding="utf-8") as f:
-        data = json.load(f)
+        # Templates live under lineup_scenarios; try exact match then prefix match
+        scenarios = data.get("lineup_scenarios", {}) if isinstance(data, dict) else {}
+        template = scenarios.get(gameMode)
+        if not template:
+            for key, value in scenarios.items():
+                if key.startswith(gameMode) or gameMode.startswith(key):
+                    template = value
+                    break
+        if template:
+            return template
 
-    # Templates live under lineup_scenarios; try exact match then prefix match
-    scenarios = data.get("lineup_scenarios", {}) if isinstance(data, dict) else {}
-    template = scenarios.get(gameMode)
-    if not template:
-        # Try prefix match (e.g. "bear_trap" matches "bear_trap_crazy_joe")
-        for key, value in scenarios.items():
-            if key.startswith(gameMode) or gameMode.startswith(key):
-                template = value
-                break
+    # Fallback: use LINEUP_TEMPLATES from code
+    templates = _get_lineup_templates_from_code()
+    template = templates.get(gameMode)
     if not template:
         raise NotFoundError(f"No lineup template for: {gameMode}")
     return template
@@ -510,7 +529,7 @@ def build_lineup_for_mode(gameMode: str):
     try:
         from engine.recommendation_engine import get_engine
         engine = get_engine()
-        result = engine.get_lineup(gameMode, heroes=heroes, profile=profile)
+        result = engine.get_lineup(gameMode, user_heroes=heroes, profile=profile)
         return result
     except Exception as e:
         logger.warning(f"Personalized lineup failed: {e}")
@@ -528,7 +547,7 @@ def build_all_lineups():
     try:
         from engine.recommendation_engine import get_engine
         engine = get_engine()
-        result = engine.get_all_lineups(heroes=heroes, profile=profile)
+        result = engine.get_all_lineups(user_heroes=heroes, profile=profile)
         return {"lineups": result}
     except Exception as e:
         logger.warning(f"Build all lineups failed: {e}")

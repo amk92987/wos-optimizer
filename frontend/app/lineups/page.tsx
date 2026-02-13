@@ -13,6 +13,7 @@ interface LineupHero {
   is_lead: boolean;
   status: string;
   power: number;
+  image_filename?: string | null;
 }
 
 interface TroopRatio {
@@ -497,10 +498,18 @@ function OptimalLineupsTab({
                     hero.is_lead ? 'bg-fire/20 border border-fire/30' : 'bg-surface'
                   }`}
                 >
-                  <div className="w-12 h-12 mx-auto mb-2 bg-surface-hover rounded-full flex items-center justify-center">
-                    <span className="text-xl">
-                      {hero.hero_class === 'Infantry' ? '🛡️' : hero.hero_class === 'Lancer' ? '⚔️' : '🏹'}
-                    </span>
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-full overflow-hidden flex items-center justify-center bg-surface-hover">
+                    {hero.image_filename ? (
+                      <img
+                        src={`/images/heroes/${hero.image_filename}`}
+                        alt={hero.hero}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-xl">
+                        {hero.hero_class === 'Infantry' ? '🛡️' : hero.hero_class === 'Lancer' ? '⚔️' : '🏹'}
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm font-medium text-frost">{hero.hero}</p>
                   <p className="text-xs text-frost-muted">{hero.hero_class}</p>

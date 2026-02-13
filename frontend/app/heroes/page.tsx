@@ -197,6 +197,7 @@ export default function HeroesPage() {
   };
 
   const tierOrder: Record<string, number> = { 'S+': 0, 'S': 1, 'A': 2, 'B': 3, 'C': 4, 'D': 5 };
+  const rarityOrder: Record<string, number> = { 'rare': 0, 'epic': 1, 'legendary': 2 };
 
   // Bulk mode helpers
   const toggleBulkSelect = (heroName: string) => {
@@ -295,11 +296,11 @@ export default function HeroesPage() {
         case 'level':
           return b.level - a.level;
         case 'generation': {
-          // Sort by generation first, then tier, then name within generation
+          // Sort by generation first, then rarity (blue→purple→gold), then name
           if (a.generation !== b.generation) return a.generation - b.generation;
-          const aTier = tierOrder[a.tier_overall || 'D'] ?? 5;
-          const bTier = tierOrder[b.tier_overall || 'D'] ?? 5;
-          if (aTier !== bTier) return aTier - bTier;
+          const aRarity = rarityOrder[(a.rarity || 'rare').toLowerCase()] ?? 0;
+          const bRarity = rarityOrder[(b.rarity || 'rare').toLowerCase()] ?? 0;
+          if (aRarity !== bRarity) return aRarity - bRarity;
           return a.name.localeCompare(b.name);
         }
         case 'tier': {
@@ -333,15 +334,26 @@ export default function HeroesPage() {
       switch (sortBy) {
         case 'name':
           return a.name.localeCompare(b.name);
-        case 'generation':
-          return a.generation - b.generation;
+        case 'generation': {
+          // Sort by generation first, then rarity (blue→purple→gold), then name
+          if (a.generation !== b.generation) return a.generation - b.generation;
+          const aRarity = rarityOrder[(a.rarity || 'rare').toLowerCase()] ?? 0;
+          const bRarity = rarityOrder[(b.rarity || 'rare').toLowerCase()] ?? 0;
+          if (aRarity !== bRarity) return aRarity - bRarity;
+          return a.name.localeCompare(b.name);
+        }
         case 'tier': {
           const aTier = tierOrder[a.tier_overall || 'D'] ?? 5;
           const bTier = tierOrder[b.tier_overall || 'D'] ?? 5;
           return aTier - bTier;
         }
-        default:
-          return a.generation - b.generation;
+        default: {
+          if (a.generation !== b.generation) return a.generation - b.generation;
+          const aR = rarityOrder[(a.rarity || 'rare').toLowerCase()] ?? 0;
+          const bR = rarityOrder[(b.rarity || 'rare').toLowerCase()] ?? 0;
+          if (aR !== bR) return aR - bR;
+          return a.name.localeCompare(b.name);
+        }
       }
     });
 
@@ -791,13 +803,13 @@ export default function HeroesPage() {
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-amber-400">
-                      {(ownedHeroes.reduce((sum, h) => sum + h.level, 0) / ownedHeroes.length).toFixed(1)}
+                      {(ownedHeroes.reduce((sum, h) => sum + Number(h.level || 0), 0) / ownedHeroes.length).toFixed(1)}
                     </p>
                     <p className="text-xs text-zinc-500">Avg Level</p>
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-yellow-400">
-                      {ownedHeroes.reduce((sum, h) => sum + h.stars, 0)}
+                      {ownedHeroes.reduce((sum, h) => sum + Number(h.stars || 0), 0)}
                     </p>
                     <p className="text-xs text-zinc-500">Total Stars</p>
                   </div>
