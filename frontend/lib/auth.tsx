@@ -57,9 +57,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           }
         }
       }
-      // Restore impersonation state
+      // Restore impersonation state and impersonated user data
       if (localStorage.getItem('impersonating') === 'true') {
         setIsImpersonating(true);
+        const savedImpersonateUser = localStorage.getItem('impersonate_user');
+        if (savedImpersonateUser) {
+          try {
+            setUser(JSON.parse(savedImpersonateUser));
+          } catch {
+            // If parsing fails, fall through with admin user
+          }
+        }
       }
       setIsLoading(false);
     }
@@ -93,6 +101,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearTokens();
     setToken(null);
     setUser(null);
+    setIsImpersonating(false);
+    localStorage.removeItem('impersonating');
+    localStorage.removeItem('impersonate_user_id');
+    localStorage.removeItem('impersonate_user');
+    localStorage.removeItem('admin_user');
   };
 
   const impersonate = async (userId: string) => {
@@ -105,10 +118,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Impersonation doesn't change auth tokens (admin stays authenticated).
     // We swap the displayed user and store the target ID so API calls
     // include the X-Impersonate-User header for backend routing.
-    setUser(response.user);
+    // The backend returns the raw DynamoDB user item which may have
+    // 'user_id' instead of 'id', so we normalize to the User interface.
+    const raw = response.user as any;
+    const impersonatedUser: User = {
+      id: raw.id || raw.user_id || userId,
+      email: raw.email || raw.username || userId,
+      username: raw.username || raw.email || userId,
+      role: raw.role || 'user',
+      is_active: raw.is_active !== false,
+      is_test_account: raw.is_test_account || false,
+      created_at: raw.created_at || '',
+    };
+    setUser(impersonatedUser);
     setIsImpersonating(true);
     localStorage.setItem('impersonating', 'true');
     localStorage.setItem('impersonate_user_id', userId);
+    localStorage.setItem('impersonate_user', JSON.stringify(impersonatedUser));
   };
 
   const switchBack = () => {
@@ -120,6 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsImpersonating(false);
     localStorage.removeItem('impersonating');
     localStorage.removeItem('impersonate_user_id');
+    localStorage.removeItem('impersonate_user');
   };
 
   return (

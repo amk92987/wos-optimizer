@@ -2,6 +2,7 @@
 
 import json
 from dataclasses import asdict
+from decimal import Decimal
 
 from aws_lambda_powertools import Logger
 from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
@@ -12,6 +13,25 @@ from common import profile_repo, hero_repo
 
 app = APIGatewayHttpResolver()
 logger = Logger()
+
+
+def _convert_decimals(obj):
+    """Recursively convert Decimal values to int/float.
+
+    DynamoDB returns all numbers as Decimal, but the recommendation engine
+    (and Python's range(), format strings, JSON serialization) expects
+    native int/float types.
+    """
+    if isinstance(obj, Decimal):
+        # Use int if it's a whole number, otherwise float
+        if obj == int(obj):
+            return int(obj)
+        return float(obj)
+    if isinstance(obj, dict):
+        return {k: _convert_decimals(v) for k, v in obj.items()}
+    if isinstance(obj, list):
+        return [_convert_decimals(i) for i in obj]
+    return obj
 
 
 class DictObj:
@@ -29,8 +49,11 @@ class DictObj:
 
 
 def _wrap_profile(profile_dict: dict) -> DictObj:
-    """Wrap a profile dict for the engine."""
-    return DictObj(profile_dict)
+    """Wrap a profile dict for the engine.
+
+    Converts Decimal values to native Python types first.
+    """
+    return DictObj(_convert_decimals(profile_dict))
 
 
 def _wrap_heroes(hero_dicts: list) -> list:
@@ -40,9 +63,12 @@ def _wrap_heroes(hero_dicts: list) -> list:
       - hasattr(uh, 'hero') and uh.hero  (ORM relationship)
       - getattr(uh, 'name', '')          (fallback)
     DynamoDB items use 'hero_name', so we add 'name' as an alias.
+    Also converts Decimal values to native Python types.
     """
     wrapped = []
     for h in hero_dicts:
+        # Convert Decimal values from DynamoDB to native int/float
+        h = _convert_decimals(h)
         # Ensure 'name' attribute exists (engine looks for it)
         if "name" not in h and "hero_name" in h:
             h["name"] = h["hero_name"]
@@ -98,8 +124,8 @@ def get_investments():
     profile_obj = _wrap_profile(profile)
     hero_objs = _wrap_heroes(heroes)
 
-    # TODO: Implement get_hero_investments in RecommendationEngine
-    return {"investments": []}
+    investments = engine.get_hero_investments(profile=profile_obj, user_heroes=hero_objs)
+    return {"investments": investments}
 
 
 @app.get("/api/recommendations/phase")

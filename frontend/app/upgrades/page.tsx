@@ -29,7 +29,7 @@ interface HeroInvestment {
   reason: string;
 }
 
-type TabType = 'recommendations' | 'heroes' | 'gear' | 'analysis';
+type TabType = 'recommendations' | 'heroes' | 'gear';
 
 // ── Hero Gear Cost Data (from verified game data) ──────────────────────
 // Mastery Forging: Gold gear levels 1-20, costs Essence Stones + Mythic Gear
@@ -195,7 +195,6 @@ export default function UpgradesPage() {
   const upgradeTypes = ['all', 'hero', 'gear', 'building', 'research', 'troop'];
   const priorityLevels = ['all', 'high', 'medium', 'low'];
 
-  // Convert numeric priority to category (1-3 = high, 4-6 = medium, 7+ = low)
   const getPriorityLevel = (p: number) => p <= 3 ? 'high' : p <= 6 ? 'medium' : 'low';
 
   const filteredRecs = recommendations.filter((rec) => {
@@ -233,10 +232,15 @@ export default function UpgradesPage() {
     troop: '⚔️',
   };
 
+  const tabs: { id: TabType; label: string }[] = [
+    { id: 'recommendations', label: 'Top Recommendations' },
+    { id: 'heroes', label: 'Best Heroes to Invest' },
+    { id: 'gear', label: 'Gear Cost Calculator' },
+  ];
+
   return (
     <PageLayout>
       <div className="max-w-4xl mx-auto animate-fadeIn">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-frost">Upgrade Recommendations</h1>
           <p className="text-frost-muted mt-2">Personalized upgrade priorities based on your profile</p>
@@ -244,50 +248,23 @@ export default function UpgradesPage() {
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6 border-b border-surface-border pb-2">
-          <button
-            onClick={() => setActiveTab('recommendations')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'recommendations'
-                ? 'bg-ice/20 text-ice'
-                : 'text-frost-muted hover:text-frost hover:bg-surface'
-            }`}
-          >
-            Top Recommendations
-          </button>
-          <button
-            onClick={() => setActiveTab('heroes')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'heroes'
-                ? 'bg-ice/20 text-ice'
-                : 'text-frost-muted hover:text-frost hover:bg-surface'
-            }`}
-          >
-            Best Heroes to Invest
-          </button>
-          <button
-            onClick={() => setActiveTab('gear')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'gear'
-                ? 'bg-ice/20 text-ice'
-                : 'text-frost-muted hover:text-frost hover:bg-surface'
-            }`}
-          >
-            Gear Costs
-          </button>
-          <button
-            onClick={() => setActiveTab('analysis')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activeTab === 'analysis'
-                ? 'bg-ice/20 text-ice'
-                : 'text-frost-muted hover:text-frost hover:bg-surface'
-            }`}
-          >
-            Analysis
-          </button>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeTab === tab.id
+                  ? 'bg-ice/20 text-ice'
+                  : 'text-frost-muted hover:text-frost hover:bg-surface'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
 
         {/* Content */}
-        {isLoading ? (
+        {isLoading && activeTab !== 'gear' ? (
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
               <div key={i} className="card animate-pulse">
@@ -314,10 +291,8 @@ export default function UpgradesPage() {
             tierColors={tierColors}
             classColors={classColors}
           />
-        ) : activeTab === 'gear' ? (
-          <GearCostsTab />
         ) : (
-          <AnalysisTab />
+          <GearCostsTab />
         )}
       </div>
     </PageLayout>
@@ -520,7 +495,6 @@ function GearCostsTab() {
 
   const maxLevel = track === 'mastery' ? 20 : 100;
 
-  // Clamp values when switching tracks
   const handleTrackChange = (t: GearTrack) => {
     setTrack(t);
     const max = t === 'mastery' ? 20 : 100;
@@ -596,7 +570,7 @@ function GearCostsTab() {
             <label className="text-xs text-frost-muted block mb-1">From Level</label>
             <input
               type="number"
-              min={track === 'legendary' ? 0 : 0}
+              min={0}
               max={maxLevel - 1}
               value={fromLevel}
               onChange={(e) => setFromLevel(Math.max(0, Math.min(maxLevel - 1, Number(e.target.value))))}
@@ -633,104 +607,130 @@ function GearCostsTab() {
       {/* Results */}
       {fromLevel >= toLevel ? (
         <div className="card text-center py-8">
-          <p className="text-frost-muted">Set "From Level" lower than "To Level" to see costs</p>
+          <p className="text-frost-muted">Set &quot;From Level&quot; lower than &quot;To Level&quot; to see costs</p>
         </div>
       ) : costs && (
         <div className="space-y-4">
-          {/* Per Slot Costs */}
+          {/* Cost Summary Table */}
           <div className="card">
-            <h3 className="text-sm font-medium text-frost-muted mb-3">
-              Cost per slot (Level {fromLevel} → {toLevel})
+            <h3 className="section-header mb-4">
+              Cost Breakdown: Level {fromLevel} → {toLevel}
             </h3>
-            <div className={`grid gap-4 ${track === 'legendary' ? 'grid-cols-3' : 'grid-cols-2'}`}>
-              {track === 'legendary' ? (
-                <>
-                  <CostCard label="XP" value={(costs.per_slot as any).xp} color="text-blue-400" />
-                  <CostCard label="Mithril" value={(costs.per_slot as any).mithril} color="text-purple-400" />
-                  <CostCard label="Legendary Gear" value={(costs.per_slot as any).legendary_gear} color="text-red-400" />
-                </>
-              ) : (
-                <>
-                  <CostCard label="Essence Stones" value={(costs.per_slot as any).essence_stones} color="text-amber-400" />
-                  <CostCard label="Mythic Gear" value={(costs.per_slot as any).mythic_gear} color="text-orange-400" />
-                </>
-              )}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-surface-border">
+                    <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                    <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Slot</th>
+                    {slotCount > 1 && (
+                      <th className="text-right py-2 px-3 text-ice font-medium">
+                        Total ({slotCount} slots)
+                      </th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {track === 'legendary' ? (
+                    <>
+                      <CostRow
+                        label="Gear XP"
+                        perSlot={(costs.per_slot as any).xp}
+                        total={slotCount > 1 ? (costs.total as any).xp : undefined}
+                        color="text-blue-400"
+                      />
+                      <CostRow
+                        label="Mithril"
+                        perSlot={(costs.per_slot as any).mithril}
+                        total={slotCount > 1 ? (costs.total as any).mithril : undefined}
+                        color="text-purple-400"
+                      />
+                      <CostRow
+                        label="Legendary Gear Pieces"
+                        perSlot={(costs.per_slot as any).legendary_gear}
+                        total={slotCount > 1 ? (costs.total as any).legendary_gear : undefined}
+                        color="text-red-400"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <CostRow
+                        label="Essence Stones"
+                        perSlot={(costs.per_slot as any).essence_stones}
+                        total={slotCount > 1 ? (costs.total as any).essence_stones : undefined}
+                        color="text-amber-400"
+                      />
+                      <CostRow
+                        label="Mythic Gear Pieces"
+                        perSlot={(costs.per_slot as any).mythic_gear}
+                        total={slotCount > 1 ? (costs.total as any).mythic_gear : undefined}
+                        color="text-orange-400"
+                      />
+                    </>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
-
-          {/* Total Costs (if multiple slots) */}
-          {slotCount > 1 && (
-            <div className="card border-2 border-ice/30">
-              <h3 className="text-sm font-medium text-ice mb-3">
-                Total for {slotCount} slots
-              </h3>
-              <div className={`grid gap-4 ${track === 'legendary' ? 'grid-cols-3' : 'grid-cols-2'}`}>
-                {track === 'legendary' ? (
-                  <>
-                    <CostCard label="XP" value={(costs.total as any).xp} color="text-blue-400" large />
-                    <CostCard label="Mithril" value={(costs.total as any).mithril} color="text-purple-400" large />
-                    <CostCard label="Legendary Gear" value={(costs.total as any).legendary_gear} color="text-red-400" large />
-                  </>
-                ) : (
-                  <>
-                    <CostCard label="Essence Stones" value={(costs.total as any).essence_stones} color="text-amber-400" large />
-                    <CostCard label="Mythic Gear" value={(costs.total as any).mythic_gear} color="text-orange-400" large />
-                  </>
-                )}
-              </div>
-            </div>
-          )}
 
           {/* Milestone Breakdown (Legendary only) */}
           {track === 'legendary' && milestones.length > 0 && (
             <div className="card">
-              <h3 className="text-sm font-medium text-frost-muted mb-3">Milestone Costs</h3>
+              <h3 className="section-header mb-3">Milestone Unlocks</h3>
               <p className="text-xs text-frost-muted mb-3">
-                Every 20 levels requires Mithril and Legendary Gear to unlock the next batch
+                Every 20 levels requires Mithril and Legendary Gear pieces to unlock the next tier
               </p>
-              <div className="space-y-2">
-                {milestones.map((m) => {
-                  const edge = LEGENDARY_COSTS[m - 1]; // edge index is m-1 for reaching level m
-                  return (
-                    <div key={m} className="flex items-center justify-between py-2 px-3 rounded bg-surface-hover">
-                      <span className="text-sm font-medium text-frost">Level {m}</span>
-                      <div className="flex gap-4 text-sm">
-                        {edge.mithril > 0 && (
-                          <span className="text-purple-400">{edge.mithril} Mithril</span>
-                        )}
-                        {edge.legendary_gear > 0 && (
-                          <span className="text-red-400">{edge.legendary_gear} Legendary Gear</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-surface-border">
+                      <th className="text-left py-2 px-3 text-frost-muted font-medium">Level</th>
+                      <th className="text-right py-2 px-3 text-frost-muted font-medium">Mithril</th>
+                      <th className="text-right py-2 px-3 text-frost-muted font-medium">Legendary Gear</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {milestones.map((m) => {
+                      const edge = LEGENDARY_COSTS[m - 1];
+                      return (
+                        <tr key={m} className="border-b border-surface-border/30">
+                          <td className="py-2 px-3 font-medium text-frost">Level {m}</td>
+                          <td className="py-2 px-3 text-right text-purple-400">
+                            {edge.mithril > 0 ? edge.mithril : '-'}
+                          </td>
+                          <td className="py-2 px-3 text-right text-red-400">
+                            {edge.legendary_gear > 0 ? edge.legendary_gear : '-'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}
 
           {/* Gear Info */}
           <div className="card">
-            <h3 className="text-sm font-medium text-frost-muted mb-2">About Hero Gear</h3>
+            <h3 className="section-header mb-2">About Hero Gear</h3>
             <ul className="space-y-1.5 text-sm text-frost-muted">
               <li className="flex items-start gap-2">
-                <span className="text-ice">•</span>
+                <span className="text-ice">-</span>
                 <span>4 gear slots per hero: Goggles, Gauntlets, Belt, Boots</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-ice">•</span>
+                <span className="text-ice">-</span>
                 <span>Gear is class-specific (Infantry/Marksman/Lancer) but <strong className="text-frost">transferable</strong> between heroes of the same class</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-ice">•</span>
+                <span className="text-ice">-</span>
                 <span>Move gear to newer generation heroes as they become available</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-ice">•</span>
+                <span className="text-ice">-</span>
                 <span>Mastery Forging unlocks at Gold quality + Enhancement Level 20</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-ice">•</span>
+                <span className="text-ice">-</span>
                 <span>Legendary Ascension requires Gold gear at Enhancement 100 + Mastery 10 + 2 Mythic pieces</span>
               </li>
             </ul>
@@ -741,85 +741,23 @@ function GearCostsTab() {
   );
 }
 
-function CostCard({ label, value, color, large }: { label: string; value: number; color: string; large?: boolean }) {
+function CostRow({ label, perSlot, total, color }: {
+  label: string;
+  perSlot: number;
+  total?: number;
+  color: string;
+}) {
   return (
-    <div className="p-3 rounded-lg bg-surface text-center">
-      <p className={`${large ? 'text-2xl' : 'text-xl'} font-bold ${color}`}>
-        {value.toLocaleString()}
-      </p>
-      <p className="text-xs text-frost-muted mt-1">{label}</p>
-    </div>
-  );
-}
-
-function AnalysisTab() {
-  return (
-    <div className="space-y-6">
-      <div className="card">
-        <h2 className="section-header">Priority Settings</h2>
-        <p className="text-sm text-frost-muted mb-4">
-          Your current priority settings affect which recommendations appear first.
-          To change these values, go to <a href="/settings" className="text-ice hover:underline">Settings</a>.
-        </p>
-        <div className="grid grid-cols-5 gap-4 text-center">
-          {[
-            { label: 'SvS', value: 4 },
-            { label: 'Rally', value: 3 },
-            { label: 'Castle Battle', value: 3 },
-            { label: 'Exploration', value: 2 },
-            { label: 'Gathering', value: 1 },
-          ].map((p) => (
-            <div key={p.label} className="p-3 rounded-lg bg-surface">
-              <p className="text-lg font-bold text-ice">{'★'.repeat(p.value)}{'☆'.repeat(5 - p.value)}</p>
-              <p className="text-xs text-frost-muted">{p.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="card">
-        <h2 className="section-header">Recommendation Logic</h2>
-        <ul className="space-y-2 text-sm text-frost-muted">
-          <li className="flex items-start gap-2">
-            <span className="text-ice">•</span>
-            <span>Heroes are prioritized by tier (S+ → D) and generation relevance</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-ice">•</span>
-            <span>Spending profile affects number of heroes recommended (F2P: 3-4, Whale: all)</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-ice">•</span>
-            <span>Expedition skills are prioritized for combat-focused players</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-ice">•</span>
-            <span>Farm accounts get specialized "focus on 1-2 heroes" advice</span>
-          </li>
-        </ul>
-      </div>
-
-      <div className="card">
-        <h2 className="section-header">Tips for Better Recommendations</h2>
-        <ul className="space-y-2 text-sm text-frost-muted">
-          <li className="flex items-start gap-2">
-            <span className="text-success">✓</span>
-            <span>Set your correct spending profile in Settings</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-success">✓</span>
-            <span>Adjust priority sliders to match your goals</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-success">✓</span>
-            <span>Keep hero levels and skills up to date</span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-success">✓</span>
-            <span>Mark farm accounts correctly for specialized advice</span>
-          </li>
-        </ul>
-      </div>
-    </div>
+    <tr className="border-b border-surface-border/30">
+      <td className="py-3 px-3 text-frost">{label}</td>
+      <td className={`py-3 px-3 text-right font-bold ${color}`}>
+        {perSlot.toLocaleString()}
+      </td>
+      {total !== undefined && (
+        <td className={`py-3 px-3 text-right font-bold text-lg ${color}`}>
+          {total.toLocaleString()}
+        </td>
+      )}
+    </tr>
   );
 }

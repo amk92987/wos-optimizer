@@ -1,203 +1,434 @@
-# Comprehensive QA Checklist
+# QA Checklist - WoS Optimizer
 
-Last Updated: 2026-01-12
+Comprehensive quality assurance process for the Whiteout Survival Optimizer web application.
 
-## Areas Checked
+**Last Updated:** 2026-01-13
 
-### 1. HTML/Markdown Rendering
-| Check | Files | Status | Notes |
-|-------|-------|--------|-------|
-| Self-closing img tags | 1_Hero_Tracker.py | FIXED | Line 340 - added `/>` |
-| Self-closing br/hr tags | 7_Save_Load.py, 15_Admin.py | OK | Working, low priority |
-| Split div tags | 15_Admin.py | OK | Lines 349/377 - fragile but functional |
-| Proper HTML escaping | All pages | OK | unsafe_allow_html used appropriately |
+---
 
-### 2. AI Advisor Error Handling
-| Check | Files | Status | Notes |
-|-------|-------|--------|-------|
-| Error message sanitization | 6_AI_Advisor.py | FIXED | Line 322-331 - hides API details |
-| API exception handling | recommendation_engine.py | FIXED | Lines 444-459 - user-friendly messages |
-| JSON parsing safety | ai_recommender.py | FIXED | Lines 478-504 - no raw content exposure |
-| Rate limit handling | 6_AI_Advisor.py | OK | Proper limits and cooldowns |
-| Conversation logging | 6_AI_Advisor.py | OK | Logs properly for training data |
+## Table of Contents
 
-### 3. Lineup Recommender
-| Check | Files | Status | Notes |
-|-------|-------|--------|-------|
-| Database attribute names | 5_Lineups.py | FIXED | Lines 88-91 - stars, skill levels |
-| Null checks for profile data | 5_Lineups.py | OK | server_age_days handled |
-| Hero availability checks | 5_Lineups.py | OK | get_best_available_hero() working |
-| 3-hero vs 5-hero structure | 5_Lineups.py | OK | Different dict keys but handled |
-| Hardcoded hero names | 5_Lineups.py | MONITOR | Works but should verify heroes.json sync |
+1. [Quick Smoke Test](#quick-smoke-test)
+2. [Visual/Rendering Checks](#visualrendering-checks)
+3. [Functional Testing](#functional-testing)
+4. [Data Integrity](#data-integrity)
+5. [Error Handling](#error-handling)
+6. [Performance](#performance)
+7. [Security](#security)
+8. [Accessibility](#accessibility)
+9. [Browser/Device Compatibility](#browserdevice-compatibility)
+10. [Pre-Release Checklist](#pre-release-checklist)
 
-### 4. Power Multipliers
-| Check | Files | Status | Notes |
-|-------|-------|--------|-------|
-| Chief gear tier mapping | power_optimizer.py | REVIEW | Tier 35 max vs 42 max in data |
-| Chief charm levels | power_optimizer.py | OK | 1-16 levels, 9-100% bonus |
-| Hero power formula | power_optimizer.py | DOCUMENTED | Estimated, not game data |
-| Troop power values | troop_data.json | OK | Verified T1-T11 values |
-| War Academy power | war_academy.steps.json | OK | Exact values from game |
+---
 
-### 5. Dynamic Hero/Gear/Charm Displays
-| Check | Files | Status | Notes |
-|-------|-------|--------|-------|
-| Hero skill descriptions | 1_Hero_Tracker.py | OK | Fallback to "coming soon" |
-| Gear tier lookup | 2_Chief_Tracker.py | FIXED | Line 246 - null check added |
-| Charm bonus display | 2_Chief_Tracker.py | OK | Defaults to 9.0% if missing |
-| Hero image loading | 1_Hero_Tracker.py | OK | Fallback to class symbol |
-| Mythic gear attributes | 1_Hero_Tracker.py | OK | Safe getattr with defaults |
+## Quick Smoke Test
 
-### 6. Recommendation Engine
-| Check | Files | Status | Notes |
-|-------|-------|--------|-------|
-| Hero name validation | hero_analyzer.py | OK | Lookup fallback to empty dict |
-| Error handling | recommendation_engine.py | FIXED | User-friendly error messages |
-| Hardcoded hero references | Multiple files | MONITOR | Should sync with heroes.json |
-| Special character handling | All analyzers | OK | No issues found |
+Run these checks after any significant change (5 minutes):
 
-## Issues Fixed This Session
+- [ ] App starts without errors: `streamlit run app.py`
+- [ ] All pages load without Python exceptions
+- [ ] Database connection works (Hero Tracker shows heroes)
+- [ ] No visible HTML tags in rendered content
+- [ ] No encoding errors (no `Ã×`, `â€™`, etc.)
 
-### Critical (Blocking)
-1. **Unclosed `<img>` tag** - 1_Hero_Tracker.py:340
-   - Problem: HTML rendering could break
-   - Fix: Added self-closing `/>` to img tag
+---
 
-2. **Wrong database attributes** - 5_Lineups.py:88-91
-   - Problem: `star_rank` and `exploration_skill_level` don't exist
-   - Fix: Changed to `stars`, `exploration_skill_1_level`, `expedition_skill_1_level`
+## Visual/Rendering Checks
 
-### High Priority
-3. **Raw API errors shown to users** - 6_AI_Advisor.py:322-323
-   - Problem: Technical error messages visible to users
-   - Fix: Added error categorization with user-friendly messages
+### HTML Rendering Issues
 
-4. **Null check missing** - 2_Chief_Tracker.py:246
-   - Problem: AttributeError if gear_data is None
-   - Fix: Added `if gear_data else 1` check
+Common problems to look for:
 
-5. **JSON parsing crash** - ai_recommender.py:491-492
-   - Problem: `content` variable undefined in except block, raw content exposed
-   - Fix: Initialized content to None, removed raw content from errors
+| Issue | Example | Where to Check |
+|-------|---------|----------------|
+| Unclosed tags visible | `</div>` showing in text | All pages with custom HTML |
+| HTML entities unescaped | `&amp;` instead of `&` | Tips, descriptions |
+| Broken markdown | `**text` without closing | All markdown content |
+| CSS not applied | Plain unstyled elements | Hero cards, tip cards |
 
-6. **AI exception exposure** - recommendation_engine.py:444-449
-   - Problem: Raw exception strings shown to users
-   - Fix: Categorized errors with sanitized messages
+**Pages with Custom HTML to Verify:**
 
-## Comprehensive System Review (Phase 2)
+- [ ] `11_Quick_Tips.py` - All tip cards render correctly
+- [ ] `1_Hero_Tracker.py` - Hero cards, tier badges, star ratings
+- [ ] `10_Combat.py` - Stat comparisons, tables
+- [ ] `00_Beginner_Guide.py` - Guide content, collapsibles
+- [ ] `14_Daybreak_Island.py` - Decoration cards
 
-### 7. Session State Management
-| Check | Files | Status | Notes |
-|-------|-------|--------|-------|
-| AI Advisor chat_messages access | 6_AI_Advisor.py | FIXED | Lines 708-757 - now uses .get() |
-| Dynamic state cleanup | Admin pages | MONITOR | Keys accumulate, low priority |
-| Auth state initialization | database/auth.py | OK | Centralized in init_session_state() |
-| Profile state access | 7_Save_Load.py | OK | Safe patterns used |
+### Encoding Issues
 
-### 8. Database Integrity
-| Check | Files | Status | Notes |
-|-------|-------|--------|-------|
-| Cascade deletes User→Profiles | models.py | POST-LAUNCH | Will orphan data if user deleted |
-| Cascade deletes Profile→Children | models.py | POST-LAUNCH | Same issue for profile deletion |
-| Foreign key validation | models.py | OK | Constraints in place |
-| Session management | db.py | OK | Works for expected traffic |
-| Enum validation (role, spending) | models.py | POST-LAUNCH | String columns, no constraints |
+| Check | What to Look For |
+|-------|------------------|
+| UTF-8 characters | Proper `×`, `→`, `★`, `☆` rendering |
+| Hero names | Special characters in names render correctly |
+| Game terms | "SvS", "PvE", etc. not garbled |
 
-### 9. System Features Verified
-| Feature | Pages | Status | Edge Cases Noted |
-|---------|-------|--------|------------------|
-| User Registration | auth_register.py | OK | No email verification (documented) |
-| User Login | auth_login.py | OK | Bcrypt works correctly |
-| Hero Tracker | 1_Hero_Tracker.py | OK | 42 heroes, all have images |
-| Chief Gear/Charms | 2_Chief_Tracker.py | OK | 42 tiers, 16 charm levels |
-| Lineups | 5_Lineups.py | OK | Generation-aware recommendations |
-| AI Advisor | 6_AI_Advisor.py | OK | Rate limiting, error handling |
-| Admin Dashboard | Admin pages (10) | OK | CRUD, impersonation working |
-| Settings | 13_Settings.py | OK | All profile fields saved |
+**Test these specific characters:**
+- [ ] Multiplication sign: `×` (not `Ã—`)
+- [ ] Arrows: `→`, `←`, `↑`, `↓`
+- [ ] Stars: `★`, `☆`
+- [ ] Checkmarks: `✓`, `✗`
 
-## Known Issues (Not Blocking)
+### Layout Issues
 
-### Medium Priority
-1. **Split div tags in Admin** - 15_Admin.py:349/377
-   - Pattern is fragile but works in practice
-   - Consider refactoring to single markdown call
+- [ ] Cards don't overflow containers
+- [ ] Tables fit on screen (horizontal scroll if needed)
+- [ ] Expanders open/close properly
+- [ ] Tabs switch without layout shift
+- [ ] Sidebar collapses correctly on mobile
 
-2. **Hero power formula is estimated** - power_optimizer.py:324-325
-   - Uses arbitrary coefficients (500 base, +20/level)
-   - Should be documented as estimate, not exact
+---
 
-3. **Chief gear tier mapping** - power_optimizer.py:146
-   - Mythic quality maps to tier 35, but data shows tier 42 max
-   - Needs verification against game data
+## Functional Testing
 
-4. **Missing cascade deletes** - models.py
-   - User deletion leaves orphaned profiles, heroes, inventory
-   - Recommend adding cascade='all, delete-orphan' post-launch
+### Core Features
 
-5. **Dynamic session state accumulation** - Admin pages
-   - Keys like `editing_{id}` accumulate without cleanup
-   - Low impact, monitor for memory issues
+#### Hero Tracker (`1_Hero_Tracker.py`)
 
-### Low Priority
-1. **Skill description fallbacks** - 1_Hero_Tracker.py
-   - Shows "Skill description coming soon" for missing data
-   - All Gen 1-14 heroes now have descriptions
+| Test | Expected Result | Verified |
+|------|-----------------|----------|
+| View hero list | All heroes display with images | [ ] |
+| Toggle "Owned" checkbox | Hero saves owned status | [ ] |
+| Edit hero level | Level persists after page refresh | [ ] |
+| Edit star rating | Stars update visually | [ ] |
+| Edit skill levels | Skills save correctly | [ ] |
+| Edit hero gear | Gear slots save quality/level | [ ] |
+| Hero image loading | No broken images | [ ] |
+| Filter by generation | Correct heroes shown | [ ] |
+| Filter by owned | Only owned heroes shown | [ ] |
 
-2. **Hardcoded hero names** - Multiple files
-   - Works as long as heroes.json is in sync
-   - Consider dynamic lookup validation
+#### Chief Tracker (`2_Chief_Tracker.py`)
 
-3. **No password reset flow**
-   - Admin can reset via Admin → Users page
-   - Email setup planned post-launch
+| Test | Expected Result | Verified |
+|------|-----------------|----------|
+| Chief gear display | Shows all 6 slots | [ ] |
+| Gear tier selection | Tiers save correctly | [ ] |
+| Set bonus display | Shows 3pc/6pc bonuses | [ ] |
+| Chief charms section | Charms editable | [ ] |
 
-4. **Rate limit uses UTC midnight**
-   - User sees reset at different local times
-   - Acceptable for initial launch
+#### Backpack/Inventory (`3_Backpack.py`)
 
-## Recommended Future Checks
+| Test | Expected Result | Verified |
+|------|-----------------|----------|
+| Item list loads | Items display | [ ] |
+| Add item quantity | Quantity saves | [ ] |
+| OCR upload (if enabled) | Parses screenshot | [ ] |
 
-### Before Each Release
-- [ ] Run app locally and test all pages
-- [ ] Check AI Advisor with valid and invalid API keys
-- [ ] Test lineup recommendations with empty/partial hero roster
-- [ ] Verify new heroes are in heroes.json with skill descriptions
-- [ ] Check chief gear/charm displays at various tiers
+#### Lineups (`5_Lineups.py`)
 
-### Quarterly Review
-- [ ] Verify power multiplier formulas against game updates
-- [ ] Check for deprecated heroes or renamed heroes
-- [ ] Review error message handling for new API behaviors
-- [ ] Audit hardcoded hero references
+| Test | Expected Result | Verified |
+|------|-----------------|----------|
+| Game mode selection | Different modes available | [ ] |
+| Hero selection | Can pick from owned heroes | [ ] |
+| Lineup saves | Lineup persists | [ ] |
+| Recommendations work | Suggests heroes | [ ] |
 
-### After Game Updates
-- [ ] Update heroes.json with new heroes/skill descriptions
-- [ ] Verify tier lists are current
-- [ ] Check if gear tier system changed
-- [ ] Update troop power values if rebalanced
+#### AI Advisor (`6_AI_Advisor.py`)
 
-## Files Modified This Session
+| Test | Expected Result | Verified |
+|------|-----------------|----------|
+| Question input works | Can type question | [ ] |
+| Submit returns answer | Response displays | [ ] |
+| Rate limiting works | Shows limit message | [ ] |
+| Thumbs up/down works | Feedback saves | [ ] |
+| Error handling | Graceful API errors | [ ] |
 
-| File | Lines Changed | Type |
-|------|---------------|------|
-| pages/1_Hero_Tracker.py | 340 | Fix - self-closing img tag |
-| pages/5_Lineups.py | 88-91 | Fix - correct DB attributes |
-| pages/6_AI_Advisor.py | 322-331, 708-757 | Fix - error handling, session state |
-| pages/2_Chief_Tracker.py | 246-247 | Fix - null check |
-| engine/recommendation_engine.py | 444-459 | Fix - error sanitization |
-| engine/ai_recommender.py | 478-504 | Fix - JSON parsing safety |
-| deploy/AWS_DEPLOYMENT_CHECKLIST.md | 497-529 | Add - email setup section |
-| docs/QA_CHECKLIST.md | All | Add - comprehensive checklist |
+#### Quick Tips (`11_Quick_Tips.py`)
 
-## Testing Commands
+| Test | Expected Result | Verified |
+|------|-----------------|----------|
+| All tabs load | 4 tabs display | [ ] |
+| Critical Tips shows tips | Tips render | [ ] |
+| Alliance tab shows tips | R4/R5 tips display | [ ] |
+| Common Mistakes shows | Mistakes render | [ ] |
+| By Category expanders work | Categories expand | [ ] |
+| Priority badges display | Colors correct | [ ] |
+
+### Authentication & Admin
+
+#### Login/Register
+
+| Test | Expected Result | Verified |
+|------|-----------------|----------|
+| Login with valid creds | Redirects to home | [ ] |
+| Login with invalid creds | Shows error | [ ] |
+| Register new user | Account created | [ ] |
+| Register duplicate | Shows error | [ ] |
+| Logout works | Session ends | [ ] |
+
+#### Admin Pages
+
+| Test | Expected Result | Verified |
+|------|-----------------|----------|
+| Admin can access admin pages | Pages load | [ ] |
+| Non-admin cannot access | Redirects away | [ ] |
+| User impersonation works | Sees user view | [ ] |
+| Switch back works | Returns to admin | [ ] |
+| Feature flags toggle | Features enable/disable | [ ] |
+| User suspend/activate | Status changes | [ ] |
+
+---
+
+## Data Integrity
+
+### Cross-Reference Checks
+
+Data displayed should match source files:
+
+| Display Location | Data Source | Check |
+|------------------|-------------|-------|
+| Hero Tracker hero list | `data/heroes.json` | [ ] Count matches |
+| Hero tier badges | `data/heroes.json` tier_overall | [ ] Tiers correct |
+| Quick Tips critical | `data/guides/quick_tips.json` | [ ] All critical shown |
+| Chief Gear slots | `data/chief_gear.json` | [ ] 6 slots, correct names |
+| Event calendar | `data/events.json` | [ ] Dates correct |
+
+### Value Verification
+
+Cross-check these high-impact values against in-game or wiki:
+
+- [ ] Chief Gear slot names (Coat, Pants, Belt, Weapon, Cap, Watch)
+- [ ] Chief Gear set bonuses (3pc Defense, 6pc Attack)
+- [ ] Tool Enhancement research bonuses (0.4%-2.5% per level)
+- [ ] SvS point values (Fire Crystal 2000, Mithril 40000)
+- [ ] Rally joiner skill mechanics (leftmost hero's top-right skill)
+- [ ] Daybreak decoration max stats (Mythic 10%, Epic 2.5%)
+
+### Database Integrity
+
+- [ ] All foreign keys valid (UserHero.hero_id points to valid Hero)
+- [ ] No orphaned records
+- [ ] Profile settings save and load correctly
+- [ ] Skill levels in valid range (1-5)
+- [ ] Star ratings in valid range (0-5)
+
+---
+
+## Error Handling
+
+### Graceful Degradation
+
+| Scenario | Expected Behavior | Verified |
+|----------|-------------------|----------|
+| Database connection fails | Shows error message | [ ] |
+| API key missing | Graceful fallback | [ ] |
+| API rate limited | Shows limit message | [ ] |
+| JSON file missing | Loads defaults | [ ] |
+| Hero image missing | Shows placeholder | [ ] |
+| Invalid user input | Shows validation error | [ ] |
+
+### Error Messages
+
+- [ ] Error messages are user-friendly (not stack traces)
+- [ ] No Python exceptions exposed to users
+- [ ] Error states allow recovery (retry, go back)
+
+---
+
+## Performance
+
+### Load Times
+
+| Page | Target Load Time | Verified |
+|------|------------------|----------|
+| Home | < 2 seconds | [ ] |
+| Hero Tracker | < 3 seconds | [ ] |
+| Quick Tips | < 2 seconds | [ ] |
+| AI Advisor | < 1 second (before query) | [ ] |
+
+### Memory/Resource Usage
+
+- [ ] No memory leaks on page navigation
+- [ ] Large lists paginated or virtualized
+- [ ] Images lazy loaded where appropriate
+- [ ] Database connections closed properly
+
+---
+
+## Security
+
+### Input Validation
+
+- [ ] SQL injection protected (SQLAlchemy ORM)
+- [ ] XSS protected (no raw user input in HTML)
+- [ ] CSRF protected (Streamlit handles)
+- [ ] File uploads validated (if OCR enabled)
+
+### Authentication
+
+- [ ] Passwords hashed (bcrypt)
+- [ ] Sessions expire appropriately
+- [ ] Admin routes protected
+- [ ] Sensitive data not logged
+
+### Secrets
+
+- [ ] API keys not in code
+- [ ] Database file not exposed
+- [ ] No secrets in git history
+
+---
+
+## Accessibility
+
+### Basic Checks
+
+- [ ] Text has sufficient contrast
+- [ ] Images have alt text (where applicable)
+- [ ] Forms have labels
+- [ ] Keyboard navigation works
+- [ ] Tab order is logical
+
+### Screen Reader
+
+- [ ] Headings properly nested (h1 > h2 > h3)
+- [ ] Tables have headers
+- [ ] Interactive elements labeled
+
+---
+
+## Browser/Device Compatibility
+
+### Browsers to Test
+
+| Browser | Version | Verified |
+|---------|---------|----------|
+| Chrome | Latest | [ ] |
+| Firefox | Latest | [ ] |
+| Safari | Latest | [ ] |
+| Edge | Latest | [ ] |
+
+### Devices/Screen Sizes
+
+| Device Type | Width | Verified |
+|-------------|-------|----------|
+| Desktop | 1920px | [ ] |
+| Laptop | 1366px | [ ] |
+| Tablet | 768px | [ ] |
+| Mobile | 375px | [ ] |
+
+### Responsive Behavior
+
+- [ ] Navigation accessible on mobile
+- [ ] Tables scroll horizontally on small screens
+- [ ] Cards stack vertically on mobile
+- [ ] Text remains readable at all sizes
+
+---
+
+## Pre-Release Checklist
+
+### Before Any Release
+
+- [ ] All smoke tests pass
+- [ ] No visible rendering errors
+- [ ] No encoding issues
+- [ ] Core features functional
+- [ ] Data displays correctly
+- [ ] Error handling works
+- [ ] Performance acceptable
+
+### Before Major Release
+
+All of the above, plus:
+
+- [ ] Full functional test suite passes
+- [ ] Data integrity verified against sources
+- [ ] Security review completed
+- [ ] Browser compatibility tested
+- [ ] Documentation updated
+- [ ] CHANGELOG updated
+
+---
+
+## Issue Tracking
+
+### Known Issues Template
+
+When documenting issues:
+
+```markdown
+## [Page Name] - Issue Title
+
+**Severity:** Critical / High / Medium / Low
+**Status:** Open / In Progress / Fixed
+
+**Description:**
+What's happening
+
+**Steps to Reproduce:**
+1. Go to...
+2. Click...
+3. Observe...
+
+**Expected Behavior:**
+What should happen
+
+**Actual Behavior:**
+What actually happens
+
+**Screenshots:**
+(if applicable)
+
+**Environment:**
+- Browser:
+- Screen size:
+- User type (admin/user):
+```
+
+---
+
+## Automated Checks
+
+### Checks That Can Be Automated
+
+These checks should be implemented in `/qa-review` skill:
+
+1. **HTML validation** - Check for unclosed tags in rendered output
+2. **Encoding check** - Scan for known bad character sequences
+3. **JSON validation** - Verify all JSON files parse correctly
+4. **Link checking** - Verify internal navigation works
+5. **Data consistency** - Verify counts match across files
+6. **Image availability** - Check all referenced images exist
+
+### Manual-Only Checks
+
+These require human verification:
+
+1. Visual layout correctness
+2. Subjective UX quality
+3. Game data accuracy against in-game
+4. Accessibility screen reader testing
+5. Performance feel
+
+---
+
+## Running QA
+
+### Quick Review (5 min)
 
 ```bash
-# Run the app
-streamlit run app.py
-
-# Test specific pages
-# Navigate to: Hero Tracker, Chief Tracker, Lineups, AI Advisor
-
-# Check for Python errors
-python -c "from pages import *"  # Basic import check
+# Run the /qa-review skill
+/qa-review quick
 ```
+
+### Full Review (30 min)
+
+```bash
+# Run comprehensive QA
+/qa-review full
+```
+
+### Data Audit
+
+```bash
+# Run data validation
+/data-audit
+```
+
+---
+
+## Version History
+
+| Date | Version | Changes |
+|------|---------|---------|
+| 2026-01-13 | 1.0 | Initial comprehensive checklist |

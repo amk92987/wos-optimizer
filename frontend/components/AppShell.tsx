@@ -21,7 +21,7 @@ const mobileNavItems = [
   { href: '/settings', label: 'More', icon: '☰' },
 ];
 
-function ImpersonationBanner({ email }: { email: string }) {
+function ImpersonationBanner({ username, email }: { username?: string; email: string }) {
   const { switchBack } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -38,10 +38,12 @@ function ImpersonationBanner({ email }: { email: string }) {
     }
   };
 
+  const displayName = username && username !== email ? `${username} (${email})` : email;
+
   return (
     <div className="bg-fire/20 border-t border-fire/30 px-4 py-2 text-center">
       <span className="text-xs text-fire">
-        Viewing as: {email}
+        Viewing as: {displayName}
       </span>
       <button
         onClick={handleSwitchBack}
@@ -636,7 +638,7 @@ export default function AppShell({ children }: AppShellProps) {
 
           {/* Impersonation banner */}
           {isImpersonating && user && (
-            <ImpersonationBanner email={user.email} />
+            <ImpersonationBanner username={user.username} email={user.email} />
           )}
 
           {/* Maintenance mode warning for admins */}

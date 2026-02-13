@@ -1,217 +1,193 @@
-# Whiteout Survival Optimizer
+# Bear's Den - Whiteout Survival Optimizer
 
-A comprehensive web-based tool to help Whiteout Survival players track their heroes, manage resources, and get personalized upgrade recommendations optimized for SvS (State vs State) and combat.
+A comprehensive web app to help Whiteout Survival players track heroes, manage resources, and get personalized upgrade recommendations optimized for SvS and combat.
 
-## Features
-
-### Hero Management
-- Track all 56+ heroes from Gen 1-14 with detailed stats
-- **Actual hero portrait images** from the game
-- Visual hero cards with tier badges (S+ through D), rarity borders, and generation badges
-- Inline editing for level (1-80), stars (0-5), ascension, skills, and gear
-- Hero gear tracking (4 slots + mythic gear per hero)
-- Tier descriptions explaining hero value
-
-### Strategy Guides
-- **Combat Optimization** - All hidden stat sources (Research, Daybreak decorations, Chief Gear, Charms, Pets)
-- **Quick Tips** - 13 categories of consolidated game knowledge with priority ratings
-- **Events Guide** - Event calendar and point optimization strategies
-- **Daybreak Island** - Battle enhancer decorations and Tree of Life priorities
-
-### Recommendations
-- **Rule-based recommendation engine** with curated game knowledge (instant responses)
-- **Power Optimizer** - Upgrade recommendations backed by actual power calculations:
-  - Chief Gear: 42 tiers with exact % bonuses (9.35% → 187%)
-  - Chief Charms: 16 levels with exact % bonuses (9% → 100%)
-  - War Academy: Exact power_gain values per level (6,888 → 8,784)
-  - Troop Tiers: Exact power per unit (T11 lancers/marksmen = 80 power!)
-  - Hero upgrades: Level, star, and skill power estimates
-- AI-powered fallback (Claude or OpenAI) for complex questions
-- Priority-based upgrade recommendations (SvS, Rally, Castle Battle, PvE, Gathering)
-- Combat-focused analysis for SvS optimization
-- Rally joiner hero selection with verified game mechanics
-
-### Lineup Builder
-- Hero lineup optimization for different content types
-- March composition builder
-- Expedition vs Exploration skill tracking
-
-### Resource Management
-- Backpack inventory tracking
-- OCR screenshot parsing (EasyOCR)
-- **Pack Analyzer** with Frost Star valuation system (1 FS = $0.01)
-  - 100+ items with researched values across 12 categories
-  - Speedup and resource grids for quick entry
-  - Efficiency ratings and filler detection
-  - "Farmer Mode" to zero-out farmable resources
-
-### User Profiles
-- Multiple profile support
-- Server age and generation tracking
-- Spending profile selection (F2P to Whale)
-- Priority focus configuration
-- Alliance role settings
-
-### Admin Dashboard
-- **User Management** - Create, edit, suspend/activate users with role-based access
-- **Admin Impersonation** - "Login as User" to see exactly what users see
-- **Feature Flags** - Toggle features on/off without code changes
-- **Announcements** - System-wide notification management
-- **Audit Log** - Track user actions and system events
-- **Usage Reports** - Analytics and metrics dashboard
-- **Data Export** - Export data to CSV, Excel, or JSON
-- **Database Browser** - Direct database inspection and management
-
-## Installation
-
-### Prerequisites
-- Python 3.10+
-- pip
-
-### Setup
-
-1. Clone the repository:
-```bash
-git clone https://github.com/YOUR_USERNAME/wos-optimizer.git
-cd wos-optimizer
-```
-
-2. Create and activate virtual environment:
-```bash
-# Windows
-python -m venv .venv
-.venv\Scripts\activate
-
-# Unix/macOS
-python -m venv .venv
-source .venv/bin/activate
-```
-
-3. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-4. (Optional) Download hero images:
-```bash
-py scripts/download_hero_images.py
-```
-
-5. (Optional) Set AI API key for AI recommendations (choose one):
-```bash
-# Claude (preferred) - Windows
-set ANTHROPIC_API_KEY=your-key-here
-# Claude - Unix/macOS
-export ANTHROPIC_API_KEY=your-key-here
-
-# OpenAI (fallback) - Windows
-set OPENAI_API_KEY=your-key-here
-# OpenAI - Unix/macOS
-export OPENAI_API_KEY=your-key-here
-```
-
-6. Run the application:
-```bash
-streamlit run app.py
-```
-
-7. Open http://localhost:8501 in your browser
-
-## Application Pages
-
-### User Pages (Game-Focused)
-| Page | Description |
-|------|-------------|
-| **Home** | Welcome, quick start guide, generation calculator |
-| **Beginner Guide** | New player onboarding guide |
-| **Hero Tracker** | Hero management with portraits, inline editing |
-| **Chief Tracker** | Chief gear and charms tracking |
-| **Backpack** | Inventory tracking via OCR or manual entry |
-| **AI Advisor** | AI-powered personalized recommendations |
-| **Lineups** | Hero lineup builder for rallies and events |
-| **Save/Load** | Multi-profile management |
-| **Packs** | Pack value analysis with Frost Star valuation |
-| **Events** | Event calendar and optimization |
-| **Combat** | SvS/combat stat source guide |
-| **Quick Tips** | Consolidated cheat sheet of key game knowledge |
-| **Battle Tactics** | Advanced battle strategies |
-| **Daybreak Island** | Tree of Life and decoration priorities |
-| **Settings** | User profile and priority configuration |
-
-### Admin Pages (System Management)
-| Page | Description |
-|------|-------------|
-| **Dashboard** | System overview with key metrics |
-| **Users** | User CRUD, suspend/activate, impersonation |
-| **Announcements** | System-wide notification management |
-| **Feature Flags** | Toggle features on/off (8 default flags) |
-| **Database** | Database browser and table management |
-| **Feedback** | User feedback collection inbox |
-| **Game Data** | Game data file management |
-| **Data Integrity** | Data validation and consistency checks |
-| **Usage Reports** | Analytics and user engagement metrics |
-| **Export** | Data export (CSV, Excel, JSON formats) |
-
-## Key Game Mechanics
-
-### Rally Joiner System
-When joining a rally, only the **leftmost hero's top-right expedition skill** applies. The top 4 highest LEVEL skills from all joiners are used.
-
-**Best Attack Joiners**: Jessie (+25% DMG), Jeronimo (Infantry ATK)
-**Best Defense Joiners**: Sergey (-20% DMG taken)
-
-### Daybreak Island
-Combat stats come from **Battle Enhancer Decorations**, not just Tree of Life:
-- Mythic decorations: 10 levels × 1% = **10% max** (Floating Market, Snow Castle, etc.)
-- Epic decorations: 5 levels × 0.5% = **2.5% max**
-
-### SvS Prep Phase
-**SPEEDUPS ONLY GIVE POINTS ON DAY 1, 2, AND 5**
-- Fire Crystals: 2,000 pts each (Day 1)
-- Lucky Wheel: 8,000 pts per spin (Day 2/3)
-- Mithril: 40,000 pts each (Day 4)
+**Live**: [wos.randomchaoslabs.com](https://wos.randomchaoslabs.com)
+**Dev**: [wosdev.randomchaoslabs.com](https://wosdev.randomchaoslabs.com)
 
 ## Tech Stack
 
-- **Frontend**: Streamlit
-- **Database**: SQLite with SQLAlchemy ORM
-- **AI**: Claude (Anthropic) or OpenAI API (optional)
-- **OCR**: EasyOCR (optional)
-- **Data**: 59 JSON files covering all game systems
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | Next.js 14 (App Router), TypeScript, Tailwind CSS |
+| **Backend** | Python 3.13, AWS Lambda (10 functions) |
+| **Database** | Amazon DynamoDB (3 tables) |
+| **Auth** | Amazon Cognito |
+| **Infra** | AWS SAM (CloudFormation), API Gateway HTTP API |
+| **CDN** | CloudFront + S3 (static hosting) |
+| **AI** | OpenAI / Claude API (optional, for AI Advisor) |
+| **IaC** | `infra/template.yaml` (SAM template) |
 
 ## Project Structure
 
 ```
-WoS/
-├── app.py                    # Main entry point
-├── pages/                    # 12 Streamlit pages (5,100+ lines)
-├── database/                 # SQLAlchemy models and DB management
-├── data/                     # 59 JSON data files
-│   ├── heroes.json           # All hero data
-│   ├── guides/               # Strategy guides
+wos-optimizer/
+├── frontend/                 # Next.js application
+│   ├── app/                  # Pages (App Router)
+│   │   ├── heroes/           # Hero Tracker
+│   │   ├── chief/            # Chief Gear & Charms Tracker
+│   │   ├── upgrades/         # Upgrade Recommendations & Gear Calculator
+│   │   ├── advisor/          # AI Advisor chat
+│   │   ├── lineups/          # Lineup Builder
+│   │   ├── admin/            # Admin panel (10+ pages)
+│   │   └── ...               # Other pages
+│   ├── components/           # Shared React components
+│   │   ├── hero/             # Hero card sub-components
+│   │   ├── AppShell.tsx      # Layout shell with header/sidebar
+│   │   ├── HeroCard.tsx      # Expandable hero card
+│   │   ├── Sidebar.tsx       # Navigation sidebar
+│   │   └── ...
+│   ├── hooks/                # Custom React hooks
+│   │   └── useAutoSave.ts    # Debounced auto-save hook
+│   └── lib/                  # Utilities
+│       ├── api.ts            # API client (all backend calls)
+│       └── auth.tsx          # Auth context (Cognito)
+│
+├── backend/                  # Lambda function code
+│   ├── handlers/             # Lambda entry points
+│   │   ├── auth.py           # Login, register, password reset
+│   │   ├── heroes.py         # Hero CRUD, roster management
+│   │   ├── profiles.py       # Profile CRUD, settings
+│   │   ├── chief.py          # Chief gear & charms
+│   │   ├── recommendations.py # Upgrade recommendations
+│   │   ├── advisor.py        # AI Advisor (rules + AI)
+│   │   ├── admin.py          # Admin panel (users, flags, audit, etc.)
+│   │   ├── general.py        # Announcements, inbox, search, unread count
+│   │   ├── cleanup.py        # Scheduled cleanup (expired sessions, etc.)
+│   │   └── user_migration.py # Cognito post-confirmation trigger
+│   ├── common/               # Shared backend code
+│   │   ├── dynamo_repo.py    # DynamoDB data access layer
+│   │   ├── admin_repo.py     # Admin-specific data access
+│   │   ├── ai_repo.py        # AI conversation logging
+│   │   ├── auth.py           # JWT/Cognito auth utilities
+│   │   └── config.py         # Environment config
+│   └── engine/               # Recommendation engine
+│       ├── recommendation_engine.py  # Main orchestrator
+│       ├── ai_recommender.py         # AI provider integration
+│       └── analyzers/                # Specialized analyzers
+│           ├── hero_analyzer.py      # Hero upgrade logic
+│           ├── gear_advisor.py       # Gear priority logic
+│           ├── lineup_builder.py     # Event lineup builder
+│           ├── progression_tracker.py # Game phase detection
+│           └── request_classifier.py  # Routes questions to rules vs AI
+│
+├── infra/                    # Infrastructure as Code
+│   ├── template.yaml         # SAM template (all AWS resources)
+│   ├── samconfig.toml        # SAM deploy config (dev/live profiles)
+│   └── url-rewrite.js        # CloudFront URL rewrite function
+│
+├── data/                     # Game data (JSON files)
+│   ├── heroes.json           # Hero reference data (AUTHORITATIVE)
+│   ├── chief_gear.json       # Chief gear progression
+│   ├── guides/               # Strategy guide data
 │   ├── optimizer/            # Decision engine config
-│   └── upgrades/             # Upgrade edge graphs (920+ edges)
-├── assets/heroes/            # 56 hero portrait images
-├── engine/                   # Recommendation engines
-│   ├── recommendation_engine.py  # Main orchestrator
-│   └── analyzers/            # HeroAnalyzer, GearAdvisor, PowerOptimizer, etc.
-├── scripts/                  # Data building utilities
-├── styles/                   # CSS styling
-└── .claude/skills/           # 5 Claude Code skills
+│   ├── upgrades/             # Upgrade cost edge graphs (920+ edges)
+│   └── ai/                   # AI knowledge base
+│
+├── scripts/                  # Build & deploy scripts
+│   ├── deploy_dev.ps1        # Deploy to dev environment
+│   ├── deploy_live.ps1       # Deploy to production
+│   ├── download_hero_images.py
+│   └── build_*.py            # Data building scripts
+│
+├── docs/                     # Documentation
+│   ├── ARCHITECTURE.md       # System architecture
+│   ├── SAM_DEPLOYMENT.md     # AWS deployment guide
+│   └── ...
+│
+│── # Legacy (Streamlit era - kept for reference)
+├── app.py                    # Old Streamlit entry point
+├── pages/                    # Old Streamlit pages
+├── database/                 # Old SQLAlchemy models
+├── engine/                   # Old recommendation engine (root copy)
+├── config.py                 # Old Streamlit config
+└── requirements.txt          # Old Python dependencies
 ```
 
-## Contributing
+## Features
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Player Tools
+- **Hero Tracker** - Track all 56+ heroes (Gen 1-14) with inline editing for level, stars, skills, gear
+- **Chief Tracker** - Chief gear and charms progression tracking
+- **Upgrade Recommendations** - Personalized upgrade priorities based on spending profile and game phase
+- **Gear Cost Calculator** - Exact material costs for hero gear upgrades
+- **AI Advisor** - Chat-based advisor using rules engine (92%+) with AI fallback
+- **Lineup Builder** - Optimal lineups for Bear Trap, Crazy Joe, Garrison, SvS, and more
+- **Profiles** - Multiple game profiles with auto-save
+
+### Strategy Guides
+- Beginner Guide, Combat Optimization, Quick Tips, Battle Tactics, Daybreak Island, Events
+
+### Admin Panel
+- User management with impersonation
+- Feature flags, announcements, audit log
+- Data browser, integrity checks, usage reports
+- Error tracking with in-app badge notifications
+- AI conversation review and training data curation
+
+## Development
+
+### Prerequisites
+- Node.js 18+ (frontend)
+- Python 3.13+ (backend)
+- AWS CLI + SAM CLI (deployment)
+
+### Local Frontend Development
+```bash
+cd frontend
+npm install
+npm run dev
+# Opens at http://localhost:3000
+```
+
+### Deploy to Dev
+```powershell
+# Full deploy (backend + frontend)
+.\scripts\deploy_dev.ps1
+
+# Backend only
+.\scripts\deploy_dev.ps1 -BackendOnly
+
+# Frontend only
+.\scripts\deploy_dev.ps1 -FrontendOnly
+```
+
+### Key Configuration
+- SAM config: `infra/samconfig.toml` (profiles: default=dev, live=live)
+- Frontend env: `frontend/.env.local` (API URL, Cognito pool)
+- Backend config: Environment variables set in SAM template
+
+## Architecture
+
+```
+User Browser
+     |
+     v
+CloudFront (CDN + SPA routing)
+     |
+     +---> S3 Bucket (Next.js static export)
+     |
+     +---> API Gateway HTTP API (/api/*)
+               |
+               v
+          10 Lambda Functions
+               |
+               v
+          DynamoDB (3 tables)
+               |
+               +---> wos-main-{env}      (users, profiles, heroes, AI conversations)
+               +---> wos-admin-{env}     (flags, feedback, errors, audit log)
+               +---> wos-reference-{env} (game data cache)
+```
+
+## Data Sources
+
+- [Whiteout Survival Wiki](https://www.whiteoutsurvival.wiki/) - Hero data, game mechanics
+- [WhiteoutSurvival.app](https://whiteoutsurvival.app/) - FC building costs
+- [WhiteoutData](https://whiteoutdata.com/) - Building costs L1-L30
+- [Quackulator](https://www.quackulator.com/) - Chief gear costs
+- [AllClash](https://www.allclash.com/) - Community tier lists
 
 ## License
 
-MIT License - feel free to use this project for personal or commercial purposes.
-
-## Acknowledgments
-
-- [Whiteout Survival Wiki](https://www.whiteoutsurvival.wiki/) - Hero data and images
-- [WhiteoutData](https://whiteoutdata.com/) - Game mechanics
-- [WhiteoutSurvival.app](https://whiteoutsurvival.app/) - FC building data
-- [Quackulator](https://www.quackulator.com/) - Cost calculators
-- [AllClash](https://www.allclash.com/) - Tier list information
+MIT License

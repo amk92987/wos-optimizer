@@ -1,317 +1,297 @@
-# WoS Optimizer Architecture
-
-This document describes the architecture and data flow of the Bear's Den (Whiteout Survival Optimizer) application.
+# Bear's Den - Architecture
 
 ## System Overview
 
 ```
-+------------------+     +------------------+     +------------------+
-|   Streamlit UI   |---->|  Recommendation  |---->|   AI Provider    |
-|   (pages/*.py)   |     |  Engine (engine/)|     | (OpenAI/Claude)  |
-+------------------+     +------------------+     +------------------+
-         |                       |
-         v                       v
-+------------------+     +------------------+
-|  SQLite Database |<----|   Game Data      |
-|  (wos.db)        |     |  (data/*.json)   |
-+------------------+     +------------------+
+                         ┌──────────────────┐
+                         │   Route 53 DNS   │
+                         │ *.randomchaoslabs │
+                         └────────┬─────────┘
+                                  │
+                         ┌────────v─────────┐
+                         │   CloudFront     │
+                         │   Distribution   │
+                         │ (URL rewrite fn) │
+                         └───┬──────────┬───┘
+                             │          │
+                    /app/*   │          │  /api/*
+                             │          │
+                   ┌─────────v──┐  ┌────v──────────┐
+                   │  S3 Bucket │  │  API Gateway   │
+                   │  (Next.js  │  │  (HTTP API)    │
+                   │  static)   │  │                │
+                   └────────────┘  └───────┬────────┘
+                                           │
+                              ┌─────────────┼──────────────┐
+                              │             │              │
+                    ┌─────────v──┐ ┌────────v──┐ ┌────────v──┐
+                    │  Auth Fn   │ │ Heroes Fn │ │ Admin Fn  │
+                    │  Profiles  │ │ Chief Fn  │ │ General   │
+                    │            │ │ Recommend │ │ Cleanup   │
+                    └─────┬──────┘ │ Advisor   │ └─────┬─────┘
+                          │        └─────┬──────┘      │
+                          │              │             │
+                    ┌─────v──────────────v─────────────v─────┐
+                    │              DynamoDB                   │
+                    │  ┌──────────┐ ┌──────────┐ ┌─────────┐ │
+                    │  │ MainTable│ │AdminTable│ │ RefTable│ │
+                    │  └──────────┘ └──────────┘ └─────────┘ │
+                    └────────────────────────────────────────┘
 ```
 
-## Core Components
+## Lambda Functions (10)
 
-### 1. Streamlit Application (`app.py`)
+| Function | Routes | Purpose |
+|----------|--------|---------|
+| **AuthFunction** | `/api/auth/*` | Login, register, password change, Cognito integration |
+| **HeroesFunction** | `/api/heroes/*` | Hero CRUD, roster management, bulk updates |
+| **ProfilesFunction** | `/api/profiles/*` | Profile CRUD, settings, active profile |
+| **ChiefFunction** | `/api/chief/*` | Chief gear slots, charms, gear progression |
+| **RecommendFunction** | `/api/recommendations/*` | Upgrade recommendations, investments, phase detection |
+| **AdvisorFunction** | `/api/advisor/*` | AI Advisor chat, rules engine, AI fallback |
+| **AdminFunction** | `/api/admin/*` | Users, feature flags, audit log, database, integrity, errors, AI settings |
+| **GeneralFunction** | `/api/general/*` | Announcements, inbox, notifications, search, unread count, game data |
+| **CleanupFunction** | (Scheduled) | Periodic cleanup of expired data |
+| **UserMigrationFunction** | (Cognito trigger) | Post-confirmation user setup |
 
-Entry point that handles:
-- User authentication (login/register/logout)
-- Page routing based on user role (admin vs user)
-- Session management
-- Navigation menus
+## DynamoDB Schema
 
-### 2. Pages (`pages/*.py`)
+### MainTable (`wos-main-{env}`)
 
-| Category | Pages | Purpose |
-|----------|-------|---------|
-| **User Pages** | 0_Home, 00_Beginner_Guide | Welcome and onboarding |
-| **Tracker Pages** | 1_Hero_Tracker, 2_Chief_Tracker, 3_Backpack | Game state tracking |
-| **Analysis Pages** | 5_Lineups, 6_AI_Advisor | Recommendations and advice |
-| **Reference Pages** | 10_Combat, 11_Quick_Tips, 12_Battle_Tactics | Game guides |
-| **Settings Pages** | 7_Save_Load, 13_Settings | Profile management |
-| **Admin Pages** | 0_Admin_Home through 15_Admin | System management |
+Stores user data, profiles, heroes, and AI conversations.
 
-### 3. Database Layer (`database/`)
+| Entity | PK | SK | Key Attributes |
+|--------|----|----|----------------|
+| User metadata | `USER#{userId}` | `METADATA` | email, role, is_active, created_at |
+| User profile | `USER#{userId}` | `PROFILE#{profileId}` | name, furnace_level, spending_profile, priorities |
+| User hero | `PROFILE#{profileId}` | `HERO#{heroName}` | level, stars, skills, gear slots |
+| AI conversation | `USER#{userId}` | `AICONV#{timestamp}` | question, answer, provider, rating |
 
-```
-database/
-├── db.py          # Connection, session management
-├── models.py      # SQLAlchemy ORM models
-└── auth.py        # Authentication functions
-```
+**GSI: GSI1** (email lookup)
+- GSI1PK: `EMAIL#{email}` / GSI1SK: `USER`
 
-**Key Models:**
-- `User` - Authentication, roles, rate limiting
-- `UserProfile` - Game account settings (furnace, state, priorities)
-- `Hero` - Static hero reference data (from heroes.json)
-- `UserHero` - User's hero levels, skills, gear
-- `UserInventory` - Backpack items
-- `AIConversation` - AI Q&A logging for training data
+**GSI: GSI2** (Cognito sub lookup)
+- GSI2PK: `COGNITO#{sub}` / GSI2SK: `USER`
 
-### 4. Recommendation Engine (`engine/`)
+### AdminTable (`wos-admin-{env}`)
 
-```
-engine/
-├── recommendation_engine.py  # Main orchestrator
-├── recommender.py            # Rule-based recommendations
-├── ai_recommender.py         # AI-powered recommendations
-└── analyzers/
-    ├── hero_analyzer.py      # Hero upgrade logic
-    ├── gear_advisor.py       # Chief/hero gear priorities
-    ├── lineup_builder.py     # Event lineup builder
-    ├── progression_tracker.py # Game phase detection
-    └── request_classifier.py  # Routes questions to rules vs AI
-```
+Stores admin-specific data: feature flags, feedback, errors, audit log.
 
-**Data Flow for Recommendations:**
+| Entity | PK | SK | Key Attributes |
+|--------|----|----|----------------|
+| Feature flag | `FLAG` | `{flagName}` | is_enabled, description |
+| Feedback | `FEEDBACK` | `{timestamp}#{id}` | category, description, status |
+| Error log | `ERRORS` | `{timestamp}#{id}` | error_type, message, stack_trace, handler |
+| Audit entry | `AUDIT#{month}` | `{timestamp}#{id}` | action, admin_username, target |
+| Announcement | `ANNOUNCEMENT` | `{id}` | title, message, type, is_active |
+| AI settings | `SETTINGS` | `AI` | mode, provider, daily_limit |
+| Notification | `NOTIFICATION#{userId}` | `{id}` | type, title, message, is_read |
 
-```
-User Question
-     |
-     v
-+-------------------+
-| Request Classifier|---> Simple question? --> Rules Engine --> Response
-+-------------------+                              |
-     |                                             v
-     | Complex question                     Hero Analyzer
-     v                                      Gear Advisor
-+-------------------+                       Lineup Builder
-|   AI Recommender  |
-+-------------------+
-     |
-     v
-+-------------------+
-| OpenAI / Claude   |
-| (with verified    |
-|  game mechanics)  |
-+-------------------+
-     |
-     v
-  AI Response
-```
+### ReferenceTable (`wos-reference-{env}`)
 
-### 5. Game Data (`data/`)
+Caches game reference data loaded from JSON files.
 
-**Authoritative Source Files:**
+| Entity | PK | SK |
+|--------|----|----|
+| Game data | `GAMEDATA` | `{dataType}` |
 
-| File | Purpose | Priority |
-|------|---------|----------|
-| `heroes.json` | Hero stats, generations, skills | **CRITICAL** - always reference for hero data |
-| `chief_gear.json` | Chief gear progression | High |
-| `events.json` | Event calendar and mechanics | High |
-| `guides/quick_tips.json` | Player tips by category | Medium |
+## Frontend Architecture
 
-**Data Structure:**
+### Next.js App Router
+
+The frontend is a statically exported Next.js app (`output: 'export'` in next.config.js). All pages are client-side rendered with data fetched from the API.
 
 ```
-data/
-├── heroes.json              # Hero reference (AUTHORITATIVE)
-├── chief_gear.json          # Gear stats
-├── events.json              # Event data
-├── guides/                  # Strategy guides
-│   ├── quick_tips.json      # 15 categories, 79 tips
-│   └── hero_lineup_reasoning.json
-├── optimizer/               # Decision rules
-│   ├── progression_phases.json
-│   └── decision_rules.json
-├── upgrades/                # Cost data (920+ edges)
-│   ├── buildings.edges.json
-│   └── war_academy.steps.json
-└── ai/                      # AI training data
-    └── openai_wos_knowledge.json
+frontend/app/
+├── layout.tsx          # Root layout (AppShell wrapper)
+├── page.tsx            # Home page
+├── heroes/page.tsx     # Hero Tracker
+├── chief/page.tsx      # Chief Tracker
+├── upgrades/page.tsx   # Recommendations + Gear Calculator
+├── advisor/page.tsx    # AI Advisor chat
+├── lineups/page.tsx    # Lineup Builder
+├── profiles/page.tsx   # Profile management
+├── admin/              # Admin panel
+│   ├── page.tsx        # Dashboard
+│   ├── users/          # User management
+│   ├── inbox/          # Notifications + errors
+│   ├── announcements/  # System announcements
+│   ├── feature-flags/  # Feature toggles
+│   ├── database/       # Data browser
+│   ├── data-integrity/ # Validation checks
+│   ├── usage-reports/  # Analytics
+│   └── ...
+└── ...
 ```
 
-## Data Flow Diagrams
+### Key Components
 
-### User Profile Flow
+| Component | Purpose |
+|-----------|---------|
+| `AppShell.tsx` | Layout with header, sidebar, mobile nav, impersonation banner |
+| `Sidebar.tsx` | Navigation with section groups, notification badges |
+| `HeroCard.tsx` | Expandable hero card with inline editing |
+| `HeroDetailModal.tsx` | Full hero detail view |
+| `UserMenu.tsx` | Top-right user dropdown |
 
-```
-User Logs In
-     |
-     v
-Load UserProfile from DB
-     |
-     +--> No profile? --> Create default profile
-     |
-     v
-Load UserHeroes (owned heroes with levels)
-     |
-     v
-Load Heroes.json (static hero data)
-     |
-     v
-Merge: UserHero + Hero = Complete hero context
-     |
-     v
-Display in Hero Tracker / Pass to AI Advisor
-```
+### State Management
 
-### AI Recommendation Flow
+- **Auth**: React Context (`lib/auth.tsx`) - user, token, impersonation state
+- **API calls**: Direct fetch via `lib/api.ts` (no state library)
+- **Auto-save**: `hooks/useAutoSave.ts` - 300ms debounce, optimistic updates
+- **Local storage**: Sidebar collapse, dismissed announcements, impersonation state
 
-```
-User asks question in AI Advisor
-     |
-     v
-Request Classifier analyzes question
-     |
-     +-- Simple pattern match --> Rules Engine
-     |                               |
-     |                               v
-     |                          Format response
-     |                               |
-     +-- Complex/unknown -----> AI Recommender
-                                    |
-                                    v
-                              Build user context:
-                              - Profile (furnace, spending)
-                              - Owned heroes + levels
-                              - Priorities (SvS, Rally, etc)
-                                    |
-                                    v
-                              Add VERIFIED_MECHANICS:
-                              - HERO_GENERATION_REFERENCE
-                              - Rally mechanics
-                              - Chief gear rules
-                                    |
-                                    v
-                              Call OpenAI/Claude API
-                                    |
-                                    v
-                              Log to AIConversation table
-                                    |
-                                    v
-                              Return response to user
+### API Client (`lib/api.ts`)
+
+All backend communication goes through typed API functions organized by domain:
+
+```typescript
+authApi.login(email, password)
+heroesApi.getUserHeroes(token)
+profilesApi.getProfiles(token)
+chiefApi.getGear(token)
+recommendApi.getRecommendations(token)
+advisorApi.ask(token, question, context)
+adminApi.getUsers(token)
+generalApi.getAnnouncements(token)
+inboxApi.getUnreadCount(token)
 ```
 
-### Lineup Builder Flow
+## Backend Architecture
 
-```
-User selects event type (Bear Trap, Garrison, etc)
-     |
-     v
-Load user's owned heroes + levels
-     |
-     v
-Load LINEUP_TEMPLATES for event type
-     |
-     v
-For each slot:
-  1. Get preferred heroes from template
-  2. Filter by user's roster
-  3. Rank by: level > stars > gear quality
-  4. Select best available
-     |
-     v
-Calculate troop ratios from template
-     |
-     v
-Generate "Why This Lineup" explanations
-     |
-     v
-Display lineup recommendation
+### Handler Pattern
+
+Each Lambda handler follows the same pattern:
+
+```python
+from aws_lambda_powertools import Logger
+from aws_lambda_powertools.event_handler import APIGatewayHttpResolver
+
+app = APIGatewayHttpResolver()
+logger = Logger()
+
+@app.get("/api/heroes")
+def list_heroes():
+    user_id = get_authenticated_user(app)  # JWT validation
+    # ... business logic ...
+    return {"heroes": [...]}
+
+def handler(event, context):
+    return app.resolve(event, context)
 ```
 
-## Key Architectural Decisions
+### Authentication Flow
 
-### 1. Rules Engine First, AI Fallback
+1. Frontend calls Cognito for login/register (JWT tokens)
+2. API Gateway passes JWT in Authorization header
+3. Each handler validates JWT via `common/auth.py`
+4. Admin routes additionally check `role == 'admin'`
+5. Impersonation: admin sends `X-Impersonate-User` header to act as another user
 
-92.3% of questions are handled by the rules engine (request_classifier.py). This:
-- Reduces API costs
-- Provides faster responses
-- Ensures consistent answers for common questions
+### Recommendation Engine
 
-### 2. Verified Mechanics in AI Prompts
-
-The AI prompts include `VERIFIED_MECHANICS` and `HERO_GENERATION_REFERENCE` constants that:
-- Prevent hallucination of incorrect data
-- Ensure Jessie is always Gen 1 (not Gen 5)
-- Provide correct rally joining mechanics
-
-### 3. Single Source of Truth
-
-`data/heroes.json` is the ONLY authoritative source for hero data. All components read from it:
-- Hero Tracker displays
-- AI Recommender context
-- Lineup Builder logic
-
-### 4. Profile Isolation
-
-Each `UserProfile` is independent:
-- Users can have multiple profiles (main + farm accounts)
-- Profiles can be in different states (servers)
-- Farm accounts get different recommendations
-
-## Security Considerations
-
-### Authentication
-- Passwords hashed with bcrypt
-- Session-based login
-- Admin impersonation with tracking
-
-### AI Jailbreak Protection
-- Only answers Whiteout Survival questions
-- Rejects off-topic requests
-- No code generation
-
-### Database
-- SQLAlchemy ORM (SQL injection protection)
-- Prepared statements only
-
-## Performance Optimizations
-
-### Caching
-- Hero images loaded as base64 once per session
-- Static data cached in session state
-
-### Database
-- Lazy loading for related objects
-- Indexed foreign keys
-
-### AI
-- Rules engine reduces API calls by 92%
-- Response caching for identical questions
-
-## Testing
-
-### Test Profiles
-6 test users with 9 profiles covering:
-- Different spending profiles (F2P to Whale)
-- Different game phases (new player to FC30)
-- Farm accounts
-- Rally leaders vs fillers
-
-Run tests:
-```bash
-.venv/Scripts/python.exe scripts/test_ai_comprehensive.py
+```
+User Request
+     │
+     ▼
+┌─────────────────┐
+│ Request          │──→ Pattern match? ──→ Rules Engine ──→ Response
+│ Classifier       │                        (hero_analyzer,
+└─────────────────┘                         gear_advisor,
+     │                                      lineup_builder)
+     │ Complex question
+     ▼
+┌─────────────────┐
+│ AI Recommender  │──→ Build context (profile + heroes + mechanics)
+└─────────────────┘──→ Call OpenAI/Claude API
+                   ──→ Log conversation
+                   ──→ Return response
 ```
 
-### QA Checks
-```bash
-.venv/Scripts/python.exe scripts/run_qa_check.py
+The rules engine handles ~92% of questions. AI is the fallback for complex/novel questions.
+
+## Infrastructure
+
+### SAM Template (`infra/template.yaml`)
+
+Defines all AWS resources:
+- 10 Lambda functions with API Gateway routes
+- 3 DynamoDB tables (PAY_PER_REQUEST)
+- Cognito User Pool
+- S3 bucket for frontend
+- CloudFront distribution with URL rewrite function
+- IAM roles with least-privilege permissions
+
+### Deployment
+
+```powershell
+# Dev deployment
+.\scripts\deploy_dev.ps1
+
+# Runs:
+# 1. sam build (Python Lambda packages)
+# 2. sam deploy --config-env default (CloudFormation stack)
+# 3. npm run build (Next.js static export)
+# 4. aws s3 sync (upload to S3)
+# 5. aws cloudfront create-invalidation (cache clear)
 ```
 
-## Deployment
+### Environments
 
-See `deploy/AWS_DEPLOYMENT_CHECKLIST.md` for production deployment guide covering:
-- AWS EC2 setup
-- RDS database migration
-- SSL/HTTPS configuration
-- Environment variables
+| Env | Stack | Domain | API |
+|-----|-------|--------|-----|
+| Dev | `wos-dev` | wosdev.randomchaoslabs.com | qro6iih6oe.execute-api.us-east-1.amazonaws.com/dev |
+| Live | `wos-live` | wos.randomchaoslabs.com | (TBD) |
 
-## File Quick Reference
+## Data Flow
 
-| Need to... | Look in... |
-|------------|------------|
-| Add a new page | `pages/` - create new file |
-| Add a hero | `data/heroes.json` - add to heroes array |
-| Change AI behavior | `engine/ai_recommender.py` - update prompts |
-| Add recommendation rule | `engine/analyzers/` - modify relevant analyzer |
-| Add database model | `database/models.py` - add SQLAlchemy class |
-| Add Claude skill | `.claude/skills/` - create new skill folder |
+### Hero Tracker Save Flow
+
+```
+User edits hero level in HeroCard
+     │
+     ▼
+useAutoSave hook debounces (300ms)
+     │
+     ▼
+PATCH /api/heroes/{heroName}
+     │
+     ▼
+HeroesFunction validates + updates DynamoDB
+     │
+     ▼
+SaveIndicator shows ✓ in UI
+```
+
+### Impersonation Flow
+
+```
+Admin clicks "Login As" on Users page
+     │
+     ▼
+POST /api/admin/impersonate/{userId}
+     │
+     ▼
+Backend returns target user data
+     │
+     ▼
+Frontend stores admin user in localStorage
+Sets displayed user to impersonated user
+Shows "Viewing as: username" banner
+     │
+     ▼
+All API calls include X-Impersonate-User header
+Backend routes to impersonated user's data
+     │
+     ▼
+"Switch Back" restores admin user from localStorage
+```
+
+## Security
+
+- **Auth**: Cognito JWT tokens, validated in every Lambda
+- **Admin**: Role-based access control on all `/api/admin/*` routes
+- **Impersonation**: Logged to audit trail, admin-only
+- **CORS**: Configured in API Gateway, restricted to app domain
+- **Data isolation**: All queries scoped to authenticated user's PK
+- **AI safety**: Jailbreak protection, WoS-only question filtering

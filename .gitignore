@@ -1,6 +1,48 @@
-infra/.aws-sam/
-frontend/node_modules/
-frontend/.next/
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Node / Next.js
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# AWS SAM
+infra/.aws-sam/
+.aws-sam/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Environment / Secrets
+.env
 .env.local
+.env.production
+.env.*.local
+
+# Database
+*.db
+*.sqlite3
+
+# Build artifacts
+backend/assets/
+backend/data/
+
+# Exports and temp data
+export_data/
+Screenshots/
+
+# OS files
+Thumbs.db
+.DS_Store
+nul
+
+# Local Claude settings
+.claude/settings.local.json
