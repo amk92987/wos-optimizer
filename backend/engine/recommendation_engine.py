@@ -222,7 +222,8 @@ class RecommendationEngine:
         # Convert user_gear ORM objects to dict format if gear_dict not provided
         if not gear_dict and user_gear:
             gear_dict = self._convert_gear_to_dict(user_gear)
-        gear_recs = self.gear_advisor.analyze(profile, gear_dict or {})
+        charm_dict = self._extract_charm_levels(user_charms or []) if user_charms else None
+        gear_recs = self.gear_advisor.analyze(profile, gear_dict or {}, charm_dict)
         for rec in gear_recs:
             all_recommendations.append(Recommendation(
                 priority=rec.priority,
@@ -657,20 +658,35 @@ class RecommendationEngine:
         return heroes_dict
 
     def _convert_gear_to_dict(self, user_gear: list) -> dict:
-        """Convert user_gear ORM objects to dict format for GearAdvisor."""
+        """Convert user_gear ORM/dict objects to dict format for GearAdvisor.
+
+        Maps DynamoDB field names to in-game slot names:
+            armor → coat (Infantry), boots → pants (Infantry),
+            gloves → belt (Marksman), amulet → weapon (Marksman),
+            helmet → cap (Lancer), ring → watch (Lancer)
+        """
         gear_dict = {'chief_gear': {}, 'hero_gear': {}}
 
+        db_to_game = {
+            'armor_quality': 'coat', 'boots_quality': 'pants',
+            'gloves_quality': 'belt', 'amulet_quality': 'weapon',
+            'helmet_quality': 'cap', 'ring_quality': 'watch',
+        }
+
         for gear in user_gear:
-            # UserChiefGear has attributes like ring_quality, amulet_quality, etc.
-            if hasattr(gear, 'ring_quality'):
-                gear_dict['chief_gear'] = {
-                    'ring': getattr(gear, 'ring_quality', None) or 1,
-                    'amulet': getattr(gear, 'amulet_quality', None) or 1,
-                    'helmet': getattr(gear, 'helmet_quality', None) or 1,
-                    'armor': getattr(gear, 'armor_quality', None) or 1,
-                    'gloves': getattr(gear, 'gloves_quality', None) or 1,
-                    'boots': getattr(gear, 'boots_quality', None) or 1,
-                }
+            has_gear = False
+            if isinstance(gear, dict):
+                has_gear = 'ring_quality' in gear or 'helmet_quality' in gear
+            else:
+                has_gear = hasattr(gear, 'ring_quality')
+
+            if has_gear:
+                for db_field, game_slot in db_to_game.items():
+                    if isinstance(gear, dict):
+                        val = gear.get(db_field, None) or 1
+                    else:
+                        val = getattr(gear, db_field, None) or 1
+                    gear_dict['chief_gear'][game_slot] = val
 
         return gear_dict
 
@@ -692,6 +708,159 @@ class RecommendationEngine:
     def get_gear_priority(self, spending_profile: str = "f2p") -> List[dict]:
         """Get gear upgrade priority order for a spending profile."""
         return self.gear_advisor.get_gear_priority_order(spending_profile)
+
+    def get_stat_insights(
+        self,
+        profile,
+        user_gear: list = None,
+        user_charms: list = None,
+    ) -> Dict[str, Any]:
+        """
+        Analyze combat stat balance from tracked data (chief gear + charms).
+
+        Returns stat gap analysis and balance recommendations.
+        Untracked sources (Research, Daybreak, Pets) are noted but can't be measured.
+        """
+        gear_qualities = self._extract_gear_qualities(user_gear or [])
+        charm_levels = self._extract_charm_levels(user_charms or [])
+
+        # Approximate stat contribution per troop type from gear
+        troop_gear_stats: Dict[str, Dict[str, float]] = {
+            'Infantry': {'attack': 0, 'defense': 0},
+            'Marksman': {'attack': 0, 'defense': 0},
+            'Lancer': {'attack': 0, 'defense': 0},
+        }
+
+        # Gear quality → approximate % contribution (rough mapping)
+        quality_to_pct = {1: 2, 2: 5, 3: 10, 4: 15, 5: 22, 6: 30, 7: 40}
+
+        gear_slot_to_troop = {
+            'coat': 'Infantry', 'pants': 'Infantry',
+            'belt': 'Marksman', 'weapon': 'Marksman',
+            'cap': 'Lancer', 'watch': 'Lancer',
+        }
+
+        for slot, troop in gear_slot_to_troop.items():
+            quality = gear_qualities.get(slot, 1)
+            pct = quality_to_pct.get(quality, 2)
+            troop_gear_stats[troop]['attack'] += pct
+            troop_gear_stats[troop]['defense'] += pct
+
+        # Charm levels → approximate contribution
+        troop_charm_stats: Dict[str, float] = {'Infantry': 0, 'Marksman': 0, 'Lancer': 0}
+        charm_slot_to_troop = {
+            'coat': 'Infantry', 'pants': 'Infantry',
+            'belt': 'Marksman', 'weapon': 'Marksman',
+            'cap': 'Lancer', 'watch': 'Lancer',
+        }
+
+        for piece, troop in charm_slot_to_troop.items():
+            for slot_num in range(1, 4):
+                key = f"{piece}_slot_{slot_num}"
+                level = charm_levels.get(key, 0)
+                troop_charm_stats[troop] += level * 0.5  # ~0.5% per charm level
+
+        # Identify gaps
+        insights: Dict[str, Any] = {
+            'gear_stats': troop_gear_stats,
+            'charm_stats': troop_charm_stats,
+            'gaps': [],
+            'recommendations': [],
+            'untracked_sources': [
+                'Research (Battle Tree)',
+                'Daybreak Island Decorations',
+                'Pets',
+                'Alliance Tech',
+                'Tree of Life',
+                'VIP Level',
+            ],
+        }
+
+        # Find gear gaps
+        all_gear_totals = {t: s['attack'] + s['defense'] for t, s in troop_gear_stats.items()}
+        if all_gear_totals:
+            max_total = max(all_gear_totals.values())
+            for troop, total in all_gear_totals.items():
+                if max_total > 0 and total < max_total * 0.7:
+                    gap_pct = ((max_total - total) / max_total * 100)
+                    insights['gaps'].append({
+                        'type': 'gear',
+                        'troop': troop,
+                        'message': f"{troop} gear stats are ~{gap_pct:.0f}% lower than your strongest type",
+                    })
+                    best_troop = max(all_gear_totals, key=all_gear_totals.get)  # type: ignore
+                    weak_slots = [s for s, t in gear_slot_to_troop.items() if t == troop]
+                    insights['recommendations'].append({
+                        'priority': 2,
+                        'action': f"Upgrade {troop} gear ({'/'.join(s.title() for s in weak_slots)})",
+                        'reason': f"Your {troop} stats are lagging behind {best_troop}. Marginal returns are highest on the weakest stat.",
+                        'category': 'stat_balance',
+                    })
+
+        # Find charm gaps
+        if any(v > 0 for v in troop_charm_stats.values()):
+            max_charm = max(troop_charm_stats.values())
+            for troop, total in troop_charm_stats.items():
+                if max_charm > 0 and total < max_charm * 0.5:
+                    insights['gaps'].append({
+                        'type': 'charms',
+                        'troop': troop,
+                        'message': f"{troop} charm stats are significantly behind",
+                    })
+                    best_charm_troop = max(troop_charm_stats, key=troop_charm_stats.get)  # type: ignore
+                    insights['recommendations'].append({
+                        'priority': 2,
+                        'action': f"Upgrade {troop} charms before pushing {best_charm_troop} charms further",
+                        'reason': f"Your {troop} charm levels are lagging. Balanced charms compound better due to the multiplicative damage formula.",
+                        'category': 'stat_balance',
+                    })
+
+        return insights
+
+    def _extract_gear_qualities(self, user_gear: list) -> Dict[str, int]:
+        """Extract chief gear quality values from user_gear ORM/dict objects.
+
+        DynamoDB stores gear with generic names (helmet, armor, etc.)
+        while the game uses display names (Cap, Coat, etc.):
+            helmet → cap (Lancer), ring → watch (Lancer),
+            armor → coat (Infantry), boots → pants (Infantry),
+            gloves → belt (Marksman), amulet → weapon (Marksman)
+        """
+        qualities: Dict[str, int] = {}
+        # Map DynamoDB field names to in-game slot names
+        field_map = {
+            'armor_quality': 'coat', 'boots_quality': 'pants',
+            'gloves_quality': 'belt', 'amulet_quality': 'weapon',
+            'helmet_quality': 'cap', 'ring_quality': 'watch',
+        }
+        for gear in user_gear:
+            for field, slot in field_map.items():
+                if isinstance(gear, dict):
+                    val = gear.get(field, 0)
+                else:
+                    val = getattr(gear, field, 0)
+                if val:
+                    qualities[slot] = int(val)
+        return qualities
+
+    def _extract_charm_levels(self, user_charms: list) -> Dict[str, int]:
+        """Extract charm slot levels from user_charms ORM/dict objects."""
+        levels: Dict[str, int] = {}
+        charm_pieces = ['cap', 'watch', 'coat', 'pants', 'belt', 'weapon']
+        for charm in user_charms:
+            for piece in charm_pieces:
+                for slot_num in range(1, 4):
+                    key = f"{piece}_slot_{slot_num}"
+                    if isinstance(charm, dict):
+                        val = charm.get(key, 0)
+                    else:
+                        val = getattr(charm, key, 0)
+                    if val:
+                        if isinstance(val, str) and '-' in val:
+                            levels[key] = int(val.split('-')[0])
+                        else:
+                            levels[key] = int(val)
+        return levels
 
     def get_hero_investments(
         self,

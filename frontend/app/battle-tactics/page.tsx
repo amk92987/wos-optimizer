@@ -725,6 +725,7 @@ const ARENA_AOE_HEROES = [
   { name: 'Natalia', gen: 1, class: 'Infantry', tier: 'S', skill: 'Wild Bash', desc: 'Fast AoE stun can win fights before enemy skills activate. Excellent frontline.' },
   { name: 'Jeronimo', gen: 1, class: 'Infantry', tier: 'S', skill: 'Combo Slash', desc: 'Multi-stage AoE attacks with massive damage multiplier. Strongest Gen 1 hero.' },
   { name: 'Molly', gen: 1, class: 'Lancer', tier: 'S', skill: 'Super Snowball', desc: '180-252% AoE damage + 1.5s freeze. Core team DPS with long-term value.' },
+  { name: 'Alonso', gen: 2, class: 'Marksman', tier: 'A+', skill: 'Trapnet', desc: '200-280% AoE damage + 1.5s immobilize. Strong AoE burst with crowd control. Also has Tidal Force (50-70% AoE) and Harpoon Blast stun.' },
   { name: 'Norah', gen: 5, class: 'Lancer', tier: 'A', skill: 'Barrage', desc: '5-grenade cascade hitting random targets (heroes first). Great AoE spread.' },
   { name: 'Hendrik', gen: 8, class: 'Marksman', tier: 'A', skill: "Song of R'lyeh", desc: '220-300% AoE + 1.5s stun to targets within range. Strong backline DPS.' },
   { name: 'Sonya', gen: 8, class: 'Lancer', tier: 'A', skill: 'Extreme Cold', desc: '220-300% AoE + 1.5s freeze. Great crowd control + damage.' },

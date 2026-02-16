@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import PageLayout from '@/components/PageLayout';
 
 type TabKey = 'getting-started' | 'battle-decorations' | 'tree-of-life' | 'strategy';
@@ -88,7 +89,7 @@ const commonMistakes = [
   { mistake: 'Building decorations without a Prosperity goal', whyBad: 'Decorations beyond Prosperity gates waste Life Essence', fix: 'Only build decorations to meet the next Tree of Life gate' },
   { mistake: 'Rushing Daybreak before Furnace L30', whyBad: 'FC unlock is more valuable than Daybreak buffs', fix: 'Get Tree of Life L6, then focus Furnace to L30' },
   { mistake: 'Using Common/Uncommon decorations', whyBad: 'Lowest efficiency - wastes Life Essence', fix: 'Save for Epic/Mythic decorations' },
-  { mistake: 'Ignoring Daybreak entirely', whyBad: 'Free combat stats with no downside', fix: 'At minimum, get Tree of Life L6 for Troops Health +5%' },
+  { mistake: 'Ignoring Daybreak entirely', whyBad: 'Free combat stats with no downside', fix: 'At minimum, get Tree of Life L6 for Troops Attack +5%' },
   { mistake: 'Not upgrading Lumber Camps early', whyBad: 'Lower production rate = less Life Essence over time. This compounds significantly.', fix: 'Rush Lumber Camp and Tree upgrades first before buying decorations.' },
   { mistake: 'Letting Life Essence storage fill up', whyBad: 'Once storage is full, you stop generating. Wasted production.', fix: 'Collect every 12 hours or set reminders.' },
 ];
@@ -99,7 +100,7 @@ const spendingStrategies = {
     priority: 'Medium',
     focus: 'Combat buffs with minimal wood investment',
     strategy: [
-      'Rush Tree of Life L6 for first combat buff',
+      'Rush Tree of Life L6 for Troops Attack +5% (L4 gives Defense +5% first)',
       'Use Epic decorations for balance of cost and efficiency',
       "Don't over-invest beyond L6 until Furnace L30 is reached",
       'Tree of Life L10 is a late-game goal, not mid-game',
@@ -211,6 +212,54 @@ function BattleDecorationsTab() {
       <h2 className="text-xl font-bold text-frost mb-2">Battle Enhancer Decorations</h2>
       <p className="text-frost-muted mb-4">The MAIN source of combat stats from Daybreak - more impactful than Tree of Life</p>
 
+      {/* Priority Callout */}
+      <div className="p-4 rounded-lg bg-gradient-to-r from-fire/20 to-orange-500/20 border border-fire/30 mb-6">
+        <p className="font-bold text-fire mb-2">Why Daybreak Decorations Are Critical</p>
+        <p className="text-sm text-frost-muted">
+          At 400% total stats, maxing your main troop&apos;s Mythic decorations (+10% Attack, +10% Defense) is
+          equivalent to upgrading 2-3 chief gear tiers. An opponent who has both Mythic decorations maxed has
+          +20% stats you don&apos;t. <strong className="text-frost">Don&apos;t skip Daybreak.</strong>
+          {' '}<Link href="/combat" className="text-ice underline hover:text-frost text-xs">Compare all stat sources</Link>
+        </p>
+      </div>
+
+      {/* Total Stat Contribution Panel */}
+      <div className="card mb-6 border-ice/30">
+        <h3 className="font-bold text-frost mb-3">Maximum Combat Stats From Daybreak</h3>
+        <p className="text-frost-muted text-xs mb-4">Per troop type, if all decorations and Tree of Life are maxed</p>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+          <div className="bg-surface rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold text-frost">+17.5%</p>
+            <p className="text-xs text-frost-muted">Attack</p>
+            <p className="text-[10px] text-frost-muted">Mythic +10% + Epic +2.5% + ToL +5%</p>
+          </div>
+          <div className="bg-surface rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold text-frost">+17.5%</p>
+            <p className="text-xs text-frost-muted">Defense</p>
+            <p className="text-[10px] text-frost-muted">Mythic +10% + Epic +2.5% + ToL +5%</p>
+          </div>
+          <div className="bg-surface rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold text-frost">+5%</p>
+            <p className="text-xs text-frost-muted">Health</p>
+            <p className="text-[10px] text-frost-muted">Tree of Life L9</p>
+          </div>
+          <div className="bg-surface rounded-lg p-3 text-center">
+            <p className="text-2xl font-bold text-frost">+5%</p>
+            <p className="text-xs text-frost-muted">Lethality</p>
+            <p className="text-[10px] text-frost-muted">Tree of Life L10</p>
+          </div>
+        </div>
+
+        <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3 text-sm">
+          <p className="text-purple-300 font-medium">Limited Mythics (event-only)</p>
+          <p className="text-frost-muted text-xs mt-1">
+            Serpent Sanctuary adds +20% ALL combat stats. Ferris Wheel +10% ATK, Carousel +10% DEF.
+            These are massive but only available during special events.
+          </p>
+        </div>
+      </div>
+
       {/* Warning */}
       <div className="p-4 rounded-lg bg-red-500/20 border border-red-500/30 mb-6">
         <p className="font-bold text-red-400">
@@ -244,9 +293,9 @@ function BattleDecorationsTab() {
         </ol>
       </div>
 
-      {/* Mythic Decorations */}
-      <h3 className="text-lg font-bold text-frost mb-4">Mythic Decorations (+10% at max level)</h3>
-      <div className="grid md:grid-cols-3 gap-4 mb-8">
+      {/* Mythic Decorations with Impact Calculator */}
+      <h3 className="text-lg font-bold text-frost mb-4">Mythic Decorations — Impact Per Level</h3>
+      <div className="grid md:grid-cols-3 gap-4 mb-4">
         {Object.entries(mythicDecorations).map(([troopType, decos]) => {
           const colors = troopColors[troopType];
           return (
@@ -258,11 +307,53 @@ function BattleDecorationsTab() {
                 <div key={i} className="bg-surface/50 p-3 rounded-lg">
                   <p className="font-medium text-frost">{deco.name}</p>
                   <p className="text-sm text-frost-muted">{deco.effect}</p>
+                  <div className="mt-2">
+                    <div className="flex justify-between text-[10px] text-frost-muted mb-1">
+                      <span>+1% per level</span>
+                      <span>10 levels = +10% max</span>
+                    </div>
+                    <div className="w-full bg-surface-border rounded-full h-2">
+                      <div className={`h-2 rounded-full ${colors.border.replace('border-', 'bg-')}`} style={{ width: '100%' }} />
+                    </div>
+                    <p className="text-[10px] text-frost-muted mt-1">
+                      At 500% total stats, +10% = ~2% of your total — equivalent to a chief gear tier jump
+                    </p>
+                  </div>
                 </div>
               ))}
             </div>
           );
         })}
+      </div>
+
+      {/* Decoration level breakdown */}
+      <div className="card mb-6">
+        <h4 className="font-medium text-frost mb-3">Per-Level Contribution In Context</h4>
+        <p className="text-xs text-frost-muted mb-3">How much each decoration level matters at different total stat levels</p>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left p-2 text-frost-muted">Deco Level</th>
+                <th className="text-right p-2 text-frost-muted">Bonus</th>
+                <th className="text-right p-2 text-frost-muted">% of 300% total</th>
+                <th className="text-right p-2 text-frost-muted">% of 500% total</th>
+                <th className="text-right p-2 text-frost-muted">% of 700% total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((lvl) => (
+                <tr key={lvl} className="border-b border-surface-border/30">
+                  <td className="p-2 text-frost">Level {lvl}</td>
+                  <td className="text-right p-2 text-frost font-mono">+{lvl}%</td>
+                  <td className="text-right p-2 text-frost-muted font-mono">{(lvl / 300 * 100).toFixed(1)}%</td>
+                  <td className="text-right p-2 text-frost-muted font-mono">{(lvl / 500 * 100).toFixed(1)}%</td>
+                  <td className="text-right p-2 text-frost-muted font-mono">{(lvl / 700 * 100).toFixed(1)}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Epic Decorations */}
@@ -535,6 +626,7 @@ export default function DaybreakPage() {
           <h1 className="text-3xl font-bold text-frost">Daybreak Island Guide</h1>
           <p className="text-frost-muted mt-2">
             Combat buffs from Battle Decorations and Tree of Life. <strong className="text-frost">Decorations &gt; Tree of Life for combat.</strong>
+            {' '}<Link href="/combat" className="text-ice underline hover:text-frost text-sm">See full Combat Optimization Guide</Link>
           </p>
         </div>
 

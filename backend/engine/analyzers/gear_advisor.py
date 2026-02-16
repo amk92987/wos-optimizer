@@ -125,13 +125,14 @@ class GearAdvisor:
         """
         self.gear_data = gear_data or {}
 
-    def analyze(self, profile, user_gear: dict = None) -> List[GearRecommendation]:
+    def analyze(self, profile, user_gear: dict = None, user_charms: dict = None) -> List[GearRecommendation]:
         """
         Analyze user's gear and generate recommendations.
 
         Args:
             profile: User profile with spending_profile and priorities
             user_gear: Dict with 'chief_gear' and 'hero_gear' status
+            user_charms: Optional dict of charm slot levels
 
         Returns:
             List of GearRecommendation objects
@@ -146,6 +147,11 @@ class GearAdvisor:
         # Chief gear recommendations (applies to everyone)
         recommendations.extend(
             self._analyze_chief_gear(user_gear.get('chief_gear', {}), priority_svs)
+        )
+
+        # Stat balance analysis (gear pairs + charms)
+        recommendations.extend(
+            self._analyze_stat_balance(user_gear.get('chief_gear', {}), user_charms)
         )
 
         # Hero gear recommendations (spender-aware)
@@ -327,6 +333,132 @@ class GearAdvisor:
                             relevance_tags=['hero_gear'],
                             rule_id=f"hero_gear_{target.lower()}"
                         ))
+
+        return recommendations
+
+    def _analyze_stat_balance(self, chief_gear: dict, user_charms: dict = None) -> List[GearRecommendation]:
+        """
+        Identify weakest gear pairs and charm imbalances.
+
+        Marginal returns are highest on the weakest stat — going from +10% to +20%
+        gives more combat impact than +60% to +70%.
+        """
+        recommendations = []
+        if not chief_gear:
+            return recommendations
+
+        # Map gear pairs to troop types
+        troop_gear_pairs = {
+            'Infantry': {'slots': ['coat', 'pants'], 'label': 'Coat/Pants'},
+            'Marksman': {'slots': ['belt', 'weapon'], 'label': 'Belt/Weapon'},
+            'Lancer': {'slots': ['cap', 'watch'], 'label': 'Cap/Watch'},
+        }
+
+        # Calculate average quality per troop type
+        troop_qualities: Dict[str, float] = {}
+        for troop, info in troop_gear_pairs.items():
+            avg = sum(normalize_quality(chief_gear.get(s, 1)) for s in info['slots']) / len(info['slots'])
+            troop_qualities[troop] = avg
+
+        if not troop_qualities:
+            return recommendations
+
+        max_quality = max(troop_qualities.values())
+        min_quality = min(troop_qualities.values())
+
+        # Only flag if there's a meaningful gap (at least 1 full tier)
+        if max_quality - min_quality >= 1.0:
+            weakest_troop = min(troop_qualities, key=troop_qualities.get)  # type: ignore
+            strongest_troop = max(troop_qualities, key=troop_qualities.get)  # type: ignore
+            weak_info = troop_gear_pairs[weakest_troop]
+            strong_info = troop_gear_pairs[strongest_troop]
+
+            weak_name = QUALITY_NAMES.get(int(troop_qualities[weakest_troop]), 'Common')
+            strong_name = QUALITY_NAMES.get(int(troop_qualities[strongest_troop]), 'Common')
+
+            recommendations.append(GearRecommendation(
+                priority=2,
+                action=f"Upgrade {weakest_troop} gear ({weak_info['label']}) — lagging behind",
+                gear_type="chief",
+                piece=weak_info['label'],
+                reason=(
+                    f"Your {weakest_troop} stats are lagging ({weak_name} vs {strong_name} {strongest_troop}). "
+                    f"{weak_info['label']} upgrades will have higher marginal impact than pushing {strong_info['label']} further."
+                ),
+                resources="Hardened Alloy, Polishing Solution, Design Plans",
+                relevance_tags=['stat_balance', 'efficiency'],
+                rule_id="stat_balance_gear"
+            ))
+
+        # Analyze charm balance if data is provided
+        if user_charms:
+            charm_recs = self._analyze_charm_balance(user_charms)
+            recommendations.extend(charm_recs)
+
+        return recommendations
+
+    def _analyze_charm_balance(self, user_charms: dict) -> List[GearRecommendation]:
+        """Detect lopsided charm levels across troop types."""
+        recommendations = []
+        if not user_charms:
+            return recommendations
+
+        # Charm slots map: gear piece → troop type
+        charm_troop_map = {
+            'cap': 'Lancer', 'watch': 'Lancer',
+            'coat': 'Infantry', 'pants': 'Infantry',
+            'belt': 'Marksman', 'weapon': 'Marksman',
+        }
+
+        # Collect charm levels per troop type
+        troop_charm_totals: Dict[str, List[int]] = {'Infantry': [], 'Lancer': [], 'Marksman': []}
+
+        for piece, troop in charm_troop_map.items():
+            for slot_num in range(1, 4):
+                key = f"{piece}_slot_{slot_num}"
+                val = user_charms.get(key, 0)
+                # Parse charm level — could be string like "4-2" (sub-levels) or int
+                if isinstance(val, str) and '-' in val:
+                    level = int(val.split('-')[0])
+                elif val:
+                    level = int(val)
+                else:
+                    level = 0
+                troop_charm_totals[troop].append(level)
+
+        # Calculate average charm level per troop type
+        troop_charm_avg: Dict[str, float] = {}
+        for troop, levels in troop_charm_totals.items():
+            if levels:
+                troop_charm_avg[troop] = sum(levels) / len(levels)
+            else:
+                troop_charm_avg[troop] = 0
+
+        if not troop_charm_avg or max(troop_charm_avg.values()) == 0:
+            return recommendations
+
+        max_avg = max(troop_charm_avg.values())
+        min_avg = min(troop_charm_avg.values())
+
+        # Flag if one troop type's charms are significantly behind (2+ levels)
+        if max_avg - min_avg >= 2.0:
+            weakest = min(troop_charm_avg, key=troop_charm_avg.get)  # type: ignore
+            strongest = max(troop_charm_avg, key=troop_charm_avg.get)  # type: ignore
+
+            recommendations.append(GearRecommendation(
+                priority=2,
+                action=f"Upgrade {weakest} charms — lagging behind other types",
+                gear_type="chief",
+                piece=f"{weakest} charms",
+                reason=(
+                    f"Your {weakest} charms (avg L{min_avg:.0f}) are behind {strongest} charms (avg L{max_avg:.0f}). "
+                    f"Upgrade {weakest} charms before pushing {strongest} charms further — "
+                    f"balanced charms also unlock the army-wide bonus."
+                ),
+                resources="Charm materials",
+                relevance_tags=['stat_balance', 'charms'],
+                rule_id="stat_balance_charms"
+            ))
 
         return recommendations
 

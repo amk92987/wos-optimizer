@@ -153,6 +153,42 @@ def get_phase_info():
         return {"phase": {"name": phase, "furnace_level": furnace}}
 
 
+@app.get("/api/recommendations/stat-insights")
+def get_stat_insights():
+    profile, heroes = _load_user_context()
+
+    from engine.recommendation_engine import get_engine
+    engine = get_engine()
+
+    profile_obj = _wrap_profile(profile)
+
+    # Load chief gear and charms if available
+    user_gear = []
+    user_charms = []
+    try:
+        from common import chief_repo
+        profile_id = profile["profile_id"]
+        gear = chief_repo.get_chief_gear(profile_id)
+        if gear:
+            user_gear = [_convert_decimals(gear)]
+        charms = chief_repo.get_chief_charms(profile_id)
+        if charms:
+            user_charms = [_convert_decimals(charms)]
+    except Exception as e:
+        logger.warning(f"Could not load gear/charms for stat insights: {e}")
+
+    try:
+        insights = engine.get_stat_insights(
+            profile=profile_obj,
+            user_gear=user_gear,
+            user_charms=user_charms,
+        )
+        return {"stat_insights": insights}
+    except Exception as e:
+        logger.warning(f"Stat insights failed: {e}")
+        return {"stat_insights": {"gaps": [], "recommendations": [], "untracked_sources": []}}
+
+
 @app.get("/api/recommendations/gear-priority")
 def get_gear_priority():
     profile, heroes = _load_user_context()
