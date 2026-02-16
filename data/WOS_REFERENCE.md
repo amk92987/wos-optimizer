@@ -7,13 +7,14 @@
 ## Table of Contents
 1. [Hero Skill System](#hero-skill-system)
 2. [Rally Mechanics](#rally-mechanics)
-3. [Chief Gear](#chief-gear)
-4. [Hero Skills Database](#hero-skills-database)
-5. [Troop Ratios](#troop-ratios)
-6. [Server Timeline](#server-timeline)
-7. [Hero Tier Rankings](#hero-tier-rankings)
-8. [Event Strategies](#event-strategies)
-9. [Recommendation Explanation System](#recommendation-explanation-system)
+3. [Battle Mechanics & Combat Stats](#battle-mechanics--combat-stats)
+4. [Chief Gear](#chief-gear)
+5. [Hero Skills Database](#hero-skills-database)
+6. [Troop Ratios](#troop-ratios)
+7. [Server Timeline](#server-timeline)
+8. [Hero Tier Rankings](#hero-tier-rankings)
+9. [Event Strategies](#event-strategies)
+10. [Recommendation Explanation System](#recommendation-explanation-system)
 
 ---
 
@@ -74,6 +75,76 @@ Increasing amount of manuals required per level upgrade (exact amounts vary by h
 **Why Sergey is best for garrison:** Universal damage reduction is the most straightforward defensive joiner effect.
 
 **Note:** Skill effects scale with level. A level 5 Jessie provides +25% DMG, while level 1 only provides +5%.
+
+---
+
+## Battle Mechanics & Combat Stats
+
+**Source:** In-game battle reports (2026-02-14), verified from user screenshots.
+
+### The 12 Combat Stats
+
+Every battle is governed by **4 stats per troop type × 3 troop types = 12 stat bonuses**:
+
+| Stat | What It Does | Sources |
+|------|-------------|---------|
+| **Attack** | Base damage output | Hero skills, Chief Gear, Charms, Research, VIP, Daybreak, Pets, Alliance |
+| **Defense** | Damage mitigation/reduction | Same sources as Attack |
+| **Lethality** | Armor penetration (ignores portion of enemy Defense) | Same sources; separate from Attack |
+| **Health** | Total HP pool for troops | Same sources; separate from Defense |
+
+These 4 stats apply independently to each troop type:
+- **Infantry** Attack, Defense, Lethality, Health
+- **Lancer** Attack, Defense, Lethality, Health
+- **Marksman** Attack, Defense, Lethality, Health
+
+### Stat Bonus Magnitudes
+
+Stat bonuses are **cumulative percentages** from ALL sources stacked together. At high levels of play:
+- Bonuses range from **300% to 800%+** (meaning troops are 4-9× their base stats)
+- A well-invested account can have **2× the stat bonuses** of a mid-tier account across all 12 stats
+- The largest gaps tend to be in **Lethality** (up to 3× advantage observed)
+- Even "small" hero skill percentages (+5-25%) are meaningful multipliers on top of 300-800% base bonuses
+
+### Real Battle Report Example (Feb 2026)
+
+| Stat | Strong Account | Weaker Account | Advantage |
+|------|---------------|----------------|-----------|
+| Infantry Attack | +745.8% | +357.3% | 2.09× |
+| Infantry Defense | +715.8% | +359.8% | 1.99× |
+| Infantry Lethality | +585.7% | +261.7% | 2.24× |
+| Infantry Health | +518.3% | +288.1% | 1.80× |
+| Lancer Attack | +703.0% | +324.7% | 2.17× |
+| Lancer Defense | +682.6% | +310.9% | 2.20× |
+| Lancer Lethality | +401.2% | +238.7% | 1.68× |
+| Lancer Health | +376.1% | +266.6% | 1.41× |
+| Marksman Attack | +801.8% | +333.6% | 2.40× |
+| Marksman Defense | +758.9% | +324.4% | 2.34× |
+| Marksman Lethality | +757.8% | +244.3% | 3.10× |
+| Marksman Health | +543.6% | +281.1% | 1.93× |
+
+### How Stats Stack (Sources of Combat Bonuses)
+
+All these sources combine **additively** into the final stat percentage:
+
+1. **Hero Skills** — Expedition skills (PvP) or Exploration skills (PvE). Each hero provides buffs from their 3 active skills. Skill effects can be:
+   - **Self buffs**: atk_buff, def_buff, hp_buff, dmg_dealt_buff, lethality_buff, shield, dodge, crit_rate, crit_dmg
+   - **Enemy debuffs**: enemy_vuln (take more damage), enemy_def_debuff, enemy_atk_debuff, enemy_lethality_debuff
+   - **Rally-wide**: enemy debuffs benefit ALL rally participants (not just your troops)
+2. **Chief Gear** — 6 pieces, each with base stats + set bonus. Troop-type-specific: Coat/Pants = Infantry, Belt/Shortstaff = Marksman, Hat/Watch = Lancer
+3. **Chief Charms** — Unlocked at Furnace 25. 3 slots per gear piece, same type. Levels 1-16 with sub-levels.
+4. **Daybreak Island Decorations** — Mythic decorations give up to 10% per troop stat. Tree of Life gives universal buffs.
+5. **Research** — Multiple research trees contribute stat bonuses
+6. **VIP Level** — Passive stat increases
+7. **Pets** — Pet skills provide additional stat buffs
+8. **Alliance Technology** — Alliance-wide stat contributions
+
+### Key Battle Mechanics
+
+- **Attack vs Defense**: Attack determines raw damage, Defense reduces it. Lethality penetrates Defense.
+- **Health vs Damage Reduction**: Health is the HP pool. Damage reduction (from skills like Wu Ming's -25%) applies BEFORE damage is dealt, reducing the effective hit.
+- **Hero Power**: Each hero has individual power. In battle reports, heroes show individual power (e.g., lead hero at 100,807 vs support heroes at 33,602).
+- **Battle outcome** depends on: stat advantages, troop composition, hero skill synergy, and troop count.
 
 ---
 
