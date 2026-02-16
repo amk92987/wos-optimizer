@@ -31,14 +31,14 @@ if (-not $FrontendOnly) {
 
 if (-not $BackendOnly) {
     Write-Host "`n=== Syncing Frontend to S3 ===" -ForegroundColor Cyan
-    & $awsCli s3 sync "$rootDir\frontend\out" "s3://wos-frontend-dev-561893854848" --delete
+    & $awsCli s3 sync "$rootDir\frontend\out" "s3://wos-frontend-dev-561893854848" --delete --no-progress
     if ($LASTEXITCODE -ne 0) {
         Write-Host "S3 sync failed!" -ForegroundColor Red
         exit 1
     }
 
     Write-Host "`n=== Invalidating CloudFront ===" -ForegroundColor Cyan
-    & $awsCli cloudfront create-invalidation --distribution-id E1CU7UPD2I54BY --paths "/*"
+    & $awsCli cloudfront create-invalidation --distribution-id EWE2LGBUHCEI1 --paths "/*"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "CloudFront invalidation failed!" -ForegroundColor Red
         exit 1

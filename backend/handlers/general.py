@@ -498,8 +498,15 @@ def get_general_lineup(gameMode: str):
     try:
         from engine.recommendation_engine import get_engine
         engine = get_engine()
-        result = engine.lineup_builder.build_general_lineup(gameMode, max_generation=max_generation)
-        return result
+        lineup = engine.lineup_builder.build_general_lineup(gameMode, max_generation=max_generation)
+        return {
+            "game_mode": lineup.game_mode,
+            "heroes": lineup.heroes,
+            "troop_ratio": lineup.troop_ratio,
+            "notes": lineup.notes,
+            "confidence": lineup.confidence,
+            "recommended_to_get": lineup.recommended_to_get,
+        }
     except Exception as e:
         logger.warning(f"General lineup failed, returning template: {e}")
         # Fall back to template data

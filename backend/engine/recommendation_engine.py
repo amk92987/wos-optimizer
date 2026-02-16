@@ -337,7 +337,11 @@ class RecommendationEngine:
             Dict with lineup information
         """
         heroes_dict = self._heroes_list_to_dict(user_heroes)
-        lineup = self.lineup_builder.build_lineup(game_mode, heroes_dict, profile)
+        lineup = self.lineup_builder.build_personalized_lineup(
+            event_type=game_mode,
+            user_heroes=heroes_dict,
+            max_generation=99,
+        )
 
         return {
             "game_mode": lineup.game_mode,
@@ -350,11 +354,17 @@ class RecommendationEngine:
 
     def get_all_lineups(self, user_heroes: list, profile=None) -> Dict[str, dict]:
         """Get lineups for all game modes."""
+        from engine.analyzers.lineup_builder import LINEUP_TEMPLATES
         heroes_dict = self._heroes_list_to_dict(user_heroes)
-        lineups = self.lineup_builder.get_all_lineups(heroes_dict, profile)
 
-        return {
-            mode: {
+        result = {}
+        for mode in LINEUP_TEMPLATES:
+            lineup = self.lineup_builder.build_personalized_lineup(
+                event_type=mode,
+                user_heroes=heroes_dict,
+                max_generation=99,
+            )
+            result[mode] = {
                 "game_mode": lineup.game_mode,
                 "heroes": lineup.heroes,
                 "troop_ratio": lineup.troop_ratio,
@@ -362,8 +372,7 @@ class RecommendationEngine:
                 "confidence": lineup.confidence,
                 "recommended_to_get": lineup.recommended_to_get,
             }
-            for mode, lineup in lineups.items()
-        }
+        return result
 
     def get_joiner_recommendation(self, user_heroes: list, attack: bool = True) -> dict:
         """Get specific recommendation for joining rallies."""
@@ -621,6 +630,18 @@ class RecommendationEngine:
                 heroes_dict[name] = {
                     'level': _val('level', 1),
                     'stars': _val('stars', 1),
+                    'ascension': _val('ascension', 0),
+                    # Gear (4 slots)
+                    'gear_slot1_quality': _val('gear_slot1_quality', 0),
+                    'gear_slot2_quality': _val('gear_slot2_quality', 0),
+                    'gear_slot3_quality': _val('gear_slot3_quality', 0),
+                    'gear_slot4_quality': _val('gear_slot4_quality', 0),
+                    'gear_slot1_level': _val('gear_slot1_level', 0),
+                    'gear_slot2_level': _val('gear_slot2_level', 0),
+                    'gear_slot3_level': _val('gear_slot3_level', 0),
+                    'gear_slot4_level': _val('gear_slot4_level', 0),
+                    # Exclusive gear (mythic heroes only)
+                    'exclusive_gear_skill_level': _val('exclusive_gear_skill_level', 0),
                     # Individual skills
                     'expedition_skill_1': exp_skill_1,
                     'expedition_skill_2': exp_skill_2,

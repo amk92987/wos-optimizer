@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
-import { lineupsApi, profileApi } from '@/lib/api';
+import { lineupsApi, profileApi, getHeroDataVersion } from '@/lib/api';
 
 interface LineupHero {
   hero: string;
@@ -57,12 +57,11 @@ interface EventType {
 }
 
 const eventTypes: EventType[] = [
-  { id: 'bear_trap', name: 'Bear Trap', icon: '🐻' },
-  { id: 'crazy_joe', name: 'Crazy Joe', icon: '🤪' },
-  { id: 'garrison', name: 'Garrison Leader', icon: '🏰' },
   { id: 'svs_attack', name: 'Rally Leader', icon: '⚔️' },
   { id: 'rally_attack', name: 'Rally Joiner', icon: '🎯' },
+  { id: 'garrison', name: 'Garrison Leader', icon: '🏰' },
   { id: 'rally_defense', name: 'Garrison Joiner', icon: '🛡️' },
+  { id: 'bear_trap', name: 'Bear Trap', icon: '🐻' },
 ];
 
 /** Convert snake_case to Title Case for display */
@@ -70,12 +69,12 @@ function formatLabel(s: string): string {
   return s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-type TabType = 'optimal' | 'joiner' | 'exploration' | 'reference';
+type TabType = 'optimal' | 'joiner' | 'exploration' | 'reference' | 'how';
 
 export default function LineupsPage() {
   const { token, user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('optimal');
-  const [selectedEvent, setSelectedEvent] = useState('bear_trap');
+  const [selectedEvent, setSelectedEvent] = useState('svs_attack');
   const [selectedGeneration, setSelectedGeneration] = useState(8);
   const [personalizedLineup, setPersonalizedLineup] = useState<LineupResponse | null>(null);
   const [generalLineup, setGeneralLineup] = useState<LineupResponse | null>(null);
@@ -86,6 +85,42 @@ export default function LineupsPage() {
   const [joinerDefense, setJoinerDefense] = useState<JoinerRecommendation | null>(null);
   const [hasHeroes, setHasHeroes] = useState<boolean | null>(null);
   const [usingGeneralFallback, setUsingGeneralFallback] = useState(false);
+  const heroDataVersionRef = useRef(getHeroDataVersion());
+
+  // Re-fetch lineup data when hero data changes (e.g. after bulk update on Heroes page)
+  useEffect(() => {
+    const checkForHeroUpdates = () => {
+      const currentVersion = getHeroDataVersion();
+      if (currentVersion !== heroDataVersionRef.current) {
+        heroDataVersionRef.current = currentVersion;
+        if (token) {
+          fetchPersonalizedLineup();
+          if (activeTab === 'joiner') {
+            fetchJoinerRecommendations();
+          }
+        }
+      }
+    };
+
+    // Check on visibility change (handles tab switching / bfcache)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkForHeroUpdates();
+      }
+    };
+
+    // Check on window focus (handles returning to browser)
+    window.addEventListener('focus', checkForHeroUpdates);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Check immediately on mount (handles SPA navigation after hero changes)
+    checkForHeroUpdates();
+
+    return () => {
+      window.removeEventListener('focus', checkForHeroUpdates);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [token, activeTab]);
 
   // Fetch templates and profile gen on mount
   useEffect(() => {
@@ -271,6 +306,7 @@ export default function LineupsPage() {
             { id: 'joiner' as const, label: 'Rally Joiner Guide' },
             { id: 'exploration' as const, label: 'Exploration' },
             { id: 'reference' as const, label: 'Quick Reference' },
+            { id: 'how' as const, label: 'How It Works' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -307,6 +343,7 @@ export default function LineupsPage() {
         )}
         {activeTab === 'exploration' && <ExplorationTab />}
         {activeTab === 'reference' && <ReferenceTab templates={templates} />}
+        {activeTab === 'how' && <HowItWorksTab />}
       </div>
     </PageLayout>
   );
@@ -331,7 +368,7 @@ function PvePvpExplanation() {
               <h3 className="font-medium text-success mb-2">PvE - Exploration Skills (Left Side)</h3>
               <p className="text-sm text-frost-muted mb-2">Fighting against the game:</p>
               <ul className="text-sm text-frost-muted space-y-1">
-                <li>- Bear Trap, Crazy Joe</li>
+                <li>- Bear Trap, Labyrinth</li>
                 <li>- Labyrinth, Exploration</li>
                 <li>- Uses left-side skills on hero card</li>
                 <li>- Upgraded with Exploration Manuals</li>
@@ -360,6 +397,15 @@ function PvePvpExplanation() {
     </div>
   );
 }
+
+const BEAR_TRAP_JOINERS = [
+  { name: 'Jessie', gen: 1, skill: 'Stand of Arms', effect: '+5-25% DMG dealt' },
+  { name: 'Jasser', gen: 1, skill: 'Tactical Genius', effect: '+5-25% DMG dealt' },
+  { name: 'Seo-yoon', gen: 1, skill: 'Rallying Beat', effect: '+5-25% ATK' },
+  { name: 'Hervor', gen: 12, skill: 'Call For Blood', effect: '+5-25% DMG dealt' },
+  { name: 'Hendrik', gen: 8, skill: "Worm's Ravage", effect: '-5-25% enemy DEF' },
+  { name: 'Sonya', gen: 8, skill: 'Treasure Hunter', effect: '+4-20% DMG' },
+];
 
 function OptimalLineupsTab({
   eventTypes,
@@ -437,8 +483,8 @@ function OptimalLineupsTab({
       {/* Event Selection */}
       <div id="event-selection" className="card mb-6">
         <h2 className="section-header">Select Event Type</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {eventTypes.map((event: EventType) => (
+        <div className="grid grid-cols-2 gap-3">
+          {eventTypes.map((event: EventType, index: number) => (
             <button
               key={event.id}
               onClick={() => {
@@ -449,6 +495,8 @@ function OptimalLineupsTab({
                 }, 0);
               }}
               className={`p-4 rounded-lg text-center transition-all ${
+                index === eventTypes.length - 1 ? 'col-span-2 max-w-[50%] w-full justify-self-center' : ''
+              } ${
                 selectedEvent === event.id
                   ? 'bg-ice/20 border-2 border-ice text-ice'
                   : 'bg-surface border-2 border-transparent text-frost-muted hover:text-frost hover:bg-surface-hover'
@@ -488,17 +536,15 @@ function OptimalLineupsTab({
         ) : lineup?.heroes && lineup.heroes.length > 0 ? (
           <div className="mb-6">
             <h3 className="text-sm font-medium text-frost-muted mb-3">
-              {isPersonalized ? 'Your Best Heroes' : 'Recommended Heroes'}
+              {selectedEvent === 'bear_trap' ? 'Rally Leader (Your Rally)' : isPersonalized ? 'Your Best Heroes' : 'Recommended Heroes'}
             </h3>
             <div className="flex gap-3 flex-wrap">
               {lineup.heroes.map((hero, i) => (
                 <div
                   key={hero.hero}
-                  className={`flex-1 min-w-[120px] p-3 rounded-lg text-center ${
-                    hero.is_lead ? 'bg-fire/20 border border-fire/30' : 'bg-surface'
-                  }`}
+                  className="flex-1 min-w-[120px] p-3 rounded-lg text-center bg-ice/5 border border-ice/25"
                 >
-                  <div className="w-12 h-12 mx-auto mb-2 rounded-full overflow-hidden flex items-center justify-center bg-surface-hover">
+                  <div className="w-12 h-12 mx-auto mb-2 rounded-full overflow-hidden flex items-center justify-center bg-surface-hover ring-2 ring-ice/20">
                     {hero.image_filename ? (
                       <img
                         src={`/images/heroes/${hero.image_filename}`}
@@ -516,7 +562,6 @@ function OptimalLineupsTab({
                   {hero.status && (
                     <p className="text-xs text-success mt-1">{hero.status}</p>
                   )}
-                  {hero.is_lead && <p className="text-xs text-fire mt-1">Lead</p>}
                 </div>
               ))}
             </div>
@@ -627,6 +672,63 @@ function OptimalLineupsTab({
           </div>
         )}
       </div>
+
+      {/* Bear Trap Joiner Rallies - Separate Card */}
+      {selectedEvent === 'bear_trap' && (
+        <div className="card mb-6 border-orange-500/30">
+          <h2 className="text-lg font-bold text-orange-400 mb-2">Joiner Rallies (up to 6)</h2>
+          <p className="text-sm text-frost-muted mb-4">
+            When joining someone else{"'"}s rally, only your <strong className="text-frost">first hero{"'"}s expedition skill</strong> matters.
+            Heroes 2 and 3 contribute nothing except troop capacity.
+          </p>
+
+          <div className="space-y-2 mb-4">
+            {BEAR_TRAP_JOINERS.map((joiner, i) => {
+              const isConserve = i >= 3;
+              return (
+                <div
+                  key={joiner.name}
+                  className={`p-3 rounded-lg border flex items-center justify-between flex-wrap gap-2 ${
+                    isConserve ? 'bg-surface border-surface-border' : 'bg-ice/5 border-ice/25'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`text-xs font-bold w-5 ${isConserve ? 'text-frost-muted' : 'text-ice'}`}>#{i + 1}</span>
+                    <div>
+                      <span className="text-sm font-medium text-frost">{joiner.name}</span>
+                      <span className="text-xs text-frost-muted ml-2">Gen {joiner.gen}</span>
+                      <p className="text-xs text-frost-muted">{joiner.skill}: {joiner.effect}</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className={`text-xs font-medium ${isConserve ? 'text-frost-muted' : 'text-ice'}`}>
+                      {isConserve ? '20/20/60' : '0/10/90'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* No good joiner callout */}
+          <div className="p-4 rounded-lg bg-warning/10 border border-warning/30 mb-4">
+            <p className="text-sm text-frost">
+              <strong className="text-warning">Don{"'"}t have these heroes?</strong> Send troops with <strong className="text-frost">no hero at all</strong>.
+              A hero whose expedition skill doesn{"'"}t boost damage (gathering speed, construction speed) actually wastes a skill slot
+              that could go to an alliance mate with a real damage skill.
+            </p>
+          </div>
+
+          {/* Two ratio explanation */}
+          <div className="p-3 rounded-lg bg-surface">
+            <p className="text-sm text-frost-muted">
+              <strong className="text-frost">Why two ratios?</strong> Use <strong className="text-ice">0/10/90</strong> (max marksman)
+              for your first 3 joins while you have plenty of marksmen. Switch to <strong className="text-frost">20/20/60</strong> for
+              joins 4-6 to conserve marksman troops across all your rallies. If you have plenty of marksmen, use 0/10/90 for all 6.
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -982,13 +1084,6 @@ function ReferenceTab({ templates }: { templates: Record<string, LineupTemplate>
                 <td className="p-2 text-frost-muted">Maximize ranged DPS</td>
               </tr>
               <tr className="border-b border-surface-border/50">
-                <td className="p-2 text-frost font-medium">Crazy Joe</td>
-                <td className="p-2 text-center">90%</td>
-                <td className="p-2 text-center">10%</td>
-                <td className="p-2 text-center">0%</td>
-                <td className="p-2 text-frost-muted">Kill before backline attacks</td>
-              </tr>
-              <tr className="border-b border-surface-border/50">
                 <td className="p-2 text-frost font-medium">Garrison Defense</td>
                 <td className="p-2 text-center">60%</td>
                 <td className="p-2 text-center">20%</td>
@@ -1085,8 +1180,8 @@ function ReferenceTab({ templates }: { templates: Record<string, LineupTemplate>
             <h3 className="font-medium text-frost mb-2">PvE (Exploration Skills)</h3>
             <p className="text-sm text-frost-muted mb-2">Fighting against the game:</p>
             <ul className="text-sm text-frost-muted list-disc list-inside">
-              <li>Bear Trap, Crazy Joe</li>
-              <li>Labyrinth, Exploration</li>
+              <li>Bear Trap, Exploration</li>
+              <li>Labyrinth, Frozen Stages</li>
               <li>Uses left-side skills</li>
             </ul>
           </div>
@@ -1209,6 +1304,228 @@ function ReferenceTab({ templates }: { templates: Record<string, LineupTemplate>
                 Only expand your roster when your core 3-4 heroes are near maximum for your generation.
               </p>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HowItWorksTab() {
+  return (
+    <div className="space-y-6">
+      {/* Hero Skills: The Foundation */}
+      <div className="card">
+        <h2 className="text-lg font-bold text-frost mb-4">Which Hero Skills Matter?</h2>
+        <p className="text-sm text-frost-muted mb-4">
+          Every hero has <strong className="text-frost">two sets of skills</strong> that activate in completely different situations.
+          Understanding this is the single most important thing for building lineups.
+        </p>
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
+          <div className="p-4 rounded-lg bg-success/10 border border-success/20">
+            <h3 className="font-semibold text-success mb-2">Exploration Skills (Left Side)</h3>
+            <p className="text-xs text-frost-muted mb-2">Upgraded with Exploration Manuals</p>
+            <p className="text-sm text-frost-muted mb-3">
+              These skills activate in <strong className="text-success">PvE content</strong> where your heroes fight game-controlled enemies.
+            </p>
+            <div className="space-y-1">
+              <p className="text-xs text-success/80">Used in:</p>
+              <ul className="text-xs text-frost-muted space-y-0.5 ml-3">
+                <li>- Bear Trap</li>
+                <li>- Crazy Joe</li>
+                <li>- Exploration</li>
+                <li>- Labyrinth</li>
+              </ul>
+            </div>
+          </div>
+          <div className="p-4 rounded-lg bg-fire/10 border border-fire/20">
+            <h3 className="font-semibold text-fire mb-2">Expedition Skills (Right Side)</h3>
+            <p className="text-xs text-frost-muted mb-2">Upgraded with Expedition Manuals</p>
+            <p className="text-sm text-frost-muted mb-3">
+              These skills activate in <strong className="text-fire">PvP content</strong> where your troops fight other players.
+            </p>
+            <div className="space-y-1">
+              <p className="text-xs text-fire/80">Used in:</p>
+              <ul className="text-xs text-frost-muted space-y-0.5 ml-3">
+                <li>- Rally Leader & Joiner</li>
+                <li>- Garrison Leader & Joiner</li>
+                <li>- SvS Battles</li>
+                <li>- Arena</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div className="p-3 rounded-lg bg-warning/10 border border-warning/30">
+          <p className="text-sm text-frost">
+            <strong>Key takeaway:</strong> A hero with amazing exploration skills might have weak expedition skills.
+            Always check which skill set matters for your game mode before investing manuals.
+          </p>
+        </div>
+      </div>
+
+      {/* Leader vs Joiner */}
+      <div className="card">
+        <h2 className="text-lg font-bold text-frost mb-4">Leader vs Joiner: Different Rules</h2>
+        <div className="space-y-4">
+          <div className="p-4 rounded-lg bg-surface border border-surface-border">
+            <h3 className="font-semibold text-ice mb-2">Leading a Rally or Garrison</h3>
+            <p className="text-sm text-frost-muted mb-2">
+              When you lead, <strong className="text-frost">all 3 expedition skills</strong> from <strong className="text-frost">each of your 3 heroes</strong> activate.
+            </p>
+            <div className="flex items-center gap-2 mt-3">
+              <div className="text-center px-3 py-2 rounded bg-ice/10 border border-ice/20">
+                <p className="text-xs text-frost-muted">Hero 1</p>
+                <p className="text-sm font-bold text-ice">3 skills</p>
+              </div>
+              <span className="text-frost-muted">+</span>
+              <div className="text-center px-3 py-2 rounded bg-ice/10 border border-ice/20">
+                <p className="text-xs text-frost-muted">Hero 2</p>
+                <p className="text-sm font-bold text-ice">3 skills</p>
+              </div>
+              <span className="text-frost-muted">+</span>
+              <div className="text-center px-3 py-2 rounded bg-ice/10 border border-ice/20">
+                <p className="text-xs text-frost-muted">Hero 3</p>
+                <p className="text-sm font-bold text-ice">3 skills</p>
+              </div>
+              <span className="text-frost-muted">=</span>
+              <div className="text-center px-3 py-2 rounded bg-ice/20 border border-ice/30">
+                <p className="text-xs text-frost-muted">Total</p>
+                <p className="text-sm font-bold text-ice">9 skills</p>
+              </div>
+            </div>
+            <p className="text-xs text-frost-muted mt-2">
+              This is why hero selection and skill levels matter so much for leaders.
+            </p>
+          </div>
+
+          <div className="p-4 rounded-lg bg-surface border border-surface-border">
+            <h3 className="font-semibold text-fire mb-2">Joining a Rally or Garrison</h3>
+            <p className="text-sm text-frost-muted mb-2">
+              When you join, <strong className="text-frost">ONLY your first hero&apos;s top-right expedition skill</strong> contributes.
+              Your other 2 heroes and their skills don&apos;t count at all.
+            </p>
+            <div className="flex items-center gap-2 mt-3">
+              <div className="text-center px-3 py-2 rounded bg-fire/10 border border-fire/20">
+                <p className="text-xs text-frost-muted">Hero 1</p>
+                <p className="text-sm font-bold text-fire">1 skill</p>
+              </div>
+              <span className="text-frost-muted">+</span>
+              <div className="text-center px-3 py-2 rounded bg-surface border border-surface-border opacity-40">
+                <p className="text-xs text-frost-muted">Hero 2</p>
+                <p className="text-sm text-frost-muted">ignored</p>
+              </div>
+              <span className="text-frost-muted">+</span>
+              <div className="text-center px-3 py-2 rounded bg-surface border border-surface-border opacity-40">
+                <p className="text-xs text-frost-muted">Hero 3</p>
+                <p className="text-sm text-frost-muted">ignored</p>
+              </div>
+            </div>
+            <p className="text-xs text-frost-muted mt-2">
+              This is why Jessie (Stand of Arms: +25% damage) and Sergey (Defenders&apos; Edge: -20% damage taken) are the best joiners
+              regardless of their level or gear.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* How the Optimizer Picks Heroes */}
+      <div className="card">
+        <h2 className="text-lg font-bold text-frost mb-4">How the Optimizer Picks Heroes</h2>
+        <p className="text-sm text-frost-muted mb-4">
+          The lineup optimizer evaluates every hero you own and picks the best combination for each game mode. Here&apos;s what it considers:
+        </p>
+
+        <div className="space-y-3 mb-4">
+          <div className="flex gap-3 items-start">
+            <div className="w-8 h-8 rounded-full bg-ice/20 border border-ice/30 flex items-center justify-center flex-shrink-0">
+              <span className="text-ice text-sm font-bold">1</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-frost">Your Investment</p>
+              <p className="text-xs text-frost-muted">Hero level, stars, ascension, gear quality, and skill levels. A well-built hero beats a neglected one.</p>
+            </div>
+          </div>
+          <div className="flex gap-3 items-start">
+            <div className="w-8 h-8 rounded-full bg-ice/20 border border-ice/30 flex items-center justify-center flex-shrink-0">
+              <span className="text-ice text-sm font-bold">2</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-frost">Mode-Aware Skill Analysis</p>
+              <p className="text-xs text-frost-muted">
+                The optimizer reads each hero&apos;s skill descriptions and identifies what they do &mdash; healing, ATK buffs,
+                damage reduction, etc. &mdash; then weights those effects based on what wins in each specific mode.
+              </p>
+            </div>
+          </div>
+          <div className="flex gap-3 items-start">
+            <div className="w-8 h-8 rounded-full bg-ice/20 border border-ice/30 flex items-center justify-center flex-shrink-0">
+              <span className="text-ice text-sm font-bold">3</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-frost">Composition Rules</p>
+              <p className="text-xs text-frost-muted">
+                Every 3-hero lineup must have exactly 1 Infantry, 1 Lancer, and 1 Marksman. The optimizer respects this constraint and picks the best hero of each class.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Example */}
+        <div className="p-4 rounded-lg bg-surface border border-surface-border">
+          <h3 className="text-sm font-semibold text-ice mb-3">Example: Garrison vs Rally</h3>
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <p className="text-xs font-medium text-frost mb-2">Garrison Leader (survive repeated attacks)</p>
+              <ul className="text-xs text-frost-muted space-y-1">
+                <li>- Healing and HP buffs are critical</li>
+                <li>- Damage reduction keeps troops alive</li>
+                <li>- Pure offense skills have low value</li>
+                <li>- A hero with +25% damage dealt is less useful than one with -20% damage taken</li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-frost mb-2">Rally Leader (kill enemy fast)</p>
+              <ul className="text-xs text-frost-muted space-y-1">
+                <li>- ATK buffs and damage dealt are critical</li>
+                <li>- Burst damage wins short fights</li>
+                <li>- Healing has low value (fight ends fast)</li>
+                <li>- A hero with +25% ATK for all troops is ideal</li>
+              </ul>
+            </div>
+          </div>
+          <p className="text-xs text-frost-muted mt-3 italic">
+            The same hero can be a great pick for one mode and a poor pick for another.
+            The optimizer evaluates this automatically for every hero in your roster.
+          </p>
+        </div>
+      </div>
+
+      {/* Lineup Composition */}
+      <div className="card">
+        <h2 className="text-lg font-bold text-frost mb-4">Lineup Composition</h2>
+        <div className="space-y-3">
+          <div className="p-3 rounded-lg bg-surface">
+            <p className="text-sm text-frost-muted">
+              <strong className="text-frost">3-hero lineups</strong> always require 1 of each class: Infantry + Lancer + Marksman.
+              You cannot double up on a class in a 3-hero lineup.
+            </p>
+          </div>
+          <div className="p-3 rounded-lg bg-surface">
+            <p className="text-sm text-frost-muted">
+              <strong className="text-frost">5-hero lineups</strong> (Arena) can have multiple heroes of the same class, giving you more flexibility.
+            </p>
+          </div>
+          <div className="p-3 rounded-lg bg-surface">
+            <p className="text-sm text-frost-muted">
+              <strong className="text-frost">Multi-lineup events</strong> like Canyon Clash and Labyrinth use multiple 3-hero lineups.
+              Each lineup still follows the 1-of-each-class rule, but you need enough heroes to fill all lineups.
+            </p>
+          </div>
+          <div className="p-3 rounded-lg bg-surface">
+            <p className="text-sm text-frost-muted">
+              <strong className="text-frost">Troop ratios</strong> vary by mode. Bear Trap wants 90% Marksman (ranged DPS before the bear reaches melee),
+              while Garrison wants 60% Infantry (survive incoming attacks). The optimizer recommends the best ratio for each mode.
+            </p>
           </div>
         </div>
       </div>

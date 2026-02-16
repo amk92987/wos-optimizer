@@ -101,21 +101,22 @@
     "crazy_joe": {
       "name": "Crazy Joe",
       "short_name": "CJ",
-      "category": "pve",
+      "category": "alliance_defense",
       "frequency": "weekly",
       "typical_day": "Thursday",
-      "duration_hours": 24,
-      "description": "Solo/Alliance PvE boss event.",
+      "duration_hours": 1,
+      "description": "Alliance wave defense event. 21 waves of bandits attack member cities and Alliance HQ. Players reinforce each other's cities.",
       "point_sources": [
-        {"action": "Deal damage", "points": "based on damage"},
-        {"action": "Complete stages", "points": "stage completion bonus"}
+        {"action": "Kill bandits while reinforcing", "points": "based on kills"},
+        {"action": "Online-only waves (7,14,17)", "points": "2x points"},
+        {"action": "Alliance HQ waves (10,20)", "points": "high value"}
       ],
       "optimizer_relevance": {
-        "priority_systems": ["hero_exploration_skills", "hero_level"],
-        "key_heroes": ["Philly", "Wu Ming", "Blanchette"],
-        "tip": "Similar to Bear Trap. Focus on sustained damage and healing."
+        "priority_systems": ["hero_expedition_skills", "hero_level"],
+        "key_heroes": ["Sergey", "Jeronimo", "Natalia"],
+        "tip": "Garrison-style defense combat. Use expedition skills. 90/10/0 Infantry ratio. Reinforce evenly across alliance."
       },
-      "rewards": ["Resources", "Speedups", "Hero XP"]
+      "rewards": ["Speedups", "Resources", "Hero XP"]
     },
     "flame_lotto": {
       "name": "Flame Lotto",

@@ -17,6 +17,25 @@ interface ApiOptions {
 }
 
 /**
+ * Bump hero data version in localStorage so other pages know to re-fetch.
+ */
+export function bumpHeroDataVersion() {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('heroes_data_version', Date.now().toString());
+  }
+}
+
+/**
+ * Get the current hero data version from localStorage.
+ */
+export function getHeroDataVersion(): string {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('heroes_data_version') || '';
+  }
+  return '';
+}
+
+/**
  * Get the current Cognito ID token from localStorage.
  * Falls back to legacy 'token' key for backwards compatibility.
  */
@@ -72,6 +91,7 @@ export async function api<T>(endpoint: string, options: ApiOptions = {}): Promis
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
+    cache: 'no-store',
   });
 
   if (!response.ok) {
@@ -88,6 +108,7 @@ export async function api<T>(endpoint: string, options: ApiOptions = {}): Promis
           method,
           headers: retryHeaders,
           body: body ? JSON.stringify(body) : undefined,
+          cache: 'no-store',
         });
         if (retryResponse.ok) {
           return retryResponse.json();

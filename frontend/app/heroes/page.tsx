@@ -7,7 +7,7 @@ import HeroCard from '@/components/HeroCard';
 import HeroRoleBadges from '@/components/HeroRoleBadges';
 import HeroDetailModal from '@/components/HeroDetailModal';
 import { useAuth } from '@/lib/auth';
-import { heroesApi, profileApi, UserHero, Hero } from '@/lib/api';
+import { heroesApi, profileApi, UserHero, Hero, bumpHeroDataVersion } from '@/lib/api';
 
 type Tab = 'owned' | 'all';
 type FilterClass = 'all' | 'infantry' | 'lancer' | 'marksman';
@@ -97,6 +97,7 @@ export default function HeroesPage() {
     try {
       const data = await heroesApi.getOwned(token);
       setOwnedHeroes(data.heroes || []);
+      bumpHeroDataVersion();
     } catch (error) {
       console.error('Failed to refresh heroes:', error);
     }
@@ -156,6 +157,7 @@ export default function HeroesPage() {
 
     // Fire backend call in background
     heroesApi.addHero(token, heroName).then(() => {
+      bumpHeroDataVersion();
 
       // Auto-update profile generation in background (non-blocking)
       profileApi.getCurrent(token).then(profileData => {
@@ -189,6 +191,7 @@ export default function HeroesPage() {
 
     try {
       await heroesApi.removeHero(token, heroName);
+      bumpHeroDataVersion();
     } catch (error) {
       // Revert on failure
       setOwnedHeroes(previousHeroes);

@@ -166,7 +166,7 @@
         },
         {
           "tip": "Exploration skills for PvE, Expedition skills for PvP",
-          "detail": "Bear Trap, Crazy Joe = Exploration. SvS, rallies = Expedition. Don't mix them up.",
+          "detail": "Bear Trap, Labyrinth = Exploration. SvS, rallies, Crazy Joe, garrison = Expedition. Don't mix them up.",
           "priority": "high"
         },
         {
@@ -289,7 +289,7 @@
         },
         {
           "tip": "Expedition skills for PvP, Exploration skills for PvE",
-          "detail": "Rallies, SvS, garrison = expedition skills (right side). Bear Trap, Crazy Joe, exploration = exploration skills (left side).",
+          "detail": "Rallies, SvS, garrison, Crazy Joe = expedition skills (right side). Bear Trap, exploration = exploration skills (left side).",
           "priority": "high"
         }
       ]

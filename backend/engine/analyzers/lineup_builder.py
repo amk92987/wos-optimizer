@@ -48,14 +48,28 @@ def load_hero_metadata() -> Dict[str, Dict[str, Any]]:
     for hero in heroes_list:
         name = hero.get('name', '')
         if name:
+            # Read pre-tagged effects keyed by skill number
+            expedition_effects = {}
+            exploration_effects = {}
+            for i in range(1, 4):
+                exp_effs = hero.get(f'expedition_skill_{i}_effects', [])
+                if exp_effs:
+                    expedition_effects[i] = exp_effs
+                expl_effs = hero.get(f'exploration_skill_{i}_effects', [])
+                if expl_effs:
+                    exploration_effects[i] = expl_effs
+
             metadata[name] = {
                 'class': hero.get('hero_class', 'Unknown'),
                 'gen': hero.get('generation', 1),
                 'tier': hero.get('tier_overall', 'C'),
                 'tier_expedition': hero.get('tier_expedition', 'C'),
+                'tier_exploration': hero.get('tier_exploration', 'C'),
                 'role': hero.get('best_use', 'Unknown')[:30] if hero.get('best_use') else 'Unknown',
                 'rarity': hero.get('rarity', 'Rare'),
                 'image_filename': hero.get('image_filename'),
+                'expedition_effects': expedition_effects,
+                'exploration_effects': exploration_effects,
             }
 
     _HERO_METADATA_CACHE = metadata
@@ -70,9 +84,12 @@ def get_hero_metadata(hero_name: str) -> Dict[str, Any]:
         'gen': 99,
         'tier': 'C',
         'tier_expedition': 'C',
+        'tier_exploration': 'C',
         'role': 'Unknown',
         'rarity': 'Rare',
         'image_filename': None,
+        'expedition_effects': [],
+        'exploration_effects': [],
     })
 
 
@@ -90,17 +107,202 @@ class LineupRecommendation:
 # Hero tier values for ranking (S+ = 6, S = 5, ... D = 1)
 TIER_VALUES = {"S+": 6, "S": 5, "A": 4, "B": 3, "C": 2, "D": 1}
 
+# Mode categories for tier and skill selection
+PVE_MODES = {"exploration"}
+JOINER_MODES = {"rally_joiner_attack", "rally_joiner_defense", "rally_attack", "rally_defense"}
 
-def calculate_hero_power(hero_stats: dict, hero_data: dict = None) -> int:
+# Heroes whose tier_expedition is inflated due to their joiner-specific skills.
+# In non-joiner lineups, use tier_overall instead to avoid overvaluing them.
+JOINER_SPECIALISTS = {"Jessie", "Sergey"}
+
+
+# ---------------------------------------------------------------------------
+# Skill Effect Scoring — Pre-tagged approach
+#
+# Each hero's skills are pre-tagged in heroes.json with structured effect data:
+#   {type, target, max_value, effective_pct}
+# The engine reads these tags and computes scores based on:
+#   effective_value = max_value * (skill_level / 5) * (effective_pct / 100)
+#   score += mode_weight[type] * effective_value
+# This is deterministic, accurate, and works for any hero including future ones.
+# ---------------------------------------------------------------------------
+
+# Non-combat utility effects — ignored for lineup scoring
+UTILITY_EFFECTS = {
+    'gathering_speed', 'gathering_capacity', 'march_speed',
+    'training_speed', 'research_speed', 'building_speed',
+    'building_cost_reduction', 'healing_speed', 'stamina_reduction',
+}
+
+# Scaling factor to keep skill scores in ~0-300 range
+# (comparable to other scoring components like level, stars, gear)
+SKILL_SCORE_SCALE = 20
+
+# Troop composition by mode — used to weight class-specific effects.
+# A +100% infantry buff in a mode with 50% infantry = 50% effective impact.
+MODE_TROOP_RATIOS = {
+    'svs_attack':  {'infantry': 0.50, 'lancer': 0.20, 'marksman': 0.30},
+    'garrison':    {'infantry': 0.60, 'lancer': 0.15, 'marksman': 0.25},
+    'bear_trap':   {'infantry': 0.00, 'lancer': 0.10, 'marksman': 0.90},
+    'crazy_joe':   {'infantry': 0.90, 'lancer': 0.10, 'marksman': 0.00},
+    'world_march': {'infantry': 0.50, 'lancer': 0.20, 'marksman': 0.30},
+}
+
+# Mode-specific weights for each effect type.
+# Higher weight = more critical for that mode's win condition.
+MODE_SKILL_WEIGHTS = {
+    # Garrison: survive repeated attacks. Healing/defense >>> offense.
+    'garrison': {
+        'troop_healing': 100, 'hp_buff': 75, 'dmg_reduction': 60, 'shield': 55,
+        'def_buff': 50, 'enemy_atk_debuff': 45, 'enemy_dmg_debuff': 45,
+        'dodge': 40, 'enemy_lethality_debuff': 35, 'enemy_crit_debuff': 30,
+        'enemy_vuln': 15, 'periodic_dmg': 10, 'extra_dmg': 10,
+        'atk_buff': 10, 'enemy_def_debuff': 10,
+        'dmg_dealt_buff': 5, 'lethality_buff': 5,
+        'crit_rate_buff': 5, 'crit_dmg_buff': 5,
+    },
+    # SvS Attack / Rally Lead: kill enemy fast. Offense >>> sustain.
+    # enemy_vuln elevated because rallies benefit ALL participants.
+    'svs_attack': {
+        'dmg_dealt_buff': 80, 'enemy_vuln': 75, 'atk_buff': 65, 'extra_dmg': 60,
+        'enemy_def_debuff': 55, 'lethality_buff': 40, 'periodic_dmg': 35,
+        'crit_rate_buff': 35, 'crit_dmg_buff': 30,
+        'dmg_reduction': 30, 'enemy_atk_debuff': 25, 'enemy_dmg_debuff': 25,
+        'hp_buff': 20, 'shield': 15, 'troop_healing': 15, 'def_buff': 15,
+        'enemy_lethality_debuff': 15, 'dodge': 10, 'enemy_crit_debuff': 10,
+    },
+    # Bear Trap: RALLY boss fight — maximize DPS before bear reaches melee.
+    # Enemy debuffs (enemy_vuln, enemy_def_debuff) are weighted ABOVE personal
+    # buffs because they benefit ALL rally participants, not just your troops.
+    'bear_trap': {
+        'enemy_vuln': 120, 'dmg_dealt_buff': 90, 'atk_buff': 80,
+        'enemy_def_debuff': 75, 'extra_dmg': 60, 'lethality_buff': 45,
+        'periodic_dmg': 40, 'crit_rate_buff': 40, 'crit_dmg_buff': 35,
+        'troop_healing': 25, 'shield': 10,
+        'dmg_reduction': 10, 'hp_buff': 10, 'enemy_atk_debuff': 10,
+        'enemy_dmg_debuff': 10, 'def_buff': 5, 'dodge': 5,
+        'enemy_lethality_debuff': 5, 'enemy_crit_debuff': 5,
+    },
+    # Crazy Joe: not currently shown on lineup page but kept for API compatibility.
+    'crazy_joe': {
+        'troop_healing': 60, 'dmg_reduction': 55, 'shield': 45,
+        'hp_buff': 45, 'def_buff': 40, 'enemy_atk_debuff': 40,
+        'atk_buff': 35, 'enemy_dmg_debuff': 35,
+        'dmg_dealt_buff': 30, 'dodge': 25,
+        'extra_dmg': 25, 'enemy_vuln': 20, 'periodic_dmg': 20,
+        'enemy_lethality_debuff': 20, 'lethality_buff': 15,
+        'crit_rate_buff': 15, 'enemy_crit_debuff': 15,
+        'enemy_def_debuff': 15, 'crit_dmg_buff': 10,
+    },
+    # World March: balanced — need both offense and survival.
+    'world_march': {
+        'atk_buff': 50, 'dmg_dealt_buff': 50,
+        'extra_dmg': 40, 'dmg_reduction': 40,
+        'enemy_vuln': 35, 'hp_buff': 35, 'enemy_def_debuff': 35,
+        'lethality_buff': 30, 'troop_healing': 30, 'shield': 30,
+        'enemy_atk_debuff': 30, 'enemy_dmg_debuff': 30,
+        'def_buff': 25, 'periodic_dmg': 25, 'crit_rate_buff': 25,
+        'dodge': 20, 'crit_dmg_buff': 20, 'enemy_lethality_debuff': 20,
+        'enemy_crit_debuff': 15,
+    },
+}
+
+
+def _get_skill_value(hero_data: dict, hero_stats: dict, mode: str) -> int:
     """
-    Calculate a hero's effective power based on level, stars, gear, and tier.
+    Compute how valuable a hero's skill effects are for a specific game mode.
+
+    Reads pre-tagged effects from hero data and scales by:
+    - Skill level (1-5, linear scaling: value_at_level = max * level/5)
+    - Effect reliability (effective_pct: accounts for chance triggers, uptime)
+    - Mode-specific importance weights
+
+    Supports both metadata format ({1: [...], 2: [...]}) and raw heroes.json
+    format (expedition_skill_1_effects, expedition_skill_2_effects, etc.).
 
     Args:
-        hero_stats: User's hero stats {level, stars, gear_slot1_quality, etc.}
-        hero_data: Static hero data from heroes.json (for tier info)
+        hero_data: Hero metadata or raw hero data with effect tags
+        hero_stats: User's hero stats with skill levels (None = assume max)
+        mode: Game mode key (e.g., 'svs_attack', 'garrison', 'bear_trap')
 
     Returns:
-        Power score (higher = better)
+        Weighted skill score (int, typically 0-300 range)
+    """
+    if not hero_data or not mode:
+        return 0
+
+    weights = MODE_SKILL_WEIGHTS.get(mode, {})
+    if not weights:
+        return 0
+
+    use_exploration = mode in PVE_MODES
+    skill_prefix = 'exploration_skill' if use_exploration else 'expedition_skill'
+    effects_key = 'exploration_effects' if use_exploration else 'expedition_effects'
+
+    # Try metadata format first: {1: [...], 2: [...], 3: [...]}
+    effects_by_skill = hero_data.get(effects_key)
+
+    # Fall back to raw heroes.json format: expedition_skill_1_effects, etc.
+    if effects_by_skill is None:
+        effects_by_skill = {}
+        for i in range(1, 4):
+            key = f'{skill_prefix}_{i}_effects'
+            effects = hero_data.get(key, [])
+            if effects:
+                effects_by_skill[i] = effects
+
+    total = 0.0
+    for skill_num, effects_list in effects_by_skill.items():
+        skill_num_int = int(skill_num)  # dict keys may be strings from JSON
+        # Get user's skill level (default 5 if no stats — general guide mode)
+        if hero_stats:
+            skill_level = hero_stats.get(f'{skill_prefix}_{skill_num_int}', 1)
+        else:
+            skill_level = 5
+
+        for effect in effects_list:
+            eff_type = effect.get('type', '')
+            if eff_type in UTILITY_EFFECTS:
+                continue
+
+            max_val = effect.get('max_value', 0)
+            eff_pct = effect.get('effective_pct', 100)
+            target = effect.get('target', 'all')
+
+            # effective_value = percentage at this skill level, discounted by reliability
+            effective_value = max_val * (skill_level / 5) * (eff_pct / 100)
+
+            # Apply troop composition weighting for class-specific effects.
+            # "all" and "enemy" targets affect everything → no discount.
+            # "infantry"/"lancer"/"marksman" only benefit that class's troops.
+            troop_ratios = MODE_TROOP_RATIOS.get(mode, {})
+            if target in ('all', 'enemy'):
+                target_mult = 1.0
+            elif target in troop_ratios:
+                target_mult = troop_ratios[target]
+            else:
+                target_mult = 0.33  # Unknown target, assume ~1/3 relevance
+
+            weight = weights.get(eff_type, 0)
+            total += weight * effective_value * target_mult
+
+    return int(total / SKILL_SCORE_SCALE)
+
+
+def calculate_hero_power(
+    hero_stats: dict,
+    hero_data: dict = None,
+    mode: str = None,
+    is_joiner_slot: bool = False,
+) -> int:
+    """
+    Calculate a hero's effective power for a specific game mode.
+
+    Mode-aware scoring:
+    - PvE modes use exploration skills and tier_exploration
+    - PvP modes use expedition skills and tier_expedition
+    - Joiner specialists (Jessie/Sergey) use tier_overall in non-joiner slots
+    - Exclusive gear skill provides a significant bonus for mythic heroes
     """
     score = 0
 
@@ -112,24 +314,50 @@ def calculate_hero_power(hero_stats: dict, hero_data: dict = None) -> int:
     stars = hero_stats.get('stars', 0)
     score += stars * 50  # 0-250 points
 
-    # Ascension tier (0-5)
-    ascension = hero_stats.get('ascension_tier', 0)
+    # Ascension (0-5)
+    ascension = hero_stats.get('ascension', hero_stats.get('ascension_tier', 0))
     score += ascension * 30  # 0-150 points
 
-    # Gear quality (4 slots, quality 0-6)
+    # Gear quality (4 slots, quality 0-7)
     for slot in range(1, 5):
         quality = hero_stats.get(f'gear_slot{slot}_quality', 0)
         gear_level = hero_stats.get(f'gear_slot{slot}_level', 0)
-        score += quality * 15 + gear_level // 10  # 0-100 per slot
+        score += quality * 15 + gear_level // 10  # 0-115 per slot
 
-    # Expedition skills (for PvP modes)
-    exp_skill = hero_stats.get('expedition_skill_1_level', 1)
-    score += exp_skill * 20  # 0-100 points
+    # Note: skill levels are factored into _get_skill_value() through effect scaling
+    # (value_at_level = max_value * skill_level / 5), so no separate skill contribution here.
 
-    # Base tier bonus from hero data
+    # Exclusive gear skill (mythic heroes, 0-10)
+    exclusive_skill = hero_stats.get('exclusive_gear_skill_level', 0)
+    score += exclusive_skill * 20  # 0-200 points
+
+    # Tier bonus - mode-aware
     if hero_data:
-        tier = hero_data.get('tier_expedition', 'C')
+        hero_name = hero_data.get('name', '')
+
+        if mode in PVE_MODES:
+            tier = hero_data.get('tier_exploration', 'C')
+        elif is_joiner_slot:
+            tier = hero_data.get('tier_expedition', 'C')
+        elif hero_name in JOINER_SPECIALISTS:
+            # Joiner specialists in non-joiner slots: use overall tier
+            tier = hero_data.get('tier_overall', 'C')
+        else:
+            tier = hero_data.get('tier_expedition', 'C')
+
         score += TIER_VALUES.get(tier, 2) * 25  # 25-150 points
+
+        # Joiner specialist penalty in non-joiner PvP modes.
+        # Their key skill (e.g., Stand of Arms) doesn't activate as a lead,
+        # making them significantly weaker than their tier suggests.
+        if hero_name in JOINER_SPECIALISTS and not is_joiner_slot and mode not in PVE_MODES:
+            score -= 150
+
+    # Skill effect analysis — the "game AI" component.
+    # Evaluates what each hero's skills actually DO and weights them by
+    # what matters for winning in this specific mode.
+    # Auto-detected from skill descriptions, works for future heroes too.
+    score += _get_skill_value(hero_data, hero_stats, mode)
 
     return score
 
@@ -145,8 +373,8 @@ LINEUP_TEMPLATES = {
         "slots": [
             # Infantry: S+ first (Elif, Hervor, Magnus, Wu Ming, Jeronimo), then S (Gatot, Edith), then A
             {"class": "Infantry", "role": "Lead/Tank", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Flint"], "is_lead": True},
-            # Lancer: S first (Dominic, Flora, Karol, Freya, Sonya, Gordon, Renee, Norah), then A
-            {"class": "Lancer", "role": "Support/Heal", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly"]},
+            # Lancer: S first, then A (including mid-gen Mia/Reina/Philly)
+            {"class": "Lancer", "role": "Support/Heal", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Mia", "Reina", "Philly", "Molly"]},
             # Marksman: S+ first (Vulcanus, Blanchette), then S, then A
             {"class": "Marksman", "role": "Main DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
         ],
@@ -191,19 +419,20 @@ LINEUP_TEMPLATES = {
         "ratio_explanation": "Balanced 50/20/30 ratio works for general field combat. Infantry tanks damage, Marksman deals DPS, Lancer provides healing and utility."
     },
     "bear_trap": {
-        "name": "Bear Trap Rally",
+        "name": "Bear Trap",
         "slots": [
-            # Marksman: S+ first (Vulcanus, Blanchette), then S (Cara, Ligeia, Rufus, Xura, Hendrik, etc.)
-            {"class": "Marksman", "role": "Main DPS Lead", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso", "Bahiti", "Zinman"], "is_lead": True},
-            {"class": "Marksman", "role": "Secondary DPS", "preferred": ["Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso", "Bahiti", "Zinman"]},
-            # Infantry: S+ for ATK buffs (Jeronimo, Wu Ming, Elif, Hervor, Magnus)
-            {"class": "Infantry", "role": "Frontline Buffer", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Natalia", "Flint"]},
+            # Marksman lead for maximum ranged DPS against slow bear
+            {"class": "Marksman", "role": "Main DPS Lead", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"], "is_lead": True},
+            # Lancer for healing/support during extended fight
+            {"class": "Lancer", "role": "Healer/Support", "preferred": ["Flora", "Karol", "Dominic", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Philly", "Mia", "Reina"]},
+            # Infantry for ATK buffs that apply to all troops
+            {"class": "Infantry", "role": "Frontline Buffer", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Natalia"]},
         ],
         "troop_ratio": {"infantry": 0, "lancer": 10, "marksman": 90},
         "notes": "Bear moves SLOWLY - maximize ranged damage window. 90% Marksman troops deal massive DPS before melee begins.",
         "key_heroes": ["Hendrik", "Alonso", "Jeronimo"],
         "hero_explanations": {
-            # Marksman (primary - 2 slots)
+            # Marksman (lead DPS)
             "Vulcanus": "S+ Gen 13 Marksman. Top DPS with sustain. Best lead if available.",
             "Blanchette": "S+ Gen 10 Marksman. Pure offense powerhouse. Excellent lead.",
             "Cara": "S Gen 14 Marksman. Sustain + offense. Great for longer fights.",
@@ -215,32 +444,43 @@ LINEUP_TEMPLATES = {
             "Gwen": "A Gen 4 Marksman. Good mid-game option.",
             "Wayne": "A Gen 6 Marksman. Strong sustained DPS.",
             "Alonso": "A Gen 2 Marksman. Early-game best. Reliable damage.",
-            "Bahiti": "B Gen 1 Marksman. Budget backup option.",
-            "Zinman": "C Gen 1 Marksman. Starter option if no others available.",
-            # Infantry (buffer slot - 1 slot)
+            # Lancer (healer/support)
+            "Flora": "S Gen 13 Lancer. Heals 5-25% HP. Best healer for long bear fights.",
+            "Karol": "S Gen 12 Lancer. -4-20% damage taken for ALL troops.",
+            "Dominic": "S Gen 14 Lancer. +100% Lancer damage + sustain.",
+            "Freya": "S Gen 10 Lancer. Reduces damage taken.",
+            "Sonya": "S Gen 8 Lancer. Offense-focused buffs.",
+            "Gordon": "S Gen 7 Lancer. Venom + enemy debuff.",
+            "Renee": "S Gen 6 Lancer. Infantry ATK boost.",
+            "Norah": "S Gen 5 Lancer. -15% damage AND +15% dealt.",
+            "Philly": "A Gen 2 Lancer. Best early healer. ATK/DEF buffs.",
+            "Mia": "A Gen 3 Lancer. Healing + sustain. Good early option.",
+            "Reina": "A Gen 4 Lancer. Solid support option.",
+            # Infantry (buffer)
             "Jeronimo": "S+ Gen 1 Infantry. +50% ATK/DMG buffs apply to ALL troops including Marksman.",
             "Wu Ming": "S+ Gen 6 Infantry. -25% damage taken. Good if bear reaches melee.",
             "Elif": "S+ Gen 14 Infantry. Shield + ATK reduction. Latest gen tank.",
             "Hervor": "S+ Gen 12 Infantry. Damage reduction + offense. Balanced.",
             "Magnus": "S+ Gen 9 Infantry. Shield + damage reduction.",
-            "Natalia": "A-tier Infantry. Feral Protection for sustained survival.",
-            "Flint": "A-tier Infantry. Control + tank. Solid backup."
+            "Natalia": "A-tier Infantry. Feral Protection for sustained survival."
         },
         "ratio_explanation": "Bear Trap's slow movement creates an extended ranged damage window. 90% Marksman troops exploit this by dealing maximum DPS before the bear reaches melee range. 10% Lancer provides minimal frontline."
     },
     "crazy_joe": {
-        "name": "Crazy Joe Rally",
+        "name": "Crazy Joe",
         "slots": [
-            # Infantry only - S+ first, then S, then A
-            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Gregory"], "is_lead": True},
-            {"class": "Infantry", "role": "Tank Support", "preferred": ["Wu Ming", "Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Gregory", "Sergey"]},
-            {"class": "Infantry", "role": "Infantry DPS", "preferred": ["Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Gregory", "Hector"]},
+            # Infantry lead - ATK buffs for infantry-heavy troop ratio
+            {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia"], "is_lead": True},
+            # Lancer for support/healing
+            {"class": "Lancer", "role": "Support", "preferred": ["Flora", "Karol", "Dominic", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Philly", "Mia", "Reina"]},
+            # Marksman for DPS buffs (even though 0% marksman troops)
+            {"class": "Marksman", "role": "DPS Support", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso"]},
         ],
         "troop_ratio": {"infantry": 90, "lancer": 10, "marksman": 0},
         "notes": "Infantry kills before back row attacks. 90/10/0 ratio is key. Joe targets backline first - 0% Marksman is MANDATORY.",
         "key_heroes": ["Jeronimo", "Wu Ming"],
         "hero_explanations": {
-            # All Infantry (3 slots - Joe requires infantry-only lineup)
+            # Infantry (lead - ATK buffs)
             "Jeronimo": "S+ Gen 1 Infantry. +50% ATK/DMG buffs. Best for burst - kill Joe before he kills you.",
             "Wu Ming": "S+ Gen 6 Infantry. -25% ALL damage taken. Better for sustained fights against tougher Joes.",
             "Elif": "S+ Gen 14 Infantry. Shield + enemy ATK reduction. Top-tier tank for Joe.",
@@ -249,21 +489,27 @@ LINEUP_TEMPLATES = {
             "Gatot": "S Gen 8 Infantry. 3/3 sustain skills. Pure defense for survival-focused strategy.",
             "Edith": "S Gen 7 Infantry. 3/3 sustain skills. Extremely tanky backup.",
             "Natalia": "A-tier Infantry. Feral Protection (-50% damage). Great sustain backup.",
-            "Gregory": "A-tier Infantry. Tank with control abilities.",
-            "Sergey": "A-tier Infantry. Defensive skills. Solid backup option.",
-            "Hector": "A-tier Infantry. DPS-focused. Good damage backup.",
-            "Flint": "A-tier Infantry. Control + tank. Reliable option.",
-            "Ahmose": "A-tier Infantry. Balanced tank. Early backup option."
+            # Lancer (support)
+            "Flora": "S Gen 13 Lancer. Heals 5-25% HP. Best healer.",
+            "Karol": "S Gen 12 Lancer. -4-20% damage taken for ALL troops.",
+            "Dominic": "S Gen 14 Lancer. +100% Lancer damage + sustain.",
+            "Norah": "S Gen 5 Lancer. -15% damage AND +15% dealt.",
+            "Philly": "A Gen 2 Lancer. Best early healer.",
+            # Marksman (DPS support - hero skills still help even with 0% marksman troops)
+            "Vulcanus": "S+ Gen 13 Marksman. Sustain + high DPS skills.",
+            "Blanchette": "S+ Gen 10 Marksman. Pure offense skills.",
+            "Hendrik": "S Gen 8 Marksman. Defense buffs + DPS.",
+            "Alonso": "A Gen 2 Marksman. Early-game best."
         },
         "ratio_explanation": "Crazy Joe's AI targets BACKLINE FIRST. With 0% Marksman troops, Joe finds no backline and is forced into unfavorable frontline combat against your 90% Infantry."
     },
     "svs_attack": {
-        "name": "SvS Castle Attack",
+        "name": "Rally Leader",
         "slots": [
             # Infantry: S+ first for offense (Jeronimo, Wu Ming, Elif, Hervor, Magnus)
             {"class": "Infantry", "role": "ATK Lead", "preferred": ["Jeronimo", "Wu Ming", "Elif", "Hervor", "Magnus", "Gatot", "Edith", "Natalia", "Flint"], "is_lead": True},
             # Lancer: S first, then A (Molly is B-tier, should be last)
-            {"class": "Lancer", "role": "Support", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly", "Philly"]},
+            {"class": "Lancer", "role": "Support", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Mia", "Reina", "Philly", "Molly"]},
             # Marksman: S+ first (Vulcanus, Blanchette), then S, then A
             {"class": "Marksman", "role": "DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso", "Bahiti", "Zinman"]},
         ],
@@ -308,12 +554,12 @@ LINEUP_TEMPLATES = {
         "ratio_explanation": "SvS castle attacks use balanced 50/20/30 to handle varied garrison compositions. Infantry leads and absorbs damage, Marksman provides kill power."
     },
     "garrison": {
-        "name": "Castle Garrison",
+        "name": "Garrison Leader",
         "slots": [
             # Infantry: S+ first by power, sustain tip shown separately
             {"class": "Infantry", "role": "Tank Lead", "preferred": ["Elif", "Hervor", "Magnus", "Wu Ming", "Jeronimo", "Gatot", "Edith", "Natalia", "Flint", "Ahmose"], "is_lead": True},
             # Lancer: S first by power
-            {"class": "Lancer", "role": "Healer", "preferred": ["Dominic", "Flora", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Lloyd", "Fred", "Molly", "Philly"]},
+            {"class": "Lancer", "role": "Healer", "preferred": ["Flora", "Dominic", "Karol", "Freya", "Sonya", "Gordon", "Renee", "Norah", "Philly", "Mia", "Reina", "Lloyd", "Fred", "Molly"]},
             # Marksman: S+ first by power
             {"class": "Marksman", "role": "Counter DPS", "preferred": ["Vulcanus", "Blanchette", "Cara", "Ligeia", "Rufus", "Xura", "Hendrik", "Bradley", "Gwen", "Wayne", "Alonso", "Bahiti", "Zinman"]},
         ],
@@ -359,11 +605,11 @@ LINEUP_TEMPLATES = {
         "ratio_explanation": "Garrison defense prioritizes survival with 60% Infantry. Lower Marksman (25%) because they die fast under rallies - Infantry survives longer."
     },
     "rally_joiner_attack": {
-        "name": "Rally Joiner (Attack)",
+        "name": "Rally Joiner",
         "slots": [
-            {"class": "Marksman", "role": "JOINER (Only this matters!)", "preferred": ["Jessie"], "is_lead": True, "is_joiner": True},
+            {"class": "Lancer", "role": "JOINER (Only this matters!)", "preferred": ["Jessie"], "is_lead": True, "is_joiner": True},
             {"class": "Infantry", "role": "Filler", "preferred": ["any"]},
-            {"class": "Lancer", "role": "Filler", "preferred": ["any"]},
+            {"class": "Marksman", "role": "Filler", "preferred": ["any"]},
         ],
         "troop_ratio": {"infantry": 30, "lancer": 20, "marksman": 50},
         "notes": "ONLY slot 1 hero's TOP-RIGHT expedition skill matters! Jessie's Stand of Arms gives +25% DMG to ALL your troops.",
@@ -375,10 +621,10 @@ LINEUP_TEMPLATES = {
         "ratio_explanation": "When joining rallies, your troop composition supports the rally leader. 50% Marksman for damage, 30% Infantry for survival, 20% Lancer for balance."
     },
     "rally_joiner_defense": {
-        "name": "Garrison Joiner (Defense)",
+        "name": "Garrison Joiner",
         "slots": [
             {"class": "Infantry", "role": "JOINER (Only this matters!)", "preferred": ["Sergey", "Patrick"], "is_lead": True, "is_joiner": True},
-            {"class": "Infantry", "role": "Filler", "preferred": ["any"]},
+            {"class": "Marksman", "role": "Filler", "preferred": ["any"]},
             {"class": "Lancer", "role": "Filler", "preferred": ["any"]},
         ],
         "troop_ratio": {"infantry": 60, "lancer": 15, "marksman": 25},
@@ -637,46 +883,47 @@ class LineupBuilder:
                 })
                 continue
 
-            # Find best available hero for this slot from user's collection
+            # Find best available hero for this slot from ALL user's heroes of the required class.
+            # Preferred lists provide a small bonus for lead slots to guide mode-specific
+            # choices (e.g., sustain heroes for garrison) without being a hard gate.
             best_hero = None
-            best_power = -1
+            best_score = -1
 
-            # For lead slots, follow preferred order strictly (first available wins)
-            # For non-lead slots, pick highest power among preferred
-            use_strict_order = is_lead
+            for hero_name, hero_stats in user_heroes.items():
+                if hero_name in used_heroes:
+                    continue
+                hero_meta = get_hero_metadata(hero_name)
+                if hero_meta.get("class") != slot_class:
+                    continue
+                if hero_meta.get("gen", 99) > max_generation:
+                    continue
 
-            # First try preferred heroes in order
-            for hero_name in preferred:
-                if hero_name in user_heroes and hero_name not in used_heroes:
-                    hero_meta = get_hero_metadata(hero_name)
-                    if hero_meta.get("gen", 99) <= max_generation:
-                        hero_stats = user_heroes[hero_name]
-                        hero_data = self.hero_lookup.get(hero_name)
-                        power = calculate_hero_power(hero_stats, hero_data)
+                hero_data = self.hero_lookup.get(hero_name)
+                power = calculate_hero_power(
+                    hero_stats, hero_data,
+                    mode=event_type,
+                    is_joiner_slot=(event_type in JOINER_MODES),
+                )
 
-                        if use_strict_order:
-                            # Lead slot: take FIRST available preferred hero
-                            best_hero = hero_name
-                            best_power = power
-                            break
-                        else:
-                            # Non-lead slot: take highest power preferred hero
-                            if power > best_power:
-                                best_power = power
-                                best_hero = hero_name
+                # Preferred-order bonus: curated lists encode mode-specific suitability.
+                # Joiner slots are special: the hero's specific joiner skill is the
+                # ONLY thing that matters (e.g., Jessie's Stand of Arms, Sergey's
+                # Defenders' Edge). Stats, level, gear are irrelevant — so the
+                # preferred bonus must massively outweigh any stat differences.
+                if hero_name in preferred:
+                    idx = preferred.index(hero_name)
+                    if slot.get("is_joiner"):
+                        # Joiner slot: preferred hero is THE answer, not just a tiebreaker.
+                        # +1000 ensures joiner heroes always beat non-joiner alternatives.
+                        power += max(1000 - idx * 100, 200)
+                    elif is_lead:
+                        power += max(100 - idx * 10, 10)
+                    else:
+                        power += max(75 - idx * 5, 5)
 
-            # If no preferred hero found, find any hero of the right class
-            if not best_hero:
-                for hero_name, hero_stats in user_heroes.items():
-                    if hero_name in used_heroes:
-                        continue
-                    hero_meta = get_hero_metadata(hero_name)
-                    if hero_meta.get("class") == slot_class and hero_meta.get("gen", 99) <= max_generation:
-                        hero_data = self.hero_lookup.get(hero_name)
-                        power = calculate_hero_power(hero_stats, hero_data)
-                        if power > best_power:
-                            best_power = power
-                            best_hero = hero_name
+                if power > best_score:
+                    best_score = power
+                    best_hero = hero_name
 
             if best_hero:
                 used_heroes.add(best_hero)
@@ -689,7 +936,7 @@ class LineupBuilder:
                     "slot": role,
                     "role": hero_meta.get("role", role),
                     "is_lead": is_lead,
-                    "power": best_power,
+                    "power": best_score,
                     "status": f"Lv{level}",
                     "image_filename": hero_meta.get("image_filename"),
                 })
@@ -774,7 +1021,7 @@ class LineupBuilder:
                     if sustain_name in user_heroes and sustain_name not in hero_names_in_lineup:
                         sustain_stats = user_heroes[sustain_name]
                         sustain_data = self.hero_lookup.get(sustain_name)
-                        sustain_power = calculate_hero_power(sustain_stats, sustain_data)
+                        sustain_power = calculate_hero_power(sustain_stats, sustain_data, mode=event_type)
                         if sustain_power > 0 and lead_power > 0:
                             power_ratio = sustain_power / lead_power
                             if power_ratio >= 0.8:  # Within 20% power

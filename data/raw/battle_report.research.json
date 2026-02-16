@@ -1,0 +1,94 @@
+{
+  "system": "battle_report_analysis",
+  "retrieved_at": "2026-02-15T00:00:00Z",
+  "sources": [
+    {"source_id": "user_screenshot", "url": "Screenshots/Battle Results/1-3.png", "confidence": "A"}
+  ],
+  "data_completeness": "partial",
+  "overview": {
+    "description": "Analysis of a battle report from user's account ([CPS]Lord Farquad 1). Screenshots show full battle results including stat bonus comparison.",
+    "result": "VICTORY",
+    "date": "2026-02-14",
+    "our_troops": 158012,
+    "enemy_troops": 182892,
+    "our_injured": 1663,
+    "enemy_injured": 53514
+  },
+  "stat_bonus_structure": {
+    "description": "Battle reports show 12 stat bonuses: 4 stats x 3 troop types. These bonuses are cumulative from ALL sources: hero skills, chief gear, chief charms, Daybreak Island decorations, research, VIP, pets, alliance tech, etc.",
+    "stats_per_troop_type": ["Attack", "Defense", "Lethality", "Health"],
+    "troop_types": ["Infantry", "Lancer", "Marksman"],
+    "total_bonus_count": 12
+  },
+  "stat_bonuses": {
+    "our_bonuses": {
+      "infantry_attack": 745.8,
+      "infantry_defense": 715.8,
+      "infantry_lethality": 585.7,
+      "infantry_health": 518.3,
+      "lancer_attack": 703.0,
+      "lancer_defense": 682.6,
+      "lancer_lethality": 401.2,
+      "lancer_health": 376.1,
+      "marksman_attack": 801.8,
+      "marksman_defense": 758.9,
+      "marksman_lethality": 757.8,
+      "marksman_health": 543.6
+    },
+    "enemy_bonuses": {
+      "infantry_attack": 357.3,
+      "infantry_defense": 359.8,
+      "infantry_lethality": 261.7,
+      "infantry_health": 288.1,
+      "lancer_attack": 324.7,
+      "lancer_defense": 310.9,
+      "lancer_lethality": 238.7,
+      "lancer_health": 266.6,
+      "marksman_attack": 333.6,
+      "marksman_defense": 324.4,
+      "marksman_lethality": 244.3,
+      "marksman_health": 281.1
+    }
+  },
+  "hero_comparison": {
+    "our_heroes": {
+      "count": 3,
+      "levels": "Lv.10.0 each",
+      "hero_powers": [100807, 33602, 33603],
+      "total_hero_power": 168012
+    },
+    "enemy_heroes": {
+      "count": 3,
+      "levels": "Lv.9.0 each",
+      "hero_powers": [50964, 50964, 50964],
+      "total_hero_power": 152892
+    }
+  },
+  "insights": {
+    "advantage_ratios": {
+      "infantry_attack": 2.09,
+      "infantry_defense": 1.99,
+      "infantry_lethality": 2.24,
+      "infantry_health": 1.80,
+      "lancer_attack": 2.17,
+      "lancer_defense": 2.20,
+      "lancer_lethality": 1.68,
+      "lancer_health": 1.41,
+      "marksman_attack": 2.40,
+      "marksman_defense": 2.34,
+      "marksman_lethality": 3.10,
+      "marksman_health": 1.93
+    },
+    "biggest_advantage": "Marksman Lethality (3.10x)",
+    "smallest_advantage": "Lancer Health (1.41x)",
+    "key_observations": [
+      "4 core combat stats per troop type: Attack, Defense, Lethality, Health",
+      "Lethality is separate from Attack - likely penetration/armor-piercing",
+      "Health is separate from Defense - HP pool vs damage reduction",
+      "Bonuses stack from hundreds of percent to 800%+ from all sources",
+      "Winner had roughly 2x stat advantage across all categories",
+      "Marksman stats were highest for winner (heavy marksman investment)",
+      "Even 'small' hero skill percentages (5-25%) matter when stacked on top of 300-800% base bonuses"
+    ]
+  }
+}

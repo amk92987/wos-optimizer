@@ -20,7 +20,23 @@
       "expedition_skill_1_desc": "Increases Iron Gathering Speed by 5-25%.",
       "expedition_skill_2": "Craftsmanship",
       "expedition_skill_2_desc": "Skilled metalwork increases Iron Gathering Capacity by 5-25%.",
-      "mythic_gear": null
+      "mythic_gear": null,
+      "expedition_skill_1_effects": [
+        {
+          "type": "gathering_speed",
+          "target": "iron",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "gathering_capacity",
+          "target": "iron",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Eugene",
@@ -42,7 +58,23 @@
       "expedition_skill_1_desc": "Increases Wood Gathering Speed by 5-25%.",
       "expedition_skill_2": "Master Woodcutter",
       "expedition_skill_2_desc": "Expert forestry increases Wood Gathering Capacity by 5-25%.",
-      "mythic_gear": null
+      "mythic_gear": null,
+      "expedition_skill_1_effects": [
+        {
+          "type": "gathering_speed",
+          "target": "wood",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "gathering_capacity",
+          "target": "wood",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Charlie",
@@ -64,7 +96,23 @@
       "expedition_skill_1_desc": "Increases Coal Gathering Speed by 5-25%.",
       "expedition_skill_2": "Coal Extraction",
       "expedition_skill_2_desc": "Mining expertise increases Coal Gathering Capacity by 5-25%.",
-      "mythic_gear": null
+      "mythic_gear": null,
+      "expedition_skill_1_effects": [
+        {
+          "type": "gathering_speed",
+          "target": "coal",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "gathering_capacity",
+          "target": "coal",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Cloris",
@@ -86,7 +134,23 @@
       "expedition_skill_1_desc": "Increases Meat Gathering Speed by 5-25%.",
       "expedition_skill_2": "Predator",
       "expedition_skill_2_desc": "Expert tracking increases Meat Gathering Capacity by 5-25%.",
-      "mythic_gear": null
+      "mythic_gear": null,
+      "expedition_skill_1_effects": [
+        {
+          "type": "gathering_speed",
+          "target": "meat",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "gathering_capacity",
+          "target": "meat",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Sergey",
@@ -112,7 +176,23 @@
       "expedition_skill_2_desc": "Reduces enemy attack power during combat.",
       "mythic_gear": null,
       "rally_joiner_role": "garrison",
-      "rally_joiner_skill": "-20% DMG taken (all troops)"
+      "rally_joiner_skill": "-20% DMG taken (all troops)",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "enemy_atk_debuff",
+          "target": "enemy",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Gina",
@@ -136,7 +216,23 @@
       "expedition_skill_1_desc": "Reduces Stamina cost by 10-20%.",
       "expedition_skill_2": "Quick Paced",
       "expedition_skill_2_desc": "Boosts Wilderness March Speed by 20-100%.",
-      "mythic_gear": null
+      "mythic_gear": null,
+      "expedition_skill_1_effects": [
+        {
+          "type": "stamina_reduction",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "march_speed",
+          "target": "all",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Bahiti",
@@ -160,7 +256,23 @@
       "expedition_skill_1_desc": "Reduces damage taken by 4-20% for all troops.",
       "expedition_skill_2": "Fluorescence",
       "expedition_skill_2_desc": "Bahiti's battlefield instinct grants all troops' attack a 50% chance of increasing damage dealt by 10-50%.",
-      "mythic_gear": null
+      "mythic_gear": null,
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 50
+        }
+      ]
     },
     {
       "name": "Seo-yoon",
@@ -186,7 +298,23 @@
       "expedition_skill_2_desc": "Ancient healing arts increase Infirmary Healing Speed by 10-50%.",
       "mythic_gear": null,
       "rally_joiner_role": "attack",
-      "rally_joiner_skill": "+25% ATK for all troops"
+      "rally_joiner_skill": "+25% ATK for all troops",
+      "expedition_skill_1_effects": [
+        {
+          "type": "atk_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "healing_speed",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Jasser",
@@ -212,7 +340,23 @@
       "expedition_skill_2_desc": "Military knowledge increases Research Speed by 3-15%.",
       "mythic_gear": null,
       "rally_joiner_role": "attack",
-      "rally_joiner_skill": "+25% DMG dealt (all troops)"
+      "rally_joiner_skill": "+25% DMG dealt (all troops)",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "research_speed",
+          "target": "all",
+          "max_value": 15,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Patrick",
@@ -236,7 +380,23 @@
       "expedition_skill_1_desc": "Patrick's culinary masterpieces invigorate our troops, increasing Health by 5-25% for all troops.",
       "expedition_skill_2": "Caloric Booster",
       "expedition_skill_2_desc": "Patrick's gourmet meals motivate and unleash the potential of our soldiers, increasing Attack by 5-25% for all troops.",
-      "mythic_gear": null
+      "mythic_gear": null,
+      "expedition_skill_1_effects": [
+        {
+          "type": "hp_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "atk_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Ling Xue",
@@ -260,7 +420,23 @@
       "expedition_skill_1_desc": "Debilitating attacks reduce enemy Attack by 4-20%.",
       "expedition_skill_2": "Total Control",
       "expedition_skill_2_desc": "Discipline increases Training Speed by 5-25%.",
-      "mythic_gear": null
+      "mythic_gear": null,
+      "expedition_skill_1_effects": [
+        {
+          "type": "enemy_atk_debuff",
+          "target": "enemy",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "training_speed",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Lumak Bokan",
@@ -284,7 +460,23 @@
       "expedition_skill_1_desc": "Guerrilla tactics reduce enemy Damage Dealt by 4-20%.",
       "expedition_skill_2": "Emerald Warrior",
       "expedition_skill_2_desc": "Jungle expertise increases Hunting March Speed by 20-100%.",
-      "mythic_gear": null
+      "mythic_gear": null,
+      "expedition_skill_1_effects": [
+        {
+          "type": "enemy_dmg_debuff",
+          "target": "enemy",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "march_speed",
+          "target": "all",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Jeronimo",
@@ -312,7 +504,31 @@
       "expedition_skill_3_desc": "Jeronimo's sword arts empower soldiers to seize battle opportunities, increasing Damage Dealt by 6-30% for all troops for 2 turns every 4 turns.",
       "mythic_gear": "Dawnbreak",
       "rally_joiner_role": "attack",
-      "rally_joiner_skill": "Infantry ATK multiplier - boosts all rally damage"
+      "rally_joiner_skill": "Infantry ATK multiplier - boosts all rally damage",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "atk_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 30,
+          "effective_pct": 50
+        }
+      ]
     },
     {
       "name": "Natalia",
@@ -338,7 +554,31 @@
       "expedition_skill_2_desc": "Passive buff increasing Attack by 5-25% for all troops under her command.",
       "expedition_skill_3": "Call of the Wild",
       "expedition_skill_3_desc": "Boosts damage output by 5-25% for all troops through Natalia's connection with nature.",
-      "mythic_gear": "Frostbite Aegis"
+      "mythic_gear": "Frostbite Aegis",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 40
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "atk_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Molly",
@@ -364,7 +604,31 @@
       "expedition_skill_2_desc": "Molly excels in snowy terrains, granting all troops' attack a 50% chance of increasing damage dealt by 10-50%.",
       "expedition_skill_3": "Youthful Rage",
       "expedition_skill_3_desc": "Hell hath no fury like an angry Molly. Increasing damage dealt by +5-25%.",
-      "mythic_gear": "Frost Launcher"
+      "mythic_gear": "Frost Launcher",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 40
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Zinman",
@@ -390,7 +654,31 @@
       "expedition_skill_2_desc": "Reduces Building Upgrade Costs by 3-15%.",
       "expedition_skill_3": "Positional Batter",
       "expedition_skill_3_desc": "Zinman's defensive tactics reduce Garrison Damage Taken by 4-20%.",
-      "mythic_gear": "Nail Gun Prime"
+      "mythic_gear": "Nail Gun Prime",
+      "expedition_skill_1_effects": [
+        {
+          "type": "building_speed",
+          "target": "all",
+          "max_value": 15,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "building_cost_reduction",
+          "target": "all",
+          "max_value": 15,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Flint",
@@ -416,7 +704,31 @@
       "expedition_skill_2_desc": "Raises Attack by 5-25% for all troops.",
       "expedition_skill_3": "Immolation",
       "expedition_skill_3_desc": "Elevates all troops' Lethality by 5-25% through Flint's destructive flames.",
-      "mythic_gear": "Inferno Piercer"
+      "mythic_gear": "Inferno Piercer",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "atk_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "lethality_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Philly",
@@ -442,7 +754,37 @@
       "expedition_skill_2_desc": "Philly's uses her secret tonic to enhance the warriors' strength, granting all troops' attack a 25% chance of dealing +120-200% damage.",
       "expedition_skill_3": "Energizing Shot",
       "expedition_skill_3_desc": "Philly's special shot improves troops' focus, granting a 40% chance of reducing all troops' Damage Taken by 10-50%.",
-      "mythic_gear": "Lifebloom Bow"
+      "mythic_gear": "Lifebloom Bow",
+      "expedition_skill_1_effects": [
+        {
+          "type": "atk_buff",
+          "target": "all",
+          "max_value": 15,
+          "effective_pct": 100
+        },
+        {
+          "type": "def_buff",
+          "target": "all",
+          "max_value": 10,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "all",
+          "max_value": 200,
+          "effective_pct": 25
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 40
+        }
+      ]
     },
     {
       "name": "Alonso",
@@ -468,7 +810,31 @@
       "expedition_skill_2_desc": "Grants a 20% chance to reduce enemy damage by 10-50% for all hostile troops for two turns.",
       "expedition_skill_3": "Poison Harpoon",
       "expedition_skill_3_desc": "Provides troops a 50% chance to deal 10-50% additional damage through toxic coatings.",
-      "mythic_gear": "Captain Ahab"
+      "mythic_gear": "Captain Ahab",
+      "expedition_skill_1_effects": [
+        {
+          "type": "lethality_buff",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 40
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "enemy_dmg_debuff",
+          "target": "enemy",
+          "max_value": 50,
+          "effective_pct": 20
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 50
+        }
+      ]
     },
     {
       "name": "Logan",
@@ -494,7 +860,31 @@
       "expedition_skill_2_desc": "Reduces enemy Attack by 4-20% through sheer intimidation.",
       "expedition_skill_3": "Leader Inspiration",
       "expedition_skill_3_desc": "Inspiring leadership increases all troops' Defense by 4-20%.",
-      "mythic_gear": "Fists of Steel"
+      "mythic_gear": "Fists of Steel",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "lancer",
+          "max_value": 50,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "enemy_atk_debuff",
+          "target": "enemy",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "def_buff",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Mia",
@@ -520,7 +910,31 @@
       "expedition_skill_2_desc": "Mia provides troops with a 50% chance of dealing 10-50% additional damage.",
       "expedition_skill_3": "Ritual Deciphering",
       "expedition_skill_3_desc": "Mia foresees potential dangers before battle, granting a 40% chance of reducing damage taken by 10-50% for all troops.",
-      "mythic_gear": "Fate Crystal"
+      "mythic_gear": "Fate Crystal",
+      "expedition_skill_1_effects": [
+        {
+          "type": "enemy_vuln",
+          "target": "enemy",
+          "max_value": 50,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 40
+        }
+      ]
     },
     {
       "name": "Greg",
@@ -546,7 +960,31 @@
       "expedition_skill_2_desc": "Uses the authority of the law to intimidate enemies, granting all troops' attack a 20% chance of reducing damage dealt by 10-50% for all enemy troops for 2 turns.",
       "expedition_skill_3": "Law and Order",
       "expedition_skill_3_desc": "Increases Health by 5-25% for all troops through Greg's faith in law and order.",
-      "mythic_gear": "Scales of Justice"
+      "mythic_gear": "Scales of Justice",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 40,
+          "effective_pct": 20
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "enemy_dmg_debuff",
+          "target": "enemy",
+          "max_value": 50,
+          "effective_pct": 20
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "hp_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Ahmose",
@@ -572,7 +1010,49 @@
       "expedition_skill_2_desc": "Amplifies Infantry damage dealt by 20-100% with the power of Fire Crystal.",
       "expedition_skill_3": "Blade of Light",
       "expedition_skill_3_desc": "Infuses Infantry weapons with Fire Crystals, increasing damage per attack by 12-60% and target damage taken by 5-25% for 1 turn.",
-      "mythic_gear": "Fire Crystal Spear"
+      "mythic_gear": "Fire Crystal Spear",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "infantry",
+          "max_value": 70,
+          "effective_pct": 50
+        },
+        {
+          "type": "dmg_reduction",
+          "target": "lancer",
+          "max_value": 30,
+          "effective_pct": 50
+        },
+        {
+          "type": "dmg_reduction",
+          "target": "marksman",
+          "max_value": 30,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "infantry",
+          "max_value": 60,
+          "effective_pct": 100
+        },
+        {
+          "type": "enemy_vuln",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Reina",
@@ -598,7 +1078,31 @@
       "expedition_skill_2_desc": "Reina's adept leadership grants all troops a 4-20% chance of dodging normal attacks.",
       "expedition_skill_3": "Shadow Blade",
       "expedition_skill_3_desc": "Lancers have a 25% chance of performing an extra attack, dealing 120-200% damage.",
-      "mythic_gear": "Shadow Kunai"
+      "mythic_gear": "Shadow Kunai",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 30,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dodge",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "lancer",
+          "max_value": 200,
+          "effective_pct": 25
+        }
+      ]
     },
     {
       "name": "Lynn",
@@ -624,7 +1128,31 @@
       "expedition_skill_2_desc": "Reduces damage dealt by enemy troops by 4-20%.",
       "expedition_skill_3": "Oonai Cadenza",
       "expedition_skill_3_desc": "Increases Marksmen's attack by 1-5% for every 3 attacks, stackable until battle end.",
-      "mythic_gear": "Ella's Tear"
+      "mythic_gear": "Ella's Tear",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 40
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "enemy_dmg_debuff",
+          "target": "enemy",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "atk_buff",
+          "target": "marksman",
+          "max_value": 35,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Hector",
@@ -650,7 +1178,37 @@
       "expedition_skill_2_desc": "Increases Infantry Damage Dealt by 100-200% and Marksman Damage by 20-100% for 10 attacks with diminishing returns.",
       "expedition_skill_3": "Blitz",
       "expedition_skill_3_desc": "Grants a 25% chance of dealing 120-200% damage on attack.",
-      "mythic_gear": "Steel Fangs"
+      "mythic_gear": "Steel Fangs",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 40
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 200,
+          "effective_pct": 25
+        },
+        {
+          "type": "dmg_dealt_buff",
+          "target": "marksman",
+          "max_value": 100,
+          "effective_pct": 25
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "all",
+          "max_value": 200,
+          "effective_pct": 25
+        }
+      ]
     },
     {
       "name": "Norah",
@@ -676,7 +1234,55 @@
       "expedition_skill_2_desc": "20% chance of dealing 20-100% extra damage to all enemies on attack. Best rally joiner skill.",
       "expedition_skill_3": "Momentum",
       "expedition_skill_3_desc": "Increases all troops' Damage Dealt by 5-25% and reduces damage taken by 5-25% every 5 Lancer attacks for 2 turns.",
-      "mythic_gear": "Unity Banner"
+      "mythic_gear": "Unity Banner",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "infantry",
+          "max_value": 15,
+          "effective_pct": 100
+        },
+        {
+          "type": "dmg_reduction",
+          "target": "marksman",
+          "max_value": 15,
+          "effective_pct": 100
+        },
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 15,
+          "effective_pct": 100
+        },
+        {
+          "type": "dmg_dealt_buff",
+          "target": "marksman",
+          "max_value": 15,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "all",
+          "max_value": 100,
+          "effective_pct": 20
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 35
+        },
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 35
+        }
+      ]
     },
     {
       "name": "Gwen",
@@ -702,7 +1308,31 @@
       "expedition_skill_2_desc": "Increases Marksmen damage and provides team-wide combat buffs.",
       "expedition_skill_3": "Carpet Bombing",
       "expedition_skill_3_desc": "Periodic AoE bombardment dealing damage to all enemies.",
-      "mythic_gear": "Wings of Hope"
+      "mythic_gear": "Wings of Hope",
+      "expedition_skill_1_effects": [
+        {
+          "type": "enemy_vuln",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "marksman",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "periodic_dmg",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 50
+        }
+      ]
     },
     {
       "name": "Jessie",
@@ -728,7 +1358,23 @@
       "expedition_skill_2_desc": "With a keen engineering eye, Jessie enhances troops armor, reducing damage taken by 4-20% for all troops.",
       "mythic_gear": null,
       "rally_joiner_role": "attack",
-      "rally_joiner_skill": "+25% DMG dealt (all troops) - affects normal attacks, hero skills, pet abilities"
+      "rally_joiner_skill": "+25% DMG dealt (all troops) - affects normal attacks, hero skills, pet abilities",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Wu Ming",
@@ -754,7 +1400,31 @@
       "expedition_skill_2_desc": "Spreads wisdom and techniques, increasing friendly troops' damage dealt by 4-20%.",
       "expedition_skill_3": "Elemental Resonance",
       "expedition_skill_3_desc": "Leads everyone to heightened affinity, increasing troops' skill damage dealt by 5-25%.",
-      "mythic_gear": "Shadow Cyclone"
+      "mythic_gear": "Shadow Cyclone",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 28,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 40
+        }
+      ]
     },
     {
       "name": "Renee",
@@ -780,7 +1450,31 @@
       "expedition_skill_2_desc": "Dream Marks highlight vulnerabilities, increasing troop damage to marked targets by 30-150%.",
       "expedition_skill_3": "Dreamslice",
       "expedition_skill_3_desc": "Dream Marks expose weaknesses, increasing damage dealt to marked targets by 15-75% for all troops.",
-      "mythic_gear": "Immortal Edge"
+      "mythic_gear": "Immortal Edge",
+      "expedition_skill_1_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "lancer",
+          "max_value": 200,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "enemy_vuln",
+          "target": "enemy",
+          "max_value": 150,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 75,
+          "effective_pct": 50
+        }
+      ]
     },
     {
       "name": "Wayne",
@@ -806,7 +1500,31 @@
       "expedition_skill_2_desc": "On every other attack, Marksmen deal 8-40% extra damage to enemy Lancers and 4-20% extra to enemy Marksmen.",
       "expedition_skill_3": "Fleet",
       "expedition_skill_3_desc": "Grants all troops' attacks a 5-25% Crit Rate.",
-      "mythic_gear": "Precision Longshot"
+      "mythic_gear": "Precision Longshot",
+      "expedition_skill_1_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "all",
+          "max_value": 100,
+          "effective_pct": 25
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "marksman",
+          "max_value": 30,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "crit_rate_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Gordon",
@@ -832,7 +1550,37 @@
       "expedition_skill_2_desc": "Envenomed weapons increase Lancer Damage by 30-150% and reduce enemy Damage by 6-30% for 1 turn every 3 turns.",
       "expedition_skill_3": "Toxic Release",
       "expedition_skill_3_desc": "Generates bio-toxic fog confusing enemy Infantry, increasing their Damage Taken by 6-30%.",
-      "mythic_gear": "Venomfang Spear"
+      "mythic_gear": "Venomfang Spear",
+      "expedition_skill_1_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "lancer",
+          "max_value": 100,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "lancer",
+          "max_value": 150,
+          "effective_pct": 33
+        },
+        {
+          "type": "enemy_dmg_debuff",
+          "target": "enemy",
+          "max_value": 30,
+          "effective_pct": 33
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "enemy_vuln",
+          "target": "enemy",
+          "max_value": 30,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Edith",
@@ -858,7 +1606,37 @@
       "expedition_skill_2_desc": "Mr. Tin's metallic body reduces Infantry damage taken by 4-20%.",
       "expedition_skill_3": "Steel Sentinel",
       "expedition_skill_3_desc": "Mobile defense system increases Health by 5-25% for all troops.",
-      "mythic_gear": "Mr. Tin Mk II"
+      "mythic_gear": "Mr. Tin Mk II",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "marksman",
+          "max_value": 20,
+          "effective_pct": 100
+        },
+        {
+          "type": "dmg_dealt_buff",
+          "target": "lancer",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "infantry",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "hp_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Bradley",
@@ -884,7 +1662,31 @@
       "expedition_skill_2_desc": "Increases damage vs Lancers by 6-30% and vs Infantry by 5-25%.",
       "expedition_skill_3": "Tactical Assistance",
       "expedition_skill_3_desc": "Delivers periodic offense boosts of 6-30% for all troops for 2 turns every 4 turns.",
-      "mythic_gear": "Artillery Prime"
+      "mythic_gear": "Artillery Prime",
+      "expedition_skill_1_effects": [
+        {
+          "type": "atk_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 30,
+          "effective_pct": 50
+        }
+      ]
     },
     {
       "name": "Gatot",
@@ -910,7 +1712,31 @@
       "expedition_skill_2_desc": "Great kings bless Infantry, granting them Shield equal to Attack x 6-30% each time they attack for 1 turn.",
       "expedition_skill_3": "Royal Legion",
       "expedition_skill_3_desc": "Formidable forces reduce enemy Attack by 5-25%.",
-      "mythic_gear": "Crown of Kings"
+      "mythic_gear": "Crown of Kings",
+      "expedition_skill_1_effects": [
+        {
+          "type": "def_buff",
+          "target": "infantry",
+          "max_value": 30,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "shield",
+          "target": "infantry",
+          "max_value": 30,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "enemy_atk_debuff",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Hendrik",
@@ -936,7 +1762,31 @@
       "expedition_skill_2_desc": "Covers all friendly Troops with hard-shelled barnacles every 4 turns, increasing Defense by 6-30% for 2 turns.",
       "expedition_skill_3": "Dragon's Heir",
       "expedition_skill_3_desc": "Every 3 turns, abyssal spirit descendants attack with Marksmen, dealing 8-40% damage to all enemies.",
-      "mythic_gear": "Abyss Driver"
+      "mythic_gear": "Abyss Driver",
+      "expedition_skill_1_effects": [
+        {
+          "type": "enemy_def_debuff",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "def_buff",
+          "target": "all",
+          "max_value": 30,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "periodic_dmg",
+          "target": "enemy",
+          "max_value": 40,
+          "effective_pct": 33
+        }
+      ]
     },
     {
       "name": "Sonya",
@@ -962,7 +1812,37 @@
       "expedition_skill_2_desc": "Lancers deal 15-75% additional damage every 2 attacks and boost all troop attack by 5-25% for one turn.",
       "expedition_skill_3": "Torrential Impact",
       "expedition_skill_3_desc": "Lancers deal 50-250% damage every 5 turns and stun the target for 1 turn.",
-      "mythic_gear": "Cryogenic Harpoon"
+      "mythic_gear": "Cryogenic Harpoon",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "lancer",
+          "max_value": 75,
+          "effective_pct": 50
+        },
+        {
+          "type": "atk_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "periodic_dmg",
+          "target": "lancer",
+          "max_value": 250,
+          "effective_pct": 20
+        }
+      ]
     },
     {
       "name": "Magnus",
@@ -988,7 +1868,31 @@
       "expedition_skill_2_desc": "Infantry gain Shield equal to 6-30% of Attack every 3 turns for 1 turn.",
       "expedition_skill_3": "Iceman",
       "expedition_skill_3_desc": "Tundra's hardened warriors reduce Infantry Damage Taken by 3-15%.",
-      "mythic_gear": "Storm Axe"
+      "mythic_gear": "Storm Axe",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "shield",
+          "target": "infantry",
+          "max_value": 30,
+          "effective_pct": 33
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "infantry",
+          "max_value": 15,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Fred",
@@ -1014,7 +1918,37 @@
       "expedition_skill_2_desc": "Lancers deal 20-100% extra damage every 3 turns and reduce enemy Attack by 5-25% for 1 turn.",
       "expedition_skill_3": "Scorched Earth",
       "expedition_skill_3_desc": "Burns the battlefield, dealing 10-50% damage to all enemies every 3 turns.",
-      "mythic_gear": "Flame Piercer"
+      "mythic_gear": "Flame Piercer",
+      "expedition_skill_1_effects": [
+        {
+          "type": "enemy_vuln",
+          "target": "enemy",
+          "max_value": 15,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "lancer",
+          "max_value": 100,
+          "effective_pct": 33
+        },
+        {
+          "type": "enemy_atk_debuff",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 33
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "periodic_dmg",
+          "target": "enemy",
+          "max_value": 50,
+          "effective_pct": 33
+        }
+      ]
     },
     {
       "name": "Xura",
@@ -1040,7 +1974,31 @@
       "expedition_skill_2_desc": "Protective spores reduce all friendly troops' Damage Taken by 4-20%.",
       "expedition_skill_3": "Storm Sniper",
       "expedition_skill_3_desc": "Wind-guided shots increase Marksmen Damage Dealt by 20-100%.",
-      "mythic_gear": "Wind Dancer's Bow"
+      "mythic_gear": "Wind Dancer's Bow",
+      "expedition_skill_1_effects": [
+        {
+          "type": "enemy_atk_debuff",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "marksman",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Blanchette",
@@ -1066,7 +2024,37 @@
       "expedition_skill_2_desc": "Relentless pursuit grants 5-25% bonus damage vs wounded targets for all troops.",
       "expedition_skill_3": "Crimson Sniper",
       "expedition_skill_3_desc": "Precision shooting increases all troops' Crit Rate by 4-20% and Crit Damage by 10-50%.",
-      "mythic_gear": "Radiant Annihilator"
+      "mythic_gear": "Radiant Annihilator",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "marksman",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "crit_rate_buff",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        },
+        {
+          "type": "crit_dmg_buff",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Gregory",
@@ -1092,7 +2080,31 @@
       "expedition_skill_2_desc": "Gregory's courage inspires, increasing all troops' Attack by 5-25%.",
       "expedition_skill_3": "Defensive Lines",
       "expedition_skill_3_desc": "Fortified positions reduce Infantry Damage Taken by 4-20%.",
-      "mythic_gear": "Sunguard Blade"
+      "mythic_gear": "Sunguard Blade",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 50,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "atk_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "infantry",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Freya",
@@ -1118,7 +2130,55 @@
       "expedition_skill_2_desc": "Marked enemies take 20-100% extra damage from Lancers and spread 10-50% damage to nearby enemies.",
       "expedition_skill_3": "Lunar Blessing",
       "expedition_skill_3_desc": "Moon's blessing increases all troops' Damage Dealt by 5-25%.",
-      "mythic_gear": "Chain of Vengeance"
+      "mythic_gear": "Chain of Vengeance",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "infantry",
+          "max_value": 15,
+          "effective_pct": 100
+        },
+        {
+          "type": "dmg_reduction",
+          "target": "marksman",
+          "max_value": 15,
+          "effective_pct": 100
+        },
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 15,
+          "effective_pct": 100
+        },
+        {
+          "type": "dmg_dealt_buff",
+          "target": "marksman",
+          "max_value": 15,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "lancer",
+          "max_value": 100,
+          "effective_pct": 100
+        },
+        {
+          "type": "periodic_dmg",
+          "target": "enemy",
+          "max_value": 50,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Eleonora",
@@ -1144,7 +2204,31 @@
       "expedition_skill_2_desc": "Blazing light deals 10-50% damage to all enemies every 4 turns.",
       "expedition_skill_3": "Royal Decree",
       "expedition_skill_3_desc": "Inspires Infantry, increasing their Damage Dealt by 20-100%.",
-      "mythic_gear": "Hammer & Shield"
+      "mythic_gear": "Hammer & Shield",
+      "expedition_skill_1_effects": [
+        {
+          "type": "hp_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "periodic_dmg",
+          "target": "enemy",
+          "max_value": 50,
+          "effective_pct": 25
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Lloyd",
@@ -1170,7 +2254,31 @@
       "expedition_skill_2_desc": "Powerful explosives boost Lancer Attack by 30-150% every 3 turns for 1 turn.",
       "expedition_skill_3": "Ingenious Mastery",
       "expedition_skill_3_desc": "Ingenious engineering increases all troops' Lethality by 10-50%.",
-      "mythic_gear": "Mastercraft Treasure"
+      "mythic_gear": "Mastercraft Treasure",
+      "expedition_skill_1_effects": [
+        {
+          "type": "enemy_lethality_debuff",
+          "target": "enemy",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "atk_buff",
+          "target": "lancer",
+          "max_value": 150,
+          "effective_pct": 33
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "lethality_buff",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Rufus",
@@ -1196,7 +2304,37 @@
       "expedition_skill_2_desc": "Earthquake bombs reduce enemy Lethality by 10-50%.",
       "expedition_skill_3": "Inferno Regiment",
       "expedition_skill_3_desc": "Blazing morale increases Marksmen Damage Dealt by 20-100%.",
-      "mythic_gear": "Meteor Blaster"
+      "mythic_gear": "Meteor Blaster",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 60,
+          "effective_pct": 50
+        },
+        {
+          "type": "enemy_vuln",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "enemy_lethality_debuff",
+          "target": "enemy",
+          "max_value": 50,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "marksman",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Hervor",
@@ -1222,7 +2360,37 @@
       "expedition_skill_2_desc": "Unbreakable spirit reduces Infantry Damage Taken by 6-30%.",
       "expedition_skill_3": "Battlethirsty",
       "expedition_skill_3_desc": "Battle hunger increases Infantry Damage Dealt by 20-100% and reduces their Damage Taken by 4-20%.",
-      "mythic_gear": "Undying Battlethirst"
+      "mythic_gear": "Undying Battlethirst",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "infantry",
+          "max_value": 30,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 100,
+          "effective_pct": 100
+        },
+        {
+          "type": "dmg_reduction",
+          "target": "infantry",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Karol",
@@ -1248,7 +2416,31 @@
       "expedition_skill_2_desc": "Armor-piercing tactics increase damage vs Lancers by 6-30% and vs Infantry by 5-25%.",
       "expedition_skill_3": "Standard of Ages",
       "expedition_skill_3_desc": "Ancient battle standard increases all troops' Attack by 5-25%.",
-      "mythic_gear": "Spirit of Winterwind"
+      "mythic_gear": "Spirit of Winterwind",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "all",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "atk_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Ligeia",
@@ -1274,7 +2466,31 @@
       "expedition_skill_2_desc": "Venomous arrows increase target damage taken by 5-25% for 2 turns every 3 turns.",
       "expedition_skill_3": "Defense Reduction",
       "expedition_skill_3_desc": "Corrosive venom reduces all enemy troops' Defense by 5-25%.",
-      "mythic_gear": "Spider Queen"
+      "mythic_gear": "Spider Queen",
+      "expedition_skill_1_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "marksman",
+          "max_value": 100,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "enemy_vuln",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 67
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "enemy_def_debuff",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Gisela",
@@ -1300,7 +2516,31 @@
       "expedition_skill_2_desc": "Power generators boost all troops' Attack by 5-25%.",
       "expedition_skill_3": "Auto-Turrets",
       "expedition_skill_3_desc": "Automated defenses deal 10-50% damage to enemies every 3 turns.",
-      "mythic_gear": "Craftsmaster Gear"
+      "mythic_gear": "Craftsmaster Gear",
+      "expedition_skill_1_effects": [
+        {
+          "type": "def_buff",
+          "target": "infantry",
+          "max_value": 30,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "atk_buff",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "periodic_dmg",
+          "target": "enemy",
+          "max_value": 50,
+          "effective_pct": 33
+        }
+      ]
     },
     {
       "name": "Flora",
@@ -1326,7 +2566,31 @@
       "expedition_skill_2_desc": "Living plants heal friendly troops for 5-25% of max Health every 4 turns.",
       "expedition_skill_3": "Confusion Pollen",
       "expedition_skill_3_desc": "Hallucinogenic spores reduce enemy Attack by 5-25%.",
-      "mythic_gear": "Botanist's Arsenal"
+      "mythic_gear": "Botanist's Arsenal",
+      "expedition_skill_1_effects": [
+        {
+          "type": "enemy_vuln",
+          "target": "enemy",
+          "max_value": 50,
+          "effective_pct": 50
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "troop_healing",
+          "target": "all",
+          "max_value": 25,
+          "effective_pct": 25
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "enemy_atk_debuff",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Vulcanus",
@@ -1352,7 +2616,37 @@
       "expedition_skill_2_desc": "Armor-piercing rounds increase all troops' damage vs high-defense targets by 10-50%.",
       "expedition_skill_3": "Bleeding Edge",
       "expedition_skill_3_desc": "All attacks cause Bleed, dealing 2-10% extra damage per turn for 2 turns.",
-      "mythic_gear": "Doom Sigil"
+      "mythic_gear": "Doom Sigil",
+      "expedition_skill_1_effects": [
+        {
+          "type": "atk_buff",
+          "target": "marksman",
+          "max_value": 60,
+          "effective_pct": 100
+        },
+        {
+          "type": "enemy_def_debuff",
+          "target": "enemy",
+          "max_value": 60,
+          "effective_pct": 67
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "all",
+          "max_value": 50,
+          "effective_pct": 80
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "extra_dmg",
+          "target": "all",
+          "max_value": 10,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Elif",
@@ -1378,7 +2672,31 @@
       "expedition_skill_2_desc": "Coordinated blade work increases Infantry Damage Dealt by 20-100%.",
       "expedition_skill_3": "Enchanting Tapestry",
       "expedition_skill_3_desc": "Woven enchantments grant Infantry Shield equal to 6-30% of Attack every 3 turns.",
-      "mythic_gear": "Dancer's Veil"
+      "mythic_gear": "Dancer's Veil",
+      "expedition_skill_1_effects": [
+        {
+          "type": "enemy_atk_debuff",
+          "target": "enemy",
+          "max_value": 25,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "shield",
+          "target": "infantry",
+          "max_value": 30,
+          "effective_pct": 33
+        }
+      ]
     },
     {
       "name": "Dominic",
@@ -1404,7 +2722,49 @@
       "expedition_skill_2_desc": "Hidden spikes deal 10-50% damage to enemies every 3 turns.",
       "expedition_skill_3": "Mirror Maze",
       "expedition_skill_3_desc": "Illusions reduce Infantry and Marksmen Damage Taken by 3-15% and boost their Damage Dealt by 3-15%.",
-      "mythic_gear": "Mystic Mechanism"
+      "mythic_gear": "Mystic Mechanism",
+      "expedition_skill_1_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "lancer",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "periodic_dmg",
+          "target": "enemy",
+          "max_value": 50,
+          "effective_pct": 33
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_reduction",
+          "target": "infantry",
+          "max_value": 15,
+          "effective_pct": 100
+        },
+        {
+          "type": "dmg_reduction",
+          "target": "marksman",
+          "max_value": 15,
+          "effective_pct": 100
+        },
+        {
+          "type": "dmg_dealt_buff",
+          "target": "infantry",
+          "max_value": 15,
+          "effective_pct": 100
+        },
+        {
+          "type": "dmg_dealt_buff",
+          "target": "marksman",
+          "max_value": 15,
+          "effective_pct": 100
+        }
+      ]
     },
     {
       "name": "Cara",
@@ -1430,24 +2790,104 @@
       "expedition_skill_2_desc": "Mechanical companion increases normal attack damage by 6-30% for all troops.",
       "expedition_skill_3": "Witch's Wrath",
       "expedition_skill_3_desc": "Dark fury increases Marksmen Damage Dealt by 20-100%.",
-      "mythic_gear": "Velocomet"
+      "mythic_gear": "Velocomet",
+      "expedition_skill_1_effects": [
+        {
+          "type": "enemy_crit_debuff",
+          "target": "enemy",
+          "max_value": 20,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_2_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "all",
+          "max_value": 30,
+          "effective_pct": 100
+        }
+      ],
+      "expedition_skill_3_effects": [
+        {
+          "type": "dmg_dealt_buff",
+          "target": "marksman",
+          "max_value": 100,
+          "effective_pct": 100
+        }
+      ]
     }
   ],
   "generation_timeline": {
-    "1": {"start_day": 0, "end_day": 40, "description": "Starting heroes"},
-    "2": {"start_day": 40, "end_day": 120, "description": "First unlocks"},
-    "3": {"start_day": 120, "end_day": 200, "description": "Mid-early game"},
-    "4": {"start_day": 200, "end_day": 280, "description": "Mid game"},
-    "5": {"start_day": 280, "end_day": 360, "description": "Mid-late game"},
-    "6": {"start_day": 360, "end_day": 440, "description": "Late game"},
-    "7": {"start_day": 440, "end_day": 520, "description": "Advanced"},
-    "8": {"start_day": 520, "end_day": 600, "description": "Veteran"},
-    "9": {"start_day": 600, "end_day": 680, "description": "Expert"},
-    "10": {"start_day": 680, "end_day": 760, "description": "Master"},
-    "11": {"start_day": 760, "end_day": 840, "description": "Grandmaster"},
-    "12": {"start_day": 840, "end_day": 920, "description": "Legend"},
-    "13": {"start_day": 920, "end_day": 1000, "description": "Mythic"},
-    "14": {"start_day": 1000, "end_day": 1080, "description": "Apex"}
+    "1": {
+      "start_day": 0,
+      "end_day": 40,
+      "description": "Starting heroes"
+    },
+    "2": {
+      "start_day": 40,
+      "end_day": 120,
+      "description": "First unlocks"
+    },
+    "3": {
+      "start_day": 120,
+      "end_day": 200,
+      "description": "Mid-early game"
+    },
+    "4": {
+      "start_day": 200,
+      "end_day": 280,
+      "description": "Mid game"
+    },
+    "5": {
+      "start_day": 280,
+      "end_day": 360,
+      "description": "Mid-late game"
+    },
+    "6": {
+      "start_day": 360,
+      "end_day": 440,
+      "description": "Late game"
+    },
+    "7": {
+      "start_day": 440,
+      "end_day": 520,
+      "description": "Advanced"
+    },
+    "8": {
+      "start_day": 520,
+      "end_day": 600,
+      "description": "Veteran"
+    },
+    "9": {
+      "start_day": 600,
+      "end_day": 680,
+      "description": "Expert"
+    },
+    "10": {
+      "start_day": 680,
+      "end_day": 760,
+      "description": "Master"
+    },
+    "11": {
+      "start_day": 760,
+      "end_day": 840,
+      "description": "Grandmaster"
+    },
+    "12": {
+      "start_day": 840,
+      "end_day": 920,
+      "description": "Legend"
+    },
+    "13": {
+      "start_day": 920,
+      "end_day": 1000,
+      "description": "Mythic"
+    },
+    "14": {
+      "start_day": 1000,
+      "end_day": 1080,
+      "description": "Apex"
+    }
   },
   "tier_descriptions": {
     "S+": "Meta-defining. Stays relevant across many generations. Always worth max investment. Examples: Jeronimo, Wu Ming, Blanchette.",
@@ -1457,28 +2897,41 @@
     "C": "Average. Replace when possible. Minimal investment.",
     "D": "Poor. Avoid investing resources. Use only as absolute last resort."
   },
-  "rarity_order": ["Rare", "Epic", "Legendary"],
+  "rarity_order": [
+    "Rare",
+    "Epic",
+    "Legendary"
+  ],
   "class_info": {
     "Infantry": {
       "description": "Frontline tanks. High defense and health.",
       "position": "Front row",
       "color": "#E74C3C",
       "symbol": "shield",
-      "chief_gear": ["Coat", "Pants"]
+      "chief_gear": [
+        "Coat",
+        "Pants"
+      ]
     },
     "Marksman": {
       "description": "Ranged damage dealers. High attack.",
       "position": "Back row corners",
       "color": "#3498DB",
       "symbol": "bow",
-      "chief_gear": ["Belt", "Shortstaff"]
+      "chief_gear": [
+        "Belt",
+        "Shortstaff"
+      ]
     },
     "Lancer": {
       "description": "Balanced fighters. Good damage and mobility.",
       "position": "Back row center",
       "color": "#2ECC71",
       "symbol": "sword",
-      "chief_gear": ["Hat", "Watch"]
+      "chief_gear": [
+        "Hat",
+        "Watch"
+      ]
     }
   },
   "rarity_colors": {
@@ -1488,13 +2941,34 @@
   },
   "gear_system": {
     "quality_levels": {
-      "0": {"name": "None", "color": "#666666"},
-      "1": {"name": "Gray", "color": "#9E9E9E"},
-      "2": {"name": "Green", "color": "#4CAF50"},
-      "3": {"name": "Blue", "color": "#2196F3"},
-      "4": {"name": "Purple", "color": "#9C27B0"},
-      "5": {"name": "Orange", "color": "#FF9800"},
-      "6": {"name": "Mythic", "color": "#E91E63"}
+      "0": {
+        "name": "None",
+        "color": "#666666"
+      },
+      "1": {
+        "name": "Gray",
+        "color": "#9E9E9E"
+      },
+      "2": {
+        "name": "Green",
+        "color": "#4CAF50"
+      },
+      "3": {
+        "name": "Blue",
+        "color": "#2196F3"
+      },
+      "4": {
+        "name": "Purple",
+        "color": "#9C27B0"
+      },
+      "5": {
+        "name": "Orange",
+        "color": "#FF9800"
+      },
+      "6": {
+        "name": "Mythic",
+        "color": "#E91E63"
+      }
     },
     "max_level_by_quality": {
       "1": 20,
@@ -1504,6 +2978,11 @@
       "5": 100,
       "6": 120
     },
-    "slots": ["Weapon", "Armor", "Helmet", "Boots"]
+    "slots": [
+      "Weapon",
+      "Armor",
+      "Helmet",
+      "Boots"
+    ]
   }
 }

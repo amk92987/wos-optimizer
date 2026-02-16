@@ -5,10 +5,11 @@ import PageLayout from '@/components/PageLayout';
 import { useAuth } from '@/lib/auth';
 import { lineupsApi, heroesApi, LineupResponse, UserHero } from '@/lib/api';
 
-type TabKey = 'castle-battles' | 'bear-trap' | 'arena' | 'canyon-clash' | 'foundry' | 'frostfire' | 'labyrinth';
+type TabKey = 'castle-battles' | 'crazy-joe' | 'bear-trap' | 'arena' | 'canyon-clash' | 'foundry' | 'frostfire' | 'labyrinth';
 
 const tabs: { key: TabKey; label: string; icon: string }[] = [
   { key: 'castle-battles', label: 'Castle Battles', icon: '🏰' },
+  { key: 'crazy-joe', label: 'Crazy Joe', icon: '🤪' },
   { key: 'bear-trap', label: 'Bear Trap', icon: '🐻' },
   { key: 'arena', label: 'Arena', icon: '🏟️' },
   { key: 'canyon-clash', label: 'Canyon Clash', icon: '⚔️' },
@@ -165,6 +166,225 @@ function CastleBattlesTab() {
             </ul>
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function CrazyJoeTab() {
+  const waves = [
+    { range: 'Waves 1-6', target: 'Random member cities', points: 'Standard', tip: 'Spread reinforcements evenly across alliance members' },
+    { range: 'Wave 7', target: 'Online players ONLY', points: '2x points', tip: 'Be online! Reinforce online allies for double points' },
+    { range: 'Waves 8-9', target: 'Random member cities', points: 'Standard', tip: 'Recall from HQ prep, keep reinforcing cities' },
+    { range: 'Wave 10', target: 'Alliance HQ ONLY', points: 'High', tip: 'Send all troops to Alliance HQ before this wave' },
+    { range: 'Waves 11-13', target: 'Random member cities', points: 'Standard', tip: 'Recall from HQ, spread back to member cities' },
+    { range: 'Wave 14', target: 'Online players ONLY', points: '2x points', tip: 'Stay online! Double points again' },
+    { range: 'Waves 15-16', target: 'Random member cities', points: 'Standard', tip: 'Prep for high-value wave 17' },
+    { range: 'Wave 17', target: 'Online players ONLY', points: '2x points', tip: 'CRITICAL - waves 17-19 give ~31% of total points' },
+    { range: 'Waves 18-19', target: 'Random member cities', points: 'High', tip: 'Keep reinforcing - these are high-value waves' },
+    { range: 'Wave 20', target: 'Alliance HQ ONLY', points: 'Very High', tip: 'Send everything to HQ for the final boss wave' },
+    { range: 'Wave 21', target: 'Final wave on cities', points: 'Standard', tip: 'Last wave - mop up remaining bandits' },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="card bg-gradient-to-r from-yellow-500/10 to-transparent border-yellow-500/30">
+        <p className="text-frost">
+          Crazy Joe is a <strong className="text-yellow-400">weekly alliance defense event</strong> where 21 waves of bandits attack
+          your alliance. This is <strong className="text-frost">NOT a rally</strong> - you reinforce alliance members{"'"} cities and
+          the Alliance HQ, and your troops defend when attacked. Coordination and timing are everything.
+        </p>
+      </div>
+
+      {/* How It Works */}
+      <div className="card">
+        <h2 className="section-header text-yellow-400">How It Works</h2>
+        <div className="space-y-3">
+          <div className="p-3 rounded-lg bg-surface">
+            <p className="text-sm text-frost">
+              <strong className="text-ice">1. Reinforce</strong> - Send troops to alliance members{"'"} cities before waves hit.
+              Your troops defend their city and you earn points from kills.
+            </p>
+          </div>
+          <div className="p-3 rounded-lg bg-surface">
+            <p className="text-sm text-frost">
+              <strong className="text-ice">2. Garrison Mechanics</strong> - Works like garrison joining: only your
+              <strong className="text-frost"> first hero{"'"}s expedition skill</strong> matters. The top 4 highest-level
+              first skills from all reinforcers apply to the battle.
+            </p>
+          </div>
+          <div className="p-3 rounded-lg bg-surface">
+            <p className="text-sm text-frost">
+              <strong className="text-ice">3. Your Barricade</strong> - Place 3 heroes on your own city{"'"}s barricade.
+              First slot is most important (expedition skill). Don{"'"}t leave any barricade slot empty.
+            </p>
+          </div>
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+            <p className="text-sm text-frost">
+              <strong className="text-red-400">Key Rule:</strong> If a city loses 2 waves, it stops generating points.
+              Prioritize defending weaker alliance members to keep all cities active.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Troop Ratio */}
+      <div className="card border-red-500/30">
+        <h2 className="section-header">Troop Ratio</h2>
+        <div className="flex items-center gap-6 mb-4">
+          <div className="text-center">
+            <p className={`text-2xl font-bold ${troopColors.infantry}`}>90%</p>
+            <p className="text-xs text-frost-muted">Infantry</p>
+          </div>
+          <div className="text-center">
+            <p className={`text-2xl font-bold ${troopColors.lancer}`}>10%</p>
+            <p className="text-xs text-frost-muted">Lancer</p>
+          </div>
+          <div className="text-center">
+            <p className={`text-2xl font-bold ${troopColors.marksman}`}>0%</p>
+            <p className="text-xs text-frost-muted">Marksman</p>
+          </div>
+        </div>
+        <div className="p-3 rounded-lg bg-surface">
+          <p className="text-sm text-frost-muted">
+            <strong className="text-frost">Why Infantry?</strong> Infantry engage first in combat. With enough stats and numbers,
+            they kill all bandits before Lancers or Marksmen even attack. With 0% Marksman troops, Crazy Joe{"'"}s AI finds no
+            backline to target and is forced into unfavorable frontline combat against your Infantry wall.
+          </p>
+        </div>
+      </div>
+
+      {/* Heroes */}
+      <div className="card">
+        <h2 className="section-header">Hero Strategy</h2>
+        <div className="grid md:grid-cols-2 gap-4 mb-4">
+          <div className="p-4 rounded-lg bg-ice/10 border border-ice/20">
+            <h3 className="font-medium text-ice mb-2">Your Barricade (City Defense)</h3>
+            <ul className="text-sm text-frost-muted space-y-2">
+              <li><strong className="text-frost">Slot 1:</strong> Sergey - Defenders{"'"} Edge (-20% DMG taken)</li>
+              <li><strong className="text-frost">Slot 2-3:</strong> Your strongest remaining heroes</li>
+              <li className="text-xs text-warning">Never leave a barricade slot empty!</li>
+            </ul>
+          </div>
+          <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20">
+            <h3 className="font-medium text-green-400 mb-2">Reinforcement March</h3>
+            <ul className="text-sm text-frost-muted space-y-2">
+              <li><strong className="text-frost">Slot 1:</strong> Sergey (defense) or Jeronimo (offense)</li>
+              <li><strong className="text-frost">Slot 2-3:</strong> Any heroes (only slot 1 skill matters)</li>
+              <li className="text-xs text-frost-muted">Same as rally joining - only first hero{"'"}s expedition skill applies</li>
+            </ul>
+          </div>
+        </div>
+        <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+          <p className="text-sm text-frost">
+            <strong className="text-yellow-400">Skill Type:</strong> Crazy Joe uses <strong className="text-frost">Expedition skills</strong> (right side)
+            because reinforcement is garrison-style defense combat, even though the bandits are AI (PvE).
+          </p>
+        </div>
+      </div>
+
+      {/* Wave Timeline */}
+      <div className="card">
+        <h2 className="section-header">Wave Timeline (21 Waves)</h2>
+        <p className="text-frost-muted text-sm mb-4">
+          Event lasts ~40 minutes. Special waves are highlighted - plan your troop movements around these.
+        </p>
+        <div className="space-y-2">
+          {waves.map((wave, i) => {
+            const isSpecial = wave.points !== 'Standard';
+            const isHQ = wave.target.includes('HQ');
+            const isOnline = wave.target.includes('Online');
+            return (
+              <div
+                key={i}
+                className={`p-3 rounded-lg border ${
+                  isHQ ? 'bg-purple-500/10 border-purple-500/30' :
+                  isOnline ? 'bg-yellow-500/10 border-yellow-500/30' :
+                  'bg-surface border-surface-border'
+                }`}
+              >
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-3">
+                    <span className={`text-sm font-bold ${
+                      isHQ ? 'text-purple-400' : isOnline ? 'text-yellow-400' : 'text-frost-muted'
+                    }`}>
+                      {wave.range}
+                    </span>
+                    <span className="text-sm text-frost">{wave.target}</span>
+                  </div>
+                  {isSpecial && (
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded ${
+                      isHQ ? 'bg-purple-500/20 text-purple-400' : 'bg-yellow-500/20 text-yellow-400'
+                    }`}>
+                      {wave.points}
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-frost-muted mt-1">{wave.tip}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Scoring Strategy */}
+      <div className="card">
+        <h2 className="section-header">Maximizing Points</h2>
+        <div className="space-y-3">
+          {[
+            { priority: 'critical', title: 'Stay Online During Double-Point Waves', desc: 'Waves 7, 14, and 17 target ONLY online players and give 2x points. Being offline during these means zero points from the highest-value waves.' },
+            { priority: 'critical', title: 'Reinforce Cities with Fewer Defenders', desc: 'Points come from kills. If 10 people reinforce one city, each gets fewer kills. Spread evenly across alliance members.' },
+            { priority: 'high', title: 'Recall and Reposition for HQ Waves', desc: 'Waves 10 and 20 target ONLY the Alliance HQ. Recall troops from member cities and send to HQ before these waves hit.' },
+            { priority: 'high', title: 'Do NOT Heal During Event', desc: 'Healed troops return to YOUR city and steal kills from reinforcers. Wait until the event ends to heal.' },
+            { priority: 'high', title: 'Prioritize Waves 17-19', desc: 'These three waves account for ~31% of total points. Have your troops positioned and ready.' },
+            { priority: 'medium', title: 'Defend Weaker Members', desc: 'If a city loses 2 waves, it stops generating points. Reinforce weaker alliance members to keep all cities active throughout the event.' },
+            { priority: 'medium', title: 'Coordinate Troop Swaps', desc: 'Between major waves, recall and re-send troops to rebalance across alliance members. Communication is key.' },
+          ].map((item, i) => {
+            const colors = priorityColors[item.priority];
+            return (
+              <div key={i} className={`p-3 rounded-lg ${colors.bg} border ${colors.border}`}>
+                <div className="flex items-start gap-3">
+                  <span className={`text-xs font-bold uppercase ${colors.text}`}>{item.priority}</span>
+                  <div>
+                    <p className="font-medium text-frost">{item.title}</p>
+                    <p className="text-sm text-frost-muted mt-1">{item.desc}</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Common Mistakes */}
+      <div className="card border-red-500/30">
+        <h2 className="section-header text-red-400">Common Mistakes</h2>
+        <ul className="space-y-2 text-sm text-frost-muted">
+          <li className="flex items-start gap-2">
+            <span className="text-red-400">X</span>
+            <span>Stacking all reinforcements on one city (kills get split between too many defenders)</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-red-400">X</span>
+            <span>Healing troops during the event (healed troops go to YOUR city, not the reinforced city)</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-red-400">X</span>
+            <span>Going offline during waves 7, 14, or 17 (these are double-point online-only waves)</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-red-400">X</span>
+            <span>Forgetting to send troops to Alliance HQ before waves 10 and 20</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-red-400">X</span>
+            <span>Using Marksman troops (Infantry kills bandits before backline troops engage)</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-red-400">X</span>
+            <span>Leaving barricade hero slots empty on your own city</span>
+          </li>
+        </ul>
       </div>
     </div>
   );
@@ -380,14 +600,15 @@ function BearTrapTab() {
               <span className="text-xs font-bold text-green-400 mt-0.5 shrink-0">OPTIMAL</span>
               <div>
                 <p className="text-sm text-frost"><strong>0/10/90</strong> (same as leader)</p>
-                <p className="text-xs text-frost-muted">Maximum DPS. Use this if you have enough marksman troops to fill all your rallies.</p>
+                <p className="text-xs text-frost-muted">Maximum DPS. Use this for your first few joiner rallies while you still have plenty of marksman troops available.</p>
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <span className="text-xs font-bold text-ice mt-0.5 shrink-0">PRACTICAL</span>
+              <span className="text-xs font-bold text-ice mt-0.5 shrink-0">CONSERVE</span>
               <div>
                 <p className="text-sm text-frost"><strong>20/20/60</strong></p>
-                <p className="text-xs text-frost-muted">Still marksman-heavy but spreads your troops across 6-7 rallies (1 lead + 5-6 joins) without running out of marksmen.</p>
+                <p className="text-xs text-frost-muted">Switch to this ratio when you{"'"}re running low on marksman troops. You lead 1 rally + join up to 6 others, so
+                  7 full marksman-heavy marches can drain your marksmen fast. Using 20/20/60 for your later joins lets you fill all 6 joiner slots without running out.</p>
               </div>
             </div>
           </div>
@@ -1878,6 +2099,8 @@ export default function BattleTacticsPage() {
     switch (activeTab) {
       case 'castle-battles':
         return <CastleBattlesTab />;
+      case 'crazy-joe':
+        return <CrazyJoeTab />;
       case 'bear-trap':
         return <BearTrapTab />;
       case 'arena':

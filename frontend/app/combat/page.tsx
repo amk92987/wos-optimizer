@@ -51,7 +51,7 @@ export default function CombatPage() {
           <div className="mt-4 space-y-3 text-sm text-frost-muted">
             <div className="bg-surface rounded-lg p-3">
               <h4 className="font-semibold text-frost mb-1">PvE (Player vs Environment)</h4>
-              <p>Bear Trap, Crazy Joe, Labyrinth, Exploration. Uses <strong className="text-ice">Exploration Skills</strong>. You can retry for better RNG.</p>
+              <p>Bear Trap, Labyrinth, Exploration. Uses <strong className="text-ice">Exploration Skills</strong>. You can retry for better RNG.</p>
             </div>
             <div className="bg-surface rounded-lg p-3">
               <h4 className="font-semibold text-frost mb-1">PvP (Player vs Player)</h4>

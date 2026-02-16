@@ -359,7 +359,7 @@ const categoryTips: Record<string, { name: string; icon: string; tips: { tip: st
     icon: '🎯',
     tips: [
       { tip: "Rally joining: ONLY leftmost hero's expedition skill applies", detail: "Put Jessie (+25% DMG) or Jeronimo in leftmost slot. Other heroes' expedition skills are wasted.", priority: 'critical' },
-      { tip: 'Exploration skills for PvE, Expedition skills for PvP', detail: 'Bear Trap, Crazy Joe = Exploration. SvS, rallies = Expedition. Don\'t mix them up.', priority: 'high' },
+      { tip: 'Exploration skills for PvE, Expedition skills for PvP', detail: 'Bear Trap, Labyrinth = Exploration. SvS, rallies, Crazy Joe, garrison = Expedition. Don\'t mix them up.', priority: 'high' },
       { tip: 'Sergey in leftmost slot for DEFENSE', detail: "Sergey's -20% DMG taken is best defensive skill. Use him when reinforcing garrisons.", priority: 'high' },
       { tip: 'Class counters: Infantry > Lancer > Marksman > Infantry', detail: "~30% damage bonus against weak class. Match your composition to counter enemy's main type.", priority: 'medium' },
     ],
@@ -539,7 +539,7 @@ function HeroInvestmentTab() {
         <div className="p-4 pt-0 text-sm text-frost-muted space-y-3">
           <div>
             <p className="font-medium text-frost">PvE (Player vs Environment)</p>
-            <p>Content where you fight against the game, not other players: Bear Trap, Crazy Joe, Labyrinth, Exploration</p>
+            <p>Content where you fight against the game, not other players: Bear Trap, Labyrinth, Exploration</p>
             <p className="text-green-400">Uses Exploration Skills</p>
           </div>
           <div>
