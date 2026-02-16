@@ -3,11 +3,6 @@
 ## Active TODO
 
 ### UI / Frontend
-- [ ] **Frost/Arctic Theme Enhancements** - Subtle UI polish across the app
-  - Tasteful frost/ice accents where appropriate (not overwhelming)
-  - Slight improvements to card borders, hover effects, gradient accents
-  - Consider frosted glass effects on key panels
-
 - [ ] **Rethink Combat Priority Settings** - SvS, Castle Battle, and Rally are redundant
   - Currently 5 priorities: SvS, Rally, Castle Battle, Exploration, Gathering
   - SvS/Castle/Rally are essentially the same combat activity
@@ -16,34 +11,31 @@
   - Discuss approach before implementing
 
 - [ ] **Admin Dashboard Trend Charts** - Charts not showing data
-  - Fix when dev environment is set up
+
+- [ ] **Legendary Gear Level Logic on Hero Tracker** - Rethink gear editing UX
+  - Gear must be at level 100 before it can be upgraded to Legendary quality
+  - Once Legendary, levels reset and go up from there (Legendary level progression)
+  - Current UI doesn't enforce this — selecting Legendary should handle the level transition correctly
+  - Research gear enhancement mechanics to get the exact flow right
+
+- [ ] **Gear Power Contribution to Lineups** - Incorporate gear stats into lineup scoring
+  - Understand how gear adds power/stats to heroes
+  - Factor gear quality + level into lineup recommendations
+  - Currently lineup engine only considers hero level/stars/skills, not gear
 
 ### Backend / Engine
 - [ ] **Full Code Review Pass** - Audit all recent combat/daybreak/estimator changes
   - Check for dead code, type mismatches, edge cases
   - Verify all API endpoints return expected shapes
 
-### Infrastructure
-- [ ] **Set Up Fresh Dev Environment** - Deploy new `wos-dev` stack
-  - New DynamoDB tables, Cognito pool, CloudFront distribution
-  - Move `wosdev.randomchaoslabs.com` alias to new distribution
-  - Remove `wosdev` alias from current (live) distribution
-
-- [ ] **Create App Icons** - PWA icons for mobile
-  - manifest.json references icon-192.png and icon-512.png that don't exist
-  - Generate from bear logo
-
-### Auth / Security
-- [ ] **Forgot Password Flow** - Add password reset via email
-  - Add "Forgot Password?" link on login page
-  - Generate secure reset tokens
-  - Send password reset email
-
-- [ ] **Email Verification on Signup** - Enforce email verification
-  - `is_verified` field exists but not enforced
-  - Block login until verified (or grace period)
-
 ## Recently Completed
+
+### Feb 2026 - UI Polish & Fixes
+- [x] Frost/arctic theme enhancements (ice shield avatar, sidebar glow, frost dividers, card hover, page title glow, frosted dropdown, snowflake visibility)
+- [x] Hero info popout button on My Heroes tab (reuses HeroDetailModal)
+- [x] Fix event type underscores on Events page (alliance_pve → Alliance Pve)
+- [x] Fix Crazy Joe data (20 phases not 21, biweekly not daily, 2 battles per occurrence)
+- [x] Fix loading screen bear paw box-shadow artifact
 
 ### Feb 2026 - Battle Enhancement Features
 - [x] Add "12 Combat Stats" education content (Stats & Sources tab)

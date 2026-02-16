@@ -53,9 +53,9 @@ export default function HeroesPage() {
     }
   }, [token]);
 
-  // Load all heroes when tab switches
+  // Load all heroes reference data (needed for detail modal on both tabs)
   useEffect(() => {
-    if (token && activeTab === 'all' && allHeroes.length === 0 && !allHeroesLoading) {
+    if (token && allHeroes.length === 0 && !allHeroesLoading) {
       setAllHeroesLoading(true);
       setAllHeroesError(null);
       heroesApi.getAll(token, false)
@@ -66,7 +66,7 @@ export default function HeroesPage() {
         })
         .finally(() => setAllHeroesLoading(false));
     }
-  }, [token, activeTab, allHeroes.length]);
+  }, [token, allHeroes.length]);
 
   const ownedHeroNames = new Set(ownedHeroes.map(h => h.hero_name));
 
@@ -746,6 +746,10 @@ export default function HeroesPage() {
                                   token={token}
                                   onSaved={refreshOwnedHeroes}
                                   onRemove={() => handleRemoveHero(hero.hero_name)}
+                                  onInfoClick={allHeroes.length > 0 ? () => {
+                                    const ref = allHeroes.find(h => h.name === hero.hero_name);
+                                    if (ref) setSelectedHero(ref);
+                                  } : undefined}
                                 />
                               </div>
                             </div>
@@ -773,6 +777,10 @@ export default function HeroesPage() {
                           token={token}
                           onSaved={refreshOwnedHeroes}
                           onRemove={() => handleRemoveHero(hero.hero_name)}
+                          onInfoClick={allHeroes.length > 0 ? () => {
+                            const ref = allHeroes.find(h => h.name === hero.hero_name);
+                            if (ref) setSelectedHero(ref);
+                          } : undefined}
                         />
                       </div>
                     </div>

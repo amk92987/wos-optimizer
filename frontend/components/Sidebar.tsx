@@ -214,8 +214,11 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto py-2">
-          {navigation.map((group) => (
+          {navigation.map((group, groupIndex) => (
             <div key={group.label} className={`${isCollapsed ? 'px-2' : 'px-3'} py-2`}>
+              {groupIndex > 0 && (
+                <div className={`mb-2 h-px bg-gradient-to-r from-transparent via-ice/15 to-transparent ${isCollapsed ? 'mx-1' : 'mx-3'}`} />
+              )}
               {!isCollapsed && (
                 <p className="px-3 mb-1 text-xs font-semibold text-text-muted uppercase tracking-wider">
                   {group.label}
@@ -240,7 +243,7 @@ export default function Sidebar({ isOpen = true, onClose }: SidebarProps) {
                           transition-all duration-200 text-sm relative
                           ${
                             isActive
-                              ? 'bg-ice/10 text-ice border border-ice/20'
+                              ? 'bg-ice/10 text-ice border border-ice/20 shadow-glow-sm'
                               : 'text-text-secondary hover:text-frost hover:bg-surface/50'
                           }
                         `}

@@ -190,9 +190,9 @@ function UserMenu({ unreadCount = 0 }: { unreadCount?: number }) {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 p-2 rounded-lg hover:bg-surface/50 transition-colors relative"
       >
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isAdmin ? 'bg-fire/20' : 'bg-ice/20'} relative`}>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-ice/20 shadow-glow-sm relative`}>
           {isAdmin ? (
-            <svg className="w-4 h-4 text-fire" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-ice drop-shadow-[0_0_4px_rgba(74,144,217,0.6)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
           ) : (
@@ -220,7 +220,7 @@ function UserMenu({ unreadCount = 0 }: { unreadCount?: number }) {
 
       {/* Dropdown menu */}
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-surface border border-surface-border rounded-xl shadow-card overflow-hidden z-50 animate-fade-in">
+        <div className="absolute right-0 mt-2 w-64 bg-surface/95 backdrop-blur-xl border border-ice/15 rounded-xl shadow-card overflow-hidden z-50 animate-fade-in">
           {/* User info header */}
           <div className="p-4 border-b border-surface-border/50 bg-background-light">
             <p className="font-medium text-frost truncate">{user?.email}</p>

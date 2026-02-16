@@ -47,7 +47,7 @@ function useGamePhase(): string {
         else if (fc && parseInt(fc.replace(/\D/g, '') || '0') >= 5) setPhase('endgame');
         else setPhase('late_game');
       })
-      .catch(() => {});
+      .catch((err) => console.warn('Could not load profile for game phase detection:', err));
   }, [token]);
 
   return phase;

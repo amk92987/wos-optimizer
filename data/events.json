@@ -102,19 +102,18 @@
       "name": "Crazy Joe",
       "short_name": "CJ",
       "category": "alliance_defense",
-      "frequency": "weekly",
-      "typical_day": "Thursday",
+      "frequency": "every_other_week",
+      "typical_day": "Varies (2 battles per occurrence)",
       "duration_hours": 1,
-      "description": "Alliance wave defense event. 21 waves of bandits attack member cities and Alliance HQ. Players reinforce each other's cities.",
+      "description": "Alliance PvE wave defense event with 20 phases. Occurs roughly every other week with 2 separate battles per occurrence at different times.",
       "point_sources": [
         {"action": "Kill bandits while reinforcing", "points": "based on kills"},
-        {"action": "Online-only waves (7,14,17)", "points": "2x points"},
-        {"action": "Alliance HQ waves (10,20)", "points": "high value"}
+        {"action": "Boss waves (10, 20)", "points": "high value"}
       ],
       "optimizer_relevance": {
         "priority_systems": ["hero_expedition_skills", "hero_level"],
         "key_heroes": ["Sergey", "Jeronimo", "Natalia"],
-        "tip": "Garrison-style defense combat. Use expedition skills. 90/10/0 Infantry ratio. Reinforce evenly across alliance."
+        "tip": "Infantry-heavy combat. Use expedition skills. 90/10/0 Infantry ratio. Joe targets backline so marksmen get wiped."
       },
       "rewards": ["Speedups", "Resources", "Hero XP"]
     },

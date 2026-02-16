@@ -352,6 +352,11 @@ body {
   }
 }
 
+/* Frost glow on page titles (h1) */
+h1.text-frost {
+  text-shadow: 0 0 20px rgba(74, 144, 217, 0.25), 0 0 40px rgba(74, 144, 217, 0.08);
+}
+
 /* ============================================
    HERO RARITY & TIER EFFECTS
    ============================================ */
@@ -538,68 +543,6 @@ body {
 
 .btn-gold:hover {
   box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
-}
-
-/* ============================================
-   FROST THEME DECORATIVE ELEMENTS
-   ============================================ */
-
-/* Frost border effect */
-.frost-border {
-  position: relative;
-}
-
-.frost-border::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(135deg,
-    rgba(125, 211, 252, 0.3) 0%,
-    rgba(74, 144, 217, 0.1) 50%,
-    rgba(125, 211, 252, 0.3) 100%);
-  border-radius: inherit;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.frost-border:hover::before {
-  opacity: 1;
-}
-
-/* Ice crystal corners */
-.ice-corners {
-  position: relative;
-}
-
-.ice-corners::before,
-.ice-corners::after {
-  content: '';
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border-color: var(--ice);
-  border-style: solid;
-  opacity: 0.5;
-}
-
-.ice-corners::before {
-  top: -1px;
-  left: -1px;
-  border-width: 2px 0 0 2px;
-  border-radius: 8px 0 0 0;
-}
-
-.ice-corners::after {
-  bottom: -1px;
-  right: -1px;
-  border-width: 0 2px 2px 0;
-  border-radius: 0 0 8px 0;
-}
-
-/* Snowflake decoration (subtle) */
-.snowflake-bg {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60'%3E%3Cpath fill='%234A90D9' fill-opacity='0.03' d='M30 0l2 10-2 10-2-10 2-10zm0 40l2 10-2 10-2-10 2-10zM0 30l10-2 10 2-10 2-10-2zm40 0l10-2 10 2-10 2-10-2z'/%3E%3C/svg%3E");
 }
 
 /* ============================================

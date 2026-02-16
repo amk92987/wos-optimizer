@@ -17,12 +17,13 @@ interface HeroCardProps {
   token: string | null;
   onSaved?: () => void;
   onRemove?: () => void;
+  onInfoClick?: () => void;
 }
 
 const GEAR_SLOTS = ['Weapon', 'Armor', 'Helmet', 'Boots'];
 const GEAR_ICONS = ['\u2694\uFE0F', '\uD83D\uDEE1\uFE0F', '\u26D1\uFE0F', '\uD83D\uDC62'];
 
-export default function HeroCard({ hero, token, onSaved, onRemove }: HeroCardProps) {
+export default function HeroCard({ hero, token, onSaved, onRemove, onInfoClick }: HeroCardProps) {
   // Local state mirrors hero props, updated optimistically on interaction
   const [state, setState] = useState(() => ({
     level: hero.level,
@@ -145,6 +146,15 @@ export default function HeroCard({ hero, token, onSaved, onRemove }: HeroCardPro
           <span className={getTierClass(hero.tier_overall)}>
             {hero.tier_overall || 'B'}
           </span>
+          {onInfoClick && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onInfoClick(); }}
+              className="w-5 h-5 rounded-full bg-ice/15 text-ice hover:bg-ice/30 flex items-center justify-center text-xs font-bold transition-colors flex-shrink-0"
+              title="View hero details"
+            >
+              i
+            </button>
+          )}
           <SaveIndicator status={saveStatus} />
         </div>
         <div className="flex items-center gap-3 text-sm mb-1">

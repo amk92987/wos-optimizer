@@ -1,0 +1,546 @@
+{
+  "system": "gear_enhancement",
+  "description": "Comprehensive research on gear enhancement mechanics in Whiteout Survival, covering both Hero Gear and Chief Gear systems",
+  "retrieved_at": "2026-02-16T00:00:00Z",
+  "last_updated": "2026-02-16",
+  "research_version": 1,
+
+  "sources": [
+    {
+      "source_id": "SRC_LOCAL_HERO_GEAR_RESEARCH",
+      "path": "data/raw/hero_gear.research.json",
+      "confidence": "A",
+      "notes": "Existing comprehensive hero gear research file with 11 sources"
+    },
+    {
+      "source_id": "SRC_LOCAL_CHIEF_GEAR",
+      "path": "data/chief_gear.json",
+      "confidence": "A",
+      "notes": "Chief gear slot mapping and upgrade strategy"
+    },
+    {
+      "source_id": "SRC_LOCAL_CHIEF_EQUIPMENT_DATA",
+      "path": "data/chief_equipment_data.json",
+      "confidence": "A",
+      "notes": "Chief gear tier progression with exact bonus percentages (42 tiers)"
+    },
+    {
+      "source_id": "SRC_LOCAL_HERO_GEAR_LEGENDARY_EDGES",
+      "path": "data/upgrades/hero_gear.legendary.edges.json",
+      "confidence": "A",
+      "notes": "Complete level-by-level XP/Mithril/Legendary Gear costs for Legendary tier enhancement"
+    },
+    {
+      "source_id": "SRC_LOCAL_HERO_GEAR_MASTERY_EDGES",
+      "path": "data/upgrades/hero_gear.mastery.edges.json",
+      "confidence": "A",
+      "notes": "Complete mastery forging costs (Essence Stones + Mythic Gear per level)"
+    },
+    {
+      "source_id": "SRC_LOCAL_CHIEF_GEAR_STEPS",
+      "path": "data/upgrades/chief_gear.steps.json",
+      "confidence": "A",
+      "notes": "Chief gear upgrade costs per step (83 edges, red-0 through red T4-3)"
+    },
+    {
+      "source_id": "SRC_WIKI_HERO_GEAR",
+      "url": "https://www.whiteoutsurvival.wiki/hero-gears/hero-gear/",
+      "confidence": "A",
+      "notes": "Official wiki - gear quality tiers, sacrifice XP, mastery overview, exclusive gear"
+    },
+    {
+      "source_id": "SRC_WHITEOUTDATA_HERO_GEAR_XP",
+      "url": "https://whiteoutdata.com/data/hero-gear-xp-chart/",
+      "confidence": "A",
+      "notes": "Complete XP table for enhancement levels 1-100"
+    },
+    {
+      "source_id": "SRC_WHITEOUTDATA_MASTERY",
+      "url": "https://whiteoutdata.com/others/mastery-forging/",
+      "confidence": "A",
+      "notes": "Mastery forging costs per level"
+    },
+    {
+      "source_id": "SRC_WHITEOUTAPP_HERO_GEAR",
+      "url": "https://whiteoutsurvival.app/gears/hero-gears/",
+      "confidence": "A",
+      "notes": "Legendary gear empowerment milestones"
+    },
+    {
+      "source_id": "SRC_WHITEOUTAPP_ENHANCEMENT",
+      "url": "https://whiteoutsurvival.app/gears/hero-gears-enhancement/",
+      "confidence": "A",
+      "notes": "Enhancement XP calculator and per-level costs"
+    },
+    {
+      "source_id": "SRC_WHITEOUTDATA_MAX_LEVELS",
+      "url": "https://whiteoutdata.com/others/max-levels/",
+      "confidence": "A",
+      "notes": "Max level caps: hero gear = 100, exclusive gear = 10, mastery = 20"
+    },
+    {
+      "source_id": "SRC_CENTURY_HELP_ASCENSION",
+      "url": "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/section/1282-hero-gear-ascension-and-empowerment/",
+      "confidence": "A",
+      "notes": "Official help center for ascension and empowerment mechanics"
+    },
+    {
+      "source_id": "SRC_LDPLAYER_GUIDE",
+      "url": "https://www.ldplayer.net/blog/whiteout-survival-gear-upgrade-guide.html",
+      "confidence": "B",
+      "notes": "Confirms gear quality is NOT upgrade-in-place; you find/obtain higher quality gear"
+    },
+    {
+      "source_id": "SRC_MOBI_GUIDE",
+      "url": "https://mobi.gg/en/tips/whiteout-survival-hero-gear-guide/",
+      "confidence": "B",
+      "notes": "Slot names (Goggles/Gauntlets/Belt/Boots), stats per slot, class specificity"
+    },
+    {
+      "source_id": "SRC_LDSHOP_GUIDE",
+      "url": "https://www.ldshop.gg/blog/guide/whiteout-survival-hero-gear-guide.html",
+      "confidence": "B",
+      "notes": "Enhancement points per quality, gear transferability"
+    },
+    {
+      "source_id": "SRC_QUACKULATOR_CHIEF_GEAR",
+      "url": "https://www.quackulator.com/chiefgear.php",
+      "confidence": "A",
+      "notes": "Chief gear calculator with resource costs per tier"
+    },
+    {
+      "source_id": "SRC_WOS_REFERENCE",
+      "path": "data/WOS_REFERENCE.md",
+      "confidence": "A",
+      "notes": "Internal reference with chief gear tiers, ROI comparison, slot mapping"
+    }
+  ],
+
+  "findings": {
+
+    "1_gear_quality_progression": {
+      "question": "What are the exact upgrade paths for gear quality (Common through Mythic)?",
+      "confidence": "A",
+
+      "hero_gear_quality": {
+        "description": "Hero gear has 6 quality tiers. Quality is NOT upgraded in-place. You obtain higher quality gear from different sources (drops, shops, events). Lower quality gear is used as sacrifice material to provide Enhancement XP to the gear you keep.",
+        "tiers": [
+          {
+            "tier_number": 1,
+            "name": "Grey",
+            "alt_names": ["Common", "Gray"],
+            "color": "#808080",
+            "can_enhance": false,
+            "sacrifice_xp": 10,
+            "how_to_obtain": "Exploration stages (early levels), random drops",
+            "purpose": "Only used as sacrifice material for Enhancement XP"
+          },
+          {
+            "tier_number": 2,
+            "name": "Green",
+            "alt_names": ["Uncommon"],
+            "color": "#00AA00",
+            "can_enhance": true,
+            "sacrifice_xp": 30,
+            "how_to_obtain": "Exploration stages, Arena battles",
+            "purpose": "Basic enhanceable gear, mostly used as sacrifice material"
+          },
+          {
+            "tier_number": 3,
+            "name": "Blue",
+            "alt_names": ["Rare"],
+            "color": "#0066FF",
+            "can_enhance": true,
+            "sacrifice_xp": 60,
+            "how_to_obtain": "Exploration stages (higher levels), Arena shop",
+            "purpose": "Mid-tier gear, used as sacrifice material or temporary equipment"
+          },
+          {
+            "tier_number": 4,
+            "name": "Purple",
+            "alt_names": ["Epic"],
+            "color": "#9933CC",
+            "can_enhance": true,
+            "sacrifice_xp": 150,
+            "how_to_obtain": "Exploration stages (high levels), Arena shop, events",
+            "purpose": "Good mid-game gear with high sacrifice value"
+          },
+          {
+            "tier_number": 5,
+            "name": "Gold",
+            "alt_names": ["Mythic", "Orange"],
+            "color": "#FFB300",
+            "can_enhance": true,
+            "how_to_obtain": "Arena shop, packs, events, server milestones (~day 40)",
+            "purpose": "Best obtainable base tier. Unlocks Mastery Forging. This is the tier you invest in long-term.",
+            "mastery_available": true,
+            "ascension_available": true,
+            "ascension_note": "Can be ascended to Legendary (Red) tier at Enhancement 100 + Mastery 10"
+          },
+          {
+            "tier_number": 6,
+            "name": "Legendary",
+            "alt_names": ["Red"],
+            "color": "#FF3300",
+            "can_enhance": true,
+            "how_to_obtain": "Ascension from Gold/Mythic tier",
+            "purpose": "Highest tier. Obtained only by ascending a fully maxed Gold piece.",
+            "mastery_available": true,
+            "empowerment_available": true
+          }
+        ],
+        "key_insight": "You do NOT upgrade gear from Grey to Green to Blue etc. You FIND/OBTAIN gear at each quality level from different sources. Low quality gear is sacrificed into your high quality gear for Enhancement XP. The only quality 'upgrade' is ascending Gold gear to Legendary tier (a one-time promotion requiring specific milestones).",
+        "sacrifice_mechanics": "Lower quality gear can be 'fed' into higher quality gear to provide Enhancement XP. Grey=10 XP, Green=30 XP, Blue=60 XP, Purple=150 XP. Gold/Mythic gear CANNOT be sacrificed (they are consumed differently: for Mastery Forging levels 11-20 and for Ascension)."
+      },
+
+      "chief_gear_quality": {
+        "description": "Chief gear uses a COMPLETELY DIFFERENT system from hero gear. Chief gear has a single continuous tier progression (42 tiers from Green 0-star to Pink T3 3-star) where you upgrade step-by-step using materials. There is no 'find new gear' mechanic.",
+        "tier_progression_summary": {
+          "green": "Tiers 1-2: Green 0-star, Green 1-star (9.35-12.75% bonus)",
+          "blue": "Tiers 3-6: Blue 0-3 stars (17.00-29.75% bonus)",
+          "purple": "Tiers 7-14: Purple 0-3 stars + Purple T1 0-3 stars (34.00-54.23% bonus)",
+          "gold": "Tiers 15-26: Gold 0-3 stars + Gold T1 0-3 + Gold T2 0-3 (56.78-85.00% bonus)",
+          "pink": "Tiers 27-42: Pink 0-3 stars + Pink T1-T3 0-3 (89.25-187.00% bonus)"
+        },
+        "upgrade_materials": ["Hardened Alloy", "Polishing Solution", "Design Plans", "Lunar Amber"],
+        "upgrade_mechanism": "Step-by-step material upgrades. Each tier has 4 steps (5 steps for T4 tiers). Upgrading within a tier costs less than crossing tier boundaries.",
+        "note": "The WOS_REFERENCE.md lists chief gear tiers as: Common, Uncommon, Rare, Epic, Legendary, Mythic. This maps to: Green, Blue, Purple, Gold, Pink, (Pink T4). The detailed progression in chief_equipment_data.json shows 42 granular tiers."
+      }
+    },
+
+    "2_level_requirements_and_quality_interaction": {
+      "question": "Does gear need to be level 100 before upgrading to the next quality tier? What happens to the level when you upgrade quality?",
+      "confidence": "A",
+
+      "hero_gear_answer": {
+        "does_level_100_unlock_next_quality": "NO for most tiers. Quality tiers are obtained as separate items, not upgraded from existing gear. The ONLY exception is Gold-to-Legendary ascension, which requires Enhancement Level 100 AND Mastery Level 10.",
+        "what_happens_to_level_on_quality_change": "NOT APPLICABLE for Grey through Gold. You don't upgrade quality in-place. You get a new piece of gear at the quality level. For the Gold-to-Legendary ASCENSION: the gear's enhancement level resets. The new Legendary piece starts fresh at Enhancement Level 0 with a new (higher) enhancement cap of 100.",
+        "enhancement_level_cap_per_quality": {
+          "grey": "Cannot be enhanced at all (0 levels)",
+          "green": "100 (all enhanceable tiers share the same 100 cap)",
+          "blue": "100",
+          "purple": "100",
+          "gold": "100",
+          "legendary": "100 (after ascension, starts at 0 again)"
+        },
+        "practical_note": "In practice, only Gold and Legendary gear are worth enhancing to high levels. Enhancing Green/Blue/Purple gear is a waste of resources since those tiers will eventually be replaced."
+      },
+
+      "chief_gear_answer": {
+        "description": "Chief gear does not have an enhancement level system. It uses a step-based tier progression where you spend materials to advance through 42 tiers. Each tier has 4 steps (5 for T4). There is no 'level 100' concept.",
+        "step_system": "Within each tier, there are 4 steps (step 1 through step 4). Completing step 4 advances you to the next tier. T4 tiers have 5 steps."
+      }
+    },
+
+    "3_legendary_gear_specifics": {
+      "question": "Once gear becomes Legendary, how do levels work? Do they reset? What's the max level?",
+      "confidence": "A",
+
+      "answer": {
+        "level_reset": "YES. When Gold/Mythic gear is ascended to Legendary, the enhancement level effectively resets. The new Legendary piece starts at Enhancement Level 0.",
+        "max_level": 100,
+        "mastery_available": true,
+        "mastery_max_level": 20,
+        "enhancement_xp_costs": {
+          "description": "Legendary gear has HIGHER XP costs per level compared to Gold gear enhancement",
+          "level_1": "Requires 2 Legendary Gear pieces (no XP cost - this is the ascension cost)",
+          "level_2": "2,500 XP",
+          "level_20": "Milestone - requires 10 Mithril + 3 Legendary Gear (no XP)",
+          "level_40": "Milestone - requires 20 Mithril + 5 Legendary Gear (no XP)",
+          "level_60": "Milestone - requires 30 Mithril + 5 Legendary Gear (no XP)",
+          "level_80": "Milestone - requires 40 Mithril + 10 Legendary Gear (no XP)",
+          "level_100": "Milestone - requires 50 Mithril + 10 Legendary Gear (no XP)",
+          "xp_scaling": "XP increases by ~50 per level within each 20-level segment. Level 2=2500, level 19=3350, level 21=3500, level 99=9300",
+          "total_xp_1_to_100": 502000,
+          "total_mithril": 150,
+          "total_legendary_gear_pieces": 35
+        },
+        "empowerment_system": {
+          "description": "At milestone levels (1, 20, 40, 60, 80, 100), Legendary gear requires Mithril and Legendary Gear pieces as 'empowerment' costs in addition to or instead of XP. Between milestones, only Enhancement XP is needed.",
+          "milestones": [
+            {"level": 1, "legendary_gear": 2, "mithril": 0, "note": "Initial ascension cost"},
+            {"level": 20, "legendary_gear": 3, "mithril": 10},
+            {"level": 40, "legendary_gear": 5, "mithril": 20},
+            {"level": 60, "legendary_gear": 5, "mithril": 30},
+            {"level": 80, "legendary_gear": 10, "mithril": 40},
+            {"level": 100, "legendary_gear": 10, "mithril": 50}
+          ]
+        },
+        "reforge": {
+          "enhancement_reforge": "Resets Enhancement Level to 0, refunds 100% of XP and materials",
+          "mastery_reforge": "Resets Mastery Level AND Enhancement Level to 0, refunds only 50% of Essence Stones. WARNING: destructive - loses enhancement progress too."
+        }
+      }
+    },
+
+    "4_mastery_system": {
+      "question": "When does mastery unlock? How does it work?",
+      "confidence": "A (costs), C (percentage bonuses)",
+
+      "unlock_requirements": {
+        "furnace_level": 20,
+        "gear_quality": "Gold (Mythic) or higher",
+        "gear_enhancement_level": 20,
+        "note": "All three conditions must be met simultaneously"
+      },
+
+      "how_it_works": {
+        "description": "Mastery Forging provides an X% multiplier buff to both the base Gear Strength AND all other buffs provided by that piece of gear. It acts as a percentage-based amplifier on top of the gear's existing stats.",
+        "max_level": 20,
+        "two_phases": {
+          "levels_1_to_10": "Require only Essence Stones (10 per first level, +10 each level: 10, 20, 30...100)",
+          "levels_11_to_20": "Require Essence Stones AND Mythic Hero Gear pieces (110+1, 120+2, ...200+10)"
+        },
+        "total_costs": {
+          "essence_stones_0_to_10": 550,
+          "essence_stones_0_to_20": 2100,
+          "mythic_gear_0_to_10": 0,
+          "mythic_gear_0_to_20": 55
+        },
+        "percentage_bonuses_per_level": {
+          "status": "UNKNOWN - No public source provides exact percentage values per mastery level",
+          "what_we_know": "The wiki describes it as 'an x% buff' but no source lists the exact x for each level. The percentage is displayed as yellow text on the gear in-game.",
+          "estimation_approach": "Would need in-game screenshots at each mastery level to determine exact values",
+          "confidence": "C"
+        },
+        "key_threshold": "Mastery Level 10 is the minimum required for Legendary Ascension. This is the practical target for most players before the Mythic Gear costs at levels 11-20 become prohibitive."
+      },
+
+      "mastery_for_ascension": {
+        "minimum_mastery_for_ascension": 10,
+        "note": "After ascending to Legendary, mastery is available again on the new Legendary piece, also up to level 20"
+      },
+
+      "essence_stone_sources": [
+        "Bear Hunt rewards",
+        "Intel Missions",
+        "Growth Missions",
+        "Mystery Shop",
+        "Foundry Shop",
+        "Arena Shop",
+        "VIP Shop",
+        "Frostdragon Tyrant Shop",
+        "Canyon Shop",
+        "Tundra Trading Station",
+        "Alliance Mobilization",
+        "Mia Fortune event",
+        "Chests (various)",
+        "Pack purchases"
+      ]
+    },
+
+    "5_gear_power_and_stats": {
+      "question": "How does gear quality and level translate to actual combat stats?",
+      "confidence": "B",
+
+      "hero_gear_stats": {
+        "stat_categories": {
+          "hero_stats": {
+            "description": "Directly affect the hero character in combat (exploration, arena, etc.)",
+            "types": ["Hero Attack", "Hero Defense", "Hero Health"]
+          },
+          "command_stats": {
+            "description": "Affect the troops under the hero's command. These are percentage-based troop buffs.",
+            "types": ["Troop Health", "Troop Lethality", "Escort Attack", "Escort Defense", "Escort Health"],
+            "class_restriction": "Command buffs only apply to the troop type matching the gear class"
+          }
+        },
+        "stats_per_slot": [
+          {
+            "slot": "Goggles (Slot 1)",
+            "hero_stats": ["Hero Attack", "Hero Health"],
+            "command_stats": ["Escort Attack", "Escort Health", "Troop Lethality"],
+            "source": "SRC_MOBI_GUIDE"
+          },
+          {
+            "slot": "Gauntlets (Slot 2)",
+            "hero_stats": ["Hero Defense", "Hero Health"],
+            "command_stats": ["Escort Defense", "Escort Health", "Troop Health"],
+            "source": "SRC_MOBI_GUIDE"
+          },
+          {
+            "slot": "Belt (Slot 3)",
+            "hero_stats": ["Hero Defense", "Hero Health"],
+            "command_stats": ["Escort Defense", "Escort Health", "Troop Health"],
+            "source": "SRC_MOBI_GUIDE"
+          },
+          {
+            "slot": "Boots (Slot 4)",
+            "hero_stats": ["Hero Attack", "Hero Health"],
+            "command_stats": ["Escort Attack", "Escort Health", "Troop Lethality"],
+            "source": "SRC_MOBI_GUIDE"
+          }
+        ],
+        "stat_scaling": {
+          "by_quality": "Higher quality gear has higher base stats. Gold gear provides significantly better base stats than Purple or Blue.",
+          "by_enhancement_level": "Enhancement levels increase all stats on the gear. XP costs scale from 10 XP at level 1 to 2,400 XP at level 100.",
+          "by_mastery": "Mastery Forging applies a percentage multiplier to ALL gear stats (base Gear Strength + all buffs). Available only at Gold quality or higher.",
+          "exact_stat_values": "UNKNOWN - No public source provides exact stat values per enhancement level per quality tier. Would require in-game data mining or systematic screenshots.",
+          "confidence": "C for exact numbers, A for mechanics"
+        },
+        "enhancement_xp_per_level": {
+          "description": "XP cost to reach each enhancement level (same across all quality tiers that can be enhanced)",
+          "pattern": "Levels 1-29: increases by 5 XP per level (10, 15, 20, 25...150). Level 30+: larger, variable increments.",
+          "sample_costs": {
+            "level_1": 10, "level_5": 30, "level_10": 55, "level_20": 105,
+            "level_30": 160, "level_40": 280, "level_50": 470,
+            "level_60": 640, "level_70": 1050, "level_80": 1440,
+            "level_90": 1870, "level_100": 2400
+          },
+          "total_xp_estimate": "Approximately 55,000-60,000 XP for levels 1-100",
+          "source": "SRC_WHITEOUTDATA_HERO_GEAR_XP"
+        }
+      },
+
+      "chief_gear_stats": {
+        "stat_type": "Percentage-based Attack and Defense buffs for the associated troop type",
+        "bonus_progression": {
+          "description": "Each chief gear tier provides a specific percentage bonus that applies to the troop type's Attack AND Defense",
+          "green_0star": "9.35%",
+          "blue_0star": "17.00%",
+          "purple_0star": "34.00%",
+          "gold_0star": "56.78%",
+          "pink_0star": "89.25%",
+          "pink_t3_3star_max": "187.00%"
+        },
+        "set_bonuses": {
+          "3_piece": "Defense boost for ALL troop types (not just the matched type)",
+          "6_piece": "Attack boost for ALL troop types",
+          "note": "Set bonuses scale with the lowest tier among equipped pieces"
+        }
+      }
+    },
+
+    "6_gear_slot_mapping": {
+      "question": "Which gear pieces map to which troop types?",
+      "confidence": "A",
+
+      "chief_gear_slots": {
+        "description": "6 Chief Gear slots, 2 per troop type. Each piece provides Attack AND Defense buffs for its troop type.",
+        "mapping": [
+          {"slot": "Coat", "troop_type": "Infantry", "stats": ["Attack", "Defense"], "priority": 1},
+          {"slot": "Pants", "troop_type": "Infantry", "stats": ["Attack", "Defense"], "priority": 2},
+          {"slot": "Belt", "troop_type": "Marksman", "stats": ["Attack", "Defense"], "priority": 3},
+          {"slot": "Weapon (Shortstaff)", "troop_type": "Marksman", "stats": ["Attack", "Defense"], "priority": 4},
+          {"slot": "Cap (Hat)", "troop_type": "Lancer", "stats": ["Attack", "Defense"], "priority": 5},
+          {"slot": "Watch", "troop_type": "Lancer", "stats": ["Attack", "Defense"], "priority": 6}
+        ],
+        "upgrade_priority_reasoning": {
+          "infantry_first": "Infantry engage first in battle, form frontline, need survivability to protect Marksmen behind them",
+          "marksman_second": "Primary damage dealers. Their Attack stats directly increase kill rate.",
+          "lancer_last": "Less exposed to direct fire, mid-line support, lowest priority for most compositions"
+        }
+      },
+
+      "hero_gear_slots": {
+        "description": "4 Hero Gear slots per hero. All gear is class-specific (Infantry hero can only equip Infantry gear, etc.).",
+        "mapping": [
+          {
+            "slot_number": 1,
+            "name": "Goggles",
+            "alt_names": ["Headgear", "Helmet"],
+            "hero_stats": ["Hero Attack", "Hero Health"],
+            "command_stats": ["Escort Attack", "Escort Health", "Troop Lethality"]
+          },
+          {
+            "slot_number": 2,
+            "name": "Gauntlets",
+            "alt_names": ["Gloves"],
+            "hero_stats": ["Hero Defense", "Hero Health"],
+            "command_stats": ["Escort Defense", "Escort Health", "Troop Health"]
+          },
+          {
+            "slot_number": 3,
+            "name": "Belt",
+            "alt_names": [],
+            "hero_stats": ["Hero Defense", "Hero Health"],
+            "command_stats": ["Escort Defense", "Escort Health", "Troop Health"]
+          },
+          {
+            "slot_number": 4,
+            "name": "Boots",
+            "alt_names": [],
+            "hero_stats": ["Hero Attack", "Hero Health"],
+            "command_stats": ["Escort Attack", "Escort Health", "Troop Lethality"]
+          }
+        ],
+        "class_specificity": "All hero gear is troop-type specific. An Infantry hero can ONLY equip Infantry-type hero gear. The game auto-filters compatible options.",
+        "exclusive_gear_slot_5": {
+          "description": "5th slot available only to Legendary (SSR/Gold rarity) heroes at 1-Star Ascension",
+          "stats": ["Hero Attack", "Hero Defense", "Hero Health", "Troop Health (Command)", "Troop Lethality (Command)"],
+          "max_level": 10,
+          "upgrade_resource": "Hero-specific Widgets (5 per level, 275 total for level 10)",
+          "exclusive_skills": "2 unique skills unlocked at levels 1 and 2"
+        }
+      }
+    }
+  },
+
+  "summary_answers": {
+    "1_quality_progression": "Hero gear quality is NOT upgraded in-place. You FIND/OBTAIN gear at each quality level from different sources (exploration, arena, events, shops, packs). Lower quality gear is sacrificed to provide Enhancement XP to your Gold-quality gear. The only true quality 'upgrade' is ascending Gold to Legendary at Enhancement 100 + Mastery 10. Chief gear uses a completely different system: a single continuous tier progression (Green through Pink T3) upgraded step-by-step with materials.",
+
+    "2_level_requirements": "Enhancement level 100 is NOT required to 'upgrade quality' in the normal sense, because you don't upgrade quality in-place. The only situation where level 100 matters is: Gold gear must reach Enhancement Level 100 AND Mastery Level 10 before it can be ascended to Legendary. When ascended, the level resets to 0 on the new Legendary piece.",
+
+    "3_legendary_specifics": "When Gold gear ascends to Legendary, the enhancement level resets. The new Legendary piece starts at Level 0 and can be enhanced up to Level 100 again. Legendary enhancement has higher XP costs (2,500-9,300 per level) and requires empowerment resources (Mithril + Legendary Gear pieces) at milestone levels 1, 20, 40, 60, 80, 100. Total cost: 502,000 XP + 150 Mithril + 35 Legendary Gear pieces for full Enhancement 100.",
+
+    "4_mastery_system": "Mastery Forging unlocks when three conditions are met: Furnace Level 20, gear is Gold quality or higher, AND gear Enhancement Level is at least 20. It provides a percentage multiplier buff to all gear stats. 20 levels total: levels 1-10 need only Essence Stones (550 total), levels 11-20 also need Mythic Gear pieces (55 total). Mastery Level 10 is the critical threshold for Legendary ascension. Exact percentage bonuses per level are unknown (no public source provides them).",
+
+    "5_gear_stats": "Hero gear provides two categories of stats: Hero Stats (Attack, Defense, Health for the hero unit itself) and Command Stats (percentage-based troop buffs for the matching troop type: Troop Health, Troop Lethality, Escort Attack/Defense/Health). Slots 1 (Goggles) and 4 (Boots) provide Attack+Lethality buffs. Slots 2 (Gauntlets) and 3 (Belt) provide Defense+Health buffs. Chief gear provides percentage-based Attack AND Defense for its troop type, ranging from 9.35% (Green 0-star) to 187.00% (Pink T3 3-star). Exact stat values per hero gear enhancement level are not publicly documented.",
+
+    "6_slot_mapping": "CHIEF GEAR: Coat/Pants = Infantry, Belt/Weapon(Shortstaff) = Marksman, Cap(Hat)/Watch = Lancer. Each provides Attack AND Defense for its troop type. HERO GEAR: 4 slots (Goggles, Gauntlets, Belt, Boots) are class-specific (Infantry hero gets Infantry gear). All 4 slots exist for each troop class. Plus an optional 5th Exclusive Gear slot for Legendary heroes at 1-Star Ascension."
+  },
+
+  "correcting_claude_md": {
+    "mastery_unlock": {
+      "claude_md_says": "Gold+ (per CLAUDE.md: mastery 0-20 for Gold+)",
+      "actual": "Gold quality gear AND Furnace Level 20 AND Enhancement Level 20 minimum. The CLAUDE.md statement is partially correct but omits the Furnace 20 and Enhancement 20 prerequisites.",
+      "recommendation": "Update CLAUDE.md to specify all three prerequisites"
+    },
+    "quality_naming": {
+      "claude_md_says": "quality (0=None through 6=Legendary), level (0-100), mastery (0-20 for Gold+)",
+      "actual": "The codebase frontend uses 0=None, 1=Gray, 2=Green, 3=Blue, 4=Purple, 5=Gold, 6=Legendary. The backend engine has 7=Mythic (may be legacy). This mapping is correct in CLAUDE.md.",
+      "note": "The question asks about Common/Rare/Epic/Legendary/Mythic but these are community names. In-game uses color names: Grey/Green/Blue/Purple/Gold/Legendary(Red)."
+    }
+  },
+
+  "open_questions_remaining": [
+    {
+      "question": "What are the exact mastery forging percentage bonuses per level (1-20)?",
+      "confidence": "C",
+      "notes": "No public source provides exact values. Would need in-game screenshots at each level."
+    },
+    {
+      "question": "What are the exact stat values (Hero Attack, Hero Defense, etc.) per enhancement level per gear quality?",
+      "confidence": "C",
+      "notes": "No public stat table exists. Would need systematic in-game data collection."
+    },
+    {
+      "question": "What is the exact server age requirement for Legendary gear ascension?",
+      "confidence": "C",
+      "notes": "Official help center says 'server must be active for a certain number of days' without specifying exact day count."
+    },
+    {
+      "question": "Do Green, Blue, and Purple gear actually share the same 100 enhancement level cap as Gold?",
+      "confidence": "B",
+      "notes": "Multiple sources confirm max level 100 globally. No source mentions per-tier caps below 100. Grey is confirmed as non-enhanceable. In practice, no one enhances Green/Blue/Purple gear to high levels so the cap is moot."
+    }
+  ],
+
+  "changelog": [
+    {
+      "date": "2026-02-16",
+      "changes": [
+        "Initial creation of gear_enhancement.research.json",
+        "Compiled findings from 18 sources (local data files + web sources)",
+        "Documented hero gear quality progression (find-not-upgrade-in-place)",
+        "Documented chief gear tier progression (42 tiers, step-based upgrades)",
+        "Documented enhancement level mechanics across quality tiers",
+        "Documented Legendary ascension: level reset, empowerment milestones, total costs",
+        "Documented mastery forging: unlock requirements, costs, open question on exact percentages",
+        "Documented gear slot mapping for both chief gear (6 slots) and hero gear (4+1 slots)",
+        "Documented stat types (Hero Stats vs Command Stats) per gear slot",
+        "Identified corrections needed in CLAUDE.md regarding mastery prerequisites"
+      ]
+    }
+  ]
+}

@@ -17,7 +17,7 @@ function Snowflakes() {
       delay: Math.random() * 3,
       duration: 2.5 + Math.random() * 3,
       size: 3 + Math.random() * 5,
-      opacity: 0.15 + Math.random() * 0.35,
+      opacity: 0.2 + Math.random() * 0.35,
       drift: -15 + Math.random() * 30,
     })),
   []);
@@ -70,7 +70,7 @@ export default function PageLayout({ children }: PageLayoutProps) {
           <img
             src="/images/bear_paw.png"
             alt="Loading"
-            className="w-16 h-16 mx-auto mb-4 animate-pulse opacity-60"
+            className="w-16 h-16 mx-auto mb-4 animate-pulse opacity-60 drop-shadow-[0_0_12px_rgba(74,144,217,0.4)]"
           />
           <p className="text-zinc-400">Loading...</p>
         </div>

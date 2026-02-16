@@ -653,7 +653,7 @@ export default function EventsPage() {
                       </div>
                       <p className="text-sm text-frost-muted line-clamp-2">{event.description}</p>
                       <div className="flex items-center gap-3 mt-2 text-xs text-frost-muted">
-                        <span>{event.type.charAt(0).toUpperCase() + event.type.slice(1)}</span>
+                        <span>{event.type.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}</span>
                         <span>-</span>
                         <span>{event.frequency}</span>
                         {event.duration && (
@@ -712,7 +712,7 @@ export default function EventsPage() {
                     </span>
                   </div>
                   <p className="text-sm text-frost-muted">
-                    {selectedEvent.event.type.charAt(0).toUpperCase() + selectedEvent.event.type.slice(1)} - {selectedEvent.event.frequency}
+                    {selectedEvent.event.type.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')} - {selectedEvent.event.frequency}
                     {selectedEvent.event.duration && ` - ${selectedEvent.event.duration}`}
                   </p>
                 </div>
