@@ -292,6 +292,8 @@ def register():
     record_failed_attempt(ip, "register", REGISTER_WINDOW_SECONDS)
 
     # Sign up in Cognito
+    cognito_sub = None
+    recovered = False
     try:
         signup_resp = cognito.sign_up(
             ClientId=Config.USER_POOL_CLIENT_ID,
@@ -303,41 +305,71 @@ def register():
         )
         cognito_sub = signup_resp["UserSub"]
     except cognito.exceptions.UsernameExistsException:
-        raise BadRequestError("An account with this email already exists")
+        # Recover from partial registration: Cognito user exists but DynamoDB
+        # record may be missing (e.g., previous registration attempt failed
+        # after Cognito sign_up but before DynamoDB create_user).
+        # Try to authenticate — if it works, complete the registration.
+        try:
+            tokens = _cognito_auth(email, password)
+            cognito_user = cognito.get_user(AccessToken=tokens["access_token"])
+            for attr in cognito_user.get("UserAttributes", []):
+                if attr["Name"] == "sub":
+                    cognito_sub = attr["Value"]
+                    break
+            if cognito_sub:
+                recovered = True
+                logger.info("Recovering partial registration", email=email, sub=cognito_sub)
+            else:
+                raise BadRequestError("An account with this email already exists")
+        except (cognito.exceptions.NotAuthorizedException,
+                cognito.exceptions.UserNotFoundException):
+            # Password doesn't match existing account — genuine duplicate
+            raise BadRequestError("An account with this email already exists")
+        except BadRequestError:
+            raise
+        except Exception:
+            raise BadRequestError("An account with this email already exists")
     except cognito.exceptions.InvalidPasswordException as e:
         raise BadRequestError(f"Password does not meet requirements: {e}")
     except Exception as e:
         logger.error("Cognito sign_up error", error=str(e))
         raise BadRequestError("Registration failed")
 
-    # Auto-confirm the user so they can log in immediately
-    try:
-        cognito.admin_confirm_sign_up(
-            UserPoolId=Config.USER_POOL_ID,
-            Username=email,
-        )
-    except Exception as e:
-        logger.error("Cognito admin_confirm_sign_up error", error=str(e))
-        # User was created but not confirmed -- still proceed with DynamoDB record
-        # They can use forgot-password flow to gain access later
+    # Auto-confirm the user so they can log in immediately (skip if recovered)
+    if not recovered:
+        try:
+            cognito.admin_confirm_sign_up(
+                UserPoolId=Config.USER_POOL_ID,
+                Username=email,
+            )
+        except Exception as e:
+            logger.error("Cognito admin_confirm_sign_up error", error=str(e))
 
-    # Create DynamoDB user record with uniqueness guards
-    try:
-        user = create_user(
-            user_id=cognito_sub,
-            email=email,
-            username=email,
-        )
-    except ConflictError:
-        # Cognito user was created but DynamoDB guard failed -- edge case
-        raise BadRequestError("An account with this email already exists")
+    # Create DynamoDB user record with uniqueness guards (idempotent for recovery)
+    user = get_user(cognito_sub)
+    if not user:
+        try:
+            user = create_user(
+                user_id=cognito_sub,
+                email=email,
+                username=email,
+            )
+        except ConflictError:
+            # Guards exist but user record might not — fetch it
+            user = get_user(cognito_sub)
+            if not user:
+                user = create_user(user_id=cognito_sub, email=email, username=email)
 
-    # Log the user in automatically
-    try:
-        tokens = _cognito_auth(email, password)
-    except Exception as e:
-        logger.error("Post-registration login failed", error=str(e))
-        raise BadRequestError("Account created but auto-login failed. Please log in manually.")
+    if not user:
+        raise BadRequestError("Registration failed — please try again")
+
+    # Log the user in automatically (skip if recovered — already have tokens)
+    if not recovered:
+        try:
+            tokens = _cognito_auth(email, password)
+        except Exception as e:
+            logger.error("Post-registration login failed", error=str(e))
+            raise BadRequestError("Account created but auto-login failed. Please log in manually.")
 
     return {
         **tokens,
