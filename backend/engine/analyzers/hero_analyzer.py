@@ -138,10 +138,9 @@ class HeroAnalyzer:
         current_gen = self.get_current_generation(server_age)
 
         # Get priority weights
-        priority_svs = getattr(profile, 'priority_svs', 5)
-        priority_rally = getattr(profile, 'priority_rally', 4)
-        priority_castle = getattr(profile, 'priority_castle_battle', 4)
-        priority_pve = getattr(profile, 'priority_exploration', 3)
+        priority_pvp = getattr(profile, 'priority_pvp_attack', 5)
+        priority_def = getattr(profile, 'priority_defense', 4)
+        priority_pve = getattr(profile, 'priority_pve', 3)
 
         # Get spending profile and farm status
         spending_profile = getattr(profile, 'spending_profile', 'f2p')
@@ -196,12 +195,12 @@ class HeroAnalyzer:
 
         # Rule 2: Check joiner heroes (Jessie/Sergey)
         recommendations.extend(
-            self._check_joiner_heroes(owned_heroes, hero_stats, priority_rally, priority_castle)
+            self._check_joiner_heroes(owned_heroes, hero_stats, priority_pvp, priority_def)
         )
 
         # Rule 3: Check generation-appropriate heroes
         recommendations.extend(
-            self._check_generation_heroes(owned_heroes, current_gen, priority_svs)
+            self._check_generation_heroes(owned_heroes, current_gen, priority_pvp)
         )
 
         # Get ranked heroes for investment priority
@@ -210,7 +209,7 @@ class HeroAnalyzer:
 
         # Rule 4: Check skill gaps (spending-aware)
         recommendations.extend(
-            self._check_skill_gaps(hero_stats, priority_rally, priority_pve, current_gen,
+            self._check_skill_gaps(hero_stats, priority_pvp, priority_pve, current_gen,
                                    top_heroes, spending_profile)
         )
 
@@ -222,7 +221,7 @@ class HeroAnalyzer:
         # Rule 6: Farm account specific recommendations
         if is_farm:
             recommendations.extend(
-                self._check_farm_account(hero_stats, ranked_heroes, priority_svs)
+                self._check_farm_account(hero_stats, ranked_heroes, priority_pvp)
             )
 
         # Sort by priority
@@ -273,15 +272,15 @@ class HeroAnalyzer:
 
         return recommendations
 
-    def _check_joiner_heroes(self, owned: set, stats: dict, rally_priority: int, castle_priority: int) -> List[HeroRecommendation]:
+    def _check_joiner_heroes(self, owned: set, stats: dict, pvp_priority: int, def_priority: int) -> List[HeroRecommendation]:
         """Check joiner hero status (Jessie for attack, Sergey for defense)."""
         recommendations = []
 
         # Check Jessie for attack joining
-        if rally_priority >= 3:
+        if pvp_priority >= 3:
             if "Jessie" not in owned:
                 recommendations.append(HeroRecommendation(
-                    priority=1 if rally_priority >= 4 else 2,
+                    priority=1 if pvp_priority >= 4 else 2,
                     action="Unlock Jessie",
                     hero="Jessie",
                     reason="Best attack joiner. Her Stand of Arms (+5-25% DMG) is the top skill when joining rallies.",
@@ -295,7 +294,7 @@ class HeroAnalyzer:
                 if jessie_skill < 5:
                     current_bonus = JOINER_HEROES["attack"]["effect_per_level"][jessie_skill - 1]
                     recommendations.append(HeroRecommendation(
-                        priority=1 if rally_priority >= 4 else 2,
+                        priority=1 if pvp_priority >= 4 else 2,
                         action=f"Max Jessie's expedition skill (currently Lv{jessie_skill})",
                         hero="Jessie",
                         reason=f"Stand of Arms at +{current_bonus}% → +25% at L5. Put her slot 1 when joining rallies!",
@@ -305,7 +304,7 @@ class HeroAnalyzer:
                     ))
 
         # Check Sergey for defense joining
-        if castle_priority >= 3:
+        if def_priority >= 3:
             if "Sergey" not in owned:
                 recommendations.append(HeroRecommendation(
                     priority=2,
@@ -372,7 +371,7 @@ class HeroAnalyzer:
 
         return recommendations
 
-    def _check_skill_gaps(self, stats: dict, rally_priority: int, pve_priority: int,
+    def _check_skill_gaps(self, stats: dict, pvp_priority: int, pve_priority: int,
                           current_gen: int, top_heroes: set, spending_profile: str) -> List[HeroRecommendation]:
         """Check for skill upgrade opportunities (spending-profile-aware)."""
         recommendations = []
@@ -399,8 +398,8 @@ class HeroAnalyzer:
             # Adjust priority based on whether this is a focus hero
             priority_bonus = 0 if is_top_hero else 1
 
-            # Check expedition skill gap (for rally/SvS players)
-            if rally_priority >= 3 and exp_skill < 5 and level >= 30:
+            # Check expedition skill gap (for PvP players)
+            if pvp_priority >= 3 and exp_skill < 5 and level >= 30:
                 reason = f"{tier} tier hero. Expedition skills boost rally/SvS performance."
                 if not is_top_hero and spending_profile == 'dolphin':
                     reason += " (Lower priority - focus on core heroes first.)"

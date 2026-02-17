@@ -234,15 +234,16 @@
     "xp_per_level": {
       "description": "XP required to reach each enhancement level (1-100). Costs scale roughly linearly with acceleration at higher levels.",
       "source": "SRC_WHITEOUTDATA_HERO_GEAR_XP",
-      "sample_values": {
-        "1": 10, "2": 15, "3": 20, "5": 30, "10": 55, "15": 80,
-        "20": 105, "25": 130, "30": 160, "35": 210, "40": 280,
-        "45": 370, "50": 470, "55": 560, "60": 640, "65": 830,
-        "70": 1050, "75": 1190, "80": 1440, "85": 1650, "90": 1870,
-        "95": 2130, "100": 2400
-      },
-      "total_xp_estimate": "Approximately 55,000-60,000 XP for levels 1-100 (needs exact calculation)",
-      "full_table_needed": true
+      "full_table": [
+        10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105,
+        110, 115, 120, 125, 130, 135, 140, 145, 150, 160, 170, 180, 190, 200, 210, 220, 230,
+        240, 250, 270, 290, 310, 330, 350, 370, 390, 410, 430, 450, 470, 490, 510, 530, 550,
+        570, 590, 610, 630, 650, 680, 710, 740, 770, 800, 830, 860, 890, 920, 950, 990, 1030,
+        1070, 1110, 1150, 1190, 1230, 1270, 1310, 1350, 1400, 1450, 1500, 1550, 1600, 1650,
+        1700, 1750, 1800, 1850, 1900, 1950, 2000, 2050, 2100, 2150, 2200, 2250, 2300, 2350, 2400
+      ],
+      "total_xp": 73320,
+      "source": "whiteoutdata.com and whiteoutsurvival.app (cross-verified Feb 2026)"
     },
     "reforge": {
       "description": "Enhancement Reforge resets gear to Enhancement Level 0",

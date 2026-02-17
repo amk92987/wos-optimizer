@@ -87,8 +87,8 @@ def update_profile(profileId: str):
     allowed = {
         "name", "state_number", "server_age_days", "furnace_level",
         "furnace_fc_level", "spending_profile", "priority_focus",
-        "alliance_role", "priority_svs", "priority_rally",
-        "priority_castle_battle", "priority_exploration", "priority_gathering",
+        "alliance_role", "priority_pvp_attack", "priority_defense",
+        "priority_pve", "priority_economy",
         "is_farm_account", "linked_main_profile_id",
     }
     updates = {k: v for k, v in body.items() if k in allowed}

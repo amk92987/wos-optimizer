@@ -319,11 +319,10 @@ class UserProfileEntity(DynamoBase):
     priority_focus: PriorityFocus = PriorityFocus.balanced_growth
     alliance_role: AllianceRole = AllianceRole.filler
 
-    priority_svs: int = Field(default=5, ge=1, le=5)
-    priority_rally: int = Field(default=4, ge=1, le=5)
-    priority_castle_battle: int = Field(default=4, ge=1, le=5)
-    priority_exploration: int = Field(default=3, ge=1, le=5)
-    priority_gathering: int = Field(default=2, ge=1, le=5)
+    priority_pvp_attack: int = Field(default=5, ge=1, le=5)
+    priority_defense: int = Field(default=4, ge=1, le=5)
+    priority_pve: int = Field(default=3, ge=1, le=5)
+    priority_economy: int = Field(default=2, ge=1, le=5)
 
     last_svs_date: Optional[str] = None
     svs_wins: int = 0
@@ -352,11 +351,10 @@ class UserProfileEntity(DynamoBase):
             "spending_profile": self.spending_profile,
             "priority_focus": self.priority_focus,
             "alliance_role": self.alliance_role,
-            "priority_svs": self.priority_svs,
-            "priority_rally": self.priority_rally,
-            "priority_castle_battle": self.priority_castle_battle,
-            "priority_exploration": self.priority_exploration,
-            "priority_gathering": self.priority_gathering,
+            "priority_pvp_attack": self.priority_pvp_attack,
+            "priority_defense": self.priority_defense,
+            "priority_pve": self.priority_pve,
+            "priority_economy": self.priority_economy,
             "last_svs_date": self.last_svs_date,
             "svs_wins": self.svs_wins,
             "svs_losses": self.svs_losses,
@@ -385,11 +383,10 @@ class UserProfileEntity(DynamoBase):
             spending_profile=item.get("spending_profile", "f2p"),
             priority_focus=item.get("priority_focus", "balanced_growth"),
             alliance_role=item.get("alliance_role", "filler"),
-            priority_svs=item.get("priority_svs", 5),
-            priority_rally=item.get("priority_rally", 4),
-            priority_castle_battle=item.get("priority_castle_battle", 4),
-            priority_exploration=item.get("priority_exploration", 3),
-            priority_gathering=item.get("priority_gathering", 2),
+            priority_pvp_attack=item.get("priority_pvp_attack", 5),
+            priority_defense=item.get("priority_defense", 4),
+            priority_pve=item.get("priority_pve", 3),
+            priority_economy=item.get("priority_economy", 2),
             last_svs_date=item.get("last_svs_date"),
             svs_wins=item.get("svs_wins", 0),
             svs_losses=item.get("svs_losses", 0),
@@ -1720,11 +1717,10 @@ class CreateProfileRequest(BaseModel):
     spending_profile: SpendingProfile = SpendingProfile.f2p
     priority_focus: PriorityFocus = PriorityFocus.balanced_growth
     alliance_role: AllianceRole = AllianceRole.filler
-    priority_svs: int = Field(default=5, ge=1, le=5)
-    priority_rally: int = Field(default=4, ge=1, le=5)
-    priority_castle_battle: int = Field(default=4, ge=1, le=5)
-    priority_exploration: int = Field(default=3, ge=1, le=5)
-    priority_gathering: int = Field(default=2, ge=1, le=5)
+    priority_pvp_attack: int = Field(default=5, ge=1, le=5)
+    priority_defense: int = Field(default=4, ge=1, le=5)
+    priority_pve: int = Field(default=3, ge=1, le=5)
+    priority_economy: int = Field(default=2, ge=1, le=5)
     is_farm_account: bool = False
     linked_main_profile_id: Optional[str] = None
 
@@ -1740,11 +1736,10 @@ class UpdateProfileRequest(BaseModel):
     spending_profile: Optional[SpendingProfile] = None
     priority_focus: Optional[PriorityFocus] = None
     alliance_role: Optional[AllianceRole] = None
-    priority_svs: Optional[int] = Field(default=None, ge=1, le=5)
-    priority_rally: Optional[int] = Field(default=None, ge=1, le=5)
-    priority_castle_battle: Optional[int] = Field(default=None, ge=1, le=5)
-    priority_exploration: Optional[int] = Field(default=None, ge=1, le=5)
-    priority_gathering: Optional[int] = Field(default=None, ge=1, le=5)
+    priority_pvp_attack: Optional[int] = Field(default=None, ge=1, le=5)
+    priority_defense: Optional[int] = Field(default=None, ge=1, le=5)
+    priority_pve: Optional[int] = Field(default=None, ge=1, le=5)
+    priority_economy: Optional[int] = Field(default=None, ge=1, le=5)
     is_farm_account: Optional[bool] = None
     linked_main_profile_id: Optional[str] = None
     last_svs_date: Optional[str] = None
@@ -1765,11 +1760,10 @@ class ProfileResponse(BaseModel):
     spending_profile: str
     priority_focus: str
     alliance_role: str
-    priority_svs: int
-    priority_rally: int
-    priority_castle_battle: int
-    priority_exploration: int
-    priority_gathering: int
+    priority_pvp_attack: int
+    priority_defense: int
+    priority_pve: int
+    priority_economy: int
     last_svs_date: Optional[str] = None
     svs_wins: int = 0
     svs_losses: int = 0

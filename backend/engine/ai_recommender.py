@@ -495,19 +495,17 @@ RULES:
 
         # Priorities - compact format
         if isinstance(profile, dict):
-            p_svs = profile.get('priority_svs', 5)
-            p_rally = profile.get('priority_rally', 4)
-            p_castle = profile.get('priority_castle_battle', 4)
-            p_pve = profile.get('priority_exploration', 3)
-            p_gather = profile.get('priority_gathering', 2)
+            p_pvp = profile.get('priority_pvp_attack', 5)
+            p_def = profile.get('priority_defense', 4)
+            p_pve = profile.get('priority_pve', 3)
+            p_econ = profile.get('priority_economy', 2)
         else:
-            p_svs = getattr(profile, 'priority_svs', 5)
-            p_rally = getattr(profile, 'priority_rally', 4)
-            p_castle = getattr(profile, 'priority_castle_battle', 4)
-            p_pve = getattr(profile, 'priority_exploration', 3)
-            p_gather = getattr(profile, 'priority_gathering', 2)
+            p_pvp = getattr(profile, 'priority_pvp_attack', 5)
+            p_def = getattr(profile, 'priority_defense', 4)
+            p_pve = getattr(profile, 'priority_pve', 3)
+            p_econ = getattr(profile, 'priority_economy', 2)
 
-        lines.append(f"PRIORITIES: SvS={p_svs}, Rally={p_rally}, Castle={p_castle}, PvE={p_pve}, Gather={p_gather}")
+        lines.append(f"PRIORITIES: PvP Attack={p_pvp}, Defense={p_def}, PvE={p_pve}, Economy={p_econ}")
         lines.append("")
 
         # Heroes section

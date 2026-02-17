@@ -736,11 +736,10 @@ export interface Profile {
   spending_profile: string;
   priority_focus: string;
   alliance_role: string;
-  priority_svs: number;
-  priority_rally: number;
-  priority_castle_battle: number;
-  priority_exploration: number;
-  priority_gathering: number;
+  priority_pvp_attack: number;
+  priority_defense: number;
+  priority_pve: number;
+  priority_economy: number;
   is_farm_account: boolean;
   is_active: boolean;
   created_at: string;

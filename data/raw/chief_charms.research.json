@@ -62,11 +62,11 @@
     {"level": 9, "charm_guide": 300, "charm_design": 400, "jewel_secrets": 0, "power": 1072000},
     {"level": 10, "charm_guide": 420, "charm_design": 420, "jewel_secrets": 0, "power": 1196000},
     {"level": 11, "charm_guide": 560, "charm_design": 420, "jewel_secrets": 0, "power": 1320000},
-    {"level": 12, "charm_guide": 580, "charm_design": 450, "jewel_secrets": 15, "power": null},
-    {"level": 13, "charm_guide": 580, "charm_design": 450, "jewel_secrets": 30, "power": null},
-    {"level": 14, "charm_guide": 600, "charm_design": 500, "jewel_secrets": 45, "power": null},
-    {"level": 15, "charm_guide": 600, "charm_design": 500, "jewel_secrets": 70, "power": null},
-    {"level": 16, "charm_guide": 650, "charm_design": 550, "jewel_secrets": 100, "power": null}
+    {"level": 12, "charm_guide": 580, "charm_design": 450, "jewel_secrets": 15, "power": 1444000},
+    {"level": 13, "charm_guide": 580, "charm_design": 450, "jewel_secrets": 30, "power": 1568000},
+    {"level": 14, "charm_guide": 600, "charm_design": 500, "jewel_secrets": 45, "power": 1692000},
+    {"level": 15, "charm_guide": 600, "charm_design": 500, "jewel_secrets": 70, "power": 1816000},
+    {"level": 16, "charm_guide": 650, "charm_design": 550, "jewel_secrets": 100, "power": 1940000}
   ],
 
   "totals": {

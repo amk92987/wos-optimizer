@@ -1,0 +1,134 @@
+{
+  "system": "crazy_joe_event",
+  "retrieved_at": "2026-02-16T00:00:00Z",
+  "data_completeness": "complete",
+  "sources": [
+    {"source_id": "SRC_WOS_WIKI_CJ", "url": "https://www.whiteoutsurvival.wiki/events/crazy-joe/", "confidence": "A"},
+    {"source_id": "SRC_WOS_APP_CJ", "url": "https://whiteoutsurvival.app/events/crazy-joe/", "confidence": "A"},
+    {"source_id": "SRC_ONECHILLED_CJ", "url": "https://onechilledgamer.com/whiteout-survival-crazy-joe-guide/", "confidence": "B"},
+    {"source_id": "SRC_AJACKOF_CJ", "url": "https://www.ajackof.com/games/whiteout-survival-wos/whiteout-survival-crazy-joe-guide/", "confidence": "B"},
+    {"source_id": "SRC_BASICALLY_CJ", "url": "https://basicallyaverage.com/how-to-succeed-at-crazy-joe-whiteout-survival-guide/", "confidence": "B"},
+    {"source_id": "SRC_BLUESTACKS_CJ", "url": "https://www.bluestacks.com/blog/game-guides/white-out-survival/wos-crazy-joe-event-guide-en.html", "confidence": "B"},
+    {"source_id": "SRC_LOOTBAR_CJ", "url": "https://lootbar.gg/blog/en/crazy-joe-event-guide-whiteout-survival-rewards-tips.html", "confidence": "B"},
+    {"source_id": "SRC_LDCLOUD_CJ", "url": "https://www.ldcloud.net/blog/whiteout-survival-en-crazy-joe-guide-tips", "confidence": "B"}
+  ],
+
+  "overview": {
+    "event_type": "alliance_pve_wave_defense",
+    "description": "Alliance-wide cooperative PvE event where AI-controlled bandit waves attack all alliance members' cities and the Alliance Headquarters",
+    "not_a_rally": true,
+    "not_solo": true,
+    "frequency": "every_other_week",
+    "schedule": "Tue/Thu during SvS/KOI/HoC periods",
+    "battles_per_occurrence": 2,
+    "duration_per_battle": "~40 minutes",
+    "total_waves": 20,
+    "furnace_requirement": 7,
+    "difficulty_levels": 21,
+    "activation": "R4/R5 alliance leaders schedule and activate"
+  },
+
+  "wave_structure": {
+    "normal_waves": [1, 2, 3, 4, 5, 6, 8, 9, 11, 12, 13, 15, 16, 18, 19],
+    "elite_waves": {
+      "waves": [7, 14, 17],
+      "target": "online_players_only",
+      "bonus": "approximately_double_points",
+      "note": "Reinforced player MUST be online or 0 points"
+    },
+    "hq_waves": {
+      "waves": [10, 20],
+      "target": "alliance_hq_only",
+      "note": "Require coordinated reinforcement; highest-level HQ receives attacks"
+    },
+    "high_value_note": "Waves 17-19 account for approximately 31% of all points"
+  },
+
+  "troop_composition": {
+    "optimal_ratio": {"infantry": 90, "lancer": 10, "marksman": 0},
+    "confidence": "A",
+    "reasoning": [
+      "Infantry engage first in turn-based combat — they secure kills before Lancers or Marksmen act",
+      "Points are based on kills — Infantry get the majority of kills",
+      "Crazy Joe's AI targets backline first — Marksmen are extremely vulnerable",
+      "With 0% Marksmen, Joe is forced into unfavorable frontline combat against Infantry wall"
+    ],
+    "hq_wave_10_ratio": {"infantry": 35, "lancer": 65, "marksman": 0, "note": "Offense-focused: Lancers have higher output frequency for kill contribution"},
+    "hq_wave_20_ratio": {"infantry": 65, "lancer": 35, "marksman": 0, "note": "Survival-focused: Infantry must tank to prevent frontline collapse"}
+  },
+
+  "hero_strategy": {
+    "skill_type": "expedition",
+    "note": "Uses expedition skills (right side) because reinforcement is garrison-style defense combat",
+    "barricade_defense": {
+      "slot_1": "Sergey (Defenders' Edge: -4 to -20% DMG taken)",
+      "slots_2_3": "Strongest remaining heroes with defensive expedition skills",
+      "never_leave_empty": true
+    },
+    "reinforcement_march": {
+      "slot_1": "Sergey (defense) or Jeronimo (offense)",
+      "note": "Only first hero's top-right expedition skill matters when reinforcing"
+    },
+    "recommended_heroes": [
+      {"name": "Sergey", "role": "Primary defense", "reason": "Defenders' Edge -20% DMG taken at max level", "consensus": "universal"},
+      {"name": "Jeronimo", "role": "Infantry tank/DPS", "reason": "+50% ATK/DMG for infantry", "consensus": "high"},
+      {"name": "Natalia", "role": "DPS", "reason": "Strong damage dealer", "consensus": "high"},
+      {"name": "Cloris", "role": "Tank/Support", "reason": "Protects backline", "consensus": "medium"},
+      {"name": "Logan", "role": "Defensive titan", "reason": "Boosts troop health, reduces damage", "consensus": "medium"},
+      {"name": "Freya", "role": "Support", "reason": "Team-wide buffs, healing, shields", "consensus": "medium"},
+      {"name": "Wu Ming", "role": "Infantry tank", "reason": "-25% all damage taken", "consensus": "medium"}
+    ]
+  },
+
+  "scoring": {
+    "own_city_defense": ">=50% kill rate = MAX points (1,000 per wave)",
+    "reinforcement_scoring": "50% of reinforced player's score, divided by contribution",
+    "kill_percentage_scaling": "Points scale linearly with % of attackers killed",
+    "city_owner_bonus": "City owners earn max points regardless of whose troops killed, IF allies achieve 100% victory",
+    "two_strike_rule": "If city fails to defend (<50% kills) TWICE, Joe stops attacking you",
+    "still_can_reinforce": "After 2 failures you can still reinforce allies for points",
+    "event_end_condition": "Only ends early if ALL alliance members fail twice"
+  },
+
+  "critical_rules": {
+    "shields_do_not_work": "Shield is completely ineffective during Crazy Joe",
+    "do_not_heal_during_event": "Healed troops return to YOUR city, steal kills from allies reinforcing you",
+    "do_not_teleport": "Teleporting cancels your event participation",
+    "do_not_train_during_event": "Newly trained troops appear in city and reduce allies' kill share",
+    "no_troop_death": "Troops become wounded only — go to infirmary, no permanent loss",
+    "no_resource_loss": "You do NOT lose resources when defeated"
+  },
+
+  "troop_recall_timing": {
+    "after_wave_9": "Recall best troops from allies, redirect to Alliance HQ for Wave 10",
+    "after_wave_10": "Recall from HQ immediately, redeploy to support allies",
+    "after_wave_19": "Recall and send to HQ for Wave 20"
+  },
+
+  "rewards": {
+    "materials": ["Polishing Solution", "Hardened Alloy", "Design Plans"],
+    "currency": ["Alliance Tokens"],
+    "other": ["Speed-ups"],
+    "distribution": {
+      "personal_ranking": "Based on individual points vs all state players",
+      "alliance_ranking": "Combined alliance score vs other alliances",
+      "milestone_rewards": "10 tiers of Alliance Token rewards",
+      "delivery": "Alliance rewards distributed at 10 UTC next day; based on alliance at delivery time, not participation time"
+    },
+    "f2p_importance": "Primary F2P source for Chief Gear materials"
+  },
+
+  "advanced_strategies": {
+    "zero_defense": "Send ALL troops to reinforce allies, leaving own city empty. Sacrifice 2 strikes but earn reinforcement points. Requires trust and coordination.",
+    "alt_account": "Send all troops out on alts and reinforce them with main to claim 100% kill points",
+    "difficulty_increase": "Only increase difficulty when alliance achieves 80%+ success rate"
+  },
+
+  "difficulty_scaling": {
+    "example_level_1": {"troops_to_bases": 173601, "troops_to_hq": 241494},
+    "example_level_11": {"troops_to_bases": 529624, "troops_to_hq": 736753},
+    "max_level": 21,
+    "scaling": "Enemy troop count increases ~10-13% per difficulty level",
+    "enemy_troop_range": "T1-T10 across all difficulties"
+  }
+}

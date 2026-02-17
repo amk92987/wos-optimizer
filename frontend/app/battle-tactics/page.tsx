@@ -183,16 +183,16 @@ function CrazyJoeTab() {
     { range: 'Wave 17', target: 'Online players ONLY', points: '2x points', tip: 'CRITICAL - waves 17-19 give ~31% of total points' },
     { range: 'Waves 18-19', target: 'Random member cities', points: 'High', tip: 'Keep reinforcing - these are high-value waves' },
     { range: 'Wave 20', target: 'Alliance HQ ONLY', points: 'Very High', tip: 'Send everything to HQ for the final boss wave' },
-    { range: 'Wave 21', target: 'Final wave on cities', points: 'Standard', tip: 'Last wave - mop up remaining bandits' },
   ];
 
   return (
     <div className="space-y-6">
       <div className="card bg-gradient-to-r from-yellow-500/10 to-transparent border-yellow-500/30">
         <p className="text-frost">
-          Crazy Joe is a <strong className="text-yellow-400">weekly alliance defense event</strong> where 21 waves of bandits attack
+          Crazy Joe is a <strong className="text-yellow-400">weekly alliance defense event</strong> where 20 waves of bandits attack
           your alliance. This is <strong className="text-frost">NOT a rally</strong> - you reinforce alliance members{"'"} cities and
           the Alliance HQ, and your troops defend when attacked. Coordination and timing are everything.
+          <strong className="text-green-400"> No permanent troop losses</strong> - wounded troops go to the infirmary and no resources are lost.
         </p>
       </div>
 
@@ -285,7 +285,7 @@ function CrazyJoeTab() {
 
       {/* Wave Timeline */}
       <div className="card">
-        <h2 className="section-header">Wave Timeline (21 Waves)</h2>
+        <h2 className="section-header">Wave Timeline (20 Waves)</h2>
         <p className="text-frost-muted text-sm mb-4">
           Event lasts ~40 minutes. Special waves are highlighted - plan your troop movements around these.
         </p>
@@ -384,7 +384,43 @@ function CrazyJoeTab() {
             <span className="text-red-400">X</span>
             <span>Leaving barricade hero slots empty on your own city</span>
           </li>
+          <li className="flex items-start gap-2">
+            <span className="text-red-400">X</span>
+            <span>Putting up a shield (shields do NOT prevent Crazy Joe attacks)</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-red-400">X</span>
+            <span>Teleporting during the event (cancels your participation entirely)</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="text-red-400">X</span>
+            <span>Training troops during the event (new troops appear in your city and steal kills from reinforcers)</span>
+          </li>
         </ul>
+      </div>
+
+      {/* Rewards */}
+      <div className="card">
+        <h2 className="section-header text-green-400">Rewards</h2>
+        <p className="text-sm text-frost-muted mb-3">
+          Crazy Joe is the <strong className="text-frost">primary F2P source for Chief Gear materials</strong>. Rewards are based on personal ranking + alliance ranking.
+        </p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { name: 'Polishing Solution', color: 'text-cyan-400', desc: 'Chief Gear enhancement' },
+            { name: 'Hardened Alloy', color: 'text-gray-300', desc: 'Chief Gear upgrades' },
+            { name: 'Design Plans', color: 'text-yellow-400', desc: 'Chief Gear blueprints' },
+            { name: 'Alliance Tokens', color: 'text-purple-400', desc: 'Alliance shop currency' },
+          ].map((r, i) => (
+            <div key={i} className="p-3 rounded-lg bg-surface text-center">
+              <p className={`font-medium text-sm ${r.color}`}>{r.name}</p>
+              <p className="text-xs text-frost-muted mt-1">{r.desc}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-frost-muted mt-3">
+          Alliance rewards are distributed at 10:00 UTC the next day based on which alliance you{"'"}re in at that time, not which alliance you participated with.
+        </p>
       </div>
     </div>
   );

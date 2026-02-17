@@ -241,7 +241,7 @@ WoS/
 - Spending profile: f2p, minnow, dolphin, orca, whale
 - Priority focus: svs_combat, balanced_growth, economy_focus
 - Alliance role: rally_lead, filler, farmer, casual
-- Priority levels (1-5 scale): SvS, Rally, Castle Battle, PvE, Gathering
+- Priority levels (1-5 scale): PvP Attack, Defense, PvE, Economy
 - Farm account: is_farm_account, linked_main_profile_id
 - SvS tracking (wins, losses, last date)
 
@@ -383,9 +383,9 @@ The expanded body is **always interactive** (no edit/save/cancel buttons). All c
 ### Upgrade Recommendations
 
 **Priority Settings Display:**
-- Shows 5 priority categories with visual star ratings (★☆)
-- Categories: SvS Combat, Rally, Castle Battle, Exploration, Gathering
-- Adjustable via sidebar (renamed from PvE to Exploration)
+- Shows 4 priority categories with arctic-themed sliders (1-5 scale)
+- Categories: PvP Attack, Defense, PvE, Economy
+- Adjustable on Settings page with ice-blue Playstyle buttons
 
 **Top Recommendations Tab:**
 - One recommendation per hero (deduplicated, highest priority shown)
@@ -645,114 +645,20 @@ When generating AI recommendations or lineup suggestions, always load and refere
 - [Quackulator](https://www.quackulator.com/) - Cost calculators
 - [AllClash](https://www.allclash.com/) - Tier list information
 
-## Current Work - Resume Here
+## Upgrade Calculators (Feb 2026)
 
-**Donate & Feedback System (Jan 2026):**
-- Ko-fi donate button in user menu (top-right popover)
-- Donate message on Homepage (under Quick Start) and AI Advisor page
-- Inline feedback form in user menu with hint to use AI Advisor for bad recommendations
-- Full feedback form on AI Advisor with "Report Bad Recommendation" option
-- Ko-fi URL: `https://ko-fi.com/randomchaoslabs` (in `app.py` line ~291 and `utils/toolbar.py`)
+The Upgrades page has an **"Upgrade Calculators"** tab with 6 calculators organized by category:
 
-**AI Advisor Chat System (Jan 2026):**
-- **Chat History**: Messages persist within session, displayed in chat bubble format
-- **New Chat Button**: Clears current conversation to start fresh
-- **Past Chats**: Shows last 10 conversations with "Load" buttons to revisit
-- **Logging**: Both rules AND AI responses now logged to database (previously only AI)
-- **Rating**: Thumbs up/down buttons on AI responses
-- **Source Labels**: Shows (Rules) or (AI) on each response
+| Category | Calculator | Resources Calculated |
+|----------|-----------|---------------------|
+| Hero Gear | Enhancement | XP (pre-Legendary, L0-100) |
+| Hero Gear | Legendary | XP + Mithril + Legendary Gear (L0-100) |
+| Hero Gear | Mastery | Essence Stones + Mythic Gear (L0-20) |
+| Chief | Chief Gear | Hardened Alloy + Polishing Solution + Design Plans + Lunar Amber (46 tiers) |
+| Chief | Charms | Charm Guides + Charm Designs + Jewel Secrets (16 levels with sub-levels) |
+| Buildings | War Academy | Fire Crystal Shards + Refined Fire Crystals + Meat/Wood/Coal/Iron (FC1-FC10) |
 
-**User Menu Features (`app.py`):**
-- User popover (top-right) contains:
-  - ☕ Support Bear's Den (Ko-fi link, deep orange gradient)
-  - 💬 Send Feedback (expandable form)
-  - 🔑 Change Password
-  - Logout / Switch Back (if impersonating)
-
-**AI System (WORKING - Unlimited mode for testing):**
-- OpenAI API key configured and tested
-- AI Mode: UNLIMITED (for testing, switch back to ON for production)
-- Provider: OpenAI (gpt-4o-mini)
-- 92.3% of questions handled by rules engine (saves API costs)
-
-**Authentication System (Email = Username):**
-- Users log in with email address (not separate username)
-- Registration requires only email + password
-- Legacy usernames still work for backwards compatibility
-- Email change requires verification code sent to new email
-- `PendingEmailChange` model stores verification codes (15 min expiry, 3 attempts max)
-- Email sending via `utils/email.py` (debug mode logs to console, set `EMAIL_MODE=smtp` for real emails)
-- Test accounts use `{username}@test.com` format
-
-**Test Account System:**
-- User model has `is_test_account` flag for easy filtering
-- Admin → Users shows "Test Accts" count, `TEST` badge, and "Test Only" filter
-- Create/Edit users can toggle test account status
-- Run `/wos-test-ai` to reset test data (keeps users, recreates profiles)
-
-**Comprehensive Test Suite (`/wos-test-ai`):**
-- Script: `scripts/test_ai_comprehensive.py`
-- 6 test users, 9 profiles total
-- Login with `{username}@test.com` and password `test123`
-
-| Email (login) | Profiles | State | Notes |
-|---------------|----------|-------|-------|
-| test_gen10_dolphin@test.com | Main + Farm | 456 | Dolphin, FC30, 28 heroes |
-| test_gen4_f2p@test.com | Single | 789 | F2P, FC27, 13 heroes |
-| test_gen2_whale@test.com | Main + Farm | 999 | Whale, FC25, 15 heroes |
-| test_multi_state@test.com | 2 profiles | 200, 850 | Different states |
-| test_new_player@test.com | Single | 900 | Day 7, F18, 3 heroes |
-| test_rally_leader@test.com | Single | 350 | Orca, rally_lead role |
-
-**Spending-Profile-Aware Recommendations:**
-- F2P/minnow: Only recommends upgrades for top 3-4 heroes
-- Dolphin: Shows "lower priority" notes for non-core heroes
-- Whale: Recommends all heroes
-- Farm accounts: "Focus on 1-2 heroes only", Jessie for joining
-
-**Bugs Fixed (Jan 2026):**
-1. Skill level detection - was using wrong attribute names
-2. Gear quality Mythic detection - updated QUALITY_VALUES (Mythic=7)
-3. Rally joiner confidence - only counts critical slots
-4. Unreachable code in get_generation_relevance() fixed
-
-**Test Results:**
-- Recommendations: Working - spending-aware, farm-aware
-- Lineups: Correct heroes and troop ratios
-- AI routing: 92.3% rules, 7.7% AI
-
-## Next Steps - Farm Account System
-
-**Farm Account Features (Priority Order):**
-
-1. **Test Account Generation** - Add farm profiles to test users in `scripts/test_ai_comprehensive.py`
-   - Farm profiles are F2P accounts used only for resource gathering
-   - No combat upgrades, minimal hero investment
-
-2. **Save/Load Page Enhancements:**
-   - Add "Mark as Farm Account" button next to Load/Preview/Delete buttons
-   - Button changes to "Farm Account" with different styling (color) when marked
-   - "This is a farm account" checkbox should sync with button state
-   - Add "State #" field to Save/Load (should tie to Settings screen)
-   - Fix vertical alignment - profile text (name, date, hero count) should be vertically centered with buttons
-
-3. **Cross-Account Linking:**
-   - Farm accounts must be in the same state as main account to link
-   - When user has a farm account, auto-check "I'm a resource farmer" on Packs page
-
-4. **Lineup Engine (IN PROGRESS):**
-   - Enhanced `LineupBuilder` with `build_personalized_lineup()` and `build_general_lineup()` methods
-   - Considers hero levels, stars, gear when ranking
-   - Generation-aware filtering
-   - "Recommended to Get" section for missing key heroes
-   - LINEUP_TEMPLATES define ideal heroes by event type
-
-## Lineups Page Restructure (Completed)
-
-- Added tabs: "Optimal Lineups" | "Natalia vs Jeronimo"
-- Debate content moved to separate tab using native Streamlit components
-- Main lineup content is now higher up on the page
-- Fixed cloudy text issue by removing text-shadow from CSS
+Chief Gear and Charms calculators also show stat bonus % gains.
 
 **Troop Ratio Reference (Infantry/Lancer/Marksman):**
 | Mode | Ratio | Reasoning |
@@ -764,32 +670,14 @@ When generating AI recommendations or lineup suggestions, always load and refere
 | Rally Joiner Attack | 30/20/50 | Support rally leader's composition |
 | Rally Joiner Defense | 50/30/20 | Infantry-heavy for garrison support |
 
-**Remaining Tasks:**
-1. ~~Enhance AI conversation logging with full user snapshot~~ (DONE - user_snapshot field)
-2. ~~Add spending-profile-aware recommendations~~ (DONE - F2P/whale advice differs)
-3. ~~Add farm account detection logic~~ (DONE - farm-specific recommendations)
-4. More recommendation diversity (not all hero upgrades)
-
-**To Test in App:**
-```bash
-streamlit run app.py
-```
-Login as test user or admin, go to AI Advisor page
-
 ## Future Enhancements
 
-**Planned (Next Sprint):**
-- Configure email sending (Gmail SMTP or AWS SES) for email verification
-- Mobile optimization (responsive design, touch-friendly)
-- PWA "Save to Home Screen" support for mobile users
-- Favorite/bookmark AI responses
-- Conversation threading (group follow-up questions together)
-
 **Backlog:**
+- Legendary Gear Level Logic on Hero Tracker (enforce level 100 before Legendary ascension)
+- Gear Power Contribution to Lineups (factor gear quality/level into lineup scoring)
+- Remove Legacy Streamlit Code (~2.5MB of dead code, see TODO.md for full breakdown)
 - Gem shadow prices (needs in-game screenshots)
 - Research tree granular costs
 - Goal pathfinding ("How do I reach X milestone?")
-- Power calculators (per-upgrade power gain)
-- Alliance coordination features
 - CAPTCHA or login attempt protection
 - Email notifications for admin (new feedback alerts)

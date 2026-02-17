@@ -98,11 +98,10 @@ class RecommendationEngine:
 
     # Priority weights for different game modes
     MODE_WEIGHTS = {
-        'svs': {'expedition': 1.0, 'exploration': 0.3},
-        'rally': {'expedition': 1.0, 'exploration': 0.2},
-        'castle_battle': {'expedition': 0.9, 'exploration': 0.4},
-        'exploration': {'expedition': 0.3, 'exploration': 1.0},
-        'gathering': {'expedition': 0.2, 'exploration': 0.4},
+        'pvp_attack': {'expedition': 1.0, 'exploration': 0.25},
+        'defense': {'expedition': 0.9, 'exploration': 0.4},
+        'pve': {'expedition': 0.3, 'exploration': 1.0},
+        'economy': {'expedition': 0.2, 'exploration': 0.4},
     }
 
     def __init__(self, heroes_data: dict, user_heroes: list, profile: Any):
@@ -127,11 +126,10 @@ class RecommendationEngine:
     def _calculate_priority_weights(self) -> Dict[str, float]:
         """Calculate normalized priority weights from user profile."""
         raw_priorities = {
-            'svs': getattr(self.profile, 'priority_svs', 5),
-            'rally': getattr(self.profile, 'priority_rally', 4),
-            'castle_battle': getattr(self.profile, 'priority_castle_battle', 4),
-            'exploration': getattr(self.profile, 'priority_exploration', 3),
-            'gathering': getattr(self.profile, 'priority_gathering', 2),
+            'pvp_attack': getattr(self.profile, 'priority_pvp_attack', 5),
+            'defense': getattr(self.profile, 'priority_defense', 4),
+            'pve': getattr(self.profile, 'priority_pve', 3),
+            'economy': getattr(self.profile, 'priority_economy', 2),
         }
 
         total = sum(raw_priorities.values())

@@ -17,11 +17,25 @@ def _generate_ulid() -> str:
     return f"{ts:012x}{rand}"
 
 
+def _migrate_priority_fields(item: dict) -> dict:
+    """Migrate old 5-priority fields to new 4-priority fields if needed."""
+    if item and 'priority_pvp_attack' not in item and 'priority_svs' in item:
+        item['priority_pvp_attack'] = max(
+            int(item.get('priority_svs', 5)),
+            int(item.get('priority_rally', 4))
+        )
+        item['priority_defense'] = int(item.get('priority_castle_battle', 4))
+        item['priority_pve'] = int(item.get('priority_exploration', 3))
+        item['priority_economy'] = int(item.get('priority_gathering', 2))
+    return item
+
+
 def get_profile(user_id: str, profile_id: str) -> Optional[dict]:
     """Get a specific profile."""
     table = get_table("main")
     resp = table.get_item(Key={"PK": f"USER#{user_id}", "SK": f"PROFILE#{profile_id}"})
-    return resp.get("Item")
+    item = resp.get("Item")
+    return _migrate_priority_fields(item) if item else None
 
 
 def get_profiles(user_id: str, include_deleted: bool = False) -> list:
@@ -37,7 +51,7 @@ def get_profiles(user_id: str, include_deleted: bool = False) -> list:
     items = resp.get("Items", [])
     if not include_deleted:
         items = [p for p in items if not p.get("deleted_at")]
-    return items
+    return [_migrate_priority_fields(p) for p in items]
 
 
 def get_deleted_profiles(user_id: str) -> list:
@@ -50,7 +64,7 @@ def get_deleted_profiles(user_id: str) -> list:
             ":prefix": "PROFILE#",
         },
     )
-    return [p for p in resp.get("Items", []) if p.get("deleted_at")]
+    return [_migrate_priority_fields(p) for p in resp.get("Items", []) if p.get("deleted_at")]
 
 
 def get_default_profile(user_id: str) -> Optional[dict]:
@@ -95,11 +109,10 @@ def create_profile(
         "spending_profile": "f2p",
         "priority_focus": "balanced_growth",
         "alliance_role": "filler",
-        "priority_svs": 5,
-        "priority_rally": 4,
-        "priority_castle_battle": 4,
-        "priority_exploration": 3,
-        "priority_gathering": 2,
+        "priority_pvp_attack": 5,
+        "priority_defense": 4,
+        "priority_pve": 3,
+        "priority_economy": 2,
         "is_farm_account": is_farm_account,
         "created_at": now,
         "updated_at": now,
@@ -205,8 +218,8 @@ def duplicate_profile(user_id: str, source_profile_id: str, new_name: str) -> di
     settings_fields = [
         "server_age_days", "furnace_level", "furnace_fc_level",
         "spending_profile", "priority_focus", "alliance_role",
-        "priority_svs", "priority_rally", "priority_castle_battle",
-        "priority_exploration", "priority_gathering",
+        "priority_pvp_attack", "priority_defense",
+        "priority_pve", "priority_economy",
     ]
     updates = {k: source[k] for k in settings_fields if k in source and source[k] is not None}
     if updates:

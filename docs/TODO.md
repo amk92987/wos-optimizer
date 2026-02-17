@@ -3,39 +3,70 @@
 ## Active TODO
 
 ### UI / Frontend
-- [ ] **Rethink Combat Priority Settings** - SvS, Castle Battle, and Rally are redundant
-  - Currently 5 priorities: SvS, Rally, Castle Battle, Exploration, Gathering
-  - SvS/Castle/Rally are essentially the same combat activity
-  - Need new categories that actually differentiate playstyles
-  - Used by: hero_analyzer, gear_advisor, recommender, ai_recommender
-  - Discuss approach before implementing
-
-- [ ] **Admin Dashboard Trend Charts** - Charts not showing data
-
 - [ ] **Legendary Gear Level Logic on Hero Tracker** - Rethink gear editing UX
   - Gear must be at level 100 before it can be upgraded to Legendary quality
   - Once Legendary, levels reset and go up from there (Legendary level progression)
   - Current UI doesn't enforce this — selecting Legendary should handle the level transition correctly
-  - Research gear enhancement mechanics to get the exact flow right
+  - Research data in `data/raw/gear_enhancement.research.json`
 
 - [ ] **Gear Power Contribution to Lineups** - Incorporate gear stats into lineup scoring
   - Understand how gear adds power/stats to heroes
   - Factor gear quality + level into lineup recommendations
   - Currently lineup engine only considers hero level/stars/skills, not gear
 
-### Backend / Engine
-- [ ] **Full Code Review Pass** - Audit all recent combat/daybreak/estimator changes
-  - Check for dead code, type mismatches, edge cases
-  - Verify all API endpoints return expected shapes
+### Repo Cleanup
+- [ ] **Remove Legacy Streamlit Code** - Dead code from pre-serverless era
+  - **Phase 1 (Quick wins)**: Delete clearly dead directories/files
+    - `app.py`, `config.py`, `requirements.txt`, `nul` (root files)
+    - `pages/` (32 old Streamlit pages, ~230KB)
+    - `auth_pages/` (old auth pages, ~8KB)
+    - `styles/` (Streamlit CSS, ~50KB)
+    - `.streamlit/` (Streamlit config)
+    - `deploy/` (old Lightsail Docker/Nginx, ~20KB)
+    - `static/` (old landing page, ~5KB)
+  - **Phase 2 (Deeper cleanup)**: Remove replaced code
+    - `engine/` (replaced by `backend/engine/`, ~60KB)
+    - `database/` (replaced by `backend/common/`, ~50KB)
+    - `api/` (abandoned React FastAPI prototype, ~80KB)
+    - `ocr/` (disabled feature, ~2KB)
+    - `utils/` (Streamlit helpers — keep `email.py` if needed, ~30KB)
+    - `export_data/` (one-time migration artifacts, ~330KB)
+  - **Phase 3 (Optional)**: IDE/media cleanup
+    - `.idea/` (PyCharm config)
+    - `Screenshots/` (old Streamlit screenshots, ~1.5MB)
+  - **Scripts to remove** (in `scripts/`):
+    - `add_ai_limit_column.py`, `export_data.py`, `export_postgres.py`
+    - `import_data.py`, `migrate_data.py`, `migrate_dynamodb.py`, `migrate_to_dynamodb.py`
+    - `setup_cognito_users.py`, `compare_engine_to_ai.py`, `update_claude_answers.py`
+    - `prompt_test_results.json`, `start_frontend.bat`
+  - **Scripts to keep**: `download_hero_images.py`, `build_*_edges.py`, `compute_gem_costs.py`,
+    `run_data_audit.py`, `run_qa_check.py`, `seed_reference_data.py`, `tag_hero_effects.py`,
+    `test_ai_comprehensive.py`, `test_lineups.py`, `create_admin.py`
+  - Total cleanup: ~2.5MB of dead code
 
 ## Recently Completed
 
+### Feb 2026 - Upgrade Calculators & Data Fixes
+- [x] Build Unified Upgrade Calculators tab with 6 calculators (Enhancement, Legendary, Mastery, Chief Gear, Charms, War Academy)
+- [x] Chief Gear + Charms calculators show stat bonus % gains
+- [x] War Academy calculator with FC prereqs, build times, power gains, milestone breakdown
+- [x] Fix charm bonus percentages in Chief Tracker (14 of 16 values were wrong)
+- [x] Add 4 missing Pink T4 chief gear tiers (43-46) to Chief Tracker
+- [x] Fix admin dashboard trend charts (field name mismatch: `historical` not `data_points`)
+- [x] Fix underscore display in recommendation Resources text
+- [x] Enhance Crazy Joe Battle Tactics page: fix 21→20 waves, add no-troop-loss note, shields/teleport/training warnings, rewards section
+- [x] Crazy Joe research saved to `data/raw/crazy_joe.research.json`
+- [x] Verify combat priority system (3/4 priorities confirmed working in rules engine)
+- [x] Update research data: hero gear XP table (73,320 total), charm power values for L12-16
+
 ### Feb 2026 - UI Polish & Fixes
+- [x] Combat priorities refactor: 5 → 4 (PvP Attack, Defense, PvE, Economy) with arctic-themed sliders and consistent ice-blue Playstyle buttons
 - [x] Frost/arctic theme enhancements (ice shield avatar, sidebar glow, frost dividers, card hover, page title glow, frosted dropdown, snowflake visibility)
 - [x] Hero info popout button on My Heroes tab (reuses HeroDetailModal)
 - [x] Fix event type underscores on Events page (alliance_pve → Alliance Pve)
 - [x] Fix Crazy Joe data (20 phases not 21, biweekly not daily, 2 battles per occurrence)
 - [x] Fix loading screen bear paw box-shadow artifact
+- [x] Code review pass: removed dead CSS, fixed hero info guard, added useGamePhase error logging, reverted card hover
 
 ### Feb 2026 - Battle Enhancement Features
 - [x] Add "12 Combat Stats" education content (Stats & Sources tab)

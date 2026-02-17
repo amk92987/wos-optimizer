@@ -503,7 +503,7 @@ function SettingsContent() {
                     onClick={() => handleSave({ spending_profile: option.value })}
                     className={`p-3 rounded-lg text-center transition-all ${
                       profile?.spending_profile === option.value
-                        ? 'bg-amber/20 border-2 border-amber text-amber'
+                        ? 'bg-ice/30 border-2 border-ice-light/60 text-ice-light shadow-[0_0_12px_rgba(74,144,217,0.3)]'
                         : 'bg-surface border border-border text-zinc-400 hover:text-zinc-100 hover:border-zinc-600'
                     }`}
                   >
@@ -524,7 +524,7 @@ function SettingsContent() {
                     onClick={() => handleSave({ priority_focus: option.value })}
                     className={`p-3 rounded-lg text-center transition-all ${
                       profile?.priority_focus === option.value
-                        ? 'bg-blue-500/20 border-2 border-blue-500 text-blue-400'
+                        ? 'bg-ice/30 border-2 border-ice-light/60 text-ice-light shadow-[0_0_12px_rgba(74,144,217,0.3)]'
                         : 'bg-surface border border-border text-zinc-400 hover:text-zinc-100 hover:border-zinc-600'
                     }`}
                   >
@@ -545,7 +545,7 @@ function SettingsContent() {
                     onClick={() => handleSave({ alliance_role: option.value })}
                     className={`p-3 rounded-lg text-center transition-all ${
                       profile?.alliance_role === option.value
-                        ? 'bg-green-500/20 border-2 border-green-500 text-green-400'
+                        ? 'bg-ice/30 border-2 border-ice-light/60 text-ice-light shadow-[0_0_12px_rgba(74,144,217,0.3)]'
                         : 'bg-surface border border-border text-zinc-400 hover:text-zinc-100 hover:border-zinc-600'
                     }`}
                   >
@@ -569,27 +569,33 @@ function SettingsContent() {
           defaultOpen={true}
           className="mb-4"
         >
-          <div className="space-y-4">
+          <div className="space-y-5">
             {[
-              { key: 'priority_svs', label: 'SvS / State vs State' },
-              { key: 'priority_rally', label: 'Rally Attacks' },
-              { key: 'priority_castle_battle', label: 'Castle Battles' },
-              { key: 'priority_exploration', label: 'Exploration / PvE' },
-              { key: 'priority_gathering', label: 'Resource Gathering' },
+              { key: 'priority_pvp_attack', label: 'PvP Attack', desc: 'Rallies, SvS marches, bear traps', tooltip: 'Offensive combat: leading and joining rallies, SvS field battles, and bear trap attacks. Higher priority means more focus on attack heroes and expedition skills.' },
+              { key: 'priority_defense', label: 'Defense', desc: 'Garrison, reinforcing allies', tooltip: 'Defensive combat: garrisoning your city, reinforcing alliance members, and castle defense. Higher priority means more focus on defense joiners like Sergey.' },
+              { key: 'priority_pve', label: 'PvE / Events', desc: 'Exploration, Crazy Joe, events', tooltip: 'Player vs environment: exploration stages, Crazy Joe, and event content. Higher priority means more focus on exploration skills and PvE hero upgrades.' },
+              { key: 'priority_economy', label: 'Economy', desc: 'Gathering, resources', tooltip: 'Resource generation: gathering on the map, resource production, and farming. Higher priority means less combat investment and more focus on economic growth.' },
             ].map((item) => (
-              <div key={item.key} className="flex items-center gap-4">
-                <label className="text-sm text-zinc-300 w-48">{item.label}</label>
-                <input
-                  type="range"
-                  min={1}
-                  max={5}
-                  value={(profile as any)?.[item.key] || 3}
-                  onChange={(e) => handleSave({ [item.key]: parseInt(e.target.value) })}
-                  className="flex-1 accent-amber"
-                />
-                <span className="text-amber font-bold w-8 text-center">
-                  {(profile as any)?.[item.key] || 3}
-                </span>
+              <div key={item.key}>
+                <div className="flex items-center gap-4">
+                  <div className="w-48">
+                    <label className="text-sm text-zinc-300 cursor-help" title={item.tooltip}>
+                      {item.label}
+                    </label>
+                    <p className="text-xs text-zinc-500">{item.desc}</p>
+                  </div>
+                  <input
+                    type="range"
+                    min={1}
+                    max={5}
+                    value={(profile as any)?.[item.key] || 3}
+                    onChange={(e) => handleSave({ [item.key]: parseInt(e.target.value) })}
+                    className="flex-1 arctic-slider"
+                  />
+                  <span className="text-ice font-bold w-8 text-center">
+                    {(profile as any)?.[item.key] || 3}
+                  </span>
+                </div>
               </div>
             ))}
           </div>

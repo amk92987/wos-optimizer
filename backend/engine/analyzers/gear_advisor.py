@@ -141,12 +141,11 @@ class GearAdvisor:
         user_gear = user_gear or {}
 
         spending_profile = getattr(profile, 'spending_profile', 'f2p')
-        priority_svs = getattr(profile, 'priority_svs', 5)
-        priority_rally = getattr(profile, 'priority_rally', 4)
+        priority_pvp = getattr(profile, 'priority_pvp_attack', 5)
 
         # Chief gear recommendations (applies to everyone)
         recommendations.extend(
-            self._analyze_chief_gear(user_gear.get('chief_gear', {}), priority_svs)
+            self._analyze_chief_gear(user_gear.get('chief_gear', {}), priority_pvp)
         )
 
         # Stat balance analysis (gear pairs + charms)
@@ -159,7 +158,7 @@ class GearAdvisor:
             self._analyze_hero_gear(
                 user_gear.get('hero_gear', {}),
                 spending_profile,
-                priority_rally
+                priority_pvp
             )
         )
 

@@ -176,11 +176,10 @@ _TEST_ACCOUNTS = [
                 "spending_profile": "dolphin",
                 "priority_focus": "svs_combat",
                 "alliance_role": "filler",
-                "priority_svs": 5,
-                "priority_rally": 5,
-                "priority_castle_battle": 4,
-                "priority_exploration": 2,
-                "priority_gathering": 1,
+                "priority_pvp_attack": 5,
+                "priority_defense": 4,
+                "priority_pve": 2,
+                "priority_economy": 1,
                 "heroes": [
                     # Gen 1 - All maxed
                     {"name": "Jeronimo",  "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
@@ -224,8 +223,8 @@ _TEST_ACCOUNTS = [
                 "furnace_level": 25,
                 "spending_profile": "f2p",
                 "alliance_role": "farmer",
-                "priority_svs": 1, "priority_rally": 1, "priority_castle_battle": 1,
-                "priority_exploration": 1, "priority_gathering": 5,
+                "priority_pvp_attack": 1, "priority_defense": 1,
+                "priority_pve": 1, "priority_economy": 5,
                 "is_farm_account": True,
                 "heroes": [
                     {"name": "Smith",     "level": 50, "stars": 4, "expl": [4,4,1], "exped": [4,4,1], "gear": 0},
@@ -253,11 +252,10 @@ _TEST_ACCOUNTS = [
                 "spending_profile": "f2p",
                 "priority_focus": "balanced_growth",
                 "alliance_role": "filler",
-                "priority_svs": 5,
-                "priority_rally": 4,
-                "priority_castle_battle": 3,
-                "priority_exploration": 3,
-                "priority_gathering": 3,
+                "priority_pvp_attack": 5,
+                "priority_defense": 3,
+                "priority_pve": 3,
+                "priority_economy": 3,
                 "heroes": [
                     # Gen 1 core
                     {"name": "Jeronimo",  "level": 60, "stars": 4, "ascension": 3, "expl": [4,4,3], "exped": [4,4,3], "gear": 4},
@@ -293,11 +291,10 @@ _TEST_ACCOUNTS = [
                 "spending_profile": "whale",
                 "priority_focus": "svs_combat",
                 "alliance_role": "rally_lead",
-                "priority_svs": 5,
-                "priority_rally": 5,
-                "priority_castle_battle": 5,
-                "priority_exploration": 2,
-                "priority_gathering": 1,
+                "priority_pvp_attack": 5,
+                "priority_defense": 5,
+                "priority_pve": 2,
+                "priority_economy": 1,
                 "heroes": [
                     # Gen 1 - All maxed (whale)
                     {"name": "Jeronimo",  "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
@@ -326,8 +323,8 @@ _TEST_ACCOUNTS = [
                 "furnace_level": 18,
                 "spending_profile": "f2p",
                 "alliance_role": "farmer",
-                "priority_svs": 1, "priority_rally": 1, "priority_castle_battle": 1,
-                "priority_exploration": 1, "priority_gathering": 5,
+                "priority_pvp_attack": 1, "priority_defense": 1,
+                "priority_pve": 1, "priority_economy": 5,
                 "is_farm_account": True,
                 "heroes": [
                     {"name": "Smith",     "level": 40, "stars": 3, "expl": [3,3,1], "exped": [3,3,1], "gear": 0},
@@ -354,8 +351,8 @@ _TEST_ACCOUNTS = [
                 "furnace_level": 30,
                 "spending_profile": "minnow",
                 "alliance_role": "filler",
-                "priority_svs": 4, "priority_rally": 3, "priority_castle_battle": 3,
-                "priority_exploration": 3, "priority_gathering": 3,
+                "priority_pvp_attack": 4, "priority_defense": 3,
+                "priority_pve": 3, "priority_economy": 3,
                 "heroes": [
                     {"name": "Jeronimo",  "level": 70, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 4},
                     {"name": "Natalia",   "level": 65, "stars": 4, "ascension": 3, "expl": [4,4,4], "exped": [4,4,4], "gear": 4},
@@ -374,8 +371,8 @@ _TEST_ACCOUNTS = [
                 "furnace_level": 22,
                 "spending_profile": "minnow",
                 "alliance_role": "filler",
-                "priority_svs": 3, "priority_rally": 3, "priority_castle_battle": 3,
-                "priority_exploration": 4, "priority_gathering": 4,
+                "priority_pvp_attack": 3, "priority_defense": 3,
+                "priority_pve": 4, "priority_economy": 4,
                 "heroes": [
                     {"name": "Jeronimo",  "level": 45, "stars": 3, "ascension": 2, "expl": [3,3,3], "exped": [3,3,3], "gear": 2},
                     {"name": "Natalia",   "level": 40, "stars": 2, "ascension": 1, "expl": [2,2,2], "exped": [2,2,2], "gear": 2},
@@ -399,8 +396,8 @@ _TEST_ACCOUNTS = [
                 "spending_profile": "f2p",
                 "priority_focus": "balanced_growth",
                 "alliance_role": "casual",
-                "priority_svs": 2, "priority_rally": 2, "priority_castle_battle": 2,
-                "priority_exploration": 4, "priority_gathering": 4,
+                "priority_pvp_attack": 2, "priority_defense": 2,
+                "priority_pve": 4, "priority_economy": 4,
                 "heroes": [
                     {"name": "Jeronimo",  "level": 20, "stars": 1, "expl": [1,1,1], "exped": [1,1,1], "gear": 0},
                     {"name": "Molly",     "level": 15, "stars": 0, "expl": [1,1,1], "exped": [1,1,1], "gear": 0},
@@ -422,8 +419,8 @@ _TEST_ACCOUNTS = [
                 "spending_profile": "orca",
                 "priority_focus": "svs_combat",
                 "alliance_role": "rally_lead",
-                "priority_svs": 5, "priority_rally": 5, "priority_castle_battle": 5,
-                "priority_exploration": 2, "priority_gathering": 1,
+                "priority_pvp_attack": 5, "priority_defense": 5,
+                "priority_pve": 2, "priority_economy": 1,
                 "heroes": [
                     # Gen 1 - Maxed
                     {"name": "Jeronimo",  "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},
@@ -460,8 +457,8 @@ _TEST_ACCOUNTS = [
                 "spending_profile": "whale",
                 "priority_focus": "svs_combat",
                 "alliance_role": "rally_lead",
-                "priority_svs": 5, "priority_rally": 5, "priority_castle_battle": 5,
-                "priority_exploration": 3, "priority_gathering": 1,
+                "priority_pvp_attack": 5, "priority_defense": 5,
+                "priority_pve": 3, "priority_economy": 1,
                 "heroes": [
                     # Gen 1 fully maxed
                     {"name": "Jeronimo",  "level": 80, "stars": 5, "expl": [5,5,5], "exped": [5,5,5], "gear": 5},

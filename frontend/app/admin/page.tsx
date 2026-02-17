@@ -229,7 +229,7 @@ export default function AdminDashboard() {
     setUsageLoading(true);
     try {
       const data = await adminApi.getUsageStats(token, timeRange);
-      setUsageData(data.data_points || data.datapoints || data.metrics || []);
+      setUsageData(data.historical || []);
     } catch (err) {
       console.error('Failed to fetch usage stats:', err);
       setUsageData([]);
