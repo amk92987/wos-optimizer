@@ -20,10 +20,14 @@ function AdminUsersContent() {
   const [activeTab, setActiveTab] = useState<'list' | 'create'>(searchParams.get('tab') === 'create' ? 'create' : 'list');
   const defaultTestAccount = searchParams.get('test') === 'true';
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [defaultDailyLimit, setDefaultDailyLimit] = useState(20);
 
   useEffect(() => {
     if (token) {
       fetchUsers();
+      adminApi.getAISettings(token).then((s: Record<string, unknown>) => {
+        if (s?.daily_limit_free) setDefaultDailyLimit(Number(s.daily_limit_free));
+      }).catch(() => {});
     }
   }, [token]);
 
@@ -403,7 +407,7 @@ function AdminUsersContent() {
                                   </button>
                                   {u.ai_access_level !== 'off' && u.ai_access_level !== 'unlimited' && (
                                     <span className="text-[9px] text-frost-muted">
-                                      {u.ai_requests_today || 0}/{u.ai_daily_limit || 10}/day
+                                      {u.ai_requests_today || 0}/{u.ai_daily_limit || defaultDailyLimit}/day
                                     </span>
                                   )}
                                 </div>
