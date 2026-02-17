@@ -1,0 +1,122 @@
+{
+  "system": "century_games_announcements_and_timeline",
+  "retrieved_at": "2026-02-17T00:00:00Z",
+  "sources": [
+    {"source_id": "wos_wiki_events", "url": "https://www.whiteoutsurvival.wiki/events/", "confidence": "A"},
+    {"source_id": "wos_wiki_timeline", "url": "https://www.whiteoutsurvival.wiki/server-timeline-server-age/", "confidence": "A"},
+    {"source_id": "wos_wiki_news", "url": "https://www.whiteoutsurvival.wiki/category/news-en/", "confidence": "A"},
+    {"source_id": "century_games_updates", "url": "https://www.centurygames.com/whiteout-survival-update/", "confidence": "A"},
+    {"source_id": "century_games_dev_feedback", "url": "https://www.centurygames.com/whiteout-survival-developer-feedback/", "confidence": "A"},
+    {"source_id": "wos_global_twitter", "url": "https://x.com/WOS_Global", "confidence": "A"},
+    {"source_id": "wos_tools", "url": "https://wostools.net/", "confidence": "B"},
+    {"source_id": "whiteoutdata", "url": "https://whiteoutdata.com/", "confidence": "B"},
+    {"source_id": "vortex_gaming", "url": "https://vortexgaming.io/", "confidence": "B"},
+    {"source_id": "theria_games", "url": "https://theriagames.com/whiteout-survival-wiki/", "confidence": "B"},
+    {"source_id": "grindnstrat", "url": "https://grindnstrat.com/whiteout-survival-server-timeline/", "confidence": "B"},
+    {"source_id": "whiteoutsurvival_pl", "url": "https://whiteoutsurvival.pl/state-timeline/", "confidence": "B"}
+  ],
+  "data_completeness": "complete",
+  "overview": {
+    "key_finding": "Century Games does NOT pre-announce features more than about one update cycle in advance. Content is announced via patch notes typically 1-2 days before release.",
+    "no_public_roadmap": true,
+    "closest_to_roadmap": "Monthly Developer Feedback posts published since August 2023"
+  },
+  "official_channels": [
+    {"platform": "X/Twitter", "handle": "@WOS_Global", "url": "https://x.com/WOS_Global", "notes": "Primary announcement channel — patch notes, state transfer schedules, event announcements"},
+    {"platform": "Official Website", "url": "https://www.centurygames.com/", "notes": "Update page posts patch notes for major updates"},
+    {"platform": "Help Center", "url": "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/", "notes": "Official technical support and FAQ"},
+    {"platform": "Discord", "url": "https://discord.com/invite/whiteoutsurvival", "notes": "1.5M+ members, more player discussion than official announcements"},
+    {"platform": "Facebook", "url": "https://www.facebook.com/WhiteoutSurvival", "notes": "Official page"},
+    {"platform": "Instagram", "handle": "@whiteoutsurvival", "url": "https://www.instagram.com/whiteoutsurvival/", "notes": "Patch notes posted as image carousels"},
+    {"platform": "TikTok", "handle": "@whiteoutsurvivalofficial", "url": "https://www.tiktok.com/@whiteoutsurvivalofficial", "notes": "Official account"},
+    {"platform": "YouTube", "handle": "@WhiteoutSurvivalOfficial", "url": "https://www.youtube.com/@WhiteoutSurvivalOfficial", "notes": "Trailers and update videos"},
+    {"platform": "In-Game Mail", "notes": "Events announced 3-4 days before"}
+  ],
+  "monthly_dev_feedback": {
+    "description": "The closest thing to a roadmap. Published monthly since August 2023 on X/Twitter, WoS Wiki News, and Century Games site.",
+    "jan_2026_highlights": [
+      "Ministerial reservation system enhancements",
+      "Chat reply function for group/alliance chats",
+      "Snow Buster Raid permanently unlocked",
+      "E10 buff timer pausing during movement-restricted events",
+      "Rocket V2 instant exploration completion",
+      "Training interface quick-switch tabs",
+      "Event schedule emails now show UTC + local time simultaneously",
+      "Discussion of rumors about new experts, T12 troops, and buildings (no confirmation)"
+    ]
+  },
+  "server_timeline": {
+    "note": "NOT officially published by Century Games, but highly reliable because all servers follow the same pattern (+/- 7-21 days variance)",
+    "milestones": [
+      {"day": 0, "event": "Gen 1 Heroes (17 heroes)"},
+      {"day": 4, "event": "Fortress unlocks"},
+      {"day": 10, "event": "Tundra region opens; Polar Terror Level 3"},
+      {"day": 14, "event": "Stronghold available"},
+      {"day": 18, "event": "Polar Terror Level 4"},
+      {"day": 27, "event": "Polar Terror Level 5"},
+      {"day": 34, "event": "Arena opponent pool enlarged by nearby servers"},
+      {"day": 39, "event": "Fertile Lands opens"},
+      {"day": 40, "event": "Gen 2 Heroes (Flint, Philly, Alonso); Legendary Hero Gear tier"},
+      {"day": 53, "event": "Sunfire Castle event begins"},
+      {"day": 54, "event": "Pets Gen 1 (Cave Hyena, Arctic Wolf, Musk Ox)"},
+      {"day": 60, "event": "Fire Crystal Age begins (FC 1-3 at Furnace 30)"},
+      {"day": 80, "event": "SvS (State of Power) and King of Icefield events begin"},
+      {"day": 90, "event": "Pets Gen 2 (Titan Roc, Giant Tapir)"},
+      {"day": 120, "event": "Gen 3 Heroes (Logan, Mia, Greg); VIP Prestige Shop (VIP 12)"},
+      {"day": 140, "event": "Pets Gen 3 (Snow Leopard, Giant Elk)"},
+      {"day": 150, "event": "Fire Crystal 4-5; Crystal Laboratory; Polar Terror Level 8"},
+      {"day": 175, "event": "Legendary Chief Gear; Enhancement Material Exchange Shop"},
+      {"day": 195, "event": "Gen 4 Heroes (Ahmose, Reina, Lynn); Hero Hall refresh"},
+      {"day": 200, "event": "Pets Gen 4 (Cave Lion, Snow Ape)"},
+      {"day": 220, "event": "War Academy; Crystal Lab Level 5"},
+      {"day": 270, "event": "Gen 5 Heroes (Hector, Norah, Gwen)"},
+      {"day": 280, "event": "Pets Gen 5 (Iron Rhino, Saber-tooth Tiger)"},
+      {"day": 330, "event": "Fire Crystal 6-8; Refined Fire Crystals; Crystal Lab Level 6"},
+      {"day": 360, "event": "Gen 6 Heroes (Wu Ming, Renee, Wayne)"},
+      {"day": 440, "event": "Gen 7 Heroes (Edith, Gordon, Bradley); Charm Level 16; Charm Exchange Shop"},
+      {"day": 500, "event": "Fire Crystal 9-10"},
+      {"day": 520, "event": "Gen 8 Heroes (Gatot, Sonya, Hendrik)"},
+      {"day": 600, "event": "Gen 9 Heroes (Magnus, Xura, Fred); Legendary T4 Gear"},
+      {"day": 680, "event": "Gen 10 Heroes (Blanchette, Freya, Gregory)"},
+      {"day": 760, "event": "Gen 11 Heroes (Eleonora, Lloyd, Rufus)"},
+      {"day": 840, "event": "Gen 12 Heroes (Hervor, Karol, Ligeia)"},
+      {"day": 920, "event": "Gen 13 Heroes (Flora, Gisela, Vulcanus)"},
+      {"day": 1000, "event": "Gen 14 Heroes (Cara, Dominic, Elif)"}
+    ],
+    "hero_gen_pattern": "Hero generations arrive roughly every 80 days after Gen 2"
+  },
+  "event_rotation": [
+    {"event": "Bear Trap", "frequency": "Every ~47 hours", "duration": "30 min", "notes": "Alliance rally vs NPC; 2nd Bear Trap added Jan 2025"},
+    {"event": "Alliance Championship", "frequency": "Weekly", "notes": "6-alliance tournament with tier progression"},
+    {"event": "Fortress Battle", "frequency": "Weekly (Fridays)", "notes": "8-week seasons"},
+    {"event": "Frostfire Mine", "frequency": "Biweekly", "duration": "30 min", "notes": "Solo PvP mining"},
+    {"event": "Foundry Battle", "frequency": "Biweekly", "duration": "60 min", "notes": "Alliance PvP, no permanent troop loss"},
+    {"event": "SvS (State of Power)", "frequency": "Every 4 weeks", "duration": "10 days", "notes": "5-day prep + 5-day battle; alternates with KoI"},
+    {"event": "King of Icefield", "frequency": "Every 4 weeks", "duration": "7 days", "notes": "2 weeks after SvS"},
+    {"event": "Alliance Mobilization", "frequency": "Monthly", "duration": "6 days", "notes": "Task event with league tiers"},
+    {"event": "Alliance Showdown", "frequency": "Monthly", "duration": "6.5 days", "notes": "Cross-state, follows SvS"},
+    {"event": "Canyon Clash", "frequency": "Monthly", "duration": "1 hour", "notes": "Lost Canyon territory battle"},
+    {"event": "Sunfire Castle", "frequency": "Weekly (Saturday)", "notes": "Alliance competition for ministerial positions"},
+    {"event": "State Transfer", "frequency": "Every 4-6 weeks", "duration": "7 days", "notes": "3 phases, announced on Twitter/X"}
+  ],
+  "community_tracking_sites": [
+    {"name": "Whiteout Survival Wiki", "url": "https://www.whiteoutsurvival.wiki/", "tracks": "Most comprehensive: news, events, server timeline, hero data, patch notes"},
+    {"name": "WoS Tools", "url": "https://wostools.net/", "tracks": "Calculators, events guide with rotation schedules"},
+    {"name": "WhiteoutData", "url": "https://whiteoutdata.com/", "tracks": "Game mechanics, event details, hero data"},
+    {"name": "WhiteoutSurvival.app", "url": "https://whiteoutsurvival.app/", "tracks": "Charts, calculators, tier lists"},
+    {"name": "WOSLAND", "url": "https://www.wosland.com/free-tools/", "tracks": "Expert Calculator, SvS points calculation"},
+    {"name": "WOS Nerds", "url": "https://wosnerds.com/", "tracks": "Data-driven strategies, calculators"},
+    {"name": "Theria Games", "url": "https://theriagames.com/whiteout-survival-wiki/", "tracks": "Large guide collection, event calendar"},
+    {"name": "Out of Games", "url": "https://outof.games/realms/whiteoutsurvival/guides/events/", "tracks": "Event guides, server timeline"},
+    {"name": "Vortex Gaming", "url": "https://vortexgaming.io/", "tracks": "Dev feedback summaries, patch note analysis"},
+    {"name": "A Jack Of", "url": "https://www.ajackof.com/games/whiteout-survival-wos/whiteout-survival-server-timeline-server-age/", "tracks": "Server timeline guides"},
+    {"name": "Polish WoS Site", "url": "https://whiteoutsurvival.pl/state-timeline/", "tracks": "Interactive state timeline tool (enter your server)"},
+    {"name": "Heaven Guardian", "url": "https://heaven-guardian.com/ultimate-guide-to-whiteout-survival-state-transfer/", "tracks": "State transfer group guides"},
+    {"name": "GrindNStrat", "url": "https://grindnstrat.com/whiteout-survival-server-timeline/", "tracks": "Server timeline through Day 600+"}
+  ],
+  "recommendations": {
+    "state_transfer_guide": "Very valuable page — lots of nuance around pass costs, eligibility, transfer groups, and what you lose",
+    "timeline_tracker": "Harder since Century Games does not publish ahead, but community server timeline data could be embedded (enter your state number, see your timeline). Link to @WOS_Global for event announcements.",
+    "best_interactive_reference": "https://whiteoutsurvival.pl/state-timeline/ — Interactive tool where you enter your server and see your timeline"
+  }
+}

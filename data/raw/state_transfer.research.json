@@ -1,0 +1,142 @@
+{
+  "system": "state_transfer",
+  "retrieved_at": "2026-02-17T00:00:00Z",
+  "sources": [
+    {"source_id": "wos_wiki", "url": "https://www.whiteoutsurvival.wiki/events/state-transfer-event/", "confidence": "A"},
+    {"source_id": "wos_wiki_faq", "url": "https://www.whiteoutsurvival.wiki/state-transfer-faqs/", "confidence": "A"},
+    {"source_id": "wos_wiki_pass", "url": "https://www.whiteoutsurvival.wiki/items/transfer-pass/", "confidence": "A"},
+    {"source_id": "whiteoutsurvival_app", "url": "https://whiteoutsurvival.app/events/state-transfer/", "confidence": "A"},
+    {"source_id": "century_games_help", "url": "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/section/1460-state-transfer/", "confidence": "A"},
+    {"source_id": "century_games_faq_passes", "url": "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/faq/8155-how-many-transfer-pass-does-one-need-for-a-transfer-how-is-it-calculated/", "confidence": "A"},
+    {"source_id": "whiteoutdata", "url": "https://whiteoutdata.com/events/state-transfer-event/", "confidence": "B"},
+    {"source_id": "gamersnewz", "url": "https://gamersnewz.com/2026/01/16/january-2026-state-transfer-event-guide-for-whiteout-survival/", "confidence": "B"},
+    {"source_id": "ldshop", "url": "https://www.ldshop.gg/blog/guide/whiteout-survival-state-transfer-guide.html", "confidence": "B"},
+    {"source_id": "wos_transfer_tool", "url": "https://wos-transfer.com/en", "confidence": "B"},
+    {"source_id": "foxfiver_tracker", "url": "https://transfer.foxfiver.com/", "confidence": "B"}
+  ],
+  "data_completeness": "complete",
+  "overview": {
+    "description": "State Transfer is a periodic event (not always available) that runs for 7 days in three phases. Available after the state has FC5 unlocked. Events run approximately every 4-6 weeks.",
+    "unlock_requirement": "FC5 unlocked in the state",
+    "event_frequency": "Every 4-6 weeks (irregularly scheduled)",
+    "event_duration_days": 7,
+    "announcement_lead_time": "3-4 days before event starts (in-game mail and X/Twitter)"
+  },
+  "event_phases": [
+    {
+      "phase": 1,
+      "name": "Pre-Transfer (Presidential Review)",
+      "duration_days": 3,
+      "description": "State Presidents set Power Cap thresholds. Chiefs browse eligible states and contact Presidents. No transfers happen yet."
+    },
+    {
+      "phase": 2,
+      "name": "Invitational Transfer",
+      "duration_days": 2,
+      "description": "Presidents send invitations (Ordinary or Special) to Chiefs. Invited Chiefs can transfer."
+    },
+    {
+      "phase": 3,
+      "name": "Open Transfer",
+      "duration_days": 2,
+      "description": "Any eligible Chief meeting the Power Cap can transfer freely on a first-come, first-served basis."
+    }
+  ],
+  "transfer_passes": {
+    "debunked_claim": "The '4 passes' claim is incorrect — 4 is just a pack size ($49.99 for 4 passes)",
+    "calculation": "Based on player's Transfer Score vs target state's Transfer Rating",
+    "transfer_score_components": [
+      "Furnace Level",
+      "Chief Gear & Charms",
+      "Hero Power (base)",
+      "Hero Gear Power",
+      "Pet Power",
+      "Expert Power"
+    ],
+    "transfer_score_excludes": ["Troop Power (troops can be dismissed but score stays the same)"],
+    "state_transfer_rating": "Sum of Transfer Scores from the top 100 active chiefs in that state",
+    "rough_formula": "~1 pass per 20M Transfer Score points (exact formula not published)",
+    "ranges_by_player_type": {
+      "low_level_f26_f30": {"min": 1, "max": 3, "notes": "Transferring to a weaker/newer state"},
+      "f2p_low_spender": {"min": 6, "max": 12, "notes": "Most common range. Sources say unlikely to exceed 10"},
+      "mid_spender": {"min": 20, "max": 30, "notes": "Post-upgrade transfers"},
+      "whale_top_player": {"min": 30, "max": 50, "notes": "Transferring to Leading States"}
+    },
+    "absolute_range": {"min": 1, "max": 75, "notes": "Some sources say up to 75 for extreme cases"}
+  },
+  "pass_acquisition": {
+    "alliance_shop": {
+      "cost": "150,000 Alliance Tokens per pass",
+      "refresh": "1 per week"
+    },
+    "in_game_shop_packs": [
+      {"tier": 1, "cost_usd": 4.99, "passes": 1, "refresh": "Monthly"},
+      {"tier": 2, "cost_usd": 9.99, "passes": 2, "refresh": "Monthly"},
+      {"tier": 3, "cost_usd": 19.99, "passes": 3, "refresh": "Monthly"},
+      {"tier": 4, "cost_usd": 49.99, "passes": 4, "refresh": "Monthly"},
+      {"tier": 5, "cost_usd": 99.99, "passes": 5, "refresh": "Monthly"}
+    ],
+    "max_purchasable_per_month": 85,
+    "note": "Pack tiers unlock progressively"
+  },
+  "alliance_transfers": {
+    "feature_exists": false,
+    "description": "There is NO alliance transfer feature. Each member must transfer individually.",
+    "coordination_steps": [
+      "Every member must leave the alliance before transferring",
+      "Each member needs their own Transfer Passes",
+      "Each member must individually meet all requirements",
+      "After transferring, members rejoin or create a new alliance in the destination state"
+    ],
+    "coordination_tool": "https://wos-transfer.com/en",
+    "state_capacity_limits": {
+      "ordinary_states": {"total": 58, "invite": 38, "open": 20},
+      "leading_states": {"total": 30, "invite": 20, "open": 10}
+    }
+  },
+  "eligibility_requirements": {
+    "personal": {
+      "furnace_level": "Must reach the required minimum (varies by state age, max is F30)",
+      "power_cap": "Must not exceed the President's set Power Cap (unless Special Invite)",
+      "alliance_membership": "Must NOT be in any alliance at time of transfer",
+      "combat_status": "City cannot be in active combat or scouting",
+      "leadership_exclusions": ["Current President", "Former President during interregnum", "Transfer Manager", "Tyrant"],
+      "cooldown_days": 25,
+      "transfers_per_event": 1,
+      "max_characters_in_target_state": 4
+    },
+    "state_compatibility": {
+      "hero_generation": "Origin and target state must have the same latest hero generation",
+      "fire_crystal_level": "Must match between states",
+      "furnace_era": "Must match (same era of progression)",
+      "unlocked_buildings": "Must match",
+      "available_beasts": "Must match",
+      "equipment_systems": "Chief and hero equipment must match",
+      "state_age": "Character creation age cannot exceed target state age by more than 45-180 days (varies by bracket)",
+      "transfer_groups": "States assigned to 1 of 12 groups. Can only transfer within your group — no exceptions."
+    }
+  },
+  "transfer_groups_jan_2026": [
+    {"group": 1, "states": "4-19", "count": 16},
+    {"group": 2, "states": "21-132", "count": 112},
+    {"group": 3, "states": "140-312", "count": 173},
+    {"group": 4, "states": "313-433", "count": 121},
+    {"group": 5, "states": "434-529", "count": 96},
+    {"group": 6, "states": "530-804", "count": 275},
+    {"group": 7, "states": "805-931", "count": 127},
+    {"group": 8, "states": "932-1070", "count": 139},
+    {"group": 9, "states": "1071-1308", "count": 238},
+    {"group": 10, "states": "1309-1427", "count": 119},
+    {"group": 11, "states": "1428-1491", "count": 64},
+    {"group": 12, "states": "1492-1615", "count": 124}
+  ],
+  "what_you_lose": {
+    "resources": "Resources exceeding Storehouse Protection limit are LOST",
+    "arena_points": "Reset to 1,000; ranking deleted",
+    "event_progress": "Active events terminated; unclaimed rewards mailed",
+    "chat_groups": "All group chats removed (friends and private chats preserved)",
+    "alliance": "Must leave before transferring; lose alliance shop progress",
+    "pack_purchase_counts": "RESET (actually a benefit — you can rebuy packs)",
+    "emporium_of_enigma": "Thorns transfer only if Emporium is active in new state; otherwise removed"
+  }
+}

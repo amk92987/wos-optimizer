@@ -4,17 +4,35 @@
 
 ### Content / Research
 - [ ] **State Transfer Guide** - Add to Quick Tips or new section
-  - Individual state transfers and full alliance transfers
-  - How many transfer passes needed (reportedly 4?)
-  - Requirements, cooldowns, restrictions
-  - Research and verify mechanics before adding
+  - Research complete: `data/raw/state_transfer.research.json`
+  - **Transfer Mechanics**: 7-day event in 3 phases (Presidential Review → Invitational → Open Transfer)
+  - **Transfer Passes**: NOT 4 — ranges from 1-50+ based on Transfer Score vs State Rating (~1 pass per 20M score)
+    - F2P/low spender: 6-12 passes typical
+    - Mid spender: 20-30 passes; Whales: 30-50 passes
+    - Acquisition: Alliance Shop (150k tokens/pass/week) + in-game packs ($5-$100, max 85/month)
+  - **Alliance Transfers**: No group feature — each member transfers individually; coordination tool at wos-transfer.com
+    - State capacity limits: 58 transfers (ordinary) or 30 (leading states)
+  - **Eligibility**: F30 min, not in alliance, 25-day cooldown, 1 transfer/event, same transfer group (12 groups)
+  - **State Compatibility**: Must match hero gen, FC level, furnace era, buildings, beasts, equipment
+  - **What You Lose**: Resources over storehouse cap, arena rank reset, group chats, alliance progress
+  - **What You Keep**: Friends, private chats, heroes, gear; pack purchase counts RESET (benefit)
+  - TODO: Verify where World Chat user found their specific transfer date data
 
 - [ ] **Century Games Announcements / Timeline Tracker** - Track upcoming events and state milestones
-  - State transfer opening dates and requirements
-  - Upcoming events and release schedule
-  - What opens at which state age / server milestone
-  - Sources: official announcements, patch notes, World Chat intel
-  - May need new data sources beyond existing research skill registry
+  - Research complete: `data/raw/century_games_announcements.research.json`
+  - **Key Finding**: No public roadmap exists — Century Games announces 1-2 days before release
+  - **Primary Source**: @WOS_Global on X/Twitter for patch notes, state transfer schedules, event announcements
+  - **Monthly Dev Feedback**: Closest thing to a roadmap (published since Aug 2023 on X/Twitter + Century Games site)
+  - **Server Timeline**: All servers follow same pattern (+/- 7-21 days variance)
+    - 34 milestones tracked from Day 0 to Day 1000+ (hero gens every ~80 days after Gen 2)
+    - Best interactive tool: whiteoutsurvival.pl/state-timeline/ (enter server, see timeline)
+  - **Event Rotation**: 12 recurring events with known frequencies (Bear Trap ~47hr, SvS 4wk, State Transfer 4-6wk)
+  - **Community Sites**: 13 tracking sites cataloged (wiki, calculators, data tools)
+  - **Implementation Ideas**:
+    - Embed server timeline with "enter your state age" to show upcoming milestones
+    - Link to @WOS_Global for real-time announcements
+    - Show event rotation calendar with estimated next occurrence
+  - TODO: Research where World Chat user found specific transfer/event dates
 
 ### UI / Frontend
 - [ ] **Legendary Gear Level Logic on Hero Tracker** - Rethink gear editing UX
