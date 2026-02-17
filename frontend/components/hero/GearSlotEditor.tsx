@@ -112,6 +112,18 @@ export default function GearSlotEditor({
               </div>
             ) : null;
           })()}
+          {quality === 5 && (
+            <div className={`text-[9px] text-right mt-0.5 ${
+              level >= 100 && mastery >= 10 ? 'text-green-400/70' : 'text-amber-400/50'
+            }`}>
+              {level >= 100 && mastery >= 10 ? '\u2713 Ready to ascend to Legendary' : 'L100 + M10 to ascend to Legendary'}
+            </div>
+          )}
+          {quality === 6 && level === 0 && (
+            <div className="text-[9px] text-orange-300/50 text-right mt-0.5">
+              Enhancement reset — level from 0
+            </div>
+          )}
         </>
       )}
 

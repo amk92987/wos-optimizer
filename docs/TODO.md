@@ -3,8 +3,9 @@
 ## Active TODO
 
 ### Content / Research
-- [ ] **State Transfer Guide** - Add to Quick Tips or new section
+- [x] **State Transfer Guide** - ~~Add to Quick Tips or new section~~ Added as tab on Events page
   - Research complete: `data/raw/state_transfer.research.json`
+  - Guide live at Events > State Transfer tab (phases, passes, eligibility, group lookup, alliance info, what you lose/keep)
   - **Transfer Mechanics**: 7-day event in 3 phases (Presidential Review → Invitational → Open Transfer)
   - **Transfer Passes**: NOT 4 — ranges from 1-50+ based on Transfer Score vs State Rating (~1 pass per 20M score)
     - F2P/low spender: 6-12 passes typical
@@ -35,11 +36,15 @@
   - TODO: Research where World Chat user found specific transfer/event dates
 
 ### UI / Frontend
-- [ ] **Legendary Gear Level Logic on Hero Tracker** - Rethink gear editing UX
-  - Gear must be at level 100 before it can be upgraded to Legendary quality
-  - Once Legendary, levels reset and go up from there (Legendary level progression)
-  - Current UI doesn't enforce this — selecting Legendary should handle the level transition correctly
-  - Research data in `data/raw/gear_enhancement.research.json`
+- [x] **Legendary Gear Level Logic on Hero Tracker** - Rethink gear editing UX
+  - Auto-reset level to 0 when crossing Gold↔Legendary boundary (matches in-game ascension)
+  - Gold gear shows "L100 + M10 to ascend to Legendary" hint (green checkmark when ready)
+  - Legendary gear at L0 shows "Enhancement reset — level from 0" context note
+  - Mastery preserved on quality change (doesn't reset in-game either)
+
+- [ ] **Sidebar/Header Line Alignment** - Sidebar logo separator misaligned with header border
+  - Options: align sidebar line to match header, or remove header top border entirely
+  - Screenshot: `Screenshots/Screenshot 2026-02-17 092041.png`
 
 - [ ] **Gear Power Contribution to Lineups** - Incorporate gear stats into lineup scoring
   - Understand how gear adds power/stats to heroes

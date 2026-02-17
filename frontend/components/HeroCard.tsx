@@ -70,6 +70,19 @@ export default function HeroCard({ hero, token, onSaved, onRemove, onInfoClick }
     saveFields(fields);
   }, [saveFields]);
 
+  const handleGearQualityChange = useCallback((slotKey: string, oldQuality: number, newQuality: number) => {
+    const crossingUp = oldQuality <= 5 && newQuality === 6;
+    const crossingDown = oldQuality === 6 && newQuality <= 5;
+    if (crossingUp || crossingDown) {
+      updateMultiple({
+        [`gear_${slotKey}_quality`]: newQuality,
+        [`gear_${slotKey}_level`]: 0,
+      });
+    } else {
+      update(`gear_${slotKey}_quality`, newQuality);
+    }
+  }, [update, updateMultiple]);
+
   const getTierClass = (tier: string | null) => {
     if (!tier) return 'tier-b';
     const t = tier.toLowerCase();
@@ -281,7 +294,7 @@ export default function HeroCard({ hero, token, onSaved, onRemove, onInfoClick }
                 quality={slot.quality}
                 level={slot.level}
                 mastery={slot.mastery}
-                onQualityChange={(v) => update(`gear_${slot.key}_quality`, v)}
+                onQualityChange={(v) => handleGearQualityChange(slot.key, slot.quality, v)}
                 onLevelChange={(v) => update(`gear_${slot.key}_level`, v)}
                 onMasteryChange={(v) => update(`gear_${slot.key}_mastery`, v)}
               />
