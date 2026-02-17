@@ -115,6 +115,9 @@ JOINER_MODES = {"rally_joiner_attack", "rally_joiner_defense", "rally_attack", "
 # In non-joiner lineups, use tier_overall instead to avoid overvaluing them.
 JOINER_SPECIALISTS = {"Jessie", "Sergey"}
 
+# Nonlinear gear quality scores — Legendary is a huge jump from Gold in-game
+GEAR_QUALITY_SCORES = {0: 0, 1: 5, 2: 10, 3: 20, 4: 35, 5: 55, 6: 85}
+
 
 # ---------------------------------------------------------------------------
 # Skill Effect Scoring — Pre-tagged approach
@@ -318,11 +321,14 @@ def calculate_hero_power(
     ascension = hero_stats.get('ascension', hero_stats.get('ascension_tier', 0))
     score += ascension * 30  # 0-150 points
 
-    # Gear quality (4 slots, quality 0-7)
+    # Gear: 4 slots with quality (0-6), level (0-100), mastery (0-20 for Gold+)
     for slot in range(1, 5):
         quality = hero_stats.get(f'gear_slot{slot}_quality', 0)
         gear_level = hero_stats.get(f'gear_slot{slot}_level', 0)
-        score += quality * 15 + gear_level // 10  # 0-115 per slot
+        mastery = hero_stats.get(f'gear_slot{slot}_mastery', 0)
+        score += GEAR_QUALITY_SCORES.get(quality, 0)  # 0-85 per slot
+        score += gear_level // 5   # 0-20 per slot
+        score += mastery * 3       # 0-60 per slot
 
     # Note: skill levels are factored into _get_skill_value() through effect scaling
     # (value_at_level = max_value * skill_level / 5), so no separate skill contribution here.
@@ -330,6 +336,11 @@ def calculate_hero_power(
     # Exclusive gear skill (mythic heroes, 0-10)
     exclusive_skill = hero_stats.get('exclusive_gear_skill_level', 0)
     score += exclusive_skill * 20  # 0-200 points
+
+    # Mythic/Exclusive gear level (0-100)
+    if hero_stats.get('mythic_gear_unlocked'):
+        mythic_level = hero_stats.get('mythic_gear_level', 0)
+        score += mythic_level // 5  # 0-20 points
 
     # Tier bonus - mode-aware
     if hero_data:

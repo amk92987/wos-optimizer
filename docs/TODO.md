@@ -46,10 +46,11 @@
   - Options: align sidebar line to match header, or remove header top border entirely
   - Screenshot: `Screenshots/Screenshot 2026-02-17 092041.png`
 
-- [ ] **Gear Power Contribution to Lineups** - Incorporate gear stats into lineup scoring
-  - Understand how gear adds power/stats to heroes
-  - Factor gear quality + level into lineup recommendations
-  - Currently lineup engine only considers hero level/stars/skills, not gear
+- [x] **Gear Power Contribution to Lineups** - Improved gear scoring in lineup engine
+  - Nonlinear quality scaling (Legendary 85 vs Gold 55 — reflects in-game stat jump)
+  - Added mastery scoring (M20 = 60 pts/slot, was 0)
+  - Added mythic gear level scoring (L100 = 20 pts)
+  - Better gear level weighting (L100 = 20 pts/slot, was 10)
 
 ### Repo Cleanup
 - [ ] **Remove Legacy Streamlit Code** - Dead code from pre-serverless era
