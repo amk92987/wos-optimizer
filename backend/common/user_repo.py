@@ -98,7 +98,7 @@ def create_user(
             },
         ])
     except Exception as e:
-        if "ConditionalCheckFailed" in str(e) or "TransactionCanceledException" in str(e):
+        if "ConditionalCheckFailed" in str(e):
             raise ConflictError("Email or username already registered")
         raise
 

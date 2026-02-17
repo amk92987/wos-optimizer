@@ -307,12 +307,13 @@ def batch_delete(table, keys: list[dict]) -> None:
 def transact_write(items: list[dict]) -> dict:
     """Execute a DynamoDB TransactWriteItems operation.
 
-    Provides all-or-nothing writes across one or more tables.
+    Provides all-or-nothing writes across one or more tables using
+    Python-native types (not raw DynamoDB typed attributes). The resource
+    client handles type serialization automatically.
 
     Args:
-        items: List of transact item dicts in DynamoDB TransactWriteItems
-            format. Each dict should have exactly one key from:
-            'Put', 'Delete', 'Update', 'ConditionCheck'.
+        items: List of transact item dicts. Each dict should have exactly
+            one key from: 'Put', 'Delete', 'Update', 'ConditionCheck'.
 
             Example::
 
@@ -320,19 +321,19 @@ def transact_write(items: list[dict]) -> dict:
                     {
                         "Put": {
                             "TableName": "WoS-Main",
-                            "Item": {"PK": {"S": "USER#123"}, "SK": {"S": "PROFILE"}},
+                            "Item": {"PK": "USER#123", "SK": "PROFILE"},
                         }
                     },
                     {
                         "Delete": {
                             "TableName": "WoS-Main",
-                            "Key": {"PK": {"S": "USER#123"}, "SK": {"S": "OLD"}},
+                            "Key": {"PK": "USER#123", "SK": "OLD"},
                         }
                     },
                 ]
 
-            Note: For 'Put' operations with high-level dicts (not raw DynamoDB
-            typed attributes), use ``transact_write_items()`` instead.
+            Note: For 'Put' operations that need None-stripping and Decimal
+            conversion, use ``transact_write_items()`` instead.
 
     Returns:
         The raw DynamoDB response.
@@ -345,7 +346,9 @@ def transact_write_items(operations: list[dict]) -> dict:
     """Higher-level transact write using boto3 Table-style dicts.
 
     Each operation is a dict with one key: 'Put', 'Update', 'Delete', or
-    'ConditionCheck'. Put items are automatically prepared.
+    'ConditionCheck'. Put items are automatically prepared (None-stripped,
+    Decimal-converted). Type serialization is handled automatically by the
+    DynamoDB resource client — do NOT pre-serialize with TypeSerializer.
 
     Example::
 
@@ -367,30 +370,22 @@ def transact_write_items(operations: list[dict]) -> dict:
     Returns:
         The raw DynamoDB response.
     """
-    from boto3.dynamodb.types import TypeSerializer
-
-    serializer = TypeSerializer()
-
-    def serialize_dict(d: dict) -> dict:
-        return {k: serializer.serialize(v) for k, v in d.items()}
-
     transact_items = []
     for op in operations:
         for action, params in op.items():
             built: dict[str, Any] = {"TableName": params["TableName"]}
 
             if action == "Put":
-                item = prepare_item(params["Item"])
-                built["Item"] = serialize_dict(item)
+                built["Item"] = prepare_item(params["Item"])
             elif action in ("Delete", "ConditionCheck"):
-                built["Key"] = serialize_dict(params["Key"])
+                built["Key"] = params["Key"]
             elif action == "Update":
-                built["Key"] = serialize_dict(params["Key"])
+                built["Key"] = params["Key"]
                 if "UpdateExpression" in params:
                     built["UpdateExpression"] = params["UpdateExpression"]
                 if "ExpressionAttributeValues" in params:
-                    built["ExpressionAttributeValues"] = serialize_dict(
-                        to_decimal(params["ExpressionAttributeValues"])
+                    built["ExpressionAttributeValues"] = to_decimal(
+                        params["ExpressionAttributeValues"]
                     )
                 if "ExpressionAttributeNames" in params:
                     built["ExpressionAttributeNames"] = params["ExpressionAttributeNames"]
