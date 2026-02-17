@@ -53,34 +53,12 @@
   - Better gear level weighting (L100 = 20 pts/slot, was 10)
 
 ### Repo Cleanup
-- [ ] **Remove Legacy Streamlit Code** - Dead code from pre-serverless era
-  - **Phase 1 (Quick wins)**: Delete clearly dead directories/files
-    - `app.py`, `config.py`, `requirements.txt`, `nul` (root files)
-    - `pages/` (32 old Streamlit pages, ~230KB)
-    - `auth_pages/` (old auth pages, ~8KB)
-    - `styles/` (Streamlit CSS, ~50KB)
-    - `.streamlit/` (Streamlit config)
-    - `deploy/` (old Lightsail Docker/Nginx, ~20KB)
-    - `static/` (old landing page, ~5KB)
-  - **Phase 2 (Deeper cleanup)**: Remove replaced code
-    - `engine/` (replaced by `backend/engine/`, ~60KB)
-    - `database/` (replaced by `backend/common/`, ~50KB)
-    - `api/` (abandoned React FastAPI prototype, ~80KB)
-    - `ocr/` (disabled feature, ~2KB)
-    - `utils/` (Streamlit helpers — keep `email.py` if needed, ~30KB)
-    - `export_data/` (one-time migration artifacts, ~330KB)
-  - **Phase 3 (Optional)**: IDE/media cleanup
-    - `.idea/` (PyCharm config)
-    - `Screenshots/` (old Streamlit screenshots, ~1.5MB)
-  - **Scripts to remove** (in `scripts/`):
-    - `add_ai_limit_column.py`, `export_data.py`, `export_postgres.py`
-    - `import_data.py`, `migrate_data.py`, `migrate_dynamodb.py`, `migrate_to_dynamodb.py`
-    - `setup_cognito_users.py`, `compare_engine_to_ai.py`, `update_claude_answers.py`
-    - `prompt_test_results.json`, `start_frontend.bat`
-  - **Scripts to keep**: `download_hero_images.py`, `build_*_edges.py`, `compute_gem_costs.py`,
-    `run_data_audit.py`, `run_qa_check.py`, `seed_reference_data.py`, `tag_hero_effects.py`,
-    `test_ai_comprehensive.py`, `test_lineups.py`, `create_admin.py`
-  - Total cleanup: ~2.5MB of dead code
+- [x] **Remove Legacy Streamlit Code** - Dead code from pre-serverless era
+  - Deleted 122 files across all 3 phases: root files, directories, scripts
+  - Removed: `app.py`, `config.py`, `requirements.txt`, `nul`, `pages/`, `auth_pages/`, `styles/`,
+    `.streamlit/`, `deploy/`, `static/`, `engine/`, `database/`, `api/`, `ocr/`, `utils/`, `export_data/`,
+    `.idea/`, `Screenshots/` (partially — locked subdir), 14 legacy scripts
+  - Verified: zero production dependencies (backend/, frontend/, infra/ all clean)
 
 ## Recently Completed
 
