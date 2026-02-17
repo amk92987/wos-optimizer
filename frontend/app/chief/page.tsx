@@ -131,12 +131,12 @@ function getTierImagePath(slotImageKey: string, color: string, subtier: string, 
   return `/images/chief_gear/tiers/${slotImageKey}_${colorLower}_t${tierNum}_${stars}star.png`;
 }
 
-// Charm level options with sub-levels (4-1 through 4-3, 5-1 through 5-3, etc.)
-// Note: X-0 is omitted because it has the same bonus as (X-1)-3
-const charmLevels = ['1', '2', '3'];
-for (let level = 4; level <= 16; level++) {
-  charmLevels.push(`${level}-1`, `${level}-2`, `${level}-3`);
+// Charm level options: 1, 2, 3, 4, 4-1, 4-2, 4-3, 5-0, ..., 15-3, 16-0
+const charmLevels = ['1', '2', '3', '4', '4-1', '4-2', '4-3'];
+for (let level = 5; level <= 15; level++) {
+  charmLevels.push(`${level}-0`, `${level}-1`, `${level}-2`, `${level}-3`);
 }
+charmLevels.push('16-0');
 
 // Charm stats by completed level (bonus achieved when you finish this level)
 const CHARM_STATS: Record<number, { bonus: number; shape: string }> = {
@@ -174,16 +174,17 @@ function parseCharmMainLevel(value: string): number {
 function getCharmBonus(level: string): number {
   const { main, sub, hasSub } = parseCharmLevel(level);
   if (!hasSub) {
-    // Simple levels (1, 2, 3) - return the completed level bonus
+    // Simple levels (1, 2, 3, 4) - completed level bonus (matches wiki)
     return CHARM_STATS[main]?.bonus || 0;
   }
-  // Sub-levels: 0=start (prev level bonus), 1=1/3, 2=2/3, 3=completed
-  const prevBonus = CHARM_STATS[main - 1]?.bonus || 0;
-  const currBonus = CHARM_STATS[main]?.bonus || prevBonus;
-  if (sub === 0) return prevBonus;
-  if (sub === 3) return currBonus;
-  const increment = (currBonus - prevBonus) / 3;
-  return prevBonus + increment * sub;
+  if (sub === 0) {
+    // X-0: completed level X (matches wiki)
+    return CHARM_STATS[main]?.bonus || 0;
+  }
+  // Sub-levels -1, -2, -3: partial progress from level main toward level main+1
+  const prevBonus = CHARM_STATS[main]?.bonus || 0;
+  const nextBonus = CHARM_STATS[main + 1]?.bonus || prevBonus;
+  return prevBonus + (nextBonus - prevBonus) * sub / 4;
 }
 
 function formatCharmDisplay(level: string): string {
@@ -231,7 +232,8 @@ export default function ChiefTrackerPage() {
   const [gear, setGear] = useState<ChiefGearData | null>(null);
   const [charms, setCharms] = useState<ChiefCharmData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSaving, setIsSaving] = useState(0);
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (token) {
@@ -257,31 +259,41 @@ export default function ChiefTrackerPage() {
   const handleUpdateGear = async (slotId: string, tierId: number) => {
     if (!gear) return;
     const qualityField = `${slotId}_quality` as keyof ChiefGearData;
+    const previousGear = { ...gear };
 
     setGear(prev => prev ? { ...prev, [qualityField]: tierId } : null);
-    setIsSaving(true);
+    setIsSaving(n => n + 1);
+    setSaveError(null);
 
     try {
       await chiefApi.updateGear(token!, { [qualityField]: tierId });
     } catch (error) {
       console.error('Failed to save gear:', error);
+      setGear(previousGear);
+      setSaveError('Failed to save gear change. Please try again.');
+      setTimeout(() => setSaveError(null), 5000);
     } finally {
-      setIsSaving(false);
+      setIsSaving(n => n - 1);
     }
   };
 
   const handleUpdateCharm = async (field: string, value: string) => {
     if (!charms) return;
+    const previousCharms = { ...charms };
 
     setCharms(prev => prev ? { ...prev, [field]: value } : null);
-    setIsSaving(true);
+    setIsSaving(n => n + 1);
+    setSaveError(null);
 
     try {
       await chiefApi.updateCharms(token!, { [field]: value });
     } catch (error) {
       console.error('Failed to save charms:', error);
+      setCharms(previousCharms);
+      setSaveError('Failed to save charm change. Please try again.');
+      setTimeout(() => setSaveError(null), 5000);
     } finally {
-      setIsSaving(false);
+      setIsSaving(n => n - 1);
     }
   };
 
@@ -384,10 +396,14 @@ export default function ChiefTrackerPage() {
         )}
         {activeTab === 'priority' && <PriorityTab />}
 
-        {/* Saving indicator */}
-        {isSaving && (
-          <div className="fixed bottom-4 right-4 bg-surface border border-surface-border px-4 py-2 rounded-lg shadow-lg">
-            <span className="text-sm text-frost-muted">Saving...</span>
+        {/* Save status indicator */}
+        {(isSaving > 0 || saveError) && (
+          <div className={`fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg border ${
+            saveError ? 'bg-red-900/80 border-red-500/50' : 'bg-surface border-surface-border'
+          }`}>
+            <span className={`text-sm ${saveError ? 'text-red-300' : 'text-frost-muted'}`}>
+              {saveError || 'Saving...'}
+            </span>
           </div>
         )}
       </div>

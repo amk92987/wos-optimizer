@@ -2,6 +2,20 @@
 
 ## Active TODO
 
+### Content / Research
+- [ ] **State Transfer Guide** - Add to Quick Tips or new section
+  - Individual state transfers and full alliance transfers
+  - How many transfer passes needed (reportedly 4?)
+  - Requirements, cooldowns, restrictions
+  - Research and verify mechanics before adding
+
+- [ ] **Century Games Announcements / Timeline Tracker** - Track upcoming events and state milestones
+  - State transfer opening dates and requirements
+  - Upcoming events and release schedule
+  - What opens at which state age / server milestone
+  - Sources: official announcements, patch notes, World Chat intel
+  - May need new data sources beyond existing research skill registry
+
 ### UI / Frontend
 - [ ] **Legendary Gear Level Logic on Hero Tracker** - Rethink gear editing UX
   - Gear must be at level 100 before it can be upgraded to Legendary quality

@@ -1086,8 +1086,8 @@ function ReferenceTab({ templates }: { templates: Record<string, LineupTemplate>
               <tr className="border-b border-surface-border/50">
                 <td className="p-2 text-frost font-medium">Garrison Defense</td>
                 <td className="p-2 text-center">60%</td>
-                <td className="p-2 text-center">20%</td>
-                <td className="p-2 text-center">20%</td>
+                <td className="p-2 text-center">15%</td>
+                <td className="p-2 text-center">25%</td>
                 <td className="p-2 text-frost-muted">Heavy Infantry wall</td>
               </tr>
               <tr className="border-b border-surface-border/50">

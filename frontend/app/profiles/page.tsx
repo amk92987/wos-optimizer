@@ -41,6 +41,7 @@ export default function ProfilesPage() {
   const [confirmPermDeleteId, setConfirmPermDeleteId] = useState<string | null>(null);
   const [switchingId, setSwitchingId] = useState<string | null>(null);
   const [switchSuccess, setSwitchSuccess] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     if (token) {
@@ -69,9 +70,15 @@ export default function ProfilesPage() {
     }
   };
 
+  const showError = (msg: string) => {
+    setActionError(msg);
+    setTimeout(() => setActionError(null), 5000);
+  };
+
   const handleLoadProfile = async (profileId: string) => {
     setSwitchingId(profileId);
     setSwitchSuccess(null);
+    setActionError(null);
     try {
       await profileApi.switch(token!, profileId);
       await fetchProfiles();
@@ -80,6 +87,7 @@ export default function ProfilesPage() {
       setTimeout(() => setSwitchSuccess(null), 3000);
     } catch (error) {
       console.error('Failed to load profile:', error);
+      showError('Failed to switch profile. Please try again.');
     } finally {
       setSwitchingId(null);
     }
@@ -93,6 +101,8 @@ export default function ProfilesPage() {
       fetchDeletedProfiles();
     } catch (error) {
       console.error('Failed to delete profile:', error);
+      setConfirmDeleteId(null);
+      showError('Failed to delete profile. Please try again.');
     }
   };
 
@@ -103,6 +113,8 @@ export default function ProfilesPage() {
       fetchDeletedProfiles();
     } catch (error) {
       console.error('Failed to permanently delete profile:', error);
+      setConfirmPermDeleteId(null);
+      showError('Failed to permanently delete profile. Please try again.');
     }
   };
 
@@ -113,6 +125,7 @@ export default function ProfilesPage() {
       fetchDeletedProfiles();
     } catch (error) {
       console.error('Failed to restore profile:', error);
+      showError('Failed to restore profile. Please try again.');
     }
   };
 
@@ -122,6 +135,7 @@ export default function ProfilesPage() {
       fetchProfiles();
     } catch (error) {
       console.error('Failed to update profile:', error);
+      showError('Failed to update farm status. Please try again.');
     }
   };
 
@@ -137,6 +151,7 @@ export default function ProfilesPage() {
       setPreviewId(profileId);
     } catch (error) {
       console.error('Failed to fetch preview:', error);
+      showError('Failed to load preview. Please try again.');
     }
   };
 
@@ -211,6 +226,13 @@ export default function ProfilesPage() {
             <p className="text-sm text-green-400">
               Switched to <strong>{switchSuccess}</strong>. All pages now show this profile's data.
             </p>
+          </div>
+        )}
+
+        {/* Error Banner */}
+        {actionError && (
+          <div className="card mb-4 bg-red-500/10 border-red-500/30 animate-fadeIn">
+            <p className="text-sm text-red-400">{actionError}</p>
           </div>
         )}
 
@@ -603,10 +625,12 @@ function EditProfileForm({
   const [name, setName] = useState(profile.name || '');
   const [stateNumber, setStateNumber] = useState(profile.state_number?.toString() || '');
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
     try {
       await profileApi.update(token, profile.profile_id, {
@@ -614,8 +638,9 @@ function EditProfileForm({
         state_number: stateNumber ? parseInt(stateNumber) : null,
       } as any);
       onSaved();
-    } catch (error) {
-      console.error('Failed to update profile:', error);
+    } catch (err) {
+      console.error('Failed to update profile:', err);
+      setError('Failed to save. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -623,6 +648,7 @@ function EditProfileForm({
 
   return (
     <form onSubmit={handleSubmit} className="mt-4 pt-4 border-t border-surface-border">
+      {error && <p className="text-sm text-red-400 mb-2">{error}</p>}
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex-1 min-w-[150px]">
           <label className="block text-xs text-frost-muted mb-1">Profile Name</label>
@@ -736,6 +762,7 @@ function FarmLinkingSelect({
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = async (newValue: string) => {
+    const previousId = selectedId;
     setSelectedId(newValue);
     setIsLoading(true);
 
@@ -746,6 +773,7 @@ function FarmLinkingSelect({
       onLinked();
     } catch (error) {
       console.error('Failed to link profile:', error);
+      setSelectedId(previousId);
     } finally {
       setIsLoading(false);
     }

@@ -248,13 +248,13 @@ function CombatAuditTab({ gamePhase }: { gamePhase: string }) {
               <p>Daybreak Decorations: <span className="text-frost">No Mythics (0%)</span></p>
               <p>Chief Gear Set: <span className="text-frost">Epic (+10% ALL attack)</span></p>
               <p>Chief Gear Infantry: <span className="text-frost">+10% attack/defense</span></p>
-              <p>Charms: <span className="text-frost">L3 average (+3% attack)</span></p>
+              <p>Charms: <span className="text-frost">L3 average (+3% lethality/health)</span></p>
               <p>Pet Buff: <span className="text-frost">None active</span></p>
             </div>
             <div className="mt-3 pt-3 border-t border-red-500/30">
               <p className="text-sm">Total Attack: <strong className="text-frost">+28%</strong></p>
-              <p className="text-sm">Total Lethality: <strong className="text-frost">+10%</strong></p>
-              <p className="text-red-400 font-bold mt-2">Damage Multiplier: 1.41x</p>
+              <p className="text-sm">Total Lethality: <strong className="text-frost">+13%</strong></p>
+              <p className="text-red-400 font-bold mt-2">Damage Multiplier: 1.44x</p>
             </div>
           </div>
 
@@ -267,7 +267,7 @@ function CombatAuditTab({ gamePhase }: { gamePhase: string }) {
               <p>Daybreak Decorations: <span className="text-frost">+10% ATK, +10% DEF, +5% ToL</span></p>
               <p>Chief Gear Set: <span className="text-frost">Mythic (+25% ALL attack)</span></p>
               <p>Chief Gear Infantry: <span className="text-frost">+25% attack/defense</span></p>
-              <p>Charms: <span className="text-frost">L8 average (+12% attack)</span></p>
+              <p>Charms: <span className="text-frost">L8 average (+12% lethality/health)</span></p>
               <p>Pet Buff: <span className="text-frost">Saber-tooth (+10% lethality)</span></p>
             </div>
             <div className="mt-3 pt-3 border-t border-green-500/30">
@@ -392,7 +392,7 @@ const statSources = [
     affects: 'Class-specific',
     detail: 'Same class mapping as Chief Gear (L25+ unlock)',
     infantry: true, lancer: true, marksman: true,
-    stats: ['Attack', 'Defense'],
+    stats: ['Lethality', 'Health'],
   },
   {
     source: 'Daybreak Decorations',
@@ -693,7 +693,7 @@ function StatsSourcesTab() {
               content: (
                 <div className="space-y-3 text-sm">
                   <p className="text-frost-muted">Permanent | Unlocks: Furnace Level 25</p>
-                  <p className="text-ice text-xs">Evenly upgrading all charms grants an ARMY-WIDE attack/defense boost on top of individual bonuses</p>
+                  <p className="text-ice text-xs">Evenly upgrading all charms grants an ARMY-WIDE lethality/health boost on top of individual bonuses</p>
                   <div>
                     <h4 className="font-semibold text-frost mb-2">Priority:</h4>
                     <ol className="text-frost-muted space-y-1 list-decimal list-inside">
@@ -861,7 +861,9 @@ function BattleEstimatorTab() {
               if (gearTroop) {
                 base += gearTroop[s.toLowerCase()] || 0;
               }
-              // Charms are a single value per troop type, split evenly to ATK/DEF
+            }
+            // Charms contribute to Lethality and Health
+            if (s === 'Lethality' || s === 'Health') {
               const charmTotal = charmStats[troopName] || 0;
               base += charmTotal / 2;
             }

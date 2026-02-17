@@ -86,12 +86,15 @@ function SettingsContent() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [currentGen, setCurrentGen] = useState(1);
   const [useManualDays, setUseManualDays] = useState(false);
   const [manualDays, setManualDays] = useState<number | null>(null);
   const [confirmClearHeroes, setConfirmClearHeroes] = useState(false);
   const [clearingHeroes, setClearingHeroes] = useState(false);
   const [resetMessage, setResetMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const pendingSaveRef = useRef<Partial<Profile>>({});
 
   // Security section state
   const securityRef = useRef<HTMLDivElement>(null);
@@ -196,19 +199,33 @@ function SettingsContent() {
     }
   }, [token]);
 
-  const handleSave = async (data: Partial<Profile>) => {
+  const handleSave = (data: Partial<Profile>) => {
     if (!token || !profile?.profile_id) return;
-    setIsSaving(true);
 
-    try {
-      const result: any = await profileApi.update(token, profile.profile_id, data);
-      const updated = result.profile || result;
-      setProfile(updated);
-    } catch (error) {
-      console.error('Failed to save:', error);
-    } finally {
-      setIsSaving(false);
-    }
+    // Merge with pending changes and update local state immediately
+    pendingSaveRef.current = { ...pendingSaveRef.current, ...data };
+    setProfile(prev => prev ? { ...prev, ...data } : null);
+    setSaveError(null);
+
+    // Debounce the API call (500ms)
+    if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(async () => {
+      const toSave = { ...pendingSaveRef.current };
+      pendingSaveRef.current = {};
+      setIsSaving(true);
+
+      try {
+        const result: any = await profileApi.update(token, profile!.profile_id, toSave);
+        const updated = result.profile || result;
+        setProfile(updated);
+      } catch (error) {
+        console.error('Failed to save:', error);
+        setSaveError('Failed to save changes. Please try again.');
+        setTimeout(() => setSaveError(null), 5000);
+      } finally {
+        setIsSaving(false);
+      }
+    }, 500);
   };
 
   const spendingOptions = [
@@ -734,10 +751,14 @@ function SettingsContent() {
           </Expander>
         </div>
 
-        {/* Saving indicator */}
-        {isSaving && (
-          <div className="fixed bottom-4 right-4 bg-surface border border-border px-4 py-2 rounded-lg shadow-lg">
-            <span className="text-sm text-zinc-400">Saving...</span>
+        {/* Save status indicator */}
+        {(isSaving || saveError) && (
+          <div className={`fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg border ${
+            saveError ? 'bg-red-900/80 border-red-500/50' : 'bg-surface border-border'
+          }`}>
+            <span className={`text-sm ${saveError ? 'text-red-300' : 'text-zinc-400'}`}>
+              {saveError || 'Saving...'}
+            </span>
           </div>
         )}
       </div>

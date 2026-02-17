@@ -293,43 +293,48 @@ const CHARM_BONUSES: number[] = [
 
 function getCharmBonus(level: string): number {
   if (!level.includes('-')) {
+    // Simple levels 1-4: return the completed level bonus (matches wiki)
     const lvl = parseInt(level) || 0;
     return CHARM_BONUSES[lvl] || 0;
   }
   const [mainStr, subStr] = level.split('-');
   const main = parseInt(mainStr);
   const sub = parseInt(subStr);
-  const prevBonus = CHARM_BONUSES[main - 1] || 0;
-  const currBonus = CHARM_BONUSES[main] || prevBonus;
-  if (sub === 3) return currBonus;
-  const increment = (currBonus - prevBonus) / 3;
-  return prevBonus + increment * sub;
+  if (sub === 0) return CHARM_BONUSES[main] || 0; // X-0: completed level X (matches wiki)
+  // Sub-levels -1, -2, -3: partial progress from level main toward level main+1
+  const prevBonus = CHARM_BONUSES[main] || 0;
+  const nextBonus = CHARM_BONUSES[main + 1] || prevBonus;
+  return prevBonus + (nextBonus - prevBonus) * sub / 4;
 }
 
-// Build charm level options: 1, 2, 3, 4-1, 4-2, 4-3, ..., 16-1, 16-2, 16-3
-const CHARM_LEVELS: string[] = ['1', '2', '3'];
-for (let level = 4; level <= 16; level++) {
-  CHARM_LEVELS.push(`${level}-1`, `${level}-2`, `${level}-3`);
+// Build charm level options: 1, 2, 3, 4, 4-1, 4-2, 4-3, 5-0, ..., 15-3, 16-0
+const CHARM_LEVELS: string[] = ['1', '2', '3', '4', '4-1', '4-2', '4-3'];
+for (let level = 5; level <= 15; level++) {
+  CHARM_LEVELS.push(`${level}-0`, `${level}-1`, `${level}-2`, `${level}-3`);
 }
+CHARM_LEVELS.push('16-0');
 
 function charmLevelIndex(level: string): number {
   return CHARM_LEVELS.indexOf(level);
 }
 
 function charmLevelCost(level: string): { charm_guide: number; charm_design: number; jewel_secrets: number } {
+  const zero = { charm_guide: 0, charm_design: 0, jewel_secrets: 0 };
   if (!level.includes('-')) {
-    // Simple levels 1-3: full level cost
-    const lvl = parseInt(level) - 1;
-    return CHARM_COSTS[lvl] || { charm_guide: 0, charm_design: 0, jewel_secrets: 0 };
+    // Levels 1-4: full cost (single step to reach this level)
+    const lvl = parseInt(level);
+    return CHARM_COSTS[lvl - 1] || zero;
   }
-  // Sub-levels: divide the level cost by 3
-  const [mainStr] = level.split('-');
-  const main = parseInt(mainStr) - 1;
-  const c = CHARM_COSTS[main] || { charm_guide: 0, charm_design: 0, jewel_secrets: 0 };
+  const [mainStr, subStr] = level.split('-');
+  const main = parseInt(mainStr);
+  const sub = parseInt(subStr);
+  // X-0 completes the previous level's transition; X-1/2/3 start the next
+  const costIndex = sub === 0 ? main - 1 : main;
+  const c = CHARM_COSTS[costIndex] || zero;
   return {
-    charm_guide: Math.ceil(c.charm_guide / 3),
-    charm_design: Math.ceil(c.charm_design / 3),
-    jewel_secrets: Math.ceil(c.jewel_secrets / 3),
+    charm_guide: Math.ceil(c.charm_guide / 4),
+    charm_design: Math.ceil(c.charm_design / 4),
+    jewel_secrets: Math.ceil(c.jewel_secrets / 4),
   };
 }
 

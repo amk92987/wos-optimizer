@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from typing import Optional
 
-from .db import get_table, strip_none
+from .db import get_table, strip_none, from_decimal
 
 
 _DEFAULT_GEAR = {
@@ -38,7 +38,7 @@ def get_chief_gear(profile_id: str) -> dict:
         for key, default in _DEFAULT_GEAR.items():
             if key not in item or item[key] is None:
                 item[key] = default
-        return item
+        return from_decimal(item)
 
     # Create default gear
     return _create_default_gear(profile_id)
@@ -93,7 +93,7 @@ def update_chief_gear(profile_id: str, updates: dict) -> dict:
         ExpressionAttributeValues=attr_values,
         ReturnValues="ALL_NEW",
     )
-    return resp.get("Attributes", {})
+    return from_decimal(resp.get("Attributes", {}))
 
 
 def get_chief_charms(profile_id: str) -> dict:
@@ -108,7 +108,7 @@ def get_chief_charms(profile_id: str) -> dict:
         for key, default in _DEFAULT_CHARMS.items():
             if key not in item or item[key] is None:
                 item[key] = default
-        return item
+        return from_decimal(item)
 
     return _create_default_charms(profile_id)
 
@@ -162,4 +162,4 @@ def update_chief_charms(profile_id: str, updates: dict) -> dict:
         ExpressionAttributeValues=attr_values,
         ReturnValues="ALL_NEW",
     )
-    return resp.get("Attributes", {})
+    return from_decimal(resp.get("Attributes", {}))
