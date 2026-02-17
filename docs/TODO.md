@@ -135,7 +135,11 @@
 
 ## Backlog (Lower Priority)
 
-- [ ] **CAPTCHA / Login Protection** - Rate limiting, brute-force protection
+- [x] **Login Protection** - Rate limiting and brute-force prevention
+  - Per-IP rate limiting: login (5/15min), register (3/hr), forgot-password (3/hr)
+  - DynamoDB-backed with TTL auto-expiry, fail-open on errors
+  - API Gateway throttling: 10 req/s sustained, 20 burst
+  - Successful login clears attempt counter
 - [ ] **Service Worker** - Offline support, cache static assets
 - [ ] **Push Notifications** - Server-to-client notifications
 

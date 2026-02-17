@@ -174,6 +174,9 @@ Resources:
           - DELETE
           - OPTIONS
         AllowCredentials: !If [IsLive, true, false]
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 20
+        ThrottlingRateLimit: 10
       Auth:
         DefaultAuthorizer: CognitoAuthorizer
         Authorizers:
@@ -261,6 +264,9 @@ Resources:
             ProjectionType: ALL
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: !If [IsLive, true, false]
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
 
   ReferenceTable:
     Type: AWS::DynamoDB::Table
@@ -327,10 +333,8 @@ Resources:
                 - CreateUserPool
                 - !GetAtt UserPool.Arn
                 - !Sub "arn:aws:cognito-idp:${AWS::Region}:${AWS::AccountId}:userpool/${ExistingUserPoolId}"
-        - Statement:
-            - Effect: Allow
-              Action: dynamodb:PutItem
-              Resource: !GetAtt AdminTable.Arn
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AdminTable
         - Statement:
             - Effect: Allow
               Action: ses:SendEmail

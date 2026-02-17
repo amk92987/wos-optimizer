@@ -21,6 +21,7 @@ from common.auth import get_user_id, get_user_email, get_effective_user_id
 from common.config import Config
 from common.error_capture import capture_error
 from common.exceptions import AppError, ValidationError, ConflictError
+from common.rate_limit import check_rate_limit, record_failed_attempt, clear_attempts, TooManyRequestsError
 from common.user_repo import (
     get_user,
     create_user,
@@ -33,6 +34,25 @@ app = APIGatewayHttpResolver()
 logger = Logger()
 
 cognito = boto3.client("cognito-idp", region_name=Config.REGION)
+
+
+# ---------------------------------------------------------------------------
+# Rate limiting constants
+# ---------------------------------------------------------------------------
+LOGIN_MAX_ATTEMPTS = 5
+LOGIN_WINDOW_SECONDS = 900       # 15 minutes
+REGISTER_MAX_ATTEMPTS = 3
+REGISTER_WINDOW_SECONDS = 3600   # 1 hour
+FORGOT_MAX_ATTEMPTS = 3
+FORGOT_WINDOW_SECONDS = 3600     # 1 hour
+
+
+def _get_client_ip() -> str:
+    """Extract client IP from API Gateway HTTP API v2 event."""
+    try:
+        return app.current_event.request_context.http.source_ip
+    except Exception:
+        return "unknown"
 
 
 # ---------------------------------------------------------------------------
@@ -150,6 +170,19 @@ def _rekey_legacy_user(legacy_user: dict, new_sub: str) -> dict:
 @app.post("/api/auth/login")
 def login():
     """Authenticate user and return tokens + user info."""
+    ip = _get_client_ip()
+
+    # Rate limit check — block if too many failed attempts
+    try:
+        check_rate_limit(ip, "login", LOGIN_MAX_ATTEMPTS, LOGIN_WINDOW_SECONDS)
+    except TooManyRequestsError as e:
+        logger.warning("Login rate limited", ip=ip)
+        return Response(
+            status_code=429,
+            content_type="application/json",
+            body=json.dumps({"message": str(e)}),
+        )
+
     try:
         body = app.current_event.json_body or {}
     except (json.JSONDecodeError, ValueError):
@@ -163,14 +196,19 @@ def login():
     try:
         tokens = _cognito_auth(email, password)
     except cognito.exceptions.NotAuthorizedException:
+        record_failed_attempt(ip, "login", LOGIN_WINDOW_SECONDS)
         raise UnauthorizedError("Invalid email or password")
     except cognito.exceptions.UserNotFoundException:
+        record_failed_attempt(ip, "login", LOGIN_WINDOW_SECONDS)
         raise UnauthorizedError("Invalid email or password")
     except cognito.exceptions.UserNotConfirmedException:
         raise UnauthorizedError("Account is not confirmed. Please check your email.")
     except Exception as e:
         logger.error("Cognito auth error", error=str(e))
         raise BadRequestError("Authentication failed")
+
+    # Successful login — clear rate limit counter
+    clear_attempts(ip, "login")
 
     # Look up the Cognito sub from the ID token to find the DynamoDB user
     cognito_user = cognito.get_user(AccessToken=tokens["access_token"])
@@ -224,6 +262,19 @@ def login():
 @app.post("/api/auth/register")
 def register():
     """Create a new user account."""
+    ip = _get_client_ip()
+
+    # Rate limit check — prevent mass account creation
+    try:
+        check_rate_limit(ip, "register", REGISTER_MAX_ATTEMPTS, REGISTER_WINDOW_SECONDS)
+    except TooManyRequestsError as e:
+        logger.warning("Registration rate limited", ip=ip)
+        return Response(
+            status_code=429,
+            content_type="application/json",
+            body=json.dumps({"message": str(e)}),
+        )
+
     try:
         body = app.current_event.json_body or {}
     except (json.JSONDecodeError, ValueError):
@@ -236,6 +287,9 @@ def register():
 
     if len(password) < 6:
         raise BadRequestError("Password must be at least 6 characters")
+
+    # Count this registration attempt toward rate limit
+    record_failed_attempt(ip, "register", REGISTER_WINDOW_SECONDS)
 
     # Sign up in Cognito
     try:
@@ -294,6 +348,19 @@ def register():
 @app.post("/api/auth/forgot-password")
 def forgot_password():
     """Initiate Cognito forgot-password flow (sends code via email)."""
+    ip = _get_client_ip()
+
+    # Rate limit check — prevent email spam
+    try:
+        check_rate_limit(ip, "forgot", FORGOT_MAX_ATTEMPTS, FORGOT_WINDOW_SECONDS)
+    except TooManyRequestsError as e:
+        logger.warning("Forgot-password rate limited", ip=ip)
+        return Response(
+            status_code=429,
+            content_type="application/json",
+            body=json.dumps({"message": str(e)}),
+        )
+
     try:
         body = app.current_event.json_body or {}
     except (json.JSONDecodeError, ValueError):
@@ -302,6 +369,9 @@ def forgot_password():
 
     if not email:
         raise BadRequestError("Email is required")
+
+    # Count this attempt toward rate limit
+    record_failed_attempt(ip, "forgot", FORGOT_WINDOW_SECONDS)
 
     try:
         cognito.forgot_password(
