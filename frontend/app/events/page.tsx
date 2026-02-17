@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import PageLayout from '@/components/PageLayout';
 import { eventsApi } from '@/lib/api';
 
@@ -399,6 +399,409 @@ function ScoringSection({ scoring }: { scoring: any }) {
   );
 }
 
+// =============================================================================
+// STATE TRANSFER GUIDE
+// =============================================================================
+
+const TRANSFER_GROUPS = [
+  { group: 1, states: '4-19', min: 4, max: 19, count: 16 },
+  { group: 2, states: '21-132', min: 21, max: 132, count: 112 },
+  { group: 3, states: '140-312', min: 140, max: 312, count: 173 },
+  { group: 4, states: '313-433', min: 313, max: 433, count: 121 },
+  { group: 5, states: '434-529', min: 434, max: 529, count: 96 },
+  { group: 6, states: '530-804', min: 530, max: 804, count: 275 },
+  { group: 7, states: '805-931', min: 805, max: 931, count: 127 },
+  { group: 8, states: '932-1070', min: 932, max: 1070, count: 139 },
+  { group: 9, states: '1071-1308', min: 1071, max: 1308, count: 238 },
+  { group: 10, states: '1309-1427', min: 1309, max: 1427, count: 119 },
+  { group: 11, states: '1428-1491', min: 1428, max: 1491, count: 64 },
+  { group: 12, states: '1492-1615', min: 1492, max: 1615, count: 124 },
+];
+
+const PASS_RANGES = [
+  { label: 'Low-Level (F26-F30)', min: 1, max: 3, note: 'Transferring to a weaker/newer state', color: 'text-green-400' },
+  { label: 'F2P / Low Spender', min: 6, max: 12, note: 'Most common range', color: 'text-blue-400' },
+  { label: 'Mid Spender', min: 20, max: 30, note: 'Post-upgrade transfers', color: 'text-amber-400' },
+  { label: 'Whale / Top Player', min: 30, max: 50, note: 'Transferring to Leading States', color: 'text-red-400' },
+];
+
+const SHOP_PACKS = [
+  { tier: 1, cost: '$4.99', passes: 1 },
+  { tier: 2, cost: '$9.99', passes: 2 },
+  { tier: 3, cost: '$19.99', passes: 3 },
+  { tier: 4, cost: '$49.99', passes: 4 },
+  { tier: 5, cost: '$99.99', passes: 5 },
+];
+
+function StateTransferGuide() {
+  const [lookupState, setLookupState] = useState('');
+
+  const foundGroup = useMemo(() => {
+    const num = parseInt(lookupState);
+    if (!num || num < 1) return null;
+    return TRANSFER_GROUPS.find(g => num >= g.min && num <= g.max) || null;
+  }, [lookupState]);
+
+  return (
+    <div className="space-y-6 animate-fadeIn">
+      {/* Overview Card */}
+      <div className="card bg-gradient-to-r from-cyan-500/10 via-surface to-blue-500/10 border-cyan-500/30">
+        <h2 className="text-xl font-bold text-frost mb-3">State Transfer Guide</h2>
+        <p className="text-frost-muted text-sm mb-4">
+          State Transfer is a periodic 7-day event that lets you move to a different state. It runs approximately every 4-6 weeks
+          and is announced 3-4 days before on X/Twitter (@WOS_Global) and in-game mail.
+        </p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="p-3 rounded-lg bg-surface border border-surface-border text-center">
+            <div className="text-2xl font-bold text-cyan-400">7</div>
+            <div className="text-xs text-frost-muted">Day Event</div>
+          </div>
+          <div className="p-3 rounded-lg bg-surface border border-surface-border text-center">
+            <div className="text-2xl font-bold text-cyan-400">FC5</div>
+            <div className="text-xs text-frost-muted">State Unlock</div>
+          </div>
+          <div className="p-3 rounded-lg bg-surface border border-surface-border text-center">
+            <div className="text-2xl font-bold text-cyan-400">25d</div>
+            <div className="text-xs text-frost-muted">Cooldown</div>
+          </div>
+          <div className="p-3 rounded-lg bg-surface border border-surface-border text-center">
+            <div className="text-2xl font-bold text-cyan-400">12</div>
+            <div className="text-xs text-frost-muted">Transfer Groups</div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3 Phases */}
+      <div className="card">
+        <h3 className="text-lg font-bold text-frost mb-4">Event Phases</h3>
+        <div className="space-y-3">
+          {[
+            { phase: 1, name: 'Presidential Review', days: '3 days', desc: 'State Presidents set Power Cap thresholds. Browse eligible states and contact Presidents. No transfers happen yet.', color: 'border-l-amber-500 bg-amber-500/5' },
+            { phase: 2, name: 'Invitational Transfer', days: '2 days', desc: 'Presidents send invitations (Ordinary or Special) to Chiefs. Invited Chiefs can transfer during this phase.', color: 'border-l-purple-500 bg-purple-500/5' },
+            { phase: 3, name: 'Open Transfer', days: '2 days', desc: 'Any eligible Chief meeting the Power Cap can transfer freely, first-come first-served.', color: 'border-l-green-500 bg-green-500/5' },
+          ].map(p => (
+            <div key={p.phase} className={`p-4 rounded-lg border-l-4 ${p.color}`}>
+              <div className="flex items-center gap-3 mb-1">
+                <span className="w-7 h-7 rounded-full bg-surface flex items-center justify-center text-sm font-bold text-frost">{p.phase}</span>
+                <span className="font-bold text-frost">{p.name}</span>
+                <span className="text-xs text-frost-muted ml-auto">{p.days}</span>
+              </div>
+              <p className="text-sm text-frost-muted ml-10">{p.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Transfer Passes */}
+      <div className="card">
+        <h3 className="text-lg font-bold text-frost mb-2">Transfer Passes</h3>
+        <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 mb-4">
+          <p className="text-sm text-amber-400">
+            The number of passes needed depends on your <span className="font-bold">Transfer Score</span> vs the target state's <span className="font-bold">Transfer Rating</span> (top 100 chiefs' scores combined). Roughly ~1 pass per 20M Transfer Score points.
+          </p>
+        </div>
+
+        {/* Pass ranges */}
+        <h4 className="text-sm font-medium text-frost-muted mb-2 uppercase tracking-wide">Estimated Passes Needed</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+          {PASS_RANGES.map(r => (
+            <div key={r.label} className="p-3 rounded-lg bg-surface border border-surface-border">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-medium text-frost">{r.label}</span>
+                <span className={`text-lg font-bold ${r.color}`}>{r.min}-{r.max}</span>
+              </div>
+              <p className="text-xs text-frost-muted">{r.note}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Transfer Score Components */}
+        <Expander title="What counts toward Transfer Score?">
+          <div className="space-y-3">
+            <div>
+              <h4 className="text-xs font-semibold text-green-400 uppercase tracking-wide mb-2">Included in Score</h4>
+              <div className="flex flex-wrap gap-1">
+                {['Furnace Level', 'Chief Gear & Charms', 'Hero Power (base)', 'Hero Gear Power', 'Pet Power', 'Expert Power'].map(c => (
+                  <span key={c} className="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded">{c}</span>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h4 className="text-xs font-semibold text-red-400 uppercase tracking-wide mb-2">NOT Included (Cannot Game It)</h4>
+              <span className="px-2 py-1 bg-red-500/10 text-red-400 text-xs rounded">Troop Power (dismissing troops does NOT lower your score)</span>
+            </div>
+          </div>
+        </Expander>
+
+        {/* How to Get Passes */}
+        <div className="mt-4">
+          <Expander title="How to get Transfer Passes">
+            <div className="space-y-3">
+              <div className="p-3 rounded-lg bg-blue-500/5 border-l-4 border-l-blue-500">
+                <div className="font-medium text-frost text-sm mb-1">Alliance Shop</div>
+                <p className="text-xs text-frost-muted">150,000 Alliance Tokens per pass. Refreshes weekly (1 per week).</p>
+              </div>
+              <div>
+                <h4 className="text-xs font-semibold text-frost-muted uppercase tracking-wide mb-2">In-Game Shop Packs (Monthly Reset)</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-frost-muted border-b border-surface-border">
+                        <th className="text-left py-1.5 pr-3">Tier</th>
+                        <th className="text-right py-1.5 pr-3">Cost</th>
+                        <th className="text-right py-1.5">Passes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {SHOP_PACKS.map(p => (
+                        <tr key={p.tier} className="border-b border-surface-border/30 text-frost">
+                          <td className="py-1.5 pr-3">Pack {p.tier}</td>
+                          <td className="py-1.5 pr-3 text-right text-amber-400">{p.cost}</td>
+                          <td className="py-1.5 text-right font-bold">{p.passes}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <p className="text-xs text-frost-muted mt-2">Max 85 passes purchasable per month. Pack tiers unlock progressively.</p>
+              </div>
+            </div>
+          </Expander>
+        </div>
+      </div>
+
+      {/* Transfer Groups — with lookup */}
+      <div className="card">
+        <h3 className="text-lg font-bold text-frost mb-2">Transfer Groups</h3>
+        <p className="text-sm text-frost-muted mb-4">
+          States are assigned to 1 of 12 groups. You can <span className="text-red-400 font-medium">only transfer within your group</span> — no exceptions. Groups change slightly each event but follow similar server-age ranges.
+        </p>
+
+        {/* State Lookup */}
+        <div className="p-4 rounded-lg bg-surface border border-ice/20 mb-4">
+          <label className="block text-sm font-medium text-frost mb-2">Find Your Transfer Group</label>
+          <div className="flex gap-3 items-center">
+            <input
+              type="number"
+              value={lookupState}
+              onChange={e => setLookupState(e.target.value)}
+              placeholder="Enter your state number..."
+              className="input flex-1 max-w-[200px]"
+              min={1}
+              max={9999}
+            />
+            {foundGroup ? (
+              <div className="flex items-center gap-2">
+                <span className="text-cyan-400 font-bold text-lg">Group {foundGroup.group}</span>
+                <span className="text-xs text-frost-muted">(States {foundGroup.states} - {foundGroup.count} states)</span>
+              </div>
+            ) : lookupState ? (
+              <span className="text-frost-muted text-sm">State not found in Jan 2026 groups</span>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Groups Table */}
+        <Expander title="All Transfer Groups (January 2026)" defaultOpen={false}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-frost-muted border-b border-surface-border">
+                  <th className="text-left py-1.5 pr-3">Group</th>
+                  <th className="text-left py-1.5 pr-3">States</th>
+                  <th className="text-right py-1.5">Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {TRANSFER_GROUPS.map(g => (
+                  <tr key={g.group} className={`border-b border-surface-border/30 ${
+                    foundGroup?.group === g.group ? 'bg-cyan-500/10' : ''
+                  }`}>
+                    <td className="py-1.5 pr-3 font-bold text-frost">Group {g.group}</td>
+                    <td className="py-1.5 pr-3 text-frost-muted">{g.states}</td>
+                    <td className="py-1.5 text-right text-cyan-400">{g.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-frost-muted mt-2">Groups change each event but follow similar server-age ranges.</p>
+        </Expander>
+      </div>
+
+      {/* Eligibility Requirements */}
+      <div className="card">
+        <h3 className="text-lg font-bold text-frost mb-4">Eligibility Requirements</h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Personal Requirements */}
+          <div>
+            <h4 className="text-sm font-semibold text-frost-muted uppercase tracking-wide mb-3">Personal Requirements</h4>
+            <div className="space-y-2">
+              {[
+                { label: 'Furnace Level', value: 'Must reach required minimum (max F30)', icon: 'check' },
+                { label: 'Power Cap', value: 'Must not exceed President\'s cap (unless Special Invite)', icon: 'check' },
+                { label: 'Alliance', value: 'Must NOT be in any alliance', icon: 'warn' },
+                { label: 'Combat', value: 'City cannot be in active combat or scouting', icon: 'warn' },
+                { label: 'Cooldown', value: '25 days since last transfer', icon: 'check' },
+                { label: 'Per Event', value: 'Maximum 1 transfer per event', icon: 'check' },
+              ].map(r => (
+                <div key={r.label} className="flex items-start gap-2 text-sm">
+                  <span className={`mt-0.5 ${r.icon === 'warn' ? 'text-amber-400' : 'text-cyan-400'}`}>
+                    {r.icon === 'warn' ? '!' : '-'}
+                  </span>
+                  <div>
+                    <span className="text-frost font-medium">{r.label}: </span>
+                    <span className="text-frost-muted">{r.value}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-3 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+              <p className="text-xs text-red-400 font-medium mb-1">Cannot Transfer If You Are:</p>
+              <p className="text-xs text-frost-muted">Current President, Former President during interregnum, Transfer Manager, or Tyrant</p>
+            </div>
+          </div>
+
+          {/* State Compatibility */}
+          <div>
+            <h4 className="text-sm font-semibold text-frost-muted uppercase tracking-wide mb-3">State Must Match</h4>
+            <div className="space-y-2">
+              {[
+                { label: 'Hero Generation', value: 'Same latest hero generation' },
+                { label: 'Fire Crystal Level', value: 'Must match between states' },
+                { label: 'Furnace Era', value: 'Same era of progression' },
+                { label: 'Buildings', value: 'Unlocked buildings must match' },
+                { label: 'Beasts', value: 'Available beasts must match' },
+                { label: 'Equipment', value: 'Chief and hero equipment systems must match' },
+                { label: 'State Age', value: 'Character age cannot exceed target by 45-180 days' },
+                { label: 'Transfer Group', value: 'Must be in same group (12 groups)' },
+              ].map(r => (
+                <div key={r.label} className="flex items-start gap-2 text-sm">
+                  <span className="text-cyan-400 mt-0.5">-</span>
+                  <div>
+                    <span className="text-frost font-medium">{r.label}: </span>
+                    <span className="text-frost-muted">{r.value}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Alliance Transfers */}
+      <div className="card">
+        <h3 className="text-lg font-bold text-frost mb-2">Alliance Transfers</h3>
+        <div className="p-3 rounded-lg bg-red-500/10 border-2 border-red-500/30 mb-4">
+          <p className="text-sm text-red-400 font-bold mb-1">There is NO alliance transfer feature</p>
+          <p className="text-xs text-frost-muted">Each member must transfer individually. Coordination required.</p>
+        </div>
+
+        <div className="space-y-2 mb-4">
+          <h4 className="text-sm font-medium text-frost">Coordination Steps</h4>
+          {[
+            'Every member must leave the alliance before transferring',
+            'Each member needs their own Transfer Passes',
+            'Each member must individually meet all requirements',
+            'After transferring, rejoin or create a new alliance in the destination state',
+          ].map((step, i) => (
+            <div key={i} className="flex items-start gap-2 text-sm">
+              <span className="text-cyan-400 font-bold mt-0.5">{i + 1}.</span>
+              <span className="text-frost-muted">{step}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="p-3 rounded-lg bg-surface border border-surface-border">
+            <div className="text-sm font-medium text-frost mb-1">Ordinary States</div>
+            <div className="text-2xl font-bold text-cyan-400">58</div>
+            <div className="text-xs text-frost-muted">max transfers (38 invite + 20 open)</div>
+          </div>
+          <div className="p-3 rounded-lg bg-surface border border-surface-border">
+            <div className="text-sm font-medium text-frost mb-1">Leading States</div>
+            <div className="text-2xl font-bold text-amber-400">30</div>
+            <div className="text-xs text-frost-muted">max transfers (20 invite + 10 open)</div>
+          </div>
+        </div>
+      </div>
+
+      {/* What You Lose / Keep */}
+      <div className="card">
+        <h3 className="text-lg font-bold text-frost mb-4">What Happens When You Transfer</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Lost */}
+          <div>
+            <h4 className="text-sm font-semibold text-red-400 uppercase tracking-wide mb-3">Lost or Reset</h4>
+            <div className="space-y-2">
+              {[
+                { item: 'Resources', detail: 'Anything over Storehouse Protection limit is LOST' },
+                { item: 'Arena Points', detail: 'Reset to 1,000; ranking deleted' },
+                { item: 'Event Progress', detail: 'Active events terminated; unclaimed rewards mailed' },
+                { item: 'Group Chats', detail: 'All group chats removed' },
+                { item: 'Alliance', detail: 'Must leave before transfer; lose shop progress' },
+                { item: 'Emporium Thorns', detail: 'Only transfer if Emporium active in new state' },
+              ].map(r => (
+                <div key={r.item} className="flex items-start gap-2 text-sm">
+                  <span className="text-red-400 mt-0.5">x</span>
+                  <div>
+                    <span className="text-frost font-medium">{r.item}: </span>
+                    <span className="text-frost-muted">{r.detail}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Kept */}
+          <div>
+            <h4 className="text-sm font-semibold text-green-400 uppercase tracking-wide mb-3">Kept or Beneficial</h4>
+            <div className="space-y-2">
+              {[
+                { item: 'Heroes & Gear', detail: 'All heroes, gear, and progression transfer' },
+                { item: 'Friends List', detail: 'Friends and private chats preserved' },
+                { item: 'Chief Gear & Charms', detail: 'All chief equipment transfers' },
+                { item: 'Pets & Experts', detail: 'All pet and expert progress keeps' },
+                { item: 'Pack Purchase Counts', detail: 'RESET — you can rebuy all packs!' },
+              ].map(r => (
+                <div key={r.item} className="flex items-start gap-2 text-sm">
+                  <span className="text-green-400 mt-0.5">+</span>
+                  <div>
+                    <span className="text-frost font-medium">{r.item}: </span>
+                    <span className="text-frost-muted">{r.detail}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Tips */}
+      <div className="card">
+        <h3 className="text-lg font-bold text-frost mb-3">Tips</h3>
+        <div className="space-y-2">
+          {[
+            'Use resources down to your Storehouse Protection limit before transferring to avoid losing them',
+            'Contact the target state\'s President during Phase 1 to secure a Special Invite (bypasses Power Cap)',
+            'Plan ahead — start buying passes from Alliance Shop weeks in advance (1/week)',
+            'If moving with your alliance, use wos-transfer.com to coordinate group transfers',
+            'Pack purchase counts reset after transfer — time your transfer before buying packs to double dip',
+            'Check @WOS_Global on X/Twitter for transfer event announcements 3-4 days before they start',
+          ].map((tip, i) => (
+            <div key={i} className="flex items-start gap-2 text-sm">
+              <span className="text-cyan-400 mt-0.5">-</span>
+              <span className="text-frost-muted">{tip}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function EventsPage() {
   const [eventsGuide, setEventsGuide] = useState<EventsGuide | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -406,6 +809,7 @@ export default function EventsPage() {
   const [selectedEvent, setSelectedEvent] = useState<{ id: string; event: Event } | null>(null);
   const [filterF2P, setFilterF2P] = useState<boolean>(false);
   const [filterPriority, setFilterPriority] = useState<string>('all');
+  const [showStateTransfer, setShowStateTransfer] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -501,7 +905,7 @@ export default function EventsPage() {
         </div>
 
         {/* Priority Legend */}
-        <div className="card mb-6 bg-gradient-to-r from-surface to-surface-hover">
+        {!showStateTransfer && <div className="card mb-6 bg-gradient-to-r from-surface to-surface-hover">
           <h2 className="text-sm font-medium text-frost-muted mb-3 uppercase tracking-wide">Priority Guide</h2>
           <div className="grid grid-cols-5 gap-2">
             {['S', 'A', 'B', 'C', 'D'].map((tier) => {
@@ -520,10 +924,10 @@ export default function EventsPage() {
               );
             })}
           </div>
-        </div>
+        </div>}
 
         {/* Resource Saving Guide */}
-        {eventsGuide?.resource_saving_guide && (
+        {!showStateTransfer && eventsGuide?.resource_saving_guide && (
           <div className="mb-6">
             <Expander title="What to Save & When" defaultOpen={true}>
               <div className="overflow-x-auto">
@@ -559,9 +963,9 @@ export default function EventsPage() {
           {Object.entries(EVENT_CATEGORIES).map(([key, cat]) => (
             <button
               key={key}
-              onClick={() => setSelectedCategory(key)}
+              onClick={() => { setSelectedCategory(key); setShowStateTransfer(false); }}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                selectedCategory === key
+                selectedCategory === key && !showStateTransfer
                   ? 'bg-ice text-zinc-900'
                   : 'bg-surface text-frost-muted hover:text-frost'
               }`}
@@ -569,8 +973,24 @@ export default function EventsPage() {
               {cat.label}
             </button>
           ))}
+          <div className="w-px bg-surface-border mx-1 self-stretch" />
+          <button
+            onClick={() => setShowStateTransfer(true)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              showStateTransfer
+                ? 'bg-cyan-500 text-zinc-900'
+                : 'bg-surface text-cyan-400 hover:text-cyan-300 border border-cyan-500/30'
+            }`}
+          >
+            State Transfer
+          </button>
         </div>
 
+        {/* State Transfer Guide */}
+        {showStateTransfer && <StateTransferGuide />}
+
+        {/* Events Content (hidden when State Transfer is shown) */}
+        {!showStateTransfer && <>
         {/* Filters Row */}
         <div className="flex flex-wrap gap-3 items-center mb-6">
           <label className="flex items-center gap-2 text-sm text-frost-muted cursor-pointer">
@@ -1355,6 +1775,7 @@ export default function EventsPage() {
             </div>
           </div>
         )}
+        </>}
       </div>
     </PageLayout>
   );

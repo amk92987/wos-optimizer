@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -369,12 +370,13 @@ function UserMenu({ unreadCount = 0 }: { unreadCount?: number }) {
         </div>
       )}
 
-      {/* Feedback Modal */}
-      {showFeedbackModal && (
+      {/* Feedback Modal - portal to body to escape header's backdrop-filter containing block */}
+      {showFeedbackModal && typeof document !== 'undefined' && createPortal(
         <FeedbackModal
           token={token || ''}
           onClose={() => setShowFeedbackModal(false)}
-        />
+        />,
+        document.body
       )}
     </div>
   );
