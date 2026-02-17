@@ -779,6 +779,27 @@ function StateTransferGuide() {
         </div>
       </div>
 
+      {/* Should You Transfer? */}
+      <div className="card">
+        <h3 className="text-lg font-bold text-frost mb-2">Should You Transfer?</h3>
+        <p className="text-sm text-frost-muted mb-4">
+          A bad state is one where growth, competition, and teamwork suffer due to poor player dynamics. If any of these apply to your state, transferring could be the best solution — if you can.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[
+            { sign: 'Inactive Players', desc: 'Most players have quit or rarely log in. The state is stagnant with no competition or trade.' },
+            { sign: 'One-Sided Power Balance', desc: 'A single alliance dominates everything. Smaller groups have no chance, making wars one-sided.' },
+            { sign: 'Whale-Dominated Warfare', desc: 'Top spenders constantly battle each other while crushing weaker players in the process.' },
+            { sign: 'State-Wide Toxicity', desc: 'Global chat is full of hostility and diplomacy is a mess. Better to find a new home.' },
+          ].map(s => (
+            <div key={s.sign} className="p-3 rounded-lg bg-surface border border-surface-border">
+              <div className="text-sm font-medium text-amber-400 mb-1">{s.sign}</div>
+              <p className="text-xs text-frost-muted">{s.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Tips */}
       <div className="card">
         <h3 className="text-lg font-bold text-frost mb-3">Tips</h3>
