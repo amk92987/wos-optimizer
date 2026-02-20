@@ -441,13 +441,13 @@ const hiddenGems: { category: string; icon: string; tip: string; detail: string;
   {
     category: 'Rally Strategy', icon: '🎯',
     tip: 'Mixed joiner compositions mathematically outperform identical joiners',
-    detail: 'Hero skills have hidden categories (effect_op codes). Skills in the same category stack additively, but different categories multiply together. 4x Jessie = 2.0x damage. But 2 joiners from one category + 2 from another = 1.5 x 1.5 = 2.25x (12.5% more). Coordinate varied joiner heroes in rallies.',
+    detail: 'Hero skills have hidden internal categories. Skills in the same category stack additively, but different categories multiply together. 4x Jessie = 2.0x damage. But 2 joiners from one category + 2 from another = 1.5 x 1.5 = 2.25x (12.5% more). Coordinate varied joiner heroes in rallies.',
     priority: 'critical',
   },
   {
     category: 'Rally Strategy', icon: '🎯',
     tip: 'Enemy debuffs benefit ALL rally participants — the biggest force multiplier',
-    detail: 'Renee\'s enemy_vuln, Vulcanus\'s enemy_def_debuff, and Gordon\'s enemy_vuln apply to every member\'s troops. In a 20-person rally, a 30% enemy debuff effectively provides 30% x 20 participants = massive total value vs a personal 30% buff that only helps you.',
+    detail: 'Renee\'s enemy vulnerability debuff, Vulcanus\'s enemy defense reduction, and Gordon\'s enemy vulnerability debuff apply to every member\'s troops. In a 20-person rally, a 30% enemy debuff effectively provides 30% x 20 participants = massive total value vs a personal 30% buff that only helps you.',
     priority: 'critical',
   },
   // Hidden Heroes - High
@@ -466,7 +466,7 @@ const hiddenGems: { category: string; icon: string; tip: string; detail: string;
   {
     category: 'Hidden Heroes', icon: '🦸',
     tip: 'Blanchette is mathematically unique — the only hero with crit damage buff',
-    detail: '+50% crit damage + 20% crit rate in the same kit. No other hero has crit_dmg_buff at all. In a marksman rally (Blanchette + Vulcanus + Rufus), you get 200% marksman DMG, 60% ATK, 50% crit DMG, and 90% enemy stat reduction.',
+    detail: '+50% crit damage + 20% crit rate in the same kit. No other hero has a crit damage buff at all. In a marksman rally (Blanchette + Vulcanus + Rufus), you get 200% marksman DMG, 60% ATK, 50% crit DMG, and 90% enemy stat reduction.',
     priority: 'high',
   },
   // Gear & Widgets - High
@@ -499,8 +499,8 @@ const hiddenGems: { category: string; icon: string; tip: string; detail: string;
   // Garrison - Medium
   {
     category: 'Garrison', icon: '🏰',
-    tip: 'Garrison uses the HIGHEST stat bonuses from all defenders, not the owner\'s',
-    detail: 'When reinforcing a garrison, the player with the best stat bonuses among all defenders becomes the stat source for the entire garrison. A whale reinforcing a dolphin\'s city is extremely powerful. A dolphin reinforcing a whale adds troop bodies but not stats.',
+    tip: 'Garrison stat bonuses come from the STRONGEST player, not the garrison leader',
+    detail: 'Per the official Combat FAQ: "the player with the highest stat bonuses is chosen as the source of defense bonuses" for the entire garrison. This applies to city defense and structure garrisons (castles, facilities). The garrison leader controls hero lineup and formation, but the stat bonus multipliers (from gear, research, Daybreak, etc.) come from whoever has the best stats among all defenders. A whale reinforcing a dolphin\'s city provides massive stat bonuses to everyone. Additionally, 4 primary hero skills from garrison members activate — just like rally joiners.',
     priority: 'medium',
   },
   // Drill Camp - Medium

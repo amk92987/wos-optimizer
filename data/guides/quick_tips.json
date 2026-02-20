@@ -1230,8 +1230,8 @@
           "priority": "medium"
         },
         {
-          "tip": "Garrison uses the HIGHEST stat bonuses from all defenders, not the owner's",
-          "detail": "The player with the best stats among all garrison defenders becomes the stat source. A whale reinforcing a dolphin's city is extremely powerful.",
+          "tip": "Garrison stat bonuses come from the STRONGEST player, not the garrison leader",
+          "detail": "Per official Combat FAQ: the player with the highest stat bonuses is chosen as the source of defense bonuses for the entire garrison. Garrison leader controls hero lineup and formation, but stat bonus multipliers come from whoever has the best stats among all defenders. 4 primary hero skills from garrison members also activate.",
           "priority": "medium"
         },
         {

@@ -279,9 +279,12 @@ EXCLUSIVE GEAR WIDGETS:
 - Garrison defenders: defensive widgets activate
 - Rally joiners: NO widget benefits — exclusive gear is wasted on joiner-only heroes
 
-GARRISON STAT SELECTION:
-- The player with highest stat bonuses among all defenders becomes the stat source
-- A strong player reinforcing a weak player's city is extremely powerful
+GARRISON STAT SELECTION (from official Combat FAQ):
+- "The player with the highest stat bonuses is chosen as the source of defense bonuses" for the entire garrison
+- Garrison LEADER controls hero lineup and formation, but stat bonus multipliers come from the strongest player
+- This applies to city defense AND structure garrisons (castles, facilities)
+- 4 primary hero skills from garrison members activate (like rally joiners)
+- A whale reinforcing a weaker player's city provides massive stat bonuses to everyone
 
 === COMMON MISTAKES TO AVOID ===
 NEVER RECOMMEND THESE (even for whales):
