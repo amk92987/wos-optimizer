@@ -30,7 +30,7 @@ interface HeroInvestment {
 }
 
 type TabType = 'recommendations' | 'heroes' | 'calculators';
-type CalcType = 'enhancement' | 'legendary' | 'mastery' | 'chief_gear' | 'charms' | 'war_academy';
+type CalcType = 'enhancement' | 'legendary' | 'mastery' | 'chief_gear' | 'charms' | 'war_academy' | 'pet_leveling';
 
 /** Convert snake_case or slug text to clean Title Case */
 function formatLabel(s: string): string {
@@ -687,13 +687,14 @@ const CALC_DEFS: { id: CalcType; label: string; category: string; color: string;
   { id: 'chief_gear', label: 'Chief Gear', category: 'Chief', color: 'text-pink-400', activeColor: 'border-pink-500/50 bg-pink-500/10 text-pink-400' },
   { id: 'charms', label: 'Charms', category: 'Chief', color: 'text-green-400', activeColor: 'border-green-500/50 bg-green-500/10 text-green-400' },
   { id: 'war_academy', label: 'War Academy', category: 'Buildings', color: 'text-orange-400', activeColor: 'border-orange-500/50 bg-orange-500/10 text-orange-400' },
+  { id: 'pet_leveling', label: 'Pet Leveling', category: 'Pets', color: 'text-amber-400', activeColor: 'border-amber-500/50 bg-amber-500/10 text-amber-400' },
 ];
 
 function UpgradeCalculatorsTab() {
   const [calc, setCalc] = useState<CalcType>('enhancement');
 
   // Group calculators by category for the sub-tab selector
-  const categories = ['Hero Gear', 'Chief', 'Buildings'];
+  const categories = ['Hero Gear', 'Chief', 'Buildings', 'Pets'];
 
   return (
     <div className="space-y-6">
@@ -737,6 +738,7 @@ function UpgradeCalculatorsTab() {
       {calc === 'chief_gear' && <ChiefGearCalc />}
       {calc === 'charms' && <CharmsCalc />}
       {calc === 'war_academy' && <WarAcademyCalc />}
+      {calc === 'pet_leveling' && <PetLevelingCalc />}
     </div>
   );
 }
@@ -1694,6 +1696,263 @@ function WarAcademyCalc() {
               </div>
             </details>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Pet Leveling Calculator ──────────────────────────────────────────
+
+type PetRarity = 'Common' | 'N' | 'R' | 'SR' | 'SSR';
+
+// Pet Food costs per level (index = level - 1, so index 0 = cost for level 1→2)
+// All pets of the same rarity share identical costs (verified from whiteoutsurvival.app)
+const PET_FOOD: Record<PetRarity, number[]> = {
+  Common: [
+    100,110,120,130,140,150,160,170,185,200,
+    220,240,260,280,300,320,340,360,380,400,
+    420,440,460,480,500,520,540,560,580,600,
+    630,660,690,720,750,780,810,840,870,900,
+    940,980,1020,1060,1100,1140,1180,1220,1260,1320,
+  ],
+  N: [
+    200,220,240,260,280,300,320,340,370,400,
+    430,460,490,520,550,580,610,640,680,720,
+    760,800,840,880,920,960,1000,1040,1100,1160,
+    1220,1280,1340,1400,1460,1520,1580,1640,1720,1800,
+    1880,1960,2040,2120,2200,2280,2360,2440,2540,2640,
+    2740,2840,2940,3040,3140,3240,3340,3440,3560,
+  ],
+  R: [
+    300,330,360,390,420,450,480,510,555,600,
+    645,690,735,780,825,870,915,960,1020,1080,
+    1140,1200,1260,1320,1380,1440,1500,1560,1650,1740,
+    1830,1920,2010,2100,2190,2280,2370,2460,2580,2700,
+    2820,2940,3060,3180,3300,3420,3540,3660,3810,3960,
+    4110,4260,4410,4560,4710,4860,5010,5160,5340,5520,
+    5700,5880,6060,6240,6420,6600,6780,6960,7140,
+  ],
+  SR: [
+    400,440,480,520,560,600,640,680,740,800,
+    860,920,980,1040,1100,1160,1220,1280,1360,1440,
+    1520,1600,1680,1760,1840,1920,2000,2080,2200,2320,
+    2440,2560,2680,2800,2920,3040,3160,3280,3440,3600,
+    3760,3920,4080,4240,4400,4560,4720,4880,5080,5280,
+    5480,5680,5880,6080,6280,6480,6680,6880,7120,7360,
+    7600,7840,8080,8320,8560,8800,9040,9280,9520,9760,
+    10000,10240,10480,10720,10960,11200,11440,11680,12000,
+  ],
+  SSR: [
+    500,550,600,650,700,750,800,850,925,1000,
+    1075,1150,1225,1300,1375,1450,1525,1600,1700,1800,
+    1900,2000,2100,2200,2300,2400,2500,2600,2750,2900,
+    3050,3200,3350,3500,3650,3800,3950,4100,4300,4500,
+    4700,4900,5100,5300,5500,5700,5900,6100,6350,6600,
+    6850,7100,7350,7600,7850,8100,8350,8600,8900,9200,
+    9500,9800,10100,10400,10700,11000,11300,11600,11900,12200,
+    12500,12800,13100,13400,13700,14000,14300,14600,15000,15400,
+    15800,16200,16600,17000,17400,17800,18200,18600,19000,19400,
+    19800,20200,20600,21000,21400,21800,22200,22600,23100,
+  ],
+};
+
+// Advancement milestone costs (materials needed at every 10th level)
+// Format: { level, taming, energizing, strengthening }
+const PET_ADVANCEMENT: Record<PetRarity, { level: number; taming: number; energizing: number; strengthening: number }[]> = {
+  Common: [
+    { level: 10, taming: 15, energizing: 0, strengthening: 0 },
+    { level: 20, taming: 30, energizing: 0, strengthening: 0 },
+    { level: 30, taming: 45, energizing: 10, strengthening: 0 },
+    { level: 40, taming: 60, energizing: 20, strengthening: 0 },
+    { level: 50, taming: 90, energizing: 30, strengthening: 10 },
+  ],
+  N: [
+    { level: 10, taming: 20, energizing: 0, strengthening: 0 },
+    { level: 20, taming: 40, energizing: 0, strengthening: 0 },
+    { level: 30, taming: 60, energizing: 10, strengthening: 0 },
+    { level: 40, taming: 90, energizing: 20, strengthening: 0 },
+    { level: 50, taming: 130, energizing: 30, strengthening: 10 },
+    { level: 60, taming: 175, energizing: 50, strengthening: 20 },
+  ],
+  R: [
+    { level: 10, taming: 25, energizing: 0, strengthening: 0 },
+    { level: 20, taming: 50, energizing: 0, strengthening: 0 },
+    { level: 30, taming: 75, energizing: 10, strengthening: 0 },
+    { level: 40, taming: 100, energizing: 20, strengthening: 0 },
+    { level: 50, taming: 155, energizing: 30, strengthening: 10 },
+    { level: 60, taming: 200, energizing: 50, strengthening: 20 },
+    { level: 70, taming: 255, energizing: 80, strengthening: 40 },
+  ],
+  SR: [
+    { level: 10, taming: 30, energizing: 0, strengthening: 0 },
+    { level: 20, taming: 60, energizing: 0, strengthening: 0 },
+    { level: 30, taming: 95, energizing: 10, strengthening: 0 },
+    { level: 40, taming: 125, energizing: 20, strengthening: 0 },
+    { level: 50, taming: 190, energizing: 30, strengthening: 10 },
+    { level: 60, taming: 250, energizing: 50, strengthening: 20 },
+    { level: 70, taming: 310, energizing: 80, strengthening: 40 },
+    { level: 80, taming: 380, energizing: 100, strengthening: 60 },
+  ],
+  SSR: [
+    { level: 10, taming: 35, energizing: 0, strengthening: 0 },
+    { level: 20, taming: 70, energizing: 0, strengthening: 0 },
+    { level: 30, taming: 110, energizing: 15, strengthening: 0 },
+    { level: 40, taming: 145, energizing: 35, strengthening: 0 },
+    { level: 50, taming: 220, energizing: 50, strengthening: 10 },
+    { level: 60, taming: 290, energizing: 65, strengthening: 20 },
+    { level: 70, taming: 365, energizing: 85, strengthening: 40 },
+    { level: 80, taming: 440, energizing: 100, strengthening: 60 },
+    { level: 90, taming: 585, energizing: 115, strengthening: 80 },
+    { level: 100, taming: 730, energizing: 135, strengthening: 100 },
+  ],
+};
+
+const PET_MAX_LEVEL: Record<PetRarity, number> = { Common: 50, N: 60, R: 70, SR: 80, SSR: 100 };
+
+const PET_RARITY_OPTIONS: { value: PetRarity; label: string; pets: string }[] = [
+  { value: 'Common', label: 'Common', pets: 'Cave Hyena' },
+  { value: 'N', label: 'N (Uncommon)', pets: 'Arctic Wolf, Musk Ox' },
+  { value: 'R', label: 'R (Rare)', pets: 'Giant Tapir, Titan Roc' },
+  { value: 'SR', label: 'SR (Epic)', pets: 'Giant Elk, Snow Leopard, Frostscale Chameleon' },
+  { value: 'SSR', label: 'SSR (Legendary)', pets: 'Cave Lion, Snow Ape, Iron Rhino, Saber-tooth Tiger, Mammoth, Frost Gorilla' },
+];
+
+function PetLevelingCalc() {
+  const [rarity, setRarity] = useState<PetRarity>('SSR');
+  const [fromLevel, setFromLevel] = useState(1);
+  const [toLevel, setToLevel] = useState(100);
+
+  const maxLevel = PET_MAX_LEVEL[rarity];
+  const foodArr = PET_FOOD[rarity];
+  const advArr = PET_ADVANCEMENT[rarity];
+
+  // Clamp levels when rarity changes
+  useEffect(() => {
+    const max = PET_MAX_LEVEL[rarity];
+    if (fromLevel > max) setFromLevel(1);
+    if (toLevel > max) setToLevel(max);
+  }, [rarity, fromLevel, toLevel]);
+
+  const costs = useMemo(() => {
+    if (fromLevel >= toLevel) return null;
+
+    // Pet food: sum costs from fromLevel to toLevel-1
+    // foodArr[i] = cost from level (i+1) to (i+2), so for level L the cost is foodArr[L-1]
+    let totalFood = 0;
+    for (let lvl = fromLevel; lvl < toLevel; lvl++) {
+      totalFood += foodArr[lvl - 1] || 0;
+    }
+
+    // Advancement materials: sum milestones in range
+    let totalTaming = 0, totalEnergizing = 0, totalStrengthening = 0;
+    const milestonesInRange: typeof advArr = [];
+    for (const m of advArr) {
+      if (m.level > fromLevel && m.level <= toLevel) {
+        totalTaming += m.taming;
+        totalEnergizing += m.energizing;
+        totalStrengthening += m.strengthening;
+        milestonesInRange.push(m);
+      }
+    }
+
+    return { totalFood, totalTaming, totalEnergizing, totalStrengthening, milestonesInRange };
+  }, [fromLevel, toLevel, foodArr, advArr]);
+
+  return (
+    <div className="space-y-4">
+      {/* Info Banner */}
+      <div className="card border border-amber-500/30 bg-amber-500/5">
+        <p className="text-sm text-frost">
+          Calculate <strong className="text-amber-400">Pet Leveling</strong> costs. All pets of the same rarity share identical costs.
+          Skills upgrade automatically at advancement milestones (every 10 levels).
+        </p>
+      </div>
+
+      {/* Inputs */}
+      <div className="card">
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">Pet Rarity</label>
+            <select
+              value={rarity}
+              onChange={(e) => setRarity(e.target.value as PetRarity)}
+              className="input w-full text-sm"
+            >
+              {PET_RARITY_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <p className="text-[10px] text-frost-muted mt-1">{PET_RARITY_OPTIONS.find(o => o.value === rarity)?.pets}</p>
+          </div>
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">From Level</label>
+            <input
+              type="number"
+              min={1}
+              max={maxLevel - 1}
+              value={fromLevel}
+              onChange={(e) => setFromLevel(Math.max(1, Math.min(maxLevel - 1, Number(e.target.value))))}
+              className="input w-full text-center text-lg"
+            />
+          </div>
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">To Level</label>
+            <input
+              type="number"
+              min={2}
+              max={maxLevel}
+              value={toLevel}
+              onChange={(e) => setToLevel(Math.max(2, Math.min(maxLevel, Number(e.target.value))))}
+              className="input w-full text-center text-lg"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Results */}
+      {fromLevel >= toLevel ? (
+        <div className="card text-center py-8">
+          <p className="text-frost-muted">Set &quot;From Level&quot; lower than &quot;To Level&quot; to see costs</p>
+        </div>
+      ) : costs && (
+        <div className="card">
+          <h3 className="section-header mb-4">Cost: Level {fromLevel} → {toLevel} ({rarity})</h3>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                <th className="text-right py-2 px-3 text-frost-muted font-medium">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <CostRow label="Pet Food" perSlot={costs.totalFood} color="text-amber-400" />
+              {costs.totalTaming > 0 && <CostRow label="Taming Manuals" perSlot={costs.totalTaming} color="text-blue-400" />}
+              {costs.totalEnergizing > 0 && <CostRow label="Energizing Potions" perSlot={costs.totalEnergizing} color="text-green-400" />}
+              {costs.totalStrengthening > 0 && <CostRow label="Strengthening Serums" perSlot={costs.totalStrengthening} color="text-purple-400" />}
+            </tbody>
+          </table>
+
+          {/* Milestone Breakdown */}
+          {costs.milestonesInRange.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-surface-border">
+              <h4 className="text-xs font-semibold text-frost-muted mb-2 uppercase tracking-wider">Advancement Milestones</h4>
+              <div className="space-y-1">
+                {costs.milestonesInRange.map((m) => (
+                  <div key={m.level} className="flex items-center justify-between text-xs bg-surface/50 rounded px-3 py-2">
+                    <span className="text-frost font-medium">Level {m.level}</span>
+                    <span className="text-frost-muted">
+                      {m.taming} Taming
+                      {m.energizing > 0 && ` + ${m.energizing} Energizing`}
+                      {m.strengthening > 0 && ` + ${m.strengthening} Strengthening`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

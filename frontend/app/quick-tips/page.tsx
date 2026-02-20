@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 
-type TabKey = 'critical' | 'hidden-gems' | 'hero-investment' | 'alliance' | 'mistakes' | 'by-category';
+type TabKey = 'critical' | 'hidden-gems' | 'pets' | 'hero-investment' | 'alliance' | 'mistakes' | 'by-category';
 
 // Priority colors
 const priorityColors: Record<string, { border: string; badge: string; label: string }> = {
@@ -519,6 +519,135 @@ const hiddenGems: { category: string; icon: string; tip: string; detail: string;
   },
 ];
 
+// === PETS DATA ===
+const petsData: { name: string; gen: number; rarity: string; maxLevel: number; skillName: string; skillEffect: string; cooldown: string; duration: string; category: 'Combat' | 'Utility' }[] = [
+  // Gen 1
+  { name: 'Cave Hyena', gen: 1, rarity: 'Common', maxLevel: 50, skillName: 'Builder\'s Aide', skillEffect: '+15% Construction Speed', cooldown: '23h', duration: '5 min', category: 'Utility' },
+  { name: 'Arctic Wolf', gen: 1, rarity: 'N', maxLevel: 60, skillName: 'Arctic Embrace', skillEffect: '+60 Chief Stamina', cooldown: '20h', duration: 'Instant', category: 'Utility' },
+  { name: 'Musk Ox', gen: 1, rarity: 'N', maxLevel: 60, skillName: 'Burden Bearer', skillEffect: 'Instantly completes 1 resource tile', cooldown: '20h', duration: 'Instant', category: 'Utility' },
+  // Gen 2
+  { name: 'Giant Tapir', gen: 2, rarity: 'R', maxLevel: 70, skillName: 'Natural Intuition', skillEffect: '+500 Pet Food', cooldown: '20h', duration: 'Instant', category: 'Utility' },
+  { name: 'Titan Roc', gen: 2, rarity: 'R', maxLevel: 70, skillName: 'Razorbeak', skillEffect: 'Reduces enemy Health (up to 5%)', cooldown: '20h', duration: '2h', category: 'Combat' },
+  // Gen 3
+  { name: 'Giant Elk', gen: 3, rarity: 'SR', maxLevel: 80, skillName: 'Mystical Finding', skillEffect: 'Unearths an item', cooldown: '23h', duration: 'Instant', category: 'Utility' },
+  { name: 'Snow Leopard', gen: 3, rarity: 'SR', maxLevel: 80, skillName: 'Lightning Raid', skillEffect: '+30% March Speed, reduces enemy Lethality', cooldown: '20h', duration: '2h', category: 'Combat' },
+  { name: 'Frostscale Chameleon', gen: 3, rarity: 'SR', maxLevel: 80, skillName: 'Mystic Fog', skillEffect: 'Reduces enemy Defense (up to 10%)', cooldown: '20h', duration: '2h', category: 'Combat' },
+  // Gen 4
+  { name: 'Cave Lion', gen: 4, rarity: 'SSR', maxLevel: 100, skillName: 'Feral Anthem', skillEffect: '+Troop Attack (up to 10%)', cooldown: '20h', duration: '2h', category: 'Combat' },
+  { name: 'Snow Ape', gen: 4, rarity: 'SSR', maxLevel: 100, skillName: 'Tumbling Power', skillEffect: '+Squad Capacity (up to 15,000)', cooldown: '20h', duration: '2h', category: 'Combat' },
+  // Gen 5
+  { name: 'Iron Rhino', gen: 5, rarity: 'SSR', maxLevel: 100, skillName: 'Rallying Beasts', skillEffect: '+Rally Capacity (up to 150,000)', cooldown: '20h', duration: '2h', category: 'Combat' },
+  { name: 'Saber-tooth Tiger', gen: 5, rarity: 'SSR', maxLevel: 100, skillName: 'Apex Assault', skillEffect: '+Troop Lethality (up to 10%)', cooldown: '20h', duration: '2h', category: 'Combat' },
+  // Gen 6
+  { name: 'Mammoth', gen: 6, rarity: 'SSR', maxLevel: 100, skillName: 'Hardened Skin', skillEffect: '+Troop Defense (up to 10%)', cooldown: '20h', duration: '2h', category: 'Combat' },
+  { name: 'Frost Gorilla', gen: 6, rarity: 'SSR', maxLevel: 100, skillName: 'Earthbound Vigor', skillEffect: '+Troop Health (up to 10%)', cooldown: '20h', duration: '2h', category: 'Combat' },
+];
+
+const rarityColors: Record<string, { bg: string; text: string; border: string }> = {
+  'Common': { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30' },
+  'N': { bg: 'bg-green-500/20', text: 'text-green-400', border: 'border-green-500/30' },
+  'R': { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30' },
+  'SR': { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30' },
+  'SSR': { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/30' },
+};
+
+function PetsTab() {
+  const generations = [1, 2, 3, 4, 5, 6];
+
+  return (
+    <div>
+      <h2 className="text-xl font-bold text-frost mb-2">Pets Guide</h2>
+      <p className="text-frost-muted mb-6">All 14 pets, their combat skills, and when to use them. Pets unlock at Furnace 18 (54+ server days).</p>
+
+      {/* Which Pet to Activate */}
+      <div className="card border border-amber-500/30 bg-amber-500/5 mb-6">
+        <h3 className="font-bold text-amber-400 mb-3">Which Pet to Activate?</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+          <div className="bg-surface/50 rounded-lg p-3">
+            <p className="font-medium text-red-400 mb-1">SvS Attack</p>
+            <p className="text-frost-muted">Saber-tooth Tiger (+Lethality) or Cave Lion (+Attack)</p>
+          </div>
+          <div className="bg-surface/50 rounded-lg p-3">
+            <p className="font-medium text-blue-400 mb-1">Defense / Garrison</p>
+            <p className="text-frost-muted">Mammoth (+Defense) or Frost Gorilla (+Health)</p>
+          </div>
+          <div className="bg-surface/50 rounded-lg p-3">
+            <p className="font-medium text-purple-400 mb-1">Rally Leader</p>
+            <p className="text-frost-muted">Iron Rhino (+150K Rally Capacity at max)</p>
+          </div>
+          <div className="bg-surface/50 rounded-lg p-3">
+            <p className="font-medium text-green-400 mb-1">General / Marching</p>
+            <p className="text-frost-muted">Snow Leopard (+March Speed + Enemy Lethality reduction)</p>
+          </div>
+        </div>
+      </div>
+
+      {/* All Pets by Generation */}
+      <h3 className="font-bold text-frost mb-3">All Pets by Generation</h3>
+      {generations.map((gen) => {
+        const genPets = petsData.filter(p => p.gen === gen);
+        return (
+          <div key={gen} className="mb-4">
+            <h4 className="text-sm font-semibold text-frost-muted mb-2">Generation {gen}</h4>
+            <div className="space-y-2">
+              {genPets.map((pet) => {
+                const rc = rarityColors[pet.rarity];
+                return (
+                  <div key={pet.name} className={`bg-surface/50 border ${rc.border} rounded-lg p-3`}>
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1 flex-wrap">
+                          <span className="font-semibold text-frost">{pet.name}</span>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${rc.bg} ${rc.text}`}>{pet.rarity}</span>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded ${pet.category === 'Combat' ? 'bg-red-500/20 text-red-400' : 'bg-cyan-500/20 text-cyan-400'}`}>{pet.category}</span>
+                        </div>
+                        <p className="text-sm text-frost-muted">
+                          <span className="text-ice">{pet.skillName}</span> — {pet.skillEffect}
+                        </p>
+                      </div>
+                      <div className="text-right text-xs text-frost-muted whitespace-nowrap">
+                        <p>Max L{pet.maxLevel}</p>
+                        {pet.duration !== 'Instant' && <p>{pet.duration} / {pet.cooldown} CD</p>}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Key Tips */}
+      <h3 className="font-bold text-frost mt-6 mb-3">Key Tips</h3>
+      <TipCard
+        tip="Always activate combat pets before SvS and major battles"
+        detail="Combat pet buffs last 2 hours with a 20-hour cooldown. Forgetting to activate your pet before a fight is one of the most common mistakes — it's free stats you're leaving on the table."
+        priority="critical"
+        categoryBadge="🐾 Pets"
+      />
+      <TipCard
+        tip="SSR pets give +10% stat buffs at max level vs ~5% for R/SR pets"
+        detail="Gen 4-6 SSR pets (Cave Lion, Saber-tooth Tiger, Mammoth, Frost Gorilla) are the endgame combat pets. Each provides +10% to a core stat at level 100. Lower rarity pets cap at 5-7%."
+        priority="high"
+        categoryBadge="🐾 Pets"
+      />
+      <TipCard
+        tip="Pet levels give passive Attack/Defense % bonuses to all troops"
+        detail="Beyond the activated skill, every pet level adds passive Attack and Defense bonuses. An SSR pet at L100 gives +33.5% ATK and +33.5% DEF permanently — a massive hidden stat source."
+        priority="high"
+        categoryBadge="🐾 Pets"
+      />
+      <TipCard
+        tip="Skills upgrade automatically at advancement milestones — no separate cost"
+        detail="Every 10 levels you advance your pet using Taming Manuals, Energizing Potions, and Strengthening Serums. The skill levels up as part of that advancement. There's no separate skill upgrade mechanic."
+        priority="medium"
+        categoryBadge="🐾 Pets"
+      />
+    </div>
+  );
+}
+
 function TipCard({ tip, detail, priority, categoryBadge }: { tip: string; detail: string; priority: 'critical' | 'high' | 'medium' | 'low'; categoryBadge?: string }) {
   const colors = priorityColors[priority];
   return (
@@ -835,6 +964,7 @@ export default function QuickTipsPage() {
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'critical', label: 'Critical Tips' },
     { key: 'hidden-gems', label: 'Hidden Gems' },
+    { key: 'pets', label: 'Pets' },
     { key: 'hero-investment', label: 'Hero Investment' },
     { key: 'alliance', label: 'Alliance (R4/R5)' },
     { key: 'mistakes', label: 'Common Mistakes' },
@@ -873,6 +1003,7 @@ export default function QuickTipsPage() {
         <div className="mb-8">
           {activeTab === 'critical' && <CriticalTipsTab />}
           {activeTab === 'hidden-gems' && <HiddenGemsTab />}
+          {activeTab === 'pets' && <PetsTab />}
           {activeTab === 'hero-investment' && <HeroInvestmentTab />}
           {activeTab === 'alliance' && <AllianceTab />}
           {activeTab === 'mistakes' && <CommonMistakesTab />}
@@ -882,7 +1013,7 @@ export default function QuickTipsPage() {
         {/* Footer */}
         <div className="text-center border-t border-surface-border pt-6">
           <p className="text-sm text-frost-muted mb-4">
-            {criticalTips.length} critical tips | {hiddenGems.length} hidden gems | {Object.keys(heroGenerations).length} generations | {commonMistakes.length} common mistakes
+            {criticalTips.length} critical tips | {hiddenGems.length} hidden gems | {petsData.length} pets | {Object.keys(heroGenerations).length} generations | {commonMistakes.length} common mistakes
           </p>
           <button
             onClick={() => window.print()}
