@@ -40,17 +40,17 @@
       "infantry": {
         "strong_against": "Lancer",
         "weak_against": "Marksman",
-        "bonus": "~30% damage bonus against weak class"
+        "bonus": "~10% attack bonus against weak class"
       },
       "lancer": {
         "strong_against": "Marksman",
         "weak_against": "Infantry",
-        "bonus": "~30% damage bonus against weak class"
+        "bonus": "~10% attack bonus against weak class"
       },
       "marksman": {
         "strong_against": "Infantry",
         "weak_against": "Lancer",
-        "bonus": "~30% damage bonus against weak class"
+        "bonus": "~10% attack bonus against weak class"
       }
     },
     "optimization": "Match your composition to counter enemy's primary class"

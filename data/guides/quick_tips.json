@@ -1168,6 +1168,83 @@
           "priority": "medium"
         }
       ]
+    },
+
+    "hidden_gems": {
+      "name": "Hidden Gems",
+      "icon": "gem",
+      "tips": [
+        {
+          "tip": "Attack and Lethality MULTIPLY together in the damage formula",
+          "detail": "Kills = sqrt(Troops) x (Attack x Lethality) / (Defense x Health). Since they multiply, investing in whichever stat is LOWER gives more damage per resource. Most accounts have Attack >> Lethality, so Lethality upgrades are almost always more efficient.",
+          "priority": "critical"
+        },
+        {
+          "tip": "\"Damage Dealt\" buffs are the strongest buff type in the game",
+          "detail": "There are 3 types: Attack (boosts base stat), Normal Attack Damage (only auto-attacks), and Damage Dealt (multiplies EVERYTHING: troops, hero skills, pets, teammate buffs). Jessie's +25% Damage Dealt is a final multiplier on all damage.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Mixed joiner compositions mathematically outperform identical joiners",
+          "detail": "Hero skills have hidden categories (effect_op codes). Same category stacks additively, different categories multiply. 4x Jessie = 2.0x. 2 from one category + 2 from another = 1.5 x 1.5 = 2.25x (12.5% more damage).",
+          "priority": "critical"
+        },
+        {
+          "tip": "Enemy debuffs benefit ALL rally participants — the biggest force multiplier",
+          "detail": "Renee's enemy_vuln, Vulcanus's enemy_def_debuff, and Gordon's enemy_vuln apply to every member's troops. In a 20-person rally, a 30% enemy debuff is far more valuable than a personal 30% buff.",
+          "priority": "critical"
+        },
+        {
+          "tip": "Renee (Gen 6) has the strongest debuff in the game",
+          "detail": "Her Dreamcatcher skill applies 150% enemy vulnerability (50% uptime = 75% effective). In rallies, this benefits all participants. Top priority for rally leader lineups.",
+          "priority": "high"
+        },
+        {
+          "tip": "Rufus (Gen 11) is a stealth S++ hero",
+          "detail": "He simultaneously buffs infantry DMG +60%, marksman DMG +100%, AND debuffs enemy lethality -50% and enemy vulnerability +25%. One of only 2 heroes who can reduce enemy Lethality.",
+          "priority": "high"
+        },
+        {
+          "tip": "Blanchette is mathematically unique — the only hero with crit damage buff",
+          "detail": "+50% crit damage + 20% crit rate in the same kit. No other hero has crit_dmg_buff. Marksman rally (Blanchette + Vulcanus + Rufus) = 200% marksman DMG, 60% ATK, 50% crit DMG.",
+          "priority": "high"
+        },
+        {
+          "tip": "Exclusive gear bonuses (widgets) do NOT work when joining rallies",
+          "detail": "Rally leaders get full widget benefits. Garrison defenders get defensive widgets. Rally JOINERS get zero widget benefit. Exclusive gear on joiner-only heroes is wasted.",
+          "priority": "high"
+        },
+        {
+          "tip": "Exclusive skills use DUAL math — both additive AND multiplicative",
+          "detail": "Regular stats stack purely additively. But exclusive skills and buff items apply +X% additive AND xX% multiplicative simultaneously. Makes exclusive skill levels disproportionately powerful.",
+          "priority": "high"
+        },
+        {
+          "tip": "Class counters only provide 10% attack bonus, not 30%",
+          "detail": "Many guides overstate this. Stat bonuses and skill quality matter ~7x more than counter matchups. Don't restructure compositions just for counters.",
+          "priority": "medium"
+        },
+        {
+          "tip": "T7+ Lancers can bypass Infantry to hit Marksmen directly",
+          "detail": "Ambusher skill: 20% chance to skip frontline and strike back-row Marksmen. T7+ Marksmen get Volley: 10% chance to attack twice. Include Lancers for anti-Marksman insurance.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Garrison uses the HIGHEST stat bonuses from all defenders, not the owner's",
+          "detail": "The player with the best stats among all garrison defenders becomes the stat source. A whale reinforcing a dolphin's city is extremely powerful.",
+          "priority": "medium"
+        },
+        {
+          "tip": "Drill Camp syncs all heroes to your 5th-best hero's level for free",
+          "detail": "No daily cost. Only costs 500 gems to swap a hero out immediately instead of 24h cooldown. Investing in 5 core heroes implicitly raises your entire roster.",
+          "priority": "medium"
+        },
+        {
+          "tip": "SvS casualty recovery heavily favors attacking over defending",
+          "detail": "Attackers recover 90% of losses via Field Triage. Defenders lose troops more permanently. Alliance strategy should favor aggressive rallies over passive garrison stacking.",
+          "priority": "medium"
+        }
+      ]
     }
   },
 

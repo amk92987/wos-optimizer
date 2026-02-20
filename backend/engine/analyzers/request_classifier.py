@@ -220,12 +220,38 @@ class RequestClassifier:
 
         question_lower = question.lower()
 
-        # Extract hero names
+        # Extract hero names (all 56 heroes from heroes.json, Gen 1-14)
         hero_names = [
-            "jessie", "sergey", "jeronimo", "natalia", "molly", "zinman",
-            "bahiti", "gina", "flint", "philly", "alonso", "logan", "mia",
-            "greg", "ahmose", "reina", "lynn", "hector", "wu ming", "patrick",
-            "charlie", "cloris", "gordon", "renee", "eugene"
+            # Gen 1
+            "bahiti", "charlie", "cloris", "eugene", "gina", "jasser",
+            "jeronimo", "jessie", "ling xue", "lumak bokan", "molly",
+            "natalia", "patrick", "seo-yoon", "sergey", "smith", "zinman",
+            # Gen 2
+            "alonso", "flint", "philly",
+            # Gen 3
+            "greg", "logan", "mia",
+            # Gen 4
+            "ahmose", "lynn", "reina",
+            # Gen 5
+            "gwen", "hector", "norah",
+            # Gen 6
+            "renee", "wayne", "wu ming",
+            # Gen 7
+            "bradley", "edith", "gordon",
+            # Gen 8
+            "gatot", "hendrik", "sonya",
+            # Gen 9
+            "fred", "magnus", "xura",
+            # Gen 10
+            "blanchette", "freya", "gregory",
+            # Gen 11
+            "eleonora", "lloyd", "rufus",
+            # Gen 12
+            "hervor", "karol", "ligeia",
+            # Gen 13
+            "flora", "gisela", "vulcanus",
+            # Gen 14
+            "cara", "dominic", "elif",
         ]
         for hero in hero_names:
             if hero in question_lower:

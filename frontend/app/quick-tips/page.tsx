@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 
-type TabKey = 'critical' | 'hero-investment' | 'alliance' | 'mistakes' | 'by-category';
+type TabKey = 'critical' | 'hidden-gems' | 'hero-investment' | 'alliance' | 'mistakes' | 'by-category';
 
 // Priority colors
 const priorityColors: Record<string, { border: string; badge: string; label: string }> = {
@@ -422,6 +422,103 @@ const spendingAdvice: Record<string, string> = {
   whale: 'MAX all S+ heroes. HIGH investment in all S-tier. Use A-tier as needed for depth and variety.',
 };
 
+// Hidden Gems - non-obvious competitive insights from deep combat analysis
+const hiddenGems: { category: string; icon: string; tip: string; detail: string; priority: 'critical' | 'high' | 'medium' }[] = [
+  // Combat Math - Critical
+  {
+    category: 'Combat Math', icon: '🔢',
+    tip: 'Attack and Lethality MULTIPLY together in the damage formula',
+    detail: 'Kills = sqrt(Troops) x (Attack x Lethality) / (Defense x Health). Since they multiply, investing in whichever stat is LOWER gives more damage per resource. Most accounts have Attack >> Lethality, so Lethality upgrades are almost always more efficient.',
+    priority: 'critical',
+  },
+  {
+    category: 'Combat Math', icon: '🔢',
+    tip: '"Damage Dealt" buffs are the strongest buff type in the game',
+    detail: 'There are 3 damage buff types: "Attack" (boosts base troop stat only), "Normal Attack Damage" (only troop auto-attacks), and "Damage Dealt" (multiplies EVERYTHING — troops, hero skills, pets, teammate buffs). Jessie\'s +25% Damage Dealt is a final multiplier on all damage sources.',
+    priority: 'critical',
+  },
+  // Rally Strategy - Critical
+  {
+    category: 'Rally Strategy', icon: '🎯',
+    tip: 'Mixed joiner compositions mathematically outperform identical joiners',
+    detail: 'Hero skills have hidden categories (effect_op codes). Skills in the same category stack additively, but different categories multiply together. 4x Jessie = 2.0x damage. But 2 joiners from one category + 2 from another = 1.5 x 1.5 = 2.25x (12.5% more). Coordinate varied joiner heroes in rallies.',
+    priority: 'critical',
+  },
+  {
+    category: 'Rally Strategy', icon: '🎯',
+    tip: 'Enemy debuffs benefit ALL rally participants — the biggest force multiplier',
+    detail: 'Renee\'s enemy_vuln, Vulcanus\'s enemy_def_debuff, and Gordon\'s enemy_vuln apply to every member\'s troops. In a 20-person rally, a 30% enemy debuff effectively provides 30% x 20 participants = massive total value vs a personal 30% buff that only helps you.',
+    priority: 'critical',
+  },
+  // Hidden Heroes - High
+  {
+    category: 'Hidden Heroes', icon: '🦸',
+    tip: 'Renee (Gen 6) has the strongest debuff in the game',
+    detail: 'Her Dreamcatcher skill applies 150% enemy vulnerability (50% uptime = 75% effective). In rallies, this benefits all participants. She should be a top priority for rally leader lineups, not just a "good Lancer."',
+    priority: 'high',
+  },
+  {
+    category: 'Hidden Heroes', icon: '🦸',
+    tip: 'Rufus (Gen 11) is a stealth S++ hero',
+    detail: 'He simultaneously buffs infantry DMG +60%, marksman DMG +100%, AND debuffs enemy lethality -50% and enemy vulnerability +25%. He\'s one of only 2 heroes who can reduce enemy Lethality — a stat most players can\'t counter.',
+    priority: 'high',
+  },
+  {
+    category: 'Hidden Heroes', icon: '🦸',
+    tip: 'Blanchette is mathematically unique — the only hero with crit damage buff',
+    detail: '+50% crit damage + 20% crit rate in the same kit. No other hero has crit_dmg_buff at all. In a marksman rally (Blanchette + Vulcanus + Rufus), you get 200% marksman DMG, 60% ATK, 50% crit DMG, and 90% enemy stat reduction.',
+    priority: 'high',
+  },
+  // Gear & Widgets - High
+  {
+    category: 'Gear & Widgets', icon: '⚙️',
+    tip: 'Exclusive gear bonuses (widgets) do NOT work when joining rallies',
+    detail: 'Rally leaders get full widget benefits. Garrison defenders get defensive widgets. But rally JOINERS get zero widget benefit. Expensive exclusive gear upgrades on joiner-only heroes like Jessie or Sergey are completely wasted in rallies.',
+    priority: 'high',
+  },
+  {
+    category: 'Gear & Widgets', icon: '⚙️',
+    tip: 'Exclusive skills use DUAL math — both additive AND multiplicative',
+    detail: 'Regular stats (research, chief gear) stack purely additively. But exclusive skills and buff items apply +X% additive AND xX% multiplicative simultaneously. This makes exclusive skill levels on rally leader heroes disproportionately powerful per percentage point.',
+    priority: 'high',
+  },
+  // Combat Math - Medium
+  {
+    category: 'Combat Math', icon: '🔢',
+    tip: 'Class counters only provide 10% attack bonus, not 30%',
+    detail: 'Many guides overstate the rock-paper-scissors bonus. The real counter advantage is only ~10% attack. Stat bonuses and skill quality matter roughly 7x more than getting the counter matchup right. Don\'t restructure your whole composition just for counters.',
+    priority: 'medium',
+  },
+  // Troop Mechanics - Medium
+  {
+    category: 'Troop Mechanics', icon: '⚔️',
+    tip: 'T7+ Lancers can bypass Infantry to hit Marksmen directly',
+    detail: 'T7+ Lancers have a hidden "Ambusher" skill: 20% chance to skip the frontline and strike back-row Marksmen. T7+ Marksmen get "Volley": 10% chance to attack twice in one turn. Always include some Lancers for anti-Marksman insurance in mixed compositions.',
+    priority: 'medium',
+  },
+  // Garrison - Medium
+  {
+    category: 'Garrison', icon: '🏰',
+    tip: 'Garrison uses the HIGHEST stat bonuses from all defenders, not the owner\'s',
+    detail: 'When reinforcing a garrison, the player with the best stat bonuses among all defenders becomes the stat source for the entire garrison. A whale reinforcing a dolphin\'s city is extremely powerful. A dolphin reinforcing a whale adds troop bodies but not stats.',
+    priority: 'medium',
+  },
+  // Drill Camp - Medium
+  {
+    category: 'Drill Camp', icon: '🏋️',
+    tip: 'Drill Camp syncs all heroes to your 5th-best hero\'s level for free',
+    detail: 'No daily cost to use Drill Camp. Only costs 500 gems to swap a hero out immediately instead of waiting the 24h cooldown. This means investing heavily in 5 core heroes implicitly raises your entire roster\'s level.',
+    priority: 'medium',
+  },
+  // SvS - Medium
+  {
+    category: 'SvS', icon: '⚔️',
+    tip: 'SvS casualty recovery heavily favors attacking over defending',
+    detail: 'Attackers recover 90% of losses via Field Triage. Defenders lose troops more permanently (35% dead, 10% severely injured). Alliance strategy should favor aggressive rallies over passive garrison stacking when you have the stats to compete.',
+    priority: 'medium',
+  },
+];
+
 function TipCard({ tip, detail, priority, categoryBadge }: { tip: string; detail: string; priority: 'critical' | 'high' | 'medium' | 'low'; categoryBadge?: string }) {
   const colors = priorityColors[priority];
   return (
@@ -508,6 +605,40 @@ function CriticalTipsTab() {
           priority="critical"
           categoryBadge={`${tip.icon} ${tip.category}`}
         />
+      ))}
+    </div>
+  );
+}
+
+function HiddenGemsTab() {
+  // Group tips by category
+  const grouped: Record<string, typeof hiddenGems> = {};
+  for (const gem of hiddenGems) {
+    if (!grouped[gem.category]) grouped[gem.category] = [];
+    grouped[gem.category].push(gem);
+  }
+
+  return (
+    <div>
+      <h2 className="text-xl font-bold text-frost mb-2">Hidden Gems</h2>
+      <p className="text-frost-muted mb-6">
+        Non-obvious competitive insights from deep combat analysis. The stuff even experienced players miss.
+      </p>
+
+      {Object.entries(grouped).map(([category, tips]) => (
+        <div key={category} className="mb-6">
+          <h3 className="text-lg font-semibold text-frost mb-3 flex items-center gap-2">
+            <span>{tips[0].icon}</span> {category}
+          </h3>
+          {tips.map((gem, i) => (
+            <TipCard
+              key={i}
+              tip={gem.tip}
+              detail={gem.detail}
+              priority={gem.priority}
+            />
+          ))}
+        </div>
       ))}
     </div>
   );
@@ -703,6 +834,7 @@ export default function QuickTipsPage() {
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'critical', label: 'Critical Tips' },
+    { key: 'hidden-gems', label: 'Hidden Gems' },
     { key: 'hero-investment', label: 'Hero Investment' },
     { key: 'alliance', label: 'Alliance (R4/R5)' },
     { key: 'mistakes', label: 'Common Mistakes' },
@@ -740,6 +872,7 @@ export default function QuickTipsPage() {
         {/* Tab Content */}
         <div className="mb-8">
           {activeTab === 'critical' && <CriticalTipsTab />}
+          {activeTab === 'hidden-gems' && <HiddenGemsTab />}
           {activeTab === 'hero-investment' && <HeroInvestmentTab />}
           {activeTab === 'alliance' && <AllianceTab />}
           {activeTab === 'mistakes' && <CommonMistakesTab />}
@@ -749,7 +882,7 @@ export default function QuickTipsPage() {
         {/* Footer */}
         <div className="text-center border-t border-surface-border pt-6">
           <p className="text-sm text-frost-muted mb-4">
-            {criticalTips.length} critical tips | {Object.keys(heroGenerations).length} generations | {commonMistakes.length} common mistakes
+            {criticalTips.length} critical tips | {hiddenGems.length} hidden gems | {Object.keys(heroGenerations).length} generations | {commonMistakes.length} common mistakes
           </p>
           <button
             onClick={() => window.print()}
