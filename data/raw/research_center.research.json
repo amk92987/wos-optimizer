@@ -1,0 +1,96 @@
+{
+  "system": "research_center",
+  "retrieved_at": "2026-02-21T00:00:00Z",
+  "sources": [
+    {"source_id": "wos_wiki", "url": "https://www.whiteoutsurvival.wiki/research/", "confidence": "A"},
+    {"source_id": "grindnstrat", "url": "https://grindnstrat.com/whiteout-survival-research-guide/", "confidence": "B"},
+    {"source_id": "whiteoutdata", "url": "https://whiteoutdata.com/buildings/research-center/", "confidence": "A"}
+  ],
+  "data_completeness": "complete",
+  "overview": {
+    "unlock": "Furnace Level 9 + Research Center building",
+    "trees": ["Growth", "Economy", "Battle"],
+    "fc_research": "War Academy at Furnace 30 / FC1",
+    "resources": ["Meat", "Wood", "Coal", "Iron", "Steel"]
+  },
+  "growth_tree": {
+    "total_cost": {"meat": 212530000, "wood": 212530000, "coal": 42050000, "iron": 10650000, "steel": 3640000},
+    "total_time_days": 883,
+    "items": [
+      {"name": "Tool Enhancement", "tiers": 7, "levels_per_tier": 3, "effect": "Research Speed", "grand_total": "+27.80%", "priority": "critical"},
+      {"name": "Tooling Up", "tiers": 7, "levels_per_tier": 3, "effect": "Construction Speed", "grand_total": "+27.80%", "priority": "high"},
+      {"name": "Ward Expansion", "tiers": 7, "levels_per_tier": 3, "effect": "Infirmary Capacity", "grand_total": "+163,300", "priority": "medium"},
+      {"name": "Camp Expansion", "tiers": 7, "levels_per_tier": 3, "effect": "Training Capacity", "grand_total": "+204", "priority": "medium"},
+      {"name": "Bandaging", "tiers": 7, "levels_per_tier": 3, "effect": "Healing Speed", "grand_total": "+40.80%", "priority": "medium"},
+      {"name": "Trainer Tools", "tiers": 7, "levels_per_tier": 3, "effect": "Training Speed", "grand_total": "+202.20%", "priority": "high"},
+      {"name": "Command Tactics", "tiers": 3, "levels_per_tier": 1, "effect": "March Queues", "grand_total": "+3", "priority": "high"}
+    ]
+  },
+  "economy_tree": {
+    "total_cost": {"meat": 162920000, "wood": 162920000, "coal": 32400000, "iron": 8090000, "steel": 3220000},
+    "total_time_days": 166,
+    "items": [
+      {"name": "Meat Output", "tiers": 6, "levels_per_tier": 3, "effect": "Hunter's Hut Output", "grand_total": "+119.50%"},
+      {"name": "Wood Output", "tiers": 6, "levels_per_tier": 3, "effect": "Sawmill Output", "grand_total": "+119.50%"},
+      {"name": "Coal Output", "tiers": 6, "levels_per_tier": 3, "effect": "Coal Mine Output", "grand_total": "+119.50%"},
+      {"name": "Iron Output", "tiers": 6, "levels_per_tier": 3, "effect": "Ironworks Output", "grand_total": "+116.00%"},
+      {"name": "Food Gathering", "tiers": 6, "levels_per_tier": 3, "effect": "Meat Gathering Speed", "grand_total": "+242.50%"},
+      {"name": "Wood Gathering", "tiers": 6, "levels_per_tier": 3, "effect": "Wood Gathering Speed", "grand_total": "+242.50%"},
+      {"name": "Coal Mining", "tiers": 6, "levels_per_tier": 3, "effect": "Coal Gathering Speed", "grand_total": "+242.50%"},
+      {"name": "Iron Mining", "tiers": 6, "levels_per_tier": 3, "effect": "Iron Gathering Speed", "grand_total": "+242.50%"}
+    ]
+  },
+  "battle_tree": {
+    "total_cost": {"meat": 901100000, "wood": 901100000, "coal": 180580000, "iron": 45260000, "steel": 16430000},
+    "total_time_days": 931,
+    "all_troops": [
+      {"name": "Weapons Prep", "effect": "All Troops Attack", "grand_total": "+47.25%"},
+      {"name": "Special Defensive Training", "effect": "All Troops Defense", "grand_total": "+47.25%"},
+      {"name": "Assault Techniques", "effect": "All Troops Lethality", "grand_total": "+47.25%"},
+      {"name": "Survival Techniques", "effect": "All Troops Health", "grand_total": "+47.25%"},
+      {"name": "Regimental Expansion", "effect": "Deployment Capacity", "grand_total": "varies"}
+    ],
+    "troop_specific": {
+      "infantry": [
+        {"name": "Reprisal Tactics", "stat": "Attack", "grand_total": "+111.75%"},
+        {"name": "Defensive Formation", "stat": "Defense", "grand_total": "+111.75%"},
+        {"name": "Close Combat", "stat": "Lethality", "grand_total": "+111.75%"},
+        {"name": "Shield Upgrade", "stat": "Health", "grand_total": "+111.75%"}
+      ],
+      "marksman": [
+        {"name": "Precision Targeting", "stat": "Attack", "grand_total": "+111.75%"},
+        {"name": "Picket Lines", "stat": "Defense", "grand_total": "+111.75%"},
+        {"name": "Targeted Sniping", "stat": "Lethality", "grand_total": "+111.75%"},
+        {"name": "Marksman Armor", "stat": "Health", "grand_total": "+111.75%"}
+      ],
+      "lancer": [
+        {"name": "Skirmishing", "stat": "Attack", "grand_total": "+111.75%"},
+        {"name": "Bulwark Formations", "stat": "Defense", "grand_total": "+111.75%"},
+        {"name": "Lancer Upgrade", "stat": "Lethality", "grand_total": "+111.75%"},
+        {"name": "Lancer Armor", "stat": "Health", "grand_total": "+111.75%"}
+      ]
+    },
+    "tier_levels": {"I": 3, "II": 3, "III": 4, "IV": 5, "V": 6, "VI": 6}
+  },
+  "fc_research": {
+    "unlock": "Furnace 30 / FC1, War Academy building",
+    "currency": "Fire Crystal Shards",
+    "time_per_troop_type_days": 271,
+    "shared_items": [
+      {"name": "Flame Squad", "levels": 5, "effect": "Deployment Capacity", "total": "+1,000"},
+      {"name": "Flame Legion", "levels": 12, "effect": "Rally Capacity", "total": "+30,000+"}
+    ],
+    "per_troop_items": {
+      "pattern": "Same structure for Infantry/Marksman/Lancer",
+      "items": [
+        {"role": "Health", "levels": 8, "total": "+25.00%", "names": ["Flame Shield", "Crystal Armor", "Blazing Armor"]},
+        {"role": "Lethality", "levels": 8, "total": "+25.00%", "names": ["Flame Strike", "Crystal Vision", "Blazing Charge"]},
+        {"role": "Attack", "levels": 12, "total": "+39.00%", "names": ["Flame Tomahawk", "Crystal Arrow", "Blazing Lance"]},
+        {"role": "Defense", "levels": 12, "total": "+39.00%", "names": ["Flame Protection", "Crystal Protection", "Blazing Guardian"]},
+        {"role": "T11 Unlock", "levels": 1, "total": "Unlocks T11 troops", "time_days": 91, "names": ["Helios Infantry", "Helios Marksman", "Helios Lancer"]},
+        {"role": "First Aid", "levels": 10, "total": "-15% Heal Time, +20% DEF", "names": ["Helios Inf. First Aid", "Helios Mark. First Aid", "Helios Lancer First Aid"]},
+        {"role": "Training", "levels": 10, "total": "-50% Training Cost, +1,000 Deploy", "names": ["Helios Inf. Training", "Helios Mark. Training", "Helios Lancer Training"]}
+      ]
+    }
+  }
+}

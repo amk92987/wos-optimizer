@@ -1,0 +1,64 @@
+{
+  "system": "president_appointments",
+  "retrieved_at": "2026-02-21T00:00:00Z",
+  "sources": [
+    {"source_id": "wos_wiki", "url": "https://www.whiteoutsurvival.wiki/president/", "confidence": "A"},
+    {"source_id": "whiteoutdata", "url": "https://whiteoutdata.com/others/president-and-appointments/", "confidence": "A"},
+    {"source_id": "official_help", "url": "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/faq/8594-supreme-president-perks/", "confidence": "A"}
+  ],
+  "data_completeness": "complete",
+  "overview": {
+    "unlock": "Win Castle Battle (Sunfire Castle)",
+    "apply_requirement": "Furnace Level 16+",
+    "description": "President can appoint 6 Ministers (buffs) and 6 Criminals (debuffs)"
+  },
+  "minister_positions": [
+    {
+      "position": "Vice President",
+      "normal_buffs": {"construction_speed": 10, "research_speed": 10, "training_speed": 10},
+      "supreme_buffs": {"construction_speed": 15, "research_speed": 15, "training_speed": 15},
+      "special": "Minister of Interior can also appoint/remove officials"
+    },
+    {
+      "position": "Minister of the Interior",
+      "normal_buffs": {"resource_production": 80},
+      "supreme_buffs": {"resource_production": 120}
+    },
+    {
+      "position": "Minister of Health",
+      "normal_buffs": {"healing_speed": 100, "infirmary_capacity": 5000},
+      "supreme_buffs": {"healing_speed": 150, "infirmary_capacity": 7500}
+    },
+    {
+      "position": "Minister of Defense",
+      "normal_buffs": {"troop_lethality": 10},
+      "supreme_buffs": {"troop_lethality": 15}
+    },
+    {
+      "position": "Minister of Strategy",
+      "normal_buffs": {"troop_attack": 5, "deployment_capacity": 2500},
+      "supreme_buffs": {"troop_attack": 8, "deployment_capacity": 3750}
+    },
+    {
+      "position": "Minister of Education",
+      "normal_buffs": {"training_speed": 50, "training_capacity": 200},
+      "supreme_buffs": {"training_speed": 75, "training_capacity": 300}
+    }
+  ],
+  "presidential_skills": [
+    {"name": "Mobilize", "effect": "+30% Training Speed (state-wide)", "duration": "24 hours", "cooldown": "~7 days", "authority_cost": 45000},
+    {"name": "Mercantilism", "effect": "+10% Construction Speed (state-wide)", "duration": "24 hours", "cooldown": "~7 days", "authority_cost": 45000},
+    {"name": "Research Advancement", "effect": "+10% Research Speed (state-wide)", "duration": "24 hours", "cooldown": "~7 days", "authority_cost": 45000},
+    {"name": "Medical Advancement", "effect": "+50% Healing Speed (state-wide)", "duration": "24 hours", "cooldown": "~7 days", "authority_cost": 45000}
+  ],
+  "supreme_president": {
+    "personal_buff": {"troop_attack": 7.5, "troop_defense": 7.5, "troop_lethality": 7.5, "troop_health": 7.5},
+    "description": "Wins both phases of SvS. Gets boosted minister buffs + personal combat buff."
+  },
+  "cooldowns": {
+    "perk_swap": "5 minutes (President only)",
+    "appoint_remove": "2 hours per position",
+    "rapid_removal": "30 minutes",
+    "presidential_skills": "~6 days 23 hours 50 minutes"
+  }
+}

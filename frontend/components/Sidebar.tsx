@@ -41,6 +41,7 @@ const userNavigation = [
       { href: '/quick-tips', label: 'Quick Tips', icon: '💡' },
       { href: '/battle-tactics', label: 'Battle Tactics', icon: '🎯' },
       { href: '/daybreak', label: 'Daybreak Island', icon: '🏝️' },
+      { href: '/research', label: 'Research & Buffs', icon: '🔬' },
     ],
   },
   {

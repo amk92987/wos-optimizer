@@ -1,0 +1,77 @@
+{
+  "system": "chiefs_house",
+  "retrieved_at": "2026-02-21T00:00:00Z",
+  "sources": [
+    {"source_id": "wos_wiki", "url": "https://www.whiteoutsurvival.wiki/buildings/chiefs-house/", "confidence": "A"},
+    {"source_id": "whiteoutdata", "url": "https://whiteoutdata.com/buildings/chiefs-house-and-chief-order/", "confidence": "A"},
+    {"source_id": "whiteoutdata_construction", "url": "https://whiteoutdata.com/guides/how-to-reduce-construction-time/", "confidence": "A"}
+  ],
+  "data_completeness": "complete",
+  "overview": {
+    "unlock": "Furnace Level 6",
+    "currency": "Contentment",
+    "contentment_purchase": "50,000 = 50 Gems",
+    "max_level": 30,
+    "description": "Provides 6 Chief Orders that buff construction speed, resource production, healing, and mood"
+  },
+  "chief_orders": [
+    {
+      "name": "Urgent Mobilization",
+      "aliases": ["Night Shifts", "Overdrive"],
+      "effect": "Forces survivors at all worksites to work for 48 hours (Survivor Time)",
+      "contentment_cost": 50000,
+      "cooldown": "8 hours",
+      "side_effect": "-10 Mood"
+    },
+    {
+      "name": "Rush Job",
+      "effect": "Provides 5 days worth of resources from all worksites instantly",
+      "contentment_cost": 150000,
+      "cooldown": "24 hours",
+      "side_effect": null
+    },
+    {
+      "name": "Comprehensive Care",
+      "aliases": ["Healing Order"],
+      "effect": "Instantly heals all sick survivors in the city",
+      "contentment_cost": 150000,
+      "cooldown": "4 hours",
+      "side_effect": null
+    },
+    {
+      "name": "Double Time",
+      "effect": "Reduces construction/upgrade time by 20% for builds started within 5 minutes",
+      "contentment_cost": 800000,
+      "cooldown": "24 hours",
+      "side_effect": null,
+      "notes": "Must activate BEFORE starting construction. 5-minute activation window. Stacks additively with pet construction buff and other speed buffs."
+    },
+    {
+      "name": "Productivity Day",
+      "effect": "+100% output across all resource worksites for 24 hours (Survivor Time)",
+      "contentment_cost": 50000,
+      "cooldown": "12 hours",
+      "side_effect": "-10 Mood"
+    },
+    {
+      "name": "Festivities",
+      "effect": "+50 Mood, +30 Comfort during Day of City Festivities",
+      "contentment_cost": 50000,
+      "cooldown": "24 hours",
+      "side_effect": "Survivors stop working during festivities"
+    }
+  ],
+  "construction_speed_stacking": {
+    "sources": [
+      {"name": "Double Time (Chief Order)", "bonus": "20%", "type": "temporary", "duration": "5-min window, 24h cooldown"},
+      {"name": "Cave Hyena (Pet Skill)", "bonus": "15%", "type": "temporary", "duration": "5-min window"},
+      {"name": "Tooling Up VII (Research)", "bonus": "27.80%", "type": "permanent"},
+      {"name": "Zinman Bastionist (Hero)", "bonus": "15%", "type": "permanent"},
+      {"name": "Alliance Tech Adaptive Tools", "bonus": "5%", "type": "permanent"},
+      {"name": "Vice President Appointment", "bonus": "10-15%", "type": "temporary", "duration": "duration of term"},
+      {"name": "Mercantilism (Presidential Skill)", "bonus": "10%", "type": "temporary", "duration": "24h, ~7d cooldown"}
+    ],
+    "stacking_type": "additive",
+    "confirmation": "WhiteoutData confirms Hyena + Double Time = 35% (20+15), suggesting additive stacking"
+  }
+}
