@@ -46,12 +46,12 @@ export default function BeginnerGuidePage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6 border-b border-frost/10 pb-4">
+        <div className="flex flex-wrap gap-1.5 mb-6 border-b border-frost/10 pb-4 lg:flex-nowrap lg:gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center ${
                 activeTab === tab.key
                   ? 'bg-ice/20 text-ice'
                   : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'
@@ -126,7 +126,7 @@ function GettingStartedTab() {
             <div className="bg-surface rounded-lg p-4">
               <h4 className="font-medium text-frost mb-2">Early hero priorities:</h4>
               <ul className="text-sm text-frost-muted space-y-1">
-                <li>• Focus on 5-6 heroes maximum (one main lineup)</li>
+                <li>• Focus on 3-5 heroes maximum (F2P: stick to 3 core heroes)</li>
                 <li>• Level them evenly rather than maxing one</li>
                 <li>• Prioritize expedition skills over exploration skills for combat</li>
                 <li>• Legendary heroes {'>'} Epic heroes for long-term investment</li>
@@ -159,15 +159,16 @@ function GettingStartedTab() {
 
 function ProgressionTab() {
   const milestones = [
-    { range: '1-10', name: 'Tutorial Phase', desc: 'Basic buildings, T1-T3 troops, initial heroes. Just follow the guide.' },
-    { range: '11-14', name: 'Early Game', desc: 'More building slots, T4 troops unlock, Alliance features. Join an active alliance ASAP.' },
+    { range: '1-8', name: 'Tutorial Phase', desc: 'Basic buildings, T1-T3 troops, initial heroes. Just follow the guide.' },
+    { range: '9', name: 'Research Center', desc: 'Research unlocks! Always keep something researching. Prioritize Tool Enhancement at each tier for research speed.' },
+    { range: '10-14', name: 'Early Game', desc: 'More building slots, T4 troops unlock, Alliance features. Join an active alliance ASAP.' },
     { range: '15', name: 'Hero Gear Unlocks', desc: 'You can now equip gear on heroes. Start collecting gear materials.' },
-    { range: '16-18', name: 'Mid Progression', desc: 'T5 troops, more research. Events become more important.' },
-    { range: '19', name: 'Daybreak Island', desc: 'Unlocks island for combat buffs. Don\'t rush this - focus on Furnace first.' },
+    { range: '16-18', name: 'Pets Unlock', desc: 'T5 troops. Pets unlock at F18 (requires 55+ server days). Start leveling combat pets.' },
+    { range: '19', name: 'Daybreak Island', desc: 'Unlocks combat buff decorations. Build Mythic decorations (+10% stats) for your main troop type.' },
     { range: '20-24', name: 'Tier 6 Era', desc: 'T6 troops unlock. You\'re now a real contributor in alliance battles.' },
-    { range: '25', name: 'Labyrinth & Glowstones', desc: 'New resource system. Great source of mythic shards and gear.' },
+    { range: '25', name: 'Chief Charms & Labyrinth', desc: 'Chief Charms unlock — huge stat bonuses for your main troop type. Labyrinth provides mythic shards.' },
     { range: '26-29', name: 'Late Game Prep', desc: 'T7-T8 troops. Focus heavily on hero gear and skills now.' },
-    { range: '30', name: 'FC Unlocks!', desc: 'Fire Crystal system begins. This is the real endgame. T9 troops available.' },
+    { range: '30', name: 'FC Unlocks!', desc: 'Fire Crystal system, War Academy, and Hero Gear Mastery begin. T9 troops available.' },
     { range: 'FC1-FC10', name: 'Fire Crystal Era', desc: 'New upgrade currency (Fire Crystals). Much slower progression but huge power gains.' },
     { range: 'RFC1+', name: 'Refined FC Era', desc: 'Requires Refined Fire Crystals. You\'re now a veteran player.' },
   ];
@@ -230,7 +231,7 @@ function First30DaysTab() {
       title: 'Building Momentum',
       items: [
         'Keep pushing Furnace level (aim for F15+ by day 14)',
-        'Start leveling your best 5-6 heroes evenly',
+        'Start leveling your best 3-5 heroes evenly',
         'Participate in every event, even if you can\'t complete them',
         'Learn which events are worth spending resources on',
         'Build troops to meet alliance rally requirements',
@@ -296,6 +297,9 @@ function ResourcesTab() {
               <li>• <strong className="text-frost">Hero Shards</strong> - Save for hero upgrade events</li>
               <li>• <strong className="text-frost">Hero XP items</strong> - Save for hero leveling events</li>
               <li>• <strong className="text-frost">Skill Books</strong> - Save for skill upgrade events</li>
+              <li>• <strong className="text-frost">Fire Crystals</strong> - Save for SvS Prep Day 1 (2,000 pts each)</li>
+              <li>• <strong className="text-frost">Mithril</strong> - Save for SvS Prep Day 4 (40,000 pts each!)</li>
+              <li>• <strong className="text-frost">Wild Marks</strong> - Save for SvS Day 3 (Advanced = 15,000 pts each)</li>
             </ul>
           </div>
 
@@ -435,6 +439,7 @@ function GameSystemsTab() {
             </div>
             <p className="text-sm text-frost-muted">
               Pick <strong className="text-frost">ONE main type</strong> and specialize. Most players choose based on their best heroes.
+              The class counter bonus is only ~10% — hero skills and stat investments matter far more than getting the matchup right.
             </p>
           </div>
 
@@ -450,12 +455,14 @@ function GameSystemsTab() {
 
           {/* Pets */}
           <div>
-            <h3 className="text-lg font-semibold text-ice mb-2">Pets</h3>
-            <p className="text-frost-muted mb-2">Unlocked later, pets provide passive bonuses and active abilities:</p>
+            <h3 className="text-lg font-semibold text-ice mb-2">Pets (F18 + 55 days)</h3>
+            <p className="text-frost-muted mb-2">15 pets across 7 generations with combat buffs and daily utility:</p>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Level pets with Pet Food</li>
-              <li>• Advance pets with Taming Manuals</li>
-              <li>• Each pet specializes in different bonuses (combat, economy, etc.)</li>
+              <li>• <strong className="text-frost">Combat pets</strong> — buff troop stats for 2 hours (Attack, Defense, Lethality, Health). Always activate before battles!</li>
+              <li>• <strong className="text-frost">Utility pets</strong> — daily use abilities (+Stamina, +Pet Food, complete resource tiles, unearth items)</li>
+              <li>• <strong className="text-frost">Passive bonuses</strong> — every pet level adds permanent ATK/DEF %. SSR pets at L100 give +33.5% each</li>
+              <li>• <strong className="text-frost">Refinement</strong> — uses Wild Marks to randomly boost pet stats further. Save marks for SvS Day 3</li>
+              <li>• You can activate multiple pets at once — no limit</li>
             </ul>
           </div>
 
@@ -472,12 +479,14 @@ function GameSystemsTab() {
 
           {/* Research */}
           <div>
-            <h3 className="text-lg font-semibold text-ice mb-2">Research</h3>
-            <p className="text-frost-muted mb-2">Three trees: Economy, Combat, Hero.</p>
+            <h3 className="text-lg font-semibold text-ice mb-2">Research (F9+)</h3>
+            <p className="text-frost-muted mb-2">Three trees: Battle, Growth, Economy.</p>
             <ul className="text-sm text-frost-muted space-y-1">
-              <li>• Early game: Balance economy and combat</li>
-              <li>• Mid game: Focus on troop stats in combat tree</li>
-              <li>• <strong className="text-frost">Always research something</strong> - dead time is wasted time</li>
+              <li>• <strong className="text-frost">Tool Enhancement FIRST</strong> at each tier (I-VII) — gives ~35% total research speed. Do this before anything else.</li>
+              <li>• <strong className="text-frost">Lethality is a multiplier</strong> — Attack and Lethality multiply together. +10% each = +21% damage. Prioritize Lethality.</li>
+              <li>• Priority order: Battle tree {'>'} Growth tree {'>'} Economy tree</li>
+              <li>• Research your main troop type stats first before touching others</li>
+              <li>• <strong className="text-frost">Always research something</strong> — dead time is wasted time</li>
             </ul>
           </div>
         </div>
@@ -527,7 +536,7 @@ function GameSystemsTab() {
 
 function TipsTab() {
   const mistakes = [
-    { title: 'Spreading heroes too thin', desc: 'Focus on 5-6 heroes, not 15. A few strong heroes beat many weak ones.' },
+    { title: 'Spreading heroes too thin', desc: 'Focus on 3-5 heroes, not 15. A few strong heroes beat many weak ones.' },
     { title: 'Ignoring events', desc: 'Events multiply your progress. Always check what\'s running before spending resources.' },
     { title: 'Rushing troops over heroes', desc: 'Troops die. Heroes don\'t. Prioritize hero investment.' },
     { title: 'Spending gems randomly', desc: 'Gems are premium currency. Save for Lucky Wheel and VIP shop refreshes.' },
@@ -551,6 +560,8 @@ function TipsTab() {
     { task: 'Keep buildings/research queued', desc: 'No idle time' },
     { task: 'Collect Daybreak Island essence', desc: 'If unlocked (caps at 12hrs)' },
     { task: 'Arena battles', desc: 'Use your attempts for tokens. Do these as close to reset as possible for higher rankings.' },
+    { task: 'Keep Furnace at MAX power', desc: 'Never let coal run out. Survivors freeze and become unhappy/sick without heat.' },
+    { task: 'Activate utility pets', desc: 'Arctic Wolf (+Stamina), Musk Ox (resource tile), Giant Tapir (+Pet Food), Giant Elk (item) — free daily value.' },
   ];
 
   return (
