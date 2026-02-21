@@ -108,7 +108,7 @@ export default function CombatPage() {
 
           {/* Troop Type Advantage */}
           <div className="bg-surface rounded-lg p-4">
-            <h3 className="font-semibold text-frost mb-3">Troop Type Advantage (~30% bonus damage)</h3>
+            <h3 className="font-semibold text-frost mb-3">Troop Type Advantage (10% attack bonus)</h3>
             <div className="flex flex-wrap items-center justify-center gap-3 text-center">
               <div className="flex flex-col items-center">
                 <span className="text-2xl mb-1">🗡️</span>
@@ -142,12 +142,12 @@ export default function CombatPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6 border-b border-frost/10 pb-4">
+        <div className="flex flex-wrap gap-1.5 mb-6 border-b border-surface-border pb-4 lg:flex-nowrap lg:gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center ${
                 activeTab === tab.key
                   ? 'bg-ice text-background'
                   : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'

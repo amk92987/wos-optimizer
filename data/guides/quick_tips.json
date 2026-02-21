@@ -176,7 +176,7 @@
         },
         {
           "tip": "Class counters: Infantry > Lancer > Marksman > Infantry",
-          "detail": "~30% damage bonus against weak class. Match your composition to counter enemy's main type.",
+          "detail": "10% attack bonus against weak class. Match your composition to counter enemy's main type.",
           "priority": "medium"
         },
         {

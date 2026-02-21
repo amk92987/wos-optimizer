@@ -361,7 +361,7 @@ const categoryTips: Record<string, { name: string; icon: string; tips: { tip: st
       { tip: "Rally joining: ONLY leftmost hero's expedition skill applies", detail: "Put Jessie (+25% DMG) or Jeronimo in leftmost slot. Other heroes' expedition skills are wasted.", priority: 'critical' },
       { tip: 'Exploration skills for PvE, Expedition skills for PvP', detail: 'Bear Trap, Labyrinth = Exploration. SvS, rallies, Crazy Joe, garrison = Expedition. Don\'t mix them up.', priority: 'high' },
       { tip: 'Sergey in leftmost slot for DEFENSE', detail: "Sergey's -20% DMG taken is best defensive skill. Use him when reinforcing garrisons.", priority: 'high' },
-      { tip: 'Class counters: Infantry > Lancer > Marksman > Infantry', detail: "~30% damage bonus against weak class. Match your composition to counter enemy's main type.", priority: 'medium' },
+      { tip: 'Class counters: Infantry > Lancer > Marksman > Infantry', detail: "10% attack bonus against weak class. Match your composition to counter enemy's main type.", priority: 'medium' },
     ],
   },
   chief_gear: {

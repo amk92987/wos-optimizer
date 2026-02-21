@@ -75,7 +75,7 @@ Comprehensive inventory of all game data, sources, confidence levels, and where 
 **Key Data Points:**
 - Power per unit by tier and class
 - Base stats: defense, lethality, attack, health, load capacity
-- Class counters: ~30% bonus damage (Infantry > Lancer > Marksman > Infantry)
+- Class counters: 10% attack bonus (Infantry > Lancer > Marksman > Infantry); +10% defense at T7
 
 **Verification Checklist:**
 - [ ] Verify T10-T11 power values against in-game
@@ -190,7 +190,7 @@ Comprehensive inventory of all game data, sources, confidence levels, and where 
 
 **Verification Checklist:**
 - [ ] Test damage formula against actual combat results
-- [ ] Verify class counter bonus (stated as ~30%)
+- [x] Verify class counter bonus — confirmed 10% attack (T1 passive), +10% defense (T7 passive)
 
 ---
 
