@@ -1,0 +1,552 @@
+{
+  "system": "pet_refinement",
+  "retrieved_at": "2026-02-21T00:00:00Z",
+  "sources": [
+    {
+      "source_id": "SRC_CENTURYGAMES_PET_SYSTEM",
+      "url": "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/section/1275-pet-system/",
+      "type": "official",
+      "confidence": "A",
+      "notes": "Official Century Games help center. 8 FAQs covering pet refinement mechanics, secondary stats quality, and value decrease warnings."
+    },
+    {
+      "source_id": "SRC_CENTURYGAMES_PET_ITEMS",
+      "url": "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/faq/6650-what-are-the-functions-of-the-new-pet-items/",
+      "type": "official",
+      "confidence": "A",
+      "notes": "Official FAQ defining Common Wild Mark (refinement) and Advanced Wild Mark (advanced refinement) as distinct items."
+    },
+    {
+      "source_id": "SRC_CENTURYGAMES_REFINE_DECREASE",
+      "url": "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/faq/6656-why-does-the-refinement-value-of-my-pet-decrease/",
+      "type": "official",
+      "confidence": "A",
+      "notes": "Official FAQ explaining refinement is irreversible, stats change on Replace, warning prompt on substantial stat drops."
+    },
+    {
+      "source_id": "SRC_WHITEOUTSURVIVAL_APP_PETS",
+      "url": "https://whiteoutsurvival.app/pets/",
+      "type": "data_site",
+      "confidence": "A",
+      "notes": "Comprehensive pet database with max refinement percentages, stat progression tables, and skill scaling for all 14 pets."
+    },
+    {
+      "source_id": "SRC_WHITEOUTSURVIVAL_WIKI_PETS",
+      "url": "https://www.whiteoutsurvival.wiki/pets/",
+      "type": "wiki",
+      "confidence": "A",
+      "notes": "Wiki with per-pet pages showing base vs post-advancement stat progression tables."
+    },
+    {
+      "source_id": "SRC_WIKI_COMMON_WILD_MARK",
+      "url": "https://www.whiteoutsurvival.wiki/items/common-wild-mark/",
+      "type": "wiki",
+      "confidence": "A",
+      "notes": "Item page for Common Wild Mark with description and sources."
+    },
+    {
+      "source_id": "SRC_WIKI_ADVANCED_WILD_MARK",
+      "url": "https://www.whiteoutsurvival.wiki/items/advanced-wild-mark/",
+      "type": "wiki",
+      "confidence": "A",
+      "notes": "Item page for Advanced Wild Mark with description and sources."
+    },
+    {
+      "source_id": "SRC_WOS_WIKI_WILD_MARK",
+      "url": "https://wos.wiki/Wild_Mark",
+      "type": "wiki",
+      "confidence": "B",
+      "notes": "Community wiki page listing sources for both wild mark types."
+    },
+    {
+      "source_id": "SRC_WOS_INFO_PETGUIDE",
+      "url": "https://www.wos-info.com/petguide",
+      "type": "community_tool",
+      "confidence": "B",
+      "notes": "Community calculator with estimated CWM costs per tier. Values are experimental probability estimates. Has data for Giant Tapir and Snow Leopard refinement costs."
+    },
+    {
+      "source_id": "SRC_SIMPLEGAMEGUIDE_PETS",
+      "url": "https://simplegameguide.com/whiteout-survival-pet-system/",
+      "type": "guide",
+      "confidence": "B",
+      "notes": "Detailed guide covering Replace/Confirm flow, irreversibility, and secondary stat quality protection."
+    },
+    {
+      "source_id": "SRC_WHITEOUTDATA_PETS",
+      "url": "https://whiteoutdata.com/guides/pets/",
+      "type": "data_site",
+      "confidence": "B",
+      "notes": "Pet guide covering refinement strategy and wild mark usage."
+    },
+    {
+      "source_id": "SRC_LDCLOUD_PET_GUIDE",
+      "url": "https://www.ldcloud.net/blog/whiteout-survival-en-pet-guide-and-tips",
+      "type": "guide",
+      "confidence": "B",
+      "notes": "Comprehensive guide describing refinement as customizing offense/defense/economy lean."
+    },
+    {
+      "source_id": "SRC_LDPLAYER_PET_GUIDE",
+      "url": "https://www.ldplayer.net/blog/whiteout-survival-pet-guide.html",
+      "type": "guide",
+      "confidence": "B",
+      "notes": "In-depth guide noting refinement is random and stats can decrease."
+    },
+    {
+      "source_id": "SRC_COMMONSENSEGAMER_PETS",
+      "url": "https://commonsensegamer.com/whiteout-survival-pets-guide/",
+      "type": "guide",
+      "confidence": "B",
+      "notes": "Guide recommending bulk refinement when marks are plentiful."
+    },
+    {
+      "source_id": "SRC_WOSTOOLS_SVS",
+      "url": "https://wostools.net/svs-prep-phase-guide",
+      "type": "community_tool",
+      "confidence": "B",
+      "notes": "SvS prep guide with Day 3 point values for wild mark usage."
+    },
+    {
+      "source_id": "SRC_LDSHOP_PET_GUIDE",
+      "url": "https://www.ldshop.gg/blog/guide/whiteout-survival-pet-guide.html",
+      "type": "guide",
+      "confidence": "C",
+      "notes": "General pet guide covering refinement basics."
+    },
+    {
+      "source_id": "SRC_THERIA_PET_GUIDE",
+      "url": "https://theriagames.com/guide/whiteout-survival-pet-guide/",
+      "type": "guide",
+      "confidence": "C",
+      "notes": "General pet guide with refinement overview."
+    }
+  ],
+
+  "overview": {
+    "description": "Pet Refinement is a secondary enhancement system separate from pet leveling. It uses Wild Marks to randomly adjust the pet's troop buff percentages (Attack and Defense). Refinement provides additional stat bonuses on top of the base level stats, with a maximum cap that varies by pet rarity and generation.",
+    "unlock_requirements": {
+      "furnace_level": 18,
+      "state_age_days": 55,
+      "building": "Beast Cage",
+      "notes": "Same as pet system unlock. Refinement is available once you have a pet."
+    },
+    "relationship_to_leveling": {
+      "description": "Pet leveling (via Pet Food) provides base Attack and Defense % bonuses that increase deterministically with each level. Refinement (via Wild Marks) provides a SEPARATE additional bonus percentage on top of level bonuses. The max refinement value caps how high the wild mark bonus can go.",
+      "example": "A Mammoth at L100 provides 33.52% base Attack/Defense from leveling. Refinement via Wild Marks can add up to 49.16% more on top of that.",
+      "confidence": "B",
+      "notes": "The exact relationship between base stats and refinement bonuses is inferred from multiple sources. The wiki shows 'base/refined' values at advancement milestones, but the max refinement percentages from whiteoutsurvival.app are much higher, indicating wild mark refinement is a separate system."
+    }
+  },
+
+  "refinement_mechanics": {
+    "process": {
+      "description": "Using a Wild Mark triggers a random re-roll of the pet's refinement stat bonuses. The new values may be higher or lower than current values. Players then choose whether to accept or reject the new values.",
+      "steps": [
+        "1. Select a pet and tap Refine",
+        "2. Choose Common Wild Mark (standard refinement) or Advanced Wild Mark (advanced refinement)",
+        "3. The game calculates new random stat values",
+        "4. If stats improved: green indicator appears with 'Replace' button",
+        "5. If stats decreased: red indicator appears with warning",
+        "6. Tap 'Replace' to preview the new stats",
+        "7. Tap 'Confirm' to apply the new stats (IRREVERSIBLE)",
+        "8. Tap 'Continue' to skip/reject the roll (Wild Mark is still consumed)"
+      ],
+      "source": "SRC_CENTURYGAMES_REFINE_DECREASE"
+    },
+    "randomness": {
+      "description": "Refinement outcomes are random/probabilistic. Each refinement attempt can increase or decrease individual stat bonuses. This is NOT a guaranteed linear progression.",
+      "confidence": "A",
+      "source": "SRC_CENTURYGAMES_REFINE_DECREASE"
+    },
+    "irreversibility": {
+      "description": "Once you tap Confirm to apply new refinement stats, the change is permanent and cannot be undone.",
+      "source": "SRC_SIMPLEGAMEGUIDE_PETS",
+      "confidence": "A"
+    },
+    "warning_system": {
+      "description": "The game shows a secondary confirmation prompt ONLY when there is a drop in Total Power. It does NOT warn for individual stat line decreases if overall power stays the same or increases.",
+      "source": "SRC_CENTURYGAMES_PET_SYSTEM",
+      "confidence": "A"
+    },
+    "quality_protection": {
+      "description": "If you refine your pet after improving its quality (rarity upgrade), the secondary stats quality will NOT decrease below the new quality tier. This is a floor protection mechanism.",
+      "source": "SRC_CENTURYGAMES_PET_SYSTEM",
+      "confidence": "A"
+    }
+  },
+
+  "stat_types": {
+    "description": "Refinement affects the pet's passive troop buff percentages. All pets provide Attack and Defense bonuses to ALL troops (not troop-type-specific). Refinement adjusts these general Attack/Defense buff percentages.",
+    "refinable_stats": [
+      {
+        "stat": "All Troops Attack",
+        "description": "Percentage bonus to attack for all troop types (Infantry, Lancer, Marksman)",
+        "applies_to": "all_troops"
+      },
+      {
+        "stat": "All Troops Defense",
+        "description": "Percentage bonus to defense for all troop types (Infantry, Lancer, Marksman)",
+        "applies_to": "all_troops"
+      }
+    ],
+    "notes": "Based on whiteoutsurvival.app data, all pets provide Attack and Defense as their two base stat lines from leveling. Refinement adjusts these same stat categories. It is not confirmed whether refinement can also roll Lethality or Health sub-stats.",
+    "confidence": "B",
+    "source": "SRC_WHITEOUTSURVIVAL_APP_PETS"
+  },
+
+  "color_quality_tiers": {
+    "description": "Refinement buffs have a color-coded quality tier that indicates the strength of the current refinement. Tiers progress from lowest to highest quality.",
+    "tiers": [
+      {
+        "tier": "Gray",
+        "description": "Starting/base tier. Lowest refinement quality.",
+        "wild_mark_type": "Common Wild Mark",
+        "notes": "Default state before any refinement."
+      },
+      {
+        "tier": "Green",
+        "description": "First improved tier above gray.",
+        "wild_mark_type": "Common Wild Mark",
+        "notes": "Achievable with moderate CWM investment."
+      },
+      {
+        "tier": "Blue",
+        "description": "Intermediate tier.",
+        "wild_mark_type": "Common Wild Mark",
+        "notes": "Solid improvement. Continue using Common Wild Marks."
+      },
+      {
+        "tier": "Purple",
+        "description": "High tier. Threshold for switching to Advanced Wild Marks.",
+        "wild_mark_type": "Common Wild Mark to reach, Advanced Wild Mark to push higher",
+        "notes": "Community consensus: switch to Advanced Wild Marks once at least one buff reaches Purple quality."
+      },
+      {
+        "tier": "Gold",
+        "description": "Top tier achievable with Advanced Wild Marks.",
+        "wild_mark_type": "Advanced Wild Mark",
+        "notes": "Highest commonly referenced tier. Advanced Wild Marks are more effective at this level."
+      },
+      {
+        "tier": "Orange",
+        "description": "Possible highest tier beyond Gold.",
+        "wild_mark_type": "Advanced Wild Mark",
+        "notes": "Referenced in some sources but less commonly discussed. May be the absolute maximum tier.",
+        "confidence": "C"
+      }
+    ],
+    "confidence": "B",
+    "notes": "Gray/Green/Blue/Purple progression is well-documented across multiple sources. Gold tier is confirmed. Orange tier is mentioned in some guides but less certain.",
+    "sources": ["SRC_WOS_INFO_PETGUIDE", "SRC_WHITEOUTDATA_PETS", "SRC_LDCLOUD_PET_GUIDE"]
+  },
+
+  "wild_marks": {
+    "common_wild_mark": {
+      "description": "A stone imbued with a subtle touch of the wild, which can stir a pet's instincts to some extent. Used for standard pet refinement.",
+      "usage": "Standard refinement. Use for Gray -> Green -> Blue -> Purple tier progression.",
+      "gem_cost": 500,
+      "gem_cost_note": "500 gems per 1 Common Wild Mark from Gem Shop",
+      "sources": [
+        "Gem Shop (500 gems each)",
+        "Pet Adventure",
+        "Growth Missions",
+        "Beast Whisperer Event",
+        "Packs"
+      ],
+      "svs_prep_day3_points": 1150,
+      "confidence": "A",
+      "source": "SRC_WIKI_COMMON_WILD_MARK"
+    },
+    "advanced_wild_mark": {
+      "description": "A stone imbued with a subtle touch of the wild, which can fully unleash a pet's potential. Used for pet advanced refinement.",
+      "usage": "Advanced refinement. Use ONLY after at least one pet buff reaches Purple quality. More effective at higher tiers.",
+      "sources": [
+        "Level 3 Treasure Spots",
+        "Ally Treasure Chests",
+        "Tundra Trading Station",
+        "Arena Shop",
+        "Canyon Shop",
+        "Alliance Championship Shop",
+        "Beast Whisperer Event",
+        "Pet Weekly Card",
+        "Mystery Shop",
+        "Packs"
+      ],
+      "svs_prep_day3_points": 15000,
+      "confidence": "A",
+      "source": "SRC_WIKI_ADVANCED_WILD_MARK"
+    },
+    "strategy": {
+      "description": "Use Common Wild Marks to progress refinement from Gray through Blue tiers. Once at least one buff reaches Purple quality, switch to Advanced Wild Marks for more efficient progression toward Gold tier. Using Advanced Wild Marks before Purple is wasteful.",
+      "key_rules": [
+        "Always use Common Wild Marks for Gray -> Green -> Blue progression",
+        "Switch to Advanced Wild Marks ONLY when at least one buff reaches Purple",
+        "Advanced Wild Marks are more effective at higher quality tiers (Purple+)",
+        "Save Wild Marks for SvS Prep Day 3 for maximum point value",
+        "Refine whenever you have marks available - take solid improvements when offered",
+        "Don't be greedy - accept good rolls rather than risking decreases"
+      ],
+      "confidence": "B",
+      "sources": ["SRC_WOS_INFO_PETGUIDE", "SRC_WHITEOUTDATA_PETS", "SRC_COMMONSENSEGAMER_PETS"]
+    }
+  },
+
+  "max_refinement_by_pet": {
+    "description": "Maximum total refinement bonus percentage achievable for each pet. Higher rarity and later generation pets have higher caps.",
+    "source": "SRC_WHITEOUTSURVIVAL_APP_PETS",
+    "confidence": "A",
+    "pets": [
+      {
+        "name": "Cave Hyena",
+        "rarity": "Common",
+        "max_level": 50,
+        "max_refinement_pct": 6.70,
+        "max_level_base_attack_defense_pct": 5.02
+      },
+      {
+        "name": "Arctic Wolf",
+        "rarity": "N",
+        "max_level": 60,
+        "max_refinement_pct": 13.41,
+        "max_level_base_attack_defense_pct": 10.06
+      },
+      {
+        "name": "Musk Ox",
+        "rarity": "N",
+        "max_level": 60,
+        "max_refinement_pct": 13.41,
+        "max_level_base_attack_defense_pct": 10.06
+      },
+      {
+        "name": "Giant Tapir",
+        "rarity": "R",
+        "max_level": 70,
+        "max_refinement_pct": 20.11,
+        "max_level_base_attack_defense_pct": null,
+        "notes": "Base stat at max level not confirmed"
+      },
+      {
+        "name": "Titan Roc",
+        "rarity": "R",
+        "max_level": 70,
+        "max_refinement_pct": 20.11,
+        "max_level_base_attack_defense_pct": null,
+        "notes": "Base stat at max level not confirmed"
+      },
+      {
+        "name": "Giant Elk",
+        "rarity": "SR",
+        "max_level": 80,
+        "max_refinement_pct": 29.05,
+        "max_level_base_attack_defense_pct": 21.78
+      },
+      {
+        "name": "Snow Leopard",
+        "rarity": "SR",
+        "max_level": 80,
+        "max_refinement_pct": 29.05,
+        "max_level_base_attack_defense_pct": null,
+        "notes": "Base stat at max level not confirmed, expected similar to Giant Elk"
+      },
+      {
+        "name": "Cave Lion",
+        "rarity": "SSR",
+        "max_level": 100,
+        "max_refinement_pct": 44.69,
+        "max_level_base_attack_defense_pct": 33.52,
+        "generation": "Gen 4"
+      },
+      {
+        "name": "Snow Ape",
+        "rarity": "SSR",
+        "max_level": 100,
+        "max_refinement_pct": 44.69,
+        "max_level_base_attack_defense_pct": 33.52,
+        "generation": "Gen 4"
+      },
+      {
+        "name": "Iron Rhino",
+        "rarity": "SSR",
+        "max_level": 100,
+        "max_refinement_pct": 44.69,
+        "max_level_base_attack_defense_pct": 33.52,
+        "generation": "Gen 5"
+      },
+      {
+        "name": "Saber-tooth Tiger",
+        "rarity": "SSR",
+        "max_level": 100,
+        "max_refinement_pct": 49.16,
+        "max_level_base_attack_defense_pct": 33.52,
+        "generation": "Gen 5"
+      },
+      {
+        "name": "Mammoth",
+        "rarity": "SSR",
+        "max_level": 100,
+        "max_refinement_pct": 49.16,
+        "max_level_base_attack_defense_pct": 33.52,
+        "generation": "Gen 6"
+      },
+      {
+        "name": "Frost Gorilla",
+        "rarity": "SSR",
+        "max_level": 100,
+        "max_refinement_pct": 49.16,
+        "max_level_base_attack_defense_pct": 33.52,
+        "generation": "Gen 6"
+      },
+      {
+        "name": "Frostscale Chameleon",
+        "rarity": "SSR",
+        "max_level": 100,
+        "max_refinement_pct": 58.10,
+        "max_level_base_attack_defense_pct": 33.52,
+        "generation": "Gen 7",
+        "notes": "Newest SSR pet with highest refinement cap. Unlocks at 450 days."
+      }
+    ]
+  },
+
+  "estimated_cwm_costs_by_tier": {
+    "description": "Estimated Common Wild Mark (CWM) costs to reach each quality tier. These are EXPERIMENTAL ESTIMATES based on probability calculations and may differ significantly in actual gameplay.",
+    "source": "SRC_WOS_INFO_PETGUIDE",
+    "confidence": "C",
+    "disclaimer": "Values are experimental estimates. Actual costs vary due to randomness.",
+    "examples": {
+      "giant_tapir_R": {
+        "to_green": {"cwm_cost": 76, "max_buff_pct": 6.03},
+        "to_blue": {"cwm_cost": 227, "max_buff_pct": 10.06},
+        "expected_at_500_cwm": 7.02
+      },
+      "snow_leopard_SR": {
+        "to_green": {"cwm_cost": 96, "max_buff_pct": 13.41},
+        "to_blue": {"cwm_cost": 372, "max_buff_pct": 22.35},
+        "to_purple": {"cwm_cost": 1491, "max_buff_pct": 31.28},
+        "expected_at_500_cwm": 12.84,
+        "expected_at_1000_cwm": 16.21
+      }
+    }
+  },
+
+  "svs_integration": {
+    "description": "Wild Marks give SvS Prep points when used on Day 3 (Beast Slay day). Save Wild Marks for SvS for maximum value.",
+    "day_3_points": {
+      "advanced_wild_mark": 15000,
+      "common_wild_mark": 1150,
+      "pet_advancement_score_increase_by_1": 50
+    },
+    "strategy": "Save ALL Wild Marks for SvS Prep Day 3. Advanced Wild Marks are worth 15,000 points each (same as Lucky Wheel tickets). Common Wild Marks are worth 1,150 points each.",
+    "confidence": "A",
+    "sources": ["SRC_WOSTOOLS_SVS"]
+  },
+
+  "pet_level_stat_progression": {
+    "description": "Base Attack/Defense % bonuses from pet leveling (separate from wild mark refinement). All pets give equal Attack and Defense bonuses. Shown here for SSR pets (max L100).",
+    "source": "SRC_WHITEOUTSURVIVAL_APP_PETS",
+    "confidence": "A",
+    "ssr_pet_progression": {
+      "level_1": 0.17,
+      "level_10_base": 1.68,
+      "level_10_post_advancement": 2.86,
+      "level_20_base": 4.53,
+      "level_20_post_advancement": 5.70,
+      "level_30_base": 7.38,
+      "level_30_post_advancement": 8.85,
+      "level_40_base": 10.52,
+      "level_40_post_advancement": 11.99,
+      "level_50_base": 13.67,
+      "level_50_post_advancement": 15.44,
+      "level_60_base": null,
+      "level_60_post_advancement": null,
+      "level_70_base": null,
+      "level_70_post_advancement": null,
+      "level_80_base": null,
+      "level_80_post_advancement": null,
+      "level_90_base": null,
+      "level_90_post_advancement": null,
+      "level_100_base": 31.46,
+      "level_100_post_advancement": 33.52,
+      "notes": "Post-advancement values represent the stat after completing the advancement milestone at each 10-level gate (requires Taming Manual + Energizing Potion + Strengthening Serum). Base values are the stat just before advancement."
+    },
+    "common_pet_progression": {
+      "max_level": 50,
+      "level_1": 0.05,
+      "level_50_post_advancement": 5.02,
+      "notes": "Cave Hyena Common rarity"
+    },
+    "n_pet_progression": {
+      "max_level": 60,
+      "level_1": 0.08,
+      "level_60_post_advancement": 10.06,
+      "notes": "Arctic Wolf / Musk Ox N rarity"
+    },
+    "sr_pet_progression": {
+      "max_level": 80,
+      "level_1": 0.14,
+      "level_80_post_advancement": 21.78,
+      "notes": "Giant Elk SR rarity"
+    }
+  },
+
+  "frostscale_chameleon": {
+    "description": "Newest SSR pet (Gen 7) with the highest refinement cap of any pet. Not in the original pets.research.json. Added to game later.",
+    "name": "Frostscale Chameleon",
+    "rarity": "SSR",
+    "max_level": 100,
+    "max_refinement_pct": 58.10,
+    "unlock_days": 450,
+    "skill_name": "Mystic Fog",
+    "skill_effect": "Reduces enemy Troops' Defense by 2.5%/3%/3.5%/4%/5%/6%/7%/8%/9%/10% for 2 hours",
+    "skill_cooldown_hours": 20,
+    "notes": "This pet provides an enemy defense debuff rather than a friendly buff, making it unique among SSR pets. Defense reduction benefits ALL rally participants, similar to hero enemy debuff skills.",
+    "confidence": "A",
+    "source": "SRC_WHITEOUTSURVIVAL_APP_PETS"
+  },
+
+  "key_findings": {
+    "verified_facts": [
+      "Refinement uses two materials: Common Wild Mark (standard) and Advanced Wild Mark (advanced)",
+      "Refinement outcomes are RANDOM - stats can go up or down",
+      "Refinement is IRREVERSIBLE once Confirmed",
+      "Game warns only when Total Power would drop, not for individual stat decreases",
+      "Secondary stats quality cannot drop below current quality tier after quality improvement",
+      "All pets provide Attack and Defense percentage bonuses from leveling",
+      "Max refinement cap varies by pet: Common 6.70%, N 13.41%, R 20.11%, SR 29.05%, SSR 44.69-58.10%",
+      "Later generation SSR pets have higher refinement caps (Gen 4-5: 44.69%, Gen 5-6: 49.16%, Gen 7: 58.10%)",
+      "Common Wild Mark costs 500 gems in Gem Shop",
+      "SvS Day 3: Advanced Wild Mark = 15,000 pts, Common Wild Mark = 1,150 pts",
+      "Color quality tiers progress: Gray -> Green -> Blue -> Purple -> Gold",
+      "Use Common Wild Marks until Purple, then switch to Advanced Wild Marks",
+      "14 total pets in the game (including Frostscale Chameleon, was listed as SR in original research but is actually SSR)"
+    ],
+    "community_consensus": [
+      "Always refine when you have marks - take solid improvements",
+      "Don't use Advanced Wild Marks before reaching Purple quality (wasteful)",
+      "Save Wild Marks for SvS Prep Day 3 for maximum point value",
+      "Refinement lets you customize pet toward offense, defense, or economy",
+      "Higher rarity pets benefit more from refinement due to higher caps",
+      "Frostscale Chameleon's enemy defense debuff makes it the best combat pet for rallies"
+    ],
+    "unverified_or_uncertain": [
+      "Exact number of refinement stat lines per pet (likely 2: Attack and Defense, but may have more sub-lines)",
+      "Whether refinement can roll Lethality or Health stats in addition to Attack/Defense",
+      "Orange tier existence above Gold (mentioned in some sources, unconfirmed)",
+      "Exact percentage ranges for each color quality tier",
+      "Whether there is a stat lock mechanism to preserve individual stat lines during re-rolls",
+      "Precise CWM/AWM costs to reach each tier (estimates only, high variance due to randomness)",
+      "Whether 'max refinement' percentage is additive on top of level bonuses or represents a different calculation"
+    ]
+  },
+
+  "data_gaps": [
+    "No source provides exact percentage ranges for each color quality tier (Gray/Green/Blue/Purple/Gold)",
+    "No source confirms exact number of individual refinement stat lines per pet",
+    "No source provides Advanced Wild Mark gem shop price (may not be purchasable with gems)",
+    "No source provides detailed refinement progression curves or probability distributions",
+    "Frostscale Chameleon generation (listed as Gen 7 based on 450-day unlock, needs in-game verification)",
+    "Whether pets at different rarities have different stat line compositions during refinement",
+    "Full stat progression tables for R-rarity pets (Giant Tapir, Titan Roc) at max level"
+  ]
+}

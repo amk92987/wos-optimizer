@@ -531,7 +531,7 @@ const petsData: { name: string; gen: number; rarity: string; maxLevel: number; s
   // Gen 3
   { name: 'Giant Elk', gen: 3, rarity: 'SR', maxLevel: 80, skillName: 'Mystical Finding', skillEffect: 'Unearths an item', cooldown: '23h', duration: 'Instant', category: 'Utility' },
   { name: 'Snow Leopard', gen: 3, rarity: 'SR', maxLevel: 80, skillName: 'Lightning Raid', skillEffect: '+30% March Speed, reduces enemy Lethality', cooldown: '20h', duration: '2h', category: 'Combat' },
-  { name: 'Frostscale Chameleon', gen: 3, rarity: 'SR', maxLevel: 80, skillName: 'Mystic Fog', skillEffect: 'Reduces enemy Defense (up to 10%)', cooldown: '20h', duration: '2h', category: 'Combat' },
+  { name: 'Frostscale Chameleon', gen: 7, rarity: 'SSR', maxLevel: 100, skillName: 'Mystic Fog', skillEffect: 'Reduces enemy Defense (up to 10%)', cooldown: '20h', duration: '2h', category: 'Combat' },
   // Gen 4
   { name: 'Cave Lion', gen: 4, rarity: 'SSR', maxLevel: 100, skillName: 'Feral Anthem', skillEffect: '+Troop Attack (up to 10%)', cooldown: '20h', duration: '2h', category: 'Combat' },
   { name: 'Snow Ape', gen: 4, rarity: 'SSR', maxLevel: 100, skillName: 'Tumbling Power', skillEffect: '+Squad Capacity (up to 15,000)', cooldown: '20h', duration: '2h', category: 'Combat' },
@@ -552,7 +552,7 @@ const rarityColors: Record<string, { bg: string; text: string; border: string }>
 };
 
 function PetsTab() {
-  const generations = [1, 2, 3, 4, 5, 6];
+  const generations = [1, 2, 3, 4, 5, 6, 7];
 
   return (
     <div>
@@ -565,20 +565,38 @@ function PetsTab() {
         <p className="text-sm text-frost-muted mb-3">You can activate multiple pets at once — activate all combat pets before SvS and major battles.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
           <div className="bg-surface/50 rounded-lg p-3">
-            <p className="font-medium text-red-400 mb-1">SvS Attack</p>
-            <p className="text-frost-muted">Saber-tooth Tiger (+Lethality), Cave Lion (+Attack), and Iron Rhino (+Rally Capacity) if leading rallies</p>
+            <p className="font-medium text-red-400 mb-2">Attack</p>
+            <ul className="space-y-1 text-frost-muted">
+              <li>Saber-tooth Tiger (+Lethality)</li>
+              <li>Cave Lion (+Attack)</li>
+              <li>Iron Rhino (+Rally Capacity)</li>
+              <li>Snow Leopard (+March Speed)</li>
+            </ul>
           </div>
           <div className="bg-surface/50 rounded-lg p-3">
-            <p className="font-medium text-blue-400 mb-1">Defense / Garrison</p>
-            <p className="text-frost-muted">Mammoth (+Defense), Frost Gorilla (+Health), and Snow Ape (+Squad Capacity)</p>
+            <p className="font-medium text-blue-400 mb-2">Defense / Garrison</p>
+            <ul className="space-y-1 text-frost-muted">
+              <li>Mammoth (+Defense)</li>
+              <li>Frost Gorilla (+Health)</li>
+              <li>Snow Ape (+Squad Capacity)</li>
+            </ul>
           </div>
           <div className="bg-surface/50 rounded-lg p-3">
-            <p className="font-medium text-purple-400 mb-1">Debuffs</p>
-            <p className="text-frost-muted">Frostscale Chameleon (-Enemy Defense), Titan Roc (-Enemy Health), Snow Leopard (-Enemy Lethality)</p>
+            <p className="font-medium text-purple-400 mb-2">Debuffs</p>
+            <ul className="space-y-1 text-frost-muted">
+              <li>Frostscale Chameleon (-Enemy Defense)</li>
+              <li>Snow Leopard (-Enemy Lethality)</li>
+              <li>Titan Roc (-Enemy Health)</li>
+            </ul>
           </div>
           <div className="bg-surface/50 rounded-lg p-3">
-            <p className="font-medium text-green-400 mb-1">Utility</p>
-            <p className="text-frost-muted">Snow Leopard (+March Speed) for traveling, Arctic Wolf (+Stamina) for daily use</p>
+            <p className="font-medium text-green-400 mb-2">Daily Use</p>
+            <ul className="space-y-1 text-frost-muted">
+              <li>Arctic Wolf (+60 Stamina)</li>
+              <li>Musk Ox (complete a resource tile)</li>
+              <li>Giant Tapir (+500 Pet Food)</li>
+              <li>Giant Elk (unearth an item)</li>
+            </ul>
           </div>
         </div>
       </div>
@@ -619,6 +637,63 @@ function PetsTab() {
         );
       })}
 
+      {/* Pet Refinement */}
+      <h3 className="font-bold text-frost mt-6 mb-3">Pet Refinement</h3>
+      <div className="card border border-purple-500/30 bg-purple-500/5 mb-4">
+        <h4 className="font-bold text-purple-400 mb-2">How Refinement Works</h4>
+        <p className="text-sm text-frost-muted mb-3">
+          Refinement is a <span className="text-frost font-medium">separate system from leveling</span> that uses Wild Marks to re-roll your pet{"'"}s bonus Attack/Defense percentages.
+          Results are <span className="text-red-400 font-medium">completely random</span> — stats can go up or down each roll. There{"'"}s no way to calculate costs because it{"'"}s luck-based.
+        </p>
+        <div className="space-y-2 text-sm">
+          <div className="bg-surface/50 rounded-lg p-3">
+            <p className="font-medium text-frost mb-1">Color Quality Tiers</p>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="px-2 py-0.5 rounded bg-gray-500/30 text-gray-400 text-xs">Gray</span>
+              <span className="text-frost-muted">→</span>
+              <span className="px-2 py-0.5 rounded bg-green-500/30 text-green-400 text-xs">Green</span>
+              <span className="text-frost-muted">→</span>
+              <span className="px-2 py-0.5 rounded bg-blue-500/30 text-blue-400 text-xs">Blue</span>
+              <span className="text-frost-muted">→</span>
+              <span className="px-2 py-0.5 rounded bg-purple-500/30 text-purple-400 text-xs">Purple</span>
+              <span className="text-frost-muted">→</span>
+              <span className="px-2 py-0.5 rounded bg-amber-500/30 text-amber-400 text-xs">Gold</span>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <div className="bg-surface/50 rounded-lg p-3">
+              <p className="font-medium text-green-400 mb-1">Common Wild Mark</p>
+              <p className="text-frost-muted">500 gems each. Use for Gray → Purple progression. 1,150 SvS Day 3 pts.</p>
+            </div>
+            <div className="bg-surface/50 rounded-lg p-3">
+              <p className="font-medium text-purple-400 mb-1">Advanced Wild Mark</p>
+              <p className="text-frost-muted">Not gem-purchasable. Use only after reaching Purple quality. 15,000 SvS Day 3 pts.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="card border border-surface-border mb-4">
+        <h4 className="font-bold text-frost mb-2">Max Refinement Bonus by Rarity</h4>
+        <p className="text-xs text-frost-muted mb-2">Additional Attack/Defense % on top of level bonuses</p>
+        <div className="space-y-1 text-sm">
+          {([
+            ['Common', '+6.7%', 'text-gray-400'],
+            ['N (Uncommon)', '+13.4%', 'text-green-400'],
+            ['R (Rare)', '+20.1%', 'text-blue-400'],
+            ['SR (Epic)', '+29.1%', 'text-purple-400'],
+            ['SSR Gen 4-5', '+44.7%', 'text-amber-400'],
+            ['SSR Gen 5-6', '+49.2%', 'text-amber-400'],
+            ['SSR Gen 7', '+58.1%', 'text-amber-400'],
+          ] as [string, string, string][]).map(([label, value, color]) => (
+            <div key={label} className="flex justify-between bg-surface/50 rounded px-3 py-1.5">
+              <span className="text-frost-muted">{label}</span>
+              <span className={`font-medium ${color}`}>{value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Key Tips */}
       <h3 className="font-bold text-frost mt-6 mb-3">Key Tips</h3>
       <TipCard
@@ -628,6 +703,24 @@ function PetsTab() {
         categoryBadge="🐾 Pets"
       />
       <TipCard
+        tip="Pet Refinement is random — you can't plan or calculate it"
+        detail="Wild Marks re-roll your pet's bonus Attack/Defense percentages, but the result can go up OR down each time. Use Common Wild Marks until you reach Purple quality, then switch to Advanced Wild Marks. Accept good rolls — don't get greedy and risk losing stats."
+        priority="high"
+        categoryBadge="🐾 Refinement"
+      />
+      <TipCard
+        tip="Refinement is IRREVERSIBLE — the game only warns on Total Power drops"
+        detail="Once you tap Confirm, the new stats are permanent. The game shows a warning only when Total Power decreases, NOT when individual stats drop. A roll that raises Attack but lowers Defense won't trigger any warning. Always check both stats before confirming."
+        priority="high"
+        categoryBadge="🐾 Refinement"
+      />
+      <TipCard
+        tip="Save Wild Marks for SvS Prep Day 3"
+        detail="Advanced Wild Marks are worth 15,000 SvS points each (same as Lucky Wheel tickets). Common Wild Marks are worth 1,150 points. Don't waste them outside of SvS unless you have a surplus."
+        priority="high"
+        categoryBadge="🐾 SvS"
+      />
+      <TipCard
         tip="SSR pets give +10% stat buffs at max level vs ~5% for R/SR pets"
         detail="Gen 4-6 SSR pets (Cave Lion, Saber-tooth Tiger, Mammoth, Frost Gorilla) are the endgame combat pets. Each provides +10% to a core stat at level 100. Lower rarity pets cap at 5-7%."
         priority="high"
@@ -635,7 +728,7 @@ function PetsTab() {
       />
       <TipCard
         tip="Pet levels give passive Attack/Defense % bonuses to all troops"
-        detail="Beyond the activated skill, every pet level adds passive Attack and Defense bonuses. An SSR pet at L100 gives +33.5% ATK and +33.5% DEF permanently — a massive hidden stat source."
+        detail="Beyond the activated skill, every pet level adds passive Attack and Defense bonuses. An SSR pet at L100 gives +33.5% ATK and +33.5% DEF permanently. Max refinement can add another +49% on top of that — a massive hidden stat source."
         priority="high"
         categoryBadge="🐾 Pets"
       />
