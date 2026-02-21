@@ -7,12 +7,12 @@ type TabKey = 'overview' | 'growth' | 'battle' | 'economy' | 'fc-research' | 'bu
 
 const tabs: { key: TabKey; label: string }[] = [
   { key: 'overview', label: 'Overview' },
+  { key: 'stacking-tips', label: 'Stacking Tips' },
   { key: 'growth', label: 'Growth Tree' },
   { key: 'battle', label: 'Battle Tree' },
   { key: 'economy', label: 'Economy Tree' },
   { key: 'fc-research', label: 'FC Research' },
   { key: 'buffs', label: 'Buffs & Boosts' },
-  { key: 'stacking-tips', label: 'Stacking Tips' },
 ];
 
 const priorityColors: Record<string, { bg: string; border: string; text: string; label: string }> = {
@@ -117,67 +117,83 @@ function OverviewTab() {
 
 const growthItems = [
   {
-    name: 'Tool Enhancement', tiers: 'I-VII', effect: 'Research Speed', total: '+27.80%', priority: 'critical',
+    name: 'Tool Enhancement', tiers: 'I-VII', effect: 'Research Speed', total: '+27.80%', priority: 'critical', totalTime: '~120 days',
     tierData: [
-      { tier: 'I', levels: 3, buffPerLevel: '+0.40%', finalLevel: '+0.50%', tierTotal: '+1.30%' },
-      { tier: 'II', levels: 3, buffPerLevel: '+0.60%', finalLevel: '+1.00%', tierTotal: '+2.20%' },
-      { tier: 'III', levels: 3, buffPerLevel: '+1.00%', finalLevel: '+1.00%', tierTotal: '+3.00%' },
-      { tier: 'IV', levels: 3, buffPerLevel: '+1.20%', finalLevel: '+1.50%', tierTotal: '+3.90%' },
-      { tier: 'V', levels: 3, buffPerLevel: '+1.60%', finalLevel: '+2.00%', tierTotal: '+5.20%' },
-      { tier: 'VI', levels: 3, buffPerLevel: '+1.80%', finalLevel: '+2.50%', tierTotal: '+6.10%' },
-      { tier: 'VII', levels: 3, buffPerLevel: '+1.80%', finalLevel: '+2.50%', tierTotal: '+6.10%' },
+      { tier: 'I', tierTotal: '+1.30%', cumulative: '+1.30%', time: '< 1 hour' },
+      { tier: 'II', tierTotal: '+2.20%', cumulative: '+3.50%', time: '< 1 hour' },
+      { tier: 'III', tierTotal: '+3.00%', cumulative: '+6.50%', time: '~30 min' },
+      { tier: 'IV', tierTotal: '+3.90%', cumulative: '+10.40%', time: '~5 hours' },
+      { tier: 'V', tierTotal: '+5.20%', cumulative: '+15.60%', time: '~2 days' },
+      { tier: 'VI', tierTotal: '+6.10%', cumulative: '+21.70%', time: '~20 days' },
+      { tier: 'VII', tierTotal: '+6.10%', cumulative: '+27.80%', time: '~95 days' },
     ],
   },
   {
-    name: 'Tooling Up', tiers: 'I-VII', effect: 'Construction Speed', total: '+27.80%', priority: 'high',
+    name: 'Tooling Up', tiers: 'I-VII', effect: 'Construction Speed', total: '+27.80%', priority: 'high', totalTime: '~120 days',
     tierData: [
-      { tier: 'I', levels: 3, buffPerLevel: '+0.40%', finalLevel: '+0.50%', tierTotal: '+1.30%' },
-      { tier: 'II', levels: 3, buffPerLevel: '+0.60%', finalLevel: '+1.00%', tierTotal: '+2.20%' },
-      { tier: 'III', levels: 3, buffPerLevel: '+1.00%', finalLevel: '+1.00%', tierTotal: '+3.00%' },
-      { tier: 'IV', levels: 3, buffPerLevel: '+1.20%', finalLevel: '+1.50%', tierTotal: '+3.90%' },
-      { tier: 'V', levels: 3, buffPerLevel: '+1.60%', finalLevel: '+2.00%', tierTotal: '+5.20%' },
-      { tier: 'VI', levels: 3, buffPerLevel: '+1.80%', finalLevel: '+2.50%', tierTotal: '+6.10%' },
-      { tier: 'VII', levels: 3, buffPerLevel: '+1.80%', finalLevel: '+2.50%', tierTotal: '+6.10%' },
+      { tier: 'I', tierTotal: '+1.30%', cumulative: '+1.30%', time: '< 1 hour' },
+      { tier: 'II', tierTotal: '+2.20%', cumulative: '+3.50%', time: '< 1 hour' },
+      { tier: 'III', tierTotal: '+3.00%', cumulative: '+6.50%', time: '~30 min' },
+      { tier: 'IV', tierTotal: '+3.90%', cumulative: '+10.40%', time: '~5 hours' },
+      { tier: 'V', tierTotal: '+5.20%', cumulative: '+15.60%', time: '~2 days' },
+      { tier: 'VI', tierTotal: '+6.10%', cumulative: '+21.70%', time: '~20 days' },
+      { tier: 'VII', tierTotal: '+6.10%', cumulative: '+27.80%', time: '~95 days' },
     ],
   },
   {
-    name: 'Trainer Tools', tiers: 'I-VII', effect: 'Training Speed', total: '+202.20%', priority: 'high',
+    name: 'Trainer Tools', tiers: 'I-VII', effect: 'Training Speed', total: '+202.20%', priority: 'high', totalTime: '~150 days',
     tierData: [
-      { tier: 'I', levels: 3, buffPerLevel: '+2.20%', finalLevel: '+3.00%', tierTotal: '+7.40%' },
-      { tier: 'II', levels: 3, buffPerLevel: '+3.50%', finalLevel: '+5.00%', tierTotal: '+12.00%' },
-      { tier: 'III', levels: 3, buffPerLevel: '+5.00%', finalLevel: '+7.00%', tierTotal: '+17.00%' },
-      { tier: 'IV', levels: 3, buffPerLevel: '+7.00%', finalLevel: '+10.00%', tierTotal: '+24.00%' },
-      { tier: 'V', levels: 3, buffPerLevel: '+9.00%', finalLevel: '+13.00%', tierTotal: '+31.00%' },
-      { tier: 'VI', levels: 3, buffPerLevel: '+14.00%', finalLevel: '+20.00%', tierTotal: '+48.00%' },
-      { tier: 'VII', levels: 3, buffPerLevel: '+18.00%', finalLevel: '+26.80%', tierTotal: '+62.80%' },
+      { tier: 'I', tierTotal: '+7.40%', cumulative: '+7.40%', time: '< 1 hour' },
+      { tier: 'II', tierTotal: '+12.00%', cumulative: '+19.40%', time: '< 1 hour' },
+      { tier: 'III', tierTotal: '+17.00%', cumulative: '+36.40%', time: '~45 min' },
+      { tier: 'IV', tierTotal: '+24.00%', cumulative: '+60.40%', time: '~6 hours' },
+      { tier: 'V', tierTotal: '+31.00%', cumulative: '+91.40%', time: '~3 days' },
+      { tier: 'VI', tierTotal: '+48.00%', cumulative: '+139.40%', time: '~25 days' },
+      { tier: 'VII', tierTotal: '+62.80%', cumulative: '+202.20%', time: '~120 days' },
     ],
   },
   {
-    name: 'Command Tactics', tiers: 'I-III', effect: 'March Queues', total: '+3', priority: 'high',
+    name: 'Command Tactics', tiers: 'I-III', effect: 'March Queues', total: '+3', priority: 'high', totalTime: '~5 days',
     tierData: [
-      { tier: 'I', levels: 1, buffPerLevel: '+1 Queue', finalLevel: '+1 Queue', tierTotal: '+1' },
-      { tier: 'II', levels: 1, buffPerLevel: '+1 Queue', finalLevel: '+1 Queue', tierTotal: '+1' },
-      { tier: 'III', levels: 1, buffPerLevel: '+1 Queue', finalLevel: '+1 Queue', tierTotal: '+1' },
+      { tier: 'I', tierTotal: '+1', cumulative: '+1', time: '~2 min' },
+      { tier: 'II', tierTotal: '+1', cumulative: '+2', time: '~3 hours' },
+      { tier: 'III', tierTotal: '+1', cumulative: '+3', time: '~5 days' },
     ],
   },
   {
-    name: 'Bandaging', tiers: 'I-VII', effect: 'Healing Speed', total: '+40.80%', priority: 'medium',
+    name: 'Bandaging', tiers: 'I-VII', effect: 'Healing Speed', total: '+40.80%', priority: 'medium', totalTime: '~130 days',
     tierData: [
-      { tier: 'I', levels: 3, buffPerLevel: '+4.60%', finalLevel: '+6.00%', tierTotal: '+15.20%' },
-      { tier: 'II-VII', levels: 3, buffPerLevel: 'Scaling', finalLevel: 'Higher %', tierTotal: '+25.60% combined' },
+      { tier: 'I', tierTotal: '+15.20%', cumulative: '+15.20%', time: '< 1 hour' },
+      { tier: 'II', tierTotal: '+5.00%', cumulative: '+20.20%', time: '< 1 hour' },
+      { tier: 'III', tierTotal: '+4.00%', cumulative: '+24.20%', time: '~30 min' },
+      { tier: 'IV', tierTotal: '+3.80%', cumulative: '+28.00%', time: '~5 hours' },
+      { tier: 'V', tierTotal: '+3.60%', cumulative: '+31.60%', time: '~2 days' },
+      { tier: 'VI', tierTotal: '+4.20%', cumulative: '+35.80%', time: '~18 days' },
+      { tier: 'VII', tierTotal: '+5.00%', cumulative: '+40.80%', time: '~108 days' },
     ],
   },
   {
-    name: 'Ward Expansion', tiers: 'I-VII', effect: 'Infirmary Capacity', total: '+163,300', priority: 'medium',
+    name: 'Ward Expansion', tiers: 'I-VII', effect: 'Infirmary Capacity', total: '+163,300', priority: 'medium', totalTime: '~170 days',
     tierData: [
-      { tier: 'I', levels: 3, buffPerLevel: '+540', finalLevel: '+720', tierTotal: '+1,800' },
-      { tier: 'II-VII', levels: 3, buffPerLevel: 'Scaling', finalLevel: 'Higher cap', tierTotal: '+161,500 combined' },
+      { tier: 'I', tierTotal: '+1,800', cumulative: '+1,800', time: '< 1 hour' },
+      { tier: 'II', tierTotal: '+3,000', cumulative: '+4,800', time: '< 1 hour' },
+      { tier: 'III', tierTotal: '+5,000', cumulative: '+9,800', time: '~45 min' },
+      { tier: 'IV', tierTotal: '+8,000', cumulative: '+17,800', time: '~8 hours' },
+      { tier: 'V', tierTotal: '+15,000', cumulative: '+32,800', time: '~3 days' },
+      { tier: 'VI', tierTotal: '+30,000', cumulative: '+62,800', time: '~28 days' },
+      { tier: 'VII', tierTotal: '+100,500', cumulative: '+163,300', time: '~135 days' },
     ],
   },
   {
-    name: 'Camp Expansion', tiers: 'I-VII', effect: 'Training Capacity', total: '+204', priority: 'medium',
+    name: 'Camp Expansion', tiers: 'I-VII', effect: 'Training Capacity', total: '+204', priority: 'medium', totalTime: '~185 days',
     tierData: [
-      { tier: 'I-VII', levels: 3, buffPerLevel: 'Scaling', finalLevel: 'Higher cap', tierTotal: '+204 total' },
+      { tier: 'I', tierTotal: '+6', cumulative: '+6', time: '< 1 hour' },
+      { tier: 'II', tierTotal: '+6', cumulative: '+12', time: '< 1 hour' },
+      { tier: 'III', tierTotal: '+12', cumulative: '+24', time: '~45 min' },
+      { tier: 'IV', tierTotal: '+18', cumulative: '+42', time: '~8 hours' },
+      { tier: 'V', tierTotal: '+30', cumulative: '+72', time: '~3 days' },
+      { tier: 'VI', tierTotal: '+42', cumulative: '+114', time: '~30 days' },
+      { tier: 'VII', tierTotal: '+90', cumulative: '+204', time: '~150 days' },
     ],
   },
 ];
@@ -186,10 +202,79 @@ function GrowthTreeTab() {
   return (
     <div className="space-y-6">
       <div className="card bg-gradient-to-r from-green-500/10 to-transparent border-green-500/30">
-        <p className="text-frost">
-          The Growth tree has <strong>7 research items</strong> across <strong>Tiers I-VII</strong>.
-          Each item has 3 levels per tier (except Command Tactics which has 1 level per tier).
-          Total time: <strong className="text-green-400">883 days</strong> without speed bonuses.
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-frost">
+            The Growth tree has <strong>7 research items</strong> across <strong>Tiers I-VII</strong>.
+            Each item has 3 levels per tier (except Command Tactics which has 1 level per tier).
+            Total time: <strong className="text-green-400">883 days</strong> without speed bonuses.
+          </p>
+          <span className="text-[10px] font-bold bg-green-500/20 text-green-400 px-2 py-0.5 rounded whitespace-nowrap">F9+</span>
+        </div>
+      </div>
+
+      {/* Growth Tree Visual Dependency */}
+      <div className="card">
+        <h2 className="section-header">Growth Tree Research Order</h2>
+        <p className="text-frost-muted text-sm mb-4">Research unlocks flow top-to-bottom within each tier:</p>
+        <div className="bg-surface/50 rounded-lg p-4 overflow-x-auto">
+          <div className="flex flex-col items-center gap-1 min-w-[280px]">
+            {/* Row 1: Tool Enhancement */}
+            <div className="bg-red-500/20 border border-red-500/40 rounded-lg px-4 py-2 text-center w-full max-w-xs">
+              <p className="font-medium text-frost text-sm">Tool Enhancement</p>
+              <p className="text-xs text-red-400">Research Speed +27.80%</p>
+              <p className="text-[10px] text-red-400/70 font-bold">DO THIS FIRST</p>
+              <p className="text-[10px] text-frost-muted/70 italic">Saves ~28 days on every 100-day research</p>
+            </div>
+            <div className="text-frost-muted/40">&#9660;</div>
+
+            {/* Row 2: Tooling Up */}
+            <div className="bg-orange-500/15 border border-orange-500/35 rounded-lg px-4 py-2 text-center w-full max-w-xs">
+              <p className="font-medium text-frost text-sm">Tooling Up</p>
+              <p className="text-xs text-orange-400">Construction Speed +27.80%</p>
+              <p className="text-[10px] text-frost-muted/70 italic">Buildings finish ~22% faster</p>
+            </div>
+            <div className="text-frost-muted/40">&#9660;</div>
+
+            {/* Row 3: Trainer Tools + Command Tactics side by side */}
+            <div className="grid grid-cols-2 gap-2 w-full max-w-sm">
+              <div className="bg-orange-500/15 border border-orange-500/35 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Trainer Tools</p>
+                <p className="text-xs text-orange-400">Training Speed +202.20%</p>
+                <p className="text-[10px] text-frost-muted/70 italic">Troops train 3x faster</p>
+              </div>
+              <div className="bg-orange-500/15 border border-orange-500/35 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Command Tactics</p>
+                <p className="text-xs text-orange-400">+3 March Queues</p>
+                <p className="text-[10px] text-frost-muted/70 italic">Send 3 extra marches at once</p>
+              </div>
+            </div>
+            <div className="text-frost-muted/40">&#9660;</div>
+
+            {/* Row 4: Ward Expansion + Camp Expansion */}
+            <div className="grid grid-cols-2 gap-2 w-full max-w-sm">
+              <div className="bg-blue-500/15 border border-blue-500/35 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Ward Expansion</p>
+                <p className="text-xs text-blue-400">Infirmary +163,300</p>
+                <p className="text-[10px] text-frost-muted/70 italic">Protect 163K more troops from dying</p>
+              </div>
+              <div className="bg-blue-500/15 border border-blue-500/35 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Camp Expansion</p>
+                <p className="text-xs text-blue-400">Training Cap +204</p>
+                <p className="text-[10px] text-frost-muted/70 italic">Train 204 more troops per batch</p>
+              </div>
+            </div>
+            <div className="text-frost-muted/40">&#9660;</div>
+
+            {/* Row 5: Bandaging */}
+            <div className="bg-blue-500/15 border border-blue-500/35 rounded-lg px-4 py-2 text-center w-full max-w-xs">
+              <p className="font-medium text-frost text-sm">Bandaging</p>
+              <p className="text-xs text-blue-400">Healing Speed +40.80%</p>
+              <p className="text-[10px] text-frost-muted/70 italic">Heal wounded troops ~41% faster</p>
+            </div>
+          </div>
+        </div>
+        <p className="text-xs text-frost-muted mt-3 italic">
+          Tool Enhancement requires Ward Expansion + Camp Expansion at the same tier — keep those close to unlock it.
         </p>
       </div>
 
@@ -199,12 +284,14 @@ function GrowthTreeTab() {
           {growthItems.map((item) => {
             const colors = priorityColors[item.priority];
             return (
-              <details key={item.name} className={`rounded-lg ${colors.bg} border ${colors.border}`}>
-                <summary className="p-3 cursor-pointer">
-                  <div className="inline-flex items-center gap-3 w-full">
+              <details key={item.name} className={`rounded-lg ${colors.bg} border ${colors.border} group`}>
+                <summary className="p-3 cursor-pointer list-none [&::-webkit-details-marker]:hidden">
+                  <div className="flex items-center gap-3">
+                    <span className="text-frost-muted group-open:rotate-90 transition-transform text-xs">&#9654;</span>
                     <span className={`text-xs font-bold uppercase ${colors.text}`}>{colors.label}</span>
                     <span className="font-medium text-frost flex-1">{item.name} <span className="text-frost-muted text-sm">({item.tiers})</span></span>
-                    <span className="text-sm text-frost-muted">{item.effect}</span>
+                    <span className="text-sm text-frost-muted hidden sm:inline">{item.effect}</span>
+                    <span className="text-sm text-yellow-400/80">{item.totalTime}</span>
                     <span className="font-bold text-green-400">{item.total}</span>
                   </div>
                 </summary>
@@ -213,43 +300,26 @@ function GrowthTreeTab() {
                     <thead>
                       <tr className="text-frost-muted border-b border-surface-border">
                         <th className="text-left py-1 pr-3">Tier</th>
-                        <th className="text-left py-1 pr-3">Levels</th>
-                        <th className="text-left py-1 pr-3">Per Level</th>
-                        <th className="text-left py-1 pr-3">Final Level</th>
-                        <th className="text-right py-1">Tier Total</th>
+                        <th className="text-left py-1 pr-3">This Tier</th>
+                        <th className="text-left py-1 pr-3">Time</th>
+                        <th className="text-right py-1">Running Total</th>
                       </tr>
                     </thead>
                     <tbody>
                       {item.tierData.map((td) => (
                         <tr key={td.tier} className="border-b border-surface-border/30">
                           <td className="py-1 pr-3 text-frost">{td.tier}</td>
-                          <td className="py-1 pr-3 text-frost-muted">{td.levels}</td>
-                          <td className="py-1 pr-3 text-frost-muted">{td.buffPerLevel}</td>
-                          <td className="py-1 pr-3 text-green-400">{td.finalLevel}</td>
-                          <td className="py-1 text-right font-medium text-frost">{td.tierTotal}</td>
+                          <td className="py-1 pr-3 text-frost-muted">{td.tierTotal}</td>
+                          <td className="py-1 pr-3 text-yellow-400/80">{td.time}</td>
+                          <td className="py-1 text-right font-medium text-green-400">{td.cumulative}</td>
                         </tr>
                       ))}
                     </tbody>
                   </table>
-                  <p className="text-xs text-frost-muted mt-2 italic">
-                    Pattern: Early levels give a smaller buff, final level of each tier gives a larger bonus.
-                  </p>
                 </div>
               </details>
             );
           })}
-        </div>
-      </div>
-
-      {/* Growth Tree Tip */}
-      <div className={`card ${priorityColors.high.bg} border ${priorityColors.high.border}`}>
-        <div className="flex items-start gap-3">
-          <span className={`text-xs font-bold uppercase ${priorityColors.high.text} whitespace-nowrap mt-1`}>TIP</span>
-          <p className="text-frost-muted">
-            Growth tree has a <strong className="text-frost">dependency chain</strong>: Tool Enhancement requires
-            Ward Expansion + Camp Expansion at the same tier. So you&apos;ll need to keep those close to the same
-            tier to unlock Tool Enhancement.
-          </p>
         </div>
       </div>
     </div>
@@ -262,12 +332,133 @@ function BattleTreeTab() {
   return (
     <div className="space-y-6">
       <div className="card bg-gradient-to-r from-red-500/10 to-transparent border-red-500/30">
-        <p className="text-frost">
-          The Battle tree has <strong>17 research items</strong> across <strong>Tiers I-VI</strong> —
-          5 &quot;All Troops&quot; items and 12 troop-specific items (4 stats &times; 3 types).
-          Total time: <strong className="text-red-400">931 days</strong> without speed bonuses.
-          Levels per tier escalate: 3 &rarr; 3 &rarr; 4 &rarr; 5 &rarr; 6 &rarr; 6.
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-frost">
+            The Battle tree has <strong>17 research items</strong> across <strong>Tiers I-VI</strong> —
+            5 &quot;All Troops&quot; items and 12 troop-specific items (4 stats &times; 3 types).
+            Total time: <strong className="text-red-400">931 days</strong> without speed bonuses.
+            Levels per tier escalate: 3 &rarr; 3 &rarr; 4 &rarr; 5 &rarr; 6 &rarr; 6.
+          </p>
+          <span className="text-[10px] font-bold bg-red-500/20 text-red-400 px-2 py-0.5 rounded whitespace-nowrap">F9+</span>
+        </div>
+      </div>
+
+      {/* Battle Tree dependency - visual tree */}
+      <div className="card">
+        <h2 className="section-header">Battle Tree Research Order</h2>
+        <p className="text-frost-muted text-sm mb-4">Research unlocks flow top-to-bottom within each tier, branching out for troop-specific items:</p>
+        <div className="bg-surface/50 rounded-lg p-4 overflow-x-auto">
+          <div className="flex flex-col items-center gap-1 min-w-[320px]">
+            {/* Row 1: Weapons Prep */}
+            <div className="bg-red-500/20 border border-red-500/40 rounded-lg px-4 py-2 text-center">
+              <p className="font-medium text-frost text-sm">Weapons Prep</p>
+              <p className="text-xs text-red-400">All Troops Attack +47.25%</p>
+              <p className="text-[10px] text-frost-muted/70 italic">All your troops hit ~47% harder</p>
+            </div>
+            <div className="text-frost-muted/40">&#9660;</div>
+
+            {/* Row 2: Troop ATK - 3 wide */}
+            <div className="grid grid-cols-3 gap-2 w-full max-w-md">
+              <div className="bg-red-500/10 border border-red-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-red-400">Reprisal Tactics</p>
+                <p className="text-[10px] text-frost-muted">Infantry ATK +111.75%</p>
+                <p className="text-[9px] text-frost-muted/60 italic">~2x base damage</p>
+              </div>
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-blue-400">Precision Targeting</p>
+                <p className="text-[10px] text-frost-muted">Marksman ATK +111.75%</p>
+                <p className="text-[9px] text-frost-muted/60 italic">~2x base damage</p>
+              </div>
+              <div className="bg-green-500/10 border border-green-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-green-400">Skirmishing</p>
+                <p className="text-[10px] text-frost-muted">Lancer ATK +111.75%</p>
+                <p className="text-[9px] text-frost-muted/60 italic">~2x base damage</p>
+              </div>
+            </div>
+            <div className="text-frost-muted/40">&#9660;</div>
+
+            {/* Row 3: Troop DEF - 3 wide */}
+            <div className="grid grid-cols-3 gap-2 w-full max-w-md">
+              <div className="bg-red-500/10 border border-red-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-red-400">Defensive Formation</p>
+                <p className="text-[10px] text-frost-muted">Infantry DEF +111.75%</p>
+              </div>
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-blue-400">Picket Lines</p>
+                <p className="text-[10px] text-frost-muted">Marksman DEF +111.75%</p>
+              </div>
+              <div className="bg-green-500/10 border border-green-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-green-400">Bulwark Formations</p>
+                <p className="text-[10px] text-frost-muted">Lancer DEF +111.75%</p>
+              </div>
+            </div>
+            <div className="text-frost-muted/40">&#9660;</div>
+
+            {/* Row 4: Special Defensive Training */}
+            <div className="bg-blue-500/20 border border-blue-500/40 rounded-lg px-4 py-2 text-center">
+              <p className="font-medium text-frost text-sm">Special Defensive Training</p>
+              <p className="text-xs text-blue-400">All Troops Defense +47.25%</p>
+              <p className="text-[10px] text-frost-muted/70 italic">All your troops take ~32% less damage</p>
+            </div>
+            <div className="text-frost-muted/40">&#9660;</div>
+
+            {/* Row 5: Assault + Survival split */}
+            <div className="grid grid-cols-2 gap-3 w-full max-w-sm">
+              <div className="bg-orange-500/20 border border-orange-500/40 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Assault Techniques</p>
+                <p className="text-xs text-orange-400">All Troops Lethality +47.25%</p>
+                <p className="text-[10px] text-frost-muted/70 italic">Penetrate ~47% more armor</p>
+              </div>
+              <div className="bg-purple-500/20 border border-purple-500/40 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Survival Techniques</p>
+                <p className="text-xs text-purple-400">All Troops Health +47.25%</p>
+                <p className="text-[10px] text-frost-muted/70 italic">Troops survive ~47% longer</p>
+              </div>
+            </div>
+            <div className="text-frost-muted/40">&#9660;</div>
+
+            {/* Row 6: Troop Lethality - 3 wide */}
+            <div className="grid grid-cols-3 gap-2 w-full max-w-md">
+              <div className="bg-red-500/10 border border-red-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-red-400">Close Combat</p>
+                <p className="text-[10px] text-frost-muted">Infantry Leth +111.75%</p>
+              </div>
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-blue-400">Targeted Sniping</p>
+                <p className="text-[10px] text-frost-muted">Marksman Leth +111.75%</p>
+              </div>
+              <div className="bg-green-500/10 border border-green-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-green-400">Lancer Upgrade</p>
+                <p className="text-[10px] text-frost-muted">Lancer Leth +111.75%</p>
+              </div>
+            </div>
+            <div className="text-frost-muted/40">&#9660;</div>
+
+            {/* Row 7: Troop Health - 3 wide */}
+            <div className="grid grid-cols-3 gap-2 w-full max-w-md">
+              <div className="bg-red-500/10 border border-red-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-red-400">Shield Upgrade</p>
+                <p className="text-[10px] text-frost-muted">Infantry HP +111.75%</p>
+              </div>
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-blue-400">Marksman Armor</p>
+                <p className="text-[10px] text-frost-muted">Marksman HP +111.75%</p>
+              </div>
+              <div className="bg-green-500/10 border border-green-500/30 rounded px-2 py-1.5 text-center">
+                <p className="text-xs font-medium text-green-400">Lancer Armor</p>
+                <p className="text-[10px] text-frost-muted">Lancer HP +111.75%</p>
+              </div>
+            </div>
+            <div className="text-frost-muted/40">&#9660;</div>
+
+            {/* Row 8: Regimental Expansion */}
+            <div className="bg-ice/20 border border-ice/40 rounded-lg px-4 py-2 text-center">
+              <p className="font-medium text-frost text-sm">Regimental Expansion</p>
+              <p className="text-xs text-ice">Deployment Capacity +13,480</p>
+              <p className="text-[10px] text-frost-muted/70 italic">Bring 13K more troops to battle</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* All Troops */}
@@ -345,9 +536,12 @@ function BattleTreeTab() {
       {/* Troop-Specific */}
       <div className="card">
         <h2 className="section-header text-red-400">Troop-Specific Research</h2>
-        <p className="text-frost-muted text-sm mb-4">
+        <p className="text-frost-muted text-sm mb-2">
           Each troop type has 4 stats with <strong className="text-frost">+111.75%</strong> grand total each.
           Research your <strong className="text-ice">main troop type first</strong> before touching others.
+        </p>
+        <p className="text-xs text-slate-400 mb-4 italic">
+          Skip secondary troop types until your main type is at Tier V+. The resources are better spent on one strong type than three weak ones.
         </p>
         <div className="grid md:grid-cols-3 gap-4">
           {[
@@ -399,22 +593,6 @@ function BattleTreeTab() {
           ))}
         </div>
       </div>
-
-      {/* Battle Tree dependency */}
-      <div className="card">
-        <h2 className="section-header">Battle Tree Dependency Chain</h2>
-        <p className="text-frost-muted text-sm mb-3">Research unlocks follow this order within each tier:</p>
-        <div className="bg-surface/50 rounded-lg p-4 text-sm font-mono text-frost-muted space-y-1">
-          <p>Weapons Prep <span className="text-ice">(All ATK)</span></p>
-          <p className="pl-4">&rarr; Troop-Specific ATK &rarr; Troop-Specific DEF</p>
-          <p className="pl-8">&rarr; Special Defensive Training <span className="text-ice">(All DEF)</span></p>
-          <p className="pl-12">&rarr; Assault Techniques <span className="text-ice">(All Lethality)</span></p>
-          <p className="pl-16">&rarr; Troop-Specific Lethality</p>
-          <p className="pl-12">&rarr; Survival Techniques <span className="text-ice">(All Health)</span></p>
-          <p className="pl-16">&rarr; Troop-Specific Health</p>
-          <p className="pl-20">&rarr; Regimental Expansion <span className="text-ice">(Deployment)</span></p>
-        </div>
-      </div>
     </div>
   );
 }
@@ -425,10 +603,105 @@ function EconomyTreeTab() {
   return (
     <div className="space-y-6">
       <div className="card bg-gradient-to-r from-yellow-500/10 to-transparent border-yellow-500/30">
-        <p className="text-frost">
-          The Economy tree has <strong>8 items</strong> across <strong>Tiers I-VI</strong> (3 levels per tier).
-          Total time: <strong className="text-yellow-400">166 days</strong> without speed bonuses — the shortest tree.
-          <span className="text-frost-muted"> Lowest priority for combat-focused players.</span>
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-frost">
+            The Economy tree has <strong>8 items</strong> across <strong>Tiers I-VI</strong> (3 levels per tier).
+            Total time: <strong className="text-yellow-400">166 days</strong> without speed bonuses — the shortest tree.
+            <span className="text-frost-muted"> Lowest priority for combat-focused players.</span>
+          </p>
+          <span className="text-[10px] font-bold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded whitespace-nowrap">F9+</span>
+        </div>
+      </div>
+
+      {/* Economy Tree Visual Dependency */}
+      <div className="card">
+        <h2 className="section-header">Economy Tree Research Order</h2>
+        <p className="text-frost-muted text-sm mb-4">Output (city production) and Gathering (world map) are separate groups. Each has 3 resources that unlock Iron:</p>
+        <div className="bg-surface/50 rounded-lg p-4 overflow-x-auto">
+          <div className="flex flex-col items-center gap-1 min-w-[420px]">
+
+            {/* === OUTPUT SECTION === */}
+            <p className="text-xs font-bold uppercase text-yellow-400/70 mb-1">Resource Output (City Buildings)</p>
+
+            {/* Row 1: Meat, Coal, Wood outputs */}
+            <div className="grid grid-cols-3 gap-3 w-full max-w-2xl">
+              <div className="bg-yellow-500/15 border border-yellow-500/35 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Meat Output</p>
+                <p className="text-xs text-yellow-400">+119.50%</p>
+                <p className="text-[10px] text-frost-muted/70 italic">~2.2x production</p>
+              </div>
+              <div className="bg-orange-500/15 border border-orange-500/35 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Coal Output</p>
+                <p className="text-xs text-orange-400">+119.50%</p>
+                <p className="text-[10px] text-frost-muted/70 italic">~2.2x production</p>
+              </div>
+              <div className="bg-yellow-500/15 border border-yellow-500/35 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Wood Output</p>
+                <p className="text-xs text-yellow-400">+119.50%</p>
+                <p className="text-[10px] text-frost-muted/70 italic">~2.2x production</p>
+              </div>
+            </div>
+
+            {/* Unlock arrow to Iron Output */}
+            <div className="flex flex-col items-center my-1">
+              <div className="text-frost-muted/40">&#9660;</div>
+              <p className="text-[10px] text-frost-muted/50 italic">Complete tier to unlock</p>
+              <div className="text-frost-muted/40">&#9660;</div>
+            </div>
+
+            {/* Iron Output — alone */}
+            <div className="w-full max-w-[200px]">
+              <div className="bg-slate-500/15 border border-slate-500/35 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Iron Output</p>
+                <p className="text-xs text-slate-400">+116.00%</p>
+                <p className="text-[10px] text-frost-muted/70 italic">~2.2x production</p>
+              </div>
+            </div>
+
+            {/* Divider between Output and Gathering */}
+            <div className="w-full border-t border-surface-border/30 my-3"></div>
+
+            {/* === GATHERING SECTION === */}
+            <p className="text-xs font-bold uppercase text-amber-400/70 mb-1">Gathering Speed (World Map)</p>
+
+            {/* Row 1: Food, Coal, Wood gathering */}
+            <div className="grid grid-cols-3 gap-3 w-full max-w-2xl">
+              <div className="bg-amber-500/15 border border-amber-500/35 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Food Gathering</p>
+                <p className="text-xs text-amber-400">+242.50%</p>
+                <p className="text-[10px] text-frost-muted/70 italic">~3.4x map speed</p>
+              </div>
+              <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Coal Mining</p>
+                <p className="text-xs text-orange-400">+242.50%</p>
+                <p className="text-[10px] text-frost-muted/70 italic">~3.4x map speed</p>
+              </div>
+              <div className="bg-amber-500/15 border border-amber-500/35 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Wood Gathering</p>
+                <p className="text-xs text-amber-400">+242.50%</p>
+                <p className="text-[10px] text-frost-muted/70 italic">~3.4x map speed</p>
+              </div>
+            </div>
+
+            {/* Unlock arrow to Iron Mining */}
+            <div className="flex flex-col items-center my-1">
+              <div className="text-frost-muted/40">&#9660;</div>
+              <p className="text-[10px] text-frost-muted/50 italic">Complete tier to unlock</p>
+              <div className="text-frost-muted/40">&#9660;</div>
+            </div>
+
+            {/* Iron Mining — alone */}
+            <div className="w-full max-w-[200px]">
+              <div className="bg-slate-500/10 border border-slate-500/30 rounded-lg px-3 py-2 text-center">
+                <p className="font-medium text-frost text-sm">Iron Mining</p>
+                <p className="text-xs text-slate-400">+242.50%</p>
+                <p className="text-[10px] text-frost-muted/70 italic">~3.4x map speed</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p className="text-xs text-frost-muted mt-3 italic">
+          Each section follows the same pattern: complete a tier of Meat/Coal/Wood to unlock the same tier of Iron. Output and Gathering are researched independently.
         </p>
       </div>
 
@@ -503,6 +776,7 @@ function EconomyTreeTab() {
         <h2 className="section-header">Economy Tree Tips</h2>
         <div className="space-y-3">
           {[
+            { priority: 'low', title: 'Skip If Combat-Focused', desc: 'Economy research adds zero combat power. If you\'re focused on SvS and rallies, finish Battle and Growth trees first. Economy is best for farm accounts.' },
             { priority: 'high', title: 'Farm Accounts Benefit Most', desc: 'Economy research is more valuable on farm accounts that focus on resource gathering. Main accounts should prioritize Battle tree.' },
             { priority: 'medium', title: 'Output Before Gathering', desc: 'Resource Output unlocks before Gathering at each tier. Output boosts passive city production, Gathering boosts world map collection.' },
             { priority: 'medium', title: 'Unlock Order: Meat/Wood First', desc: 'Resources unlock in order: Meat/Wood first, then Coal, then Iron. Each requires the previous tier.' },
@@ -532,12 +806,15 @@ function FCResearchTab() {
   return (
     <div className="space-y-6">
       <div className="card bg-gradient-to-r from-purple-500/10 to-transparent border-purple-500/30">
-        <p className="text-frost">
-          FC Research unlocks at <strong>Furnace 30 (FC1)</strong> via the <strong>War Academy</strong>.
-          Uses <strong className="text-purple-400">Fire Crystal Shards</strong> as additional currency.
-          Each troop type has 7 research lines taking <strong>~271 days</strong> total.
-          Focus your <strong>main troop type first</strong>.
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <p className="text-frost">
+            FC Research unlocks at <strong>Furnace 30 (FC1)</strong> via the <strong>War Academy</strong>.
+            Uses <strong className="text-purple-400">Fire Crystal Shards</strong> as additional currency.
+            Each troop type has 7 research lines taking <strong>~271 days</strong> total.
+            Focus your <strong>main troop type first</strong>.
+          </p>
+          <span className="text-[10px] font-bold bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded whitespace-nowrap">F30+</span>
+        </div>
       </div>
 
       {/* Shared Items */}
@@ -612,6 +889,17 @@ function FCResearchTab() {
         </div>
       </div>
 
+      {/* Skip callout */}
+      <div className={`card ${priorityColors.low.bg} border ${priorityColors.low.border}`}>
+        <div className="flex items-start gap-3">
+          <span className={`text-xs font-bold uppercase ${priorityColors.low.text} whitespace-nowrap mt-1`}>SKIP IF</span>
+          <p className="text-frost-muted text-sm">
+            You&apos;re below <strong className="text-frost">Furnace 30</strong>. FC Research is endgame content — focus on
+            maxing the base Growth and Battle trees first. You can&apos;t even access this until War Academy is built at FC1.
+          </p>
+        </div>
+      </div>
+
       {/* FC Research Tip */}
       <div className={`card ${priorityColors.critical.bg} border ${priorityColors.critical.border}`}>
         <div className="flex items-start gap-3">
@@ -636,10 +924,13 @@ function BuffsTab() {
     <div className="space-y-6">
       {/* Chief's House */}
       <div className="card">
-        <h2 className="section-header text-yellow-400">Chief&apos;s House Orders</h2>
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="section-header text-yellow-400 mb-0">Chief&apos;s House Orders</h2>
+          <span className="text-[10px] font-bold bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded whitespace-nowrap">F6+</span>
+        </div>
         <p className="text-frost-muted text-sm mb-4">
-          Unlocks at <strong className="text-frost">Furnace Level 6</strong>. Provides 6 orders using <strong>Contentment</strong> currency.
-          (50,000 Contentment = 50 Gems)
+          Unlocks at <strong className="text-frost">Furnace Level 6</strong>. Uses <strong>Contentment</strong> currency (50K = 50 Gems).
+          These orders give temporary boosts to construction, resources, and survivor management.
         </p>
         <div className="space-y-3">
           {[
@@ -672,10 +963,13 @@ function BuffsTab() {
 
       {/* President Appointments */}
       <div className="card">
-        <h2 className="section-header text-purple-400">President Appointments</h2>
+        <div className="flex items-center justify-between mb-1">
+          <h2 className="section-header text-purple-400 mb-0">President Appointments</h2>
+          <span className="text-[10px] font-bold bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded whitespace-nowrap">F16+</span>
+        </div>
         <p className="text-frost-muted text-sm mb-4">
-          6 Minister positions with personal buffs. Requires <strong>Furnace 16+</strong> to apply.
-          Supreme President gets boosted values shown in parentheses.
+          The President appoints players to Minister positions, giving them personal buffs.
+          Requires <strong>Furnace 16+</strong> to apply. Supreme President values shown in parentheses.
         </p>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -756,6 +1050,42 @@ function StackingTipsTab() {
           VP appointment, VIP, and Alliance Tech. Timing is everything.
         </p>
       </div>
+
+      {/* Real Example — open by default, collapsible */}
+      <details open className="card bg-gradient-to-r from-green-500/10 to-transparent border-green-500/30 group">
+        <summary className="flex items-center justify-between cursor-pointer list-none">
+          <h3 className="font-bold text-green-400">Real Example: 50 Days &rarr; 26 Days</h3>
+          <span className="text-frost-muted/50 text-xs group-open:rotate-180 transition-transform">&#9660;</span>
+        </summary>
+        <div className="mt-3">
+          <p className="text-frost-muted text-sm mb-4">
+            Research speed buffs are additive — add them all up, then divide your base time.
+            Formula: <strong className="text-frost">Actual Time = Base Time &divide; (1 + Total Bonus%)</strong>
+          </p>
+          <div className="bg-surface/50 rounded-lg p-4 border border-surface-border">
+            <div className="space-y-2 text-sm">
+              <div className="flex justify-between"><span className="text-frost-muted">Tool Enhancement VII</span><span className="text-green-400">+27.80%</span></div>
+              <div className="flex justify-between"><span className="text-frost-muted">VIP 8</span><span className="text-green-400">+20.00%</span></div>
+              <div className="flex justify-between"><span className="text-frost-muted">Alliance Tech</span><span className="text-green-400">+15.00%</span></div>
+              <div className="flex justify-between"><span className="text-frost-muted">VP Appointment</span><span className="text-green-400">+10.00%</span></div>
+              <div className="flex justify-between"><span className="text-frost-muted">Research Advancement (Presidential)</span><span className="text-green-400">+10.00%</span></div>
+              <div className="flex justify-between"><span className="text-frost-muted">Speed buff item</span><span className="text-green-400">+10.00%</span></div>
+              <div className="border-t border-surface-border pt-2 mt-2 flex justify-between font-bold">
+                <span className="text-frost">Total Speed Bonus</span>
+                <span className="text-green-400">+92.80%</span>
+              </div>
+            </div>
+            <div className="mt-4 bg-green-500/10 rounded-lg p-3 text-center">
+              <p className="text-frost text-sm">
+                50 days &divide; (1 + 0.928) = 50 &divide; 1.928 = <strong className="text-green-400 text-lg">~26 days</strong>
+              </p>
+              <p className="text-frost-muted text-xs mt-1">
+                Saved <strong className="text-green-400">24 days</strong> by waiting for the right moment to stack all buffs
+              </p>
+            </div>
+          </div>
+        </div>
+      </details>
 
       {/* Research Speed Stacking */}
       <div className="card">
@@ -949,15 +1279,6 @@ function StackingTipsTab() {
         </div>
       </div>
 
-      {/* Real Example */}
-      <div className="card bg-gradient-to-r from-green-500/10 to-transparent border-green-500/30">
-        <h3 className="font-bold text-green-400 mb-2">Real Example: 50 Days &rarr; 26 Days</h3>
-        <p className="text-frost-muted text-sm">
-          By stacking Tool Enhancement, VIP, Alliance Tech, VP Appointment, Presidential Research Advancement,
-          and research speed items, a 50-day research was cut to just 26 days — <strong className="text-green-400">nearly half</strong>.
-          The key is patience: wait for the right moment when all buffs align before starting the timer and using speedups.
-        </p>
-      </div>
     </div>
   );
 }
