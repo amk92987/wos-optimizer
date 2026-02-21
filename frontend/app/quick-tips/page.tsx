@@ -559,25 +559,26 @@ function PetsTab() {
       <h2 className="text-xl font-bold text-frost mb-2">Pets Guide</h2>
       <p className="text-frost-muted mb-6">All 14 pets, their combat skills, and when to use them. Pets unlock at Furnace 18 (54+ server days).</p>
 
-      {/* Which Pet to Activate */}
+      {/* Which Pets to Activate */}
       <div className="card border border-amber-500/30 bg-amber-500/5 mb-6">
-        <h3 className="font-bold text-amber-400 mb-3">Which Pet to Activate?</h3>
+        <h3 className="font-bold text-amber-400 mb-3">Pets to Activate Before Battle</h3>
+        <p className="text-sm text-frost-muted mb-3">You can activate multiple pets at once — activate all combat pets before SvS and major battles.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
           <div className="bg-surface/50 rounded-lg p-3">
             <p className="font-medium text-red-400 mb-1">SvS Attack</p>
-            <p className="text-frost-muted">Saber-tooth Tiger (+Lethality) or Cave Lion (+Attack)</p>
+            <p className="text-frost-muted">Saber-tooth Tiger (+Lethality), Cave Lion (+Attack), and Iron Rhino (+Rally Capacity) if leading rallies</p>
           </div>
           <div className="bg-surface/50 rounded-lg p-3">
             <p className="font-medium text-blue-400 mb-1">Defense / Garrison</p>
-            <p className="text-frost-muted">Mammoth (+Defense) or Frost Gorilla (+Health)</p>
+            <p className="text-frost-muted">Mammoth (+Defense), Frost Gorilla (+Health), and Snow Ape (+Squad Capacity)</p>
           </div>
           <div className="bg-surface/50 rounded-lg p-3">
-            <p className="font-medium text-purple-400 mb-1">Rally Leader</p>
-            <p className="text-frost-muted">Iron Rhino (+150K Rally Capacity at max)</p>
+            <p className="font-medium text-purple-400 mb-1">Debuffs</p>
+            <p className="text-frost-muted">Frostscale Chameleon (-Enemy Defense), Titan Roc (-Enemy Health), Snow Leopard (-Enemy Lethality)</p>
           </div>
           <div className="bg-surface/50 rounded-lg p-3">
-            <p className="font-medium text-green-400 mb-1">General / Marching</p>
-            <p className="text-frost-muted">Snow Leopard (+March Speed + Enemy Lethality reduction)</p>
+            <p className="font-medium text-green-400 mb-1">Utility</p>
+            <p className="text-frost-muted">Snow Leopard (+March Speed) for traveling, Arctic Wolf (+Stamina) for daily use</p>
           </div>
         </div>
       </div>
@@ -983,12 +984,12 @@ export default function QuickTipsPage() {
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex flex-wrap gap-2 mb-6 border-b border-surface-border pb-4">
+        <div className="flex flex-wrap gap-1.5 mb-6 border-b border-surface-border pb-4">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                 activeTab === tab.key
                   ? 'bg-ice text-background'
                   : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'
