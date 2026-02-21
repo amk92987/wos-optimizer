@@ -300,7 +300,7 @@ export default function LineupsPage() {
         ) : null}
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-surface-border pb-2 overflow-x-auto">
+        <div className="flex flex-wrap gap-1.5 mb-6 border-b border-surface-border pb-4 lg:flex-nowrap lg:gap-2">
           {[
             { id: 'optimal' as const, label: 'Optimal Lineups' },
             { id: 'joiner' as const, label: 'Rally Joiner Guide' },
@@ -311,10 +311,10 @@ export default function LineupsPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center ${
                 activeTab === tab.id
-                  ? 'bg-ice/20 text-ice'
-                  : 'text-frost-muted hover:text-frost hover:bg-surface'
+                  ? 'bg-ice text-background'
+                  : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'
               }`}
             >
               {tab.label}

@@ -408,23 +408,23 @@ export default function HeroesPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-2 mb-6">
+        <div className="flex flex-wrap gap-1.5 mb-6 border-b border-surface-border pb-4 lg:flex-nowrap lg:gap-2">
           <button
             onClick={() => setActiveTab('owned')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center ${
               activeTab === 'owned'
-                ? 'bg-ice text-zinc-900'
-                : 'bg-surface text-zinc-400 hover:text-zinc-100'
+                ? 'bg-ice text-background'
+                : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'
             }`}
           >
             My Heroes ({ownedHeroes.length})
           </button>
           <button
             onClick={() => setActiveTab('all')}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center ${
               activeTab === 'all'
-                ? 'bg-ice text-zinc-900'
-                : 'bg-surface text-zinc-400 hover:text-zinc-100'
+                ? 'bg-ice text-background'
+                : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'
             }`}
           >
             All Heroes

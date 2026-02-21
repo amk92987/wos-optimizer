@@ -602,10 +602,10 @@ export default function PackAnalyzerPage() {
           <h2 className="text-lg font-semibold text-frost mb-4">Enter Pack Contents</h2>
 
           {/* Tabs */}
-          <div className="flex flex-wrap gap-1 mb-4 border-b border-surface-border pb-3">
+          <div className="flex flex-wrap gap-1.5 mb-6 border-b border-surface-border pb-4 lg:flex-nowrap lg:gap-2">
             {categories.map(cat => (
               <button key={cat} onClick={() => setActiveTab(cat)}
-                className={`px-2 py-1 rounded text-xs font-medium transition-colors ${activeTab === cat ? 'bg-ice/20 text-ice' : 'text-frost-muted hover:text-frost hover:bg-surface'}`}>
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center ${activeTab === cat ? 'bg-ice text-background' : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'}`}>
                 {PACK_ITEMS[cat].label}
               </button>
             ))}

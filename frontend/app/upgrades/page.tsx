@@ -429,15 +429,15 @@ export default function UpgradesPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6 border-b border-surface-border pb-2">
+        <div className="flex flex-wrap gap-1.5 mb-6 border-b border-surface-border pb-4 lg:flex-nowrap lg:gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center ${
                 activeTab === tab.id
-                  ? 'bg-ice/20 text-ice'
-                  : 'text-frost-muted hover:text-frost hover:bg-surface'
+                  ? 'bg-ice text-background'
+                  : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'
               }`}
             >
               {tab.label}

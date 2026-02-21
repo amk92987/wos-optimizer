@@ -2164,13 +2164,13 @@ export default function BattleTacticsPage() {
           <p className="text-frost-muted mt-2">Strategic guides for all combat events</p>
         </div>
 
-        {/* Tab Navigation - 2 rows: 4 + 3 */}
-        <div className="grid grid-cols-4 gap-2 mb-6">
+        {/* Tab Navigation */}
+        <div className="flex flex-wrap gap-1.5 mb-6 border-b border-surface-border pb-4 lg:flex-nowrap lg:gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center flex items-center justify-center gap-1.5 ${
                 activeTab === tab.key
                   ? 'bg-ice text-background'
                   : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'

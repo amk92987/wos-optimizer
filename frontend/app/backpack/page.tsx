@@ -145,15 +145,15 @@ export default function ItemGuidePage() {
         </div>
 
         {/* Category Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6 border-b border-surface-border pb-3">
+        <div className="flex flex-wrap gap-1.5 mb-6 border-b border-surface-border pb-4 lg:flex-nowrap lg:gap-2">
           {categories.map((cat) => (
             <button
               key={cat}
               onClick={() => setActiveTab(cat)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center ${
                 activeTab === cat
-                  ? 'bg-ice/20 text-ice'
-                  : 'text-frost-muted hover:text-frost hover:bg-surface'
+                  ? 'bg-ice text-background'
+                  : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'
               }`}
             >
               {cat}

@@ -46,14 +46,14 @@ export default function BeginnerGuidePage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex flex-wrap gap-1.5 mb-6 border-b border-frost/10 pb-4 lg:flex-nowrap lg:gap-2">
+        <div className="flex flex-wrap gap-1.5 mb-6 border-b border-surface-border pb-4 lg:flex-nowrap lg:gap-2">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center ${
                 activeTab === tab.key
-                  ? 'bg-ice/20 text-ice'
+                  ? 'bg-ice text-background'
                   : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'
               }`}
             >

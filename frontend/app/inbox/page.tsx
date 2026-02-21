@@ -93,13 +93,13 @@ export default function UserInboxPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-2 mb-6">
+        <div className="flex flex-wrap gap-1.5 mb-6 border-b border-surface-border pb-4 lg:flex-nowrap lg:gap-2">
           <button
             onClick={() => setActiveTab('notifications')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center ${
               activeTab === 'notifications'
-                ? 'bg-ice/20 text-ice'
-                : 'text-frost-muted hover:text-frost hover:bg-surface'
+                ? 'bg-ice text-background'
+                : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'
             }`}
           >
             Notifications
@@ -111,10 +111,10 @@ export default function UserInboxPage() {
           </button>
           <button
             onClick={() => setActiveTab('messages')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors whitespace-nowrap lg:flex-1 lg:text-center ${
               activeTab === 'messages'
-                ? 'bg-ice/20 text-ice'
-                : 'text-frost-muted hover:text-frost hover:bg-surface'
+                ? 'bg-ice text-background'
+                : 'bg-surface text-frost-muted hover:text-frost hover:bg-surface-hover'
             }`}
           >
             Messages
