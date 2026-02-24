@@ -55,6 +55,63 @@ def list_users():
     return {"users": users}
 
 
+@app.get("/api/admin/users/deleted")
+def list_deleted_users():
+    """List soft-deleted users (within 30-day grace period or expired)."""
+    _require_admin()
+    deleted = user_repo.get_deleted_users(limit=500)
+
+    for u in deleted:
+        uid = u.get("user_id")
+        u["id"] = uid
+        try:
+            profiles = profile_repo.get_profiles(uid, include_deleted=True) if uid else []
+            u["profile_count"] = len(profiles)
+            u["states"] = [p["state_number"] for p in profiles if p.get("state_number")]
+        except Exception:
+            u["profile_count"] = 0
+            u["states"] = []
+        u.setdefault("usage_7d", 0)
+
+    return {"users": deleted}
+
+
+@app.post("/api/admin/users/purge-expired")
+def purge_expired_users():
+    """Permanently delete users whose 30-day grace period has expired."""
+    _require_admin()
+    expired = user_repo.get_expired_deleted_users(grace_days=30)
+
+    admin_id = get_user_id(app.current_event.raw_event)
+    results = []
+
+    for user in expired:
+        uid = user.get("user_id")
+        email = user.get("email")
+        username = user.get("username")
+        try:
+            user_repo.delete_user(uid)
+
+            if email:
+                try:
+                    cognito.admin_delete_user(
+                        UserPoolId=Config.USER_POOL_ID,
+                        Username=email,
+                    )
+                except cognito.exceptions.UserNotFoundException:
+                    pass
+                except Exception:
+                    logger.warning("Cognito cleanup failed for %s", email, exc_info=True)
+
+            admin_repo.log_audit(admin_id, "admin", "purge_user", "user", uid, username)
+            results.append({"user_id": uid, "username": username, "status": "purged"})
+        except Exception as e:
+            logger.error("Failed to purge user %s: %s", uid, str(e))
+            results.append({"user_id": uid, "username": username, "status": "failed", "error": str(e)})
+
+    return {"purged": len([r for r in results if r["status"] == "purged"]), "results": results}
+
+
 @app.post("/api/admin/users")
 def create_user():
     _require_admin()
@@ -128,16 +185,81 @@ def update_user(userId: str):
 @app.delete("/api/admin/users/<userId>")
 def delete_user(userId: str):
     _require_admin()
+    params = app.current_event.query_string_parameters or {}
+    hard = params.get("hard", "false").lower() == "true"
+
     user = user_repo.get_user(userId)
     if not user:
         raise NotFoundError("User not found")
 
-    user_repo.delete_user(userId)
+    admin_id = get_user_id(app.current_event.raw_event)
+    email = user.get("email")
+
+    if hard:
+        # Permanent delete: remove all DynamoDB data + Cognito user
+        user_repo.delete_user(userId)
+
+        if email:
+            try:
+                cognito.admin_delete_user(
+                    UserPoolId=Config.USER_POOL_ID,
+                    Username=email,
+                )
+            except cognito.exceptions.UserNotFoundException:
+                logger.debug("Cognito user already gone: %s", email)
+            except Exception:
+                logger.warning("Failed to delete Cognito user: %s", email, exc_info=True)
+
+        admin_repo.log_audit(admin_id, "admin", "hard_delete_user", "user", userId, user.get("username"))
+        return {"status": "deleted", "permanent": True}
+    else:
+        # Soft delete: set deleted_at, deactivate, disable Cognito
+        user_repo.soft_delete_user(userId)
+
+        if email:
+            try:
+                cognito.admin_disable_user(
+                    UserPoolId=Config.USER_POOL_ID,
+                    Username=email,
+                )
+            except cognito.exceptions.UserNotFoundException:
+                logger.debug("Cognito user not found: %s", email)
+            except Exception:
+                logger.warning("Failed to disable Cognito user: %s", email, exc_info=True)
+
+        admin_repo.log_audit(admin_id, "admin", "soft_delete_user", "user", userId, user.get("username"))
+        return {"status": "deleted", "permanent": False}
+
+
+@app.post("/api/admin/users/<userId>/restore")
+def restore_user(userId: str):
+    """Restore a soft-deleted user."""
+    _require_admin()
+    user = user_repo.get_user(userId)
+    if not user:
+        raise NotFoundError("User not found")
+    if not user.get("deleted_at"):
+        raise ValidationError("User is not deleted")
+
+    restored = user_repo.restore_user(userId)
+    restored["id"] = restored.get("user_id", userId)
+
+    email = user.get("email")
+    if email:
+        try:
+            cognito.admin_enable_user(
+                UserPoolId=Config.USER_POOL_ID,
+                Username=email,
+            )
+        except cognito.exceptions.UserNotFoundException:
+            logger.debug("Cognito user not found for restore: %s", email)
+        except Exception:
+            logger.warning("Failed to re-enable Cognito user: %s", email, exc_info=True)
 
     admin_id = get_user_id(app.current_event.raw_event)
-    admin_repo.log_audit(admin_id, "admin", "delete_user", "user", userId, user.get("username"))
+    admin_repo.log_audit(admin_id, "admin", "restore_user", "user", userId, user.get("username"))
 
-    return {"status": "deleted"}
+    return {"user": restored}
 
 
 @app.post("/api/admin/impersonate/<userId>")

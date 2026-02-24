@@ -180,6 +180,66 @@ def delete_user(user_id: str) -> None:
             batch.delete_item(Key=item_key)
 
 
+def soft_delete_user(user_id: str) -> dict:
+    """Soft-delete a user by setting deleted_at and deactivating."""
+    table = get_table("main")
+    now = datetime.now(timezone.utc).isoformat()
+
+    resp = table.update_item(
+        Key={"PK": f"USER#{user_id}", "SK": "METADATA"},
+        UpdateExpression="SET deleted_at = :now, is_active = :false, updated_at = :now2",
+        ExpressionAttributeValues={":now": now, ":false": False, ":now2": now},
+        ReturnValues="ALL_NEW",
+    )
+    return resp.get("Attributes", {})
+
+
+def restore_user(user_id: str) -> dict:
+    """Restore a soft-deleted user by removing deleted_at and reactivating."""
+    table = get_table("main")
+    now = datetime.now(timezone.utc).isoformat()
+
+    resp = table.update_item(
+        Key={"PK": f"USER#{user_id}", "SK": "METADATA"},
+        UpdateExpression="REMOVE deleted_at SET is_active = :true, updated_at = :now",
+        ExpressionAttributeValues={":true": True, ":now": now},
+        ReturnValues="ALL_NEW",
+    )
+    return resp.get("Attributes", {})
+
+
+def get_deleted_users(limit: int = 500) -> list:
+    """List soft-deleted users (those with deleted_at set)."""
+    table = get_table("main")
+
+    params = {
+        "IndexName": "GSI4-AdminUserList",
+        "KeyConditionExpression": "entity_type = :et",
+        "FilterExpression": "attribute_exists(deleted_at)",
+        "ExpressionAttributeValues": {":et": "USER"},
+        "ScanIndexForward": False,
+    }
+
+    items = []
+    while True:
+        resp = table.query(**params)
+        items.extend(resp.get("Items", []))
+        if len(items) >= limit or "LastEvaluatedKey" not in resp:
+            break
+        params["ExclusiveStartKey"] = resp["LastEvaluatedKey"]
+
+    return items[:limit]
+
+
+def get_expired_deleted_users(grace_days: int = 30) -> list:
+    """Get soft-deleted users whose grace period has expired."""
+    from datetime import timedelta
+
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=grace_days)).isoformat()
+    deleted = get_deleted_users(limit=1000)
+    return [u for u in deleted if u.get("deleted_at", "") < cutoff]
+
+
 def record_daily_login(user_id: str) -> None:
     """Record a daily login (idempotent - one per day)."""
     table = get_table("main")
@@ -215,24 +275,34 @@ def get_login_count_last_n_days(user_id: str, days: int = 7) -> int:
     return resp.get("Count", 0)
 
 
-def list_users(test_only: bool = False, limit: int = 500) -> list:
+def list_users(test_only: bool = False, include_deleted: bool = False, limit: int = 500) -> list:
     """List all users via GSI4-AdminUserList.
 
     Paginates through all DynamoDB result pages to ensure FilterExpression
     doesn't cause missing results, then truncates to `limit` in Python.
+    By default excludes soft-deleted users (those with deleted_at set).
     """
     table = get_table("main")
+
+    filter_parts = []
+    expr_values = {":et": "USER"}
+
+    if not include_deleted:
+        filter_parts.append("attribute_not_exists(deleted_at)")
+
+    if test_only:
+        filter_parts.append("is_test_account = :t")
+        expr_values[":t"] = True
 
     params = {
         "IndexName": "GSI4-AdminUserList",
         "KeyConditionExpression": "entity_type = :et",
-        "ExpressionAttributeValues": {":et": "USER"},
+        "ExpressionAttributeValues": expr_values,
         "ScanIndexForward": False,
     }
 
-    if test_only:
-        params["FilterExpression"] = "is_test_account = :t"
-        params["ExpressionAttributeValues"][":t"] = True
+    if filter_parts:
+        params["FilterExpression"] = " AND ".join(filter_parts)
 
     items = []
     while True:

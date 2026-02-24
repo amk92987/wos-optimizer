@@ -209,6 +209,7 @@ class UserEntity(DynamoBase):
     created_at: str = Field(default_factory=utcnow_iso)
     updated_at: str = Field(default_factory=utcnow_iso)
     last_login: Optional[str] = None
+    deleted_at: Optional[str] = None
 
     # GSI attributes
     # GSI1: email -> user lookup  (GSI1PK=EMAIL#<email>, GSI1SK=USER)
@@ -235,6 +236,7 @@ class UserEntity(DynamoBase):
             "created_at": self.created_at,
             "updated_at": self.updated_at,
             "last_login": self.last_login,
+            "deleted_at": self.deleted_at,
             # GSI keys for email/username lookups
             "GSI1PK": f"EMAIL#{self.email}",
             "GSI1SK": "USER",
@@ -262,6 +264,7 @@ class UserEntity(DynamoBase):
             created_at=item.get("created_at", utcnow_iso()),
             updated_at=item.get("updated_at", utcnow_iso()),
             last_login=item.get("last_login"),
+            deleted_at=item.get("deleted_at"),
         )
 
 

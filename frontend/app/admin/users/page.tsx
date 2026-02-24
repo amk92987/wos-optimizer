@@ -21,10 +21,14 @@ function AdminUsersContent() {
   const defaultTestAccount = searchParams.get('test') === 'true';
   const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
   const [defaultDailyLimit, setDefaultDailyLimit] = useState(20);
+  const [deletedUsers, setDeletedUsers] = useState<AdminUser[]>([]);
+  const [confirmPermDeleteId, setConfirmPermDeleteId] = useState<string | null>(null);
+  const [isPurging, setIsPurging] = useState(false);
 
   useEffect(() => {
     if (token) {
       fetchUsers();
+      fetchDeletedUsers();
       adminApi.getAISettings(token).then((s: Record<string, unknown>) => {
         if (s?.daily_limit_free) setDefaultDailyLimit(Number(s.daily_limit_free));
       }).catch(() => {});
@@ -44,6 +48,15 @@ function AdminUsersContent() {
       console.error('Failed to fetch users:', error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchDeletedUsers = async () => {
+    try {
+      const data = await adminApi.listDeletedUsers(token!);
+      setDeletedUsers(Array.isArray(data.users) ? data.users : []);
+    } catch (error) {
+      console.error('Failed to fetch deleted users:', error);
     }
   };
 
@@ -84,13 +97,57 @@ function AdminUsersContent() {
   };
 
   const handleDelete = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user? This cannot be undone!')) return;
+    if (!confirm('Delete this user? They will have 30 days to be restored before permanent deletion.')) return;
     try {
       await adminApi.deleteUser(token!, String(userId));
       fetchUsers();
+      fetchDeletedUsers();
     } catch (error) {
       console.error('Failed to delete user:', error);
     }
+  };
+
+  const handleRestoreUser = async (userId: string) => {
+    try {
+      await adminApi.restoreUser(token!, String(userId));
+      fetchUsers();
+      fetchDeletedUsers();
+    } catch (error) {
+      console.error('Failed to restore user:', error);
+    }
+  };
+
+  const handlePermanentDelete = async (userId: string) => {
+    try {
+      await adminApi.deleteUser(token!, String(userId), true);
+      setConfirmPermDeleteId(null);
+      fetchDeletedUsers();
+    } catch (error) {
+      console.error('Failed to permanently delete user:', error);
+      setConfirmPermDeleteId(null);
+    }
+  };
+
+  const handlePurgeExpired = async () => {
+    if (!confirm('Permanently delete all users whose 30-day grace period has expired? This cannot be undone.')) return;
+    setIsPurging(true);
+    try {
+      const result = await adminApi.purgeExpiredUsers(token!);
+      alert(`Purged ${result.purged} expired user(s).`);
+      fetchDeletedUsers();
+    } catch (error) {
+      console.error('Failed to purge expired users:', error);
+    } finally {
+      setIsPurging(false);
+    }
+  };
+
+  const getDaysRemaining = (deletedAt: string) => {
+    const deleteDate = new Date(deletedAt);
+    const expiryDate = new Date(deleteDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const now = new Date();
+    const daysLeft = Math.ceil((expiryDate.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+    return Math.max(0, daysLeft);
   };
 
   // Calculate stats (exclude test accounts from everything except testCount)
@@ -514,6 +571,94 @@ function AdminUsersContent() {
           </>
         ) : (
           <CreateUserForm token={token || ''} onCreated={() => { setActiveTab('list'); fetchUsers(); }} defaultTest={defaultTestAccount} />
+        )}
+
+        {/* Recently Deleted Users */}
+        {deletedUsers.length > 0 && (
+          <div className="card mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-frost">Recently Deleted ({deletedUsers.length})</h2>
+              {deletedUsers.some(u => getDaysRemaining(u.deleted_at!) === 0) && (
+                <button
+                  onClick={handlePurgeExpired}
+                  disabled={isPurging}
+                  className="px-3 py-1.5 text-xs text-error hover:bg-error/10 rounded transition-colors disabled:opacity-50"
+                >
+                  {isPurging ? 'Purging...' : 'Purge Expired'}
+                </button>
+              )}
+            </div>
+            <p className="text-sm text-frost-muted mb-3">
+              Deleted users can be restored within 30 days. After 30 days, use Purge Expired to permanently remove.
+            </p>
+            <div className="space-y-2">
+              {deletedUsers.map((u) => {
+                const daysLeft = getDaysRemaining(u.deleted_at!);
+                return (
+                  <div
+                    key={u.id}
+                    className="relative flex items-center justify-between p-3 bg-surface rounded-lg"
+                  >
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-frost line-through text-sm">{u.username}</span>
+                        {u.is_test_account && (
+                          <code className="px-1 py-0.5 bg-warning/20 text-warning text-[10px] rounded">TEST</code>
+                        )}
+                      </div>
+                      <p className="text-xs text-frost-muted">{u.email}</p>
+                      <p className="text-xs mt-1">
+                        {daysLeft > 0 ? (
+                          <span className="text-frost-muted">Deletes in {daysLeft} day{daysLeft !== 1 ? 's' : ''}</span>
+                        ) : (
+                          <span className="text-warning">Grace period expired — ready for purge</span>
+                        )}
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleRestoreUser(u.id)}
+                        className="btn-secondary text-sm"
+                      >
+                        Restore
+                      </button>
+                      <button
+                        onClick={() => setConfirmPermDeleteId(u.id)}
+                        className="px-3 py-1.5 text-sm text-error hover:bg-error/10 rounded transition-colors"
+                      >
+                        Delete Now
+                      </button>
+                    </div>
+
+                    {/* Confirm permanent delete overlay */}
+                    {confirmPermDeleteId === u.id && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center rounded-lg z-10">
+                        <div className="bg-surface-card p-4 rounded-lg max-w-xs">
+                          <p className="text-sm text-frost mb-3">
+                            Permanently delete <strong>{u.username}</strong>? This removes all data and cannot be undone.
+                          </p>
+                          <div className="flex gap-2 justify-end">
+                            <button
+                              onClick={() => setConfirmPermDeleteId(null)}
+                              className="btn-secondary text-sm"
+                            >
+                              Cancel
+                            </button>
+                            <button
+                              onClick={() => handlePermanentDelete(u.id)}
+                              className="btn-danger text-sm"
+                            >
+                              Delete Forever
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
 
         {/* Edit User Modal */}

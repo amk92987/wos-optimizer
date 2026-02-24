@@ -358,8 +358,17 @@ export const adminApi = {
   updateUser: (token: string, userId: string, data: UpdateUserRequest) =>
     api<{ user: AdminUser }>(`/api/admin/users/${userId}`, { method: 'PUT', body: data, token }),
 
-  deleteUser: (token: string, userId: string) =>
-    api(`/api/admin/users/${userId}`, { method: 'DELETE', token }),
+  deleteUser: (token: string, userId: string, hard = false) =>
+    api(`/api/admin/users/${userId}?hard=${hard}`, { method: 'DELETE', token }),
+
+  restoreUser: (token: string, userId: string) =>
+    api<{ user: AdminUser }>(`/api/admin/users/${userId}/restore`, { method: 'POST', token }),
+
+  listDeletedUsers: (token: string) =>
+    api<{ users: AdminUser[] }>('/api/admin/users/deleted', { token }),
+
+  purgeExpiredUsers: (token: string) =>
+    api<{ purged: number; results: any[] }>('/api/admin/users/purge-expired', { method: 'POST', token }),
 
   seedTestAccounts: (token: string) =>
     api<{ results: any[]; password: string; message: string }>('/api/admin/seed-test-accounts', { method: 'POST', token }),
@@ -873,6 +882,7 @@ export interface AdminUser {
   ai_requests_today: number;
   created_at: string;
   last_login: string | null;
+  deleted_at?: string | null;
   profile_count: number;
   states: number[];
   usage_7d: number;
