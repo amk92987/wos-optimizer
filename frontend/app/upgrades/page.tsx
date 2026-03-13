@@ -1094,27 +1094,29 @@ function EnhancementCalc() {
           <h3 className="section-header mb-4">
             Cost: Level {fromLevel} → {toLevel}
           </h3>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-surface-border">
-                <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
-                <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Slot</th>
-                {slotCount > 1 && (
-                  <th className="text-right py-2 px-3 text-ice font-medium">
-                    Total ({slotCount} slots)
-                  </th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              <CostRow
-                label="Enhancement XP"
-                perSlot={costs.perSlot}
-                total={slotCount > 1 ? costs.total : undefined}
-                color="text-blue-400"
-              />
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-surface-border">
+                  <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                  <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Slot</th>
+                  {slotCount > 1 && (
+                    <th className="text-right py-2 px-3 text-ice font-medium">
+                      Total ({slotCount} slots)
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                <CostRow
+                  label="Enhancement XP"
+                  perSlot={costs.perSlot}
+                  total={slotCount > 1 ? costs.total : undefined}
+                  color="text-blue-400"
+                />
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -1206,24 +1208,26 @@ function LegendaryCalc() {
             <h3 className="section-header mb-4">
               Cost: Level {fromLevel} → {toLevel}
             </h3>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-surface-border">
-                  <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
-                  <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Slot</th>
-                  {slotCount > 1 && (
-                    <th className="text-right py-2 px-3 text-ice font-medium">
-                      Total ({slotCount} slots)
-                    </th>
-                  )}
-                </tr>
-              </thead>
-              <tbody>
-                <CostRow label="Gear XP" perSlot={costs.perSlot.xp} total={slotCount > 1 ? costs.total.xp : undefined} color="text-blue-400" />
-                <CostRow label="Mithril" perSlot={costs.perSlot.mithril} total={slotCount > 1 ? costs.total.mithril : undefined} color="text-purple-400" />
-                <CostRow label="Legendary Gear" perSlot={costs.perSlot.legendary_gear} total={slotCount > 1 ? costs.total.legendary_gear : undefined} color="text-red-400" />
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-surface-border">
+                    <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                    <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Slot</th>
+                    {slotCount > 1 && (
+                      <th className="text-right py-2 px-3 text-ice font-medium">
+                        Total ({slotCount} slots)
+                      </th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  <CostRow label="Gear XP" perSlot={costs.perSlot.xp} total={slotCount > 1 ? costs.total.xp : undefined} color="text-blue-400" />
+                  <CostRow label="Mithril" perSlot={costs.perSlot.mithril} total={slotCount > 1 ? costs.total.mithril : undefined} color="text-purple-400" />
+                  <CostRow label="Legendary Gear" perSlot={costs.perSlot.legendary_gear} total={slotCount > 1 ? costs.total.legendary_gear : undefined} color="text-red-400" />
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Milestone Breakdown */}
@@ -1233,31 +1237,33 @@ function LegendaryCalc() {
               <p className="text-xs text-frost-muted mb-3">
                 Every 20 levels requires Mithril and Legendary Gear to unlock the next tier
               </p>
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-surface-border">
-                    <th className="text-left py-2 px-3 text-frost-muted font-medium">Level</th>
-                    <th className="text-right py-2 px-3 text-frost-muted font-medium">Mithril</th>
-                    <th className="text-right py-2 px-3 text-frost-muted font-medium">Legendary Gear</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {milestones.map((m) => {
-                    const edge = LEGENDARY_COSTS[m - 1];
-                    return (
-                      <tr key={m} className="border-b border-surface-border/30">
-                        <td className="py-2 px-3 font-medium text-frost">Level {m}</td>
-                        <td className="py-2 px-3 text-right text-purple-400">
-                          {edge.mithril > 0 ? edge.mithril : '-'}
-                        </td>
-                        <td className="py-2 px-3 text-right text-red-400">
-                          {edge.legendary_gear > 0 ? edge.legendary_gear : '-'}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-surface-border">
+                      <th className="text-left py-2 px-3 text-frost-muted font-medium">Level</th>
+                      <th className="text-right py-2 px-3 text-frost-muted font-medium">Mithril</th>
+                      <th className="text-right py-2 px-3 text-frost-muted font-medium">Legendary Gear</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {milestones.map((m) => {
+                      const edge = LEGENDARY_COSTS[m - 1];
+                      return (
+                        <tr key={m} className="border-b border-surface-border/30">
+                          <td className="py-2 px-3 font-medium text-frost">Level {m}</td>
+                          <td className="py-2 px-3 text-right text-purple-400">
+                            {edge.mithril > 0 ? edge.mithril : '-'}
+                          </td>
+                          <td className="py-2 px-3 text-right text-red-400">
+                            {edge.legendary_gear > 0 ? edge.legendary_gear : '-'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
@@ -1347,23 +1353,25 @@ function MasteryCalc() {
           <h3 className="section-header mb-4">
             Cost: Level {fromLevel} → {toLevel}
           </h3>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-surface-border">
-                <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
-                <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Slot</th>
-                {slotCount > 1 && (
-                  <th className="text-right py-2 px-3 text-ice font-medium">
-                    Total ({slotCount} slots)
-                  </th>
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              <CostRow label="Essence Stones" perSlot={costs.perSlot.essence_stones} total={slotCount > 1 ? costs.total.essence_stones : undefined} color="text-amber-400" />
-              <CostRow label="Mythic Gear" perSlot={costs.perSlot.mythic_gear} total={slotCount > 1 ? costs.total.mythic_gear : undefined} color="text-orange-400" />
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-surface-border">
+                  <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                  <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Slot</th>
+                  {slotCount > 1 && (
+                    <th className="text-right py-2 px-3 text-ice font-medium">
+                      Total ({slotCount} slots)
+                    </th>
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                <CostRow label="Essence Stones" perSlot={costs.perSlot.essence_stones} total={slotCount > 1 ? costs.total.essence_stones : undefined} color="text-amber-400" />
+                <CostRow label="Mythic Gear" perSlot={costs.perSlot.mythic_gear} total={slotCount > 1 ? costs.total.mythic_gear : undefined} color="text-orange-400" />
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -1492,33 +1500,35 @@ function ChiefGearCalc() {
               {' → '}
               <span style={{ color: tierColor(toTier) }}>{CHIEF_TIER_NAMES[toTier]}</span>
             </h3>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-surface-border">
-                  <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
-                  <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Piece</th>
-                  {pieceCount > 1 && (
-                    <th className="text-right py-2 px-3 text-ice font-medium">
-                      Total ({pieceCount} pieces)
-                    </th>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-surface-border">
+                    <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                    <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Piece</th>
+                    {pieceCount > 1 && (
+                      <th className="text-right py-2 px-3 text-ice font-medium">
+                        Total ({pieceCount} pieces)
+                      </th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {costs.perPiece.ha > 0 && (
+                    <CostRow label="Hardened Alloy" perSlot={costs.perPiece.ha} total={pieceCount > 1 ? costs.total.ha : undefined} color="text-gray-300" />
                   )}
-                </tr>
-              </thead>
-              <tbody>
-                {costs.perPiece.ha > 0 && (
-                  <CostRow label="Hardened Alloy" perSlot={costs.perPiece.ha} total={pieceCount > 1 ? costs.total.ha : undefined} color="text-gray-300" />
-                )}
-                {costs.perPiece.ps > 0 && (
-                  <CostRow label="Polishing Solution" perSlot={costs.perPiece.ps} total={pieceCount > 1 ? costs.total.ps : undefined} color="text-cyan-400" />
-                )}
-                {costs.perPiece.dp > 0 && (
-                  <CostRow label="Design Plans" perSlot={costs.perPiece.dp} total={pieceCount > 1 ? costs.total.dp : undefined} color="text-yellow-400" />
-                )}
-                {costs.perPiece.la > 0 && (
-                  <CostRow label="Lunar Amber" perSlot={costs.perPiece.la} total={pieceCount > 1 ? costs.total.la : undefined} color="text-amber-500" />
-                )}
-              </tbody>
-            </table>
+                  {costs.perPiece.ps > 0 && (
+                    <CostRow label="Polishing Solution" perSlot={costs.perPiece.ps} total={pieceCount > 1 ? costs.total.ps : undefined} color="text-cyan-400" />
+                  )}
+                  {costs.perPiece.dp > 0 && (
+                    <CostRow label="Design Plans" perSlot={costs.perPiece.dp} total={pieceCount > 1 ? costs.total.dp : undefined} color="text-yellow-400" />
+                  )}
+                  {costs.perPiece.la > 0 && (
+                    <CostRow label="Lunar Amber" perSlot={costs.perPiece.la} total={pieceCount > 1 ? costs.total.la : undefined} color="text-amber-500" />
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -1661,26 +1671,28 @@ function CharmsCalc() {
             <h3 className="section-header mb-4">
               Cost: Level {fromLevel} → {toLevel}
             </h3>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-surface-border">
-                  <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
-                  <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Slot</th>
-                  {slotCount > 1 && (
-                    <th className="text-right py-2 px-3 text-ice font-medium">
-                      Total ({slotCount} slots)
-                    </th>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-surface-border">
+                    <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                    <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Slot</th>
+                    {slotCount > 1 && (
+                      <th className="text-right py-2 px-3 text-ice font-medium">
+                        Total ({slotCount} slots)
+                      </th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  <CostRow label="Charm Guides" perSlot={costs.perSlot.charm_guide} total={slotCount > 1 ? costs.total.charm_guide : undefined} color="text-cyan-400" />
+                  <CostRow label="Charm Designs" perSlot={costs.perSlot.charm_design} total={slotCount > 1 ? costs.total.charm_design : undefined} color="text-purple-400" />
+                  {costs.perSlot.jewel_secrets > 0 && (
+                    <CostRow label="Jewel Secrets" perSlot={costs.perSlot.jewel_secrets} total={slotCount > 1 ? costs.total.jewel_secrets : undefined} color="text-amber-400" />
                   )}
-                </tr>
-              </thead>
-              <tbody>
-                <CostRow label="Charm Guides" perSlot={costs.perSlot.charm_guide} total={slotCount > 1 ? costs.total.charm_guide : undefined} color="text-cyan-400" />
-                <CostRow label="Charm Designs" perSlot={costs.perSlot.charm_design} total={slotCount > 1 ? costs.total.charm_design : undefined} color="text-purple-400" />
-                {costs.perSlot.jewel_secrets > 0 && (
-                  <CostRow label="Jewel Secrets" perSlot={costs.perSlot.jewel_secrets} total={slotCount > 1 ? costs.total.jewel_secrets : undefined} color="text-amber-400" />
-                )}
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -1888,24 +1900,26 @@ function WarAcademyCalc() {
             <h3 className="section-header mb-4">
               Cost: {WA_LEVELS[fromIdx]} → {WA_LEVELS[toIdx]}
             </h3>
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-surface-border">
-                  <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
-                  <th className="text-right py-2 px-3 text-frost-muted font-medium">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                <CostRow label="Fire Crystal Shards" perSlot={costs.fcs} color="text-orange-400" />
-                {costs.rfc > 0 && (
-                  <CostRow label="Refined Fire Crystals" perSlot={costs.rfc} color="text-red-400" />
-                )}
-                <CostRow label="Meat" perSlot={costs.meat} color="text-red-300" />
-                <CostRow label="Wood" perSlot={costs.wood} color="text-green-400" />
-                <CostRow label="Coal" perSlot={costs.coal} color="text-gray-300" />
-                <CostRow label="Iron" perSlot={costs.iron} color="text-blue-300" />
-              </tbody>
-            </table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-surface-border">
+                    <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                    <th className="text-right py-2 px-3 text-frost-muted font-medium">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <CostRow label="Fire Crystal Shards" perSlot={costs.fcs} color="text-orange-400" />
+                  {costs.rfc > 0 && (
+                    <CostRow label="Refined Fire Crystals" perSlot={costs.rfc} color="text-red-400" />
+                  )}
+                  <CostRow label="Meat" perSlot={costs.meat} color="text-red-300" />
+                  <CostRow label="Wood" perSlot={costs.wood} color="text-green-400" />
+                  <CostRow label="Coal" perSlot={costs.coal} color="text-gray-300" />
+                  <CostRow label="Iron" perSlot={costs.iron} color="text-blue-300" />
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Milestone breakdown */}
@@ -2194,20 +2208,22 @@ function PetLevelingCalc() {
       ) : costs && (
         <div className="card">
           <h3 className="section-header mb-4">Cost: Level {fromLevel} → {toLevel} ({rarity})</h3>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-surface-border">
-                <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
-                <th className="text-right py-2 px-3 text-frost-muted font-medium">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <CostRow label="Pet Food" perSlot={costs.totalFood} color="text-amber-400" />
-              {costs.totalTaming > 0 && <CostRow label="Taming Manuals" perSlot={costs.totalTaming} color="text-blue-400" />}
-              {costs.totalEnergizing > 0 && <CostRow label="Energizing Potions" perSlot={costs.totalEnergizing} color="text-green-400" />}
-              {costs.totalStrengthening > 0 && <CostRow label="Strengthening Serums" perSlot={costs.totalStrengthening} color="text-purple-400" />}
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-surface-border">
+                  <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                  <th className="text-right py-2 px-3 text-frost-muted font-medium">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <CostRow label="Pet Food" perSlot={costs.totalFood} color="text-amber-400" />
+                {costs.totalTaming > 0 && <CostRow label="Taming Manuals" perSlot={costs.totalTaming} color="text-blue-400" />}
+                {costs.totalEnergizing > 0 && <CostRow label="Energizing Potions" perSlot={costs.totalEnergizing} color="text-green-400" />}
+                {costs.totalStrengthening > 0 && <CostRow label="Strengthening Serums" perSlot={costs.totalStrengthening} color="text-purple-400" />}
+              </tbody>
+            </table>
+          </div>
 
           {/* Milestone Breakdown */}
           {costs.milestonesInRange.length > 0 && (
@@ -2399,43 +2415,49 @@ function ExpertSkillsCalc() {
       ) : singleCosts && (
         <div className="card">
           <h3 className="section-header mb-4">{skill.name}: Level {fromLevel} → {toLevel}</h3>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-surface-border">
-                <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
-                <th className="text-right py-2 px-3 text-frost-muted font-medium">Total Needed</th>
-              </tr>
-            </thead>
-            <tbody>
-              <CostRow label="Books of Knowledge" perSlot={singleCosts.books} color="text-cyan-400" />
-              {singleCosts.exp > 0 && (
-                <CostRow label="EXP" perSlot={singleCosts.exp} color="text-purple-400" />
-              )}
-            </tbody>
-          </table>
-
-          {/* Per-level breakdown */}
-          <div className="mt-4">
-            <h4 className="text-xs text-frost-muted mb-2">Per-Level Breakdown</h4>
-            <table className="w-full text-xs">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-surface-border">
-                  <th className="text-left py-1.5 px-3 text-frost-muted">Level</th>
-                  <th className="text-right py-1.5 px-3 text-frost-muted">Books</th>
-                  <th className="text-right py-1.5 px-3 text-frost-muted">EXP</th>
+                  <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                  <th className="text-right py-2 px-3 text-frost-muted font-medium">Total Needed</th>
                 </tr>
               </thead>
               <tbody>
-                {skill.costs.filter(c => c.level > fromLevel && c.level <= toLevel).map((c) => (
-                  <tr key={c.level} className="border-b border-surface-border/30">
-                    <td className="py-1.5 px-3 text-frost">Lv.{c.level - 1} → {c.level}</td>
-                    <td className="py-1.5 px-3 text-right text-cyan-400">{c.books.toLocaleString()}</td>
-                    <td className="py-1.5 px-3 text-right text-purple-400">{c.exp > 0 ? c.exp.toLocaleString() : '—'}</td>
-                  </tr>
-                ))}
+                <CostRow label="Books of Knowledge" perSlot={singleCosts.books} color="text-cyan-400" />
+                {singleCosts.exp > 0 && (
+                  <CostRow label="EXP" perSlot={singleCosts.exp} color="text-purple-400" />
+                )}
               </tbody>
             </table>
           </div>
+
+          {/* Per-level breakdown (collapsible — can be up to 19 rows) */}
+          <details className="mt-4">
+            <summary className="text-xs text-frost-muted mb-2 cursor-pointer hover:text-frost transition-colors">
+              Per-Level Breakdown ({skill.costs.filter(c => c.level > fromLevel && c.level <= toLevel).length} levels)
+            </summary>
+            <div className="overflow-x-auto mt-2">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-surface-border">
+                    <th className="text-left py-1.5 px-3 text-frost-muted">Level</th>
+                    <th className="text-right py-1.5 px-3 text-frost-muted">Books</th>
+                    <th className="text-right py-1.5 px-3 text-frost-muted">EXP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {skill.costs.filter(c => c.level > fromLevel && c.level <= toLevel).map((c) => (
+                    <tr key={c.level} className="border-b border-surface-border/30">
+                      <td className="py-1.5 px-3 text-frost">Lv.{c.level - 1} → {c.level}</td>
+                      <td className="py-1.5 px-3 text-right text-cyan-400">{c.books.toLocaleString()}</td>
+                      <td className="py-1.5 px-3 text-right text-purple-400">{c.exp > 0 ? c.exp.toLocaleString() : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </details>
         </div>
       )}
 
@@ -2446,31 +2468,33 @@ function ExpertSkillsCalc() {
           <p className="text-xs text-frost-muted mb-3">
             Total cost to fully max all 4 skills from Lv.1 to their maximum level.
           </p>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-surface-border">
-                <th className="text-left py-2 px-3 text-frost-muted font-medium">Skill</th>
-                <th className="text-center py-2 px-3 text-frost-muted font-medium">Levels</th>
-                <th className="text-right py-2 px-3 text-frost-muted font-medium">Books</th>
-                <th className="text-right py-2 px-3 text-frost-muted font-medium">EXP</th>
-              </tr>
-            </thead>
-            <tbody>
-              {allSkillsCosts.breakdown.map((s) => (
-                <tr key={s.name} className="border-b border-surface-border/30">
-                  <td className="py-2 px-3 text-frost">{s.name}</td>
-                  <td className="py-2 px-3 text-center text-frost-muted">{s.levels}</td>
-                  <td className="py-2 px-3 text-right text-cyan-400">{s.books.toLocaleString()}</td>
-                  <td className="py-2 px-3 text-right text-purple-400">{s.exp > 0 ? s.exp.toLocaleString() : '—'}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-surface-border">
+                  <th className="text-left py-2 px-3 text-frost-muted font-medium">Skill</th>
+                  <th className="text-center py-2 px-3 text-frost-muted font-medium">Levels</th>
+                  <th className="text-right py-2 px-3 text-frost-muted font-medium">Books</th>
+                  <th className="text-right py-2 px-3 text-frost-muted font-medium">EXP</th>
                 </tr>
-              ))}
-              <tr className="border-t-2 border-cyan-500/30 font-bold">
-                <td className="py-3 px-3 text-frost" colSpan={2}>Grand Total</td>
-                <td className="py-3 px-3 text-right text-cyan-400 text-lg">{allSkillsCosts.totalBooks.toLocaleString()}</td>
-                <td className="py-3 px-3 text-right text-purple-400 text-lg">{allSkillsCosts.totalExp > 0 ? allSkillsCosts.totalExp.toLocaleString() : '—'}</td>
-              </tr>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {allSkillsCosts.breakdown.map((s) => (
+                  <tr key={s.name} className="border-b border-surface-border/30">
+                    <td className="py-2 px-3 text-frost">{s.name}</td>
+                    <td className="py-2 px-3 text-center text-frost-muted">{s.levels}</td>
+                    <td className="py-2 px-3 text-right text-cyan-400">{s.books.toLocaleString()}</td>
+                    <td className="py-2 px-3 text-right text-purple-400">{s.exp > 0 ? s.exp.toLocaleString() : '—'}</td>
+                  </tr>
+                ))}
+                <tr className="border-t-2 border-cyan-500/30 font-bold">
+                  <td className="py-3 px-3 text-frost" colSpan={2}>Grand Total</td>
+                  <td className="py-3 px-3 text-right text-cyan-400 text-lg">{allSkillsCosts.totalBooks.toLocaleString()}</td>
+                  <td className="py-3 px-3 text-right text-purple-400 text-lg">{allSkillsCosts.totalExp > 0 ? allSkillsCosts.totalExp.toLocaleString() : '—'}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
@@ -2617,42 +2641,46 @@ function ExpertAffinityCalc() {
           <h3 className="section-header mb-4">
             {aff.name}: Level {fromMilestone} &rarr; {toMilestone}
           </h3>
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-surface-border">
-                <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
-                <th className="text-right py-2 px-3 text-frost-muted font-medium">Total Needed</th>
-              </tr>
-            </thead>
-            <tbody>
-              <CostRow label="Common Expert Sigils" perSlot={costs.sigils} color="text-teal-400" />
-              <CostRow label="Advancement Points (from gifts)" perSlot={costs.advancement} color="text-purple-400" />
-            </tbody>
-          </table>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-surface-border">
+                  <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                  <th className="text-right py-2 px-3 text-frost-muted font-medium">Total Needed</th>
+                </tr>
+              </thead>
+              <tbody>
+                <CostRow label="Common Expert Sigils" perSlot={costs.sigils} color="text-teal-400" />
+                <CostRow label="Advancement Points (from gifts)" perSlot={costs.advancement} color="text-purple-400" />
+              </tbody>
+            </table>
+          </div>
 
           {/* Milestone Breakdown */}
           <div className="mt-4">
             <h4 className="text-xs text-frost-muted mb-2">Milestone Breakdown</h4>
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="border-b border-surface-border">
-                  <th className="text-left py-1.5 px-3 text-frost-muted">Milestone</th>
-                  <th className="text-right py-1.5 px-3 text-frost-muted">Sigils (total)</th>
-                  <th className="text-right py-1.5 px-3 text-frost-muted">Advancement</th>
-                  <th className="text-right py-1.5 px-3 text-frost-muted">Bonus</th>
-                </tr>
-              </thead>
-              <tbody>
-                {costs.breakdown.map((m) => (
-                  <tr key={m.level} className="border-b border-surface-border/30">
-                    <td className="py-1.5 px-3 text-frost font-medium">Level {m.level}</td>
-                    <td className="py-1.5 px-3 text-right text-teal-400">{m.sigils.toLocaleString()}</td>
-                    <td className="py-1.5 px-3 text-right text-purple-400">{m.advancement.toLocaleString()}</td>
-                    <td className="py-1.5 px-3 text-right text-green-400">+{m.bonus_pct.toFixed(1)}%</td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-surface-border">
+                    <th className="text-left py-1.5 px-3 text-frost-muted">Milestone</th>
+                    <th className="text-right py-1.5 px-3 text-frost-muted">Sigils (total)</th>
+                    <th className="text-right py-1.5 px-3 text-frost-muted">Advancement</th>
+                    <th className="text-right py-1.5 px-3 text-frost-muted">Bonus</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {costs.breakdown.map((m) => (
+                    <tr key={m.level} className="border-b border-surface-border/30">
+                      <td className="py-1.5 px-3 text-frost font-medium">Level {m.level}</td>
+                      <td className="py-1.5 px-3 text-right text-teal-400">{m.sigils.toLocaleString()}</td>
+                      <td className="py-1.5 px-3 text-right text-purple-400">{m.advancement.toLocaleString()}</td>
+                      <td className="py-1.5 px-3 text-right text-green-400">+{m.bonus_pct.toFixed(1)}%</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -2757,30 +2785,32 @@ function CrystalLabCalc() {
       {/* Normal Refinement Results */}
       <div className="card">
         <h3 className="section-header mb-4">Normal Refinement — {results.periodDays} day{results.periodDays > 1 ? 's' : ''}</h3>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-surface-border">
-              <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
-              <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Day</th>
-              {results.periodDays > 1 && (
-                <th className="text-right py-2 px-3 text-frost-muted font-medium">Total ({results.periodDays}d)</th>
-              )}
-            </tr>
-          </thead>
-          <tbody>
-            <CostRow label="Meat" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
-            <CostRow label="Wood" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
-            <CostRow label="Coal" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
-            <CostRow label="Iron" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
-            <tr className="border-t-2 border-red-500/30">
-              <td className="py-3 px-3 text-frost font-bold">Expected Fire Crystals</td>
-              <td className="py-3 px-3 text-right font-bold text-red-400 text-lg">~{results.dailyExpectedFC}</td>
-              {results.periodDays > 1 && (
-                <td className="py-3 px-3 text-right font-bold text-red-400 text-lg">~{results.periodExpectedFC}</td>
-              )}
-            </tr>
-          </tbody>
-        </table>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Day</th>
+                {results.periodDays > 1 && (
+                  <th className="text-right py-2 px-3 text-frost-muted font-medium">Total ({results.periodDays}d)</th>
+                )}
+              </tr>
+            </thead>
+            <tbody>
+              <CostRow label="Meat" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
+              <CostRow label="Wood" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
+              <CostRow label="Coal" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
+              <CostRow label="Iron" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
+              <tr className="border-t-2 border-red-500/30">
+                <td className="py-3 px-3 text-frost font-bold">Expected Fire Crystals</td>
+                <td className="py-3 px-3 text-right font-bold text-red-400 text-lg">~{results.dailyExpectedFC}</td>
+                {results.periodDays > 1 && (
+                  <td className="py-3 px-3 text-right font-bold text-red-400 text-lg">~{results.periodExpectedFC}</td>
+                )}
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Drop Rates Reference */}
@@ -2806,52 +2836,56 @@ function CrystalLabCalc() {
         <p className="text-xs text-frost-muted mb-3">
           100 super refinements per week across 5 tiers of 20. First daily refinement is 50% off.
         </p>
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-surface-border">
-              <th className="text-left py-2 px-3 text-frost-muted font-medium">Tier</th>
-              <th className="text-right py-2 px-3 text-frost-muted font-medium">FC Cost</th>
-              <th className="text-right py-2 px-3 text-frost-muted font-medium">Refined FC (EV)</th>
-              <th className="text-right py-2 px-3 text-frost-muted font-medium">× 20</th>
-            </tr>
-          </thead>
-          <tbody>
-            {SUPER_REFINEMENT_TIERS.map((t) => (
-              <tr key={t.tier} className="border-b border-surface-border/30">
-                <td className="py-2 px-3 text-frost">Tier {t.tier}</td>
-                <td className="py-2 px-3 text-right text-red-400">{t.fc_cost} FC</td>
-                <td className="py-2 px-3 text-right text-purple-400">~{t.ev.toFixed(2)}</td>
-                <td className="py-2 px-3 text-right text-purple-400">~{(t.ev * 20).toFixed(1)}</td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left py-2 px-3 text-frost-muted font-medium">Tier</th>
+                <th className="text-right py-2 px-3 text-frost-muted font-medium">FC Cost</th>
+                <th className="text-right py-2 px-3 text-frost-muted font-medium">Refined FC (EV)</th>
+                <th className="text-right py-2 px-3 text-frost-muted font-medium">x 20</th>
               </tr>
-            ))}
-            <tr className="border-t-2 border-red-500/30 font-bold">
-              <td className="py-3 px-3 text-frost" colSpan={2}>Weekly Total (with discount)</td>
-              <td className="py-3 px-3 text-right text-red-400">~{results.weeklyFCCost.toLocaleString()} FC</td>
-              <td className="py-3 px-3 text-right text-purple-400 text-lg">~{results.weeklyExpectedRefined} Refined</td>
-            </tr>
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {SUPER_REFINEMENT_TIERS.map((t) => (
+                <tr key={t.tier} className="border-b border-surface-border/30">
+                  <td className="py-2 px-3 text-frost">Tier {t.tier}</td>
+                  <td className="py-2 px-3 text-right text-red-400">{t.fc_cost} FC</td>
+                  <td className="py-2 px-3 text-right text-purple-400">~{t.ev.toFixed(2)}</td>
+                  <td className="py-2 px-3 text-right text-purple-400">~{(t.ev * 20).toFixed(1)}</td>
+                </tr>
+              ))}
+              <tr className="border-t-2 border-red-500/30 font-bold">
+                <td className="py-3 px-3 text-frost" colSpan={2}>Weekly Total (with discount)</td>
+                <td className="py-3 px-3 text-right text-red-400">~{results.weeklyFCCost.toLocaleString()} FC</td>
+                <td className="py-3 px-3 text-right text-purple-400 text-lg">~{results.weeklyExpectedRefined} Refined</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Per-refinement cost breakdown */}
       <div className="card border border-red-500/20">
         <h4 className="text-xs text-frost-muted mb-2">Daily Refinement Cost Breakdown ({dailyLimit} refines)</h4>
-        <table className="w-full text-xs">
-          <thead>
-            <tr className="border-b border-surface-border">
-              <th className="text-left py-1.5 px-3 text-frost-muted">#</th>
-              <th className="text-right py-1.5 px-3 text-frost-muted">Cost (each resource)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {CRYSTAL_LAB_REFINEMENT_COSTS.slice(0, dailyLimit).map((cost, i) => (
-              <tr key={i} className="border-b border-surface-border/30">
-                <td className="py-1.5 px-3 text-frost">Refinement {i + 1}</td>
-                <td className="py-1.5 px-3 text-right text-orange-400">{cost.toLocaleString()}</td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left py-1.5 px-3 text-frost-muted">#</th>
+                <th className="text-right py-1.5 px-3 text-frost-muted">Cost (each resource)</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {CRYSTAL_LAB_REFINEMENT_COSTS.slice(0, dailyLimit).map((cost, i) => (
+                <tr key={i} className="border-b border-surface-border/30">
+                  <td className="py-1.5 px-3 text-frost">Refinement {i + 1}</td>
+                  <td className="py-1.5 px-3 text-right text-orange-400">{cost.toLocaleString()}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

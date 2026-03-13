@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import PageLayout from '@/components/PageLayout';
 
-type TabKey = 'critical' | 'hidden-gems' | 'pets' | 'hero-investment' | 'alliance' | 'mistakes' | 'by-category';
+type TabKey = 'critical' | 'hidden-gems' | 'pets' | 'hero-investment' | 'alliance' | 'experts' | 'mistakes' | 'by-category';
 
 // Priority colors
 const priorityColors: Record<string, { border: string; badge: string; label: string }> = {
@@ -1033,6 +1033,33 @@ function CommonMistakesTab() {
   );
 }
 
+function ExpertsTab() {
+  const tips = categoryTips.experts.tips
+    .slice()
+    .sort((a, b) => {
+      const order = { critical: 0, high: 1, medium: 2, low: 3 };
+      return order[a.priority] - order[b.priority];
+    });
+
+  return (
+    <div>
+      <h2 className="text-xl font-bold text-frost mb-2">Experts, Treks & Crystal Lab</h2>
+      <p className="text-frost-muted mb-6">
+        FC4+ systems: Expert skills, affinity, Tundra/Frontier Trek, and Crystal Laboratory
+      </p>
+
+      {tips.map((tip, i) => (
+        <TipCard
+          key={i}
+          tip={tip.tip}
+          detail={tip.detail}
+          priority={tip.priority}
+        />
+      ))}
+    </div>
+  );
+}
+
 function ByCategoryTab() {
   return (
     <div>
@@ -1079,6 +1106,7 @@ export default function QuickTipsPage() {
     { key: 'pets', label: 'Pets' },
     { key: 'hero-investment', label: 'Hero Investment' },
     { key: 'alliance', label: 'Alliance (R4/R5)' },
+    { key: 'experts', label: 'Experts' },
     { key: 'mistakes', label: 'Common Mistakes' },
     { key: 'by-category', label: 'By Category' },
   ];
@@ -1118,6 +1146,7 @@ export default function QuickTipsPage() {
           {activeTab === 'pets' && <PetsTab />}
           {activeTab === 'hero-investment' && <HeroInvestmentTab />}
           {activeTab === 'alliance' && <AllianceTab />}
+          {activeTab === 'experts' && <ExpertsTab />}
           {activeTab === 'mistakes' && <CommonMistakesTab />}
           {activeTab === 'by-category' && <ByCategoryTab />}
         </div>
