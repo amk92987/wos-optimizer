@@ -6,7 +6,7 @@
     {"source_id": "dearplayers", "url": "https://www.dearplayers.com/us/events/whiteout-survival/wild-brawl", "confidence": "B"},
     {"source_id": "facebook_official", "url": "https://www.facebook.com/WhiteoutSurvival/posts/christmas-limited-pvp-eventwild-brawl-is-coming-soon/854452813865519/", "confidence": "B"}
   ],
-  "data_completeness": "partial",
+  "data_completeness": "partial_needs_reward_details",
   "overview": {
     "description": "PvP battle royale event where 10+ Chiefs compete on a shared battlefield for Strategic Points via supply chests and airdrops",
     "type": "recurring_pvp_event",

@@ -61,6 +61,7 @@ const categoryIcons: Record<string, string> = {
   new_player: '🆕',
   upgrade_priorities: '📈',
   farm_accounts: '🌾',
+  experts: '🎓',
 };
 
 // Hero niche uses - special badges for heroes with specific game mode value
@@ -399,6 +400,7 @@ const categoryTips: Record<string, { name: string; icon: string; tips: { tip: st
       { tip: 'NEVER spend Flames outside Flame Lotto', detail: 'Save every single Flame for Flame Lotto event. Best value for flame currency.', priority: 'high' },
       { tip: 'Snowbusters and Fishing are pay-to-progress', detail: "F2P players hit a wall quickly. Do free attempts only, don't buy packs for these.", priority: 'high' },
       { tip: 'Bear Trap is S-tier for F2P', detail: 'Best rewards for effort. Always participate. Use EXPLORATION skills team (not expedition).', priority: 'high' },
+      { tip: 'Wild Brawl: 10 matches per season, use Smoke Bombs wisely', detail: 'Battle royale PvP (F25+). 10+ Chiefs per match. Airdrops every 2 minutes with tactical items. Smoke Bomb = 120s invisibility. Focus on collecting Strategic Supply Chests for points.', priority: 'medium' },
     ],
   },
   farm_accounts: {
@@ -410,6 +412,22 @@ const categoryTips: Record<string, { name: string; icon: string; tips: { tip: st
       { tip: "Farm accounts don't need heroes, research, or gear", detail: 'Only level Furnace and resource buildings. No combat investment needed.', priority: 'high' },
       { tip: 'Farm accounts should stay under a shield 24/7', detail: 'Farms are weak targets. Keep them shielded always.', priority: 'high' },
       { tip: 'Aim for F18-F20 on farms, then stop', detail: 'Higher furnace = better resource buildings, but diminishing returns. F18-F20 is the sweet spot.', priority: 'high' },
+    ],
+  },
+  experts: {
+    name: 'Experts & Treks',
+    icon: '🎓',
+    tips: [
+      { tip: 'Experts unlock at FC4-FC5 via the Dawn Academy', detail: '7 experts total: Agnes (economy), Valeria (SvS), Baldur (alliance), Romulus (combat), Holger (arena), Cyrille (bear hunt), Fabian (foundry). Each has 4 skills + 1 talent + affinity system.', priority: 'critical' },
+      { tip: 'Prioritize Valeria and Romulus for combat players', detail: "Valeria: +30% Lethality/Health in SvS Battle Phase + 150K rally capacity. Romulus: +10% Attack/Defense/Lethality/Health to all troops + 100K rally capacity. Both give +20% affinity bonus at max.", priority: 'critical' },
+      { tip: 'Collect ALL free Trek Supplies daily (40 total)', detail: '20 at 00:00 UTC, 10 at 08:00 UTC, 10 at 16:00 UTC. Missing these slows expert progression significantly.', priority: 'high' },
+      { tip: 'Frontier Trek unlocks after 60 Tundra Treks - lets you target specific experts', detail: 'Tundra Trek is random encounters. After 60 treks, Frontier Trek lets you choose which expert to work on. Save Frontier Supplies for your priority expert.', priority: 'high' },
+      { tip: 'Auto Trek unlocks after 50 Tundra Treks but you must stay on the screen', detail: 'You need to keep the Tundra Trek interface open for auto-trek to work. Plan around AFK time.', priority: 'medium' },
+      { tip: 'Affinity requires Sigils at every 10-level milestone', detail: 'Sigil costs vary hugely by expert: Baldur needs 60 total, Romulus/Valeria need 360. Budget sigils for your priority expert.', priority: 'high' },
+      { tip: 'Agnes is best for economy-focused players (F2P/Minnows)', detail: '-8h construction time per build, +8 Intel missions/day, +120 Mystery Badges daily, +40 Storehouse Stamina. Great passive value.', priority: 'medium' },
+      { tip: 'Baldur boosts Crazy Joe and Alliance events significantly', detail: '+50% Crazy Joe points + bonus chests, +50% Alliance Championship Badges, +50% Alliance Showdown points, +20% Alliance Mobilization Points.', priority: 'medium' },
+      { tip: 'Crystal Laboratory: do ALL daily refinements for free Fire Crystals', detail: 'Exchange resources for 1-5 Fire Crystals per refinement (avg 2.1). 5-8 daily depending on FC level. Costs are minor resources (5K-50K each).', priority: 'high' },
+      { tip: 'Super Refinement: 50% discount on first daily refinement', detail: 'Crystal Lab Super Refinement converts FC to Refined FC (100/week). Always do your first refinement each day for the 50% discount.', priority: 'medium' },
     ],
   },
 };

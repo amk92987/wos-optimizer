@@ -23,10 +23,11 @@ import os
 import sys
 from pathlib import Path
 
-# Ensure project root is on path
+# Ensure project root is on path and set as working directory
 _project_root = str(Path(__file__).resolve().parent.parent.parent)
 if _project_root not in sys.path:
     sys.path.insert(0, _project_root)
+os.chdir(_project_root)
 
 logger = logging.getLogger("review.hook")
 

@@ -30,7 +30,7 @@ interface HeroInvestment {
 }
 
 type TabType = 'recommendations' | 'heroes' | 'calculators';
-type CalcType = 'enhancement' | 'legendary' | 'mastery' | 'chief_gear' | 'charms' | 'war_academy' | 'pet_leveling' | 'expert_skills' | 'expert_affinity';
+type CalcType = 'enhancement' | 'legendary' | 'mastery' | 'chief_gear' | 'charms' | 'war_academy' | 'pet_leveling' | 'expert_skills' | 'expert_affinity' | 'crystal_lab';
 
 /** Convert snake_case or slug text to clean Title Case */
 function formatLabel(s: string): string {
@@ -917,6 +917,33 @@ function HeroInvestmentsTab({
   );
 }
 
+// Crystal Laboratory: daily refinement costs and expected FC output
+const CRYSTAL_LAB_REFINEMENT_COSTS = [5000, 10000, 20000, 30000, 40000, 50000, 50000, 50000];
+const CRYSTAL_LAB_DROP_RATES = [
+  { crystals: 1, chance: 0.40 },
+  { crystals: 2, chance: 0.30 },
+  { crystals: 3, chance: 0.15 },
+  { crystals: 4, chance: 0.10 },
+  { crystals: 5, chance: 0.05 },
+];
+const CRYSTAL_LAB_DAILY_LIMITS: { label: string; count: number }[] = [
+  { label: 'FC5', count: 5 },
+  { label: 'War Academy', count: 6 },
+  { label: 'FC8', count: 7 },
+  { label: 'FC10', count: 8 },
+];
+// Expected value per refinement: 1*0.4 + 2*0.3 + 3*0.15 + 4*0.1 + 5*0.05 = 2.10
+const CRYSTAL_LAB_EV = CRYSTAL_LAB_DROP_RATES.reduce((sum, r) => sum + r.crystals * r.chance, 0);
+
+// Super Refinement: FC → Refined Fire Crystals (100/week, 5 tiers of 20)
+const SUPER_REFINEMENT_TIERS = [
+  { tier: 1, fc_cost: 20, ev: 1 * 0.65 + 2 * 0.25 + 3 * 0.10 },
+  { tier: 2, fc_cost: 50, ev: 2 * 0.85 + 3 * 0.15 },
+  { tier: 3, fc_cost: 100, ev: 3 * 0.85 + 4 * 0.125 + 5 * 0.02 + 6 * 0.005 },
+  { tier: 4, fc_cost: 130, ev: 3 * 0.75 + 4 * 0.15 + 5 * 0.05 + 6 * 0.03 + 7 * 0.01 + 8 * 0.005 + 9 * 0.005 },
+  { tier: 5, fc_cost: 160, ev: 3 * 0.70 + 4 * 0.12 + 5 * 0.09 + 6 * 0.04 + 7 * 0.015 + 8 * 0.01 + 9 * 0.01 + 10 * 0.005 + 11 * 0.005 + 12 * 0.005 },
+];
+
 // ══════════════════════════════════════════════════════════════════════
 // UPGRADE CALCULATORS TAB
 // ══════════════════════════════════════════════════════════════════════
@@ -931,6 +958,7 @@ const CALC_DEFS: { id: CalcType; label: string; category: string; color: string;
   { id: 'pet_leveling', label: 'Pet Leveling', category: 'Pets', color: 'text-amber-400', activeColor: 'border-amber-500/50 bg-amber-500/10 text-amber-400' },
   { id: 'expert_skills', label: 'Expert Skills', category: 'Experts', color: 'text-cyan-400', activeColor: 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400' },
   { id: 'expert_affinity', label: 'Affinity', category: 'Experts', color: 'text-teal-400', activeColor: 'border-teal-500/50 bg-teal-500/10 text-teal-400' },
+  { id: 'crystal_lab', label: 'Crystal Lab', category: 'Buildings', color: 'text-red-400', activeColor: 'border-red-500/50 bg-red-500/10 text-red-400' },
 ];
 
 function UpgradeCalculatorsTab() {
@@ -984,6 +1012,7 @@ function UpgradeCalculatorsTab() {
       {calc === 'pet_leveling' && <PetLevelingCalc />}
       {calc === 'expert_skills' && <ExpertSkillsCalc />}
       {calc === 'expert_affinity' && <ExpertAffinityCalc />}
+      {calc === 'crystal_lab' && <CrystalLabCalc />}
     </div>
   );
 }
@@ -2626,6 +2655,203 @@ function ExpertAffinityCalc() {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Crystal Laboratory Calculator ───────────────────────────────────
+
+function CrystalLabCalc() {
+  const [fcLevel, setFcLevel] = useState(0);
+  const [days, setDays] = useState(7);
+
+  const dailyLimit = CRYSTAL_LAB_DAILY_LIMITS[fcLevel].count;
+
+  const results = useMemo(() => {
+    // Daily resource costs
+    let dailyMeat = 0, dailyWood = 0, dailyCoal = 0, dailyIron = 0;
+    for (let i = 0; i < dailyLimit; i++) {
+      const cost = CRYSTAL_LAB_REFINEMENT_COSTS[i];
+      dailyMeat += cost;
+      dailyWood += cost;
+      dailyCoal += cost;
+      dailyIron += cost;
+    }
+
+    const dailyExpectedFC = +(dailyLimit * CRYSTAL_LAB_EV).toFixed(1);
+    const periodMeat = dailyMeat * days;
+    const periodExpectedFC = +(dailyExpectedFC * days).toFixed(1);
+
+    // Super refinement (weekly): 100 total = 5 tiers × 20 each
+    let weeklyFCCost = 0;
+    let weeklyExpectedRefined = 0;
+    for (const t of SUPER_REFINEMENT_TIERS) {
+      // 20 refinements per tier, first each day gets 50% discount
+      // For simplicity, compute full-price expected values (discount is minor)
+      weeklyFCCost += t.fc_cost * 20;
+      weeklyExpectedRefined += t.ev * 20;
+    }
+    // Apply daily discount: 7 days × 50% off 1 refinement at current tier
+    // Average tier cost ≈ (20+50+100+130+160)/5 = 92. Discount saves ~46/day × 7 = ~322 FC/week
+    const avgTierCost = SUPER_REFINEMENT_TIERS.reduce((s, t) => s + t.fc_cost, 0) / SUPER_REFINEMENT_TIERS.length;
+    const weeklyDiscount = Math.round(avgTierCost * 0.5 * 7);
+    weeklyFCCost -= weeklyDiscount;
+
+    return {
+      dailyLimit,
+      dailyMeat,
+      dailyExpectedFC,
+      periodDays: days,
+      periodMeat: periodMeat,
+      periodExpectedFC,
+      weeklyFCCost,
+      weeklyExpectedRefined: +weeklyExpectedRefined.toFixed(1),
+      weeklyDiscount,
+    };
+  }, [dailyLimit, days]);
+
+  return (
+    <div className="space-y-4">
+      {/* Info Banner */}
+      <div className="card border border-red-500/30 bg-red-500/5">
+        <p className="text-sm text-frost">
+          Calculate <strong className="text-red-400">Fire Crystal</strong> output from the Crystal Laboratory.
+          Normal refinement exchanges resources for Fire Crystals daily.
+          Super Refinement converts Fire Crystals to <strong className="text-red-400">Refined Fire Crystals</strong> (100/week).
+        </p>
+      </div>
+
+      {/* Inputs */}
+      <div className="card">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">FC Level (determines daily limit)</label>
+            <select
+              value={fcLevel}
+              onChange={(e) => setFcLevel(Number(e.target.value))}
+              className="input w-full text-sm"
+            >
+              {CRYSTAL_LAB_DAILY_LIMITS.map((d, i) => (
+                <option key={d.label} value={i}>{d.label} — {d.count} refinements/day</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">Time Period (days)</label>
+            <select
+              value={days}
+              onChange={(e) => setDays(Number(e.target.value))}
+              className="input w-full text-sm"
+            >
+              <option value={1}>1 day</option>
+              <option value={7}>7 days (1 week)</option>
+              <option value={14}>14 days (2 weeks)</option>
+              <option value={30}>30 days (1 month)</option>
+              <option value={90}>90 days (3 months)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Normal Refinement Results */}
+      <div className="card">
+        <h3 className="section-header mb-4">Normal Refinement — {results.periodDays} day{results.periodDays > 1 ? 's' : ''}</h3>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-surface-border">
+              <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+              <th className="text-right py-2 px-3 text-frost-muted font-medium">Per Day</th>
+              {results.periodDays > 1 && (
+                <th className="text-right py-2 px-3 text-frost-muted font-medium">Total ({results.periodDays}d)</th>
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            <CostRow label="Meat" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
+            <CostRow label="Wood" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
+            <CostRow label="Coal" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
+            <CostRow label="Iron" perSlot={results.dailyMeat} total={results.periodDays > 1 ? results.periodMeat : undefined} color="text-orange-400" />
+            <tr className="border-t-2 border-red-500/30">
+              <td className="py-3 px-3 text-frost font-bold">Expected Fire Crystals</td>
+              <td className="py-3 px-3 text-right font-bold text-red-400 text-lg">~{results.dailyExpectedFC}</td>
+              {results.periodDays > 1 && (
+                <td className="py-3 px-3 text-right font-bold text-red-400 text-lg">~{results.periodExpectedFC}</td>
+              )}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Drop Rates Reference */}
+      <div className="card border border-red-500/20">
+        <h4 className="text-xs text-frost-muted mb-2">Fire Crystal Drop Rates (per refinement)</h4>
+        <div className="flex flex-wrap gap-3">
+          {CRYSTAL_LAB_DROP_RATES.map((r) => (
+            <div key={r.crystals} className="text-xs">
+              <span className="text-red-400 font-medium">{r.crystals} FC</span>
+              <span className="text-frost-muted ml-1">({(r.chance * 100).toFixed(0)}%)</span>
+            </div>
+          ))}
+          <div className="text-xs">
+            <span className="text-frost font-medium">EV: {CRYSTAL_LAB_EV.toFixed(2)} FC</span>
+            <span className="text-frost-muted ml-1">(per refine)</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Super Refinement Summary */}
+      <div className="card">
+        <h3 className="section-header mb-4">Super Refinement (Weekly)</h3>
+        <p className="text-xs text-frost-muted mb-3">
+          100 super refinements per week across 5 tiers of 20. First daily refinement is 50% off.
+        </p>
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-surface-border">
+              <th className="text-left py-2 px-3 text-frost-muted font-medium">Tier</th>
+              <th className="text-right py-2 px-3 text-frost-muted font-medium">FC Cost</th>
+              <th className="text-right py-2 px-3 text-frost-muted font-medium">Refined FC (EV)</th>
+              <th className="text-right py-2 px-3 text-frost-muted font-medium">× 20</th>
+            </tr>
+          </thead>
+          <tbody>
+            {SUPER_REFINEMENT_TIERS.map((t) => (
+              <tr key={t.tier} className="border-b border-surface-border/30">
+                <td className="py-2 px-3 text-frost">Tier {t.tier}</td>
+                <td className="py-2 px-3 text-right text-red-400">{t.fc_cost} FC</td>
+                <td className="py-2 px-3 text-right text-purple-400">~{t.ev.toFixed(2)}</td>
+                <td className="py-2 px-3 text-right text-purple-400">~{(t.ev * 20).toFixed(1)}</td>
+              </tr>
+            ))}
+            <tr className="border-t-2 border-red-500/30 font-bold">
+              <td className="py-3 px-3 text-frost" colSpan={2}>Weekly Total (with discount)</td>
+              <td className="py-3 px-3 text-right text-red-400">~{results.weeklyFCCost.toLocaleString()} FC</td>
+              <td className="py-3 px-3 text-right text-purple-400 text-lg">~{results.weeklyExpectedRefined} Refined</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* Per-refinement cost breakdown */}
+      <div className="card border border-red-500/20">
+        <h4 className="text-xs text-frost-muted mb-2">Daily Refinement Cost Breakdown ({dailyLimit} refines)</h4>
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="border-b border-surface-border">
+              <th className="text-left py-1.5 px-3 text-frost-muted">#</th>
+              <th className="text-right py-1.5 px-3 text-frost-muted">Cost (each resource)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {CRYSTAL_LAB_REFINEMENT_COSTS.slice(0, dailyLimit).map((cost, i) => (
+              <tr key={i} className="border-b border-surface-border/30">
+                <td className="py-1.5 px-3 text-frost">Refinement {i + 1}</td>
+                <td className="py-1.5 px-3 text-right text-orange-400">{cost.toLocaleString()}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
