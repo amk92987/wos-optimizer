@@ -1,0 +1,579 @@
+{
+  "system": "experts",
+  "retrieved_at": "2026-03-13T00:00:00Z",
+  "sources": [
+    {"source_id": "whiteoutsurvival_wiki", "url": "https://www.whiteoutsurvival.wiki/experts/", "confidence": "A"},
+    {"source_id": "whiteoutsurvival_wiki", "url": "https://www.whiteoutsurvival.wiki/experts/agnes/", "confidence": "A"},
+    {"source_id": "whiteoutsurvival_wiki", "url": "https://www.whiteoutsurvival.wiki/experts/valeria/", "confidence": "A"},
+    {"source_id": "whiteoutsurvival_wiki", "url": "https://www.whiteoutsurvival.wiki/experts/baldur/", "confidence": "A"},
+    {"source_id": "whiteoutsurvival_wiki", "url": "https://www.whiteoutsurvival.wiki/experts/romulus/", "confidence": "A"},
+    {"source_id": "whiteoutsurvival_wiki", "url": "https://www.whiteoutsurvival.wiki/experts/holger/", "confidence": "A"},
+    {"source_id": "whiteoutsurvival_wiki", "url": "https://www.whiteoutsurvival.wiki/experts/cyrille/", "confidence": "A"},
+    {"source_id": "whiteoutsurvival_wiki", "url": "https://www.whiteoutsurvival.wiki/experts/fabian/", "confidence": "A"},
+    {"source_id": "centurygames_helpshift", "url": "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/faq/8397-what-is-tundra-trek/", "confidence": "A"},
+    {"source_id": "centurygames_helpshift", "url": "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/faq/8398-what-is-frontier-trek/", "confidence": "A"}
+  ],
+  "data_completeness": "mostly_complete",
+  "overview": {
+    "description": "Experts are special characters that provide passive buffs and event bonuses. They live in the Dawn Academy and are recruited through Tundra Trek encounters.",
+    "unlock": "Furnace FC4-FC5 (Dawn Academy building)",
+    "total_experts": 7,
+    "upgrade_currencies": {
+      "books_of_knowledge": "Used to upgrade expert skills (called 'learning' in-game)",
+      "exp": "Experience points needed alongside books for skill upgrades",
+      "sigils": "Common Expert Sigils - used for affinity milestone progression",
+      "affinity_gifts": {
+        "compass": "Increases affinity",
+        "fiery_heart": "Increases affinity",
+        "sail_of_conquest": "Increases affinity"
+      }
+    },
+    "affinity_system": {
+      "max_level": 100,
+      "provides": "Troop stat bonuses (Attack, Defense, Lethality, Health depending on expert)",
+      "milestone_rewards_at": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    }
+  },
+  "experts": [
+    {
+      "name": "Agnes",
+      "class": "Elite Politician",
+      "type": "Expedition",
+      "affinity_bonus": "Troops Defense +15% (at level 100)",
+      "skills": [
+        {
+          "name": "Efficient Recon",
+          "max_level": 5,
+          "description": "Gives 8 extra Intel missions per day through enhanced Lighthouse scouting",
+          "costs": [
+            {"level": 2, "exp": 43200, "books": 500},
+            {"level": 3, "exp": 86400, "books": 1000},
+            {"level": 4, "exp": 172800, "books": 2000},
+            {"level": 5, "exp": 345600, "books": 4000}
+          ]
+        },
+        {
+          "name": "Optimization",
+          "max_level": 5,
+          "description": "Boosts Storehouse Chief Stamina gain by 40",
+          "costs": [
+            {"level": 2, "exp": 34200, "books": 400},
+            {"level": 3, "exp": 69000, "books": 800},
+            {"level": 4, "exp": 138000, "books": 1600},
+            {"level": 5, "exp": 276000, "books": 3200}
+          ]
+        },
+        {
+          "name": "Project Management",
+          "max_level": 5,
+          "description": "Speeds up construction by 8 hours on every new build",
+          "costs": [
+            {"level": 2, "exp": 13800, "books": 200},
+            {"level": 3, "exp": 27600, "books": 400},
+            {"level": 4, "exp": 55200, "books": 800},
+            {"level": 5, "exp": 110400, "books": 1600}
+          ]
+        },
+        {
+          "name": "Covert Knowledge",
+          "max_level": 10,
+          "description": "Gives 120 additional Mystery Badges upon daily mission completion and 4 more free refreshes at Mystery Shop",
+          "costs": [
+            {"level": 2, "exp": 10200, "books": 100},
+            {"level": 3, "exp": 20400, "books": 200},
+            {"level": 4, "exp": 30600, "books": 300},
+            {"level": 5, "exp": 41400, "books": 400},
+            {"level": 6, "exp": 51600, "books": 500},
+            {"level": 7, "exp": 61800, "books": 600},
+            {"level": 8, "exp": 72600, "books": 700},
+            {"level": 9, "exp": 82800, "books": 800},
+            {"level": 10, "exp": 93000, "books": 900}
+          ]
+        }
+      ],
+      "talent": {
+        "name": "Earthbreaker",
+        "max_level": 11,
+        "description": "Gives 5 Seeker Chests every 120 gathering minutes (up to 30 chests daily). Produces random rewards including Fire Crystals, Gems, Enhancement XP Components, and General Speedups."
+      }
+    },
+    {
+      "name": "Valeria",
+      "class": "High Marshal",
+      "type": "Expedition",
+      "affinity_bonus": "Troops Lethality +20%, Troops Health +20% (at level 100)",
+      "skills": [
+        {
+          "name": "Well Prepared",
+          "max_level": 10,
+          "description": "+20% State of Power Preparation Phase Point gains, +3 bonus tier for daily Personal Point rewards",
+          "costs": [
+            {"level": 2, "books": 500},
+            {"level": 3, "books": 1000},
+            {"level": 4, "books": 1500},
+            {"level": 5, "books": 2000},
+            {"level": 6, "books": 2500},
+            {"level": 7, "books": 3000},
+            {"level": 8, "books": 3500},
+            {"level": 9, "books": 4000},
+            {"level": 10, "books": 4500}
+          ]
+        },
+        {
+          "name": "Radiant Honor",
+          "max_level": 10,
+          "description": "Increases Sunfire Tokens earned when claiming Medal Rewards by 50 and adds 3 extra items to State of Power Shop",
+          "costs": [
+            {"level": 2, "books": 500},
+            {"level": 3, "books": 1000},
+            {"level": 4, "books": 1500},
+            {"level": 5, "books": 2000},
+            {"level": 6, "books": 2500},
+            {"level": 7, "books": 3000},
+            {"level": 8, "books": 3500},
+            {"level": 9, "books": 4000},
+            {"level": 10, "books": 4500}
+          ]
+        },
+        {
+          "name": "Battle Concerto",
+          "max_level": 20,
+          "description": "All troops' Lethality and Health +30% during State of Power Battle Phase",
+          "total_books": 15000
+        },
+        {
+          "name": "Crushing Force",
+          "max_level": 20,
+          "description": "Increases Rally Capacity in State of Power Battle Phase by 150,000",
+          "total_books": 15000
+        }
+      ],
+      "talent": {
+        "name": "Conqueror's Spirit",
+        "max_level": 11,
+        "description": "All troops' Attack and Defense +30% in State of Power Battle Phase"
+      }
+    },
+    {
+      "name": "Baldur",
+      "class": "Negotiator",
+      "type": "Expedition",
+      "affinity_bonus": "Troops Attack +10%, Troops Defense +10% (at level 100)",
+      "skills": [
+        {
+          "name": "Blazing Sunrise",
+          "max_level": 10,
+          "description": "+20% Alliance Mobilization Points, +3 milestone bonus tiers",
+          "costs": [
+            {"level": 2, "exp": 25800, "books": 300},
+            {"level": 3, "exp": 51600, "books": 600},
+            {"level": 4, "exp": 77400, "books": 900},
+            {"level": 5, "exp": 103200, "books": 1200},
+            {"level": 6, "exp": 129600, "books": 1500},
+            {"level": 7, "exp": 155400, "books": 1800},
+            {"level": 8, "exp": 181200, "books": 2100},
+            {"level": 9, "exp": 207000, "books": 2400},
+            {"level": 10, "exp": 232800, "books": 2700}
+          ]
+        },
+        {
+          "name": "Honored Conquest",
+          "max_level": 10,
+          "description": "+50% Alliance Championship Badges and +3 Alliance Championship Shop bonus items",
+          "costs": [
+            {"level": 2, "exp": 25800, "books": 300},
+            {"level": 3, "exp": 51600, "books": 600},
+            {"level": 4, "exp": 77400, "books": 900},
+            {"level": 5, "exp": 103200, "books": 1200},
+            {"level": 6, "exp": 129600, "books": 1500},
+            {"level": 7, "exp": 155400, "books": 1800},
+            {"level": 8, "exp": 181200, "books": 2100},
+            {"level": 9, "exp": 207000, "books": 2400},
+            {"level": 10, "exp": 232800, "books": 2700}
+          ]
+        },
+        {
+          "name": "Bounty Hunter",
+          "max_level": 10,
+          "description": "+50% Crazy Joe point rewards and a bonus Chest per 200,000 points (limit 10 per season)",
+          "costs": [
+            {"level": 2, "exp": 25800, "books": 300},
+            {"level": 3, "exp": 51600, "books": 600},
+            {"level": 4, "exp": 77400, "books": 900},
+            {"level": 5, "exp": 103200, "books": 1200},
+            {"level": 6, "exp": 129600, "books": 1500},
+            {"level": 7, "exp": 155400, "books": 1800},
+            {"level": 8, "exp": 181200, "books": 2100},
+            {"level": 9, "exp": 207000, "books": 2400},
+            {"level": 10, "exp": 232800, "books": 2700}
+          ]
+        },
+        {
+          "name": "Dawn Hymn",
+          "max_level": 10,
+          "description": "+50% Alliance Showdown points (except Tundra Trade Route) and +3 bonus tiers for daily milestone reward",
+          "costs": [
+            {"level": 2, "exp": 51600, "books": 500},
+            {"level": 3, "exp": 103200, "books": 1000},
+            {"level": 4, "exp": 155400, "books": 1500},
+            {"level": 5, "exp": 207000, "books": 2000},
+            {"level": 6, "exp": 259200, "books": 2500},
+            {"level": 7, "exp": 310800, "books": 3000},
+            {"level": 8, "exp": 362400, "books": 3500},
+            {"level": 9, "exp": 414600, "books": 4000},
+            {"level": 10, "exp": 466200, "books": 4500}
+          ]
+        }
+      ],
+      "talent": {
+        "name": "Master Negotiator",
+        "max_level": 11,
+        "description": "Alliance Shop prices reduced by 15%, and Personal Activity Triumph Chest rewards +100% Defense"
+      }
+    },
+    {
+      "name": "Romulus",
+      "class": "Military Advisor",
+      "type": "Expedition",
+      "affinity_bonus": "Troops Lethality +20%, Troops Health +20% (at level 100)",
+      "skills": [
+        {
+          "name": "Call of War",
+          "max_level": 10,
+          "description": "Free recruitment of 600 additional high-level troops from any Camp per day plus 10 extra Loyalty Tags from Enlistment Office",
+          "costs": [
+            {"level": 2, "exp": 30600, "books": 300},
+            {"level": 3, "exp": 61800, "books": 600},
+            {"level": 4, "exp": 93000, "books": 900},
+            {"level": 5, "exp": 124200, "books": 1200},
+            {"level": 6, "exp": 155400, "books": 1500},
+            {"level": 7, "exp": 186600, "books": 1800},
+            {"level": 8, "exp": 217200, "books": 2100},
+            {"level": 9, "exp": 248400, "books": 2400},
+            {"level": 10, "exp": 279600, "books": 2700}
+          ]
+        },
+        {
+          "name": "Last Line",
+          "max_level": 20,
+          "description": "Troops' Attack and Defense +10%",
+          "costs": [
+            {"level": 2, "exp": 86400, "books": 500},
+            {"level": 20, "exp": 1728000, "books": 10000}
+          ],
+          "total_books_estimate": "~100000"
+        },
+        {
+          "name": "Spirit of Aeetis",
+          "max_level": 20,
+          "description": "Troops' Lethality and Health +10%",
+          "costs": [
+            {"level": 2, "exp": 159000, "books": 800},
+            {"level": 20, "exp": 2980800, "books": 15000}
+          ]
+        },
+        {
+          "name": "One Heart",
+          "max_level": 20,
+          "description": "Enhancing Rally Capacity by 100,000",
+          "costs": [
+            {"level": 2, "exp": 179400, "books": 800},
+            {"level": 20, "exp": 3369600, "books": 15000}
+          ]
+        }
+      ],
+      "talent": {
+        "name": "Commander's Crest",
+        "max_level": 11,
+        "description": "Increases heroes' Expedition Army size limit by 10,000"
+      }
+    },
+    {
+      "name": "Holger",
+      "class": "Arena Legend",
+      "type": "Expedition",
+      "affinity_bonus": "Troops Attack +15%, Troops Defense +15% (at level 100)",
+      "skills": [
+        {
+          "name": "Arena Elite",
+          "max_level": 10,
+          "description": "Arena heroes' Attack and Health +20%",
+          "costs": [
+            {"level": 2, "exp": 82800, "books": 600},
+            {"level": 3, "exp": 165600, "books": 1200},
+            {"level": 4, "exp": 248400, "books": 1800},
+            {"level": 5, "exp": 331800, "books": 2400},
+            {"level": 6, "exp": 414600, "books": 3000},
+            {"level": 7, "exp": 497400, "books": 3600},
+            {"level": 8, "exp": 580200, "books": 4200},
+            {"level": 9, "exp": 663600, "books": 4800},
+            {"level": 10, "exp": 746400, "books": 5400}
+          ]
+        },
+        {
+          "name": "Crowd Pleaser",
+          "max_level": 10,
+          "description": "Daily and weekly Arena Tokens earned +50%",
+          "costs": [
+            {"level": 2, "exp": 30600, "books": 300},
+            {"level": 3, "exp": 61800, "books": 600},
+            {"level": 4, "exp": 93000, "books": 900},
+            {"level": 5, "exp": 124200, "books": 1200},
+            {"level": 6, "exp": 155400, "books": 1500},
+            {"level": 7, "exp": 186600, "books": 1800},
+            {"level": 8, "exp": 217200, "books": 2100},
+            {"level": 9, "exp": 248400, "books": 2400},
+            {"level": 10, "exp": 279600, "books": 2700}
+          ]
+        },
+        {
+          "name": "Arena Star",
+          "max_level": 10,
+          "description": "3 more items in Arena Shop at 50% discount",
+          "costs": [
+            {"level": 2, "exp": 30600, "books": 300},
+            {"level": 3, "exp": 61800, "books": 600},
+            {"level": 4, "exp": 93000, "books": 900},
+            {"level": 5, "exp": 124200, "books": 1200},
+            {"level": 6, "exp": 155400, "books": 1500},
+            {"level": 7, "exp": 186600, "books": 1800},
+            {"level": 8, "exp": 217200, "books": 2100},
+            {"level": 9, "exp": 248400, "books": 2400},
+            {"level": 10, "exp": 279600, "books": 2700}
+          ]
+        },
+        {
+          "name": "Legacy",
+          "max_level": 10,
+          "description": "Heroes +20% additional Attack and Health in Arena",
+          "costs": [
+            {"level": 2, "exp": 82800, "books": 600},
+            {"level": 3, "exp": 165600, "books": 1200},
+            {"level": 4, "exp": 248400, "books": 1800},
+            {"level": 5, "exp": 331800, "books": 2400},
+            {"level": 6, "exp": 414600, "books": 3000},
+            {"level": 7, "exp": 497400, "books": 3600},
+            {"level": 8, "exp": 580200, "books": 4200},
+            {"level": 9, "exp": 663600, "books": 4800},
+            {"level": 10, "exp": 746400, "books": 5400}
+          ]
+        }
+      ],
+      "talent": {
+        "name": "Blade Dancing",
+        "max_level": 11,
+        "description": "100% chance of audience reward: 3 Arena Star Chests"
+      }
+    },
+    {
+      "name": "Cyrille",
+      "class": "Bear Huntress",
+      "type": "Expedition",
+      "affinity_bonus": "Troops Attack +15% (at level 100)",
+      "skills": [
+        {
+          "name": "Entrapment",
+          "max_level": 10,
+          "description": "Increases Bear Hunt Rally Capacity by 300,000",
+          "costs": [
+            {"level": 2, "exp": 3600, "books": 70},
+            {"level": 3, "exp": 7200, "books": 140},
+            {"level": 4, "exp": 10800, "books": 210},
+            {"level": 5, "exp": 14400, "books": 280},
+            {"level": 6, "exp": 18000, "books": 350},
+            {"level": 7, "exp": 21600, "books": 420},
+            {"level": 8, "exp": 25200, "books": 490},
+            {"level": 9, "exp": 28800, "books": 560},
+            {"level": 10, "exp": 32400, "books": 630}
+          ]
+        },
+        {
+          "name": "Scavenging",
+          "max_level": 5,
+          "description": "5 x100 Enhancement XP Component rewards every Bear Hunt",
+          "costs": [
+            {"level": 2, "exp": 27600, "books": 400},
+            {"level": 3, "exp": 55200, "books": 800},
+            {"level": 4, "exp": 110400, "books": 1600},
+            {"level": 5, "exp": 220800, "books": 3200}
+          ]
+        },
+        {
+          "name": "Weapon Master",
+          "max_level": 5,
+          "description": "Increases Essence Stone rewards from Bear Hunt by 5",
+          "costs": [
+            {"level": 2, "exp": 43200, "books": 500},
+            {"level": 3, "exp": 86400, "books": 1000},
+            {"level": 4, "exp": 172800, "books": 2000},
+            {"level": 5, "exp": 345600, "books": 4000}
+          ]
+        },
+        {
+          "name": "Ursa's Bane",
+          "max_level": 10,
+          "description": "Increases Bear Hunt Troops Deployment capacity by 30,000",
+          "costs": [
+            {"level": 2, "exp": 10200, "books": 100},
+            {"level": 3, "exp": 20400, "books": 200},
+            {"level": 4, "exp": 30600, "books": 300},
+            {"level": 5, "exp": 41400, "books": 400},
+            {"level": 6, "exp": 51600, "books": 500},
+            {"level": 7, "exp": 61800, "books": 600},
+            {"level": 8, "exp": 72600, "books": 700},
+            {"level": 9, "exp": 82800, "books": 800},
+            {"level": 10, "exp": 93000, "books": 900}
+          ]
+        }
+      ],
+      "talent": {
+        "name": "Earthbreaker",
+        "max_level": 11,
+        "description": "Increases Bear Hunt Damage Points by up to 30% (self only)"
+      }
+    },
+    {
+      "name": "Fabian",
+      "class": "Master of Arms",
+      "type": "Expedition",
+      "affinity_bonus": "Troops Lethality +15%, Troops Health +15% (at level 100)",
+      "skills": [
+        {
+          "name": "Salvager",
+          "max_level": 10,
+          "description": "Arsenal Tokens +100%",
+          "costs": [
+            {"level": 2, "exp": 25800, "books": 300},
+            {"level": 3, "exp": 51600, "books": 600},
+            {"level": 4, "exp": 77400, "books": 900},
+            {"level": 5, "exp": 103200, "books": 1200},
+            {"level": 6, "exp": 129600, "books": 1500},
+            {"level": 7, "exp": 155400, "books": 1800},
+            {"level": 8, "exp": 181200, "books": 2100},
+            {"level": 9, "exp": 207000, "books": 2400},
+            {"level": 10, "exp": 232800, "books": 2700}
+          ]
+        },
+        {
+          "name": "Crisis Rescue",
+          "max_level": 10,
+          "description": "Instant recovery of 1,000,000 troops each Foundry Battle and Tundra Hellfire",
+          "costs": [
+            {"level": 2, "exp": 33053, "books": 500},
+            {"level": 3, "exp": 107400, "books": 1000},
+            {"level": 4, "exp": 160800, "books": 1500},
+            {"level": 5, "exp": 214800, "books": 2000},
+            {"level": 6, "exp": 268800, "books": 2500},
+            {"level": 7, "exp": 322200, "books": 3000},
+            {"level": 8, "exp": 376200, "books": 3500},
+            {"level": 9, "exp": 429600, "books": 4000},
+            {"level": 10, "exp": 483600, "books": 4500}
+          ]
+        },
+        {
+          "name": "Heightened Firepower",
+          "max_level": 20,
+          "description": "Foundry Battle and Tundra Hellfire troops +30% Lethality and +30% Health",
+          "total_books_estimate": "~36000"
+        },
+        {
+          "name": "Battle Bulwark",
+          "max_level": 20,
+          "description": "+150,000 Rally Capacity in Foundry Battle and Tundra Hellfire",
+          "total_books_estimate": "~53000"
+        }
+      ],
+      "talent": {
+        "name": "Craftsman of War",
+        "max_level": 11,
+        "description": "All allied troops in Foundry Battle and Tundra Hellfire +30% Attack and +30% Defense"
+      }
+    }
+  ],
+  "tundra_trek": {
+    "description": "Primary way to unlock new Experts, increase affinity, and gather rewards/upgrade materials",
+    "unlock": "Requires Dawn Academy / Expert feature unlocked",
+    "mechanics": {
+      "encounter_types": ["Regular Encounters", "Expert Encounters"],
+      "regular_encounters": "Dialogue, choices, or mini-games (randomly assigned)",
+      "expert_encounters": "Meet experts, build friendship, invite to settle in town"
+    },
+    "trek_supplies": {
+      "daily_reset": {"time": "00:00 UTC", "amount": 20},
+      "timed_claim_1": {"time": "08:00 UTC", "amount": 10},
+      "timed_claim_2": {"time": "16:00 UTC", "amount": 10},
+      "total_daily_free": 40
+    },
+    "auto_trek": {
+      "unlock_after": 50,
+      "note": "Must stay on Tundra Trek interface"
+    },
+    "introduced": "2025-08-04"
+  },
+  "frontier_trek": {
+    "description": "Advanced trek mode that lets you target specific Experts to unlock/develop",
+    "unlock": "Complete 60 Tundra Trek encounters",
+    "mechanics": {
+      "expert_selection": "Choose which Expert's storyline to pursue",
+      "guaranteed_encounters": "If at a point in storyline requiring return, guaranteed encounter. After expert unlocked, all encounters guaranteed.",
+      "otherwise": "Random encounter if not at a required story point"
+    },
+    "frontier_supplies": {
+      "initial_free": 10,
+      "weekly_vip_shop": {"amount": 10, "requires_vip": 9},
+      "other_source": "Endless Wayfarer event"
+    }
+  },
+  "dawn_academy": {
+    "description": "Building where Experts reside and provide skill-based bonuses",
+    "unlock": "Furnace FC4-FC5",
+    "functions": [
+      "Expert management and skill training",
+      "Tundra Trek supply recovery",
+      "Expert recruitment via trek encounters"
+    ],
+    "notes": "Experts hold lectures at the Dawn Academy, teaching townspeople their expertise"
+  },
+  "crystal_laboratory": {
+    "description": "Building where you exchange resources for Fire Crystals daily",
+    "unlock": "Furnace Level 30 + state in Fire Crystal Age",
+    "normal_refinement": {
+      "daily_limits_by_fc": {
+        "FC5": 5,
+        "War_Academy": 6,
+        "FC8": 7,
+        "FC10": 8
+      },
+      "costs_per_refinement": [
+        {"refinement": 1, "meat": 5000, "wood": 5000, "coal": 5000, "iron": 5000},
+        {"refinement": 2, "meat": 10000, "wood": 10000, "coal": 10000, "iron": 10000},
+        {"refinement": 3, "meat": 20000, "wood": 20000, "coal": 20000, "iron": 20000},
+        {"refinement": 4, "meat": 30000, "wood": 30000, "coal": 30000, "iron": 30000},
+        {"refinement": 5, "meat": 40000, "wood": 40000, "coal": 40000, "iron": 40000},
+        {"refinement": 6, "meat": 50000, "wood": 50000, "coal": 50000, "iron": 50000},
+        {"refinement": 7, "meat": 50000, "wood": 50000, "coal": 50000, "iron": 50000},
+        {"refinement": 8, "meat": 50000, "wood": 50000, "coal": 50000, "iron": 50000}
+      ],
+      "drop_rates": {
+        "1_crystal": "40%",
+        "2_crystals": "30%",
+        "3_crystals": "15%",
+        "4_crystals": "10%",
+        "5_crystals": "5%"
+      }
+    },
+    "super_refinement": {
+      "description": "Convert Fire Crystals to Refined Fire Crystals",
+      "weekly_limit": 100,
+      "daily_discount": "50% off first refinement of the day",
+      "tiers": [
+        {"tier": 1, "fc_cost": 20, "output_range": "1-3", "probabilities": {"1": "65%", "2": "25%", "3": "10%"}},
+        {"tier": 2, "fc_cost": 50, "output_range": "2-3", "probabilities": {"2": "85%", "3": "15%"}},
+        {"tier": 3, "fc_cost": 100, "output_range": "3-6", "probabilities": {"3": "85%", "4": "12.5%", "5": "2%", "6": "0.5%"}},
+        {"tier": 4, "fc_cost": 130, "output_range": "3-9", "probabilities": {"3": "75%", "4": "15%", "5": "5%", "6": "3%", "7-9": "1-0.5% each"}},
+        {"tier": 5, "fc_cost": 160, "output_range": "3-12", "probabilities": {"3": "70%", "4": "12%", "5": "9%", "6": "4%", "7-12": "1.5-0.5% each"}}
+      ],
+      "structure": "5 tiers of 20 refinements each"
+    }
+  }
+}
