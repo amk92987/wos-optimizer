@@ -2363,6 +2363,7 @@ function ExpertSkillsCalc() {
         <div className="mt-4 flex items-center gap-2">
           <button
             onClick={() => setCalcAll(!calcAll)}
+            aria-pressed={calcAll}
             className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
               calcAll
                 ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400'
@@ -2595,11 +2596,11 @@ function ExpertAffinityCalc() {
               {aff.stats.join(' & ')} Bonus
             </div>
             <div className="flex items-center gap-3">
-              <span className="text-frost">+{costs.bonus_from.toFixed(2)}%</span>
+              <span className="text-frost">+{costs.bonus_from.toFixed(1)}%</span>
               <span className="text-frost-muted">&rarr;</span>
-              <span className="font-bold text-lg text-teal-400">+{costs.bonus_to.toFixed(2)}%</span>
+              <span className="font-bold text-lg text-teal-400">+{costs.bonus_to.toFixed(1)}%</span>
               <span className="text-xs px-2 py-0.5 rounded bg-green-500/10 text-green-400">
-                +{costs.bonus_gain.toFixed(2)}%
+                +{costs.bonus_gain.toFixed(1)}%
               </span>
             </div>
           </div>
@@ -2636,7 +2637,7 @@ function ExpertAffinityCalc() {
               <thead>
                 <tr className="border-b border-surface-border">
                   <th className="text-left py-1.5 px-3 text-frost-muted">Milestone</th>
-                  <th className="text-right py-1.5 px-3 text-frost-muted">Sigils (cum.)</th>
+                  <th className="text-right py-1.5 px-3 text-frost-muted">Sigils (total)</th>
                   <th className="text-right py-1.5 px-3 text-frost-muted">Advancement</th>
                   <th className="text-right py-1.5 px-3 text-frost-muted">Bonus</th>
                 </tr>
@@ -2647,7 +2648,7 @@ function ExpertAffinityCalc() {
                     <td className="py-1.5 px-3 text-frost font-medium">Level {m.level}</td>
                     <td className="py-1.5 px-3 text-right text-teal-400">{m.sigils.toLocaleString()}</td>
                     <td className="py-1.5 px-3 text-right text-purple-400">{m.advancement.toLocaleString()}</td>
-                    <td className="py-1.5 px-3 text-right text-green-400">+{m.bonus_pct.toFixed(2)}%</td>
+                    <td className="py-1.5 px-3 text-right text-green-400">+{m.bonus_pct.toFixed(1)}%</td>
                   </tr>
                 ))}
               </tbody>
