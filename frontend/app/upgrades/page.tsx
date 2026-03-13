@@ -30,7 +30,7 @@ interface HeroInvestment {
 }
 
 type TabType = 'recommendations' | 'heroes' | 'calculators';
-type CalcType = 'enhancement' | 'legendary' | 'mastery' | 'chief_gear' | 'charms' | 'war_academy' | 'pet_leveling';
+type CalcType = 'enhancement' | 'legendary' | 'mastery' | 'chief_gear' | 'charms' | 'war_academy' | 'pet_leveling' | 'expert_skills' | 'expert_affinity';
 
 /** Convert snake_case or slug text to clean Title Case */
 function formatLabel(s: string): string {
@@ -337,6 +337,247 @@ function charmLevelCost(level: string): { charm_guide: number; charm_design: num
     jewel_secrets: Math.ceil(c.jewel_secrets / 4),
   };
 }
+
+// Expert Skills: 7 experts, each with 4 skills at varying max levels
+// Costs are { exp, books } per level upgrade. Level 1 is free (starting level).
+interface ExpertSkillDef {
+  name: string;
+  max_level: number;
+  description: string;
+  costs: { level: number; exp: number; books: number }[];
+}
+
+interface ExpertDef {
+  name: string;
+  class_name: string;
+  affinity_bonus: string;
+  skills: ExpertSkillDef[];
+}
+
+const EXPERTS: ExpertDef[] = [
+  {
+    name: 'Agnes', class_name: 'Elite Politician', affinity_bonus: 'Troops Defense +15%',
+    skills: [
+      { name: 'Efficient Recon', max_level: 5, description: '+8 daily Intel missions',
+        costs: [{ level: 2, exp: 43200, books: 500 }, { level: 3, exp: 86400, books: 1000 }, { level: 4, exp: 172800, books: 2000 }, { level: 5, exp: 345600, books: 4000 }] },
+      { name: 'Optimization', max_level: 5, description: '+40 Storehouse Stamina gain',
+        costs: [{ level: 2, exp: 34200, books: 400 }, { level: 3, exp: 69000, books: 800 }, { level: 4, exp: 138000, books: 1600 }, { level: 5, exp: 276000, books: 3200 }] },
+      { name: 'Project Management', max_level: 5, description: '-8h construction time per build',
+        costs: [{ level: 2, exp: 13800, books: 200 }, { level: 3, exp: 27600, books: 400 }, { level: 4, exp: 55200, books: 800 }, { level: 5, exp: 110400, books: 1600 }] },
+      { name: 'Covert Knowledge', max_level: 10, description: '+120 Mystery Badges daily, +4 shop refreshes',
+        costs: [{ level: 2, exp: 10200, books: 100 }, { level: 3, exp: 20400, books: 200 }, { level: 4, exp: 30600, books: 300 }, { level: 5, exp: 41400, books: 400 }, { level: 6, exp: 51600, books: 500 }, { level: 7, exp: 61800, books: 600 }, { level: 8, exp: 72600, books: 700 }, { level: 9, exp: 82800, books: 800 }, { level: 10, exp: 93000, books: 900 }] },
+    ],
+  },
+  {
+    name: 'Valeria', class_name: 'High Marshal', affinity_bonus: 'Troops Lethality +20%, Health +20%',
+    skills: [
+      { name: 'Well Prepared', max_level: 10, description: '+20% SvS Prep Phase points, +3 daily reward tier',
+        costs: [{ level: 2, exp: 0, books: 500 }, { level: 3, exp: 0, books: 1000 }, { level: 4, exp: 0, books: 1500 }, { level: 5, exp: 0, books: 2000 }, { level: 6, exp: 0, books: 2500 }, { level: 7, exp: 0, books: 3000 }, { level: 8, exp: 0, books: 3500 }, { level: 9, exp: 0, books: 4000 }, { level: 10, exp: 0, books: 4500 }] },
+      { name: 'Radiant Honor', max_level: 10, description: '+50 Sunfire Tokens, +3 SvS Shop items',
+        costs: [{ level: 2, exp: 0, books: 500 }, { level: 3, exp: 0, books: 1000 }, { level: 4, exp: 0, books: 1500 }, { level: 5, exp: 0, books: 2000 }, { level: 6, exp: 0, books: 2500 }, { level: 7, exp: 0, books: 3000 }, { level: 8, exp: 0, books: 3500 }, { level: 9, exp: 0, books: 4000 }, { level: 10, exp: 0, books: 4500 }] },
+      { name: 'Battle Concerto', max_level: 20, description: '+30% Lethality & Health in SvS Battle',
+        costs: [{ level: 2, exp: 0, books: 500 }, { level: 3, exp: 0, books: 500 }, { level: 4, exp: 0, books: 500 }, { level: 5, exp: 0, books: 750 }, { level: 6, exp: 0, books: 750 }, { level: 7, exp: 0, books: 750 }, { level: 8, exp: 0, books: 750 }, { level: 9, exp: 0, books: 750 }, { level: 10, exp: 0, books: 750 }, { level: 11, exp: 0, books: 1000 }, { level: 12, exp: 0, books: 1000 }, { level: 13, exp: 0, books: 1000 }, { level: 14, exp: 0, books: 1000 }, { level: 15, exp: 0, books: 1000 }, { level: 16, exp: 0, books: 1000 }, { level: 17, exp: 0, books: 1000 }, { level: 18, exp: 0, books: 1000 }, { level: 19, exp: 0, books: 1000 }, { level: 20, exp: 0, books: 1000 }] },
+      { name: 'Crushing Force', max_level: 20, description: '+150K SvS Rally Capacity',
+        costs: [{ level: 2, exp: 0, books: 500 }, { level: 3, exp: 0, books: 500 }, { level: 4, exp: 0, books: 500 }, { level: 5, exp: 0, books: 750 }, { level: 6, exp: 0, books: 750 }, { level: 7, exp: 0, books: 750 }, { level: 8, exp: 0, books: 750 }, { level: 9, exp: 0, books: 750 }, { level: 10, exp: 0, books: 750 }, { level: 11, exp: 0, books: 1000 }, { level: 12, exp: 0, books: 1000 }, { level: 13, exp: 0, books: 1000 }, { level: 14, exp: 0, books: 1000 }, { level: 15, exp: 0, books: 1000 }, { level: 16, exp: 0, books: 1000 }, { level: 17, exp: 0, books: 1000 }, { level: 18, exp: 0, books: 1000 }, { level: 19, exp: 0, books: 1000 }, { level: 20, exp: 0, books: 1000 }] },
+    ],
+  },
+  {
+    name: 'Baldur', class_name: 'Negotiator', affinity_bonus: 'Troops Attack +10%, Defense +10%',
+    skills: [
+      { name: 'Blazing Sunrise', max_level: 10, description: '+20% Alliance Mobilization Points',
+        costs: [{ level: 2, exp: 25800, books: 300 }, { level: 3, exp: 51600, books: 600 }, { level: 4, exp: 77400, books: 900 }, { level: 5, exp: 103200, books: 1200 }, { level: 6, exp: 129600, books: 1500 }, { level: 7, exp: 155400, books: 1800 }, { level: 8, exp: 181200, books: 2100 }, { level: 9, exp: 207000, books: 2400 }, { level: 10, exp: 232800, books: 2700 }] },
+      { name: 'Honored Conquest', max_level: 10, description: '+50% Championship Badges, +3 shop items',
+        costs: [{ level: 2, exp: 25800, books: 300 }, { level: 3, exp: 51600, books: 600 }, { level: 4, exp: 77400, books: 900 }, { level: 5, exp: 103200, books: 1200 }, { level: 6, exp: 129600, books: 1500 }, { level: 7, exp: 155400, books: 1800 }, { level: 8, exp: 181200, books: 2100 }, { level: 9, exp: 207000, books: 2400 }, { level: 10, exp: 232800, books: 2700 }] },
+      { name: 'Bounty Hunter', max_level: 10, description: '+50% Crazy Joe points, bonus chests',
+        costs: [{ level: 2, exp: 25800, books: 300 }, { level: 3, exp: 51600, books: 600 }, { level: 4, exp: 77400, books: 900 }, { level: 5, exp: 103200, books: 1200 }, { level: 6, exp: 129600, books: 1500 }, { level: 7, exp: 155400, books: 1800 }, { level: 8, exp: 181200, books: 2100 }, { level: 9, exp: 207000, books: 2400 }, { level: 10, exp: 232800, books: 2700 }] },
+      { name: 'Dawn Hymn', max_level: 10, description: '+50% Alliance Showdown points',
+        costs: [{ level: 2, exp: 51600, books: 500 }, { level: 3, exp: 103200, books: 1000 }, { level: 4, exp: 155400, books: 1500 }, { level: 5, exp: 207000, books: 2000 }, { level: 6, exp: 259200, books: 2500 }, { level: 7, exp: 310800, books: 3000 }, { level: 8, exp: 362400, books: 3500 }, { level: 9, exp: 414600, books: 4000 }, { level: 10, exp: 466200, books: 4500 }] },
+    ],
+  },
+  {
+    name: 'Romulus', class_name: 'Military Advisor', affinity_bonus: 'Troops Lethality +20%, Health +20%',
+    skills: [
+      { name: 'Call of War', max_level: 10, description: '+600 free troops/day, +10 Loyalty Tags',
+        costs: [{ level: 2, exp: 30600, books: 300 }, { level: 3, exp: 61800, books: 600 }, { level: 4, exp: 93000, books: 900 }, { level: 5, exp: 124200, books: 1200 }, { level: 6, exp: 155400, books: 1500 }, { level: 7, exp: 186600, books: 1800 }, { level: 8, exp: 217200, books: 2100 }, { level: 9, exp: 248400, books: 2400 }, { level: 10, exp: 279600, books: 2700 }] },
+      { name: 'Last Line', max_level: 20, description: '+10% Troops Attack & Defense',
+        costs: [{ level: 2, exp: 86400, books: 500 }, { level: 3, exp: 86400, books: 500 }, { level: 4, exp: 86400, books: 500 }, { level: 5, exp: 86400, books: 500 }, { level: 6, exp: 86400, books: 500 }, { level: 7, exp: 86400, books: 500 }, { level: 8, exp: 86400, books: 500 }, { level: 9, exp: 86400, books: 500 }, { level: 10, exp: 86400, books: 500 }, { level: 11, exp: 86400, books: 500 }, { level: 12, exp: 86400, books: 500 }, { level: 13, exp: 86400, books: 500 }, { level: 14, exp: 86400, books: 500 }, { level: 15, exp: 86400, books: 500 }, { level: 16, exp: 86400, books: 500 }, { level: 17, exp: 86400, books: 500 }, { level: 18, exp: 86400, books: 500 }, { level: 19, exp: 86400, books: 500 }, { level: 20, exp: 86400, books: 500 }] },
+      { name: 'Spirit of Aeetis', max_level: 20, description: '+10% Troops Lethality & Health',
+        costs: [{ level: 2, exp: 159000, books: 800 }, { level: 3, exp: 159000, books: 800 }, { level: 4, exp: 159000, books: 800 }, { level: 5, exp: 159000, books: 800 }, { level: 6, exp: 159000, books: 800 }, { level: 7, exp: 159000, books: 800 }, { level: 8, exp: 159000, books: 800 }, { level: 9, exp: 159000, books: 800 }, { level: 10, exp: 159000, books: 800 }, { level: 11, exp: 159000, books: 800 }, { level: 12, exp: 159000, books: 800 }, { level: 13, exp: 159000, books: 800 }, { level: 14, exp: 159000, books: 800 }, { level: 15, exp: 159000, books: 800 }, { level: 16, exp: 159000, books: 800 }, { level: 17, exp: 159000, books: 800 }, { level: 18, exp: 159000, books: 800 }, { level: 19, exp: 159000, books: 800 }, { level: 20, exp: 159000, books: 800 }] },
+      { name: 'One Heart', max_level: 20, description: '+100K Rally Capacity',
+        costs: [{ level: 2, exp: 179400, books: 800 }, { level: 3, exp: 179400, books: 800 }, { level: 4, exp: 179400, books: 800 }, { level: 5, exp: 179400, books: 800 }, { level: 6, exp: 179400, books: 800 }, { level: 7, exp: 179400, books: 800 }, { level: 8, exp: 179400, books: 800 }, { level: 9, exp: 179400, books: 800 }, { level: 10, exp: 179400, books: 800 }, { level: 11, exp: 179400, books: 800 }, { level: 12, exp: 179400, books: 800 }, { level: 13, exp: 179400, books: 800 }, { level: 14, exp: 179400, books: 800 }, { level: 15, exp: 179400, books: 800 }, { level: 16, exp: 179400, books: 800 }, { level: 17, exp: 179400, books: 800 }, { level: 18, exp: 179400, books: 800 }, { level: 19, exp: 179400, books: 800 }, { level: 20, exp: 179400, books: 800 }] },
+    ],
+  },
+  {
+    name: 'Holger', class_name: 'Arena Legend', affinity_bonus: 'Troops Attack +15%, Defense +15%',
+    skills: [
+      { name: 'Arena Elite', max_level: 10, description: '+20% Arena heroes Attack & Health',
+        costs: [{ level: 2, exp: 82800, books: 600 }, { level: 3, exp: 165600, books: 1200 }, { level: 4, exp: 248400, books: 1800 }, { level: 5, exp: 331800, books: 2400 }, { level: 6, exp: 414600, books: 3000 }, { level: 7, exp: 497400, books: 3600 }, { level: 8, exp: 580200, books: 4200 }, { level: 9, exp: 663600, books: 4800 }, { level: 10, exp: 746400, books: 5400 }] },
+      { name: 'Crowd Pleaser', max_level: 10, description: '+50% daily/weekly Arena Tokens',
+        costs: [{ level: 2, exp: 30600, books: 300 }, { level: 3, exp: 61800, books: 600 }, { level: 4, exp: 93000, books: 900 }, { level: 5, exp: 124200, books: 1200 }, { level: 6, exp: 155400, books: 1500 }, { level: 7, exp: 186600, books: 1800 }, { level: 8, exp: 217200, books: 2100 }, { level: 9, exp: 248400, books: 2400 }, { level: 10, exp: 279600, books: 2700 }] },
+      { name: 'Arena Star', max_level: 10, description: '+3 Arena Shop items at 50% off',
+        costs: [{ level: 2, exp: 30600, books: 300 }, { level: 3, exp: 61800, books: 600 }, { level: 4, exp: 93000, books: 900 }, { level: 5, exp: 124200, books: 1200 }, { level: 6, exp: 155400, books: 1500 }, { level: 7, exp: 186600, books: 1800 }, { level: 8, exp: 217200, books: 2100 }, { level: 9, exp: 248400, books: 2400 }, { level: 10, exp: 279600, books: 2700 }] },
+      { name: 'Legacy', max_level: 10, description: '+20% Arena heroes Attack & Health',
+        costs: [{ level: 2, exp: 82800, books: 600 }, { level: 3, exp: 165600, books: 1200 }, { level: 4, exp: 248400, books: 1800 }, { level: 5, exp: 331800, books: 2400 }, { level: 6, exp: 414600, books: 3000 }, { level: 7, exp: 497400, books: 3600 }, { level: 8, exp: 580200, books: 4200 }, { level: 9, exp: 663600, books: 4800 }, { level: 10, exp: 746400, books: 5400 }] },
+    ],
+  },
+  {
+    name: 'Cyrille', class_name: 'Bear Huntress', affinity_bonus: 'Troops Attack +15%',
+    skills: [
+      { name: 'Entrapment', max_level: 10, description: '+300K Bear Hunt Rally Capacity',
+        costs: [{ level: 2, exp: 3600, books: 70 }, { level: 3, exp: 7200, books: 140 }, { level: 4, exp: 10800, books: 210 }, { level: 5, exp: 14400, books: 280 }, { level: 6, exp: 18000, books: 350 }, { level: 7, exp: 21600, books: 420 }, { level: 8, exp: 25200, books: 490 }, { level: 9, exp: 28800, books: 560 }, { level: 10, exp: 32400, books: 630 }] },
+      { name: 'Scavenging', max_level: 5, description: '+5 x100 Enhancement XP per Bear Hunt',
+        costs: [{ level: 2, exp: 27600, books: 400 }, { level: 3, exp: 55200, books: 800 }, { level: 4, exp: 110400, books: 1600 }, { level: 5, exp: 220800, books: 3200 }] },
+      { name: 'Weapon Master', max_level: 5, description: '+5 Essence Stones per Bear Hunt',
+        costs: [{ level: 2, exp: 43200, books: 500 }, { level: 3, exp: 86400, books: 1000 }, { level: 4, exp: 172800, books: 2000 }, { level: 5, exp: 345600, books: 4000 }] },
+      { name: 'Ursa\'s Bane', max_level: 10, description: '+30K Bear Hunt troop deployment',
+        costs: [{ level: 2, exp: 10200, books: 100 }, { level: 3, exp: 20400, books: 200 }, { level: 4, exp: 30600, books: 300 }, { level: 5, exp: 41400, books: 400 }, { level: 6, exp: 51600, books: 500 }, { level: 7, exp: 61800, books: 600 }, { level: 8, exp: 72600, books: 700 }, { level: 9, exp: 82800, books: 800 }, { level: 10, exp: 93000, books: 900 }] },
+    ],
+  },
+  {
+    name: 'Fabian', class_name: 'Master of Arms', affinity_bonus: 'Troops Lethality +15%, Health +15%',
+    skills: [
+      { name: 'Salvager', max_level: 10, description: '+100% Arsenal Tokens',
+        costs: [{ level: 2, exp: 25800, books: 300 }, { level: 3, exp: 51600, books: 600 }, { level: 4, exp: 77400, books: 900 }, { level: 5, exp: 103200, books: 1200 }, { level: 6, exp: 129600, books: 1500 }, { level: 7, exp: 155400, books: 1800 }, { level: 8, exp: 181200, books: 2100 }, { level: 9, exp: 207000, books: 2400 }, { level: 10, exp: 232800, books: 2700 }] },
+      { name: 'Crisis Rescue', max_level: 10, description: '+1M troop recovery in Foundry/Tundra Hellfire',
+        costs: [{ level: 2, exp: 33053, books: 500 }, { level: 3, exp: 107400, books: 1000 }, { level: 4, exp: 160800, books: 1500 }, { level: 5, exp: 214800, books: 2000 }, { level: 6, exp: 268800, books: 2500 }, { level: 7, exp: 322200, books: 3000 }, { level: 8, exp: 376200, books: 3500 }, { level: 9, exp: 429600, books: 4000 }, { level: 10, exp: 483600, books: 4500 }] },
+      { name: 'Heightened Firepower', max_level: 20, description: '+30% Lethality & Health in Foundry/Hellfire',
+        costs: [{ level: 2, exp: 27600, books: 200 }, { level: 3, exp: 27600, books: 200 }, { level: 4, exp: 27600, books: 200 }, { level: 5, exp: 27600, books: 200 }, { level: 6, exp: 27600, books: 200 }, { level: 7, exp: 27600, books: 200 }, { level: 8, exp: 27600, books: 200 }, { level: 9, exp: 27600, books: 200 }, { level: 10, exp: 318000, books: 2300 }, { level: 11, exp: 345600, books: 2500 }, { level: 12, exp: 345600, books: 2500 }, { level: 13, exp: 345600, books: 2500 }, { level: 14, exp: 345600, books: 2500 }, { level: 15, exp: 345600, books: 2500 }, { level: 16, exp: 345600, books: 2500 }, { level: 17, exp: 345600, books: 2500 }, { level: 18, exp: 345600, books: 2500 }, { level: 19, exp: 705000, books: 5100 }, { level: 20, exp: 705000, books: 5100 }] },
+      { name: 'Battle Bulwark', max_level: 20, description: '+150K Foundry/Hellfire Rally Capacity',
+        costs: [{ level: 2, exp: 46200, books: 300 }, { level: 3, exp: 46200, books: 300 }, { level: 4, exp: 46200, books: 300 }, { level: 5, exp: 46200, books: 300 }, { level: 6, exp: 46200, books: 300 }, { level: 7, exp: 46200, books: 300 }, { level: 8, exp: 46200, books: 300 }, { level: 9, exp: 46200, books: 300 }, { level: 10, exp: 497400, books: 3200 }, { level: 11, exp: 544200, books: 3500 }, { level: 12, exp: 544200, books: 3500 }, { level: 13, exp: 544200, books: 3500 }, { level: 14, exp: 544200, books: 3500 }, { level: 15, exp: 544200, books: 3500 }, { level: 16, exp: 544200, books: 3500 }, { level: 17, exp: 544200, books: 3500 }, { level: 18, exp: 544200, books: 3500 }, { level: 19, exp: 1104000, books: 7100 }, { level: 20, exp: 1104000, books: 7100 }] },
+    ],
+  },
+];
+
+// Expert Affinity: milestones every 10 levels, sigils required at each milestone
+// Bonus scales linearly between milestones. Data from wiki (Confidence: A).
+interface AffinityMilestone {
+  level: number;
+  sigils: number;        // cumulative sigils needed to reach this milestone
+  bonus_pct: number;     // cumulative bonus % at this level
+  advancement: number;   // advancement points needed for THIS milestone level
+}
+
+interface ExpertAffinityDef {
+  name: string;
+  stats: string[];       // which stats get buffed
+  max_bonus_pct: number; // per stat at level 100
+  milestones: AffinityMilestone[];
+}
+
+const EXPERT_AFFINITY: ExpertAffinityDef[] = [
+  {
+    name: 'Agnes', stats: ['Defense'], max_bonus_pct: 15,
+    milestones: [
+      { level: 0, sigils: 0, bonus_pct: 0, advancement: 0 },
+      { level: 10, sigils: 5, bonus_pct: 2.85, advancement: 640 },
+      { level: 20, sigils: 10, bonus_pct: 4.20, advancement: 1040 },
+      { level: 30, sigils: 15, bonus_pct: 5.55, advancement: 1460 },
+      { level: 40, sigils: 20, bonus_pct: 6.90, advancement: 2080 },
+      { level: 50, sigils: 25, bonus_pct: 8.25, advancement: 2900 },
+      { level: 60, sigils: 30, bonus_pct: 9.60, advancement: 3900 },
+      { level: 70, sigils: 35, bonus_pct: 10.95, advancement: 4900 },
+      { level: 80, sigils: 40, bonus_pct: 12.30, advancement: 5900 },
+      { level: 90, sigils: 45, bonus_pct: 13.65, advancement: 6900 },
+      { level: 100, sigils: 50, bonus_pct: 15.00, advancement: 7900 },
+    ],
+  },
+  {
+    name: 'Valeria', stats: ['Lethality', 'Health'], max_bonus_pct: 20,
+    milestones: [
+      { level: 0, sigils: 0, bonus_pct: 0, advancement: 0 },
+      { level: 10, sigils: 20, bonus_pct: 3.80, advancement: 1760 },
+      { level: 20, sigils: 40, bonus_pct: 5.60, advancement: 2860 },
+      { level: 30, sigils: 80, bonus_pct: 7.40, advancement: 4020 },
+      { level: 40, sigils: 120, bonus_pct: 9.20, advancement: 5720 },
+      { level: 50, sigils: 160, bonus_pct: 11.00, advancement: 7980 },
+      { level: 60, sigils: 200, bonus_pct: 12.80, advancement: 10730 },
+      { level: 70, sigils: 240, bonus_pct: 14.60, advancement: 13480 },
+      { level: 80, sigils: 280, bonus_pct: 16.40, advancement: 16230 },
+      { level: 90, sigils: 320, bonus_pct: 18.20, advancement: 18980 },
+      { level: 100, sigils: 360, bonus_pct: 20.00, advancement: 21730 },
+    ],
+  },
+  {
+    name: 'Baldur', stats: ['Attack', 'Defense'], max_bonus_pct: 10,
+    milestones: [
+      { level: 0, sigils: 0, bonus_pct: 0, advancement: 0 },
+      { level: 10, sigils: 6, bonus_pct: 1.90, advancement: 640 },
+      { level: 20, sigils: 12, bonus_pct: 2.80, advancement: 1040 },
+      { level: 30, sigils: 18, bonus_pct: 3.70, advancement: 1460 },
+      { level: 40, sigils: 24, bonus_pct: 4.60, advancement: 2080 },
+      { level: 50, sigils: 30, bonus_pct: 5.50, advancement: 2900 },
+      { level: 60, sigils: 36, bonus_pct: 6.40, advancement: 3900 },
+      { level: 70, sigils: 42, bonus_pct: 7.30, advancement: 4900 },
+      { level: 80, sigils: 48, bonus_pct: 8.20, advancement: 5900 },
+      { level: 90, sigils: 54, bonus_pct: 9.10, advancement: 6900 },
+      { level: 100, sigils: 60, bonus_pct: 10.00, advancement: 7900 },
+    ],
+  },
+  {
+    name: 'Romulus', stats: ['Lethality', 'Health'], max_bonus_pct: 20,
+    milestones: [
+      { level: 0, sigils: 0, bonus_pct: 0, advancement: 0 },
+      { level: 10, sigils: 20, bonus_pct: 3.80, advancement: 1760 },
+      { level: 20, sigils: 40, bonus_pct: 5.60, advancement: 2860 },
+      { level: 30, sigils: 80, bonus_pct: 7.40, advancement: 4020 },
+      { level: 40, sigils: 120, bonus_pct: 9.20, advancement: 5720 },
+      { level: 50, sigils: 160, bonus_pct: 11.00, advancement: 7980 },
+      { level: 60, sigils: 200, bonus_pct: 12.80, advancement: 10730 },
+      { level: 70, sigils: 240, bonus_pct: 14.60, advancement: 13480 },
+      { level: 80, sigils: 280, bonus_pct: 16.40, advancement: 16230 },
+      { level: 90, sigils: 320, bonus_pct: 18.20, advancement: 18980 },
+      { level: 100, sigils: 360, bonus_pct: 20.00, advancement: 21730 },
+    ],
+  },
+  {
+    name: 'Holger', stats: ['Attack', 'Defense'], max_bonus_pct: 15,
+    milestones: [
+      { level: 0, sigils: 0, bonus_pct: 0, advancement: 0 },
+      { level: 10, sigils: 8, bonus_pct: 2.85, advancement: 960 },
+      { level: 20, sigils: 16, bonus_pct: 4.20, advancement: 1560 },
+      { level: 30, sigils: 24, bonus_pct: 5.55, advancement: 2190 },
+      { level: 40, sigils: 32, bonus_pct: 6.90, advancement: 3120 },
+      { level: 50, sigils: 40, bonus_pct: 8.25, advancement: 4350 },
+      { level: 60, sigils: 48, bonus_pct: 9.60, advancement: 5850 },
+      { level: 70, sigils: 56, bonus_pct: 10.95, advancement: 7350 },
+      { level: 80, sigils: 64, bonus_pct: 12.30, advancement: 8850 },
+      { level: 90, sigils: 72, bonus_pct: 13.65, advancement: 10350 },
+      { level: 100, sigils: 80, bonus_pct: 15.00, advancement: 11850 },
+    ],
+  },
+  {
+    name: 'Cyrille', stats: ['Attack'], max_bonus_pct: 15,
+    milestones: [
+      { level: 0, sigils: 0, bonus_pct: 0, advancement: 0 },
+      { level: 10, sigils: 5, bonus_pct: 2.85, advancement: 320 },
+      { level: 20, sigils: 10, bonus_pct: 4.20, advancement: 520 },
+      { level: 30, sigils: 15, bonus_pct: 5.55, advancement: 730 },
+      { level: 40, sigils: 20, bonus_pct: 6.90, advancement: 1040 },
+      { level: 50, sigils: 25, bonus_pct: 8.25, advancement: 1450 },
+      { level: 60, sigils: 30, bonus_pct: 9.60, advancement: 1950 },
+      { level: 70, sigils: 35, bonus_pct: 10.95, advancement: 2450 },
+      { level: 80, sigils: 40, bonus_pct: 12.30, advancement: 2950 },
+      { level: 90, sigils: 45, bonus_pct: 13.65, advancement: 3450 },
+      { level: 100, sigils: 50, bonus_pct: 15.00, advancement: 3950 },
+    ],
+  },
+  {
+    name: 'Fabian', stats: ['Lethality', 'Health'], max_bonus_pct: 15,
+    milestones: [
+      { level: 0, sigils: 0, bonus_pct: 0, advancement: 0 },
+      { level: 10, sigils: 12, bonus_pct: 2.85, advancement: 960 },
+      { level: 20, sigils: 24, bonus_pct: 4.20, advancement: 1560 },
+      { level: 30, sigils: 36, bonus_pct: 5.55, advancement: 2190 },
+      { level: 40, sigils: 48, bonus_pct: 6.90, advancement: 3120 },
+      { level: 50, sigils: 60, bonus_pct: 8.25, advancement: 4350 },
+      { level: 60, sigils: 72, bonus_pct: 9.60, advancement: 5850 },
+      { level: 70, sigils: 84, bonus_pct: 10.95, advancement: 7350 },
+      { level: 80, sigils: 96, bonus_pct: 12.30, advancement: 8850 },
+      { level: 90, sigils: 108, bonus_pct: 13.65, advancement: 10350 },
+      { level: 100, sigils: 120, bonus_pct: 15.00, advancement: 11850 },
+    ],
+  },
+];
 
 // ══════════════════════════════════════════════════════════════════════
 // MAIN PAGE
@@ -688,13 +929,15 @@ const CALC_DEFS: { id: CalcType; label: string; category: string; color: string;
   { id: 'charms', label: 'Charms', category: 'Chief', color: 'text-green-400', activeColor: 'border-green-500/50 bg-green-500/10 text-green-400' },
   { id: 'war_academy', label: 'War Academy', category: 'Buildings', color: 'text-orange-400', activeColor: 'border-orange-500/50 bg-orange-500/10 text-orange-400' },
   { id: 'pet_leveling', label: 'Pet Leveling', category: 'Pets', color: 'text-amber-400', activeColor: 'border-amber-500/50 bg-amber-500/10 text-amber-400' },
+  { id: 'expert_skills', label: 'Expert Skills', category: 'Experts', color: 'text-cyan-400', activeColor: 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400' },
+  { id: 'expert_affinity', label: 'Affinity', category: 'Experts', color: 'text-teal-400', activeColor: 'border-teal-500/50 bg-teal-500/10 text-teal-400' },
 ];
 
 function UpgradeCalculatorsTab() {
   const [calc, setCalc] = useState<CalcType>('enhancement');
 
   // Group calculators by category for the sub-tab selector
-  const categories = ['Hero Gear', 'Chief', 'Buildings', 'Pets'];
+  const categories = ['Hero Gear', 'Chief', 'Buildings', 'Pets', 'Experts'];
 
   return (
     <div className="space-y-6">
@@ -739,6 +982,8 @@ function UpgradeCalculatorsTab() {
       {calc === 'charms' && <CharmsCalc />}
       {calc === 'war_academy' && <WarAcademyCalc />}
       {calc === 'pet_leveling' && <PetLevelingCalc />}
+      {calc === 'expert_skills' && <ExpertSkillsCalc />}
+      {calc === 'expert_affinity' && <ExpertAffinityCalc />}
     </div>
   );
 }
@@ -1953,6 +2198,432 @@ function PetLevelingCalc() {
               </div>
             </div>
           )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Expert Skills Calculator ────────────────────────────────────────
+
+function ExpertSkillsCalc() {
+  const [expertIdx, setExpertIdx] = useState(0);
+  const [skillIdx, setSkillIdx] = useState(0);
+  const [fromLevel, setFromLevel] = useState(1);
+  const [toLevel, setToLevel] = useState(5);
+  const [calcAll, setCalcAll] = useState(false);
+
+  const expert = EXPERTS[expertIdx];
+  const skill = expert.skills[skillIdx];
+
+  // Reset skill selection and levels when expert changes
+  useEffect(() => {
+    setSkillIdx(0);
+    setFromLevel(1);
+    setToLevel(EXPERTS[expertIdx].skills[0].max_level);
+  }, [expertIdx]);
+
+  // Reset levels when skill changes
+  useEffect(() => {
+    const s = EXPERTS[expertIdx].skills[skillIdx];
+    setFromLevel(1);
+    setToLevel(s.max_level);
+  }, [expertIdx, skillIdx]);
+
+  // Calculate costs for a single skill
+  const singleCosts = useMemo(() => {
+    if (fromLevel >= toLevel) return null;
+    let totalExp = 0, totalBooks = 0;
+    for (const c of skill.costs) {
+      if (c.level > fromLevel && c.level <= toLevel) {
+        totalExp += c.exp;
+        totalBooks += c.books;
+      }
+    }
+    return { exp: totalExp, books: totalBooks };
+  }, [skill, fromLevel, toLevel]);
+
+  // Calculate costs for ALL skills of the selected expert
+  const allSkillsCosts = useMemo(() => {
+    if (!calcAll) return null;
+    const breakdown: { name: string; exp: number; books: number; levels: string }[] = [];
+    let grandExp = 0, grandBooks = 0;
+    for (const s of expert.skills) {
+      let exp = 0, books = 0;
+      for (const c of s.costs) {
+        exp += c.exp;
+        books += c.books;
+      }
+      breakdown.push({ name: s.name, exp, books, levels: `1 → ${s.max_level}` });
+      grandExp += exp;
+      grandBooks += books;
+    }
+    return { breakdown, totalExp: grandExp, totalBooks: grandBooks };
+  }, [expert, calcAll]);
+
+  return (
+    <div className="space-y-4">
+      {/* Info Banner */}
+      <div className="card border border-cyan-500/30 bg-cyan-500/5">
+        <p className="text-sm text-frost">
+          Calculate <strong className="text-cyan-400">Books of Knowledge</strong> and{' '}
+          <strong className="text-cyan-400">EXP</strong> needed to upgrade Expert skills.
+          Experts unlock at FC4-FC5 via the Dawn Academy. Each expert has 4 skills with varying max levels (5, 10, or 20).
+        </p>
+      </div>
+
+      {/* Inputs */}
+      <div className="card">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Expert selector */}
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">Expert</label>
+            <select
+              value={expertIdx}
+              onChange={(e) => setExpertIdx(Number(e.target.value))}
+              className="input w-full text-sm"
+            >
+              {EXPERTS.map((ex, i) => (
+                <option key={ex.name} value={i}>{ex.name} — {ex.class_name}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Skill selector */}
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">Skill</label>
+            <select
+              value={skillIdx}
+              onChange={(e) => setSkillIdx(Number(e.target.value))}
+              className="input w-full text-sm"
+            >
+              {expert.skills.map((s, i) => (
+                <option key={i} value={i}>{s.name} (max Lv.{s.max_level})</option>
+              ))}
+            </select>
+          </div>
+
+          {/* From Level */}
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">From Level</label>
+            <input
+              type="number"
+              min={1}
+              max={skill.max_level - 1}
+              value={fromLevel}
+              onChange={(e) => setFromLevel(Math.max(1, Math.min(skill.max_level - 1, Number(e.target.value))))}
+              className="input w-full text-center text-lg"
+            />
+          </div>
+
+          {/* To Level */}
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">To Level</label>
+            <input
+              type="number"
+              min={2}
+              max={skill.max_level}
+              value={toLevel}
+              onChange={(e) => setToLevel(Math.max(2, Math.min(skill.max_level, Number(e.target.value))))}
+              className="input w-full text-center text-lg"
+            />
+          </div>
+        </div>
+
+        {/* Toggle: show all skills total */}
+        <div className="mt-4 flex items-center gap-2">
+          <button
+            onClick={() => setCalcAll(!calcAll)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+              calcAll
+                ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-400'
+                : 'border-surface-border bg-surface text-frost-muted hover:text-frost'
+            }`}
+          >
+            Show all skills total for {expert.name}
+          </button>
+        </div>
+      </div>
+
+      {/* Skill Description */}
+      <div className="card border border-cyan-500/20">
+        <div className="flex items-center justify-between">
+          <div>
+            <span className="text-frost font-medium">{skill.name}</span>
+            <span className="text-frost-muted text-sm ml-2">— {skill.description}</span>
+          </div>
+          <span className="text-xs px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-400">
+            Max Lv.{skill.max_level}
+          </span>
+        </div>
+        <div className="text-xs text-frost-muted mt-1">
+          {expert.name}&apos;s affinity bonus: <span className="text-cyan-400">{expert.affinity_bonus}</span>
+        </div>
+      </div>
+
+      {/* Single Skill Results */}
+      {fromLevel >= toLevel ? (
+        <div className="card text-center py-8">
+          <p className="text-frost-muted">Set &quot;From Level&quot; lower than &quot;To Level&quot; to see costs</p>
+        </div>
+      ) : singleCosts && (
+        <div className="card">
+          <h3 className="section-header mb-4">{skill.name}: Level {fromLevel} → {toLevel}</h3>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                <th className="text-right py-2 px-3 text-frost-muted font-medium">Total Needed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <CostRow label="Books of Knowledge" perSlot={singleCosts.books} color="text-cyan-400" />
+              {singleCosts.exp > 0 && (
+                <CostRow label="EXP" perSlot={singleCosts.exp} color="text-purple-400" />
+              )}
+            </tbody>
+          </table>
+
+          {/* Per-level breakdown */}
+          <div className="mt-4">
+            <h4 className="text-xs text-frost-muted mb-2">Per-Level Breakdown</h4>
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-surface-border">
+                  <th className="text-left py-1.5 px-3 text-frost-muted">Level</th>
+                  <th className="text-right py-1.5 px-3 text-frost-muted">Books</th>
+                  <th className="text-right py-1.5 px-3 text-frost-muted">EXP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {skill.costs.filter(c => c.level > fromLevel && c.level <= toLevel).map((c) => (
+                  <tr key={c.level} className="border-b border-surface-border/30">
+                    <td className="py-1.5 px-3 text-frost">Lv.{c.level - 1} → {c.level}</td>
+                    <td className="py-1.5 px-3 text-right text-cyan-400">{c.books.toLocaleString()}</td>
+                    <td className="py-1.5 px-3 text-right text-purple-400">{c.exp > 0 ? c.exp.toLocaleString() : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* All Skills Total */}
+      {calcAll && allSkillsCosts && (
+        <div className="card border border-cyan-500/20">
+          <h3 className="section-header mb-4">All Skills Total — {expert.name}</h3>
+          <p className="text-xs text-frost-muted mb-3">
+            Total cost to fully max all 4 skills from Lv.1 to their maximum level.
+          </p>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left py-2 px-3 text-frost-muted font-medium">Skill</th>
+                <th className="text-center py-2 px-3 text-frost-muted font-medium">Levels</th>
+                <th className="text-right py-2 px-3 text-frost-muted font-medium">Books</th>
+                <th className="text-right py-2 px-3 text-frost-muted font-medium">EXP</th>
+              </tr>
+            </thead>
+            <tbody>
+              {allSkillsCosts.breakdown.map((s) => (
+                <tr key={s.name} className="border-b border-surface-border/30">
+                  <td className="py-2 px-3 text-frost">{s.name}</td>
+                  <td className="py-2 px-3 text-center text-frost-muted">{s.levels}</td>
+                  <td className="py-2 px-3 text-right text-cyan-400">{s.books.toLocaleString()}</td>
+                  <td className="py-2 px-3 text-right text-purple-400">{s.exp > 0 ? s.exp.toLocaleString() : '—'}</td>
+                </tr>
+              ))}
+              <tr className="border-t-2 border-cyan-500/30 font-bold">
+                <td className="py-3 px-3 text-frost" colSpan={2}>Grand Total</td>
+                <td className="py-3 px-3 text-right text-cyan-400 text-lg">{allSkillsCosts.totalBooks.toLocaleString()}</td>
+                <td className="py-3 px-3 text-right text-purple-400 text-lg">{allSkillsCosts.totalExp > 0 ? allSkillsCosts.totalExp.toLocaleString() : '—'}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Expert Affinity Calculator ──────────────────────────────────────
+
+function ExpertAffinityCalc() {
+  const [expertIdx, setExpertIdx] = useState(0);
+  const [fromMilestone, setFromMilestone] = useState(0);
+  const [toMilestone, setToMilestone] = useState(10);
+
+  const aff = EXPERT_AFFINITY[expertIdx];
+  const milestoneOptions = aff.milestones.map(m => m.level);
+
+  // Reset milestones when expert changes
+  useEffect(() => {
+    setFromMilestone(0);
+    setToMilestone(10);
+  }, [expertIdx]);
+
+  const costs = useMemo(() => {
+    const fromIdx = milestoneOptions.indexOf(fromMilestone);
+    const toIdx = milestoneOptions.indexOf(toMilestone);
+    if (fromIdx < 0 || toIdx < 0 || fromIdx >= toIdx) return null;
+
+    const fromM = aff.milestones[fromIdx];
+    const toM = aff.milestones[toIdx];
+
+    // Sigils needed = difference in cumulative sigils
+    const sigils = toM.sigils - fromM.sigils;
+
+    // Sum advancement points for all milestones in range
+    let totalAdvancement = 0;
+    for (let i = fromIdx + 1; i <= toIdx; i++) {
+      totalAdvancement += aff.milestones[i].advancement;
+    }
+
+    // Bonus gain
+    const bonusFrom = fromM.bonus_pct;
+    const bonusTo = toM.bonus_pct;
+
+    return {
+      sigils,
+      advancement: totalAdvancement,
+      bonus_from: bonusFrom,
+      bonus_to: bonusTo,
+      bonus_gain: bonusTo - bonusFrom,
+      // Milestone breakdown
+      breakdown: aff.milestones.slice(fromIdx + 1, toIdx + 1),
+    };
+  }, [aff, fromMilestone, toMilestone, milestoneOptions]);
+
+  return (
+    <div className="space-y-4">
+      {/* Info Banner */}
+      <div className="card border border-teal-500/30 bg-teal-500/5">
+        <p className="text-sm text-frost">
+          Calculate <strong className="text-teal-400">Sigils</strong> and{' '}
+          <strong className="text-teal-400">Advancement Points</strong> needed to increase Expert affinity.
+          Affinity provides passive troop stat bonuses. Gift items (Compass, Fiery Heart, Sail of Conquest) provide advancement points.
+          Sigils are required at every 10-level milestone.
+        </p>
+      </div>
+
+      {/* Inputs */}
+      <div className="card">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Expert */}
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">Expert</label>
+            <select
+              value={expertIdx}
+              onChange={(e) => setExpertIdx(Number(e.target.value))}
+              className="input w-full text-sm"
+            >
+              {EXPERT_AFFINITY.map((ex, i) => (
+                <option key={ex.name} value={i}>
+                  {ex.name} — {ex.stats.join(' & ')} +{ex.max_bonus_pct}%
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* From Milestone */}
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">From Level</label>
+            <select
+              value={fromMilestone}
+              onChange={(e) => setFromMilestone(Number(e.target.value))}
+              className="input w-full text-sm"
+            >
+              {milestoneOptions.slice(0, -1).map((lvl) => (
+                <option key={lvl} value={lvl}>
+                  Level {lvl}{lvl === 0 ? ' (start)' : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* To Milestone */}
+          <div>
+            <label className="text-xs text-frost-muted block mb-1">To Level</label>
+            <select
+              value={toMilestone}
+              onChange={(e) => setToMilestone(Number(e.target.value))}
+              className="input w-full text-sm"
+            >
+              {milestoneOptions.filter(lvl => lvl > fromMilestone).map((lvl) => (
+                <option key={lvl} value={lvl}>Level {lvl}{lvl === 100 ? ' (max)' : ''}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Bonus Display */}
+      {costs && (
+        <div className="card border border-teal-500/20">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="text-sm text-frost-muted">
+              {aff.stats.join(' & ')} Bonus
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-frost">+{costs.bonus_from.toFixed(2)}%</span>
+              <span className="text-frost-muted">&rarr;</span>
+              <span className="font-bold text-lg text-teal-400">+{costs.bonus_to.toFixed(2)}%</span>
+              <span className="text-xs px-2 py-0.5 rounded bg-green-500/10 text-green-400">
+                +{costs.bonus_gain.toFixed(2)}%
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Results */}
+      {!costs ? (
+        <div className="card text-center py-8">
+          <p className="text-frost-muted">Select a valid level range to see costs</p>
+        </div>
+      ) : (
+        <div className="card">
+          <h3 className="section-header mb-4">
+            {aff.name}: Level {fromMilestone} &rarr; {toMilestone}
+          </h3>
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-surface-border">
+                <th className="text-left py-2 px-3 text-frost-muted font-medium">Resource</th>
+                <th className="text-right py-2 px-3 text-frost-muted font-medium">Total Needed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <CostRow label="Common Expert Sigils" perSlot={costs.sigils} color="text-teal-400" />
+              <CostRow label="Advancement Points (from gifts)" perSlot={costs.advancement} color="text-purple-400" />
+            </tbody>
+          </table>
+
+          {/* Milestone Breakdown */}
+          <div className="mt-4">
+            <h4 className="text-xs text-frost-muted mb-2">Milestone Breakdown</h4>
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="border-b border-surface-border">
+                  <th className="text-left py-1.5 px-3 text-frost-muted">Milestone</th>
+                  <th className="text-right py-1.5 px-3 text-frost-muted">Sigils (cum.)</th>
+                  <th className="text-right py-1.5 px-3 text-frost-muted">Advancement</th>
+                  <th className="text-right py-1.5 px-3 text-frost-muted">Bonus</th>
+                </tr>
+              </thead>
+              <tbody>
+                {costs.breakdown.map((m) => (
+                  <tr key={m.level} className="border-b border-surface-border/30">
+                    <td className="py-1.5 px-3 text-frost font-medium">Level {m.level}</td>
+                    <td className="py-1.5 px-3 text-right text-teal-400">{m.sigils.toLocaleString()}</td>
+                    <td className="py-1.5 px-3 text-right text-purple-400">{m.advancement.toLocaleString()}</td>
+                    <td className="py-1.5 px-3 text-right text-green-400">+{m.bonus_pct.toFixed(2)}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

@@ -81,6 +81,19 @@
       "phase_available": "mid_game",
       "priority_phases": ["mid_game", "late_game"],
       "notes": "Combat buffs via Life Essence investment"
+    },
+    "experts": {
+      "raw_file": "raw/experts.research.json",
+      "unlock": {"furnace_level": "FC4"},
+      "phase_available": "late_game",
+      "priority_phases": ["late_game", "endgame"],
+      "notes": "Dawn Academy + Experts system. 7 experts with 4 skills each. Currencies: Books of Knowledge, EXP, Sigils, Affinity gifts"
+    },
+    "crystal_laboratory": {
+      "unlock": {"furnace_level": "FC5"},
+      "phase_available": "late_game",
+      "priority_phases": ["late_game", "endgame"],
+      "notes": "Exchange resources for Fire Crystals daily (5-8 per day). Super Refinement: FC to Refined FC (100/week)"
     }
   },
 
@@ -90,6 +103,8 @@
     {"furnace": 18, "systems": ["pets"], "requires_state_age": 55},
     {"furnace": 19, "systems": ["daybreak_island"]},
     {"furnace": 25, "systems": ["chief_charms"]},
-    {"furnace": 30, "systems": ["buildings_fc", "war_academy", "hero_gear_mastery"]}
+    {"furnace": 30, "systems": ["buildings_fc", "war_academy", "hero_gear_mastery"]},
+    {"furnace": "FC4", "systems": ["experts"]},
+    {"furnace": "FC5", "systems": ["crystal_laboratory"]}
   ]
 }

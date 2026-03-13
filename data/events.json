@@ -351,6 +351,19 @@
         "tip": "Only for top alliances. Requires maximum coordination."
       },
       "rewards": ["Championship titles", "Exclusive rewards", "Alliance buffs"]
+    },
+    "wild_brawl": {
+      "name": "Wild Brawl",
+      "short_name": "WB",
+      "category": "pvp",
+      "frequency": "recurring",
+      "description": "Battle royale PvP event. 10+ Chiefs compete on a shared battlefield for Strategic Points via supply chests and airdrops. Crates drop every 2 minutes.",
+      "unlock": {"furnace_level": 25},
+      "optimizer_relevance": {
+        "priority_systems": ["troop_tier", "hero_expedition_skills", "chief_gear"],
+        "tip": "10 matches per season. Use Smoke Bombs to avoid attacks. Focus on collecting airdrops for Strategic Points."
+      },
+      "rewards": ["Pioneer Badges", "Strategic Points rewards", "Event-specific items"]
     }
   },
   "event_calendar": {

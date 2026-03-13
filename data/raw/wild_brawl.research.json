@@ -1,0 +1,41 @@
+{
+  "system": "wild_brawl",
+  "retrieved_at": "2026-03-13T00:00:00Z",
+  "sources": [
+    {"source_id": "centurygames_helpshift", "url": "https://centurygames.helpshift.com/hc/en/64-whiteout-survival/section/1589-wild-brawl/", "confidence": "A"},
+    {"source_id": "dearplayers", "url": "https://www.dearplayers.com/us/events/whiteout-survival/wild-brawl", "confidence": "B"},
+    {"source_id": "facebook_official", "url": "https://www.facebook.com/WhiteoutSurvival/posts/christmas-limited-pvp-eventwild-brawl-is-coming-soon/854452813865519/", "confidence": "B"}
+  ],
+  "data_completeness": "partial",
+  "overview": {
+    "description": "PvP battle royale event where 10+ Chiefs compete on a shared battlefield for Strategic Points via supply chests and airdrops",
+    "type": "recurring_pvp_event",
+    "unlock": {"furnace_level": 25, "state_age": "required but exact days unknown"},
+    "first_appearance": "December 2025 (Christmas-limited, later made recurring)"
+  },
+  "mechanics": {
+    "participation": {
+      "min_furnace": 25,
+      "min_players_per_match": 10,
+      "attempts_per_season": 10,
+      "note": "Attempts only consumed on successful matchmaking"
+    },
+    "battlefield": {
+      "airdrops": "Crates dropped every 2 minutes, starting 90 seconds after battle begins",
+      "strategic_points": "Earned from collecting Strategic Supply Chests and Airdrop Item Crates"
+    },
+    "items": {
+      "smoke_bomb": "Renders city invisible for 120 seconds, prevents selection/attacks",
+      "frost_bomb": "Allows continued teleportation after deployment",
+      "airdrop_pickups": "Unlimited per match"
+    },
+    "rules": {
+      "no_alliance_switching": "Cannot switch alliances during battles",
+      "counter_recon": "Only applies to castles, not garrisoned buildings",
+      "pioneer_badges": "Not recycled post-event",
+      "matchmaking_cancel": "No penalty for canceling",
+      "failed_readiness": "Temporary matchmaking unavailability"
+    }
+  },
+  "notes": "Initially Christmas 2025 limited event, now recurring. Detailed reward tiers and point breakdowns not yet documented."
+}

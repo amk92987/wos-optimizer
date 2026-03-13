@@ -15,6 +15,10 @@
 8. [Hero Tier Rankings](#hero-tier-rankings)
 9. [Event Strategies](#event-strategies)
 10. [Recommendation Explanation System](#recommendation-explanation-system)
+11. [Experts System](#experts-system)
+12. [Tundra Trek & Frontier Trek](#tundra-trek--frontier-trek)
+13. [Crystal Laboratory](#crystal-laboratory)
+14. [Wild Brawl](#wild-brawl)
 
 ---
 
@@ -742,3 +746,152 @@ Every recommendation claim is tagged with a type:
 #### Chief Gear Priority
 - **Why:** 6-piece set bonus gives Attack to ALL troops
 - **Do:** Keep all 6 pieces at same tier; when pushing next tier: Infantry → Marksman → Lancer
+
+---
+
+## Experts System
+
+**Source:** WoS Wiki (Confidence: A)
+**Unlocks:** FC4-FC5 (Dawn Academy building)
+
+### Overview
+
+Experts are special characters that provide passive troop buffs and event-specific bonuses. They live in the Dawn Academy and are recruited through Tundra Trek encounters. Each expert has 4 skills and a talent, plus an affinity system that provides scaling troop stat bonuses.
+
+### Expert Roster (7 Experts)
+
+| Expert | Class | Affinity Bonus (Max) | Focus Area |
+|--------|-------|---------------------|------------|
+| Agnes | Elite Politician | Defense +15% | Economy (Intel, Stamina, Construction, Mystery Shop) |
+| Valeria | High Marshal | Lethality +20%, Health +20% | SvS / State of Power |
+| Baldur | Negotiator | Attack +10%, Defense +10% | Alliance events (Mobilization, Championship, Crazy Joe) |
+| Romulus | Military Advisor | Lethality +20%, Health +20% | Troop recruitment, combat stats, rally capacity |
+| Holger | Arena Legend | Attack +15%, Defense +15% | Arena (hero stats, tokens, shop) |
+| Cyrille | Bear Huntress | Attack +15% | Bear Hunt (capacity, rewards, damage) |
+| Fabian | Master of Arms | Lethality +15%, Health +15% | Foundry Battle & Tundra Hellfire |
+
+### Upgrade Currencies
+
+| Currency | Purpose | Source |
+|----------|---------|--------|
+| Books of Knowledge | Skill upgrades (levels) | Trek rewards, events |
+| EXP | Skill upgrades (alongside books) | Trek rewards |
+| Common Expert Sigils | Affinity milestones (every 10 levels) | Trek rewards, events |
+| Compass / Fiery Heart / Sail of Conquest | Affinity advancement points | Gifts |
+
+### Skill System
+
+- Each expert has **4 skills** with varying max levels (5, 10, or 20)
+- Each expert has **1 talent** (max level 11)
+- Skill upgrades require **Books of Knowledge + EXP**
+- Skill effects are expert-specific (combat buffs, event bonuses, resource generation)
+
+### Affinity System
+
+- 100 levels, with milestones every 10 levels requiring **Sigils**
+- Between milestones, advancement is via **gifting** items
+- Stat bonuses scale linearly, with larger jumps at milestones
+- Max bonus varies by expert: +10%, +15%, or +20% per stat
+
+---
+
+## Tundra Trek & Frontier Trek
+
+**Source:** Century Games Help Center (Confidence: A)
+**Unlocks:** With Dawn Academy / Expert feature
+
+### Tundra Trek
+
+The primary way to unlock new Experts, increase affinity, and gather upgrade materials.
+
+- **Encounter Types:** Regular (dialogue, choices, mini-games) and Expert encounters
+- **Random Assignment:** Cannot choose encounter type
+- **Trek Supplies:** 40 free daily (20 at 00:00 UTC + 10 at 08:00 + 10 at 16:00)
+- **Auto Trek:** Unlocks after 50 treks (must stay on Tundra Trek interface)
+- **Introduced:** August 4, 2025
+
+### Frontier Trek
+
+Advanced trek mode for targeted expert progression.
+
+- **Unlock:** Complete 60 Tundra Trek encounters
+- **Key Difference:** Choose which Expert's storyline to pursue
+- **Guaranteed Encounters:** If at a required story point, encounter is guaranteed with that Expert
+- **After Unlock:** All encounters with a chosen unlocked Expert are guaranteed
+- **Frontier Supplies:** 10 free on unlock, 10/week from VIP 9 shop, also from Endless Wayfarer event
+
+---
+
+## Crystal Laboratory
+
+**Source:** WoS Wiki (Confidence: A)
+**Unlocks:** Furnace Level 30 + state in Fire Crystal Age
+
+### Normal Refinement (Daily)
+
+Exchange resources for Fire Crystals. Daily limit increases with FC level:
+
+| FC Level | Daily Refinements |
+|----------|-------------------|
+| FC5 | 5 |
+| War Academy | 6 |
+| FC8 | 7 |
+| FC10 | 8 |
+
+**Costs per refinement:**
+
+| # | Meat | Wood | Coal | Iron |
+|---|------|------|------|------|
+| 1st | 5,000 | 5,000 | 5,000 | 5,000 |
+| 2nd | 10,000 | 10,000 | 10,000 | 10,000 |
+| 3rd | 20,000 | 20,000 | 20,000 | 20,000 |
+| 4th | 30,000 | 30,000 | 30,000 | 30,000 |
+| 5th | 40,000 | 40,000 | 40,000 | 40,000 |
+| 6-8th | 50,000 | 50,000 | 50,000 | 50,000 |
+
+**Drop rates:** 1 FC (40%), 2 FC (30%), 3 FC (15%), 4 FC (10%), 5 FC (5%)
+
+### Super Refinement (Weekly)
+
+Convert Fire Crystals → Refined Fire Crystals. 100 per week, 5 tiers of 20 each.
+
+| Tier | FC Cost | Output Range | 50% discount on first daily |
+|------|---------|--------------|----|
+| 1 | 20 FC | 1-3 Refined | Yes |
+| 2 | 50 FC | 2-3 Refined | Yes |
+| 3 | 100 FC | 3-6 Refined | Yes |
+| 4 | 130 FC | 3-9 Refined | Yes |
+| 5 | 160 FC | 3-12 Refined | Yes |
+
+---
+
+## Wild Brawl
+
+**Source:** Century Games Help Center, Official Facebook (Confidence: B)
+**Unlocks:** Furnace Level 25 + state age requirement
+**Type:** Recurring PvP event (originally Christmas 2025 limited, now recurring)
+
+### Overview
+
+Battle royale-style PvP event where 10+ Chiefs compete on a shared battlefield for Strategic Points.
+
+### Rules
+
+- **Participation:** 10 matches per season, requires 10+ players to start
+- **Airdrops:** Crates dropped every 2 minutes, starting 90 seconds after battle begins
+- **Scoring:** Earn Strategic Points from Supply Chests and Airdrop Crates
+- **No Alliance Switching** during battles
+- **Counter-recon** only applies to castles, not garrisons
+
+### Items
+
+| Item | Effect |
+|------|--------|
+| Smoke Bomb | City invisible for 120 seconds, prevents selection/attacks |
+| Frost Bomb | Allows continued teleportation after deployment |
+
+### Matchmaking
+
+- Attempts only consumed on successful entry
+- No penalty for canceling matchmaking
+- Failed readiness = temporary matchmaking unavailability
